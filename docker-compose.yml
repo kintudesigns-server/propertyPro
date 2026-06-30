@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: propertypro-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: propertypro_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: propertypro-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:1234@db:5432/propertypro_db?schema=public"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "92bc837d9fae1837de9f83a218f08c3e"
+      CLOUDINARY_NAME: "${CLOUDINARY_NAME}"
+      CLOUDINARY_KEY: "${CLOUDINARY_KEY}"
+      CLOUDINARY_SECRET: "${CLOUDINARY_SECRET}"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

@@ -1,0 +1,253 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPERADMIN
+  OWNER        // Landlord/Property Owner
+  ACCOUNTANT   // Financial Staff
+  INSPECTOR    // On-site Inspections
+  TENANT       // Renter
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model User {
+  id                 String               @id @default(uuid())
+  email              String               @unique
+  password           String
+  name               String?
+  role               Role                 @default(TENANT)
+  phone              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  tenantStatus       String               @default("Pending Review")
+  
+  // Extended Tenant Profile
+  dob                    String?
+  ssn                    String?
+  employer               String?
+  position               String?
+  annualIncome           Decimal?             @db.Decimal(10, 2)
+  employmentStartDate    String?
+  emergencyName          String?
+  emergencyRelationship  String?
+  emergencyPhone         String?
+  emergencyEmail         String?
+  creditScore            Int?
+  targetMoveInDate       String?
+  notes                  String?
+
+  // Ledger Account for Owners
+  bankName           String?
+  accountNumber      String?
+  accountName        String?
+  balance            Decimal              @default(0.00) @db.Decimal(10, 2)
+
+  // Stripe Saved Payment Method
+  stripeCustomerId         String?
+  defaultPaymentMethodId   String?
+  cardBrand                String?
+  cardLast4                String?
+
+  // Relations
+  ownedProperties    Property[]           @relation("OwnerProperties")
+  leases             Lease[]              @relation("TenantLeases")
+  maintenanceRequest MaintenanceRequest[] @relation("TenantRequests")
+  assignedInspections MaintenanceRequest[] @relation("InspectorTasks")
+  payoutRequests     PayoutRequest[]      @relation("OwnerPayouts")
+  sentMessages       Message[]            @relation("SentMessages")
+  receivedMessages   Message[]            @relation("ReceivedMessages")
+  documents          Document[]           @relation("TenantDocuments")
+  transactions       Transaction[]        @relation("TenantTransactions")
+  notifications      Notification[]       @relation("UserNotifications")
+}
+
+model Property {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  city        String
+  country     String
+  state       String   @default("")
+  zip         String   @default("")
+  coverPhoto  String?  // Cloudinary URL
+  images      String[]
+  amenities   String[]
+  type        String   @default("Apartment")
+  status      String   @default("AVAILABLE")
+  yearBuilt   Int?
+  description String?
+  createdAt   DateTime @default(now())
+  
+  // Scoped Ownership & Management
+  ownerId     String
+  owner       User     @relation("OwnerProperties", fields: [ownerId], references: [id])
+  
+  units       Unit[]
+  documents   Document[]
+}
+
+model Unit {
+  id           String               @id @default(uuid())
+  name         String
+  type         String?
+  floor        Int?
+  rentAmount   Decimal              @db.Decimal(10, 2)
+  depositAmt   Decimal              @db.Decimal(10, 2)
+  rooms        Int
+  bathrooms    Int?
+  sqFootage    Int
+  amenities    String[]
+  images       String[]
+  status       String               @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
+  
+  propertyId   String
+  property     Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  leases       Lease[]
+  maintenance  MaintenanceRequest[]
+  applications Application[]
+}
+
+model Lease {
+  id          String    @id @default(uuid())
+  unitId      String
+  unit        Unit      @relation(fields: [unitId], references: [id])
+  tenantId    String
+  tenant      User      @relation("TenantLeases", fields: [tenantId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  monthlyRent Decimal   @db.Decimal(10, 2)
+  status      String    @default("DRAFT") // DRAFT, ACTIVE, TERMINATED, EXPIRED
+  
+  // Extended configuration fields
+  rentDueDay           Int       @default(1)
+  securityDeposit      Decimal?  @db.Decimal(10, 2)
+  lateFeeAmount        Decimal?  @db.Decimal(10, 2)
+  gracePeriodDays      Int       @default(5)
+  lateFeeType          String    @default("FIXED") // FIXED, PERCENTAGE
+  autoGenerateInvoices Boolean   @default(true)
+  autoEmailInvoices    Boolean   @default(false)
+  
+  invoices    Invoice[]
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  leaseId       String
+  lease         Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  amount        Decimal  @db.Decimal(10, 2)
+  dueDate       DateTime
+  status        String   @default("UNPAID") // UNPAID, PAID, OVERDUE, VOID
+  paymentMethod String?  // STRIPE, CASH, BANK_TRANSFER
+  createdAt     DateTime @default(now())
+}
+
+model MaintenanceRequest {
+  id           String   @id @default(uuid())
+  unitId       String
+  unit         Unit     @relation(fields: [unitId], references: [id])
+  tenantId     String
+  tenant       User     @relation("TenantRequests", fields: [tenantId], references: [id])
+  title        String
+  description  String
+  category     String   @default("GENERAL") // PLUMBING, ELECTRICAL, APPLIANCE, GENERAL
+  priority     String   @default("MEDIUM") // LOW, MEDIUM, HIGH, EMERGENCY
+  status       String   @default("SUBMITTED") // SUBMITTED, ASSIGNED, RESOLVED, CLOSED
+  photos       String[] // Cloudinary URLs
+  
+  // Local Inspector/Technician Assignment
+  inspectorId   String?
+  inspector     User?    @relation("InspectorTasks", fields: [inspectorId], references: [id])
+  estimatedCost Decimal? @db.Decimal(10, 2)
+  scheduledDate DateTime?
+  createdAt     DateTime @default(now())
+}
+
+model PayoutRequest {
+  id            String       @id @default(uuid())
+  ownerId       String
+  owner         User         @relation("OwnerPayouts", fields: [ownerId], references: [id])
+  amount        Decimal      @db.Decimal(10, 2)
+  status        PayoutStatus @default(PENDING)
+  bankName      String
+  accountNumber String
+  accountName   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id])
+  name        String
+  email       String
+  phone       String
+  documents   String[] // Array of Cloudinary URLs
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, LEASE_CREATED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  name        String
+  url         String
+  category    String   // LEASE, PAYMENTS, MAINTENANCE, INSURANCE, IDENTIFICATION, NOTICES, GENERAL
+  type        String   @default("Other") // Lease, Notice, Maintenance, Insurance, Identification, Income, Inspection, Receipt, Other
+  description String?
+  tags        String[]
+  fileSize    String?
+  uploadedAt  DateTime @default(now())
+  tenantId    String
+  tenant      User     @relation("TenantDocuments", fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  type        String   // INCOME, EXPENSE
+  category    String   // RENT, FEE, DEPOSIT, MAINTENANCE, OTHER
+  amount      Decimal  @db.Decimal(10, 2)
+  reference   String?
+  status      String   @default("COMPLETED") // COMPLETED, PENDING, FAILED
+  createdAt   DateTime @default(now())
+  tenantId    String?
+  tenant      User?    @relation("TenantTransactions", fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  message         String
+  type            String   @default("SYSTEM")
+  priority        String   @default("MEDIUM")
+  isRead          Boolean  @default(false)
+  relatedEntityId String?
+  createdAt       DateTime @default(now())
+}
