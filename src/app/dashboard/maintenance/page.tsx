@@ -26,7 +26,7 @@ export default function MaintenancePage() {
   const [dateFilter, setDateFilter] = useState("ALL");
   
   // View Toggle
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
   // Modals state
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -275,90 +275,167 @@ export default function MaintenancePage() {
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="text-[#64748B] text-[13px] font-semibold border-y border-[#E2E8F0]">
-              <tr>
-                <th className="px-4 py-4 font-semibold">Property</th>
-                <th className="px-4 py-4 font-semibold">Priority</th>
-                <th className="px-4 py-4 font-semibold">Status</th>
-                <th className="px-4 py-4 font-semibold">Assigned To</th>
-                <th className="px-4 py-4 font-semibold">Created</th>
-                <th className="px-4 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E2E8F0]">
-              {loading ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-[#64748B] font-medium">Loading requests...</td></tr>
-              ) : filteredRequests.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-[#64748B] font-medium">No maintenance requests found.</td></tr>
-              ) : (
-                filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-[#F8FAFC] transition-colors group">
-                    <td className="px-4 py-4">
-                      <div className="flex flex-col space-y-1">
-                        <span className="font-semibold text-[#0F172A] text-[15px]">{req.unit.property.name || req.tenant?.name || "Property Name"}</span>
-                        <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px]">
-                          {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`} (apartment)
-                        </Link>
-                        <span className="text-[#64748B] text-xs">
-                          {req.unit.property.city || "City"}, {req.unit.property.state || "State"}
+        {viewMode === "list" ? (
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="text-[#64748B] text-[13px] font-semibold border-y border-[#E2E8F0]">
+                <tr>
+                  <th className="px-4 py-4 font-semibold">Property</th>
+                  <th className="px-4 py-4 font-semibold">Priority</th>
+                  <th className="px-4 py-4 font-semibold">Status</th>
+                  <th className="px-4 py-4 font-semibold">Assigned To</th>
+                  <th className="px-4 py-4 font-semibold">Created</th>
+                  <th className="px-4 py-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E2E8F0]">
+                {loading ? (
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-[#64748B] font-medium">Loading requests...</td></tr>
+                ) : filteredRequests.length === 0 ? (
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-[#64748B] font-medium">No maintenance requests found.</td></tr>
+                ) : (
+                  filteredRequests.map((req) => (
+                    <tr key={req.id} className="hover:bg-[#F8FAFC] transition-colors group">
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col space-y-1">
+                          <span className="font-semibold text-[#0F172A] text-[15px]">{req.unit.property.name || req.tenant?.name || "Property Name"}</span>
+                          <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px]">
+                            {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`} (apartment)
+                          </Link>
+                          <span className="text-[#64748B] text-xs">
+                            {req.unit.property.city || "City"}, {req.unit.property.state || "State"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(req.priority)} capitalize`}>
+                          {req.priority.toLowerCase()}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
+                      </td>
+                      <td className="px-4 py-4">
+                        {getStatusBadge(req.status)}
+                      </td>
+                      <td className="px-4 py-4">
+                        {req.inspector ? (
+                          <span className="font-medium text-[#0F172A]">{req.inspector.name}</span>
+                        ) : (
+                          <span className="text-[#64748B] font-medium">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-1.5 text-[#64748B] font-medium text-[13px]">
+                          <Calendar className="h-4 w-4" />
+                          {format(new Date(req.createdAt), "MMM d, yyyy, hh:mm a")}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                              <Eye className="h-4 w-4 text-[#64748B]" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                              <Edit className="h-4 w-4 text-[#64748B]" />
+                              Edit Request
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
+                              <UserPlus className="h-4 w-4" />
+                              {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                            </DropdownMenuItem>
+                            <div className="h-px bg-[#E2E8F0] my-1" />
+                            <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
+                              <XCircle className="h-4 w-4" />
+                              Cancel Request
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              <div className="col-span-full py-12 text-center text-[#64748B] font-medium">Loading requests...</div>
+            ) : filteredRequests.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-[#64748B] font-medium">No maintenance requests found.</div>
+            ) : (
+              filteredRequests.map((req) => (
+                <Card key={req.id} className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
+                  <div className="p-5 border-b border-[#F1F5F9] flex justify-between items-start gap-4">
+                    <div className="flex flex-col space-y-1">
+                      <h3 className="font-bold text-[#0F172A] text-lg leading-tight line-clamp-1">{req.title}</h3>
+                      <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px]">
+                        {req.unit.property.name} - {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`}
+                      </Link>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="h-8 w-8 shrink-0 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
+                        <MoreHorizontal className="h-5 w-5" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                          <Eye className="h-4 w-4 text-[#64748B]" /> View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                          <Edit className="h-4 w-4 text-[#64748B]" /> Edit Request
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
+                          <UserPlus className="h-4 w-4" /> {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                        </DropdownMenuItem>
+                        <div className="h-px bg-[#E2E8F0] my-1" />
+                        <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
+                          <XCircle className="h-4 w-4" /> Cancel Request
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="p-5 space-y-4">
+                    <div className="flex justify-between items-center">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(req.priority)} capitalize`}>
                         {req.priority.toLowerCase()}
                       </span>
-                    </td>
-                    <td className="px-4 py-4">
                       {getStatusBadge(req.status)}
-                    </td>
-                    <td className="px-4 py-4">
-                      {req.inspector ? (
-                        <span className="font-medium text-[#0F172A]">{req.inspector.name}</span>
-                      ) : (
-                        <span className="text-[#64748B] font-medium">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-1.5 text-[#64748B] font-medium text-[13px]">
-                        <Calendar className="h-4 w-4" />
-                        {format(new Date(req.createdAt), "MMM d, yyyy, hh:mm a")}
+                    </div>
+                    
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                          <UserPlus className="h-4 w-4 text-slate-500" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Technician</p>
+                          {req.inspector ? (
+                            <p className="font-semibold text-[#0F172A] text-sm">{req.inspector.name}</p>
+                          ) : (
+                            <p className="text-[#94A3B8] font-medium text-sm italic">Unassigned</p>
+                          )}
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                            <Eye className="h-4 w-4 text-[#64748B]" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                            <Edit className="h-4 w-4 text-[#64748B]" />
-                            Edit Request
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                            <UserPlus className="h-4 w-4" />
-                            Assign Technician
-                          </DropdownMenuItem>
-                          <div className="h-px bg-[#E2E8F0] my-1" />
-                          <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
-                            <XCircle className="h-4 w-4" />
-                            Cancel Request
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                          <Calendar className="h-4 w-4 text-slate-500" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Created</p>
+                          <p className="font-semibold text-[#0F172A] text-sm">{format(new Date(req.createdAt), "MMM d, yyyy")}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Assign Modal */}
@@ -373,7 +450,11 @@ export default function MaintenancePage() {
                 <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Technician</label>
                 <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
                   <SelectTrigger className="w-full h-12 bg-white border-[#E2E8F0] rounded-xl focus:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm">
-                    <SelectValue placeholder="Select a technician" />
+                    <SelectValue placeholder="Select a technician">
+                      {selectedInspectorId === "none" || !selectedInspectorId
+                        ? ""
+                        : inspectors.find((i) => i.id === selectedInspectorId)?.name || selectedInspectorId}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[#E2E8F0]">
                     <SelectItem value="none">Leave unassigned</SelectItem>

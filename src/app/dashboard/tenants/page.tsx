@@ -22,6 +22,8 @@ export default function TenantsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [properties, setProperties] = useState<any[]>([]);
+  const [checkingProperties, setCheckingProperties] = useState(true);
 
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<any>(null);
@@ -44,6 +46,13 @@ export default function TenantsPage() {
 
   useEffect(() => {
     fetchTenants();
+    fetch("/api/properties")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setProperties(data);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setCheckingProperties(false));
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -115,12 +124,39 @@ export default function TenantsPage() {
           <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Tenants</h1>
           <p className="text-[#64748B] text-sm mt-1">Manage tenant applications and profiles</p>
         </div>
-        <Link href="/dashboard/tenants/new">
-          <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add Tenant
+        {!checkingProperties && properties.some(p => p.approvalStatus === "APPROVED") ? (
+          <Link href="/dashboard/tenants/new">
+            <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Add Tenant
+            </Button>
+          </Link>
+        ) : (
+          <Button disabled className="bg-slate-200 text-slate-400 border border-slate-200 shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2 cursor-not-allowed">
+            <Plus className="h-4 w-4" /> Add Tenant (Locked)
           </Button>
-        </Link>
+        )}
       </div>
+
+      {!checkingProperties && !properties.some(p => p.approvalStatus === "APPROVED") && (
+        <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-amber-950 text-base">Tenant Creation Suspended</h3>
+              <p className="text-amber-800 text-xs mt-0.5 font-semibold">
+                You must have at least one approved property on the platform before you can register new tenant profiles.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/properties">
+            <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-10 shrink-0 shadow-sm border-0">
+              View Properties
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

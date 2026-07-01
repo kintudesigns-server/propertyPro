@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -41,12 +41,26 @@ import { LeaseActionsMenu } from "@/components/tenant/LeaseActionsMenu";
 export default function MyLeasesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [leases, setLeases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+
+  useEffect(() => {
+    if (searchParams) {
+      const statusParam = searchParams.get("status");
+      if (statusParam === "success") {
+        toast.success("Security deposit payment received! Your lease is now active.");
+        router.replace("/dashboard/leases/my-leases");
+      } else if (statusParam === "cancelled") {
+        toast.error("Security deposit payment cancelled.");
+        router.replace("/dashboard/leases/my-leases");
+      }
+    }
+  }, [searchParams, router]);
 
   const fetchLeases = async () => {
     setLoading(true);
@@ -68,16 +82,62 @@ export default function MyLeasesPage() {
 
   const handleSignLease = async (leaseId: string) => {
     try {
-      const res = await fetch(`/api/leases/${leaseId}/sign`, { method: "POST" });
+      toast.loading("Initiating lease signing & security deposit checkout...", { id: "signing" });
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leaseId }),
+      });
+
       if (res.ok) {
-        toast.success("Lease signed successfully! Welcome to your new home.");
+        const { url } = await res.json();
+        toast.success("Security Deposit checkout created! Redirecting...", { id: "signing" });
+        window.location.href = url;
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to initiate lease checkout.", { id: "signing" });
+      }
+    } catch {
+      toast.error("Error signing lease.", { id: "signing" });
+    }
+  };
+
+  const handleAcceptRenewal = async (leaseId: string) => {
+    try {
+      const res = await fetch(`/api/leases/${leaseId}/renew`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "ACCEPT" })
+      });
+      if (res.ok) {
+        toast.success("Renewal accepted! A new lease draft will be generated.");
         fetchLeases();
       } else {
         const err = await res.json();
-        toast.error(err.error || "Failed to sign lease.");
+        toast.error(err.error || "Failed to accept renewal.");
       }
     } catch {
-      toast.error("Error signing lease.");
+      toast.error("Error accepting renewal.");
+    }
+  };
+
+  const handleRejectRenewal = async (leaseId: string) => {
+    if (!confirm("Are you sure you want to decline the renewal? This will mark your lease for move-out.")) return;
+    try {
+      const res = await fetch(`/api/leases/${leaseId}/renew`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "REJECT" })
+      });
+      if (res.ok) {
+        toast.info("Renewal declined. Move-out process initiated.");
+        fetchLeases();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to decline renewal.");
+      }
+    } catch {
+      toast.error("Error declining renewal.");
     }
   };
 
@@ -93,6 +153,7 @@ export default function MyLeasesPage() {
   }
 
   const pendingLease = leases.find((l) => l.status === "PENDING_SIGNATURE");
+  const pendingRenewal = leases.find((l) => l.renewalStatus === "PENDING_DECISION");
 
   // KPI Calculations
   const activeCount = leases.filter((l) => l.status === "ACTIVE").length;
@@ -215,6 +276,45 @@ export default function MyLeasesPage() {
             >
               Accept & Sign Lease Contract
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Pending Renewal Alert ── */}
+      {pendingRenewal && (
+        <Card className="bg-purple-50 border border-purple-200 rounded-2xl shadow-sm p-6">
+          <CardHeader className="pb-4 p-0">
+            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-purple-900">
+              <ShieldAlert className="h-5 w-5 text-purple-600" />
+              Action Required: Lease Renewal Offer
+            </CardTitle>
+            <CardDescription className="text-purple-700 text-xs font-semibold">
+              Your lease for {pendingRenewal.unit?.name} at{" "}
+              {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 p-0 space-y-3 text-sm">
+            <div className="flex justify-between pb-3 border-b border-purple-200/60">
+              <span className="text-purple-700">Proposed New Rent</span>
+              <strong className="text-purple-900 font-extrabold">
+                ${Number(pendingRenewal.monthlyRent).toLocaleString()}
+              </strong>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => handleAcceptRenewal(pendingRenewal.id)}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 rounded-xl shadow-sm"
+              >
+                Accept & Renew Lease
+              </Button>
+              <Button
+                onClick={() => handleRejectRenewal(pendingRenewal.id)}
+                variant="outline"
+                className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-100 font-bold h-10 rounded-xl bg-white"
+              >
+                Decline (Move Out)
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

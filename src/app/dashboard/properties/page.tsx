@@ -233,14 +233,25 @@ export default function PropertiesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
-                          {p.status === "AVAILABLE" ? (
-                            <Badge className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] border-0 rounded-lg px-2.5 py-0.5 font-bold">{p.status}</Badge>
-                          ) : p.status === "OCCUPIED" ? (
-                            <Badge className="bg-[#DCFCE7] text-[#22C55E] hover:bg-[#DCFCE7] border-0 rounded-lg px-2.5 py-0.5 font-bold">{p.status}</Badge>
-                          ) : (
-                            <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-lg px-2.5 py-0.5 font-bold">{p.status}</Badge>
-                          )}
-                          <span className="text-xs text-[#64748B]">{p.type}</span>
+                          <div className="flex flex-wrap gap-1">
+                            {p.status === "AVAILABLE" ? (
+                              <Badge className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">{p.status}</Badge>
+                            ) : p.status === "OCCUPIED" ? (
+                              <Badge className="bg-[#DCFCE7] text-[#22C55E] hover:bg-[#DCFCE7] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">{p.status}</Badge>
+                            ) : (
+                              <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">{p.status}</Badge>
+                            )}
+                            {p.approvalStatus === "PENDING" && (
+                              <Badge className="bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">Under Review</Badge>
+                            )}
+                            {p.approvalStatus === "APPROVED" && (
+                              <Badge className="bg-[#D1FAE5] text-[#059669] hover:bg-[#D1FAE5] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">Approved</Badge>
+                            )}
+                            {p.approvalStatus === "REJECTED" && (
+                              <Badge className="bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">Rejected</Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-[#64748B] mt-0.5">{p.type}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -326,13 +337,22 @@ export default function PropertiesPage() {
                     )}
                     
                     {/* Top Badges */}
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
                       {p.status === "AVAILABLE" ? (
                         <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Available</Badge>
                       ) : p.status === "OCCUPIED" ? (
                         <Badge className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Occupied</Badge>
                       ) : (
                         <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">{p.status}</Badge>
+                      )}
+                      {p.approvalStatus === "PENDING" && (
+                        <Badge className="bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Under Review</Badge>
+                      )}
+                      {p.approvalStatus === "APPROVED" && (
+                        <Badge className="bg-[#D1FAE5] text-[#059669] hover:bg-[#D1FAE5] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Approved</Badge>
+                      )}
+                      {p.approvalStatus === "REJECTED" && (
+                        <Badge className="bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Rejected</Badge>
                       )}
                     </div>
                     <div className="absolute top-4 right-4">

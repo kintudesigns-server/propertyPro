@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, MapPin, BedDouble, Square, CheckCircle2, Building, Search, ArrowRight } from "lucide-react";
+import { Home, MapPin, BedDouble, Square, CheckCircle2, Building, Search, ArrowRight, Calendar } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ interface VacantUnit {
   sqFootage: number;
   amenities: string[];
   property: {
+    id: string;
     name: string;
     address: string;
     city: string;
@@ -42,6 +43,62 @@ export default function ListingsPage() {
   const [selectedUnit, setSelectedUnit] = useState<VacantUnit | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [applying, setApplying] = useState(false);
+
+  // Tour Scheduling State
+  const [tourDialogOpen, setTourDialogOpen] = useState(false);
+  const [selectedTourUnit, setSelectedTourUnit] = useState<VacantUnit | null>(null);
+  const [tourName, setTourName] = useState("");
+  const [tourEmail, setTourEmail] = useState("");
+  const [tourPhone, setTourPhone] = useState("");
+  const [tourType, setTourType] = useState("IN_PERSON");
+  const [tourDate, setTourDate] = useState("");
+  const [tourTime, setTourTime] = useState("09:00:00");
+  const [schedulingTour, setSchedulingTour] = useState(false);
+
+  const handleTourSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tourName || !tourEmail || !tourPhone || !tourDate || !selectedTourUnit) {
+      toast.error("Please fill in all details.");
+      return;
+    }
+
+    setSchedulingTour(true);
+    try {
+      const scheduledAt = `${tourDate}T${tourTime}`;
+      const res = await fetch("/api/tours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: selectedTourUnit.property.id,
+          unitId: selectedTourUnit.id,
+          tenantName: tourName,
+          tenantEmail: tourEmail,
+          tenantPhone: tourPhone,
+          tourType,
+          scheduledAt,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success(
+          `Tour requested successfully for ${selectedTourUnit.name}! The landlord will confirm your slot.`
+        );
+        setTourDialogOpen(false);
+        setTourName("");
+        setTourEmail("");
+        setTourPhone("");
+        setTourDate("");
+        setTourTime("09:00:00");
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to schedule tour.");
+      }
+    } catch (err) {
+      toast.error("Error scheduling tour.");
+    } finally {
+      setSchedulingTour(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchListings() {
@@ -234,14 +291,123 @@ export default function ListingsPage() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="pt-0 p-6">
+                <CardFooter className="pt-0 p-6 flex gap-2">
+                  {/* Schedule Tour */}
+                  <Dialog open={tourDialogOpen && selectedTourUnit?.id === unit.id} onOpenChange={(open) => {
+                    setTourDialogOpen(open);
+                    if (open) setSelectedTourUnit(unit);
+                  }}>
+                    <DialogTrigger render={<Button variant="outline" className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs" />}>
+                      Schedule Tour
+                    </DialogTrigger>
+                    <DialogContent className="bg-white border-slate-100 text-slate-800 rounded-[2rem] max-w-md p-6">
+                      <DialogHeader>
+                        <DialogTitle className="text-lg font-extrabold flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-primary" />
+                          Schedule Visit for {unit.name}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-400 text-xs">
+                          Select a visit type, day, and time. We will notify the landlord of {unit.property.name}.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <form onSubmit={handleTourSubmit} className="space-y-4 pt-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="tourType" className="text-xs font-bold text-slate-700">Tour Type</Label>
+                          <select
+                            id="tourType"
+                            value={tourType}
+                            onChange={(e) => setTourType(e.target.value)}
+                            className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-primary focus:border-primary font-semibold"
+                          >
+                            <option value="IN_PERSON">In-Person Guided Tour</option>
+                            <option value="VIDEO_CALL">Virtual Video Tour</option>
+                            <option value="SELF_GUIDED">Self-Guided Tour (Smart Lock)</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="tourDate" className="text-xs font-bold text-slate-700">Date</Label>
+                            <Input
+                              id="tourDate"
+                              type="date"
+                              required
+                              value={tourDate}
+                              onChange={(e) => setTourDate(e.target.value)}
+                              className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="tourTime" className="text-xs font-bold text-slate-700">Time Slot</Label>
+                            <select
+                              id="tourTime"
+                              value={tourTime}
+                              onChange={(e) => setTourTime(e.target.value)}
+                              className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-primary focus:border-primary font-semibold"
+                            >
+                              <option value="09:00:00">9:00 AM</option>
+                              <option value="10:30:00">10:30 AM</option>
+                              <option value="12:00:00">12:00 PM</option>
+                              <option value="13:30:00">1:30 PM</option>
+                              <option value="15:00:00">3:00 PM</option>
+                              <option value="16:30:00">4:30 PM</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor="tourName" className="text-xs font-bold text-slate-700">Your Full Name</Label>
+                          <Input
+                            id="tourName"
+                            placeholder="Jane Smith"
+                            value={tourName}
+                            onChange={(e) => setTourName(e.target.value)}
+                            className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor="tourEmail" className="text-xs font-bold text-slate-700">Email Address</Label>
+                          <Input
+                            id="tourEmail"
+                            type="email"
+                            placeholder="jane@example.com"
+                            value={tourEmail}
+                            onChange={(e) => setTourEmail(e.target.value)}
+                            className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor="tourPhone" className="text-xs font-bold text-slate-700">Phone Number (SMS OTP Verification)</Label>
+                          <Input
+                            id="tourPhone"
+                            placeholder="+1 (555) 123-4567"
+                            value={tourPhone}
+                            onChange={(e) => setTourPhone(e.target.value)}
+                            className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                            required
+                          />
+                        </div>
+
+                        <Button type="submit" disabled={schedulingTour} className="w-full bg-primary hover:bg-primary/95 text-white font-bold h-11 rounded-xl transition-colors mt-2">
+                          {schedulingTour ? "Scheduling..." : "Request Tour Slot"}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Apply Now */}
                   <Dialog open={dialogOpen && selectedUnit?.id === unit.id} onOpenChange={(open) => {
                     setDialogOpen(open);
                     if (open) setSelectedUnit(unit);
                   }}>
-                    <DialogTrigger render={<Button className="w-full bg-primary hover:bg-primary/95 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-sm text-sm" />}>
+                    <DialogTrigger render={<Button className="flex-1 bg-primary hover:bg-primary/95 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs" />}>
                       Apply Now
-                      <ArrowRight className="h-4 w-4" />
+                      <ArrowRight className="h-3 w-3" />
                     </DialogTrigger>
                     <DialogContent className="bg-white border-slate-100 text-slate-800 rounded-[2rem] max-w-md p-6">
                       <DialogHeader>

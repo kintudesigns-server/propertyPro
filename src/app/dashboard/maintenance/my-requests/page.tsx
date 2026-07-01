@@ -8,6 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Wrench, Plus, Loader2, RefreshCw, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,6 +26,12 @@ export default function MyRequestsPage() {
   const [maintFilterPriority, setMaintFilterPriority] = useState("ALL");
   const [maintFilterStatus, setMaintFilterStatus] = useState("ALL");
 
+  // Reschedule Modal States
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
+  const [selectedRequestForReschedule, setSelectedRequestForReschedule] = useState<any>(null);
+  const [rescheduleData, setRescheduleData] = useState({ date: "", reason: "" });
+  const [submittingReschedule, setSubmittingReschedule] = useState(false);
+
   const fetchMaintenance = async () => {
     setLoading(true);
     try {
@@ -33,6 +43,35 @@ export default function MyRequestsPage() {
       toast.error("Failed to load maintenance requests");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRescheduleSubmit = async () => {
+    if (!selectedRequestForReschedule || !rescheduleData.date || !rescheduleData.reason) return;
+    setSubmittingReschedule(true);
+    try {
+      const res = await fetch("/api/maintenance/reschedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestId: selectedRequestForReschedule.id,
+          proposedDate: rescheduleData.date,
+          reason: rescheduleData.reason,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Reschedule request sent successfully!");
+        setRescheduleModalOpen(false);
+        fetchMaintenance();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || "Failed to process reschedule");
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setSubmittingReschedule(false);
     }
   };
 
@@ -128,6 +167,7 @@ export default function MyRequestsPage() {
                 <TableHead className="font-bold text-xs uppercase text-[#64748B]">Priority</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B]">Status</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B]">Assigned Inspector</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B]">Schedule</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B]">Date Filed</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B] text-right">Actions</TableHead>
               </TableRow>
@@ -163,23 +203,77 @@ export default function MyRequestsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="rounded-full font-bold px-2.5 py-0.5 capitalize text-[10px]">
-                        {m.status.toLowerCase()}
+                        {m.status === "CLOSED" ? "completed" : m.status.toLowerCase()}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs font-bold text-slate-700">
                       {m.inspector ? m.inspector.name : <span className="text-[#64748B] italic">Awaiting assignment</span>}
                     </TableCell>
+                    <TableCell className="text-xs">
+                      {m.diagnosisDate ? (
+                         <div className="font-semibold text-[#0F172A]">Diagnosis: {new Date(m.diagnosisDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</div>
+                      ) : null}
+                      {m.repairDate ? (
+                         <div className="font-semibold text-emerald-600">Repair: {new Date(m.repairDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</div>
+                      ) : null}
+                      {!m.diagnosisDate && !m.repairDate && <span className="text-[#64748B] italic">Not scheduled</span>}
+                    </TableCell>
                     <TableCell className="text-[#64748B] text-xs">{new Date(m.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 px-3 rounded-lg border-[#E2E8F0] text-[#3B82F6] hover:bg-blue-50 hover:border-blue-200 font-semibold text-xs flex items-center gap-1.5"
-                        onClick={() => router.push(`/dashboard/maintenance/${m.id}`)}
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        View
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        {m.status === "SUBMITTED" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 rounded-lg border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold text-xs flex items-center gap-1.5"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (confirm("Are you sure you want to cancel this request?")) {
+                                try {
+                                  const res = await fetch(`/api/maintenance?id=${m.id}`, { method: "DELETE" });
+                                  if (res.ok) {
+                                    toast.success("Request cancelled successfully");
+                                    fetchMaintenance();
+                                  } else {
+                                    toast.error("Failed to cancel request");
+                                  }
+                                } catch (err) {
+                                  toast.error("An error occurred");
+                                }
+                              }
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                        {(m.diagnosisDate || m.repairDate) && (m.status !== "RESOLVED" && m.status !== "CLOSED") && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 rounded-lg border-orange-200 text-orange-600 hover:bg-orange-50 font-semibold text-xs flex items-center gap-1.5"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRequestForReschedule(m);
+                              setRescheduleData({ date: "", reason: "" });
+                              setRescheduleModalOpen(true);
+                            }}
+                          >
+                            Reschedule
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 rounded-lg border-[#E2E8F0] text-[#3B82F6] hover:bg-blue-50 hover:border-blue-200 font-semibold text-xs flex items-center gap-1.5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/dashboard/maintenance/${m.id}`);
+                          }}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          View
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -188,6 +282,47 @@ export default function MyRequestsPage() {
           </Table>
         </div>
       </Card>
+
+      {/* Reschedule Modal */}
+      <Dialog open={rescheduleModalOpen} onOpenChange={setRescheduleModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Request Reschedule</DialogTitle>
+            <DialogDescription>
+              Please provide a new proposed date and a reason for rescheduling. This will notify the inspector to re-book your appointment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>New Proposed Date & Time</Label>
+              <Input 
+                type="datetime-local" 
+                value={rescheduleData.date}
+                onChange={(e) => setRescheduleData({...rescheduleData, date: e.target.value})} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Reason for Rescheduling</Label>
+              <Textarea 
+                placeholder="e.g., I was called into work unexpectedly..."
+                value={rescheduleData.reason}
+                onChange={(e) => setRescheduleData({...rescheduleData, reason: e.target.value})} 
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRescheduleModalOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleRescheduleSubmit} 
+              disabled={submittingReschedule || !rescheduleData.date || !rescheduleData.reason}
+              className="bg-primary text-white"
+            >
+              {submittingReschedule ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

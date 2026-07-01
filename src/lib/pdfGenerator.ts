@@ -408,3 +408,158 @@ export const generateSingleInvoicePDF = (invoice: any) => {
   doc.save(filename);
 };
 
+export const generatePDF = (htmlContent: string, filename: string) => {
+  // Extract tenant info
+  const tenantNameMatch = htmlContent.match(/Tenant Info<\/h3>\s*<p[^>]*>([^<]+)<\/p>\s*<p[^>]*>([^<]+)<\/p>/);
+  const tenantName = tenantNameMatch ? tenantNameMatch[1].trim() : "N/A";
+  const tenantEmail = tenantNameMatch ? tenantNameMatch[2].trim() : "";
+
+  // Extract property info
+  const propertyInfoMatch = htmlContent.match(/Property Info<\/h3>\s*<p[^>]*>([^<]+)<\/p>\s*<p[^>]*>([^<]+)<\/p>/);
+  const propertyName = propertyInfoMatch ? propertyInfoMatch[1].trim() : "N/A";
+  const propertyUnit = propertyInfoMatch ? propertyInfoMatch[2].trim() : "";
+
+  // Extract deductions from table rows
+  const deductions: [string, string][] = [];
+  const rowRegex = /<tr[^>]*>\s*<td[^>]*>([^<]+)<\/td>\s*<td[^>]*>(-?\$[^<]+)<\/td>\s*<\/tr>/g;
+  let match;
+  while ((match = rowRegex.exec(htmlContent)) !== null) {
+    deductions.push([match[1].trim(), match[2].trim()]);
+  }
+
+  // Extract summary values
+  const originalDepositMatch = htmlContent.match(/Original Deposit:<\/span>\s*<span[^>]*>([^<]+)<\/span>/);
+  const originalDeposit = originalDepositMatch ? originalDepositMatch[1].trim() : "$0.00";
+
+  const totalDeductionsMatch = htmlContent.match(/Total Deductions:<\/span>\s*<span[^>]*>([^<]+)<\/span>/);
+  const totalDeductions = totalDeductionsMatch ? totalDeductionsMatch[1].trim() : "$0.00";
+
+  const finalRefundMatch = htmlContent.match(/Final Refund:<\/span>\s*<span[^>]*>([^<]+)<\/span>/);
+  const finalRefund = finalRefundMatch ? finalRefundMatch[1].trim() : "$0.00";
+
+  // Generate the PDF beautifully
+  const doc = new jsPDF("p", "pt", "a4");
+  const primaryColor = "#3B82F6"; 
+  const textColor = "#0F172A"; 
+  const lightText = "#64748B"; 
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let currentY = 40;
+
+  // Header
+  doc.setFontSize(24);
+  doc.setTextColor(primaryColor);
+  doc.text("PropertyPro", 40, currentY);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text("Security Deposit Disposition", 40, currentY + 15);
+
+  const dateStr = `Generated: ${new Date().toLocaleDateString()}`;
+  doc.setFontSize(12);
+  doc.setTextColor(textColor);
+  doc.text(dateStr, pageWidth - 40 - doc.getTextWidth(dateStr), currentY);
+
+  currentY += 50;
+
+  // Divider
+  doc.setDrawColor(226, 232, 240);
+  doc.line(40, currentY, pageWidth - 40, currentY);
+  currentY += 30;
+
+  // Title
+  doc.setFontSize(18);
+  doc.setTextColor(textColor);
+  doc.text("Security Deposit Disposition Statement", 40, currentY);
+  currentY += 30;
+
+  // Info Section
+  const leftColX = 40;
+  const rightColX = pageWidth / 2 + 10;
+  
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text("TENANT INFORMATION", leftColX, currentY);
+  
+  doc.setFontSize(12);
+  doc.setTextColor(textColor);
+  doc.text(tenantName, leftColX, currentY + 15);
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text(tenantEmail, leftColX, currentY + 30);
+
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text("PROPERTY INFORMATION", rightColX, currentY);
+  
+  doc.setFontSize(12);
+  doc.setTextColor(textColor);
+  doc.text(propertyName, rightColX, currentY + 15);
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text(propertyUnit, rightColX, currentY + 30);
+
+  currentY += 70;
+
+  // Table
+  doc.setFontSize(14);
+  doc.setTextColor(textColor);
+  doc.text("Itemized Deductions", 40, currentY);
+  currentY += 15;
+
+  const tableBody = deductions.length > 0 ? deductions : [["No deductions recorded. Full deposit will be refunded.", "$0.00"]];
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Description', 'Amount Deducted']],
+    body: tableBody,
+    theme: 'grid',
+    headStyles: { fillColor: [59, 130, 246] },
+    styles: { fontSize: 11, cellPadding: 8 },
+    columnStyles: {
+      1: { halign: 'right', fontStyle: 'bold' }
+    },
+    margin: { left: 40, right: 40 }
+  });
+
+  currentY = (doc as any).lastAutoTable.finalY + 30;
+
+  // Summary
+  const rightAlign = pageWidth - 40;
+  
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  doc.text("Original Deposit:", rightAlign - 120, currentY);
+  doc.setTextColor(textColor);
+  doc.text(originalDeposit, rightAlign, currentY, { align: 'right' });
+  
+  currentY += 20;
+  doc.setTextColor(lightText);
+  doc.text("Total Deductions:", rightAlign - 120, currentY);
+  doc.setTextColor("#EF4444");
+  doc.text(totalDeductions, rightAlign, currentY, { align: 'right' });
+
+  currentY += 30;
+  doc.setDrawColor(226, 232, 240);
+  doc.line(rightAlign - 150, currentY - 15, rightAlign, currentY - 15);
+  
+  doc.setFontSize(12);
+  doc.setTextColor(textColor);
+  doc.setFont("helvetica", 'bold');
+  doc.text("Final Refund:", rightAlign - 120, currentY);
+  doc.setTextColor("#10B981");
+  doc.text(finalRefund, rightAlign, currentY, { align: 'right' });
+
+  currentY += 60;
+
+  // Footer note
+  doc.setFontSize(9);
+  doc.setFont("helvetica", 'normal');
+  doc.setTextColor(lightText);
+  const footerText = "This statement is an official security deposit disposition summary generated by PropertyPro. If you have any questions regarding these deductions or refund processing, please contact the management office.";
+  const splitFooter = doc.splitTextToSize(footerText, pageWidth - 80);
+  doc.text(splitFooter, 40, currentY);
+
+  doc.save(filename);
+};
+
+

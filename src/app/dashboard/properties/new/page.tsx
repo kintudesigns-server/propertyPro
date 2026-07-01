@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Save, UploadCloud, Plus, Trash2, Building, ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, Plus, Trash2, Building, ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewPropertyPage() {
@@ -23,8 +23,200 @@ export default function NewPropertyPage() {
     state: "",
     zip: "",
     country: "",
+    coverPhoto: "",
+    images: [] as string[],
     amenities: [] as string[],
   });
+
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+
+  const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, address: value }));
+
+    if (value.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if ((window as any).addressTimeout) {
+      clearTimeout((window as any).addressTimeout);
+    }
+
+    (window as any).addressTimeout = setTimeout(async () => {
+      try {
+        setSearchingAddress(true);
+        const token = process.env.NEXT_PUBLIC_LOCATIONIQ_TOKEN || "";
+        if (!token) {
+          toast.error("LocationIQ Error: NEXT_PUBLIC_LOCATIONIQ_TOKEN is not configured in .env file.");
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+        const res = await fetch(`https://api.locationiq.com/v1/autocomplete?key=${token}&q=${encodeURIComponent(value)}&limit=5`);
+        if (res.ok) {
+          const data = await res.json();
+          setSuggestions(Array.isArray(data) ? data : []);
+          setShowSuggestions(true);
+        } else if (res.status === 401 || res.status === 403) {
+          toast.error("LocationIQ Error: Invalid or unauthorized API key. Check NEXT_PUBLIC_LOCATIONIQ_TOKEN in your .env file.");
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } catch (err) {
+        console.error("LocationIQ Error:", err);
+      } finally {
+        setSearchingAddress(false);
+      }
+    }, 400);
+  };
+
+  const selectSuggestion = (s: any) => {
+    const addr = s.address || {};
+    
+    let streetAddress = "";
+    if (addr.house_number && addr.road) {
+      streetAddress = `${addr.house_number} ${addr.road}`;
+    } else if (addr.road) {
+      streetAddress = addr.road;
+    } else {
+      streetAddress = addr.name || s.display_name.split(",")[0] || "";
+    }
+
+    const cityVal = addr.city || addr.town || addr.village || addr.suburb || "";
+    const stateVal = addr.state || addr.state_district || addr.county || "";
+    const zipVal = addr.postcode || "";
+    const countryVal = addr.country || "";
+
+    setFormData(prev => ({
+      ...prev,
+      address: streetAddress,
+      city: cityVal,
+      state: stateVal,
+      zip: zipVal,
+      country: countryVal,
+    }));
+
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const [uploadingPropertyImages, setUploadingPropertyImages] = useState(false);
+
+  const handlePropertyImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingPropertyImages(true);
+    const newUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formDataObj = new FormData();
+      formDataObj.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formDataObj,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          newUrls.push(data.url);
+        } else {
+          toast.error(`Failed to upload ${file.name}`);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        toast.error(`Error uploading ${file.name}`);
+      }
+    }
+
+    if (newUrls.length > 0) {
+      setFormData(prev => {
+        const updatedImages = [...(prev.images || []), ...newUrls];
+        const updatedCover = prev.coverPhoto ? prev.coverPhoto : updatedImages[0];
+        return {
+          ...prev,
+          images: updatedImages,
+          coverPhoto: updatedCover,
+        };
+      });
+      toast.success(`${newUrls.length} image(s) uploaded successfully!`);
+    }
+    setUploadingPropertyImages(false);
+  };
+
+  const removePropertyImage = (urlToRemove: string) => {
+    setFormData(prev => {
+      const updatedImages = (prev.images || []).filter(url => url !== urlToRemove);
+      let updatedCover = prev.coverPhoto;
+      if (updatedCover === urlToRemove) {
+        updatedCover = updatedImages.length > 0 ? updatedImages[0] : "";
+      }
+      return {
+        ...prev,
+        images: updatedImages,
+        coverPhoto: updatedCover,
+      };
+    });
+  };
+
+  const setCoverPhoto = (url: string) => {
+    setFormData(prev => ({ ...prev, coverPhoto: url }));
+    toast.success("Cover photo updated!");
+  };
+
+  const handleUnitImagesUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    toast.loading("Uploading unit images...", { id: `unit-upload-${index}` });
+    const newUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formDataObj = new FormData();
+      formDataObj.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formDataObj,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          newUrls.push(data.url);
+        }
+      } catch (err) {
+        console.error("Unit upload error:", err);
+      }
+    }
+
+    if (newUrls.length > 0) {
+      const newUnits = [...units];
+      const currentImages = newUnits[index].images || [];
+      newUnits[index] = {
+        ...newUnits[index],
+        images: [...currentImages, ...newUrls]
+      };
+      setUnits(newUnits);
+      toast.success(`${newUrls.length} unit image(s) uploaded!`, { id: `unit-upload-${index}` });
+    } else {
+      toast.dismiss(`unit-upload-${index}`);
+    }
+  };
+
+  const removeUnitImage = (unitIndex: number, imgUrl: string) => {
+    const newUnits = [...units];
+    newUnits[unitIndex].images = (newUnits[unitIndex].images || []).filter((url: string) => url !== imgUrl);
+    setUnits(newUnits);
+  };
 
   const [customAmenity, setCustomAmenity] = useState("");
 
@@ -54,10 +246,8 @@ export default function NewPropertyPage() {
       }));
       setCustomAmenity("");
     }
-  };
-
-  const [units, setUnits] = useState([
-    { name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT" }
+  };  const [units, setUnits] = useState<any[]>([
+    { name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }
   ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -71,9 +261,8 @@ export default function NewPropertyPage() {
   };
 
   const addUnit = () => {
-    setUnits([...units, { name: `Unit ${units.length + 1}`, type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT" }]);
+    setUnits([...units, { name: `Unit ${units.length + 1}`, type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }]);
   };
-
   const removeUnit = (index: number) => {
     setUnits(units.filter((_, i) => i !== index));
   };
@@ -190,9 +379,51 @@ export default function NewPropertyPage() {
             <p className="text-sm text-[#64748B]">Where is this property located?</p>
           </div>
           <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
+            <div className="space-y-2 relative" onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
               <label className="text-sm font-bold text-[#0F172A]">Street Address <span className="text-red-500">*</span></label>
-              <Input required name="address" value={formData.address} onChange={handleChange} placeholder="123 Main St" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+              <div className="relative">
+                <Input 
+                  required 
+                  name="address" 
+                  value={formData.address} 
+                  onChange={handleAddressChange} 
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  placeholder="123 Main St" 
+                  className="h-11 rounded-xl bg-white border-[#E2E8F0] pr-10" 
+                />
+                {searchingAddress && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-[#94A3B8]" />
+                  </div>
+                )}
+              </div>
+              
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#E2E8F0] rounded-xl shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                  {suggestions.map((s, index) => (
+                    <button
+                      key={`${s.place_id}-${index}`}
+                      type="button"
+                      onMouseDown={() => selectSuggestion(s)}
+                      onClick={() => selectSuggestion(s)}
+                      className="w-full text-left px-4 py-3 hover:bg-[#F8FAFC] transition-colors border-b border-[#F1F5F9] last:border-b-0 flex flex-col gap-0.5"
+                    >
+                      <span className="font-semibold text-sm text-[#0F172A]">{s.display_name}</span>
+                      {s.address && (
+                        <span className="text-xs text-[#64748B]">
+                          {[
+                            s.address.city || s.address.town || s.address.village || s.address.suburb,
+                            s.address.state,
+                            s.address.country
+                          ].filter(Boolean).join(", ")}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -225,21 +456,84 @@ export default function NewPropertyPage() {
             <h2 className="font-bold text-[#0F172A] text-lg">Property Images</h2>
             <p className="text-sm text-[#64748B]">Upload high-quality images to showcase your property.</p>
           </div>
-          <CardContent className="p-6">
-            <div className="border-2 border-dashed border-[#CBD5E1] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F8FAFC] transition-colors cursor-pointer bg-white">
+          <CardContent className="p-6 space-y-6">
+            <input 
+              type="file" 
+              multiple 
+              accept="image/*" 
+              id="property-images-input" 
+              className="hidden" 
+              onChange={handlePropertyImagesUpload} 
+            />
+
+            <div 
+              onClick={() => document.getElementById("property-images-input")?.click()}
+              className="border-2 border-dashed border-[#CBD5E1] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F8FAFC] transition-colors cursor-pointer bg-white"
+            >
               <div className="h-16 w-16 bg-[#EFF6FF] text-[#3B82F6] rounded-full flex items-center justify-center mb-4">
-                <UploadCloud className="h-8 w-8" />
+                {uploadingPropertyImages ? (
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                ) : (
+                  <UploadCloud className="h-8 w-8" />
+                )}
               </div>
-              <h3 className="text-lg font-bold text-[#0F172A]">Upload property images</h3>
+              <h3 className="text-lg font-bold text-[#0F172A]">
+                {uploadingPropertyImages ? "Uploading images..." : "Upload property images"}
+              </h3>
               <p className="text-sm text-[#64748B] mt-1 mb-4">Drag and drop your images here, or click to browse files</p>
               <div className="flex items-center gap-4 text-xs font-semibold text-[#22C55E] mb-6">
-                <span className="flex items-center gap-1">✓ PNG, JPG, WEBP</span>
-                <span className="flex items-center gap-1">✓ Up to 10MB each</span>
+                <span>✓ PNG, JPG, WEBP</span>
+                <span>✓ Up to 10MB each</span>
               </div>
-              <Button type="button" variant="outline" className="h-10 px-6 rounded-full border-[#3B82F6] text-[#3B82F6] font-bold hover:bg-[#EFF6FF]">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="h-10 px-6 rounded-full border-[#3B82F6] text-[#3B82F6] font-bold hover:bg-[#EFF6FF]"
+              >
                 Choose Files
               </Button>
             </div>
+
+            {/* Preview Grid */}
+            {formData.images && formData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                {formData.images.map((url) => {
+                  const isCover = formData.coverPhoto === url;
+                  return (
+                    <div key={url} className="group relative aspect-video rounded-xl overflow-hidden border border-[#E2E8F0] shadow-sm bg-slate-100">
+                      <img src={url} alt="Property" className="w-full h-full object-cover" />
+                      
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setCoverPhoto(url); }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                            isCover 
+                              ? "bg-[#22C55E] text-white" 
+                              : "bg-white text-[#0F172A] hover:bg-slate-50"
+                          }`}
+                        >
+                          {isCover ? "Cover" : "Set Cover"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); removePropertyImage(url); }}
+                          className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {isCover && (
+                        <div className="absolute top-2 left-2 bg-[#22C55E] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm uppercase tracking-wider">
+                          Cover
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -388,13 +682,46 @@ export default function NewPropertyPage() {
 
                 <div className="mt-6">
                   <label className="text-xs font-bold text-[#0F172A] mb-2 block">Unit Images</label>
-                  <div className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#F8FAFC] hover:bg-white transition-colors cursor-pointer">
+                  
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    id={`unit-images-input-${index}`} 
+                    className="hidden" 
+                    onChange={(e) => handleUnitImagesUpload(index, e)} 
+                  />
+                  
+                  <div 
+                    onClick={() => document.getElementById(`unit-images-input-${index}`)?.click()}
+                    className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#F8FAFC] hover:bg-white transition-colors cursor-pointer"
+                  >
                     <div className="h-10 w-10 bg-white shadow-sm border border-[#E2E8F0] text-[#94A3B8] rounded-full flex items-center justify-center mb-3">
                       <ImageIcon className="h-5 w-5" />
                     </div>
                     <p className="text-sm font-bold text-[#0F172A]">Upload photos for {unit.name || `Unit ${index + 1}`}</p>
                     <p className="text-xs text-[#64748B] mt-1">PNG, JPG up to 5MB</p>
                   </div>
+
+                  {/* Unit Image Previews */}
+                  {unit.images && unit.images.length > 0 && (
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-4">
+                      {unit.images.map((url: string) => (
+                        <div key={url} className="group relative aspect-video rounded-lg overflow-hidden border border-[#E2E8F0] bg-slate-50">
+                          <img src={url} alt="Unit" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeUnitImage(index, url); }}
+                              className="p-1 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

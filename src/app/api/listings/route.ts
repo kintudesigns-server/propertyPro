@@ -6,6 +6,9 @@ export async function GET(req: NextRequest) {
     const vacantUnits = await prisma.unit.findMany({
       where: {
         status: "VACANT",
+        property: {
+          approvalStatus: "APPROVED",
+        },
       },
       include: {
         property: {

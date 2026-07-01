@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
           }
         }
       });
-      const ownerIds = Array.from(new Set(leases.map(l => l.unit?.property?.ownerId).filter(Boolean)));
+      const ownerIds = Array.from(new Set(leases.map(l => l.unit?.property?.ownerId).filter(Boolean))) as string[];
 
       const maintenanceRequests = await prisma.maintenanceRequest.findMany({
         where: {
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
           inspectorId: true
         }
       });
-      const inspectorIds = Array.from(new Set(maintenanceRequests.map(r => r.inspectorId).filter(Boolean)));
+      const inspectorIds = Array.from(new Set(maintenanceRequests.map(r => r.inspectorId).filter(Boolean))) as string[];
 
       const users = await prisma.user.findMany({
         where: {
@@ -131,8 +131,8 @@ export async function GET(req: NextRequest) {
           }
         }
       });
-      const ownerIds = Array.from(new Set(requests.map(r => r.unit?.property?.ownerId).filter(Boolean)));
-      const tenantIds = Array.from(new Set(requests.map(r => r.tenantId).filter(Boolean)));
+      const ownerIds = Array.from(new Set(requests.map(r => r.unit?.property?.ownerId).filter(Boolean))) as string[];
+      const tenantIds = Array.from(new Set(requests.map(r => r.tenantId).filter(Boolean))) as string[];
 
       const users = await prisma.user.findMany({
         where: {

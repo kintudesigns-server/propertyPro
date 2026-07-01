@@ -47,7 +47,9 @@ export default function NewMaintenanceRequestPage() {
     inspectorId: "",
     estimatedCost: "",
     scheduledDate: "",
-    photos: [] as string[]
+    photos: [] as string[],
+    entryPermission: false,
+    preferredTimes: ""
   });
 
   const [selectedTenant, setSelectedTenant] = useState<any>(null);
@@ -287,6 +289,32 @@ export default function NewMaintenanceRequestPage() {
                     <SelectItem value="EMERGENCY">Emergency - Immediate Action</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2.5">
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Permission to Enter <span className="text-[#EF4444]">*</span></Label>
+                <Select value={formData.entryPermission ? "true" : "false"} onValueChange={(v) => setFormData({...formData, entryPermission: v === "true"})} required>
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                    <SelectItem value="true">Yes, enter if I am not home</SelectItem>
+                    <SelectItem value="false">No, I must be home</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2.5">
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Preferred Times <span className="text-[#EF4444]">*</span></Label>
+                <Input 
+                  required
+                  placeholder="e.g. Weekdays after 3PM"
+                  value={formData.preferredTimes}
+                  onChange={(e) => setFormData({...formData, preferredTimes: e.target.value})}
+                  className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                />
               </div>
             </div>
 

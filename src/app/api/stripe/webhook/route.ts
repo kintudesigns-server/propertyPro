@@ -35,6 +35,56 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const invoiceId = session.metadata?.invoiceId;
+    const leaseId = session.metadata?.leaseId;
+    const type = session.metadata?.type;
+
+    if (leaseId && type === "BOND") {
+      console.log(`Processing bond payment for lease ${leaseId}...`);
+      try {
+        const lease = await prisma.lease.findUnique({
+          where: { id: leaseId },
+          include: { unit: { include: { property: true } } },
+        });
+
+        if (lease && lease.status === "PENDING_SIGNATURE") {
+          const depositAmount = Number(lease.securityDeposit || lease.monthlyRent || 0);
+
+          await prisma.$transaction([
+            prisma.lease.update({
+              where: { id: leaseId },
+              data: { status: "ACTIVE" },
+            }),
+            prisma.unit.update({
+              where: { id: lease.unitId },
+              data: { status: "OCCUPIED" },
+            }),
+            prisma.user.update({
+              where: { id: lease.unit.property.ownerId },
+              data: {
+                balance: {
+                  increment: depositAmount,
+                },
+              },
+            }),
+            prisma.transaction.create({
+              data: {
+                type: "INCOME",
+                category: "DEPOSIT",
+                amount: depositAmount,
+                reference: `STRIPE_BOND_${session.id.slice(-12)}`,
+                status: "COMPLETED",
+                tenantId: lease.tenantId,
+              },
+            }),
+          ]);
+
+          console.log(`Lease ${leaseId} successfully activated via bond payment webhook.`);
+        }
+      } catch (error) {
+        console.error("Error activating lease on bond webhook:", error);
+        return NextResponse.json({ error: "Database update error" }, { status: 500 });
+      }
+    }
 
     if (invoiceId) {
       console.log(`Processing invoice ${invoiceId} payment...`);

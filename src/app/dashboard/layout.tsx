@@ -7,6 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Building,
   Users,
+  UserPlus,
   FileText,
   Wrench,
   Search,
@@ -22,11 +23,25 @@ import {
   Menu,
   Briefcase,
   MessageSquare,
-  Calendar
+  Calendar,
+  DollarSign
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen bg-[#F0F4F8] flex flex-col items-center justify-center text-[#111111] gap-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3B82F6]"></div>
+        <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Loading...</p>
+      </div>
+    }>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </React.Suspense>
+  );
+}
+
+function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,12 +50,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const role = (session?.user as any)?.role;
   const isOwnerOrAdmin = role === "OWNER" || role === "SUPERADMIN";
   const isInspector = role === "INSPECTOR";
+  const isAdmin = role === "SUPERADMIN";
+  const isOwner = role === "OWNER";
   const isTenant = role === "TENANT";
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [adminOpen, setAdminOpen] = useState(true);
   const [propertiesOpen, setPropertiesOpen] = useState(true);
   const [tenantsOpen, setTenantsOpen] = useState(true);
   const [teamOpen, setTeamOpen] = useState(false);
   const [leasesOpen, setLeasesOpen] = useState(true);
+  const [toursOpen, setToursOpen] = useState(true);
   const [maintenanceOpen, setMaintenanceOpen] = useState(true);
   const [financialsOpen, setFinancialsOpen] = useState(true);
   const [activityOpen, setActivityOpen] = useState(true);
@@ -68,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     if (isTenant && (pathname === "/dashboard/tenant" || pathname === "/dashboard/tenant/")) {
       router.push("/dashboard");
-    } else if (isInspector && pathname !== "/dashboard/inspector") {
+    } else if (isInspector && (pathname === "/dashboard" || pathname === "/dashboard/")) {
       router.push("/dashboard/inspector");
     }
   }, [status, isTenant, isInspector, pathname, router]);
@@ -104,19 +123,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-
-
-  if (isInspector) {
-    if (pathname !== "/dashboard/inspector") {
-      return (
-        <div className="min-h-screen bg-[#F0F4F8] flex flex-col items-center justify-center text-[#111111] gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3B82F6]"></div>
-          <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Redirecting to inspector portal...</p>
-        </div>
-      );
-    }
-    return <>{children}</>;
-  }
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] font-sans flex text-[#111111]">
@@ -422,6 +428,80 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {sidebarOpen && <span>Profile Settings</span>}
                 </Link>
               </>
+            ) : isInspector ? (
+              <>
+                <Link
+                  href="/dashboard/inspector"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    pathname === "/dashboard/inspector"
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  {sidebarOpen && <span>Dashboard Overview</span>}
+                </Link>
+
+                {sidebarOpen && (
+                  <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                    WORK ORDERS
+                  </span>
+                )}
+
+                <Link
+                  href="/dashboard/inspector/active"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/inspector/active")
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <Wrench className="h-5 w-5" />
+                  {sidebarOpen && <span>Active Tasks</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/inspector/history"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/inspector/history")
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <FileText className="h-5 w-5" />
+                  {sidebarOpen && <span>History Logs</span>}
+                </Link>
+
+                {sidebarOpen && (
+                  <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                    SYSTEM
+                  </span>
+                )}
+
+                <Link
+                  href="/dashboard/calendar"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/calendar")
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <Calendar className="h-5 w-5" />
+                  {sidebarOpen && <span>Calendar</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/notifications"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/notifications")
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <Bell className="h-5 w-5" />
+                  {sidebarOpen && <span>Notifications</span>}
+                </Link>
+              </>
             ) : (
               <>
                 <Link
@@ -435,6 +515,107 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <LayoutDashboard className="h-5 w-5" />
                   {sidebarOpen && <span>Dashboard</span>}
                 </Link>
+
+                {isAdmin && (
+                  <>
+                    {sidebarOpen && (
+                      <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                        ADMINISTRATION
+                      </span>
+                    )}
+                    <Link
+                      href="/dashboard/admin"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <ShieldCheck className="h-5 w-5" />
+                      {sidebarOpen && <span>Admin Overview</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/properties"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/properties"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <Building className="h-5 w-5" />
+                      {sidebarOpen && <span>Approve Properties</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/payouts"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/payouts"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <DollarSign className="h-5 w-5" />
+                      {sidebarOpen && <span>Payouts</span>}
+                    </Link>
+
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() => {
+                          if (!sidebarOpen) setSidebarOpen(true);
+                          setAdminOpen(!adminOpen);
+                        }}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
+                          pathname.startsWith("/dashboard/admin/users") && !adminOpen
+                            ? "bg-[#FEF2F2] text-[#EF4444]"
+                            : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                        }`}
+                      >
+                        <Users className="h-5 w-5" />
+                        {sidebarOpen && <span className="flex-1 text-left">User Management</span>}
+                        {sidebarOpen && (
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform duration-200 ${adminOpen ? "rotate-180" : ""}`}
+                          />
+                        )}
+                      </button>
+
+                      {sidebarOpen && adminOpen && (
+                        <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
+                          <Link
+                            href="/dashboard/admin/users"
+                            className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                              pathname === "/dashboard/admin/users"
+                                ? "bg-[#FEF2F2] text-[#EF4444]"
+                                : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                            }`}
+                          >
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            All Users
+                          </Link>
+                          <Link
+                            href="/dashboard/admin/users/new"
+                            className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                              pathname === "/dashboard/admin/users/new"
+                                ? "bg-[#FEF2F2] text-[#EF4444]"
+                                : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                            }`}
+                          >
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            Add User
+                          </Link>
+                          <Link
+                            href="/dashboard/admin#roles"
+                            className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]`}
+                          >
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            User Roles
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
@@ -716,6 +897,48 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 )}
 
+                {/* Tours Accordion */}
+                {isOwnerOrAdmin && (
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() => {
+                        if (!sidebarOpen) setSidebarOpen(true);
+                        setToursOpen(!toursOpen);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
+                        isActive("/dashboard/tours") && !toursOpen
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <Calendar className="h-5 w-5" />
+                      {sidebarOpen && <span className="flex-1 text-left">Showing Tours</span>}
+                      {sidebarOpen && (
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${toursOpen ? "rotate-180" : ""}`}
+                        />
+                      )}
+                    </button>
+
+                    {/* Sub-menu */}
+                    {sidebarOpen && toursOpen && (
+                      <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
+                        <Link
+                          href="/dashboard/tours"
+                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            pathname === "/dashboard/tours"
+                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                          Tour Schedules
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Maintenance Accordion */}
                 {(!isTenant) && (
                   <div className="flex flex-col">
@@ -834,6 +1057,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                 )}
 
+                {isOwner && (
+                  <Link
+                    href="/dashboard/accounting/wallet"
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                      isActive("/dashboard/accounting/wallet")
+                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                    }`}
+                  >
+                    <DollarSign className="h-5 w-5" />
+                    {sidebarOpen && <span>Wallet & Payouts</span>}
+                  </Link>
+                )}
                 {isOwnerOrAdmin && (
                   <Link
                     href="/dashboard/accounting/transactions"

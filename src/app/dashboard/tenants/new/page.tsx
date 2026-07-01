@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Save, UploadCloud, User, Briefcase, PhoneCall, FileText, Camera } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, User, Briefcase, PhoneCall, FileText, Camera, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AddTenantPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,6 +48,18 @@ export default function AddTenantPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    fetch("/api/properties")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setProperties(data);
+      })
+      .catch(() => toast.error("Failed to load properties"))
+      .finally(() => setHasLoaded(true));
+  }, []);
+
+  const hasApprovedProperty = properties.some(p => p.approvalStatus === "APPROVED");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +110,27 @@ export default function AddTenantPage() {
           <p className="text-[#64748B] text-sm mt-1">Create a new tenant profile and invite them to the portal.</p>
         </div>
       </div>
+
+      {hasLoaded && !hasApprovedProperty && (
+        <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-amber-950 text-base">Property Approval Required</h3>
+              <p className="text-amber-800 text-sm mt-0.5 font-semibold">
+                You do not have any properties approved by administrative review. You must have at least one approved property before registering a tenant.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/properties">
+            <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-11 shrink-0 shadow-sm border-0">
+              View Properties
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
@@ -310,7 +345,7 @@ export default function AddTenantPage() {
           <Link href="/dashboard/tenants">
             <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#0F172A] border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC]">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={loading} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
+          <Button type="submit" disabled={loading || !hasApprovedProperty} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? "Saving..." : "Create Tenant"}
           </Button>
         </div>

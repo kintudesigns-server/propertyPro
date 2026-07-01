@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const { 
       unitId, tenantEmail, startDate, endDate, monthlyRent, applicationId,
       rentDueDay, securityDeposit, lateFeeAmount, gracePeriodDays, lateFeeType, 
-      autoGenerateInvoices, autoEmailInvoices 
+      autoGenerateInvoices, autoEmailInvoices, renewalNoticeDays
     } = await req.json();
 
     if (!unitId || !tenantEmail || !startDate || !endDate || !monthlyRent) {
@@ -65,6 +65,13 @@ export async function POST(req: NextRequest) {
 
     if (!unit || unit.property.ownerId !== (session.user as any).id) {
       return NextResponse.json({ error: "Unit not found or access denied" }, { status: 404 });
+    }
+
+    if (unit.property.approvalStatus !== "APPROVED") {
+      return NextResponse.json(
+        { error: "Cannot create a lease for a property that is pending administrative approval." },
+        { status: 403 }
+      );
     }
 
     // Find or create tenant by email
@@ -118,15 +125,29 @@ export async function POST(req: NextRequest) {
         lateFeeType: lateFeeType || "FIXED",
         autoGenerateInvoices: autoGenerateInvoices !== undefined ? autoGenerateInvoices : true,
         autoEmailInvoices: autoEmailInvoices !== undefined ? autoEmailInvoices : false,
+        renewalNoticeDays: renewalNoticeDays ? Number(renewalNoticeDays) : 60,
       },
     });
 
-    // Generate initial invoices: 1 for Rent, 1 for Deposit
+    // Prorated Rent Automation (Phase 1)
+    const start = new Date(startDate);
+    const startDay = start.getDate();
+    let firstMonthRentAmount = Number(monthlyRent);
+    
+    if (startDay > 1) {
+      // Calculate based on exact days in the starting month
+      const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+      const daysLived = daysInMonth - startDay + 1; // +1 to include move-in day
+      const dailyRate = Number(monthlyRent) / daysInMonth;
+      firstMonthRentAmount = dailyRate * daysLived;
+    }
+
+    // Generate initial invoice (Prorated if mid-month)
     await prisma.invoice.create({
       data: {
         leaseId: lease.id,
-        amount: Number(monthlyRent),
-        dueDate: new Date(startDate),
+        amount: Number(firstMonthRentAmount.toFixed(2)),
+        dueDate: start,
         status: "UNPAID",
       },
     });

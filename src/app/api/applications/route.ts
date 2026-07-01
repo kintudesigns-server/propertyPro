@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         await notify({
           userId: unit.property.ownerId,
           title: "New Rental Application Received",
-          message: `${name} has submitted a rental application for Unit ${unit.unitNumber || unitId} at ${unit.property.name}. Review it in the Applications section.`,
+          message: `${name} has submitted a rental application for Unit ${unit.name || unitId} at ${unit.property.name}. Review it in the Applications section.`,
           type: "SYSTEM",
           priority: "MEDIUM",
           relatedEntityId: application.id,

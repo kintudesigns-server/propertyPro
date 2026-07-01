@@ -6,19 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Building, User, Calendar, DollarSign, Loader2, Home, Settings, AlertCircle, FileText, CheckCircle2, Mail } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Building, User, Calendar, DollarSign, Loader2, Home, Settings, AlertCircle, FileText, CheckCircle2, Mail, Clock, ShieldCheck, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function CreateLeasePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramUnitId = searchParams ? searchParams.get("unitId") : null;
+  const paramTenantEmail = searchParams ? searchParams.get("tenantEmail") : null;
+
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState("");
   const [units, setUnits] = useState<any[]>([]);
   const [selectedUnitDetails, setSelectedUnitDetails] = useState<any>(null);
-  
+
   const [formData, setFormData] = useState({
     unitId: "",
     tenantEmail: "",
@@ -32,46 +38,141 @@ export default function CreateLeasePage() {
     lateFeeType: "FIXED",
     autoGenerateInvoices: true,
     autoEmailInvoices: false,
+    renewalNoticeDays: "60",
   });
 
   useEffect(() => {
+    if (paramTenantEmail) {
+      setFormData((prev) => ({ ...prev, tenantEmail: paramTenantEmail }));
+    }
+  }, [paramTenantEmail]);
+
+  useEffect(() => {
     fetch("/api/properties")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setProperties(data);
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setProperties(data);
+          if (paramUnitId) {
+            const propertyWithUnit = data.find((p: any) =>
+              p.units && p.units.some((u: any) => u.id === paramUnitId)
+            );
+            if (propertyWithUnit) {
+              setSelectedProperty(propertyWithUnit.id);
+            }
+          }
+        }
       })
-      .catch(() => toast.error("Failed to load properties"));
-  }, []);
+      .catch(() => toast.error("Failed to load properties"))
+      .finally(() => setHasLoaded(true));
+  }, [paramUnitId]);
+
+  const approvedProperties = properties.filter((p) => p.approvalStatus === "APPROVED");
 
   useEffect(() => {
     if (selectedProperty) {
       fetch(`/api/properties?id=${selectedProperty}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data && Array.isArray(data.units)) {
-            setUnits(data.units.filter((u: any) => u.status === "VACANT" || u.status === "AVAILABLE"));
+            const filteredUnits = data.units.filter((u: any) => u.status === "VACANT" || u.status === "AVAILABLE" || u.id === paramUnitId);
+            setUnits(filteredUnits);
+            if (paramUnitId) {
+              const matchedUnit = filteredUnits.find((u: any) => u.id === paramUnitId);
+              if (matchedUnit) {
+                setFormData((prev) => ({
+                  ...prev,
+                  unitId: paramUnitId,
+                  monthlyRent: matchedUnit.rentAmount ? matchedUnit.rentAmount.toString() : "",
+                  securityDeposit: matchedUnit.depositAmt ? matchedUnit.depositAmt.toString() : "",
+                }));
+                setSelectedUnitDetails(matchedUnit);
+              }
+            }
           }
         });
     } else {
       setUnits([]);
     }
-  }, [selectedProperty]);
+  }, [selectedProperty, paramUnitId]);
 
   const handleUnitSelect = (unitId: string) => {
-    setFormData({ ...formData, unitId });
+    setFormData((prev) => ({ ...prev, unitId }));
     const unit = units.find((u: any) => u.id === unitId);
     if (unit) {
       setSelectedUnitDetails(unit);
       if (unit.rentAmount) {
-        setFormData(prev => ({ 
-          ...prev, 
+        setFormData((prev) => ({
+          ...prev,
           monthlyRent: unit.rentAmount.toString(),
-          securityDeposit: unit.depositAmt ? unit.depositAmt.toString() : ""
+          securityDeposit: unit.depositAmt ? unit.depositAmt.toString() : "",
         }));
       }
     } else {
       setSelectedUnitDetails(null);
     }
+  };
+
+  const handleQuickDuration = (months: number) => {
+    if (!formData.startDate) {
+      toast.error("Please select a Start Date first");
+      return;
+    }
+    const start = new Date(formData.startDate);
+    if (isNaN(start.getTime())) return;
+    const end = new Date(start);
+    end.setMonth(start.getMonth() + months);
+    end.setDate(end.getDate() - 1); // standard cycle adjustment
+
+    const yyyy = end.getFullYear();
+    const mm = String(end.getMonth() + 1).padStart(2, "0");
+    const dd = String(end.getDate()).padStart(2, "0");
+    setFormData((prev) => ({ ...prev, endDate: `${yyyy}-${mm}-${dd}` }));
+    toast.success(`Lease duration set to ${months} months`);
+  };
+
+  const handleQuickDeposit = (multiplier: number) => {
+    const rent = Number(formData.monthlyRent) || 0;
+    if (rent <= 0) {
+      toast.error("Please enter a Monthly Rent first");
+      return;
+    }
+    setFormData((prev) => ({ ...prev, securityDeposit: (rent * multiplier).toFixed(2) }));
+    toast.success(`Security deposit set to ${multiplier}x rent`);
+  };
+
+  const getLeaseDurationMonths = () => {
+    if (!formData.startDate || !formData.endDate) return null;
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const months = (diffDays / 30.43).toFixed(1);
+    return { months, days: diffDays };
+  };
+
+  const getProratedRentDetails = () => {
+    if (!formData.startDate || !formData.monthlyRent) return null;
+    const start = new Date(formData.startDate);
+    if (isNaN(start.getTime())) return null;
+    const startDay = start.getDate();
+    const monthlyRentAmt = Number(formData.monthlyRent) || 0;
+    if (startDay === 1 || monthlyRentAmt <= 0) return { amount: monthlyRentAmt, isProrated: false };
+
+    const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+    const daysLived = daysInMonth - startDay + 1;
+    const dailyRate = monthlyRentAmt / daysInMonth;
+    const proratedAmount = dailyRate * daysLived;
+
+    const monthName = start.toLocaleString("default", { month: "short" });
+    return {
+      amount: Number(proratedAmount.toFixed(2)),
+      isProrated: true,
+      daysLived,
+      daysInMonth,
+      monthName,
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +181,7 @@ export default function CreateLeasePage() {
       toast.error("Please fill all required fields");
       return;
     }
-    
+
     setLoading(true);
     try {
       const res = await fetch("/api/leases", {
@@ -88,7 +189,7 @@ export default function CreateLeasePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      
+
       if (res.ok) {
         toast.success("Lease created successfully");
         router.push("/dashboard/leases");
@@ -103,187 +204,220 @@ export default function CreateLeasePage() {
     }
   };
 
-  const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 ${checked ? 'bg-[#3B82F6]' : 'bg-[#E2E8F0]'}`}
-    >
-      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
-    </button>
-  );
+  const proratedInfo = getProratedRentDetails();
+  const durationInfo = getLeaseDurationMonths();
+  const selectedPropertyDetails = properties.find((p) => p.id === selectedProperty);
+
+  const securityDepositVal = Number(formData.securityDeposit) || 0;
+  const firstPaymentAmount = (proratedInfo?.amount || 0) + securityDepositVal;
 
   return (
-    <div className="w-full max-w-5xl mx-auto pt-6 space-y-6 pb-20 px-4 sm:px-0">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/leases">
-            <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]">
+            <Button variant="outline" className="h-11 w-11 p-0 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-[28px] font-black text-[#0F172A] tracking-tight">Create New Lease</h1>
-            <p className="text-[#64748B] text-sm font-medium mt-0.5">Configure lease terms, late fees, and automated billing.</p>
+            <h1 className="text-3xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
+              Create Lease Agreement
+            </h1>
+            <p className="text-[#64748B] text-base mt-0.5">Configure billing rules, dates, and tenant onboarding.</p>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#EFF6FF] rounded-xl border border-[#BFDBFE]">
-          <CheckCircle2 className="h-5 w-5 text-[#3B82F6]" />
-          <span className="text-sm font-bold text-[#1E3A8A]">Draft Mode</span>
+        <div className="flex items-center gap-2.5 px-4 py-2 bg-[#EFF6FF] rounded-xl border border-[#BFDBFE] text-[#1E3A8A] font-bold text-sm shadow-xs">
+          <ShieldCheck className="h-4.5 w-4.5 text-[#3B82F6]" />
+          <span>Draft Mode</span>
         </div>
       </div>
 
+      {hasLoaded && approvedProperties.length === 0 && (
+        <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-amber-950 text-base">Property Approval Required</h3>
+              <p className="text-amber-800 text-sm mt-0.5 font-semibold">
+                You do not have any properties approved by administrative review. Leases can only be created for properties that have been approved.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/properties">
+            <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-11 shrink-0 shadow-sm border-0">
+              View Properties
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Main Form Columns */}
+        {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
-          
-          {/* Section 1: Property & Tenant */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
+          {/* Property & Tenant */}
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
-                <Building className="h-4 w-4" />
+                <Building className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Property & Tenant</h2>
+              <h2 className="text-lg font-bold text-[#0F172A]">Property & Tenant Allocation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
-                  <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({...formData, unitId: ""}); setSelectedUnitDetails(null); }} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
-                      <SelectValue placeholder="Select a property">
-                        {selectedProperty ? properties.find(p => p.id === selectedProperty)?.name : "Select a property"}
-                      </SelectValue>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
+                  <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={approvedProperties.length === 0} required>
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
+                      <SelectValue placeholder={approvedProperties.length === 0 ? "No approved properties" : "Select a property"} />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
-                      {properties.map(p => (
+                      {approvedProperties.map((p) => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
                   <Select value={formData.unitId} onValueChange={(v) => handleUnitSelect(v || "")} disabled={!selectedProperty || units.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
-                      <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No available units" : "Select unit"}>
-                        {formData.unitId ? units.find(u => u.id === formData.unitId)?.name : null}
-                      </SelectValue>
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
+                      <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No vacant units" : "Select unit"} />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
-                      {units.map(u => (
-                        <SelectItem key={u.id} value={u.id}>{u.name} (Beds: {u.rooms})</SelectItem>
+                      {units.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>{u.name} (Rent: ${u.rentAmount || 0}/mo)</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="space-y-2.5 pt-2">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Tenant Email <span className="text-[#EF4444]">*</span></Label>
+              <div className="space-y-2 pt-2">
+                <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Tenant Email <span className="text-[#EF4444]">*</span></Label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-                  <Input 
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                  <Input
                     type="email"
                     required
                     placeholder="tenant@example.com"
                     value={formData.tenantEmail}
-                    onChange={(e) => setFormData({...formData, tenantEmail: e.target.value})}
-                    className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                    onChange={(e) => setFormData({ ...formData, tenantEmail: e.target.value })}
+                    className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
                   />
                 </div>
-                <p className="text-[12px] text-[#64748B] font-medium mt-1">An invite will be automatically sent to this email to sign the lease digitally.</p>
+                <p className="text-xs text-[#64748B] font-medium">An invite will be automatically dispatched to this email to sign the digital agreement.</p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Section 2: Lease Terms */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
+          {/* Lease Dates */}
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Lease Dates</h2>
+              <h2 className="text-lg font-bold text-[#0F172A]">Lease Duration Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Start Date <span className="text-[#EF4444]">*</span></Label>
-                  <Input 
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Start Date <span className="text-[#EF4444]">*</span></Label>
+                  <Input
                     type="date"
                     required
                     value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
                   />
                 </div>
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">End Date <span className="text-[#EF4444]">*</span></Label>
-                  <Input 
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">End Date <span className="text-[#EF4444]">*</span></Label>
+                    {formData.startDate && (
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => handleQuickDuration(6)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">6m</button>
+                        <button type="button" onClick={() => handleQuickDuration(12)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">1yr</button>
+                        <button type="button" onClick={() => handleQuickDuration(24)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">2yr</button>
+                      </div>
+                    )}
+                  </div>
+                  <Input
                     type="date"
                     required
                     value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Section 3: Financial Terms */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
+          {/* Financial Terms */}
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
-                <DollarSign className="h-4 w-4" />
+                <DollarSign className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Financial Terms</h2>
+              <h2 className="text-lg font-bold text-[#0F172A]">Financial Billing Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Monthly Rent <span className="text-[#EF4444]">*</span></Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Monthly Rent <span className="text-[#EF4444]">*</span></Label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold">$</div>
-                    <Input 
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                    <Input
                       type="number"
                       step="0.01"
                       required
                       placeholder="0.00"
                       value={formData.monthlyRent}
-                      onChange={(e) => setFormData({...formData, monthlyRent: e.target.value})}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-black text-[#0F172A] shadow-sm"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Security Deposit</Label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold">$</div>
-                    <Input 
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.securityDeposit}
-                      onChange={(e) => setFormData({...formData, securityDeposit: e.target.value})}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-black text-[#0F172A] shadow-sm"
+                      onChange={(e) => setFormData({ ...formData, monthlyRent: e.target.value })}
+                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-black text-[#0F172A] shadow-xs"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Rent Due Day</Label>
-                  <Select value={formData.rentDueDay} onValueChange={(v) => setFormData({...formData, rentDueDay: v || "1"})}>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Security Deposit</Label>
+                    {Number(formData.monthlyRent) > 0 && (
+                      <div className="flex gap-1.5">
+                        <button type="button" onClick={() => handleQuickDeposit(1)} className="text-[10px] font-extrabold text-[#10B981] hover:underline bg-[#E6F4EA] px-1 py-0.5 rounded border border-[#A3E4D7]">1x</button>
+                        <button type="button" onClick={() => handleQuickDeposit(1.5)} className="text-[10px] font-extrabold text-[#10B981] hover:underline bg-[#E6F4EA] px-1 py-0.5 rounded border border-[#A3E4D7]">1.5x</button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={formData.securityDeposit}
+                      onChange={(e) => setFormData({ ...formData, securityDeposit: e.target.value })}
+                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-bold text-[#0F172A] shadow-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Rent Due Day</Label>
+                  <Select value={formData.rentDueDay} onValueChange={(v) => setFormData({ ...formData, rentDueDay: v || "1" })}>
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
                       <SelectValue placeholder="Select day" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg max-h-[200px]">
-                      {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                         <SelectItem key={day} value={day.toString()}>
-                          {day}{day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th'} of the month
+                          {day}
+                          {day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th"} of the month
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -292,50 +426,52 @@ export default function CreateLeasePage() {
               </div>
 
               {/* Late Fees */}
-              <div className="pt-6 border-t border-[#F1F5F9] space-y-6">
-                <h3 className="font-bold text-[#0F172A] text-base">Late Fee Rules</h3>
-                
+              <div className="pt-6 border-t border-[#F1F5F9] space-y-5">
+                <h3 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
+                  <Clock className="h-4.5 w-4.5 text-amber-500" /> Late Fee Configuration
+                </h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Grace Period</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Grace Period</Label>
                     <div className="relative">
-                      <Input 
+                      <Input
                         type="number"
                         min="0"
                         placeholder="5"
                         value={formData.gracePeriodDays}
-                        onChange={(e) => setFormData({...formData, gracePeriodDays: e.target.value})}
-                        className="pr-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                        onChange={(e) => setFormData({ ...formData, gracePeriodDays: e.target.value })}
+                        className="pr-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">Days</div>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">Days</div>
                     </div>
                   </div>
 
-                  <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Fee Amount</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Fee Value</Label>
                     <div className="relative">
-                       {formData.lateFeeType === "FIXED" && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold">$</div>}
-                       <Input 
+                      {formData.lateFeeType === "FIXED" && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>}
+                      <Input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
                         value={formData.lateFeeAmount}
-                        onChange={(e) => setFormData({...formData, lateFeeAmount: e.target.value})}
-                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm`}
+                        onChange={(e) => setFormData({ ...formData, lateFeeAmount: e.target.value })}
+                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs`}
                       />
-                      {formData.lateFeeType === "PERCENTAGE" && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold">%</div>}
+                      {formData.lateFeeType === "PERCENTAGE" && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">%</div>}
                     </div>
                   </div>
 
-                  <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Fee Type</Label>
-                    <Select value={formData.lateFeeType} onValueChange={(v) => setFormData({...formData, lateFeeType: v || "FIXED"})}>
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Late Fee Type</Label>
+                    <Select value={formData.lateFeeType} onValueChange={(v) => setFormData({ ...formData, lateFeeType: v || "FIXED" })}>
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
                         <SelectItem value="FIXED">Fixed Amount</SelectItem>
-                        <SelectItem value="PERCENTAGE">% of Rent</SelectItem>
+                        <SelectItem value="PERCENTAGE">% of Monthly Rent</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -345,56 +481,87 @@ export default function CreateLeasePage() {
           </Card>
         </div>
 
-        {/* Right Sidebar Columns */}
+        {/* Sidebar Summary & Preview Column */}
         <div className="space-y-8">
-          
-          {/* Unit Details Slide-In/Sticky Card */}
-          <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-none shadow-xl rounded-[24px] overflow-hidden text-white transition-all duration-300">
+          {/* Summary Panel */}
+          <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-none shadow-xl rounded-2xl overflow-hidden text-white transition-all duration-300">
             <CardContent className="p-6">
-              {selectedUnitDetails ? (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {formData.unitId ? (
+                <div className="space-y-6">
+                  {/* Property & Unit Headings */}
                   <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                    <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                      <Home className="h-6 w-6" />
+                    <div className="h-11 w-11 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                      <Home className="h-5.5 w-5.5" />
                     </div>
-                    <div>
-                      <p className="text-[12px] font-bold text-[#94A3B8] uppercase tracking-wider">Selected Unit</p>
-                      <h3 className="text-lg font-black tracking-tight">{selectedUnitDetails.name}</h3>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Bedrooms</p>
-                      <p className="text-xl font-black">{selectedUnitDetails.rooms || 0}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Bathrooms</p>
-                      <p className="text-xl font-black">{selectedUnitDetails.bathrooms || 0}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5 col-span-2">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Square Footage</p>
-                      <p className="text-xl font-black">{selectedUnitDetails.sqFootage ? `${selectedUnitDetails.sqFootage} sq ft` : "N/A"}</p>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Leasing Location</p>
+                      <h3 className="text-base font-black tracking-tight truncate">{selectedUnitDetails?.name || "Selected Unit"}</h3>
+                      <p className="text-xs text-[#94A3B8] truncate">{selectedPropertyDetails?.name || ""}</p>
                     </div>
                   </div>
 
-                  {selectedUnitDetails.amenities && selectedUnitDetails.amenities.length > 0 && (
-                    <div className="pt-2">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Amenities</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedUnitDetails.amenities.slice(0, 4).map((a: string, i: number) => (
-                          <span key={i} className="px-2 py-1 bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 text-[11px] font-bold rounded-md">
-                            {a}
-                          </span>
-                        ))}
-                        {selectedUnitDetails.amenities.length > 4 && (
-                          <span className="px-2 py-1 bg-white/5 text-[#94A3B8] border border-white/10 text-[11px] font-bold rounded-md">
-                            +{selectedUnitDetails.amenities.length - 4} more
-                          </span>
-                        )}
+                  {/* Property Details Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Layout</p>
+                      <p className="text-sm font-black">{selectedUnitDetails?.rooms || 0} Bed / {selectedUnitDetails?.bathrooms || 0} Bath</p>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Area Size</p>
+                      <p className="text-sm font-black">{selectedUnitDetails?.sqFootage ? `${selectedUnitDetails.sqFootage} sqft` : "N/A"}</p>
+                    </div>
+                  </div>
+
+                  {/* Lease Timeline Dates */}
+                  {formData.startDate && formData.endDate && (
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-2">
+                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Timeline & Duration</p>
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <p className="font-semibold text-white">{new Date(formData.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                          <p className="text-[9px] text-[#94A3B8] uppercase">Move-In</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-500" />
+                        <div className="text-right">
+                          <p className="font-semibold text-white">{new Date(formData.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                          <p className="text-[9px] text-[#94A3B8] uppercase">Move-Out</p>
+                        </div>
                       </div>
+                      {durationInfo && (
+                        <div className="text-center pt-2 border-t border-white/5">
+                          <p className="text-xs font-extrabold text-[#3B82F6]">{durationInfo.months} Months ({durationInfo.days} days)</p>
+                        </div>
+                      )}
                     </div>
                   )}
+
+                  {/* Move-in Cost Estimation */}
+                  <div className="pt-2 space-y-3">
+                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Estimated Move-In Costs</p>
+                    <div className="space-y-2 bg-white/5 p-4 rounded-xl border border-white/5 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-[#94A3B8] font-semibold">Monthly Rent Rate</span>
+                        <span className="font-bold text-white">${Number(formData.monthlyRent || 0).toFixed(2)}</span>
+                      </div>
+                      
+                      {proratedInfo?.isProrated && (
+                        <div className="flex justify-between text-xs text-[#60A5FA]">
+                          <span className="font-semibold">Prorated First Month ({proratedInfo.daysLived} days of {proratedInfo.monthName})</span>
+                          <span className="font-bold">${proratedInfo.amount.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between">
+                        <span className="text-[#94A3B8] font-semibold">Security Deposit</span>
+                        <span className="font-bold text-white">${securityDepositVal.toFixed(2)}</span>
+                      </div>
+                      
+                      <div className="border-t border-white/10 pt-2.5 mt-2 flex justify-between items-baseline">
+                        <span className="text-white font-extrabold">Due at Move-In</span>
+                        <span className="text-lg font-black text-green-400">${firstPaymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="py-12 flex flex-col items-center justify-center text-center text-[#94A3B8]">
@@ -402,57 +569,76 @@ export default function CreateLeasePage() {
                     <Building className="h-8 w-8 text-white/20" />
                   </div>
                   <h3 className="font-bold text-white mb-1">No Unit Selected</h3>
-                  <p className="text-sm font-medium">Select a property and unit to view details here.</p>
+                  <p className="text-sm font-medium px-4">Select property and unit on the left to preview lease terms and prorated costs.</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Automation Settings */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#F3F4F6] flex items-center justify-center text-[#4B5563]">
-                <Settings className="h-4 w-4" />
+          {/* Automation settings */}
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#F8FAFC] flex items-center justify-center text-slate-500">
+                <Settings className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Automation</h2>
+              <h2 className="text-lg font-bold text-[#0F172A]">Invoice Automation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
                     <FileText className="h-4 w-4 text-[#3B82F6]" /> Auto-Generate Invoices
                   </h4>
-                  <p className="text-[12px] text-[#64748B] font-medium mt-1">Automatically create rent invoices each month.</p>
+                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Generate monthly invoices automatically.</p>
                 </div>
-                <Switch 
-                  checked={formData.autoGenerateInvoices} 
-                  onChange={(val) => setFormData({...formData, autoGenerateInvoices: val})} 
+                <Switch
+                  checked={formData.autoGenerateInvoices}
+                  onCheckedChange={(val) => setFormData({ ...formData, autoGenerateInvoices: val })}
                 />
               </div>
-              
-              <div className="flex items-center justify-between pt-4 border-t border-[#F1F5F9]">
+
+              <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
                 <div>
                   <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
                     <Mail className="h-4 w-4 text-[#10B981]" /> Auto-Email Invoices
                   </h4>
-                  <p className="text-[12px] text-[#64748B] font-medium mt-1">Send invoices directly to tenant's email.</p>
+                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Send invoices directly to tenant's email address.</p>
                 </div>
-                <Switch 
-                  checked={formData.autoEmailInvoices} 
-                  onChange={(val) => setFormData({...formData, autoEmailInvoices: val})} 
+                <Switch
+                  checked={formData.autoEmailInvoices}
+                  onCheckedChange={(val) => setFormData({ ...formData, autoEmailInvoices: val })}
                 />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
+                <div>
+                  <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
+                    <Calendar className="h-4.5 w-4.5 text-orange-500" /> Renewal Notice Window
+                  </h4>
+                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Days prior to end date to alert renewal.</p>
+                </div>
+                <div className="relative w-32">
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.renewalNoticeDays}
+                    onChange={(e) => setFormData({ ...formData, renewalNoticeDays: e.target.value })}
+                    className="pr-14 h-10 rounded-xl bg-white border-[#E2E8F0] font-bold text-center shadow-xs text-sm"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">days</div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Submit Actions */}
           <div className="flex flex-col gap-3 pt-2">
-            <Button type="submit" disabled={loading} className="w-full h-14 rounded-[16px] bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-base shadow-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02]">
+            <Button type="submit" disabled={loading || approvedProperties.length === 0} className="w-full h-14 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-base shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed">
               {loading && <Loader2 className="h-5 w-5 animate-spin" />}
-              {loading ? "Creating Lease..." : "Create Lease Agreement"}
+              {loading ? "Registering Lease..." : "Create Lease Agreement"}
             </Button>
             <Link href="/dashboard/leases">
-              <Button type="button" variant="outline" className="w-full h-12 rounded-[16px] border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] font-bold hover:bg-[#F8FAFC]">
+              <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] font-bold hover:bg-[#F8FAFC]">
                 Cancel
               </Button>
             </Link>

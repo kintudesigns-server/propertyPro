@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       await prisma.user.update({
         where: { id: (session.user as any).id },
         data: {
-          balance: { increment: Number(amount) },
+          balance: { increment: Number(amount) * 0.9 },
         },
       });
     }
@@ -140,7 +140,7 @@ export async function PUT(req: NextRequest) {
       await prisma.user.update({
         where: { id: (session.user as any).id },
         data: {
-          balance: { increment: amount },
+          balance: { increment: amount * 0.9 },
         },
       });
     } else if (oldStatus === "PAID" && status !== "PAID") {
@@ -148,7 +148,7 @@ export async function PUT(req: NextRequest) {
       await prisma.user.update({
         where: { id: (session.user as any).id },
         data: {
-          balance: { decrement: amount },
+          balance: { decrement: amount * 0.9 },
         },
       });
     }

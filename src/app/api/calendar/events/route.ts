@@ -38,35 +38,37 @@ export async function GET(req: NextRequest) {
     const ownerCondition = role === "OWNER" ? { property: { ownerId: userId } } : {};
     const tenantCondition = role === "TENANT" ? { tenantId: userId } : {};
 
-    // 1. Fetch Invoices (Rent Due)
-    const invoices = await prisma.invoice.findMany({
-      where: {
-        dueDate: { gte: startDate, lte: endDate },
-        status: { not: "PAID" },
-        lease: role === "TENANT" 
-          ? { tenantId: userId } 
-          : (role === "OWNER" ? { unit: { property: { ownerId: userId } } } : {}),
-      },
-      include: {
-        lease: { include: { unit: { include: { property: true } } } },
-      },
-    });
-
-    invoices.forEach((inv) => {
-      events.push({
-        id: `inv_${inv.id}`,
-        title: `Rent Due - $${Number(inv.amount).toLocaleString()} (${inv.lease.unit.property.name} Unit ${inv.lease.unit.unitNumber || ''})`,
-        type: "PAYMENT",
-        date: inv.dueDate.toISOString(),
-        priority: "HIGH",
-        metadata: {
-          invoiceId: inv.id,
-          amount: Number(inv.amount),
-          propertyName: inv.lease.unit.property.name,
-          unitNumber: inv.lease.unit.unitNumber,
+    // 1. Fetch Invoices (Rent Due) - Inspectors do not see invoices
+    if (role !== "INSPECTOR") {
+      const invoices = await prisma.invoice.findMany({
+        where: {
+          dueDate: { gte: startDate, lte: endDate },
+          status: { not: "PAID" },
+          lease: role === "TENANT" 
+            ? { tenantId: userId } 
+            : (role === "OWNER" ? { unit: { property: { ownerId: userId } } } : {}),
+        },
+        include: {
+          lease: { include: { unit: { include: { property: true } } } },
         },
       });
-    });
+
+      invoices.forEach((inv) => {
+        events.push({
+          id: `inv_${inv.id}`,
+          title: `Rent Due - $${Number(inv.amount).toLocaleString()} (${inv.lease.unit.property.name} Unit ${inv.lease.unit.name || ''})`,
+          type: "PAYMENT",
+          date: inv.dueDate.toISOString(),
+          priority: "HIGH",
+          metadata: {
+            invoiceId: inv.id,
+            amount: Number(inv.amount),
+            propertyName: inv.lease.unit.property.name,
+            unitNumber: inv.lease.unit.name,
+          },
+        });
+      });
+    }
 
     // 2. Fetch Scheduled Maintenance
     const maintenance = await prisma.maintenanceRequest.findMany({
@@ -93,41 +95,43 @@ export async function GET(req: NextRequest) {
         metadata: {
           requestId: req.id,
           propertyName: req.unit.property.name,
-          unitNumber: req.unit.unitNumber,
+          unitNumber: req.unit.name,
           category: req.category,
         },
       });
     });
 
-    // 3. Fetch Lease Expirations
-    const leases = await prisma.lease.findMany({
-      where: {
-        endDate: { gte: startDate, lte: endDate },
-        status: "ACTIVE",
-        ...(role === "TENANT" ? { tenantId: userId } : {}),
-        ...(role === "OWNER" ? { unit: { property: { ownerId: userId } } } : {}),
-      },
-      include: {
-        unit: { include: { property: true } },
-        tenant: { select: { name: true } },
-      },
-    });
-
-    leases.forEach((lease) => {
-      events.push({
-        id: `lease_${lease.id}`,
-        title: `Lease Expires - ${lease.tenant.name}`,
-        type: "LEASE",
-        date: lease.endDate.toISOString(),
-        priority: "HIGH",
-        metadata: {
-          leaseId: lease.id,
-          propertyName: lease.unit.property.name,
-          unitNumber: lease.unit.unitNumber,
-          tenantName: lease.tenant.name,
+    // 3. Fetch Lease Expirations - Inspectors do not see leases
+    if (role !== "INSPECTOR") {
+      const leases = await prisma.lease.findMany({
+        where: {
+          endDate: { gte: startDate, lte: endDate },
+          status: "ACTIVE",
+          ...(role === "TENANT" ? { tenantId: userId } : {}),
+          ...(role === "OWNER" ? { unit: { property: { ownerId: userId } } } : {}),
+        },
+        include: {
+          unit: { include: { property: true } },
+          tenant: { select: { name: true } },
         },
       });
-    });
+
+      leases.forEach((lease) => {
+        events.push({
+          id: `lease_${lease.id}`,
+          title: `Lease Expires - ${lease.tenant.name}`,
+          type: "LEASE",
+          date: lease.endDate.toISOString(),
+          priority: "HIGH",
+          metadata: {
+            leaseId: lease.id,
+            propertyName: lease.unit.property.name,
+            unitNumber: lease.unit.name,
+            tenantName: lease.tenant.name,
+          },
+        });
+      });
+    }
 
     // Sort events by date ascending
     events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

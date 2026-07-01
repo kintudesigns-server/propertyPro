@@ -86,6 +86,8 @@ model Property {
   amenities   String[]
   type        String   @default("Apartment")
   status      String   @default("AVAILABLE")
+  approvalStatus String @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?
   yearBuilt   Int?
   description String?
   createdAt   DateTime @default(now())
@@ -96,6 +98,7 @@ model Property {
   
   units       Unit[]
   documents   Document[]
+  tours       Tour[]
 }
 
 model Unit {
@@ -117,6 +120,7 @@ model Unit {
   leases       Lease[]
   maintenance  MaintenanceRequest[]
   applications Application[]
+  tours        Tour[]
 }
 
 model Lease {
@@ -138,6 +142,14 @@ model Lease {
   lateFeeType          String    @default("FIXED") // FIXED, PERCENTAGE
   autoGenerateInvoices Boolean   @default(true)
   autoEmailInvoices    Boolean   @default(false)
+  
+  // Phase 1: Security Deposits & Move-Out
+  depositStatus        String    @default("HELD") // HELD, REFUNDED, PARTIALLY_REFUNDED, FULLY_DEDUCTED
+  deductions           Json?     // Array of { amount: number, description: string, photoUrl?: string }
+
+  // Phase 3: Automated Renewals
+  renewalNoticeDays    Int       @default(60) // Days before endDate to trigger renewal offer
+  renewalStatus        String    @default("NOT_ELIGIBLE") // NOT_ELIGIBLE, PENDING_DECISION, RENEWED, NON_RENEWAL
   
   invoices    Invoice[]
 }
@@ -171,6 +183,21 @@ model MaintenanceRequest {
   inspector     User?    @relation("InspectorTasks", fields: [inspectorId], references: [id])
   estimatedCost Decimal? @db.Decimal(10, 2)
   scheduledDate DateTime?
+  
+  // Phase 2: Real-World Maintenance Enhancements
+  entryPermission     Boolean   @default(false)
+  preferredTimes      String?
+  diagnosisDate       DateTime?
+  repairDate          DateTime?
+  diagnosisPhotos     String[]
+  repairPhotos        String[]
+  inspectorNotes      String?   @db.Text
+  estimatedLabor      Decimal?  @db.Decimal(10, 2)
+  estimatedMaterials  Decimal?  @db.Decimal(10, 2)
+  finalLabor          Decimal?  @db.Decimal(10, 2)
+  finalMaterials      Decimal?  @db.Decimal(10, 2)
+  externalVendorName  String?
+  
   createdAt     DateTime @default(now())
 }
 
@@ -250,4 +277,39 @@ model Notification {
   isRead          Boolean  @default(false)
   relatedEntityId String?
   createdAt       DateTime @default(now())
+}
+
+enum TourType {
+  IN_PERSON
+  VIDEO_CALL
+  SELF_GUIDED
+}
+
+enum TourStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Tour {
+  id               String     @id @default(uuid())
+  propertyId       String
+  property         Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitId           String?
+  unit             Unit?      @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  tenantName       String
+  tenantEmail      String
+  tenantPhone      String
+  
+  tourType         TourType   @default(IN_PERSON)
+  scheduledAt      DateTime
+  status           TourStatus @default(PENDING)
+  
+  feedbackRating   Int?
+  feedbackComments String?
+  
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 }

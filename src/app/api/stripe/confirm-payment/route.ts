@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Fire automatic notifications
-    const unitLabel = invoice.lease.unit.unitNumber
-      ? `Unit ${invoice.lease.unit.unitNumber}`
+    const unitLabel = invoice.lease.unit.name
+      ? `Unit ${invoice.lease.unit.name}`
       : "your unit";
     const propertyName = invoice.lease.unit.property.name || "the property";
 

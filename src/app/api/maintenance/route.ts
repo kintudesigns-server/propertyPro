@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         await notify({
           userId: unit.property.ownerId,
           title: `New Maintenance Request – ${data.title}`,
-          message: `A new ${data.priority || "MEDIUM"} priority maintenance request has been submitted for Unit ${unit.unitNumber || data.unitId}: "${data.description?.slice(0, 100)}"`,
+          message: `A new ${data.priority || "MEDIUM"} priority maintenance request has been submitted for ${unit?.property?.name || 'Property'} - ${unit?.name?.includes('Unit') ? unit.name : `Unit ${unit?.name || 'Unknown'}`}: "${data.description?.slice(0, 100)}..."`,
           type: "MAINTENANCE",
           priority: notifPriority,
           relatedEntityId: request.id,
@@ -156,6 +156,12 @@ export async function PUT(req: NextRequest) {
     if (updateData.scheduledDate) {
       updateData.scheduledDate = new Date(updateData.scheduledDate);
     }
+    if (updateData.diagnosisDate) {
+      updateData.diagnosisDate = new Date(updateData.diagnosisDate);
+    }
+    if (updateData.repairDate) {
+      updateData.repairDate = new Date(updateData.repairDate);
+    }
 
     // Auto-update status based on inspector assignment if not explicitly set
     if (updateData.inspectorId && !updateData.status) {
@@ -172,17 +178,21 @@ export async function PUT(req: NextRequest) {
       try {
         const fullRequest = await prisma.maintenanceRequest.findUnique({
           where: { id },
-          include: { unit: { include: { property: true } } },
+          include: { unit: { include: { property: true } }, inspector: true },
         });
         if (fullRequest?.tenantId) {
           const statusMessages: Record<string, string> = {
             ASSIGNED: `Your maintenance request "${fullRequest.title}" has been assigned to an inspector and is being scheduled.`,
+            DIAGNOSIS_SCHEDULED: `Inspector ${fullRequest.inspector?.name || "assigned"} is scheduled to come for a diagnosis visit for "${fullRequest.title}" on ${updateData.diagnosisDate ? new Date(updateData.diagnosisDate).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' }) : 'soon'}.`,
+            SUBMIT_ESTIMATE: `An estimate has been submitted for "${fullRequest.title}".`,
+            APPROVED: `The repair estimate for "${fullRequest.title}" has been approved. Repairs will be scheduled shortly.`,
+            REPAIR_SCHEDULED: `Inspector ${fullRequest.inspector?.name || "assigned"} is scheduled to come for a repair visit for "${fullRequest.title}" on ${updateData.repairDate ? new Date(updateData.repairDate).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' }) : 'soon'}.`,
             IN_PROGRESS: `Work has started on your maintenance request "${fullRequest.title}".`,
             RESOLVED: `Your maintenance request "${fullRequest.title}" has been resolved. Please check and confirm everything is in order.`,
             CLOSED: `Your maintenance request "${fullRequest.title}" has been closed.`,
           };
           const msg = statusMessages[updateData.status] ||
-            `Your maintenance request status has been updated to ${updateData.status}.`;
+            `Your maintenance request status has been updated to ${updateData.status.replace("_", " ")}.`;
           await notify({
             userId: fullRequest.tenantId,
             title: `Maintenance Update – ${fullRequest.title}`,

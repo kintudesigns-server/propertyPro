@@ -149,11 +149,18 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
                   <div className="h-px bg-[#E2E8F0]"></div>
                   <div>
                     <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
-                      <FileText className="h-3.5 w-3.5" /> Related Entity ID
+                      <FileText className="h-3.5 w-3.5" /> Related Entity Link
                     </span>
-                    <p className="text-sm font-semibold text-[#0F172A] break-all bg-slate-50 p-2 rounded-md border border-slate-200">
-                      {notification.relatedEntityId}
-                    </p>
+                    <Link 
+                      href={
+                        notification.type === "MAINTENANCE" ? `/dashboard/maintenance/${notification.relatedEntityId}` :
+                        notification.type === "LEASE" ? `/dashboard/leases` :
+                        "#"
+                      }
+                      className="block text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline break-all bg-slate-50 p-2 rounded-md border border-slate-200"
+                    >
+                      View Details (ID: {notification.relatedEntityId.split("-")[0]}...)
+                    </Link>
                   </div>
                 </>
               )}

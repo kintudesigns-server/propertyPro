@@ -6,10 +6,57 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export async function POST(req: NextRequest) {
   try {
-    const { invoiceId } = await req.json();
+    const { invoiceId, leaseId } = await req.json();
 
-    if (!invoiceId) {
-      return NextResponse.json({ error: "Missing invoiceId" }, { status: 400 });
+    if (!invoiceId && !leaseId) {
+      return NextResponse.json({ error: "Missing invoiceId or leaseId" }, { status: 400 });
+    }
+
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+
+    if (leaseId) {
+      const lease = await prisma.lease.findUnique({
+        where: { id: leaseId },
+        include: {
+          unit: {
+            include: {
+              property: true,
+            },
+          },
+        },
+      });
+
+      if (!lease) {
+        return NextResponse.json({ error: "Lease not found" }, { status: 404 });
+      }
+
+      const amount = Number(lease.securityDeposit || lease.monthlyRent || 0);
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: `Security Deposit (Bond) - ${lease.unit.property.name} (${lease.unit.name})`,
+                description: `Security deposit for lease contract starting ${new Date(lease.startDate).toLocaleDateString()}`,
+              },
+              unit_amount: Math.round(amount * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        metadata: {
+          leaseId: lease.id,
+          type: "BOND",
+        },
+        success_url: `${appUrl}/dashboard/leases/my-leases?status=success`,
+        cancel_url: `${appUrl}/dashboard/leases/my-leases?status=cancelled`,
+      });
+
+      return NextResponse.json({ url: session.url });
     }
 
     const invoice = await prisma.invoice.findUnique({
@@ -34,8 +81,6 @@ export async function POST(req: NextRequest) {
     if (invoice.status === "PAID") {
       return NextResponse.json({ error: "Invoice is already paid" }, { status: 400 });
     }
-
-    const appUrl = process.env.APP_URL || "http://localhost:3000";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

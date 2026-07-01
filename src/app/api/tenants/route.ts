@@ -100,6 +100,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Verify owner has at least one approved property
+    const approvedPropertyCount = await prisma.property.count({
+      where: {
+        ownerId: (session.user as any).id,
+        approvalStatus: "APPROVED"
+      }
+    });
+
+    if (approvedPropertyCount === 0) {
+      return NextResponse.json(
+        { error: "You must have at least one approved property to add tenants." },
+        { status: 403 }
+      );
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
       return NextResponse.json({ error: "Email already exists" }, { status: 400 });

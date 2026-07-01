@@ -109,9 +109,20 @@ export default function PropertyDetailsPage() {
               </Badge>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-[#64748B]">
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-[#64748B] mt-2">
             <MapPin className="h-4 w-4" /> {property.city}, {property.country}
           </div>
+          
+          {property.approvalStatus === "PENDING" && (
+            <div className="mt-3 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-xl text-sm font-bold flex items-center gap-2">
+              <Wrench className="h-4 w-4" /> Property Under Review. You cannot add units until an Admin approves it.
+            </div>
+          )}
+          {property.approvalStatus === "REJECTED" && (
+            <div className="mt-3 p-3 bg-red-50 text-red-800 border border-red-200 rounded-xl text-sm font-bold flex items-center gap-2">
+              <Wrench className="h-4 w-4" /> Property Rejected. Reason: {property.rejectionReason || "Not specified"}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
@@ -166,7 +177,7 @@ export default function PropertyDetailsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-lg font-bold border-[#E2E8F0] shadow-sm">View All Units</Button>
-                    <Button size="sm" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg font-bold shadow-sm">Add Unit</Button>
+                    <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg font-bold shadow-sm">Add Unit</Button>
                   </div>
                 </div>
                 <CardContent className="p-6">
@@ -302,7 +313,7 @@ export default function PropertyDetailsPage() {
                 <h2 className="text-xl font-bold text-[#0F172A]">Units List</h2>
                 <p className="text-sm font-medium text-[#64748B]">Showing {totalUnits} units for {property.name}</p>
               </div>
-              <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6">
+              <Button disabled={property.approvalStatus !== "APPROVED"} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6">
                 Add Unit
               </Button>
             </div>
