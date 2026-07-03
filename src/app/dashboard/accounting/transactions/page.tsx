@@ -24,7 +24,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Printer,
-  Plus
+  Plus,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Wrench,
+  Shield,
+  ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,6 +48,7 @@ export default function TransactionsPage() {
   const [activeTab, setActiveTab] = useState<"payments" | "payouts" | "all">("payments");
   const [activeStatusFilter, setActiveStatusFilter] = useState<"ALL" | "SUCCESS" | "REFUNDED" | "FAILED">("ALL");
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>("all");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
   const [showTipBanner, setShowTipBanner] = useState(true);
 
   // Modal / Detailed view state
@@ -77,6 +83,99 @@ export default function TransactionsPage() {
     fetchTransactions();
   }, [status, router]);
 
+  // Dynamic details mapper
+  const getTxDetails = (tx: any) => {
+    if (!tx) return {
+      title: "Transaction",
+      subtitle: "",
+      icon: <Info className="h-4 w-4 text-slate-500" />,
+      iconBg: "bg-slate-50",
+      badgeStyle: "bg-slate-50 text-slate-700 border border-slate-100",
+      badgeLabel: "Other",
+    };
+
+    const isIncome = tx.type === "INCOME";
+    const isRefund = (tx.category === "DEPOSIT" && tx.type === "EXPENSE") || tx.status === "REFUNDED";
+
+    if (tx.category === "RENT") {
+      return {
+        title: "Rent Payment",
+        subtitle: isTenant ? "Paid Rent Outflow" : "Rent Inflow",
+        icon: isTenant ? (
+          <ArrowUpRight className="h-4.5 w-4.5 text-rose-600 font-bold" />
+        ) : (
+          <ArrowDownLeft className="h-4.5 w-4.5 text-emerald-600 font-bold" />
+        ),
+        iconBg: isTenant ? "bg-rose-50" : "bg-emerald-50",
+        badgeStyle: "bg-indigo-50 text-indigo-700 border border-indigo-100/50",
+        badgeLabel: "Rent",
+      };
+    }
+    if (tx.category === "DEPOSIT") {
+      if (isRefund) {
+        return {
+          title: "Security Deposit Refund",
+          subtitle: isTenant ? "Refund Received" : "Returned to Tenant",
+          icon: isTenant ? (
+            <ArrowDownLeft className="h-4.5 w-4.5 text-emerald-600 font-bold" />
+          ) : (
+            <ArrowUpRight className="h-4.5 w-4.5 text-amber-600 font-bold" />
+          ),
+          iconBg: isTenant ? "bg-emerald-50" : "bg-amber-50",
+          badgeStyle: "bg-amber-50 text-amber-700 border border-amber-100/50",
+          badgeLabel: "Refund",
+        };
+      } else {
+        return {
+          title: "Security Deposit",
+          subtitle: isTenant ? "Escrow Deposit Paid" : "Received in Escrow",
+          icon: isTenant ? (
+            <ArrowUpRight className="h-4.5 w-4.5 text-rose-600 font-bold" />
+          ) : (
+            <ArrowDownLeft className="h-4.5 w-4.5 text-teal-600 font-bold" />
+          ),
+          iconBg: isTenant ? "bg-rose-50" : "bg-teal-50",
+          badgeStyle: "bg-teal-50 text-teal-700 border border-teal-100/50",
+          badgeLabel: "Escrow Deposit",
+        };
+      }
+    }
+    if (tx.category === "MAINTENANCE") {
+      return {
+        title: "Maintenance Cost",
+        subtitle: isTenant ? "Paid Maintenance Charge" : "Repairs & Services",
+        icon: <Wrench className="h-4.5 w-4.5 text-rose-600 font-bold" />,
+        iconBg: "bg-rose-50",
+        badgeStyle: "bg-rose-50 text-rose-700 border border-rose-100/50",
+        badgeLabel: "Maintenance",
+      };
+    }
+    if (tx.category === "FEE") {
+      return {
+        title: "Platform Fee",
+        subtitle: isIncome ? "Collected Fee" : "Processing Charge",
+        icon: <ArrowUpRight className="h-4.5 w-4.5 text-slate-600 font-bold" />,
+        iconBg: "bg-slate-100",
+        badgeStyle: "bg-slate-100 text-slate-800 border border-slate-200",
+        badgeLabel: "Processing Fee",
+      };
+    }
+
+    // Default fallback
+    return {
+      title: isIncome ? "Ledger Credit" : "Ledger Debit",
+      subtitle: `${tx.category || "General"} Activity`,
+      icon: isIncome ? (
+        <ArrowDownLeft className="h-4.5 w-4.5 text-slate-600 font-bold" />
+      ) : (
+        <ArrowUpRight className="h-4.5 w-4.5 text-slate-600 font-bold" />
+      ),
+      iconBg: "bg-slate-50",
+      badgeStyle: "bg-slate-50 text-slate-700 border border-slate-100",
+      badgeLabel: tx.category || "Other",
+    };
+  };
+
   // Client-side filtering logic
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
@@ -85,14 +184,16 @@ export default function TransactionsPage() {
       if (activeTab === "payouts" && tx.type !== "EXPENSE") return false;
 
       // 2. Status filtering based on Stripe metrics cards
-      const mappedStatus = tx.status === "COMPLETED" ? "SUCCESS" : tx.status === "PENDING" ? "SUCCESS" : "FAILED"; // Map database status
-      // Note: We can simulate a couple of refunded ones if we want, or match database category
-      const isRefunded = tx.category === "FEE" && tx.status === "FAILED"; // just an example mapping
+      const isRefunded = (tx.category === "DEPOSIT" && tx.type === "EXPENSE") || tx.status === "REFUNDED";
+      const mappedStatus = tx.status === "COMPLETED" ? "SUCCESS" : tx.status === "PENDING" ? "SUCCESS" : "FAILED";
       const currentTxStatus = isRefunded ? "REFUNDED" : mappedStatus;
 
       if (activeStatusFilter !== "ALL" && currentTxStatus !== activeStatusFilter) return false;
 
-      // 3. Search query filtering
+      // 3. Category Filter
+      if (selectedCategoryFilter !== "all" && tx.category !== selectedCategoryFilter) return false;
+
+      // 4. Search query filtering
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const refMatch = (tx.reference || "").toLowerCase().includes(query);
@@ -105,7 +206,7 @@ export default function TransactionsPage() {
         }
       }
 
-      // 4. Date filtering
+      // 5. Date filtering
       if (selectedDateFilter !== "all") {
         const txDate = new Date(tx.createdAt);
         const now = new Date();
@@ -118,7 +219,7 @@ export default function TransactionsPage() {
 
       return true;
     });
-  }, [transactions, activeTab, activeStatusFilter, searchQuery, selectedDateFilter]);
+  }, [transactions, activeTab, activeStatusFilter, searchQuery, selectedDateFilter, selectedCategoryFilter]);
 
   // Compute status counts for metrics cards (Stripe style)
   const metrics = useMemo(() => {
@@ -129,8 +230,9 @@ export default function TransactionsPage() {
     transactions.forEach((tx) => {
       if (activeTab === "payments" && tx.type !== "INCOME") return;
       if (activeTab === "payouts" && tx.type !== "EXPENSE") return;
+      if (selectedCategoryFilter !== "all" && tx.category !== selectedCategoryFilter) return;
 
-      const isRefund = tx.category === "FEE" && tx.status === "FAILED";
+      const isRefund = (tx.category === "DEPOSIT" && tx.type === "EXPENSE") || tx.status === "REFUNDED";
       if (isRefund) {
         refunded++;
       } else if (tx.status === "COMPLETED" || tx.status === "PENDING") {
@@ -146,7 +248,7 @@ export default function TransactionsPage() {
       refunded,
       failed,
     };
-  }, [transactions, activeTab]);
+  }, [transactions, activeTab, selectedCategoryFilter]);
 
   // Pagination logic
   const paginatedTransactions = useMemo(() => {
@@ -158,7 +260,7 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, activeStatusFilter, searchQuery, selectedDateFilter]);
+  }, [activeTab, activeStatusFilter, searchQuery, selectedDateFilter, selectedCategoryFilter]);
 
   const handleExportCSV = () => {
     try {
@@ -207,7 +309,7 @@ export default function TransactionsPage() {
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 sm:px-6">
       {/* ── HEADER ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs">
         <div>
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -224,14 +326,14 @@ export default function TransactionsPage() {
           <Button
             onClick={fetchTransactions}
             variant="outline"
-            className="flex-1 sm:flex-none bg-white border border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC] rounded-xl font-bold flex items-center justify-center gap-2 h-11 px-4 shadow-sm transition-all"
+            className="flex-1 sm:flex-none bg-white border border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC] rounded-xl font-bold flex items-center justify-center gap-2 h-11 px-4 shadow-xs transition-all"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
           {!isTenant && (
             <Button
               onClick={() => toast.info("Create custom transaction available in invoices page.")}
-              className="flex-1 sm:flex-none bg-[#635BFF] hover:bg-[#5249E0] text-white rounded-xl font-bold flex items-center justify-center gap-2 h-11 px-5 shadow-md transition-all"
+              className="flex-1 sm:flex-none bg-[#635BFF] hover:bg-[#5249E0] text-white rounded-xl font-bold flex items-center justify-center gap-2 h-11 px-5 shadow-xs transition-all"
             >
               <Plus className="h-4 w-4" /> Create payment
             </Button>
@@ -264,8 +366,8 @@ export default function TransactionsPage() {
       {/* ── STRIPE SUB-TABS NAVIGATION ── */}
       <div className="flex border-b border-[#E2E8F0]">
         {[
-          { id: "payments", label: "Payments" },
-          { id: "payouts", label: "Payouts" },
+          { id: "payments", label: isTenant ? "Rent Payments (Outflows)" : "Payments (Inflows)" },
+          { id: "payouts", label: isTenant ? "Refunds & Credits (Inflows)" : "Payouts & Refunds (Outflows)" },
           { id: "all", label: "All activity" }
         ].map((tab) => (
           <button
@@ -285,7 +387,7 @@ export default function TransactionsPage() {
         ))}
       </div>
 
-      {/* ── STRIPE METRICS CARDS ROW (FILTERABLE) ── */}
+      {/* ── STRIPE METRICS CARDS ROW (FILTERABLE - FIXED CUTOFF WITH DIVS) ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {
@@ -306,8 +408,8 @@ export default function TransactionsPage() {
             id: "REFUNDED",
             label: "Refunded",
             value: metrics.refunded,
-            color: "border-slate-300 hover:bg-slate-50/40",
-            textColor: "text-slate-600"
+            color: "border-amber-400 hover:bg-amber-50/20",
+            textColor: "text-amber-600"
           },
           {
             id: "FAILED",
@@ -317,18 +419,19 @@ export default function TransactionsPage() {
             textColor: "text-rose-600"
           }
         ].map((card) => (
-          <button
+          <div
             key={card.id}
+            role="button"
             onClick={() => setActiveStatusFilter(card.id as any)}
-            className={`border text-left rounded-2xl p-5 shadow-xs transition-all ${
+            className={`border text-left rounded-2xl p-5 shadow-xs transition-all cursor-pointer h-auto min-h-[105px] flex flex-col justify-between ${
               activeStatusFilter === card.id
-                ? `${card.color} border-2 scale-102 shadow-sm`
-                : "border-[#E2E8F0] bg-white hover:border-slate-300"
+                ? `${card.color} border-2 scale-[1.02] shadow-sm`
+                : "border-[#E2E8F0] bg-white hover:border-slate-300 hover:scale-[1.01]"
             }`}
           >
             <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{card.label}</div>
             <div className={`text-3xl font-black ${card.textColor} mt-2`}>{card.value}</div>
-          </button>
+          </div>
         ))}
       </div>
 
@@ -347,12 +450,28 @@ export default function TransactionsPage() {
             />
           </div>
 
+          {/* Category Filter Dropdown */}
+          <div className="relative w-full sm:w-44">
+            <select
+              value={selectedCategoryFilter}
+              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+              className="w-full h-10 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#635BFF] transition-all appearance-none cursor-pointer"
+            >
+              <option value="all">Category: All</option>
+              <option value="RENT">Rent Payments</option>
+              <option value="DEPOSIT">Security Deposits</option>
+              <option value="MAINTENANCE">Maintenance</option>
+              <option value="FEE">Fees</option>
+            </select>
+            <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+          </div>
+
           {/* Date Filter Dropdown */}
-          <div className="relative w-full sm:w-auto">
+          <div className="relative w-full sm:w-44">
             <select
               value={selectedDateFilter}
               onChange={(e) => setSelectedDateFilter(e.target.value)}
-              className="w-full sm:w-auto h-10 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#635BFF] transition-all appearance-none cursor-pointer"
+              className="w-full h-10 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#635BFF] transition-all appearance-none cursor-pointer"
             >
               <option value="all">Date: All Time</option>
               <option value="24hours">Last 24 Hours</option>
@@ -372,13 +491,6 @@ export default function TransactionsPage() {
           >
             <Download className="h-3.5 w-3.5 text-slate-500" /> Export CSV
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => toast.info("Table columns customization is synchronized.")}
-            className="border-[#E2E8F0] hover:bg-slate-50 text-xs font-bold text-slate-700 rounded-xl h-10 w-10 p-0 flex items-center justify-center shadow-xs transition-all"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
-          </Button>
         </div>
       </div>
 
@@ -395,10 +507,10 @@ export default function TransactionsPage() {
                     readOnly
                   />
                 </TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Amount</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Payment Method</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Description / Ref</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Transaction</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Reference & Channel</TableHead>
                 {!isTenant && <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Customer</TableHead>}
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Amount</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -411,7 +523,10 @@ export default function TransactionsPage() {
                 </TableRow>
               ) : (
                 paginatedTransactions.map((tx) => {
-                  const isRefund = tx.category === "FEE" && tx.status === "FAILED";
+                  const details = getTxDetails(tx);
+                  const isIncome = tx.type === "INCOME";
+                  const isRefund = (tx.category === "DEPOSIT" && tx.type === "EXPENSE") || tx.status === "REFUNDED";
+                  
                   return (
                     <TableRow
                       key={tx.id}
@@ -427,56 +542,86 @@ export default function TransactionsPage() {
                         />
                       </TableCell>
 
-                      {/* Amount column */}
+                      {/* Transaction details & Category */}
                       <TableCell className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <span className="font-black text-slate-900 text-sm">
-                            ${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-                          </span>
-                          {isRefund ? (
-                            <Badge className="bg-slate-100 text-slate-700 border-none rounded-full font-bold px-2.5 py-0.5 text-[10px]">
-                              Refunded
-                            </Badge>
-                          ) : tx.status === "COMPLETED" || tx.status === "PENDING" ? (
-                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold px-2.5 py-0.5 text-[10px]">
-                              Succeeded
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold px-2.5 py-0.5 text-[10px]">
-                              Failed
-                            </Badge>
-                          )}
+                          <div className={`h-9 w-9 rounded-xl ${details.iconBg} flex items-center justify-center shrink-0`}>
+                            {details.icon}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-900 text-sm">{details.title}</span>
+                              <Badge className={`${details.badgeStyle} rounded-full font-bold px-2 py-0.5 text-[9px]`}>
+                                {details.badgeLabel}
+                              </Badge>
+                            </div>
+                            <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{details.subtitle}</div>
+                          </div>
                         </div>
                       </TableCell>
 
-                      {/* Payment Method */}
+                      {/* Reference & Channel */}
                       <TableCell className="py-4 px-6">
-                        <div className="flex items-center gap-2 text-slate-700 font-medium text-xs">
-                          <CreditCard className="h-4 w-4 text-slate-400 shrink-0" />
-                          <span className="capitalize">{tx.category === "RENT" ? "Card •••• 4242" : "Direct Transfer"}</span>
+                        <div>
+                          <div className="font-bold text-xs text-[#635BFF] hover:underline truncate max-w-[150px]">
+                            {tx.reference || `Direct Ref: ${tx.id.substring(0, 8)}`}
+                          </div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">
+                            {tx.category === "RENT" ? "Stripe Checkout" : "Direct Admin Transfer"}
+                          </div>
                         </div>
-                      </TableCell>
-
-                      {/* Description / Ref */}
-                      <TableCell className="py-4 px-6 font-bold text-xs text-[#635BFF] hover:underline max-w-[200px] truncate">
-                        {tx.reference || `Direct Ref: ${tx.id.substring(0, 12)}`}
                       </TableCell>
 
                       {/* Customer info */}
                       {!isTenant && (
                         <TableCell className="py-4 px-6">
                           <div>
-                            <div className="font-bold text-slate-800 text-xs">{tx.tenant?.name || "Unknown Tenant"}</div>
-                            <div className="text-[10px] text-[#64748B] font-semibold">{tx.tenant?.email}</div>
+                            <div className="font-bold text-slate-800 text-xs">{tx.tenant?.name || "N/A"}</div>
+                            <div className="text-[10px] text-[#64748B] font-medium">{tx.tenant?.email || "No email"}</div>
                           </div>
                         </TableCell>
                       )}
+
+                      {/* Amount column with sign dynamically set based on user role */}
+                      <TableCell className="py-4 px-6">
+                        {(() => {
+                          // DB INCOME -> Tenant Paid (Outflow) -> Negative (-)
+                          // DB EXPENSE -> Tenant Received (Inflow) -> Positive (+)
+                          const isTenantOutflow = isTenant ? isIncome : !isIncome;
+                          const displaySign = isTenantOutflow ? "-" : "+";
+                          const displayColor = isTenantOutflow ? "text-rose-600" : "text-emerald-600";
+                          
+                          return (
+                            <div>
+                              <span className={`font-black text-sm ${displayColor}`}>
+                                {displaySign}${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                              <div className="mt-1">
+                                {isRefund ? (
+                                  <Badge className="bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-bold px-2 py-0.5 text-[9px]">
+                                    Refunded
+                                  </Badge>
+                                ) : tx.status === "COMPLETED" || tx.status === "PENDING" ? (
+                                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold px-2 py-0.5 text-[9px]">
+                                    Succeeded
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold px-2 py-0.5 text-[9px]">
+                                    Failed
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </TableCell>
 
                       {/* Date Paid */}
                       <TableCell className="py-4 px-6 text-[#64748B] text-xs font-semibold">
                         {new Date(tx.createdAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
+                          year: "numeric",
                           hour: "2-digit",
                           minute: "2-digit"
                         })}
@@ -546,58 +691,71 @@ export default function TransactionsPage() {
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Payment Status summary card */}
-              <div className="bg-slate-50 rounded-2xl p-6 border border-[#E2E8F0] flex flex-col items-center justify-center text-center space-y-3">
-                <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <CheckCircle2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-slate-900">
-                    ${Number(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} USD
-                  </div>
-                  <div className="text-xs font-bold text-slate-500 mt-0.5">Succeeded payment</div>
-                </div>
-              </div>
-
-              {/* Data Rows */}
-              <div className="space-y-4">
-                <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Transaction Parameters</h4>
-                <div className="divide-y divide-[#F1F5F9] border border-[#E2E8F0] rounded-xl overflow-hidden bg-white text-xs">
-                  {[
-                    { label: "Status", value: selectedTx.status === "COMPLETED" ? "Succeeded (Paid)" : selectedTx.status },
-                    { label: "Category", value: selectedTx.category },
-                    { label: "Type", value: selectedTx.type === "INCOME" ? "Ledger Credit" : "Ledger Debit" },
-                    { label: "Tenant Name", value: selectedTx.tenant?.name || "N/A" },
-                    { label: "Tenant Email", value: selectedTx.tenant?.email || "N/A" },
-                    { label: "Created Date", value: new Date(selectedTx.createdAt).toLocaleString() },
-                    { label: "Payment Channel", value: "Stripe Online Checkout" }
-                  ].map((row, idx) => (
-                    <div key={idx} className="flex justify-between py-3.5 px-4 bg-white hover:bg-slate-50/40">
-                      <span className="font-bold text-slate-500">{row.label}</span>
-                      <span className="font-black text-slate-800 capitalize">{row.value}</span>
+              {(() => {
+                const details = getTxDetails(selectedTx);
+                const isIncome = selectedTx.type === "INCOME";
+                const isTenantOutflow = isTenant ? isIncome : !isIncome;
+                const isRefund = (selectedTx.category === "DEPOSIT" && selectedTx.type === "EXPENSE") || selectedTx.status === "REFUNDED";
+                const isSuccess = selectedTx.status === "COMPLETED" || selectedTx.status === "PENDING";
+                
+                return (
+                  <>
+                    {/* Payment Status summary card */}
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-[#E2E8F0] flex flex-col items-center justify-center text-center space-y-3">
+                      <div className={`h-12 w-12 rounded-full ${details.iconBg} flex items-center justify-center`}>
+                        {details.icon}
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-[#635BFF] uppercase tracking-wider">{details.title}</div>
+                        <div className={`text-3xl font-black mt-1 ${isTenantOutflow ? "text-rose-600" : "text-emerald-600"}`}>
+                          {isTenantOutflow ? "-" : "+"}${Number(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} USD
+                        </div>
+                        <div className="text-xs font-bold text-slate-500 mt-0.5">{details.subtitle}</div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Metadata */}
-              <div className="space-y-3">
-                <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Stripe Metadata</h4>
-                <div className="bg-slate-50 rounded-xl p-4 border border-[#E2E8F0] text-xs font-semibold text-slate-600 space-y-2">
-                  <div className="flex justify-between">
-                    <span>app_source</span>
-                    <span className="font-bold text-slate-800">propertypro_saas</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>stripe_account_mode</span>
-                    <span className="font-bold text-slate-800 text-emerald-600">sandbox_testmode</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>payment_intent_reference</span>
-                    <span className="font-bold text-slate-800 truncate max-w-[200px]">{selectedTx.reference || "N/A"}</span>
-                  </div>
-                </div>
-              </div>
+                    {/* Data Rows */}
+                    <div className="space-y-4">
+                      <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Transaction Parameters</h4>
+                      <div className="divide-y divide-[#F1F5F9] border border-[#E2E8F0] rounded-xl overflow-hidden bg-white text-xs">
+                        {[
+                          { label: "Status", value: isRefund ? "Refunded" : isSuccess ? "Succeeded (Paid)" : "Failed" },
+                          { label: "Category", value: selectedTx.category },
+                          { label: "Type", value: isTenant ? (isIncome ? "Rent Payment (Outflow)" : "Refund Received (Inflow)") : (isIncome ? "Ledger Credit (Inflow)" : "Ledger Debit (Outflow)") },
+                          { label: "Tenant Name", value: selectedTx.tenant?.name || "N/A" },
+                          { label: "Tenant Email", value: selectedTx.tenant?.email || "N/A" },
+                          { label: "Created Date", value: new Date(selectedTx.createdAt).toLocaleString() },
+                          { label: "Payment Channel", value: selectedTx.category === "RENT" ? "Stripe Online Checkout" : "Direct Admin Payout" }
+                        ].map((row, idx) => (
+                          <div key={idx} className="flex justify-between py-3.5 px-4 bg-white hover:bg-slate-50/40">
+                            <span className="font-bold text-slate-500">{row.label}</span>
+                            <span className="font-black text-slate-800 capitalize">{row.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Metadata */}
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Stripe Metadata</h4>
+                      <div className="bg-slate-50 rounded-xl p-4 border border-[#E2E8F0] text-xs font-semibold text-slate-600 space-y-2">
+                        <div className="flex justify-between">
+                          <span>app_source</span>
+                          <span className="font-bold text-slate-800">propertypro_saas</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>stripe_account_mode</span>
+                          <span className="font-bold text-slate-800 text-emerald-600">sandbox_testmode</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>payment_intent_reference</span>
+                          <span className="font-bold text-slate-800 truncate max-w-[200px]">{selectedTx.reference || "N/A"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Modal Actions Footer */}
@@ -611,7 +769,7 @@ export default function TransactionsPage() {
               </Button>
               <Button
                 onClick={() => setSelectedTx(null)}
-                className="flex-1 bg-[#635BFF] hover:bg-[#5249E0] text-white font-bold rounded-xl flex items-center justify-center h-11 shadow-md transition-all"
+                className="flex-1 bg-[#635BFF] hover:bg-[#5249E0] text-white font-bold rounded-xl flex items-center justify-center h-11 shadow-xs transition-all"
               >
                 Done
               </Button>

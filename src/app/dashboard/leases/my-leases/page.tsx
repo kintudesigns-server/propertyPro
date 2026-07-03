@@ -49,6 +49,13 @@ export default function MyLeasesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
+  // Move-Out Modal State
+  const [showMoveOutModal, setShowMoveOutModal] = useState(false);
+  const [activeLeaseForMoveOut, setActiveLeaseForMoveOut] = useState<any>(null);
+  const [moveOutDate, setMoveOutDate] = useState("");
+  const [moveOutReason, setMoveOutReason] = useState("");
+  const [moveOutSubmitting, setMoveOutSubmitting] = useState(false);
+
   useEffect(() => {
     if (searchParams) {
       const statusParam = searchParams.get("status");
@@ -138,6 +145,41 @@ export default function MyLeasesPage() {
       }
     } catch {
       toast.error("Error declining renewal.");
+    }
+  };
+
+  const handleRequestMoveOut = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeLeaseForMoveOut) return;
+    setMoveOutSubmitting(true);
+    try {
+      const res = await fetch(`/api/leases/${activeLeaseForMoveOut.id}/move-out-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moveOutDate, moveOutReason }),
+      });
+      if (res.ok) {
+        toast.success("Move-out request submitted");
+        setShowMoveOutModal(false);
+        fetchLeases();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit request");
+      }
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setMoveOutSubmitting(false);
+    }
+  };
+
+  const openMoveOutModal = (leaseId: string) => {
+    const l = leases.find(l => l.id === leaseId);
+    if (l) {
+      setActiveLeaseForMoveOut(l);
+      setMoveOutDate("");
+      setMoveOutReason("");
+      setShowMoveOutModal(true);
     }
   };
 
@@ -271,10 +313,10 @@ export default function MyLeasesPage() {
               </strong>
             </div>
             <Button
-              onClick={() => handleSignLease(pendingLease.id)}
+              onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
               className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 rounded-xl shadow-sm"
             >
-              Accept & Sign Lease Contract
+              View & Sign Lease Contract
             </Button>
           </CardContent>
         </Card>
@@ -530,12 +572,12 @@ export default function MyLeasesPage() {
                         <TableCell className="text-right pr-4">
                           <div className="flex items-center justify-end gap-2">
                             {l.status === "PENDING_SIGNATURE" && (
-                              <Button size="sm" onClick={() => handleSignLease(l.id)}
+                              <Button size="sm" onClick={() => router.push(`/dashboard/leases/${l.id}`)}
                                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl h-8 px-3">
-                                Sign
+                                View & Sign
                               </Button>
                             )}
-                            <LeaseActionsMenu lease={l} onSignLease={handleSignLease} variant="table" />
+                            <LeaseActionsMenu lease={l} onSignLease={handleSignLease} onRequestMoveOut={openMoveOutModal} variant="table" />
                           </div>
                         </TableCell>
                       </TableRow>
@@ -559,7 +601,7 @@ export default function MyLeasesPage() {
                   >
                     {/* Top-Right Action Menu */}
                     <div className="absolute top-3 right-3 z-30">
-                      <LeaseActionsMenu lease={l} onSignLease={handleSignLease} variant="card" />
+                      <LeaseActionsMenu lease={l} onSignLease={handleSignLease} onRequestMoveOut={openMoveOutModal} variant="card" />
                     </div>
 
                     {/* Property image / placeholder */}
@@ -654,10 +696,10 @@ export default function MyLeasesPage() {
                       {l.status === "PENDING_SIGNATURE" && (
                         <div className="flex items-center gap-2">
                           <Button
-                            onClick={() => handleSignLease(l.id)}
+                            onClick={() => router.push(`/dashboard/leases/${l.id}`)}
                             className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold h-9 rounded-xl shadow-sm text-sm"
                           >
-                            Accept & Sign
+                            View & Sign
                           </Button>
                         </div>
                       )}
@@ -669,6 +711,86 @@ export default function MyLeasesPage() {
           )}
         </div>
       </Card>
+
+      {/* Move-Out Request Modal */}
+      {showMoveOutModal && activeLeaseForMoveOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
+            <div className="p-6">
+              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Request Move-Out</h2>
+              <p className="text-sm text-[#64748B] mb-6">
+                Please provide your preferred move-out date and reason. 
+                {activeLeaseForMoveOut?.moveOutNoticeDays && (
+                  <span className="block mt-2 text-amber-600 font-semibold text-xs">
+                    * Your lease agreement requires {activeLeaseForMoveOut.moveOutNoticeDays} days notice.
+                  </span>
+                )}
+              </p>
+              
+              <form onSubmit={handleRequestMoveOut} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Preferred Move-Out Date</label>
+                  <input 
+                    type="date"
+                    required
+                    value={moveOutDate}
+                    onChange={(e) => setMoveOutDate(e.target.value)}
+                    className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none"
+                  />
+                  {moveOutDate && activeLeaseForMoveOut?.moveOutNoticeDays && (
+                    <div className="mt-2 text-xs">
+                      {(new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < activeLeaseForMoveOut.moveOutNoticeDays ? (
+                        <p className="text-amber-600 font-semibold flex items-center gap-1">
+                          <ShieldAlert className="h-3 w-3" /> Short notice — you may be subject to penalties.
+                        </p>
+                      ) : (
+                        <p className="text-emerald-600 font-semibold">Notice period met.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Reason for Moving</label>
+                  <select 
+                    required
+                    value={moveOutReason}
+                    onChange={(e) => setMoveOutReason(e.target.value)}
+                    className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none bg-white"
+                  >
+                    <option value="" disabled>Select a reason...</option>
+                    <option value="End of Lease Term">End of Lease Term</option>
+                    <option value="Job Relocation">Job Relocation</option>
+                    <option value="Buying a Home">Buying a Home</option>
+                    <option value="Need More Space">Need More Space</option>
+                    <option value="Downsizing">Downsizing</option>
+                    <option value="Personal Reasons">Personal Reasons</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowMoveOutModal(false)}
+                    className="flex-1 rounded-xl h-11 border-[#E2E8F0] text-[#64748B] font-bold"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={moveOutSubmitting || !moveOutDate || !moveOutReason}
+                    className="flex-1 rounded-xl h-11 bg-red-600 hover:bg-red-700 text-white font-bold"
+                  >
+                    {moveOutSubmitting ? "Submitting..." : "Submit Notice"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

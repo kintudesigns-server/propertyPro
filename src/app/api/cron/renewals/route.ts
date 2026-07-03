@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
 
 // This simulates a CRON job that would run daily (e.g., via Vercel Cron or a separate worker)
 export async function POST() {
@@ -41,8 +42,26 @@ export async function POST() {
         
         triggeredCount++;
 
-        // In a real app, we would send an email here using SendGrid/Resend
-        console.log(`[CRON] RENEWAL TRIGGERED: Sent renewal offer to ${lease.tenant.email} for Unit ${lease.unit.name}. Current rent: $${lease.monthlyRent}`);
+        // Send the automated renewal notice email
+        if (typeof sendEmail === "function") {
+          await sendEmail({
+            to: lease.tenant.email,
+            subject: `Lease Renewal Notice - ${lease.unit.property.name} - ${lease.unit.name}`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+                <h2 style="color: #0F172A;">Lease Renewal Notice</h2>
+                <p>Dear ${lease.tenant.name},</p>
+                <p>Your lease for <strong>${lease.unit.name}</strong> at <strong>${lease.unit.property.name}</strong> is scheduled to expire on <strong>${new Date(lease.endDate).toLocaleDateString()}</strong>.</p>
+                <p>We are reaching out <strong>${noticeDays} days</strong> in advance to give you plenty of time to decide if you would like to renew your lease with us!</p>
+                <p>Please log in to your Tenant Dashboard to review your renewal options.</p>
+                <br/>
+                <p>Best regards,<br/>The Property Management Team</p>
+              </div>
+            `,
+          });
+        }
+        
+        console.log(`[CRON] RENEWAL TRIGGERED & EMAILED: Sent to ${lease.tenant.email} for Unit ${lease.unit.name}.`);
       }
     }
 

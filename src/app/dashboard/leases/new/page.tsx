@@ -17,6 +17,7 @@ export default function CreateLeasePage() {
   const searchParams = useSearchParams();
   const paramUnitId = searchParams ? searchParams.get("unitId") : null;
   const paramTenantEmail = searchParams ? searchParams.get("tenantEmail") : null;
+  const paramAppId = searchParams ? searchParams.get("appId") : null;
 
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
@@ -38,8 +39,56 @@ export default function CreateLeasePage() {
     lateFeeType: "FIXED",
     autoGenerateInvoices: true,
     autoEmailInvoices: false,
-    renewalNoticeDays: "60",
+    renewalNoticeDays: "7",
+    earlyTerminationFee: "",
+    isProratedRefundAllowed: false,
   });
+
+  useEffect(() => {
+    if (paramAppId) {
+      fetch(`/api/applications/${paramAppId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setFormData((prev) => {
+              const start = data.moveInDate ? data.moveInDate.split("T")[0] : new Date().toISOString().split("T")[0];
+              let end = "";
+              if (start && data.leaseDuration) {
+                const startDateObj = new Date(start);
+                startDateObj.setMonth(startDateObj.getMonth() + Number(data.leaseDuration));
+                startDateObj.setDate(startDateObj.getDate() - 1);
+                end = startDateObj.toISOString().split("T")[0];
+              }
+              return {
+                ...prev,
+                tenantEmail: data.email || prev.tenantEmail,
+                unitId: data.unit?.id || prev.unitId,
+                startDate: start,
+                endDate: end,
+                monthlyRent: data.unit?.rentAmount ? data.unit.rentAmount.toString() : prev.monthlyRent,
+                securityDeposit: data.unit?.depositAmt ? data.unit.depositAmt.toString() : prev.securityDeposit,
+              };
+            });
+
+            if (data.unit?.id) {
+              fetch("/api/properties")
+                .then((res) => res.json())
+                .then((propertiesData) => {
+                  if (Array.isArray(propertiesData)) {
+                    setProperties(propertiesData);
+                    const propertyWithUnit = propertiesData.find((p: any) =>
+                      p.units && p.units.some((u: any) => u.id === data.unit.id)
+                    );
+                    if (propertyWithUnit) {
+                      setSelectedProperty(propertyWithUnit.id);
+                    }
+                  }
+                });
+            }
+          }
+        });
+    }
+  }, [paramAppId]);
 
   useEffect(() => {
     if (paramTenantEmail) {
@@ -75,16 +124,16 @@ export default function CreateLeasePage() {
         .then((res) => res.json())
         .then((data) => {
           if (data && Array.isArray(data.units)) {
-            const filteredUnits = data.units.filter((u: any) => u.status === "VACANT" || u.status === "AVAILABLE" || u.id === paramUnitId);
-            setUnits(filteredUnits);
-            if (paramUnitId) {
-              const matchedUnit = filteredUnits.find((u: any) => u.id === paramUnitId);
+            setUnits(data.units); // Store all units to resolve names properly
+            if (formData.unitId || paramUnitId) {
+              const targetId = formData.unitId || paramUnitId;
+              const matchedUnit = data.units.find((u: any) => u.id === targetId);
               if (matchedUnit) {
                 setFormData((prev) => ({
                   ...prev,
-                  unitId: paramUnitId,
-                  monthlyRent: matchedUnit.rentAmount ? matchedUnit.rentAmount.toString() : "",
-                  securityDeposit: matchedUnit.depositAmt ? matchedUnit.depositAmt.toString() : "",
+                  unitId: targetId as string,
+                  monthlyRent: matchedUnit.rentAmount ? matchedUnit.rentAmount.toString() : prev.monthlyRent,
+                  securityDeposit: matchedUnit.depositAmt ? matchedUnit.depositAmt.toString() : prev.securityDeposit,
                 }));
                 setSelectedUnitDetails(matchedUnit);
               }
@@ -187,7 +236,10 @@ export default function CreateLeasePage() {
       const res = await fetch("/api/leases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          applicationId: paramAppId || undefined,
+        }),
       });
 
       if (res.ok) {
@@ -270,14 +322,21 @@ export default function CreateLeasePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
-                  <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={approvedProperties.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
-                      <SelectValue placeholder={approvedProperties.length === 0 ? "No approved properties" : "Select a property"} />
+                  <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={properties.length === 0} required>
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors">
+                      <SelectValue placeholder={properties.length === 0 && hasLoaded ? "No properties found" : "Select a property"}>
+                        {selectedProperty ? (properties.find(p => p.id === selectedProperty)?.name || selectedProperty) : undefined}
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
-                      {approvedProperties.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
+                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1">
+                      {properties.map((p) => {
+                        const isApproved = p.approvalStatus === "APPROVED";
+                        return (
+                          <SelectItem key={p.id} value={p.id} disabled={!isApproved} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700">
+                            {p.name} {!isApproved ? <span className="text-rose-500 font-semibold ml-1 text-xs">(Unapproved)</span> : ""}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -285,13 +344,20 @@ export default function CreateLeasePage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
                   <Select value={formData.unitId} onValueChange={(v) => handleUnitSelect(v || "")} disabled={!selectedProperty || units.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
-                      <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No vacant units" : "Select unit"} />
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors">
+                      <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No units found" : "Select unit"}>
+                        {formData.unitId ? (units.find(u => u.id === formData.unitId)?.name || formData.unitId) : undefined}
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
-                      {units.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>{u.name} (Rent: ${u.rentAmount || 0}/mo)</SelectItem>
-                      ))}
+                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1">
+                      {units.map((u) => {
+                        const isAvailable = u.status === "VACANT" || u.status === "AVAILABLE" || u.id === paramUnitId || u.id === formData.unitId;
+                        return (
+                          <SelectItem key={u.id} value={u.id} disabled={!isAvailable} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700">
+                            {u.name} <span className="text-slate-400 ml-1">(${u.rentAmount || 0}/mo)</span> {!isAvailable ? <span className="text-rose-500 font-semibold ml-1 text-xs">- Occupied</span> : ""}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -479,6 +545,54 @@ export default function CreateLeasePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Early Termination Policy Section */}
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:border-[#CBD5E1] transition-colors">
+            <div className="bg-[#F8FAFC] px-6 py-4 border-b border-[#E2E8F0] flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                <AlertCircle className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-[#0F172A] tracking-tight">Early Termination Policy</h2>
+                <p className="text-xs text-[#64748B] font-medium mt-0.5">Define penalties and prorated refund rules if tenant breaks lease</p>
+              </div>
+            </div>
+            
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Early Termination Fee</Label>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.earlyTerminationFee}
+                        onChange={(e) => setFormData({ ...formData, earlyTerminationFee: e.target.value })}
+                        className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-red-500 font-semibold text-[#0F172A] shadow-xs"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">Penalty tenant pays to break lease early.</p>
+                  </div>
+
+                  <div className="space-y-3 flex flex-col justify-center pt-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide cursor-pointer">Allow Prorated Refund?</Label>
+                      <Switch
+                        checked={formData.isProratedRefundAllowed}
+                        onCheckedChange={(checked) => setFormData({ ...formData, isProratedRefundAllowed: checked })}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                      If turned on, tenant receives a refund for unused days if they move out mid-month. If turned off, prepaid rent is forfeited.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar Summary & Preview Column */}
@@ -617,15 +731,17 @@ export default function CreateLeasePage() {
                   </h4>
                   <p className="text-xs text-[#64748B] font-medium mt-0.5">Days prior to end date to alert renewal.</p>
                 </div>
-                <div className="relative w-32">
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.renewalNoticeDays}
-                    onChange={(e) => setFormData({ ...formData, renewalNoticeDays: e.target.value })}
-                    className="pr-14 h-10 rounded-xl bg-white border-[#E2E8F0] font-bold text-center shadow-xs text-sm"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">days</div>
+                <div className="w-36">
+                  <Select value={formData.renewalNoticeDays} onValueChange={(v) => setFormData({ ...formData, renewalNoticeDays: v || "7" })}>
+                    <SelectTrigger className="w-full h-10 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-bold text-[#0F172A] shadow-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
+                      <SelectItem value="7" disabled={durationInfo ? durationInfo.days <= 7 : false}>1 Week Before</SelectItem>
+                      <SelectItem value="15" disabled={durationInfo ? durationInfo.days <= 15 : false}>15 Days Before</SelectItem>
+                      <SelectItem value="30" disabled={durationInfo ? durationInfo.days <= 30 : false}>1 Month Before</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

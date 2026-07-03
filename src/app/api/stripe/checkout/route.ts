@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export async function POST(req: NextRequest) {
   try {
-    const { invoiceId, leaseId } = await req.json();
+    const { invoiceId, leaseId, successUrl, cancelUrl } = await req.json();
 
     if (!invoiceId && !leaseId) {
       return NextResponse.json({ error: "Missing invoiceId or leaseId" }, { status: 400 });
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
           leaseId: lease.id,
           type: "BOND",
         },
-        success_url: `${appUrl}/dashboard/leases/my-leases?status=success`,
-        cancel_url: `${appUrl}/dashboard/leases/my-leases?status=cancelled`,
+        success_url: successUrl || `${appUrl}/dashboard/leases/my-leases?status=success`,
+        cancel_url: cancelUrl || `${appUrl}/dashboard/leases/my-leases?status=cancelled`,
       });
 
       return NextResponse.json({ url: session.url });

@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
           await prisma.$transaction([
             prisma.lease.update({
               where: { id: leaseId },
-              data: { status: "ACTIVE" },
+              data: { 
+                status: "ACTIVE",
+                refundRef: (session.payment_intent as string) || null,
+              },
             }),
             prisma.unit.update({
               where: { id: lease.unitId },
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
                 type: "INCOME",
                 category: "DEPOSIT",
                 amount: depositAmount,
-                reference: `STRIPE_BOND_${session.id.slice(-12)}`,
+                reference: (session.payment_intent as string) || `STRIPE_BOND_${session.id.slice(-12)}`,
                 status: "COMPLETED",
                 tenantId: lease.tenantId,
               },

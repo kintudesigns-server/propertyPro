@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Home, Calendar, CreditCard, Wrench, Shield, LogOut, Loader2, Plus, Clock, 
   CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, Settings, 
-  AlertTriangle, FileText, Send, Phone, Video, Info, UserCheck, DollarSign
+  AlertTriangle, FileText, Send, Phone, Video, Info, UserCheck, DollarSign, ShieldAlert
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +67,9 @@ export default function TenantDashboard() {
 
   const [profileName, setProfileName] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountName, setAccountName] = useState("");
   const [profileSubmitting, setProfileSubmitting] = useState(false);
 
   // Messaging state
@@ -79,6 +82,15 @@ export default function TenantDashboard() {
   const [docFilterCat, setDocFilterCat] = useState("ALL");
   const [maintFilterPriority, setMaintFilterPriority] = useState("ALL");
   const [maintFilterStatus, setMaintFilterStatus] = useState("ALL");
+
+  // Move-Out State
+  const [showMoveOutModal, setShowMoveOutModal] = useState(false);
+  const [moveOutDate, setMoveOutDate] = useState("");
+  const [moveOutReason, setMoveOutReason] = useState("End of lease");
+  const [moveOutSubmitting, setMoveOutSubmitting] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [tenantDisputeNote, setTenantDisputeNote] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -123,7 +135,15 @@ export default function TenantDashboard() {
         setSelectedContact(allContacts[0]);
       }
 
-      if (session?.user) {
+      const profileRes = await fetch("/api/users");
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        setProfileName(profileData.name || "");
+        setProfilePhone(profileData.phone || "");
+        setBankName(profileData.bankName || "");
+        setAccountNumber(profileData.accountNumber || "");
+        setAccountName(profileData.accountName || "");
+      } else if (session?.user) {
         setProfileName(session.user.name || "");
         setProfilePhone((session.user as any).phone || "");
       }
@@ -346,7 +366,13 @@ export default function TenantDashboard() {
       const res = await fetch("/api/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profileName, phone: profilePhone }),
+        body: JSON.stringify({
+          name: profileName,
+          phone: profilePhone,
+          bankName,
+          accountNumber,
+          accountName,
+        }),
       });
 
       if (res.ok) {
@@ -359,6 +385,55 @@ export default function TenantDashboard() {
       toast.error("Error updating profile.");
     } finally {
       setProfileSubmitting(false);
+    }
+  };
+
+  const handleRequestMoveOut = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeLease) return;
+    setMoveOutSubmitting(true);
+    try {
+      const res = await fetch(`/api/leases/${activeLease.id}/move-out-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moveOutDate, moveOutReason }),
+      });
+      if (res.ok) {
+        toast.success("Move-out request submitted");
+        setShowMoveOutModal(false);
+        fetchData();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit request");
+      }
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setMoveOutSubmitting(false);
+    }
+  };
+
+  const handleReviewRefund = async (action: "accept" | "dispute") => {
+    if (!activeLease) return;
+    setReviewSubmitting(true);
+    try {
+      const res = await fetch(`/api/leases/${activeLease.id}/tenant-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, tenantDisputeNote }),
+      });
+      if (res.ok) {
+        toast.success(action === "accept" ? "Refund accepted" : "Dispute submitted");
+        setShowDisputeModal(false);
+        fetchData();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit review");
+      }
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -392,35 +467,176 @@ export default function TenantDashboard() {
   const unpaidInvoices = invoices.filter((i) => i.status === "UNPAID" || i.status === "OVERDUE");
   const totalUnpaid = unpaidInvoices.reduce((acc, curr) => acc + Number(curr.amount), 0);
   const openRequestsCount = maintenance.filter((m) => m.status !== "RESOLVED" && m.status !== "CLOSED").length;
+  
+  const pendingLeaseUnpaidDepositInvoice = pendingLease && invoices.find(
+    (inv: any) =>
+      inv.leaseId === pendingLease.id &&
+      pendingLease.securityDeposit &&
+      Number(inv.amount) === Number(pendingLease.securityDeposit) &&
+      inv.status === "UNPAID"
+  );
 
   return (
+    <>
     <div className="space-y-8">
 
         {/* -------------------- OVERVIEW TAB -------------------- */}
         {activeTab === "overview" && (
           <div className="space-y-8">
             {pendingLease && (
-              <Card className="bg-amber-50 border border-amber-200 rounded-[24px] shadow-sm overflow-hidden p-6">
+              <Card className={`rounded-[24px] shadow-sm overflow-hidden p-6 border ${
+                pendingLeaseUnpaidDepositInvoice 
+                  ? "bg-red-50 border-red-200 text-red-950" 
+                  : "bg-amber-50 border-amber-200 text-amber-950"
+              }`}>
                 <CardHeader className="pb-4 p-0">
-                  <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-amber-900">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
-                    Action Required: Lease Pending Signature
+                  <CardTitle className={`text-lg font-extrabold flex items-center gap-2 ${
+                    pendingLeaseUnpaidDepositInvoice ? "text-red-900" : "text-amber-900"
+                  }`}>
+                    <AlertTriangle className={`h-5 w-5 ${
+                      pendingLeaseUnpaidDepositInvoice ? "text-red-600" : "text-amber-600"
+                    }`} />
+                    {pendingLeaseUnpaidDepositInvoice 
+                      ? "Action Required: Pay Security Deposit First" 
+                      : "Action Required: Lease Pending Signature"
+                    }
                   </CardTitle>
-                  <CardDescription className="text-amber-700 text-xs font-semibold">
-                    You have a pending lease contract for {pendingLease.unit?.name} at {pendingLease.unit?.property?.name}.
+                  <CardDescription className={`text-xs font-semibold ${
+                    pendingLeaseUnpaidDepositInvoice ? "text-red-700" : "text-amber-700"
+                  }`}>
+                    {pendingLeaseUnpaidDepositInvoice 
+                      ? `You must pay the security deposit of $${Number(pendingLease.securityDeposit).toFixed(2)} to unlock signing for unit ${pendingLease.unit?.name || "N/A"}.`
+                      : `You have a pending lease contract for unit ${pendingLease.unit?.name || "N/A"} at ${pendingLease.unit?.property?.name || "N/A"}.`
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 p-0 space-y-4 text-sm">
-                  <div className="flex justify-between pb-3 border-b border-amber-200/50">
-                    <span className="text-amber-700">Monthly Rent</span>
-                    <strong className="text-amber-900 font-extrabold">${Number(pendingLease.monthlyRent).toLocaleString()}</strong>
+                  <div className={`flex justify-between pb-3 border-b ${
+                    pendingLeaseUnpaidDepositInvoice ? "border-red-200/50" : "border-amber-200/50"
+                  }`}>
+                    <span>Monthly Rent</span>
+                    <strong className="font-extrabold">${Number(pendingLease.monthlyRent).toLocaleString()}</strong>
                   </div>
-                  <Button 
-                    onClick={() => handleSignLease(pendingLease.id)}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold h-11 rounded-xl shadow-sm transition-colors mt-2"
-                  >
-                    Accept & Sign Lease Contract
-                  </Button>
+                  {pendingLeaseUnpaidDepositInvoice ? (
+                    <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                      <Button 
+                        onClick={() => handlePayInvoice(pendingLeaseUnpaidDepositInvoice.id)}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold h-11 rounded-xl shadow-sm transition-colors"
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" /> Pay Security Deposit (${Number(pendingLease.securityDeposit).toFixed(2)})
+                      </Button>
+                      <Button 
+                        onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
+                        variant="outline"
+                        className="bg-white hover:bg-red-100/50 border-red-200 text-red-900 font-bold h-11 rounded-xl shadow-sm"
+                      >
+                        View Lease Details
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                      <Button 
+                        onClick={() => handleSignLease(pendingLease.id)}
+                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold h-11 rounded-xl shadow-sm transition-colors"
+                      >
+                        Accept & Sign Lease Contract
+                      </Button>
+                      <Button 
+                        onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
+                        variant="outline"
+                        className="bg-white hover:bg-amber-100/50 border-amber-200 text-amber-900 font-bold h-11 rounded-xl shadow-sm"
+                      >
+                        View Lease Details
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Refund Estimate Review Banner */}
+            {activeLease?.moveOutStatus === "INSPECTION_COMPLETED" && (
+              <Card className="rounded-[24px] shadow-sm overflow-hidden p-6 border bg-blue-50 border-blue-200 text-blue-950">
+                <CardHeader className="pb-4 p-0">
+                  <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-blue-900">
+                    <ShieldAlert className="h-5 w-5 text-blue-600" />
+                    Move-Out Inspection Complete - Action Required
+                  </CardTitle>
+                  <CardDescription className="text-xs font-semibold text-blue-700">
+                    Please review the inspection deductions and finalize your bank details for the refund.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4 p-0 space-y-4 text-sm">
+                  <div className="bg-white rounded-xl p-4 border border-blue-100">
+                    <h4 className="font-bold mb-3 text-slate-800">Refund Calculation</h4>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Original Security Deposit</span>
+                        <strong className="font-bold">${Number(activeLease.securityDeposit || 0).toFixed(2)}</strong>
+                      </div>
+                      
+                      {activeLease.deductions && (activeLease.deductions as any[]).map((d: any, idx: number) => (
+                        <div key={idx} className="flex justify-between text-red-600">
+                          <span>- {d.description}</span>
+                          <strong>-${Number(d.amount).toFixed(2)}</strong>
+                        </div>
+                      ))}
+                      
+                      <div className="flex justify-between pt-2 border-t border-slate-100 font-extrabold text-sm text-emerald-700">
+                        <span>Final Refund Amount</span>
+                        <span>
+                          ${(
+                            Number(activeLease.securityDeposit || 0) - 
+                            (activeLease.deductions ? (activeLease.deductions as any[]).reduce((sum, d) => sum + Number(d.amount), 0) : 0)
+                          ).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-4 border border-blue-100">
+                    <h4 className="font-bold mb-3 text-slate-800">Confirm Bank Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-[10px] font-bold text-slate-500">Bank Name</Label>
+                        <Input value={bankName} onChange={e => setBankName(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] font-bold text-slate-500">Account Holder</Label>
+                        <Input value={accountName} onChange={e => setAccountName(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] font-bold text-slate-500">Account / IBAN</Label>
+                        <Input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                    <Button 
+                      onClick={async () => {
+                        // First save profile, then accept
+                        if (!bankName || !accountName || !accountNumber) {
+                          toast.error("Please fill in all bank details first.");
+                          return;
+                        }
+                        await handleUpdateProfile({ preventDefault: () => {} } as any);
+                        handleReviewRefund("accept");
+                      }}
+                      disabled={reviewSubmitting || !bankName || !accountName || !accountNumber}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 rounded-xl shadow-sm transition-colors"
+                    >
+                      Accept Refund Estimate
+                    </Button>
+                    <Button 
+                      onClick={() => setShowDisputeModal(true)}
+                      variant="outline"
+                      disabled={reviewSubmitting}
+                      className="bg-white hover:bg-red-50 border-red-200 text-red-700 font-bold h-11 rounded-xl shadow-sm"
+                    >
+                      Dispute Deductions
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -512,6 +728,24 @@ export default function TenantDashboard() {
                             {new Date(activeLease.startDate).toLocaleDateString()} - {new Date(activeLease.endDate).toLocaleDateString()}
                           </strong>
                         </div>
+                        
+                        {activeLease.moveOutStatus === "NONE" && (
+                          <div className="pt-2">
+                            <Button 
+                              onClick={() => setShowMoveOutModal(true)}
+                              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold rounded-xl text-xs h-10 transition-colors"
+                            >
+                              Request Move-Out
+                            </Button>
+                          </div>
+                        )}
+                        {activeLease.moveOutStatus !== "NONE" && (
+                          <div className="pt-2">
+                            <div className="w-full bg-blue-50 text-blue-700 text-center py-2.5 font-extrabold rounded-xl text-xs border border-blue-100">
+                              Move-Out Status: {activeLease.moveOutStatus.replace(/_/g, " ")}
+                            </div>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div className="text-center py-6 text-[#64748B] italic">No active lease found.</div>
@@ -1427,6 +1661,51 @@ export default function TenantDashboard() {
                 />
               </div>
 
+              {/* Bank Payout Details Section */}
+              <div className="pt-4 border-t border-[#F1F5F9] mt-6 space-y-4">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-1.5">
+                    <Shield className="h-4 w-4 text-[#496E5C]" /> Bank Payout Details
+                  </h3>
+                  <span className="text-[11px] text-[#64748B] block mt-0.5">
+                    Provide your bank information to receive manual security deposit refunds from the administrator.
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="bankName" className="text-xs font-bold">Bank Name</Label>
+                  <Input 
+                    id="bankName"
+                    placeholder="e.g. Chase, Barclays, HSBC"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="accountName" className="text-xs font-bold">Account Holder Name</Label>
+                  <Input 
+                    id="accountName"
+                    placeholder="e.g. Jane Doe"
+                    value={accountName}
+                    onChange={(e) => setAccountName(e.target.value)}
+                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="accountNumber" className="text-xs font-bold">Account Number / IBAN</Label>
+                  <Input 
+                    id="accountNumber"
+                    placeholder="e.g. 12345678 or GB12345..."
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                  />
+                </div>
+              </div>
+
               <Button 
                 type="submit" 
                 disabled={profileSubmitting}
@@ -1439,5 +1718,119 @@ export default function TenantDashboard() {
         )}
 
     </div>
+
+      {/* Move-Out Request Modal */}
+      {showMoveOutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
+            <div className="p-6">
+              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Request Move-Out</h2>
+              <p className="text-sm text-[#64748B] mb-6">
+                Please provide your preferred move-out date and reason. 
+                {activeLease?.moveOutNoticeDays && (
+                  <span className="block mt-2 text-amber-600 font-semibold text-xs">
+                    Note: Your lease requires a {activeLease.moveOutNoticeDays}-day notice period.
+                  </span>
+                )}
+              </p>
+              
+              <form onSubmit={handleRequestMoveOut} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-[#0F172A]">Preferred Move-Out Date</Label>
+                  <Input 
+                    type="date" 
+                    required
+                    value={moveOutDate}
+                    onChange={(e) => setMoveOutDate(e.target.value)}
+                    className="h-11 rounded-xl bg-[#F8FAFC] border-[#E2E8F0]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-[#0F172A]">Reason for Leaving</Label>
+                  <select 
+                    value={moveOutReason}
+                    onChange={(e) => setMoveOutReason(e.target.value)}
+                    className="w-full h-11 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] px-3 text-sm"
+                  >
+                    <option>End of lease</option>
+                    <option>Job relocation</option>
+                    <option>Financial reasons</option>
+                    <option>Need more space</option>
+                    <option>Buying a home</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-[#F1F5F9] mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowMoveOutModal(false)}
+                    className="flex-1 h-11 rounded-xl text-slate-600 font-bold"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={moveOutSubmitting}
+                    className="flex-1 h-11 rounded-xl bg-[#496E5C] text-white font-bold hover:bg-[#3d5a4b]"
+                  >
+                    {moveOutSubmitting ? "Submitting..." : "Submit Request"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Dispute Modal */}
+      {showDisputeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
+            <div className="p-6">
+              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Dispute Deductions</h2>
+              <p className="text-sm text-[#64748B] mb-6">
+                Please explain why you disagree with the proposed deductions. Your owner will review this.
+                <span className="block mt-2 font-bold text-slate-700">
+                  You have {2 - (activeLease?.disputeCount || 0)} disputes remaining before Admin Mediation.
+                </span>
+              </p>
+              
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-[#0F172A]">Dispute Details</Label>
+                  <textarea 
+                    rows={4}
+                    value={tenantDisputeNote}
+                    onChange={(e) => setTenantDisputeNote(e.target.value)}
+                    className="w-full rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] p-3 text-sm focus:ring-[#3B82F6]"
+                    placeholder="e.g., The carpet stain was there when I moved in (see my move-in photos)."
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-[#F1F5F9] mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDisputeModal(false)}
+                    className="flex-1 h-11 rounded-xl text-slate-600 font-bold"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => handleReviewRefund("dispute")}
+                    disabled={reviewSubmitting || !tenantDisputeNote.trim()}
+                    className="flex-1 h-11 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700"
+                  >
+                    {reviewSubmitting ? "Submitting..." : "Submit Dispute"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -39,7 +40,26 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { unitId, name, email, phone, documents } = await req.json();
+    const {
+      unitId,
+      name,
+      email,
+      phone,
+      documents,
+      leaseDuration,
+      moveInDate,
+      occupantsCount,
+      employerName,
+      jobTitle,
+      monthlyIncome,
+      prevLandlordName,
+      prevLandlordPhone,
+      prevLandlordEmail,
+      reasonForMoving,
+      petsCount,
+      petDetails,
+      vehicleInfo
+    } = await req.json();
 
     if (!unitId || !name || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -53,6 +73,19 @@ export async function POST(req: NextRequest) {
         phone,
         documents: documents || [],
         status: "PENDING",
+        leaseDuration: leaseDuration ? Number(leaseDuration) : 12,
+        moveInDate: moveInDate ? new Date(moveInDate) : null,
+        occupantsCount: occupantsCount ? Number(occupantsCount) : 1,
+        employerName: employerName || null,
+        jobTitle: jobTitle || null,
+        monthlyIncome: monthlyIncome ? Number(monthlyIncome) : null,
+        prevLandlordName: prevLandlordName || null,
+        prevLandlordPhone: prevLandlordPhone || null,
+        prevLandlordEmail: prevLandlordEmail || null,
+        reasonForMoving: reasonForMoving || null,
+        petsCount: petsCount ? Number(petsCount) : 0,
+        petDetails: petDetails || null,
+        vehicleInfo: vehicleInfo || null,
       },
     });
 
@@ -72,7 +105,36 @@ export async function POST(req: NextRequest) {
           relatedEntityId: application.id,
         });
       }
-    } catch (_) {/* non-fatal */}
+
+      // Send confirmation email to guest tenant with tracking link
+      const origin = new URL(req.url).origin;
+      const trackingLink = `${origin}/listings/apply/track?id=${application.id}`;
+      await sendEmail({
+        to: email,
+        subject: `Rental Application Received - ${unit?.property?.name || "PropertyPro"}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <span style="font-size: 24px; font-weight: 900; color: #2563eb; letter-spacing: -0.025em;">Property<span style="color: #0f172a;">Pro</span></span>
+            </div>
+            <h2 style="color: #0f172a; font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 8px;">Your Rental Application is Received</h2>
+            <p style="text-align: center; color: #64748b; font-size: 13px; margin-bottom: 24px;">Application ID: ${application.id}</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #334155;">Hi <strong>${name}</strong>,</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #334155;">Thank you for applying for <strong>Unit ${unit?.name || ""}</strong> at <strong>${unit?.property?.name || "PropertyPro"}</strong>. The property owner has been notified and is currently reviewing your application.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #334155;">Since you applied as a guest, we have generated a secure live tracking dashboard for you. Use this link to view status updates, review landlord feedback, and sign lease drafts directly:</p>
+            <div style="margin: 32px 0; text-align: center;">
+              <a href="${trackingLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 12px; font-weight: bold; font-size: 14px; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Track Application Status</a>
+            </div>
+            <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; text-align: center;">If you cannot click the button, copy and paste this link in your browser: <br/>${trackingLink}</p>
+            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0;" />
+            <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">This email is sent automatically by the PropertyPro rental management system.</p>
+          </div>
+        `,
+        text: `Hi ${name},\n\nYour application for Unit ${unit?.name || ""} at ${unit?.property?.name || "PropertyPro"} has been received. Track its live status at: ${trackingLink}\n\nBest regards,\nPropertyPro Team`
+      });
+    } catch (err) {
+      console.error("[Email Confirmation] Failed to send email:", err);
+    }
 
     return NextResponse.json(application, { status: 201 });
   } catch (error: any) {

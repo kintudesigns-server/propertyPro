@@ -23,8 +23,9 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         },
       });
 
+      const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@propertypro.com";
       await transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER || "PropertyPro <noreply@propertypro.com>",
+        from: `"PropertyPro" <${fromEmail}>`,
         to,
         subject,
         text: text || "",

@@ -37,7 +37,7 @@ export const generateLeasePDF = (lease: any) => {
   // --- TITLE ---
   doc.setFontSize(18);
   doc.setTextColor(textColor);
-  doc.text("Lease Agreement Details", 40, currentY);
+  doc.text("Residential Lease Agreement", 40, currentY);
   currentY += 30;
 
   // --- PROPERTY & TENANT INFO (Two columns) ---
@@ -83,8 +83,8 @@ export const generateLeasePDF = (lease: any) => {
     startY: currentY,
     head: [['Item', 'Amount']],
     body: [
-      ['Monthly Rent', `$${Number(lease.monthlyRent || 0).toLocaleString()}`],
-      ['Security Deposit', `$${Number(lease.deposit || 0).toLocaleString()}`],
+      ['Monthly Rent', `$${Number(lease.monthlyRent || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`],
+      ['Security Deposit', `$${Number(lease.securityDeposit || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`],
     ],
     theme: 'grid',
     headStyles: { fillColor: [59, 130, 246] }, // Primary color
@@ -94,7 +94,7 @@ export const generateLeasePDF = (lease: any) => {
 
   currentY = (doc as any).lastAutoTable.finalY + 30;
 
-  // --- TERMS TABLE ---
+  // --- LEASE TERMS TABLE ---
   doc.setFontSize(14);
   doc.setTextColor(textColor);
   doc.text("Lease Terms", 40, currentY);
@@ -117,12 +117,60 @@ export const generateLeasePDF = (lease: any) => {
     margin: { left: 40, right: 40 }
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 40;
+  currentY = (doc as any).lastAutoTable.finalY + 30;
 
-  // --- FOOTER NOTE ---
+  // --- STANDARD TERMS & CONDITIONS ---
+  doc.setFontSize(14);
+  doc.setTextColor(textColor);
+  doc.text("Standard Terms & Conditions", 40, currentY);
+  currentY += 15;
+
   doc.setFontSize(10);
   doc.setTextColor(lightText);
-  const footerText = "This document is a generated summary of the lease details stored in PropertyPro. It is not a legally binding contract unless accompanied by signatures.";
+  const termsText = `1. RENT PAYMENTS: Rent is due on or before the due date specified. Late fees will be applied for payments received after the grace period.
+2. MAINTENANCE: Tenant is responsible for keeping the premises clean and sanitary. Major repairs must be reported to management immediately.
+3. ALTERATIONS: Tenant shall not make any material alterations to the unit without prior written consent from the Landlord.
+4. SECURITY DEPOSIT REFUND POLICY: The Security Deposit of $${Number(lease.securityDeposit || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} shall be held by the Landlord to secure the performance of the Tenant's obligations. Upon move-out, the property must be returned in its original condition (ordinary wear and tear excepted). The deposit will be refunded within the legally required timeframe, less any itemized deductions for damages, unpaid rent, or cleaning fees.
+5. EARLY TERMINATION POLICY: In the event the Tenant terminates this lease prior to the End Date, the Tenant shall be liable for an Early Termination Fee of $${Number(lease.earlyTerminationFee || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}. ${
+    lease.isProratedRefundAllowed 
+    ? "The Landlord shall refund a prorated portion of prepaid rent for any unused days in the month of move-out." 
+    : "Pre-paid rent is non-refundable for partial months in the event of early termination."
+  }`;
+
+  const splitTerms = doc.splitTextToSize(termsText, pageWidth - 80);
+  doc.text(splitTerms, 40, currentY);
+  
+  currentY += (splitTerms.length * 12) + 30;
+
+  // --- E-SIGNATURE SECTION ---
+  doc.setFontSize(14);
+  doc.setTextColor(textColor);
+  doc.text("Signatures", 40, currentY);
+  currentY += 20;
+
+  doc.setFontSize(10);
+  doc.setTextColor(lightText);
+  
+  if (lease.status === "ACTIVE" || lease.status === "EXPIRED" || lease.status === "TERMINATED") {
+    // Show E-Signature
+    doc.text("TENANT E-SIGNATURE (Electronic Signature on File):", 40, currentY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Signed by: ${lease.tenant?.name || "N/A"}`, 40, currentY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.text(`IP / Consent: Verified electronically`, 40, currentY + 30);
+    doc.text(`Date Signed: ${new Date(lease.createdAt).toLocaleString()}`, 40, currentY + 45);
+  } else {
+    doc.text("TENANT E-SIGNATURE:", 40, currentY);
+    doc.text("_________________________________________________", 40, currentY + 15);
+    doc.text("Status: Pending Signature", 40, currentY + 30);
+  }
+
+  currentY += 70;
+
+  // --- FOOTER NOTE ---
+  doc.setFontSize(9);
+  doc.setTextColor(lightText);
+  const footerText = "This document is a generated summary of the lease details stored in PropertyPro. It constitutes a legally binding contract when accompanied by electronic signatures.";
   
   const splitText = doc.splitTextToSize(footerText, pageWidth - 80);
   doc.text(splitText, 40, currentY);

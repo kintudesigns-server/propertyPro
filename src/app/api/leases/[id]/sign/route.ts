@@ -26,6 +26,9 @@ export async function POST(req: NextRequest, ctx: any) {
       return NextResponse.json({ error: "Lease is not pending signature" }, { status: 400 });
     }
 
+    // Security Deposit logic: We no longer block signing before deposit.
+    // Tenant reviews terms, signs, and THEN pays deposit.
+
     // Update lease to ACTIVE and unit to OCCUPIED
     const [updatedLease] = await prisma.$transaction([
       prisma.lease.update({

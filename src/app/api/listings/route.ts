@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
             city: true,
             country: true,
             coverPhoto: true,
+            amenities: true,
           },
         },
       },

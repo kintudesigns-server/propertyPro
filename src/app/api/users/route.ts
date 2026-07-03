@@ -16,7 +16,21 @@ export async function GET(req: NextRequest) {
   const role = searchParams.get("role");
 
   if (!role) {
-    return NextResponse.json({ error: "Missing role parameter" }, { status: 400 });
+    const me = await prisma.user.findUnique({
+      where: { id: requesterId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        bankName: true,
+        accountNumber: true,
+        accountName: true,
+        stripeCustomerId: true,
+      },
+    });
+    return NextResponse.json(me);
   }
 
   try {

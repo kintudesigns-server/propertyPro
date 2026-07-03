@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, MoreVertical, Eye, RefreshCw, FileText, CheckCircle2, XCircle } from "lucide-react";
+import { Search, MoreVertical, Eye, RefreshCw, FileText, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ApplicationsPage() {
@@ -35,11 +35,18 @@ export default function ApplicationsPage() {
   };
 
   const handleUpdateStatus = async (appId: string, status: string) => {
+    let reason = "";
+    if (status === "REJECTED") {
+      const input = window.prompt("Please provide a reason for rejecting this application (this will be emailed to the applicant):");
+      if (input === null) return;
+      reason = input.trim();
+    }
+
     try {
       const res = await fetch(`/api/applications/${appId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, reason }),
       });
 
       if (res.ok) {
@@ -65,7 +72,7 @@ export default function ApplicationsPage() {
       if (res.ok) {
         toast.success("Application approved! Opening Lease Creation Wizard...");
         router.push(
-          `/dashboard/leases/new?unitId=${app.unitId}&tenantName=${encodeURIComponent(
+          `/dashboard/leases/new?appId=${app.id}&unitId=${app.unitId}&tenantName=${encodeURIComponent(
             app.name
           )}&tenantEmail=${encodeURIComponent(app.email)}&tenantPhone=${encodeURIComponent(app.phone)}`
         );
@@ -75,6 +82,27 @@ export default function ApplicationsPage() {
       }
     } catch (err) {
       toast.error("Error approving application");
+    }
+  };
+
+  const handleDeleteApplication = async (appId: string) => {
+    if (!confirm("Are you sure you want to delete this application? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/applications/${appId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast.success("Application deleted successfully");
+        fetchApplications();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to delete application");
+      }
+    } catch (err) {
+      toast.error("Error deleting application");
     }
   };
 
@@ -178,36 +206,44 @@ export default function ApplicationsPage() {
                         {new Date(app.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F8FAFC] inline-flex items-center justify-center rounded-lg">
-                            <MoreVertical className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 rounded-xl border-[#E2E8F0] p-1">
-                            {app.status === "PENDING" && (
-                              <>
-                                <DropdownMenuItem onClick={() => handleApproveAndDraft(app)} className="cursor-pointer font-bold text-[#16A34A] rounded-lg">
-                                  <CheckCircle2 className="mr-2 h-4 w-4 text-[#16A34A]" /> Approve & Draft Lease
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "APPROVED")} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
-                                  <CheckCircle2 className="mr-2 h-4 w-4 text-[#94A3B8]" /> Approve (Only)
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "REJECTED")} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
-                                  <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Reject Application
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {app.status === "APPROVED" && (
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/new?unitId=${app.unitId}&tenantName=${encodeURIComponent(app.name)}&tenantEmail=${encodeURIComponent(app.email)}&tenantPhone=${encodeURIComponent(app.phone)}`)} className="cursor-pointer font-bold text-[#3B82F6] rounded-lg">
-                                <FileText className="mr-2 h-4 w-4 text-[#3B82F6]" /> Draft Lease
+                        <div className="flex items-center justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F8FAFC] inline-flex items-center justify-center rounded-lg cursor-pointer">
+                              <MoreVertical className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 rounded-xl border-[#E2E8F0] p-1">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/applications/${app.id}`)} className="cursor-pointer font-semibold text-slate-700 rounded-lg">
+                                <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                               </DropdownMenuItem>
-                            )}
-                            {app.status === "REJECTED" && (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "PENDING")} className="cursor-pointer font-semibold text-slate-700 rounded-lg">
-                                <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Re-evaluate Application
+                              {app.status === "PENDING" && (
+                                <>
+                                  <DropdownMenuItem onClick={() => handleApproveAndDraft(app)} className="cursor-pointer font-bold text-[#16A34A] rounded-lg">
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#16A34A]" /> Approve & Draft Lease
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "APPROVED")} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#94A3B8]" /> Approve (Only)
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "REJECTED")} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
+                                    <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Reject Application
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {app.status === "APPROVED" && (
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/new?appId=${app.id}&unitId=${app.unitId}&tenantName=${encodeURIComponent(app.name)}&tenantEmail=${encodeURIComponent(app.email)}&tenantPhone=${encodeURIComponent(app.phone)}`)} className="cursor-pointer font-bold text-[#3B82F6] rounded-lg">
+                                  <FileText className="mr-2 h-4 w-4 text-[#3B82F6]" /> Draft Lease
+                                </DropdownMenuItem>
+                              )}
+                              {app.status === "REJECTED" && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "PENDING")} className="cursor-pointer font-semibold text-slate-700 rounded-lg">
+                                  <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Re-evaluate Application
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => handleDeleteApplication(app.id)} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
+                                <Trash2 className="mr-2 h-4 w-4 text-rose-600" /> Delete Application
                               </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

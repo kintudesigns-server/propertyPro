@@ -66,6 +66,7 @@ model User {
   maintenanceRequest MaintenanceRequest[] @relation("TenantRequests")
   assignedInspections MaintenanceRequest[] @relation("InspectorTasks")
   payoutRequests     PayoutRequest[]      @relation("OwnerPayouts")
+  tenantPayoutRequests PayoutRequest[]    @relation("TenantPayouts")
   sentMessages       Message[]            @relation("SentMessages")
   receivedMessages   Message[]            @relation("ReceivedMessages")
   documents          Document[]           @relation("TenantDocuments")
@@ -143,15 +144,36 @@ model Lease {
   autoGenerateInvoices Boolean   @default(true)
   autoEmailInvoices    Boolean   @default(false)
   
+  // Early Termination Policies
+  earlyTerminationFee     Decimal?  @default(0) @db.Decimal(10, 2)
+  isProratedRefundAllowed Boolean   @default(false)
+
+  
   // Phase 1: Security Deposits & Move-Out
   depositStatus        String    @default("HELD") // HELD, REFUNDED, PARTIALLY_REFUNDED, FULLY_DEDUCTED
   deductions           Json?     // Array of { amount: number, description: string, photoUrl?: string }
+  refundMethod         String?   // BANK_TRANSFER, CHECK, STRIPE, OTHER
+  refundRef            String?   // Reference number or check number
+
+  // Move-Out Lifecycle
+  moveOutStatus        String    @default("NONE")  // NONE, MOVE_OUT_REQUESTED, INSPECTION_SCHEDULED, INSPECTION_COMPLETED, TENANT_ACCEPTED, TENANT_DISPUTED, ADMIN_MEDIATION, PENDING_ADMIN_PAYOUT, COMPLETED
+  moveOutRequestDate   DateTime?
+  moveOutDate          DateTime?
+  moveOutReason        String?
+  moveOutNoticeDays    Int       @default(30)
+  moveOutInspectorId   String?
+  inspectionDate       DateTime?
+  inspectionNotes      String?   @db.Text
+  inspectionPhotos     String[]
+  tenantDisputeNote    String?   @db.Text
+  disputeCount         Int       @default(0)
 
   // Phase 3: Automated Renewals
   renewalNoticeDays    Int       @default(60) // Days before endDate to trigger renewal offer
   renewalStatus        String    @default("NOT_ELIGIBLE") // NOT_ELIGIBLE, PENDING_DECISION, RENEWED, NON_RENEWAL
   
   invoices    Invoice[]
+  payoutRequests PayoutRequest[]
 }
 
 model Invoice {
@@ -203,13 +225,19 @@ model MaintenanceRequest {
 
 model PayoutRequest {
   id            String       @id @default(uuid())
-  ownerId       String
-  owner         User         @relation("OwnerPayouts", fields: [ownerId], references: [id])
+  ownerId       String?
+  owner         User?        @relation("OwnerPayouts", fields: [ownerId], references: [id])
+  tenantId      String?
+  tenant        User?        @relation("TenantPayouts", fields: [tenantId], references: [id])
+  leaseId       String?
+  lease         Lease?       @relation(fields: [leaseId], references: [id])
   amount        Decimal      @db.Decimal(10, 2)
   status        PayoutStatus @default(PENDING)
   bankName      String
   accountNumber String
   accountName   String
+  proofUrl      String?      // Cloudinary receipt or verification link
+  disbursedAt   DateTime?    // When the admin disbursed the payout
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
@@ -223,6 +251,28 @@ model Application {
   phone       String
   documents   String[] // Array of Cloudinary URLs
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, LEASE_CREATED
+  
+  // Real-world application preferences
+  leaseDuration  Int       @default(12)
+  moveInDate     DateTime?
+  occupantsCount Int       @default(1)
+  
+  // Employment & Financials
+  employerName   String?
+  jobTitle       String?
+  monthlyIncome  Decimal?  @db.Decimal(10, 2)
+  
+  // Landlord Reference
+  prevLandlordName  String?
+  prevLandlordPhone String?
+  prevLandlordEmail String?
+  reasonForMoving   String?
+  
+  // Pets & Vehicles
+  petsCount      Int       @default(0)
+  petDetails     String?
+  vehicleInfo    String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

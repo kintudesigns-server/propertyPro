@@ -1,30 +1,26 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { Eye, Download, FileText, MessageSquare, MoreHorizontal } from "lucide-react";
+import { Eye, Download, FileText, MessageSquare, MoreHorizontal, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
   lease: any;
   onSignLease?: (id: string) => void;
+  onRequestMoveOut?: (id: string) => void;
   variant?: "table" | "card";
 }
 
-export function LeaseActionsMenu({ lease, onSignLease, variant = "table" }: Props) {
+export function LeaseActionsMenu({ lease, onSignLease, onRequestMoveOut, variant = "table" }: Props) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   const handleDownload = async () => {
-    setOpen(false);
     toast.info("Preparing lease agreement for download…");
     try {
       const res = await fetch(`/api/leases/${lease.id}/download`);
@@ -38,7 +34,6 @@ export function LeaseActionsMenu({ lease, onSignLease, variant = "table" }: Prop
         URL.revokeObjectURL(url);
         toast.success("Lease agreement downloaded.");
       } else {
-        // Fallback: open lease detail page
         router.push(`/dashboard/leases/${lease.id}`);
         toast.info("Redirecting to lease details.");
       }
@@ -52,41 +47,44 @@ export function LeaseActionsMenu({ lease, onSignLease, variant = "table" }: Prop
       label: "View Details",
       icon: Eye,
       color: "text-[#3B82F6]",
-      bg: "hover:bg-blue-50",
-      onClick: () => { setOpen(false); router.push(`/dashboard/leases/${lease.id}`); },
+      onClick: () => router.push(`/dashboard/leases/${lease.id}`),
     },
     {
       label: "Download Agreement",
       icon: Download,
       color: "text-emerald-600",
-      bg: "hover:bg-emerald-50",
       onClick: handleDownload,
     },
     {
       label: "View Invoices",
       icon: FileText,
       color: "text-amber-600",
-      bg: "hover:bg-amber-50",
-      onClick: () => { setOpen(false); router.push(`/dashboard/accounting/invoices`); },
+      onClick: () => router.push(`/dashboard/accounting/invoices`),
     },
     {
       label: "Contact Landlord",
       icon: MessageSquare,
       color: "text-violet-600",
-      bg: "hover:bg-violet-50",
       onClick: () => {
-        setOpen(false);
         toast.info("Opening contact form…");
         router.push(`/dashboard/leases/${lease.id}?contact=1`);
       },
     },
   ];
 
+  if (lease.status === "ACTIVE" && lease.moveOutStatus === "NONE" && onRequestMoveOut) {
+    actions.push({
+      label: "Request Move-Out",
+      icon: LogOut,
+      color: "text-slate-600",
+      onClick: () => onRequestMoveOut(lease.id),
+    });
+  }
+
   return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((p) => !p)}
-        className={`flex items-center justify-center rounded-full transition-all ${
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={`flex items-center justify-center rounded-full transition-all focus:outline-none ${
           variant === "card"
             ? "h-8 w-8 bg-transparent text-white hover:bg-white/20 border-0 shadow-none"
             : "h-8 w-8 border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 shadow-sm"
@@ -94,22 +92,19 @@ export function LeaseActionsMenu({ lease, onSignLease, variant = "table" }: Prop
         title="More actions"
       >
         <MoreHorizontal className={`h-4 w-4 ${variant === "card" ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]" : ""}`} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-9 z-50 w-56 bg-white rounded-2xl border border-[#E2E8F0] shadow-xl py-1.5 overflow-hidden">
-          {actions.map((a) => (
-            <button
-              key={a.label}
-              onClick={a.onClick}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#0F172A] font-semibold text-left whitespace-nowrap transition-colors ${a.bg}`}
-            >
-              <a.icon className={`h-4 w-4 shrink-0 ${a.color}`} />
-              {a.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 rounded-xl border-[#E2E8F0] shadow-xl p-1.5 bg-white z-[100]">
+        {actions.map((a) => (
+          <DropdownMenuItem
+            key={a.label}
+            onClick={a.onClick}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#0F172A] font-semibold rounded-lg cursor-pointer hover:bg-slate-50 focus:bg-slate-50 transition-colors border-0 outline-none"
+          >
+            <a.icon className={`h-4 w-4 shrink-0 ${a.color}`} />
+            {a.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

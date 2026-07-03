@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { PayoutStatus } from "@prisma/client";
+import { notify } from "@/lib/notify";
+import { getStripe } from "@/lib/stripe";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,12 +19,40 @@ export async function GET(req: NextRequest) {
     let payouts: any[] = [];
     if (role === "SUPERADMIN") {
       payouts = await prisma.payoutRequest.findMany({
-        include: { owner: { select: { name: true, email: true } } },
+        include: {
+          owner: { select: { name: true, email: true } },
+          tenant: { select: { name: true, email: true } },
+          lease: {
+            include: {
+              unit: {
+                include: {
+                  property: true
+                }
+              }
+            }
+          }
+        },
         orderBy: { createdAt: "desc" },
       });
     } else if (role === "OWNER") {
       payouts = await prisma.payoutRequest.findMany({
         where: { ownerId: userId },
+        orderBy: { createdAt: "desc" },
+      });
+    } else if (role === "TENANT") {
+      payouts = await prisma.payoutRequest.findMany({
+        where: { tenantId: userId },
+        include: {
+          lease: {
+            include: {
+              unit: {
+                include: {
+                  property: true
+                }
+              }
+            }
+          }
+        },
         orderBy: { createdAt: "desc" },
       });
     } else {
@@ -104,7 +134,7 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { payoutId, status } = await req.json();
+    const { payoutId, status, proofUrl, refNumber, bankName, accountNumber, accountName, amount } = await req.json();
 
     if (!payoutId || !status) {
       return NextResponse.json({ error: "Missing payoutId or status" }, { status: 400 });
@@ -112,6 +142,19 @@ export async function PUT(req: NextRequest) {
 
     const payout = await prisma.payoutRequest.findUnique({
       where: { id: payoutId },
+      include: {
+        owner: true,
+        tenant: true,
+        lease: {
+          include: {
+            unit: {
+              include: {
+                property: true
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!payout) {
@@ -122,29 +165,211 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Payout is already processed" }, { status: 400 });
     }
 
+    const finalRef = refNumber || payout.accountNumber || `TX-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+
     if (status === PayoutStatus.COMPLETED) {
-      const updated = await prisma.payoutRequest.update({
-        where: { id: payoutId },
-        data: { status: PayoutStatus.COMPLETED },
-      });
-      return NextResponse.json(updated);
-    } else if (status === PayoutStatus.REJECTED) {
-      // Return the money back to the owner balance
-      const [updated] = await prisma.$transaction([
-        prisma.payoutRequest.update({
-          where: { id: payoutId },
-          data: { status: PayoutStatus.REJECTED },
-        }),
-        prisma.user.update({
-          where: { id: payout.ownerId },
-          data: {
-            balance: {
-              increment: Number(payout.amount),
+      // 1. Check if it's a Tenant Refund
+      if (payout.tenantId && payout.leaseId) {
+        let stripeRefundId = null;
+
+        // If refundMethod is STRIPE, trigger automatic Stripe Refund
+        if (payout.bankName === "STRIPE") {
+          let stripePaymentIntentId = payout.lease!.refundRef;
+
+          // Check transaction reference if not on lease
+          if (!stripePaymentIntentId) {
+            const depositTransaction = await prisma.transaction.findFirst({
+              where: {
+                tenantId: payout.tenantId,
+                category: "DEPOSIT",
+                type: "INCOME",
+                status: "COMPLETED",
+              },
+              orderBy: { createdAt: "desc" },
+            });
+            if (depositTransaction?.reference?.startsWith("pi_")) {
+              stripePaymentIntentId = depositTransaction.reference;
+            }
+          }
+
+          if (!stripePaymentIntentId) {
+            return NextResponse.json({
+              error: "Stripe payout requested but could not locate original Stripe Payment Intent."
+            }, { status: 400 });
+          }
+
+          try {
+            const stripeClient = getStripe();
+            const stripeRefund = await stripeClient.refunds.create({
+              payment_intent: stripePaymentIntentId,
+              amount: Math.round(Number(payout.amount) * 100),
+            });
+            stripeRefundId = stripeRefund.id;
+          } catch (stripeErr: any) {
+            console.error("Stripe refund execution failed:", stripeErr);
+            return NextResponse.json({
+              error: `Stripe Refund failed: ${stripeErr.message || "Unknown error"}`
+            }, { status: 400 });
+          }
+        }
+
+        const disbursementRef = stripeRefundId || finalRef;
+        const deductionsList = (payout.lease!.deductions as any[]) || [];
+        const newLeaseDepositStatus = deductionsList.length === 0 ? "REFUNDED" : "PARTIALLY_REFUNDED";
+
+        // Execute DB updates inside a transaction
+        const [updatedPayout] = await prisma.$transaction([
+          prisma.payoutRequest.update({
+            where: { id: payoutId },
+            data: {
+              status: PayoutStatus.COMPLETED,
+              amount: amount ? Number(amount) : payout.amount,
+              proofUrl: proofUrl || null,
+              disbursedAt: new Date(),
+              bankName: bankName || payout.bankName,
+              accountNumber: stripeRefundId || accountNumber || payout.accountNumber,
+              accountName: accountName || payout.accountName,
             },
+          }),
+          prisma.lease.update({
+            where: { id: payout.leaseId },
+            data: {
+              depositStatus: newLeaseDepositStatus,
+              moveOutStatus: "COMPLETED",
+              refundRef: disbursementRef,
+            },
+          }),
+          // Update the pending EXPENSE transaction to COMPLETED
+          prisma.transaction.updateMany({
+            where: {
+              tenantId: payout.tenantId,
+              type: "EXPENSE",
+              category: "DEPOSIT",
+              status: "PENDING",
+            },
+            data: {
+              status: "COMPLETED",
+              reference: disbursementRef,
+            },
+          }),
+          // Register Refund Receipt Document
+          prisma.document.create({
+            data: {
+              name: `Security Deposit Refund Notice - Unit ${payout.lease!.unit.name}`,
+              category: "LEASE",
+              url: proofUrl || `/dashboard/leases/${payout.leaseId!}`,
+              tenantId: payout.tenantId!,
+              propertyId: payout.lease!.unit.propertyId,
+              fileSize: "150 KB",
+            },
+          }),
+        ]);
+
+        // Send Notifications to tenant and landlord
+        try {
+          await notify({
+            userId: payout.tenantId!,
+            title: "Security Deposit Refund Completed",
+            message: `Your deposit refund of $${Number(payout.amount).toFixed(2)} has been completed by the admin via ${bankName || payout.bankName}. Reference: ${disbursementRef}.`,
+            type: "PAYMENT",
+            priority: "HIGH",
+            relatedEntityId: payout.leaseId!,
+          });
+
+          await notify({
+            userId: payout.lease!.unit.property.ownerId,
+            title: "Tenant Refund Payout Completed",
+            message: `The refund of $${Number(payout.amount).toFixed(2)} for tenant ${payout.tenant!.name} (Unit ${payout.lease!.unit.name}) has been completed and disbursed by the admin.`,
+            type: "PAYMENT",
+            priority: "MEDIUM",
+            relatedEntityId: payout.leaseId!,
+          });
+        } catch (err) {
+          console.error("Failed to send payout notifications:", err);
+        }
+
+        return NextResponse.json(updatedPayout);
+      } else {
+        // 2. Regular Owner Payout
+        const updated = await prisma.payoutRequest.update({
+          where: { id: payoutId },
+          data: {
+            status: PayoutStatus.COMPLETED,
+            proofUrl: proofUrl || null,
+            disbursedAt: new Date(),
+            bankName: bankName || payout.bankName,
+            accountNumber: accountNumber || payout.accountNumber,
+            accountName: accountName || payout.accountName,
           },
-        }),
-      ]);
-      return NextResponse.json(updated);
+        });
+        return NextResponse.json(updated);
+      }
+    } else if (status === PayoutStatus.REJECTED) {
+      if (payout.tenantId && payout.leaseId) {
+        // Rejecting a tenant refund means returning the lease deposit status to HELD (since it wasn't refunded)
+        // and refunding landlord balance
+        const [updated] = await prisma.$transaction([
+          prisma.payoutRequest.update({
+            where: { id: payoutId },
+            data: { status: PayoutStatus.REJECTED },
+          }),
+          prisma.lease.update({
+            where: { id: payout.leaseId },
+            data: { depositStatus: "HELD" },
+          }),
+          // Update transaction to FAILED
+          prisma.transaction.updateMany({
+            where: {
+              tenantId: payout.tenantId,
+              type: "EXPENSE",
+              category: "DEPOSIT",
+              status: "PENDING",
+            },
+            data: { status: "FAILED" },
+          }),
+          // Re-credit the landlord's balance since payout was rejected/refund failed
+          prisma.user.update({
+            where: { id: payout.lease!.unit.property.ownerId },
+            data: {
+              balance: {
+                increment: Number(payout.amount),
+              },
+            },
+          }),
+        ]);
+
+        try {
+          await notify({
+            userId: payout.lease!.unit.property.ownerId,
+            title: "Tenant Refund Payout Rejected",
+            message: `The security deposit refund payout of $${Number(payout.amount).toFixed(2)} for ${payout.tenant!.name} was rejected by the admin. The balance has been credited back to your ledger.`,
+            type: "PAYMENT",
+            priority: "HIGH",
+            relatedEntityId: payout.leaseId!,
+          });
+        } catch (err) {
+          console.error(err);
+        }
+
+        return NextResponse.json(updated);
+      } else {
+        // Return the money back to the owner balance for owner payout
+        const [updated] = await prisma.$transaction([
+          prisma.payoutRequest.update({
+            where: { id: payoutId },
+            data: { status: PayoutStatus.REJECTED },
+          }),
+          prisma.user.update({
+            where: { id: payout.ownerId! },
+            data: {
+              balance: {
+                increment: Number(payout.amount),
+              },
+            },
+          }),
+        ]);
+        return NextResponse.json(updated);
+      }
     } else {
       return NextResponse.json({ error: "Invalid status update" }, { status: 400 });
     }

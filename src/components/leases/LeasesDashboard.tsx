@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { generateLeasePDF, generateInvoicePDF } from "@/lib/pdfGenerator";
-import { MoreVertical, Eye, FileDown } from "lucide-react";
+import { MoreVertical, Eye, FileDown, ShieldAlert } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function LeasesDashboard({ 
@@ -127,6 +127,22 @@ export default function LeasesDashboard({
         setLeases(leases.filter(l => l.id !== id));
       } else {
         toast.error("Failed to delete lease");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    }
+  };
+
+  const handleTerminateLease = async (id: string) => {
+    if (!confirm("Are you sure you want to terminate this lease? The unit will be marked as vacant, but the lease record will be preserved.")) return;
+    try {
+      const res = await fetch(`/api/leases/${id}/terminate`, { method: 'POST' });
+      if (res.ok) {
+        toast.success("Lease terminated successfully");
+        fetchData();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to terminate lease");
       }
     } catch (error) {
       toast.error("An error occurred");
@@ -362,9 +378,18 @@ export default function LeasesDashboard({
                         <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
                           <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                          <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                          <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
                         </DropdownMenuItem>
+                        {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
+                          <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                            <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                            <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -526,9 +551,18 @@ export default function LeasesDashboard({
                             <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
                               <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                              <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                              <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
                             </DropdownMenuItem>
+                            {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
+                              <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
