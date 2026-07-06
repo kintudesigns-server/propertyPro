@@ -132,6 +132,46 @@ export async function POST(req: NextRequest) {
         `,
         text: `Hi ${name},\n\nYour application for Unit ${unit?.name || ""} at ${unit?.property?.name || "PropertyPro"} has been received. Track its live status at: ${trackingLink}\n\nBest regards,\nPropertyPro Team`
       });
+
+      // Fetch Owner details to send them an email
+      if (unit?.property?.ownerId) {
+        const owner = await prisma.user.findUnique({ where: { id: unit.property.ownerId } });
+        if (owner?.email) {
+          const ownerReviewLink = `${origin}/dashboard/owner`; // Linking to their dashboard
+          await sendEmail({
+            to: owner.email,
+            subject: `New Application: Unit ${unit?.name} at ${unit?.property?.name}`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                  <span style="font-size: 24px; font-weight: 900; color: #2563eb; letter-spacing: -0.025em;">Property<span style="color: #0f172a;">Pro</span></span>
+                </div>
+                <h2 style="color: #0f172a; font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 8px;">New Tenant Application Received</h2>
+                <p style="text-align: center; color: #64748b; font-size: 13px; margin-bottom: 24px;">Application ID: ${application.id}</p>
+                
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                  <h3 style="margin-top: 0; font-size: 15px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Applicant Details</h3>
+                  <p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Name:</strong> ${name}</p>
+                  <p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Email:</strong> ${email}</p>
+                  <p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Phone:</strong> ${phone}</p>
+                  <p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Property:</strong> Unit ${unit?.name} at ${unit?.property?.name}</p>
+                  <p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Move-in Date:</strong> ${moveInDate ? new Date(moveInDate).toLocaleDateString() : 'Not Specified'}</p>
+                  ${monthlyIncome ? `<p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Monthly Income:</strong> $${monthlyIncome}</p>` : ''}
+                  ${employerName ? `<p style="font-size: 14px; margin: 8px 0; color: #334155;"><strong>Employer:</strong> ${employerName}</p>` : ''}
+                </div>
+
+                <p style="font-size: 14px; line-height: 1.6; color: #334155;">Please log in to your dashboard to review this application, approve or reject it, and initiate the lease signing process.</p>
+                <div style="margin: 32px 0; text-align: center;">
+                  <a href="${ownerReviewLink}" style="background-color: #0f172a; color: #ffffff; padding: 12px 28px; border-radius: 12px; font-weight: bold; font-size: 14px; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);">Review in Dashboard</a>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0;" />
+                <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">This email is sent automatically by the PropertyPro rental management system.</p>
+              </div>
+            `,
+            text: `New Application from ${name} for Unit ${unit?.name} at ${unit?.property?.name}.\n\nLog in to your dashboard to review.`
+          });
+        }
+      }
     } catch (err) {
       console.error("[Email Confirmation] Failed to send email:", err);
     }

@@ -94,12 +94,31 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify property belongs to owner
+    const ownerId = (session.user as any).id;
     const property = await prisma.property.findUnique({
       where: { id: propertyId },
     });
 
-    if (!property || property.ownerId !== (session.user as any).id) {
+    if (!property || property.ownerId !== ownerId) {
       return NextResponse.json({ error: "Property not found or access denied" }, { status: 404 });
+    }
+
+    // Tier Enforcement Check
+    const owner = await prisma.user.findUnique({
+      where: { id: ownerId },
+      include: { pricingTier: true }
+    });
+
+    if (owner?.pricingTier?.maxUnits) {
+      const currentUnitCount = await prisma.unit.count({
+        where: { property: { ownerId: ownerId } }
+      });
+      if (currentUnitCount + 1 > owner.pricingTier.maxUnits) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. You can only have up to ${owner.pricingTier.maxUnits} units on your current plan.` 
+        }, { status: 403 });
+      }
     }
 
     const unit = await prisma.unit.create({

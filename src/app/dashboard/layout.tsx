@@ -24,7 +24,8 @@ import {
   Briefcase,
   MessageSquare,
   Calendar,
-  DollarSign
+  DollarSign,
+  CreditCard,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 
@@ -85,12 +86,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (isTenant && (pathname === "/dashboard/tenant" || pathname === "/dashboard/tenant/")) {
-      router.push("/dashboard");
-    } else if (isInspector && (pathname === "/dashboard" || pathname === "/dashboard/")) {
+    if (isInspector && (pathname === "/dashboard" || pathname === "/dashboard/")) {
       router.push("/dashboard/inspector");
     }
-  }, [status, isTenant, isInspector, pathname, router]);
+  }, [status, isInspector, pathname, router]);
 
   React.useEffect(() => {
     if (!isOwnerOrAdmin) return;
@@ -345,6 +344,20 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                    EXPLORE
+                  </span>
+                )}
+                
+                <Link
+                  href="/listings"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]`}
+                >
+                  <Search className="h-5 w-5" />
+                  {sidebarOpen && <span>Browse Listings</span>}
+                </Link>
+
+                {sidebarOpen && (
+                  <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
                     ACTIVITY LOGS
                   </span>
                 )}
@@ -557,6 +570,42 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <DollarSign className="h-5 w-5" />
                       {sidebarOpen && <span>Payouts</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/owner-applications"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/owner-applications"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <FileText className="h-5 w-5" />
+                      {sidebarOpen && <span>Owner Applications</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/settings/pricing"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/settings/pricing"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <Settings className="h-5 w-5" />
+                      {sidebarOpen && <span>Pricing Tiers</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/subscriptions"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/subscriptions"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <CreditCard className="h-5 w-5" />
+                      {sidebarOpen && <span>Subscriptions</span>}
                     </Link>
 
                     <div className="flex flex-col">
@@ -1095,6 +1144,38 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <Receipt className="h-5 w-5" />
                   {sidebarOpen && <span>Invoices</span>}
                 </Link>
+
+                {sidebarOpen && (
+                  <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                    ADMINISTRATION
+                  </span>
+                )}
+                
+                <Link
+                  href={isOwner ? "/dashboard/owner#settings" : "/dashboard/admin#settings"}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    (pathname === "/dashboard/owner" || pathname === "/dashboard/admin") && typeof window !== 'undefined' && window.location.hash === "#settings"
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <Settings className="h-5 w-5" />
+                  {sidebarOpen && <span>Profile Settings</span>}
+                </Link>
+                
+                {isOwner && (
+                  <Link
+                    href="/dashboard/owner#settings-subscription"
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                      pathname === "/dashboard/owner" && typeof window !== 'undefined' && window.location.hash === "#settings-subscription"
+                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                    }`}
+                  >
+                    <CreditCard className="h-5 w-5" />
+                    {sidebarOpen && <span>Subscription Plan</span>}
+                  </Link>
+                )}
               </>
             )}
           </nav>

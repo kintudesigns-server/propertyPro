@@ -29,6 +29,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No account found with this email");
         }
 
+        if (user.accountStatus === "PENDING_APPROVAL") {
+          throw new Error("Your account is pending admin approval.");
+        }
+
         const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValid) {
@@ -41,6 +45,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           phone: user.phone,
+          hasCompletedOnboarding: user.hasCompletedOnboarding,
         };
       },
     }),
@@ -51,29 +56,37 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = (user as any).role;
         token.phone = (user as any).phone;
+        token.hasCompletedOnboarding = (user as any).hasCompletedOnboarding;
       } else if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, phone: true, name: true, balance: true },
+          select: { role: true, phone: true, name: true, balance: true, hasCompletedOnboarding: true },
         });
         if (dbUser) {
           token.role = dbUser.role;
           token.phone = dbUser.phone;
           token.name = dbUser.name;
           token.balance = dbUser.balance;
+          token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
         } else {
-          // User no longer exists (e.g. after DB re-seed) — return null to invalidate session
-          return null as any;
+          // User no longer exists (e.g. after DB re-seed) — return empty object to invalidate
+          return {} as any;
         }
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).role = token.role as string;
-        (session.user as any).phone = token.phone as string | null;
-        (session.user as any).balance = token.balance ?? 0;
+      if (token && token.id) {
+        if (session.user) {
+          (session.user as any).id = token.id as string;
+          (session.user as any).role = token.role as string;
+          (session.user as any).phone = token.phone as string | null;
+          (session.user as any).balance = token.balance ?? 0;
+          (session.user as any).hasCompletedOnboarding = token.hasCompletedOnboarding as boolean;
+        }
+      } else {
+        // Token is invalid/null (user deleted), clear the session user
+        session.user = undefined as any;
       }
       return session;
     },

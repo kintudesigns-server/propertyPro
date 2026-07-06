@@ -89,7 +89,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Only property owners can add properties" }, { status: 403 });
   }
 
+  const userId = (session.user as any).id;
+
   try {
+    const owner = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { pricingTier: true, ownedProperties: { include: { units: true } } },
+    });
+
+    if (owner?.subscriptionStatus?.toLowerCase() !== "active") {
+      return NextResponse.json({ error: "Active subscription required to add properties.", code: "NO_SUBSCRIPTION" }, { status: 403 });
+    }
     const data = await req.json();
 
     if (!data.name || !data.address || !data.city || !data.country) {
@@ -101,6 +111,7 @@ export async function POST(req: NextRequest) {
       type: u.type,
       floor: u.floor ? Number(u.floor) : null,
       bathrooms: u.bathrooms ? Number(u.bathrooms) : null,
+      maxOccupants: u.maxOccupants ? Number(u.maxOccupants) : 1,
       rentAmount: Number(u.rentAmount || 0),
       depositAmt: Number(u.depositAmt || 0),
       rooms: Number(u.rooms || 0),
@@ -109,6 +120,21 @@ export async function POST(req: NextRequest) {
       images: u.images || [],
       status: u.status || "VACANT"
     })) : [];
+
+    // Tier Enforcement Check (Hard Cap)
+    if (owner?.pricingTier?.maxUnits) {
+      const currentUnitCount = await prisma.unit.count({
+        where: { property: { ownerId: userId } }
+      });
+      const requestedNewUnits = unitsPayload.length > 0 ? unitsPayload.length : 1; // Even empty properties imply at least 1 logical asset if it's a house
+
+      if (currentUnitCount + requestedNewUnits > owner.pricingTier.maxUnits) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. You can only have up to ${owner.pricingTier.maxUnits} units on your current plan.` 
+        }, { status: 403 });
+      }
+    }
 
     const property = await prisma.property.create({
       data: {
@@ -131,6 +157,18 @@ export async function POST(req: NextRequest) {
         }
       },
       include: { units: true }
+    });
+
+    // Create a notification for the owner
+    await prisma.notification.create({
+      data: {
+        userId: userId,
+        title: "Property Created",
+        message: `Your property "${property.name}" has been successfully added to your portfolio.`,
+        type: "SYSTEM",
+        priority: "LOW",
+        relatedEntityId: property.id,
+      }
     });
 
     return NextResponse.json(property, { status: 201 });
@@ -196,6 +234,7 @@ export async function PUT(req: NextRequest) {
               type: u.type,
               floor: u.floor ? Number(u.floor) : null,
               bathrooms: u.bathrooms ? Number(u.bathrooms) : null,
+              maxOccupants: u.maxOccupants ? Number(u.maxOccupants) : 1,
               rentAmount: Number(u.rentAmount || 0),
               depositAmt: Number(u.depositAmt || 0),
               rooms: Number(u.rooms || 0),
@@ -209,6 +248,7 @@ export async function PUT(req: NextRequest) {
               type: u.type,
               floor: u.floor ? Number(u.floor) : null,
               bathrooms: u.bathrooms ? Number(u.bathrooms) : null,
+              maxOccupants: u.maxOccupants ? Number(u.maxOccupants) : 1,
               rentAmount: Number(u.rentAmount || 0),
               depositAmt: Number(u.depositAmt || 0),
               rooms: Number(u.rooms || 0),
@@ -238,12 +278,13 @@ export async function PATCH(req: NextRequest) {
   try {
     const data = await req.json();
 
-    if (!data.id || !data.status) {
+    if (!data.id) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const existingProperty = await prisma.property.findUnique({
       where: { id: data.id },
+      include: { units: true }
     });
 
     if (!existingProperty) {
@@ -254,14 +295,39 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
-    const updatedProperty = await prisma.property.update({
-      where: { id: data.id },
-      data: { status: data.status },
-    });
+    // Handle Smart Media Upload
+    if (data.action === "ADD_MEDIA") {
+      const { targetType, targetId, url } = data;
+      
+      if (targetType === "PROPERTY") {
+        await prisma.property.update({
+          where: { id: data.id },
+          data: { images: [...existingProperty.images, url] }
+        });
+      } else if (targetType === "UNIT") {
+        const targetUnit = existingProperty.units.find(u => u.id === targetId);
+        if (!targetUnit) return NextResponse.json({ error: "Unit not found" }, { status: 404 });
+        
+        await prisma.unit.update({
+          where: { id: targetId },
+          data: { images: [...targetUnit.images, url] }
+        });
+      }
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
 
-    return NextResponse.json(updatedProperty, { status: 200 });
+    // Default Status Update
+    if (data.status) {
+      const updatedProperty = await prisma.property.update({
+        where: { id: data.id },
+        data: { status: data.status },
+      });
+      return NextResponse.json(updatedProperty, { status: 200 });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to update property status" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to process property update" }, { status: 500 });
   }
 }
 

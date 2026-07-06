@@ -102,6 +102,15 @@ export async function GET(req: NextRequest) {
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
     const expiringLeases = activeLeases.filter((l) => l.endDate <= thirtyDaysFromNow).length;
 
+    // 5. Check Onboarding Progress
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { employmentStatus: true, bankName: true }
+    });
+    
+    const profileComplete = !!user?.employmentStatus;
+    const bankConnected = !!user?.bankName;
+
     return NextResponse.json({
       totalProperties,
       occupancyRate: occupancyRate.toFixed(1),
@@ -118,6 +127,8 @@ export async function GET(req: NextRequest) {
       leaseRenewals: expiringLeases,
       overduePayments,
       recentEvents: 0, // Placeholder
+      profileComplete,
+      bankConnected,
     });
   } catch (err: any) {
     console.error("Dashboard Stats Error:", err);

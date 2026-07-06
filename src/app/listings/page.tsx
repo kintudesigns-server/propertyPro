@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,9 @@ import {
   X,
   Info,
   Upload,
-  Trash2
+  Trash2,
+  Users,
+  ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -40,7 +43,10 @@ interface VacantUnit {
   depositAmt: string;
   rooms: number;
   sqFootage: number;
+  maxOccupants?: number;
+  leaseStructure?: string | null;
   amenities: string[];
+  images: string[];
   property: {
     id: string;
     name: string;
@@ -49,6 +55,7 @@ interface VacantUnit {
     country: string;
     coverPhoto: string | null;
     amenities: string[];
+    type: string;
   };
 }
 
@@ -59,6 +66,7 @@ const CAR_MAKES = [
 ];
 
 export default function ListingsPage() {
+  const { data: session } = useSession();
   const [units, setUnits] = useState<VacantUnit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,6 +88,15 @@ export default function ListingsPage() {
   const [applicantEmail, setApplicantEmail] = useState("");
   const [applicantPhone, setApplicantPhone] = useState("");
   const [applicantDoc, setApplicantDoc] = useState<File | null>(null);
+
+  // Set initial state when session loads
+  useEffect(() => {
+    if (session?.user) {
+      setApplicantName((session.user as any).name || "");
+      setApplicantEmail((session.user as any).email || "");
+      if ((session.user as any).phone) setApplicantPhone((session.user as any).phone);
+    }
+  }, [session]);
   const [selectedUnit, setSelectedUnit] = useState<VacantUnit | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -93,6 +110,7 @@ export default function ListingsPage() {
   const [employerName, setEmployerName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [monthlyIncome, setMonthlyIncome] = useState("");
+  const [employmentStatus, setEmploymentStatus] = useState("EMPLOYED");
   const [prevLandlordName, setPrevLandlordName] = useState("");
   const [prevLandlordPhone, setPrevLandlordPhone] = useState("");
   const [prevLandlordEmail, setPrevLandlordEmail] = useState("");
@@ -150,6 +168,14 @@ export default function ListingsPage() {
   const [tourTime, setTourTime] = useState("09:00:00");
   const [schedulingTour, setSchedulingTour] = useState(false);
 
+  useEffect(() => {
+    if (session?.user) {
+      setTourName((session.user as any).name || "");
+      setTourEmail((session.user as any).email || "");
+      if ((session.user as any).phone) setTourPhone((session.user as any).phone);
+    }
+  }, [session]);
+
   // Load listings
   useEffect(() => {
     async function fetchListings() {
@@ -188,6 +214,39 @@ export default function ListingsPage() {
       if (sortBy === "sqft_desc") return b.sqFootage - a.sqFootage;
       return 0; // Featured
     });
+
+  // Group units by property to avoid flooding the page with 50 identical apartment cards
+  const groupedProperties = [...processedUnits].reduce((acc, unit) => {
+    const pid = unit.property.id;
+    if (!acc[pid]) {
+      acc[pid] = {
+        property: unit.property,
+        units: [],
+        minRent: Infinity, maxRent: 0,
+        minBeds: Infinity, maxBeds: 0,
+        minSqft: Infinity, maxSqft: 0
+      };
+    }
+    const group = acc[pid];
+    group.units.push(unit);
+    
+    const rent = Number(unit.rentAmount);
+    if (rent < group.minRent) group.minRent = rent;
+    if (rent > group.maxRent) group.maxRent = rent;
+    
+    const beds = unit.rooms || 0;
+    if (beds < group.minBeds) group.minBeds = beds;
+    if (beds > group.maxBeds) group.maxBeds = beds;
+
+    const sqft = unit.sqFootage || 0;
+    if (sqft < group.minSqft) group.minSqft = sqft;
+    if (sqft > group.maxSqft) group.maxSqft = sqft;
+
+    return acc;
+  }, {} as Record<string, any>);
+
+  const groupedList = Object.values(groupedProperties);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
 
   // Handlers
   const handleTourSubmit = async (e: React.FormEvent) => {
@@ -240,6 +299,18 @@ export default function ListingsPage() {
       toast.error("Please fill in all applicant details.");
       return;
     }
+    if (employmentStatus === "EMPLOYED" && (!employerName || !jobTitle)) {
+      toast.error("Please provide your employer name and job title.");
+      return;
+    }
+    if (employmentStatus !== "EMPLOYED" && !employerName) {
+      toast.error("Please provide your primary source of income.");
+      return;
+    }
+    if (!monthlyIncome) {
+      toast.error("Please provide your monthly income.");
+      return;
+    }
     if (!applicantDoc) {
       toast.error("Please upload a supporting document (ID or pay stub) to submit your application.");
       return;
@@ -287,21 +358,21 @@ export default function ListingsPage() {
         }
       }
 
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          unitId: selectedUnit.id,
-          name: applicantName,
-          email: applicantEmail,
-          phone: applicantPhone,
-          documents: documentUrls,
-          leaseDuration,
-          moveInDate: moveInDate || null,
-          occupantsCount,
-          employerName: employerName || null,
-          jobTitle: jobTitle || null,
-          monthlyIncome: monthlyIncome || null,
+        const res = await fetch("/api/applications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            unitId: selectedUnit.id,
+            name: applicantName,
+            email: applicantEmail,
+            phone: applicantPhone,
+            documents: documentUrls,
+            leaseDuration,
+            moveInDate: moveInDate || null,
+            occupantsCount,
+            employerName: employmentStatus === "EMPLOYED" ? employerName : (employmentStatus === "STUDENT" ? "Student (Source: " + employerName + ")" : "Unemployed (Source: " + employerName + ")"),
+            jobTitle: employmentStatus === "EMPLOYED" ? jobTitle : employmentStatus,
+            monthlyIncome: monthlyIncome || null,
           prevLandlordName: prevLandlordName || null,
           prevLandlordPhone: prevLandlordPhone || null,
           prevLandlordEmail: prevLandlordEmail || null,
@@ -326,6 +397,7 @@ export default function ListingsPage() {
         setEmployerName("");
         setJobTitle("");
         setMonthlyIncome("");
+        setEmploymentStatus("EMPLOYED");
         setPrevLandlordName("");
         setPrevLandlordPhone("");
         setPrevLandlordEmail("");
@@ -358,9 +430,9 @@ export default function ListingsPage() {
           <Building className="h-6 w-6 text-blue-600" />
           <span>Property<span className="text-[#0F172A]">Pro</span></span>
         </Link>
-        <Link href="/auth/login">
+        <Link href={session ? "/dashboard" : "/auth/login"}>
           <Button variant="outline" className="border-[#E2E8F0] text-slate-700 hover:bg-slate-50 rounded-full px-5 py-2 font-bold shadow-sm transition-colors text-xs">
-            Sign In
+            {session ? "Dashboard" : "Sign In"}
           </Button>
         </Link>
       </header>
@@ -488,7 +560,7 @@ export default function ListingsPage() {
               <div key={n} className="h-[26rem] rounded-[2rem] bg-white animate-pulse border border-[#E2E8F0] shadow-sm" />
             ))}
           </div>
-        ) : processedUnits.length === 0 ? (
+        ) : groupedList.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-[#E2E8F0] max-w-md mx-auto shadow-sm">
             <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
             <h3 className="text-lg font-extrabold mb-1">No Listings Found</h3>
@@ -496,68 +568,57 @@ export default function ListingsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {processedUnits.map((unit) => (
-              <Card
-                key={unit.id}
+            {groupedList.map((group: any) => {
+              const isMultiUnit = group.units.length > 1;
+              const unit = group.units[0]; // fallback for single unit
+              
+              return (
+              <div 
+                key={group.property.id} 
+                className="block group"
                 onClick={() => {
-                  setSelectedDetailUnit(unit);
-                  setDetailDialogOpen(true);
+                  if (isMultiUnit) {
+                    setSelectedGroup(group);
+                  } else {
+                    window.location.href = `/listings/${unit.id}`;
+                  }
                 }}
-                className="overflow-hidden bg-white border border-[#E2E8F0] rounded-[2rem] shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 flex flex-col group text-left cursor-pointer"
               >
+                <Card
+                  className="overflow-hidden bg-white border border-[#E2E8F0] rounded-[2rem] shadow-sm hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 flex flex-col text-left cursor-pointer h-full"
+                >
                 {/* Cover Image Container */}
                 <div className="h-56 overflow-hidden relative bg-slate-100">
                   <img
-                    src={unit.property.coverPhoto || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
-                    alt={unit.name}
+                    src={group.property.coverPhoto || unit.images?.[0] || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
+                    alt={group.property.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
                   {/* Floating Badges */}
                   <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-                    <Badge className="bg-emerald-500/90 text-white font-extrabold text-[10px] px-2.5 py-1 border-0 rounded-full shadow-sm flex items-center gap-1 backdrop-blur-sm">
-                      <ShieldCheck className="h-3.5 w-3.5" /> Verified Listing
+                    <Badge className={`font-extrabold text-[10px] px-2.5 py-1 border-0 rounded-full shadow-sm flex items-center gap-1 backdrop-blur-sm ${
+                      group.property.type === "House" ? "bg-amber-500/90 text-white" :
+                      group.property.type === "Commercial" ? "bg-indigo-500/90 text-white" :
+                      "bg-emerald-500/90 text-white"
+                    }`}>
+                      {group.property.type === "House" && <Home className="h-3.5 w-3.5" />}
+                      {group.property.type === "Commercial" && <Building className="h-3.5 w-3.5" />}
+                      {group.property.type === "Apartment" && <Building className="h-3.5 w-3.5" />}
+                      {group.property.type === "House" ? "Single Family Home" :
+                       group.property.type === "Commercial" ? "Commercial Space" : "Apartment Complex"}
                     </Badge>
-                    <Badge className="bg-blue-600/90 text-white font-extrabold text-[10px] px-2.5 py-1 border-0 rounded-full shadow-sm flex items-center gap-1 backdrop-blur-sm">
-                      <Sparkles className="h-3.5 w-3.5" /> Premium Quality
-                    </Badge>
-                  </div>
-
-                  {/* Favorite & Share buttons */}
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const isFav = favorites.includes(unit.id);
-                        if (isFav) {
-                          setFavorites(favorites.filter((id) => id !== unit.id));
-                          toast.success("Removed from favorites");
-                        } else {
-                          setFavorites([...favorites, unit.id]);
-                          toast.success("Saved to favorites!");
-                        }
-                      }}
-                      className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-600 hover:text-red-500 flex items-center justify-center transition-colors shadow-sm cursor-pointer border border-slate-100"
-                    >
-                      <Heart className={`h-4 w-4 ${favorites.includes(unit.id) ? "fill-red-500 text-red-500" : ""}`} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(`${window.location.origin}/listings?unitId=${unit.id}`);
-                        toast.success("Listing link copied to clipboard!");
-                      }}
-                      className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors shadow-sm cursor-pointer border border-slate-100"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </button>
                   </div>
 
                   {/* Rent badge overlay */}
-                  <div className="absolute bottom-4 left-4">
+                  <div className="absolute bottom-4 left-4 flex flex-col gap-1">
                     <span className="text-white font-black text-xl drop-shadow-md">
-                      ${Number(unit.rentAmount).toLocaleString()}
+                      {isMultiUnit ? (
+                        group.minRent === group.maxRent ? `$${group.minRent.toLocaleString()}` : `$${group.minRent.toLocaleString()} - $${group.maxRent.toLocaleString()}`
+                      ) : (
+                        `$${Number(unit.rentAmount).toLocaleString()}`
+                      )}
                       <span className="text-xs font-bold text-slate-200"> / month</span>
                     </span>
                   </div>
@@ -566,220 +627,113 @@ export default function ListingsPage() {
                 <CardHeader className="pb-3 px-6 pt-5">
                   <div className="flex items-center gap-1 text-[11px] text-blue-600 font-bold mb-1.5 uppercase tracking-wider">
                     <MapPin className="h-3.5 w-3.5" />
-                    <span>{unit.property.city}, {unit.property.country}</span>
+                    <span>{group.property.city}, {group.property.country}</span>
                   </div>
                   <CardTitle className="text-lg text-slate-800 font-extrabold group-hover:text-blue-600 transition-colors">
-                    {unit.name}
+                    {group.property.name}
                   </CardTitle>
                   <CardDescription className="text-slate-400 font-semibold flex items-center gap-1.5 mt-1 text-xs">
                     <Building className="h-3.5 w-3.5 text-slate-400" />
-                    {unit.property.name}
+                    {group.property.address}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="pb-4 px-6 flex-1">
                   <div className="flex items-center gap-4 text-slate-400 text-xs mb-4 border-y border-slate-100 py-3 font-semibold">
-                    <span className="flex items-center gap-1">
-                      <BedDouble className="h-4 w-4 text-blue-600" />
-                      <strong className="text-slate-800">{unit.rooms}</strong> Bed
-                    </span>
+                    {group.property.type !== "Commercial" && (
+                      <span className="flex items-center gap-1">
+                        <BedDouble className="h-4 w-4 text-blue-600" />
+                        <strong className="text-slate-800">
+                          {isMultiUnit 
+                            ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}-${group.maxBeds}`) 
+                            : unit.rooms}
+                        </strong> Beds
+                      </span>
+                    )}
                     <span className="flex items-center gap-1">
                       <Square className="h-4 w-4 text-blue-600" />
-                      <strong className="text-slate-800">{unit.sqFootage}</strong> sq ft
+                      <strong className="text-slate-800">
+                        {isMultiUnit 
+                          ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}-${group.maxSqft}`)
+                          : unit.sqFootage}
+                      </strong> sq ft
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {Array.from(new Set([...(unit.amenities || []), ...(unit.property.amenities || [])]))
-                      .slice(0, 3)
-                      .map((am) => (
-                        <Badge key={am} variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 font-bold text-[10px] rounded-full border-0 px-2.5 py-0.5">
-                          {am}
-                        </Badge>
-                      ))}
-                    {Array.from(new Set([...(unit.amenities || []), ...(unit.property.amenities || [])])).length > 3 && (
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-400 font-bold text-[10px] rounded-full border-0 px-2 py-0.5">
-                        +{Array.from(new Set([...(unit.amenities || []), ...(unit.property.amenities || [])])).length - 3} more
-                      </Badge>
-                    )}
-                  </div>
+                  
+                  {isMultiUnit && (
+                     <div className="bg-blue-50 text-blue-700 font-bold text-xs px-3 py-2 rounded-lg inline-block mb-2">
+                       {group.units.length} Units Available Now
+                     </div>
+                  )}
                 </CardContent>
 
-                {/* Footer CTAs (stopPropagation ensures detail popup doesn't open on button click) */}
                 <CardFooter className="pt-0 p-6 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                  {/* Schedule Tour Button */}
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedTourUnit(unit);
-                      setTourDialogOpen(true);
-                    }}
-                    className="flex-1 border-[#E2E8F0] text-slate-700 hover:bg-slate-50 font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
-                  >
-                    Schedule Tour
-                  </Button>
-
-                  {/* Apply Now Button */}
                   <Button
                     onClick={() => {
-                      setSelectedUnit(unit);
-                      setDialogOpen(true);
+                      if (isMultiUnit) {
+                        setSelectedGroup(group);
+                      } else {
+                        window.location.href = `/listings/${unit.id}`;
+                      }
                     }}
-                    className="flex-1 bg-blue-600 hover:bg-blue-600/90 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
                   >
-                    Apply Now
+                    {isMultiUnit ? "View Floor Plans & Units" : "View Details & Apply"}
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 </CardFooter>
               </Card>
-            ))}
+              </div>
+            )})}
           </div>
         )}
       </main>
 
-      {/* ── PROPERTY DETAILS MODAL ── */}
-      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
-          {selectedDetailUnit && (
-            <div className="space-y-6">
-              {/* Cover Photo */}
-              <div className="h-64 rounded-2xl overflow-hidden relative bg-slate-100 shadow-inner">
-                <img
-                  src={selectedDetailUnit.property.coverPhoto || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
-                  alt={selectedDetailUnit.name}
-                  className="w-full h-full object-cover"
-                />
-                <Badge className="absolute top-4 left-4 bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-1.5 border-0 rounded-full shadow-sm flex items-center gap-1">
-                  <ShieldCheck className="h-4 w-4" /> Verified Listing
+      {/* Property Group Dialog */}
+      <Dialog open={!!selectedGroup} onOpenChange={(o) => !o && setSelectedGroup(null)}>
+        <DialogContent className="bg-[#F8FAFC] border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-2xl p-0 overflow-hidden shadow-2xl">
+          {selectedGroup && (
+            <>
+              <div className="bg-white p-6 border-b border-[#E2E8F0] flex justify-between items-start">
+                <div>
+                  <DialogTitle className="text-2xl font-black">{selectedGroup.property.name}</DialogTitle>
+                  <DialogDescription className="text-slate-500 font-semibold mt-1">
+                    Select an available unit below to view full details and apply.
+                  </DialogDescription>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700 border-0 rounded-lg font-bold">
+                  {selectedGroup.units.length} Available
                 </Badge>
               </div>
-
-              {/* Header */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-800 tracking-tight">{selectedDetailUnit.name}</h2>
-                  <p className="text-sm font-semibold text-slate-400 flex items-center gap-1 mt-1">
-                    <Building className="h-4 w-4 text-slate-400" />
-                    {selectedDetailUnit.property.name} &bull; {selectedDetailUnit.property.address}, {selectedDetailUnit.property.city}
-                  </p>
-                </div>
-                <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100 flex flex-col items-end shrink-0">
-                  <span className="text-xs font-bold text-slate-400">Monthly Rent</span>
-                  <span className="text-xl font-black text-blue-600">${Number(selectedDetailUnit.rentAmount).toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Key Features Specs */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
-                  <BedDouble className="h-5 w-5 text-blue-600 mb-1" />
-                  <span className="text-xs font-bold text-slate-400">Bedrooms</span>
-                  <span className="text-sm font-black text-slate-700 mt-0.5">{selectedDetailUnit.rooms} Beds</span>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
-                  <Square className="h-5 w-5 text-blue-600 mb-1" />
-                  <span className="text-xs font-bold text-slate-400">Area</span>
-                  <span className="text-sm font-black text-slate-700 mt-0.5">{selectedDetailUnit.sqFootage} sq ft</span>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
-                  <DollarSign className="h-5 w-5 text-blue-600 mb-1" />
-                  <span className="text-xs font-bold text-slate-400">Security Deposit</span>
-                  <span className="text-sm font-black text-slate-700 mt-0.5">${Number(selectedDetailUnit.depositAmt || selectedDetailUnit.rentAmount).toLocaleString()}</span>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
-                  <Clock className="h-5 w-5 text-blue-600 mb-1" />
-                  <span className="text-xs font-bold text-slate-400">Availability</span>
-                  <span className="text-sm font-black text-emerald-600 mt-0.5">Available Now</span>
-                </div>
-              </div>
-
-              {/* Amenities */}
-              <div className="space-y-4">
-                {selectedDetailUnit.amenities && selectedDetailUnit.amenities.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="h-4 w-4 text-blue-600" />
-                      Unit Amenities
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedDetailUnit.amenities.map((am) => (
-                        <Badge key={am} variant="secondary" className="bg-blue-50 text-blue-700 font-extrabold hover:bg-blue-50 border-0 rounded-full px-3 py-1 text-xs">
-                          {am}
-                        </Badge>
-                      ))}
+              <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
+                {selectedGroup.units.map((u: any) => (
+                  <div key={u.id} className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center hover:border-blue-300 transition-colors shadow-sm">
+                    <div>
+                      <h4 className="font-extrabold text-slate-800 text-lg">
+                        {selectedGroup.property.type === "Commercial" ? "Suite " : "Unit "}{u.name}
+                      </h4>
+                      <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mt-1">
+                        {selectedGroup.property.type !== "Commercial" && (
+                          <span className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {u.rooms} Bed</span>
+                        )}
+                        <span className="flex items-center gap-1"><Square className="h-3 w-3" /> {u.sqFootage} sqft</span>
+                      </div>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <span className="font-black text-blue-600 text-xl">${Number(u.rentAmount).toLocaleString()}</span>
+                      <Button onClick={() => window.location.href = `/listings/${u.id}`} className="bg-slate-900 hover:bg-slate-800 text-white h-8 rounded-lg text-xs font-bold px-4">
+                        View Unit
+                      </Button>
                     </div>
                   </div>
-                )}
-
-                {selectedDetailUnit.property.amenities && selectedDetailUnit.property.amenities.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <Building className="h-4 w-4 text-blue-600" />
-                      Property Amenities
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedDetailUnit.property.amenities.map((am) => (
-                        <Badge key={am} variant="secondary" className="bg-emerald-50 text-emerald-700 font-extrabold hover:bg-emerald-50 border-0 rounded-full px-3 py-1 text-xs">
-                          {am}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                ))}
               </div>
-
-              {/* Description & Terms */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                <div className="space-y-2">
-                  <h4 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    Property Description
-                  </h4>
-                  <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-                    This unit offers a contemporary living environment. Fitted with high-end appliances, modern lighting, and premium finishes. The property includes professional property management services and maintenance support.
-                  </p>
-                </div>
-                <div className="space-y-2 bg-[#F8FAFC] border border-[#E2E8F0] p-4 rounded-2xl">
-                  <h4 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="h-4 w-4 text-blue-600" />
-                    Lease & Platform Terms
-                  </h4>
-                  <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
-                    <li>Minimum lease contract duration is typically 12 months.</li>
-                    <li>Security deposit (bond) amount is captured securely via Stripe.</li>
-                    <li>No platform fees for submitting tenant applications.</li>
-                    <li>Online signature is legally binding.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Action buttons inside popup */}
-              <div className="flex gap-3 border-t border-slate-100 pt-5">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedTourUnit(selectedDetailUnit);
-                    setTourDialogOpen(true);
-                    setDetailDialogOpen(false);
-                  }}
-                  className="flex-1 border-[#E2E8F0] text-slate-700 hover:bg-slate-50 font-bold rounded-xl h-11 flex justify-center items-center gap-2 transition-colors text-xs"
-                >
-                  <Calendar className="h-4 w-4" /> Schedule Tour
-                </Button>
-                <Button
-                  onClick={() => {
-                    setSelectedUnit(selectedDetailUnit);
-                    setDialogOpen(true);
-                    setDetailDialogOpen(false);
-                  }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-600/90 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-2 transition-colors text-xs"
-                >
-                  Apply for Unit <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
+
+
 
       {/* ── TOUR SCHEDULING DIALOG ── */}
       <Dialog open={tourDialogOpen} onOpenChange={setTourDialogOpen}>
@@ -1073,7 +1027,7 @@ export default function ListingsPage() {
                       
                       <div className="space-y-1.5">
                         <Label htmlFor="moveInDate" className="text-xs font-bold text-slate-700">
-                          Preferred Move-In Date
+                          Preferred Move-In Date <span className="text-red-500 font-extrabold">*</span>
                         </Label>
                         <Input
                           id="moveInDate"
@@ -1081,22 +1035,33 @@ export default function ListingsPage() {
                           value={moveInDate}
                           onChange={(e) => setMoveInDate(e.target.value)}
                           className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 text-xs focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                          required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
                       <Label htmlFor="occupantsCount" className="text-xs font-bold text-slate-700">
-                        Total Number of Occupants
+                        Total Number of Occupants <span className="text-red-500 font-extrabold">*</span>
                       </Label>
                       <Input
                         id="occupantsCount"
                         type="number"
                         min="1"
-                        max="10"
+                        max={selectedUnit?.maxOccupants || 10}
                         value={occupantsCount}
-                        onChange={(e) => setOccupantsCount(e.target.value)}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          const max = selectedUnit?.maxOccupants || 10;
+                          if (val > max) {
+                            setOccupantsCount(max.toString());
+                            toast.error(`Maximum occupants for this unit is ${max}`);
+                          } else {
+                            setOccupantsCount(e.target.value);
+                          }
+                        }}
                         className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        required
                       />
                     </div>
                   </div>
@@ -1104,35 +1069,73 @@ export default function ListingsPage() {
 
                 {formStep === 2 && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="employmentStatus" className="text-xs font-bold text-slate-700">
+                        Current Status <span className="text-red-500 font-extrabold">*</span>
+                      </Label>
+                      <select
+                        id="employmentStatus"
+                        value={employmentStatus}
+                        onChange={(e) => {
+                          setEmploymentStatus(e.target.value);
+                          setEmployerName("");
+                          setJobTitle("");
+                        }}
+                        className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                      >
+                        <option value="EMPLOYED">Employed / Self-Employed</option>
+                        <option value="STUDENT">Student</option>
+                        <option value="UNEMPLOYED">Unemployed / Other</option>
+                      </select>
+                    </div>
+
+                    {employmentStatus === "EMPLOYED" ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="employerName" className="text-xs font-bold text-slate-700">
+                            Employer / Business Name <span className="text-red-500 font-extrabold">*</span>
+                          </Label>
+                          <Input
+                            id="employerName"
+                            placeholder="Acme Corp"
+                            value={employerName}
+                            onChange={(e) => setEmployerName(e.target.value)}
+                            className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="jobTitle" className="text-xs font-bold text-slate-700">
+                            Job Title <span className="text-red-500 font-extrabold">*</span>
+                          </Label>
+                          <Input
+                            id="jobTitle"
+                            placeholder="Software Engineer"
+                            value={jobTitle}
+                            onChange={(e) => setJobTitle(e.target.value)}
+                            className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                            required
+                          />
+                        </div>
+                      </div>
+                    ) : (
                       <div className="space-y-1.5">
-                        <Label htmlFor="employerName" className="text-xs font-bold text-slate-700">
-                          Employer Name
+                        <Label htmlFor="sourceOfIncome" className="text-xs font-bold text-slate-700">
+                          Primary Source of Income / Support <span className="text-red-500 font-extrabold">*</span>
                         </Label>
                         <Input
-                          id="employerName"
-                          placeholder="Acme Corp"
-                          value={employerName}
+                          id="sourceOfIncome"
+                          placeholder={employmentStatus === "STUDENT" ? "e.g., Financial Aid, Parents, Scholarships" : "e.g., Savings, Trust, Guarantor"}
+                          value={employerName} // Reusing employerName for the source
                           onChange={(e) => setEmployerName(e.target.value)}
                           className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                          required
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="jobTitle" className="text-xs font-bold text-slate-700">
-                          Job Title
-                        </Label>
-                        <Input
-                          id="jobTitle"
-                          placeholder="Software Engineer"
-                          value={jobTitle}
-                          onChange={(e) => setJobTitle(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
-                        />
-                      </div>
-                    </div>
+                    )}
                     <div className="space-y-1.5">
                       <Label htmlFor="monthlyIncome" className="text-xs font-bold text-slate-700">
-                        Monthly Gross Income ($)
+                        Monthly Gross Income / Allowance ($) <span className="text-red-500 font-extrabold">*</span>
                       </Label>
                       <Input
                         id="monthlyIncome"
@@ -1141,6 +1144,7 @@ export default function ListingsPage() {
                         value={monthlyIncome}
                         onChange={(e) => setMonthlyIncome(e.target.value)}
                         className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        required
                       />
                     </div>
                     
@@ -1383,11 +1387,28 @@ export default function ListingsPage() {
                       type="button"
                       onClick={() => {
                         if (formStep === 1) {
-                          if (!applicantName || !applicantEmail || !applicantPhone) {
-                            toast.error("Please fill all required contact details before proceeding.");
+                          if (!applicantName || !applicantEmail || !applicantPhone || !moveInDate || !occupantsCount) {
+                            toast.error("Please fill all required details before proceeding.");
+                            return;
+                          }
+                          const max = selectedUnit?.maxOccupants || 10;
+                          if (parseInt(occupantsCount) > max) {
+                            toast.error(`This unit only allows a maximum of ${max} occupants.`);
                             return;
                           }
                         } else if (formStep === 2) {
+                          if (employmentStatus === "EMPLOYED" && (!employerName || !jobTitle)) {
+                            toast.error("Please provide your employer name and job title.");
+                            return;
+                          }
+                          if (employmentStatus !== "EMPLOYED" && !employerName) {
+                            toast.error("Please provide your primary source of income/support.");
+                            return;
+                          }
+                          if (!monthlyIncome) {
+                            toast.error("Please provide your monthly income/allowance.");
+                            return;
+                          }
                           if (!applicantDoc) {
                             toast.error("Please upload a supporting document to verify your application.");
                             return;

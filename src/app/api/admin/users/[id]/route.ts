@@ -42,6 +42,16 @@ export async function GET(
         accountNumber: true,
         accountName: true,
         balance: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        subscriptionStatus: true,
+        currentTierId: true,
+        pricingTier: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
         ownedProperties: {
           select: {
             id: true,

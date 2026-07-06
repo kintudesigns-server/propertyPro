@@ -16,6 +16,7 @@ import {
   AlertTriangle, FileText, Send, Phone, Video, Info, UserCheck, DollarSign, ShieldAlert
 } from "lucide-react";
 import { toast } from "sonner";
+import SecuritySettings from "@/components/settings/SecuritySettings";
 
 export default function TenantDashboard() {
   const { data: session, status } = useSession();
@@ -34,6 +35,7 @@ export default function TenantDashboard() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const activeTab = searchParams ? searchParams.get("tab") || "overview" : "overview";
+  const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
 
   const setActiveTab = (tabName: string) => {
     router.push(`/dashboard/tenant?tab=${tabName}`);
@@ -67,10 +69,45 @@ export default function TenantDashboard() {
 
   const [profileName, setProfileName] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
+  const [profileDob, setProfileDob] = useState("");
+  const [profileEmploymentStatus, setProfileEmploymentStatus] = useState("EMPLOYED");
+  const [profileEmployer, setProfileEmployer] = useState("");
+  const [profilePosition, setProfilePosition] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [emergencyRelationship, setEmergencyRelationship] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File is too large. Max 5MB.");
+      return;
+    }
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setProfileAvatar(data.url);
+        toast.success("Photo uploaded successfully.");
+      } else {
+        toast.error(data.error || "Failed to upload photo");
+      }
+    } catch {
+      toast.error("An error occurred during upload.");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   // Messaging state
   const [selectedContact, setSelectedContact] = useState<any>(null);
@@ -140,6 +177,13 @@ export default function TenantDashboard() {
         const profileData = await profileRes.json();
         setProfileName(profileData.name || "");
         setProfilePhone(profileData.phone || "");
+        setProfileDob(profileData.dob || "");
+        setProfileEmploymentStatus(profileData.employmentStatus || "EMPLOYED");
+        setProfileEmployer(profileData.employer || "");
+        setProfilePosition(profileData.position || "");
+        setEmergencyName(profileData.emergencyName || "");
+        setEmergencyPhone(profileData.emergencyPhone || "");
+        setEmergencyRelationship(profileData.emergencyRelationship || "");
         setBankName(profileData.bankName || "");
         setAccountNumber(profileData.accountNumber || "");
         setAccountName(profileData.accountName || "");
@@ -369,6 +413,13 @@ export default function TenantDashboard() {
         body: JSON.stringify({
           name: profileName,
           phone: profilePhone,
+          dob: profileDob,
+          employmentStatus: profileEmploymentStatus,
+          employer: profileEmployer,
+          position: profilePosition,
+          emergencyName,
+          emergencyPhone,
+          emergencyRelationship,
           bankName,
           accountNumber,
           accountName,
@@ -1623,98 +1674,254 @@ export default function TenantDashboard() {
 
         {/* -------------------- SETTINGS TAB -------------------- */}
         {activeTab === "settings" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6 max-w-xl mx-auto">
-            <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A]">Profile Credentials</h2>
-              <span className="text-xs text-[#64748B]">Modify your personal information registered in the workspace database</span>
+          <div className="space-y-6 outline-none pt-4 pb-12">
+            <div className="flex justify-between items-center mb-2">
+              <div>
+                <h2 className="text-2xl font-black text-[#111111]">Account Settings</h2>
+                <p className="text-sm text-[#7F817F] mt-0.5">Manage your preferences and profile</p>
+              </div>
             </div>
 
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="profName" className="text-xs font-bold">Full Name</Label>
-                <Input 
-                  id="profName"
-                  placeholder="Your Name"
-                  value={profileName}
-                  onChange={(e) => setProfileName(e.target.value)}
-                  className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="profPhone" className="text-xs font-bold">Contact Phone Number</Label>
-                <Input 
-                  id="profPhone"
-                  placeholder="+44 7911 123456"
-                  value={profilePhone}
-                  onChange={(e) => setProfilePhone(e.target.value)}
-                  className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold">Email Address (Locked)</Label>
-                <Input 
-                  disabled
-                  value={session?.user?.email || ""}
-                  className="bg-slate-100 border-[#E2E8F0] rounded-xl text-xs h-11 text-slate-500 cursor-not-allowed"
-                />
-              </div>
-
-              {/* Bank Payout Details Section */}
-              <div className="pt-4 border-t border-[#F1F5F9] mt-6 space-y-4">
-                <div>
-                  <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-1.5">
-                    <Shield className="h-4 w-4 text-[#496E5C]" /> Bank Payout Details
-                  </h3>
-                  <span className="text-[11px] text-[#64748B] block mt-0.5">
-                    Provide your bank information to receive manual security deposit refunds from the administrator.
-                  </span>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="bankName" className="text-xs font-bold">Bank Name</Label>
-                  <Input 
-                    id="bankName"
-                    placeholder="e.g. Chase, Barclays, HSBC"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="accountName" className="text-xs font-bold">Account Holder Name</Label>
-                  <Input 
-                    id="accountName"
-                    placeholder="e.g. Jane Doe"
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="accountNumber" className="text-xs font-bold">Account Number / IBAN</Label>
-                  <Input 
-                    id="accountNumber"
-                    placeholder="e.g. 12345678 or GB12345..."
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
-                  />
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                disabled={profileSubmitting}
-                className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-bold h-11 rounded-xl shadow-sm transition-colors mt-2"
+            <div className="flex items-center space-x-6 border-b border-[#E2E8F0] mb-6">
+              <button
+                type="button"
+                onClick={() => setActiveSettingsTab("profile")}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                  activeSettingsTab === "profile" 
+                    ? "border-slate-900 text-slate-900" 
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
               >
-                {profileSubmitting ? "Saving changes..." : "Save Profile Details"}
-              </Button>
-            </form>
-          </Card>
+                Profile Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSettingsTab("security")}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                  activeSettingsTab === "security" 
+                    ? "border-slate-900 text-slate-900" 
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                Security & Password
+              </button>
+            </div>
+
+            {activeSettingsTab === "profile" && (
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
+                
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Personal Information</h3>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 mb-6 border-b border-slate-100">
+                    <div className="h-24 w-24 shrink-0 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center relative">
+                      {profileAvatar ? (
+                        <img src={profileAvatar} alt="Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-10 w-10 text-slate-400" />
+                      )}
+                      {avatarUploading && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="relative inline-block">
+                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-bold rounded-lg border-slate-300">
+                            Change Photo
+                          </Button>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleAvatarUpload} 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                        </div>
+                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => setProfileAvatar("")}>
+                          Remove
+                        </Button>
+                      </div>
+                      <p className="text-xs text-slate-500">JPG, PNG or GIF. Max size 5MB.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="profName" className="text-sm font-bold text-slate-700">Full Name</Label>
+                      <Input 
+                        id="profName"
+                        placeholder="Your Name"
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="profPhone" className="text-sm font-bold text-slate-700">Phone Number</Label>
+                      <Input 
+                        id="profPhone"
+                        type="tel"
+                        placeholder="+1 555-0000"
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Email Address</Label>
+                      <div className="relative">
+                        <Input 
+                          disabled
+                          value={session?.user?.email || ""}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-slate-500 pl-10 cursor-not-allowed"
+                        />
+                        <Shield className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Employment Status</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Current Status</Label>
+                      <Select value={profileEmploymentStatus} onValueChange={(val) => setProfileEmploymentStatus(val || "EMPLOYED")}>
+                        <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-xl h-11">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white rounded-xl">
+                          <SelectItem value="EMPLOYED">Employed</SelectItem>
+                          <SelectItem value="SELF_EMPLOYED">Self-Employed</SelectItem>
+                          <SelectItem value="STUDENT">Student</SelectItem>
+                          <SelectItem value="UNEMPLOYED">Unemployed</SelectItem>
+                          <SelectItem value="RETIRED">Retired</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Employer / School / Income Source</Label>
+                        <Input 
+                          placeholder="e.g. Company Name, University, Savings"
+                          value={profileEmployer}
+                          onChange={(e) => setProfileEmployer(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Job Title / Support Type</Label>
+                        <Input 
+                          placeholder="e.g. Software Engineer, Scholarship"
+                          value={profilePosition}
+                          onChange={(e) => setProfilePosition(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Emergency Contact</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Contact Name</Label>
+                      <Input 
+                        placeholder="Jane Doe"
+                        value={emergencyName}
+                        onChange={(e) => setEmergencyName(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Relationship</Label>
+                      <Input 
+                        placeholder="e.g. Parent, Sibling"
+                        value={emergencyRelationship}
+                        onChange={(e) => setEmergencyRelationship(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <Label className="text-sm font-bold text-slate-700">Phone Number</Label>
+                      <Input 
+                        type="tel"
+                        placeholder="Emergency Phone"
+                        value={emergencyPhone}
+                        onChange={(e) => setEmergencyPhone(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Bank Payout Details</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Bank Name</Label>
+                      <Input 
+                        placeholder="e.g. Chase Bank"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Account Name</Label>
+                        <Input 
+                          placeholder="John Doe"
+                          value={accountName}
+                          onChange={(e) => setAccountName(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Account / IBAN Number</Label>
+                        <Input 
+                          placeholder="**** **** **** 1234"
+                          value={accountNumber}
+                          onChange={(e) => setAccountNumber(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <div className="pt-2 max-w-3xl flex justify-end">
+                  <Button 
+                    type="submit" 
+                    disabled={profileSubmitting}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
+                  >
+                    {profileSubmitting ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>
+                    ) : (
+                      "Save Profile Settings"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {activeSettingsTab === "security" && (
+              <div className="mt-2">
+                <SecuritySettings />
+              </div>
+            )}
+          </div>
         )}
 
     </div>

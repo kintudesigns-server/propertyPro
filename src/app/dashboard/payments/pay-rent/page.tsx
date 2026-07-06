@@ -461,7 +461,7 @@ export default function PayRentPage() {
                           <Banknote className={`h-6 w-6 ${daysInfo.isOverdue ? "text-red-500" : "text-blue-500"}`} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-[#0F172A] text-base">Monthly Rent</p>
+                          <p className="font-bold text-[#0F172A] text-base">{Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent'}</p>
                           <p className="text-sm text-slate-500 mt-0.5">
                             {inv.lease?.unit?.property?.name || activeLease?.unit?.property?.name} · {inv.lease?.unit?.name || activeLease?.unit?.name}
                           </p>
@@ -609,7 +609,7 @@ export default function PayRentPage() {
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-[#0F172A] text-sm">Monthly Rent — {inv.lease?.unit?.name || activeLease?.unit?.name}</p>
+                      <p className="font-bold text-[#0F172A] text-sm">{Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent'} — {inv.lease?.unit?.name || activeLease?.unit?.name}</p>
                       <p className="text-xs text-slate-500 mt-0.5">Paid · Due {formatDate(inv.dueDate)}</p>
                     </div>
                   </div>

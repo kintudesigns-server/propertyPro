@@ -74,9 +74,16 @@ export default function AdminDashboard() {
           <Button variant="ghost" size="icon" onClick={() => fetchAdminData()} className="text-[#64748B] hover:bg-[#F8FAFC]">
             <RefreshCw className="h-5 w-5" />
           </Button>
-          <Button variant="outline" className="border-[#E2E8F0] text-[#0F172A] font-semibold h-11 px-5 rounded-xl flex items-center gap-2">
-            <Settings className="h-4 w-4 text-[#64748B]" /> System Settings
-          </Button>
+          <Link href="/dashboard/admin/settings/pricing">
+            <Button variant="outline" className="border-[#E2E8F0] text-[#0F172A] font-semibold h-11 px-5 rounded-xl flex items-center gap-2 hover:bg-slate-50">
+              <Settings className="h-4 w-4 text-[#64748B]" /> Pricing Tiers
+            </Button>
+          </Link>
+          <Link href="/dashboard/admin/owner-applications">
+            <Button variant="outline" className="border-amber-200 text-amber-700 font-semibold h-11 px-5 rounded-xl flex items-center gap-2 hover:bg-amber-50 bg-amber-50">
+              <UserPlus className="h-4 w-4" /> Owner Applications
+            </Button>
+          </Link>
           <Link href="/dashboard/admin/users/new">
             <Button className="bg-[#1E293B] hover:bg-[#0F172A] text-white font-semibold rounded-xl flex items-center gap-2 h-11 px-6 shadow-sm">
               <UserPlus className="h-4 w-4" /> Add User

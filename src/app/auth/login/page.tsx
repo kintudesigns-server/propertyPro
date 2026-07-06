@@ -129,11 +129,12 @@ export default function LoginPage() {
             Demo Accounts (Password: <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">password123</code>):
           </p>
           <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 w-full text-left bg-white p-3.5 rounded-xl border border-slate-100">
-            <div>Owner (Grand Horizon): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner1@propertypro.app")}>owner1@propertypro.app</span></div>
-            <div>Owner (Canary Towers): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner2@propertypro.app")}>owner2@propertypro.app</span></div>
-            <div>Tenant: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant1@propertypro.app")}>tenant1@propertypro.app</span></div>
-            <div>Inspector: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("inspector@propertypro.app")}>inspector@propertypro.app</span></div>
-            <div>Super Admin: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("admin@propertypro.app", "admin1234")}>admin@propertypro.app</span> (Pass: <code className="text-slate-800 bg-slate-100 px-1 rounded font-mono">admin1234</code>)</div>
+            <div>Admin: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("admin@example.com")}>admin@example.com</span></div>
+            <div>Owner: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner@example.com")}>owner@example.com</span></div>
+            <div>Tenant (Onboarding): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("newtenant@example.com")}>newtenant@example.com</span></div>
+            <div>Tenant (Active): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("activetenant@example.com")}>activetenant@example.com</span></div>
+            <div>Tenant (Leaving): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("leavingtenant@example.com")}>leavingtenant@example.com</span></div>
+            <div>Inspector: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("inspector@example.com")}>inspector@example.com</span></div>
           </div>
           <Link href="/listings" className="text-primary hover:underline font-bold mt-1">
             ← Back to Listings

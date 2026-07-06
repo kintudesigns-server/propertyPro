@@ -58,10 +58,11 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   // Modals & Selected state
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -99,20 +100,8 @@ export default function AdminUsersPage() {
     if (status === "authenticated") fetchUsers();
   }, [status]);
 
-  const handleViewDetails = async (userId: string) => {
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSelectedUser(data);
-        setIsDetailModalOpen(true);
-      } else {
-        toast.error("Failed to fetch user details");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch user details");
-    }
+  const handleViewDetails = (userId: string) => {
+    router.push(`/dashboard/admin/users/${userId}`);
   };
 
   const handleOpenEdit = (user: any) => {
@@ -211,11 +200,12 @@ export default function AdminUsersPage() {
   const inactiveUsers = users.length - activeUsers;
   const adminUsers = users.filter((u) => u.role === "SUPERADMIN").length;
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch = u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
+    const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
+    const matchesStatus = statusFilter === "ALL" || u.tenantStatus === statusFilter;
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   const formatRole = (role: string) => {
     switch (role) {
@@ -279,48 +269,64 @@ export default function AdminUsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 border-0 shadow-lg shadow-blue-500/20 rounded-2xl overflow-hidden relative group">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <CardContent className="p-6 relative z-10 text-white">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-semibold text-[#0F172A]">Total Users</p>
-              <Users2 className="h-5 w-5 text-[#94A3B8]" />
+              <p className="text-sm font-bold text-blue-100">Total Users</p>
+              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <Users2 className="h-5 w-5 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-[#0F172A] mb-1">{totalUsers}</p>
-            <p className="text-sm text-[#64748B]">All registered users</p>
+            <p className="text-4xl font-black mb-1 drop-shadow-md">{totalUsers}</p>
+            <p className="text-sm font-semibold text-blue-200">All registered users</p>
           </CardContent>
+          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 border-0 shadow-lg shadow-emerald-500/20 rounded-2xl overflow-hidden relative group">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <CardContent className="p-6 relative z-10 text-white">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-semibold text-[#0F172A]">Active Users</p>
-              <UserCheck className="h-5 w-5 text-[#94A3B8]" />
+              <p className="text-sm font-bold text-emerald-100">Active Users</p>
+              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <UserCheck className="h-5 w-5 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-[#0F172A] mb-1">{activeUsers}</p>
-            <p className="text-sm text-[#64748B]">Currently active</p>
+            <p className="text-4xl font-black mb-1 drop-shadow-md">{activeUsers}</p>
+            <p className="text-sm font-semibold text-emerald-200">Currently active</p>
           </CardContent>
+          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-rose-500 to-pink-600 border-0 shadow-lg shadow-rose-500/20 rounded-2xl overflow-hidden relative group">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <CardContent className="p-6 relative z-10 text-white">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-semibold text-[#0F172A]">Inactive Users</p>
-              <UserMinus className="h-5 w-5 text-[#94A3B8]" />
+              <p className="text-sm font-bold text-rose-100">Inactive Users</p>
+              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <UserMinus className="h-5 w-5 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-[#0F172A] mb-1">{inactiveUsers}</p>
-            <p className="text-sm text-[#64748B]">Deactivated users</p>
+            <p className="text-4xl font-black mb-1 drop-shadow-md">{inactiveUsers}</p>
+            <p className="text-sm font-semibold text-rose-200">Deactivated users</p>
           </CardContent>
+          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-slate-800 to-slate-950 border-0 shadow-lg shadow-slate-900/20 rounded-2xl overflow-hidden relative group">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <CardContent className="p-6 relative z-10 text-white">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-semibold text-[#0F172A]">Admins</p>
-              <ShieldAlert className="h-5 w-5 text-[#94A3B8]" />
+              <p className="text-sm font-bold text-slate-300">Admins</p>
+              <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <ShieldAlert className="h-5 w-5 text-amber-400" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-[#0F172A] mb-1">{adminUsers}</p>
-            <p className="text-sm text-[#64748B]">Admin users</p>
+            <p className="text-4xl font-black mb-1 drop-shadow-md">{adminUsers}</p>
+            <p className="text-sm font-semibold text-slate-400">System administrators</p>
           </CardContent>
+          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
         </Card>
       </div>
 
@@ -344,18 +350,32 @@ export default function AdminUsersPage() {
                 className="pl-9 bg-[#F8FAFC] border-[#E2E8F0] h-10 rounded-xl"
               />
             </div>
-            <Button
-              variant="outline"
-              className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium"
-            >
-              <Filter className="h-4 w-4" /> All Roles
-            </Button>
-            <Button
-              variant="outline"
-              className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium hidden sm:flex"
-            >
-              <Filter className="h-4 w-4" /> All Status
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium inline-flex items-center justify-center text-sm px-4 py-2 border hover:bg-slate-50 transition-colors bg-white">
+                <Filter className="h-4 w-4" /> {roleFilter === "ALL" ? "All Roles" : formatRole(roleFilter)}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white border-[#E2E8F0] shadow-lg p-1">
+                <DropdownMenuItem onClick={() => setRoleFilter("ALL")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">All Roles</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-[#E2E8F0]" />
+                <DropdownMenuItem onClick={() => setRoleFilter("SUPERADMIN")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Admin</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("OWNER")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Property Owner</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("TENANT")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Tenant</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("INSPECTOR")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Inspector</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("ACCOUNTANT")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Accountant</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium hidden sm:inline-flex items-center justify-center text-sm px-4 py-2 border hover:bg-slate-50 transition-colors bg-white">
+                <Filter className="h-4 w-4" /> {statusFilter === "ALL" ? "All Status" : statusFilter}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 rounded-xl bg-white border-[#E2E8F0] shadow-lg p-1">
+                <DropdownMenuItem onClick={() => setStatusFilter("ALL")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">All Status</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-[#E2E8F0]" />
+                <DropdownMenuItem onClick={() => setStatusFilter("Active")} className="cursor-pointer rounded-lg font-semibold text-[#16A34A]"><CheckCircle2 className="h-4 w-4 mr-2" /> Active</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Inactive")} className="cursor-pointer rounded-lg font-semibold text-[#EF4444]"><Ban className="h-4 w-4 mr-2" /> Inactive</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -386,19 +406,19 @@ export default function AdminUsersPage() {
                 </TableRow>
               ) : (
                 filteredUsers.map((user, idx) => (
-                  <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                  <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-blue-50/50 transition-colors group">
                     <TableCell className="text-center">
                       <input type="checkbox" className="rounded border-gray-300" />
                     </TableCell>
-                    <TableCell className="text-[#64748B] text-sm font-medium">{idx + 1}</TableCell>
+                    <TableCell className="text-[#64748B] text-sm font-bold">{idx + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center font-extrabold text-sm shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md">
                           {user.name?.charAt(0) || "U"}
                         </div>
                         <div>
-                          <p className="font-bold text-[#0F172A]">{user.name || "Unknown User"}</p>
-                          <p className="text-xs text-[#64748B]">{user.email}</p>
+                          <p className="font-extrabold text-[#0F172A] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
+                          <p className="text-xs font-medium text-[#64748B]">{user.email}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -486,266 +506,6 @@ export default function AdminUsersPage() {
           </Table>
         </div>
       </Card>
-
-      {/* Modal 1: View Details */}
-      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white rounded-2xl p-0 border-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-          {selectedUser && (
-            <>
-              <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC] flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center font-extrabold text-lg shrink-0">
-                    {selectedUser.name?.charAt(0) || "U"}
-                  </div>
-                  <div>
-                    <DialogTitle className="text-xl font-bold text-[#0F172A]">
-                      {selectedUser.name || "Unknown User"}
-                    </DialogTitle>
-                    <p className="text-[#64748B] text-xs font-semibold mt-0.5">
-                      ID: {selectedUser.id}
-                    </p>
-                  </div>
-                </div>
-                <div className="mr-6 flex gap-2">
-                  <Badge className="bg-[#E0F2FE] text-[#0369A1] border-0 rounded-lg px-2.5 py-1 font-bold">
-                    {formatRole(selectedUser.role)}
-                  </Badge>
-                  {selectedUser.tenantStatus === "Inactive" ? (
-                    <Badge className="bg-[#FEE2E2] text-[#EF4444] border-0 rounded-lg px-2.5 py-1 font-bold">
-                      Inactive
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-[#DCFCE7] text-[#16A34A] border-0 rounded-lg px-2.5 py-1 font-bold">
-                      Active
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-                {/* Contact & General Grid */}
-                <div>
-                  <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">General Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E2E8F0]">
-                    <div className="flex items-center gap-2.5 text-sm text-[#0F172A]">
-                      <Mail className="h-4.5 w-4.5 text-[#94A3B8]" />
-                      <div>
-                        <p className="text-xs font-bold text-[#64748B]">Email Address</p>
-                        <p className="font-semibold">{selectedUser.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 text-sm text-[#0F172A]">
-                      <Phone className="h-4.5 w-4.5 text-[#94A3B8]" />
-                      <div>
-                        <p className="text-xs font-bold text-[#64748B]">Phone Number</p>
-                        <p className="font-semibold">{selectedUser.phone || "N/A"}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 text-sm text-[#0F172A]">
-                      <Calendar className="h-4.5 w-4.5 text-[#94A3B8]" />
-                      <div>
-                        <p className="text-xs font-bold text-[#64748B]">Member Since</p>
-                        <p className="font-semibold">
-                          {new Date(selectedUser.createdAt).toLocaleDateString(undefined, {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 text-sm text-[#0F172A]">
-                      <DollarSign className="h-4.5 w-4.5 text-[#94A3B8]" />
-                      <div>
-                        <p className="text-xs font-bold text-[#64748B]">Ledger Balance</p>
-                        <p className="font-semibold text-emerald-600">${Number(selectedUser.balance || 0).toFixed(2)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bank / Payout details */}
-                <div>
-                  <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Bank Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E2E8F0] text-sm text-[#0F172A]">
-                    <div>
-                      <p className="text-xs font-bold text-[#64748B]">Bank Name</p>
-                      <p className="font-semibold mt-0.5">{selectedUser.bankName || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#64748B]">Account Holder</p>
-                      <p className="font-semibold mt-0.5">{selectedUser.accountName || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#64748B]">Account Number</p>
-                      <p className="font-semibold mt-0.5">{maskAccount(selectedUser.accountNumber)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Role Specific Section */}
-                {selectedUser.role === "TENANT" && (
-                  <>
-                    <hr className="border-[#E2E8F0]" />
-                    {/* Employment / Background */}
-                    <div>
-                      <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Tenant Profile Details</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E2E8F0] text-sm text-[#0F172A]">
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Date of Birth</p>
-                          <p className="font-semibold mt-0.5">{selectedUser.dob || "N/A"}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">SSN (Masked)</p>
-                          <p className="font-semibold mt-0.5">{maskSSN(selectedUser.ssn)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Credit Score</p>
-                          <p className="font-semibold mt-0.5 text-indigo-600">{selectedUser.creditScore || "N/A"}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Employer & Position</p>
-                          <p className="font-semibold mt-0.5">
-                            {selectedUser.employer ? `${selectedUser.employer} (${selectedUser.position || "N/A"})` : "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Annual Income</p>
-                          <p className="font-semibold mt-0.5 text-emerald-600">
-                            {selectedUser.annualIncome ? `$${Number(selectedUser.annualIncome).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Preferred Move-In</p>
-                          <p className="font-semibold mt-0.5">{selectedUser.targetMoveInDate || "N/A"}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Emergency Contact */}
-                    <div>
-                      <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Emergency Contact</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E2E8F0] text-sm text-[#0F172A]">
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Name & Relationship</p>
-                          <p className="font-semibold mt-0.5">
-                            {selectedUser.emergencyName ? `${selectedUser.emergencyName} (${selectedUser.emergencyRelationship || "N/A"})` : "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#64748B]">Contact Info</p>
-                          <p className="font-semibold mt-0.5 text-slate-500">
-                            {selectedUser.emergencyPhone || ""} {selectedUser.emergencyEmail ? `| ${selectedUser.emergencyEmail}` : ""}
-                            {!selectedUser.emergencyPhone && !selectedUser.emergencyEmail && "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Associated Leases */}
-                    <div>
-                      <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Lease Agreements</h3>
-                      {selectedUser.leases && selectedUser.leases.length > 0 ? (
-                        <div className="border border-[#E2E8F0] rounded-xl overflow-hidden">
-                          <table className="w-full text-left border-collapse text-sm">
-                            <thead>
-                              <tr className="bg-slate-50 border-b border-[#E2E8F0]">
-                                <th className="p-3 font-bold text-[#64748B]">Property & Unit</th>
-                                <th className="p-3 font-bold text-[#64748B]">Start / End Date</th>
-                                <th className="p-3 font-bold text-[#64748B]">Monthly Rent</th>
-                                <th className="p-3 font-bold text-[#64748B]">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selectedUser.leases.map((lease: any) => (
-                                <tr key={lease.id} className="border-b border-[#E2E8F0] last:border-b-0 hover:bg-slate-50">
-                                  <td className="p-3 font-semibold">
-                                    <p className="text-[#0F172A]">{lease.unit?.property?.name || "Unknown Property"}</p>
-                                    <p className="text-xs text-[#64748B]">Unit {lease.unit?.name || "N/A"}</p>
-                                  </td>
-                                  <td className="p-3 text-slate-500 text-xs font-medium">
-                                    {new Date(lease.startDate).toLocaleDateString()} - {new Date(lease.endDate).toLocaleDateString()}
-                                  </td>
-                                  <td className="p-3 font-bold text-[#0F172A]">
-                                    ${Number(lease.monthlyRent).toLocaleString()}
-                                  </td>
-                                  <td className="p-3">
-                                    <span className={`inline-block px-2 py-0.5 text-xs font-bold rounded-md ${
-                                      lease.status === "ACTIVE" ? "bg-green-100 text-green-700" :
-                                      lease.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
-                                      "bg-gray-100 text-gray-700"
-                                    }`}>
-                                      {lease.status}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-[#64748B] italic">No lease records associated with this tenant.</p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {selectedUser.role === "OWNER" && (
-                  <>
-                    <hr className="border-[#E2E8F0]" />
-                    {/* Owned Properties */}
-                    <div>
-                      <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Owned Properties</h3>
-                      {selectedUser.ownedProperties && selectedUser.ownedProperties.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {selectedUser.ownedProperties.map((prop: any) => (
-                            <div
-                              key={prop.id}
-                              className="border border-[#E2E8F0] p-4 rounded-xl flex items-start gap-3 bg-slate-50 hover:bg-slate-100/70 transition-all cursor-pointer"
-                              onClick={() => router.push(`/dashboard/properties/${prop.id}`)}
-                            >
-                              <Building className="h-5 w-5 text-[#3B82F6] shrink-0 mt-0.5" />
-                              <div>
-                                <p className="font-bold text-[#0F172A]">{prop.name}</p>
-                                <p className="text-xs text-[#64748B] mt-0.5">{prop.address}</p>
-                                <p className="text-xs text-[#94A3B8]">{prop.city}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-[#64748B] italic">No properties registered under this owner.</p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {selectedUser.notes && (
-                  <>
-                    <hr className="border-[#E2E8F0]" />
-                    <div>
-                      <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Internal Admin Notes</h3>
-                      <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4 text-sm text-[#0F172A] italic">
-                        {selectedUser.notes}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="p-6 border-t border-[#E2E8F0] bg-slate-50 flex justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDetailModalOpen(false)}
-                  className="rounded-xl h-11 font-bold px-6 border-[#E2E8F0] text-[#0F172A] hover:bg-slate-100"
-                >
-                  Close Profile
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Modal 2: Edit User */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

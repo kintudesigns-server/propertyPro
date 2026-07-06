@@ -699,7 +699,7 @@ export default function LeaseDetailsPage() {
                         <CreditCard className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-[#0F172A] text-sm truncate">{inv.type === 'SECURITY_DEPOSIT' ? 'Security Deposit' : 'Rent Payment'}</p>
+                        <p className="font-bold text-[#0F172A] text-sm truncate">{Number(inv.amount) === Number(lease.securityDeposit) ? 'Security Deposit' : 'Rent Payment'}</p>
                         <p className="text-xs font-medium text-[#64748B] mt-0.5 truncate">Due on {new Date(inv.dueDate).toLocaleDateString()}</p>
                       </div>
                     </div>

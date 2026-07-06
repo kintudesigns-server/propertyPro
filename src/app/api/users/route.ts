@@ -28,6 +28,24 @@ export async function GET(req: NextRequest) {
         accountNumber: true,
         accountName: true,
         stripeCustomerId: true,
+        emergencyName: true,
+        emergencyPhone: true,
+        emergencyRelationship: true,
+        dob: true,
+        employmentStatus: true,
+        employer: true,
+        position: true,
+        avatar: true,
+        subscriptionStatus: true,
+        pricingTier: {
+          select: {
+            id: true,
+            name: true,
+            maxUnits: true,
+            price: true,
+            features: true,
+          }
+        },
       },
     });
     return NextResponse.json(me);
@@ -99,7 +117,11 @@ export async function PUT(req: NextRequest) {
   const userId = (session.user as any).id;
 
   try {
-    const { name, phone, bankName, accountNumber, accountName } = await req.json();
+    const { 
+      name, phone, bankName, accountNumber, accountName,
+      emergencyName, emergencyPhone, emergencyRelationship, dob, 
+      employmentStatus, employer, position, avatar
+    } = await req.json();
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -109,6 +131,14 @@ export async function PUT(req: NextRequest) {
         bankName,
         accountNumber,
         accountName,
+        emergencyName,
+        emergencyPhone,
+        emergencyRelationship,
+        dob,
+        employmentStatus,
+        employer,
+        position,
+        avatar
       },
     });
 

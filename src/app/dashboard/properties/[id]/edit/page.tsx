@@ -258,7 +258,7 @@ export default function EditPropertyPage() {
               images: u.images || []
             })));
           } else {
-            setUnits([{ name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT", images: [] }]);
+            setUnits([{ name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", maxOccupants: "2", rentAmount: "", depositAmt: "", status: "VACANT", images: [] }]);
           }
         } else {
           toast.error("Failed to load property");
@@ -304,7 +304,7 @@ export default function EditPropertyPage() {
     setUnits(newUnits);
   };
   const addUnit = () => {
-    setUnits([...units, { name: `Unit ${units.length + 1}`, type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }]);
+    setUnits([...units, { name: `Unit ${units.length + 1}`, type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", maxOccupants: "2", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }]);
   };
   const removeUnit = (index: number) => {
     setUnits(units.filter((_, i) => i !== index));
@@ -324,6 +324,7 @@ export default function EditPropertyPage() {
           rentAmount: Number(u.rentAmount) || 0,
           rooms: Number(u.rooms) || 0,
           bathrooms: Number(u.bathrooms) || 0,
+          maxOccupants: Number(u.maxOccupants) || 1,
           sqFootage: Number(u.sqFootage) || 0,
           depositAmt: Number(u.depositAmt || u.rentAmount || 0),
           floor: u.floor ? Number(u.floor) : null
@@ -707,15 +708,19 @@ export default function EditPropertyPage() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#0F172A]">Bedrooms</label>
-                    <Input required type="number" value={unit.rooms || ""} onChange={(e) => handleUnitChange(index, "rooms", e.target.value)} placeholder="2" className="h-10 rounded-xl" />
+                    <Input type="number" value={unit.rooms || ""} onChange={(e) => handleUnitChange(index, "rooms", e.target.value)} placeholder="2" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#0F172A]">Bathrooms</label>
-                    <Input required type="number" value={unit.bathrooms || ""} onChange={(e) => handleUnitChange(index, "bathrooms", e.target.value)} placeholder="1" className="h-10 rounded-xl" />
+                    <Input type="number" value={unit.bathrooms || ""} onChange={(e) => handleUnitChange(index, "bathrooms", e.target.value)} placeholder="1" className="h-10 rounded-xl" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#0F172A]">Max Occupants</label>
+                    <Input type="number" value={unit.maxOccupants || ""} onChange={(e) => handleUnitChange(index, "maxOccupants", e.target.value)} placeholder="2" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#0F172A]">Square Footage</label>
-                    <Input required type="number" value={unit.sqFootage || ""} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} placeholder="800" className="h-10 rounded-xl" />
+                    <Input type="number" value={unit.sqFootage || ""} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} placeholder="800" className="h-10 rounded-xl" />
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">

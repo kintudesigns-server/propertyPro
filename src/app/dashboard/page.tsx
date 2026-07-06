@@ -179,11 +179,15 @@ export default function DashboardPage() {
     }[] = [];
 
     unpaidInvoices.forEach((inv) => {
+      const lease = leases.find((l: any) => l.id === inv.leaseId);
+      const isDeposit = lease && Number(inv.amount) === Number(lease.securityDeposit);
       activities.push({
         id: `invoice-${inv.id}`,
-        title: "Rent Reminder",
+        title: isDeposit ? "Deposit Reminder" : "Rent Reminder",
         date: new Date(inv.dueDate),
-        description: `Your rent payment of $${Number(inv.amount).toLocaleString()} is outstanding.`,
+        description: isDeposit
+          ? `Your security deposit of $${Number(inv.amount).toLocaleString()} is outstanding.`
+          : `Your rent payment of $${Number(inv.amount).toLocaleString()} is outstanding.`,
         badgeText: "Notification",
         badgeColor: "bg-slate-100 text-[#475569] border border-[#E2E8F0]",
         icon: <DollarSign className="h-4 w-4 text-slate-600" />,
@@ -604,29 +608,119 @@ export default function DashboardPage() {
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A]">
-            Good afternoon, {session?.user?.name || "Admin"}!
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+            Good afternoon, {session?.user?.name ? session.user.name.split(' ')[0] : "Admin"}!
           </h1>
-          <p className="text-[#64748B] mt-1 text-sm">Here's what's happening with your property portfolio</p>
+          <p className="text-[#64748B] mt-1.5 text-sm font-medium">Here's what's happening with your property portfolio</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={fetchLandlordStats}
-            disabled={statsLoading}
-            className="bg-white border border-[#E2E8F0] shadow-sm text-[#0F172A] hover:bg-[#F8FAFC] rounded-xl flex items-center gap-2 font-semibold h-11 px-5"
-          >
-            <RefreshCw className={`h-4 w-4 ${statsLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </Button>
-        </div>
+        {(stats?.totalProperties ?? 0) > 0 && (
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={fetchLandlordStats}
+              disabled={statsLoading}
+              className="bg-white border border-[#E2E8F0] shadow-sm text-[#0F172A] hover:bg-[#F8FAFC] rounded-xl flex items-center gap-2 font-semibold h-11 px-5"
+            >
+              <RefreshCw className={`h-4 w-4 ${statsLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </Button>
+          </div>
+        )}
       </div>
+
+      {stats?.totalProperties === 0 && (
+        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-[32px] shadow-2xl mb-8 overflow-hidden">
+          {/* Abstract Background Shapes */}
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl pointer-events-none"></div>
+
+          <div className="relative z-10 p-8 md:p-10 border-b border-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-4">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-xs font-bold text-white tracking-wide uppercase">Onboarding Active</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3 tracking-tight">
+                Welcome to PropertyPro!
+              </h2>
+              <p className="text-slate-400 mt-3 font-medium max-w-2xl text-lg leading-relaxed">
+                Let's get your portfolio set up so you can start managing properties and collecting rent online. Complete these steps to unlock your dashboard.
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-start md:items-end w-full md:w-auto bg-slate-900/50 p-5 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
+              <span className="text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-widest">Setup Progress</span>
+              <div className="flex items-center gap-4">
+                <div className="w-32 h-3 bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out" style={{ width: `${(( (stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0) ) / 3) * 100}%` }}></div>
+                </div>
+                <span className="font-black text-white text-xl">{(stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0)}<span className="text-slate-500">/3</span></span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-8 md:p-10 space-y-4">
+          <div className="relative z-10 p-8 md:p-10 space-y-4 bg-slate-900/30">
+            <div 
+              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
+              onClick={() => router.push('/dashboard/owner#settings')}
+            >
+              <div className="flex items-center gap-5">
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.profileComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'}`}>
+                  {stats?.profileComplete ? <CheckCircle2 className="h-7 w-7" /> : <Users className="h-7 w-7" />}
+                </div>
+                <div>
+                  <h4 className={`font-black text-xl ${stats?.profileComplete ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-blue-400 transition-colors'}`}>Complete Landlord Profile</h4>
+                  <p className={`text-sm mt-1 font-medium ${stats?.profileComplete ? 'text-emerald-500/60' : 'text-slate-400'}`}>Set your entity type (Individual or Business) and support contact info.</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
+            </div>
+
+            <div 
+              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.totalProperties > 0 ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-emerald-500/50 hover:bg-emerald-500/10'}`}
+              onClick={() => router.push('/dashboard/properties/new')}
+            >
+              <div className="flex items-center gap-5">
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.totalProperties > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-400'}`}>
+                  {stats?.totalProperties > 0 ? <CheckCircle2 className="h-7 w-7" /> : <Home className="h-7 w-7" />}
+                </div>
+                <div>
+                  <h4 className={`font-black text-xl ${stats?.totalProperties > 0 ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-emerald-400 transition-colors'}`}>Add Your First Property</h4>
+                  <p className={`text-sm mt-1 font-medium ${stats?.totalProperties > 0 ? 'text-emerald-500/60' : 'text-slate-400'}`}>Create a property, set up rentable units, and track occupancy.</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
+            </div>
+
+            <div 
+              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.bankConnected ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-purple-500/50 hover:bg-purple-500/10'}`}
+              onClick={() => router.push('/dashboard/accounting/wallet')}
+            >
+              <div className="flex items-center gap-5">
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.bankConnected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-purple-500/20 group-hover:text-purple-400'}`}>
+                  {stats?.bankConnected ? <CheckCircle2 className="h-7 w-7" /> : <Wallet className="h-7 w-7" />}
+                </div>
+                <div>
+                  <h4 className={`font-black text-xl ${stats?.bankConnected ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-purple-400 transition-colors'}`}>Connect Bank Account</h4>
+                  <p className={`text-sm mt-1 font-medium ${stats?.bankConnected ? 'text-emerald-500/60' : 'text-slate-400'}`}>Link your account to securely receive online rent payments via Stripe.</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
+            </div>
+          </div>
+          </div>
+        </Card>
+      )}
 
       {/* Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

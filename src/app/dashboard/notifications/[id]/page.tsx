@@ -61,20 +61,29 @@ function resolveNavActions(notification: any): NavAction[] {
   const id = relatedEntityId;
   const actions: NavAction[] = [];
 
-  if (!id) return actions;
-
   const t = (title as string).toLowerCase();
 
   // ── Applications ───────────────────────────
-  if (t.includes("application")) {
+  if (t.includes("owner application")) {
     actions.push({
-      href: `/dashboard/applications/${id}`,
-      label: "View Application Details",
-      description: "Open the full tenant application, review submitted documents, and approve or reject.",
-      Icon: ClipboardList,
+      href: `/dashboard/admin/owner-applications`,
+      label: "View Owner Applications",
+      description: "Review pending owner requests, approve access, and assign limits.",
+      Icon: Building2,
       color: "bg-blue-50",
       textColor: "text-blue-600",
     });
+  } else if (t.includes("application")) {
+    if (id) {
+      actions.push({
+        href: `/dashboard/applications/${id}`,
+        label: "View Application Details",
+        description: "Open the full tenant application, review submitted documents, and approve or reject.",
+        Icon: ClipboardList,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    }
     actions.push({
       href: `/dashboard/tenants/applications`,
       label: "Go to Applications Ledger",
@@ -87,18 +96,60 @@ function resolveNavActions(notification: any): NavAction[] {
 
   // ── Maintenance ────────────────────────────
   else if (t.includes("maintenance")) {
+    if (id) {
+      actions.push({
+        href: `/dashboard/maintenance/${id}`,
+        label: "View Maintenance Request",
+        description: "Inspect the full maintenance ticket, update status, or assign an inspector.",
+        Icon: Wrench,
+        color: "bg-orange-50",
+        textColor: "text-orange-600",
+      });
+    }
     actions.push({
-      href: `/dashboard/maintenance/${id}`,
-      label: "View Maintenance Request",
-      description: "Inspect the full maintenance ticket, update status, or assign an inspector.",
+      href: `/dashboard/maintenance`,
+      label: "All Maintenance Requests",
+      description: "View the full maintenance ledger and dispatch team.",
       Icon: Wrench,
-      color: "bg-orange-50",
-      textColor: "text-orange-600",
+      color: "bg-slate-50",
+      textColor: "text-slate-600",
     });
   }
 
-  // ── Payments / Invoices ────────────────────
-  else if (t.includes("payment") || t.includes("invoice")) {
+  // ── Mediation & Disputes ───────────────────
+  else if (t.includes("mediation") || t.includes("dispute")) {
+    actions.push({
+      href: `/dashboard/admin/payouts`, // Or any mediation ledger if exists
+      label: "View Mediation Dashboard",
+      description: "Review disputes, inspect tenant move-out notes, and resolve conflicts.",
+      Icon: AlertCircle,
+      color: "bg-red-50",
+      textColor: "text-red-600",
+    });
+  }
+
+  // ── Payouts ────────────────────────────────
+  else if (t.includes("payout")) {
+    actions.push({
+      href: `/dashboard/admin/payouts`,
+      label: "View Payout Requests",
+      description: "Review pending payouts, process disbursements, and check owner balances.",
+      Icon: CreditCard,
+      color: "bg-emerald-50",
+      textColor: "text-emerald-600",
+    });
+    actions.push({
+      href: `/dashboard/accounting/wallet`,
+      label: "Go to Owner Wallet",
+      description: "Check your current balance and view your payout history.",
+      Icon: FileText,
+      color: "bg-slate-50",
+      textColor: "text-slate-600",
+    });
+  }
+
+  // ── Payments / Invoices / Transactions / Refunds ──
+  else if (t.includes("payment") || t.includes("invoice") || t.includes("transaction") || t.includes("refund")) {
     actions.push({
       href: `/dashboard/accounting/invoices`,
       label: "Go to Invoices",
@@ -119,14 +170,16 @@ function resolveNavActions(notification: any): NavAction[] {
 
   // ── Lease ──────────────────────────────────
   else if (t.includes("lease")) {
-    actions.push({
-      href: `/dashboard/leases/${id}`,
-      label: "Open Lease",
-      description: "View lease details, renewal dates, and linked tenant information.",
-      Icon: FileText,
-      color: "bg-purple-50",
-      textColor: "text-purple-600",
-    });
+    if (id) {
+      actions.push({
+        href: `/dashboard/leases/${id}`,
+        label: "Open Lease",
+        description: "View lease details, renewal dates, and linked tenant information.",
+        Icon: FileText,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    }
     actions.push({
       href: `/dashboard/leases`,
       label: "All Leases",
@@ -139,18 +192,28 @@ function resolveNavActions(notification: any): NavAction[] {
 
   // ── Property approval ──────────────────────
   else if (t.includes("propert")) {
+    if (id) {
+      actions.push({
+        href: `/dashboard/properties/${id}`,
+        label: "View Property",
+        description: "Open the property listing, manage units, and review approval status.",
+        Icon: Building2,
+        color: "bg-indigo-50",
+        textColor: "text-indigo-600",
+      });
+    }
     actions.push({
-      href: `/dashboard/properties/${id}`,
-      label: "View Property",
-      description: "Open the property listing, manage units, and review approval status.",
-      Icon: Building2,
-      color: "bg-indigo-50",
-      textColor: "text-indigo-600",
+      href: `/dashboard/admin/properties`,
+      label: "Property Approvals",
+      description: "Review pending property listings waiting for admin approval.",
+      Icon: CheckCircle2,
+      color: "bg-slate-50",
+      textColor: "text-slate-600",
     });
   }
 
   // ── Generic SYSTEM fallback ────────────────
-  else if (type === "SYSTEM") {
+  else {
     actions.push({
       href: `/dashboard`,
       label: "Go to Dashboard",

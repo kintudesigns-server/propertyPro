@@ -21,6 +21,12 @@ export async function GET() {
         role: true,
         createdAt: true,
         tenantStatus: true,
+        pricingTier: {
+          select: {
+            name: true,
+            maxUnits: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
     });

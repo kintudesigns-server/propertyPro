@@ -47,7 +47,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
+  const ownerId = (session.user as any).id;
+
   try {
+    const owner = await prisma.user.findUnique({ where: { id: ownerId } });
+    if (owner?.subscriptionStatus !== "Active") {
+      return NextResponse.json({ error: "Active subscription required to create leases." }, { status: 403 });
+    }
+
     const origin = new URL(req.url).origin;
     const loginLink = `${origin}/auth/login`;
     const { 

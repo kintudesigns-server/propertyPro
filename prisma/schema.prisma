@@ -31,11 +31,14 @@ model User {
   phone              String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
+  accountStatus      String               @default("ACTIVE") // ACTIVE, PENDING_APPROVAL, SUSPENDED
   tenantStatus       String               @default("Pending Review")
   
   // Extended Tenant Profile
+  avatar                 String?
   dob                    String?
   ssn                    String?
+  employmentStatus       String?              @default("EMPLOYED")
   employer               String?
   position               String?
   annualIncome           Decimal?             @db.Decimal(10, 2)
@@ -54,24 +57,92 @@ model User {
   accountName        String?
   balance            Decimal              @default(0.00) @db.Decimal(10, 2)
 
-  // Stripe Saved Payment Method
+  // Stripe Saved Payment Method & Subscriptions
   stripeCustomerId         String?
+  stripeSubscriptionId     String?
+  subscriptionStatus       String?              // active, past_due, canceled
+  currentTierId            String?
   defaultPaymentMethodId   String?
   cardBrand                String?
   cardLast4                String?
 
+  // Onboarding
+  hasCompletedOnboarding   Boolean  @default(false)
+  onboardingStep           Int      @default(0)
+
   // Relations
-  ownedProperties    Property[]           @relation("OwnerProperties")
-  leases             Lease[]              @relation("TenantLeases")
-  maintenanceRequest MaintenanceRequest[] @relation("TenantRequests")
-  assignedInspections MaintenanceRequest[] @relation("InspectorTasks")
-  payoutRequests     PayoutRequest[]      @relation("OwnerPayouts")
-  tenantPayoutRequests PayoutRequest[]    @relation("TenantPayouts")
-  sentMessages       Message[]            @relation("SentMessages")
-  receivedMessages   Message[]            @relation("ReceivedMessages")
-  documents          Document[]           @relation("TenantDocuments")
-  transactions       Transaction[]        @relation("TenantTransactions")
-  notifications      Notification[]       @relation("UserNotifications")
+  ownedProperties      Property[]           @relation("OwnerProperties")
+  leases               Lease[]              @relation("TenantLeases")
+  maintenanceRequest   MaintenanceRequest[] @relation("TenantRequests")
+  assignedInspections  MaintenanceRequest[] @relation("InspectorTasks")
+  payoutRequests       PayoutRequest[]      @relation("OwnerPayouts")
+  tenantPayoutRequests PayoutRequest[]      @relation("TenantPayouts")
+  sentMessages         Message[]            @relation("SentMessages")
+  receivedMessages     Message[]            @relation("ReceivedMessages")
+  documents            Document[]           @relation("TenantDocuments")
+  transactions         Transaction[]        @relation("TenantTransactions")
+  notifications        Notification[]       @relation("UserNotifications")
+  pricingTier          PricingTier?         @relation(fields: [currentTierId], references: [id])
+  sentInvitations      TenantInvitation[]   @relation("InvitedByOwner")
+  acceptedInvitations  TenantInvitation[]   @relation("AcceptedByTenant")
+}
+
+model OwnerApplication {
+  id              String   @id @default(uuid())
+  trackingId      String   @unique @default(uuid())
+  name            String
+  email           String
+  phone           String
+  website         String?
+  entityType      String
+  portfolioSize   String
+  currentSoftware String?
+  status          String   @default("PENDING")  // PENDING, UNDER_REVIEW, APPROVED, REJECTED
+  adminNotes      String?
+  rejectionReason String?
+  reviewedAt      DateTime?
+  reviewedByAdminId String?
+  createdUserId   String?   // User.id created after approval
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TenantInvitation {
+  id              String   @id @default(uuid())
+  token           String   @unique @default(uuid())
+  tenantEmail     String
+  tenantName      String
+  unitId          String
+  unit            Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  propertyId      String
+  monthlyRent     Decimal  @db.Decimal(10, 2)
+  leaseStartDate  DateTime
+  status          String   @default("PENDING")  // PENDING, ACCEPTED, EXPIRED, CANCELLED
+  invitedByOwnerId String
+  invitedByOwner  User     @relation("InvitedByOwner", fields: [invitedByOwnerId], references: [id])
+  acceptedByTenantId String?
+  acceptedByTenant   User?  @relation("AcceptedByTenant", fields: [acceptedByTenantId], references: [id])
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PricingTier {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  price           Float
+  minUnits        Int
+  maxUnits        Int
+  features        String[]
+  isCustom        Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  stripeProductId String?
+  stripePriceId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users           User[]
 }
 
 model Property {
@@ -114,7 +185,9 @@ model Unit {
   sqFootage    Int
   amenities    String[]
   images       String[]
+  maxOccupants Int      @default(1)
   status       String               @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
+  leaseStructure String?            // NNN, Gross, etc.
   
   propertyId   String
   property     Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
@@ -122,6 +195,7 @@ model Unit {
   maintenance  MaintenanceRequest[]
   applications Application[]
   tours        Tour[]
+  invitations  TenantInvitation[]
 }
 
 model Lease {

@@ -14,10 +14,14 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import { Home, Building, Users, Calendar, Wrench, Wallet, ArrowUpRight, LogOut, Loader2, Plus, DollarSign, CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, ClipboardList, Settings, Shield, TrendingUp, Percent, Briefcase, Clock, ArrowDownRight, AlertTriangle, Activity, FileText, RefreshCw, BarChart2, Target, LayoutGrid, List, Table2, MapPin, Eye, Edit2, MoreVertical, CheckCircle2, Trash2, Bed, Bath, Maximize2, Building2, ArrowLeft, Star, Image, Square, PanelLeft } from "lucide-react";
+import { Home, Building, Users, Calendar, Wrench, Wallet, ArrowUpRight, LogOut, Loader2, Plus, DollarSign, CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, ClipboardList, Settings, Shield, TrendingUp, Percent, Briefcase, Clock, ArrowDownRight, AlertTriangle, Activity, FileText, RefreshCw, BarChart2, Target, LayoutGrid, List, Table2, MapPin, Eye, Edit2, MoreVertical, CheckCircle2, Trash2, Bed, Bath, Maximize2, Building2, ArrowLeft, Star, Image, Square, PanelLeft, Download, Lock } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import SecuritySettings from "@/components/settings/SecuritySettings";
+import OwnerOnboardingChecklist from "@/components/owner/OwnerOnboardingChecklist";
+import InviteTenantModal from "@/components/owner/InviteTenantModal";
+import EmbeddedSubscribeModal from "@/components/subscription/EmbeddedSubscribeModal";
 
 export default function OwnerDashboard() {
   const { data: session, status } = useSession();
@@ -40,14 +44,8 @@ export default function OwnerDashboard() {
   const [leaseSearch, setLeaseSearch] = useState("");
   const [maintSubTab, setMaintSubTab] = useState("all"); // "all", "emergency", "inspections"
   const [financialsTab, setFinancialsTab] = useState("transactions"); // "transactions", "invoices", "revenues", "expenses", "reports"
+  const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   
-  // Settings Form States
-  const [setName, setSetName] = useState("");
-  const [setPhone, setSetPhone] = useState("");
-  const [setBankName, setSetBankName] = useState("");
-  const [setAccNumber, setSetAccNumber] = useState("");
-  const [setAccName, setSetAccName] = useState("");
-
   // Inbox & Chat States
   const [chats, setChats] = useState<any[]>([
     { id: "1", sender: "John Doe (Tenant)", lastMsg: "Hi, I sent the rent payment for this month.", time: "10:30 AM", unread: true, messages: [{ sender: "tenant", text: "Hi, I sent the rent payment for this month.", time: "10:30 AM" }] },
@@ -98,9 +96,18 @@ export default function OwnerDashboard() {
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "");
+      let hash = window.location.hash.replace(/^#+/, "");
+      hash = hash.split('#')[0];
       if (hash) {
-        setActiveTabState(hash);
+        if (hash === "settings-subscription") {
+          setActiveTabState("settings");
+          setActiveSettingsTab("subscription");
+        } else if (hash === "settings") {
+          setActiveTabState("settings");
+          setActiveSettingsTab("profile");
+        } else {
+          setActiveTabState(hash);
+        }
       }
     };
     handleHashChange();
@@ -201,6 +208,31 @@ export default function OwnerDashboard() {
   const [pType, setPType] = useState("Apartment");
   const [editPropId, setEditPropId] = useState<string | null>(null);
 
+  // Profile Settings State
+  const [profileName, setProfileName] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
+  const [profileEmploymentStatus, setProfileEmploymentStatus] = useState("EMPLOYED");
+  const [profileEmployer, setProfileEmployer] = useState("");
+  const [profilePosition, setProfilePosition] = useState("");
+  const [entityType, setEntityType] = useState("INDIVIDUAL");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyRelationship, setEmergencyRelationship] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [pricingTier, setPricingTier] = useState<any>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState("Active");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
+  const [pricingTiers, setPricingTiers] = useState<any[]>([]);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [pendingPropertyDraft, setPendingPropertyDraft] = useState<any>(null);
+  const [pricingModalContext, setPricingModalContext] = useState<"general" | "blocked_property">("general");
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
@@ -209,7 +241,7 @@ export default function OwnerDashboard() {
 
   const fetchOwnerData = async () => {
     try {
-      const [propRes, leaseRes, maintRes, payoutRes, inspectorRes, invoiceRes, tenantRes, appRes] = await Promise.all([
+      const [propRes, leaseRes, maintRes, payoutRes, inspectorRes, invoiceRes, tenantRes, appRes, tierRes] = await Promise.all([
         fetch("/api/properties"),
         fetch("/api/leases"),
         fetch("/api/maintenance"),
@@ -218,6 +250,7 @@ export default function OwnerDashboard() {
         fetch("/api/invoices"),
         fetch("/api/users?role=TENANT"),
         fetch("/api/applications"),
+        fetch("/api/pricing-tiers"),
       ]);
 
       // Check each response and surface errors clearly
@@ -244,9 +277,70 @@ export default function OwnerDashboard() {
 
       if (leaseRes.ok) {
         const data = await leaseRes.json();
-        if (Array.isArray(data)) setLeases(data);
-      } else {
-        console.error("Leases API error:", await leaseRes.text());
+        setLeases(Array.isArray(data) ? data : []);
+      }
+
+      // Fetch user profile data
+      if (session?.user) {
+        try {
+          const userRes = await fetch(`/api/users`);
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            setProfileName(userData.name || "");
+            setProfilePhone(userData.phone || "");
+            setProfileAvatar(userData.avatar || "");
+            setProfileEmploymentStatus(userData.employmentStatus || "EMPLOYED");
+            setEntityType(userData.employmentStatus === "BUSINESS" ? "BUSINESS" : "INDIVIDUAL");
+            setProfileEmployer(userData.employer || "");
+            setProfilePosition(userData.position || "");
+            setEmergencyName(userData.emergencyName || "");
+            setEmergencyRelationship(userData.emergencyRelationship || "");
+            setEmergencyPhone(userData.emergencyPhone || "");
+            setBankName(userData.bankName || "");
+            setAccountName(userData.accountName || "");
+            setAccountNumber(userData.accountNumber || "");
+            setPricingTier(userData.pricingTier || null);
+            const currentStatus = userData.subscriptionStatus || "";
+            setSubscriptionStatus(currentStatus);
+
+            // Auto-submit pending property draft if subscription is now active
+            const draft = sessionStorage.getItem("pp_pending_property_draft");
+            if (draft && currentStatus?.toLowerCase() === "active") {
+              try {
+                const draftData = JSON.parse(draft);
+                sessionStorage.removeItem("pp_pending_property_draft");
+                setPendingPropertyDraft(draftData);
+                // Auto-submit after a brief delay so UI is ready
+                setTimeout(async () => {
+                  try {
+                    const res = await fetch("/api/properties", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(draftData),
+                    });
+                    if (res.ok) {
+                      toast.success(`🎉 Welcome to your new plan! Your property "${draftData.name || "New Property"}" has been created automatically.`, { duration: 6000 });
+                      setPendingPropertyDraft(null);
+                      fetchOwnerData();
+                      setActiveTab("properties");
+                    } else {
+                      const err = await res.json();
+                      toast.error(`Auto-save failed: ${err.error || "Please try adding the property again."}`);
+                      setPendingPropertyDraft(null);
+                    }
+                  } catch {
+                    setPendingPropertyDraft(null);
+                    toast.error("Auto-save failed. Please add your property again.");
+                  }
+                }, 1200);
+              } catch {
+                sessionStorage.removeItem("pp_pending_property_draft");
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to load user profile:", e);
+        }
       }
 
       if (maintRes.ok) {
@@ -291,17 +385,19 @@ export default function OwnerDashboard() {
         console.error("Applications API error:", await appRes.text());
       }
 
-      // Get balance and prefill settings from session
-      const sessionRes = await fetch("/api/auth/session");
-      if (sessionRes.ok) {
-        const sessionData = await sessionRes.json();
-        const user = sessionData?.user || {};
-        setBalance(Number(user.balance) || 0);
-        setSetName(user.name || "");
-        setSetPhone(user.phone || "");
-        setSetBankName(user.bankName || "");
-        setSetAccNumber(user.accountNumber || "");
-        setSetAccName(user.accountName || "");
+      if (tierRes.ok) {
+        const data = await tierRes.json();
+        if (Array.isArray(data)) setPricingTiers(data.filter((t: any) => t.isActive && !t.isCustom));
+      }
+
+      // Get balance from session
+      if (session?.user) {
+        const sessionRes = await fetch("/api/auth/session");
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          const user = sessionData?.user || {};
+          setBalance(Number(user.balance) || 0);
+        }
       }
 
     } catch (err) {
@@ -334,7 +430,22 @@ export default function OwnerDashboard() {
         setActiveTab("properties");
       } else {
         const err = await res.json();
-        toast.error(err.error || "Failed to save property");
+        // Check if this is a subscription-gate error (403 with subscription message)
+        const errMsg: string = err.error || "";
+        const isSubscriptionError = res.status === 403 && (
+          errMsg.toLowerCase().includes("subscription") ||
+          errMsg === "LIMIT_REACHED"
+        );
+        if (isSubscriptionError && !data.id) {
+          // Save draft to sessionStorage so it survives the Stripe redirect
+          sessionStorage.setItem("pp_pending_property_draft", JSON.stringify(data));
+          // Open pricing modal inline, keeping the user on the same page
+          setPricingModalContext("blocked_property");
+          setShowPricingModal(true);
+          toast.info("Your property details have been saved. Choose a plan below to activate your listing.", { duration: 6000 });
+        } else {
+          toast.error(err.message || err.error || "Failed to save property");
+        }
       }
     } catch (err) {
       toast.error("Property save error");
@@ -537,7 +648,7 @@ export default function OwnerDashboard() {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!setName) {
+    if (!profileName) {
       toast.error("Please fill in your name.");
       return;
     }
@@ -547,11 +658,11 @@ export default function OwnerDashboard() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: setName,
-          phone: setPhone,
-          bankName: setBankName,
-          accountNumber: setAccNumber,
-          accountName: setAccName,
+          name: profileName,
+          phone: profilePhone,
+          bankName: bankName,
+          accountNumber: accountNumber,
+          accountName: accountName,
         }),
       });
 
@@ -907,450 +1018,126 @@ export default function OwnerDashboard() {
   else if (unitSort === 'RENT_LOW') auFilteredUnits.sort((a, b) => Number(a.rentAmount) - Number(b.rentAmount));
   // ----------------------------------------
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSubmitting(true);
+    try {
+      const res = await fetch(`/api/users`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profileName,
+          phone: profilePhone,
+          avatar: profileAvatar,
+          employmentStatus: entityType,
+          employer: profileEmployer,
+          position: profilePosition,
+          emergencyName,
+          emergencyRelationship,
+          emergencyPhone,
+          bankName,
+          accountName,
+          accountNumber,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Profile updated successfully!");
+        fetchOwnerData();
+      } else {
+        const err = await res.json();
+        toast.error(`Error: ${err.error}`);
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`);
+    } finally {
+      setProfileSubmitting(false);
+    }
+  };
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarUploading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileAvatar(reader.result as string);
+        setAvatarUploading(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddPropertyClick = () => {
+    // If no subscription at all, open the pricing modal inline instead of blocking with an error
+    if (!pricingTier || subscriptionStatus?.toLowerCase() !== 'active') {
+      setPricingModalContext("blocked_property");
+      setShowPricingModal(true);
+      return;
+    }
+    if (pricingTier && units.length >= pricingTier.maxUnits) {
+      setPricingModalContext("blocked_property");
+      setShowPricingModal(true);
+      return;
+    }
+    setActiveTab('add-property');
+  };
+
   const isManagementActive = ["properties", "add-property", "available-units", "units", "add-unit", "unit-details", "tenants", "leases"].includes(activeTab);
   const isMaintenanceActive = ["maintenance", "inspections"].includes(activeTab);
   const isFinancialsActive = ["transactions", "invoices", "revenues", "expenses", "reports"].includes(activeTab);
   const isActivityActive = ["inbox", "calendar"].includes(activeTab);
   const isAdministrationActive = ["settings"].includes(activeTab);
 
+  const handleCheckout = async (tierId: string) => {
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tierId })
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.requiresPortal) {
+        handlePortal();
+      } else {
+        alert(data.error || 'Checkout failed');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to initiate checkout.');
+    }
+  };
+
+  const handlePortal = async () => {
+    try {
+      const response = await fetch('/api/stripe/portal', { method: 'POST' });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to open portal');
+      }
+    } catch (error) {
+      console.error('Portal error:', error);
+      alert('Failed to open billing portal.');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F5F7F9] text-[#111111] font-sans flex relative">
-      {/* Edge-to-Edge Left Sidebar */}
-      <aside className="hidden md:flex w-[260px] bg-white border-r border-slate-200 py-6 flex-col justify-between z-30 h-screen sticky top-0">
-        <div className="flex flex-col gap-6 h-full overflow-hidden">
-          {/* Brand Logo Header */}
-          <div className="flex items-center gap-3 px-6 mb-2">
-            <div className="bg-blue-600 text-white p-2 rounded-xl flex items-center justify-center shadow-sm">
-              <Building className="h-5 w-5" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-slate-900">PropertyPro</span>
-          </div>
-
-          {/* Sidebar Navigation */}
-          <nav className="flex flex-col gap-4 overflow-y-auto px-4 scrollbar-thin pb-4 flex-1">
-            {/* Dashboard Button */}
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "dashboard" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
-            >
-              <Home className="h-4 w-4" />
-              <span>Dashboard</span>
-            </button>
-
-            {/* Management Section */}
-            <div className="flex flex-col gap-1">
-              <span className="px-4 py-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Management</span>
-              
-              {/* Properties submenu */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setPropertiesOpen(!propertiesOpen)}
-                  className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Building className="h-4 w-4" />
-                    <span>Properties</span>
-                  </div>
-                  {propertiesOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
-                </button>
-                {propertiesOpen && (
-                  <div className="flex flex-col mt-1 ml-6 border-l border-slate-200 relative py-1">
-                    <button
-                      onClick={() => setActiveTab("properties")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "properties" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      All Properties
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("add-property")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "add-property" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Add Property
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("available-units")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "available-units" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Available Units
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("units")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "units" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      All Units
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Tenants */}
-              <button
-                onClick={() => setActiveTab("tenants")}
-                className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === "tenants" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Users className="h-4 w-4" />
-                  <span>Tenants</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-400" />
-              </button>
-
-              {/* Leases collapsible */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setTenantsOpen(!tenantsOpen)}
-                  className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50`}
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-4 w-4" />
-                    <span>Leases</span>
-                  </div>
-                  {tenantsOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
-                </button>
-                {tenantsOpen && (
-                  <div className="flex flex-col mt-1 ml-6 border-l border-slate-200 relative py-1">
-                    <button
-                      onClick={() => { setActiveTab("leases"); setLeaseSubTab("all"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "leases" && leaseSubTab === "all" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      All Leases
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab("leases"); setLeaseSubTab("new"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "leases" && leaseSubTab === "new" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Create Lease
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab("leases"); setLeaseSubTab("active"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "leases" && leaseSubTab === "active" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Active Leases
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab("leases"); setLeaseSubTab("expiring"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "leases" && leaseSubTab === "expiring" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Expiring Soon
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              {/* Applications */}
-              <button
-                onClick={() => setActiveTab("applications")}
-                className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === "applications" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <ClipboardList className="h-4 w-4" />
-                  <span>Applications</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-400" />
-              </button>
-            </div>
-
-            {/* Maintenance Section */}
-            <div className="flex flex-col gap-1 mt-2">
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setMaintenanceOpen(!maintenanceOpen)}
-                  className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Wrench className="h-4 w-4" />
-                    <span>Maintenance</span>
-                  </div>
-                  {maintenanceOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
-                </button>
-                {maintenanceOpen && (
-                  <div className="flex flex-col mt-1 ml-6 border-l border-slate-200 relative py-1">
-                    <button
-                      onClick={() => { setActiveTab("maintenance"); setMaintSubTab("all"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "maintenance" && maintSubTab === "all" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      All Requests
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab("maintenance"); setMaintSubTab("emergency"); }}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "maintenance" && maintSubTab === "emergency" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Emergency
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("inspections")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "inspections" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Inspections
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Financials Section */}
-            <div className="flex flex-col gap-1 mt-2">
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setFinancialsOpen(!financialsOpen)}
-                  className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Wallet className="h-4 w-4" />
-                    <span>Financials</span>
-                  </div>
-                  {financialsOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
-                </button>
-                {financialsOpen && (
-                  <div className="flex flex-col mt-1 ml-6 border-l border-slate-200 relative py-1">
-                    <button
-                      onClick={() => setActiveTab("transactions")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "transactions" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Transactions
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("invoices")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "invoices" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Invoices
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("revenues")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "revenues" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Revenues
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("expenses")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "expenses" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Expenses
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("reports")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "reports" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Reports
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Activity Section */}
-            <div className="flex flex-col gap-1 mt-2">
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setActivityOpen(!activityOpen)}
-                  className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4" />
-                    <span>Activity</span>
-                  </div>
-                  {activityOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
-                </button>
-                {activityOpen && (
-                  <div className="flex flex-col mt-1 ml-6 border-l border-slate-200 relative py-1">
-                    <button
-                      onClick={() => setActiveTab("inbox")}
-                      className={`relative flex items-center justify-between w-full pl-5 pr-2 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "inbox" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                        Inbox
-                      </div>
-                      <span className="bg-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">15</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("calendar")}
-                      className={`relative flex items-center w-full pl-5 py-2 text-sm font-semibold transition-all ${
-                        activeTab === "calendar" ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="absolute left-0 top-1/2 -mt-px w-3 border-t border-slate-200"></span>
-                      Calendar
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Administration Section */}
-            <div className="flex flex-col gap-1 mt-2">
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={`flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === "settings" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Settings className="h-4 w-4" />
-                  <span>Settings</span>
-                </div>
-              </button>
-            </div>
-          </nav>
-
-          {/* User profile card at the bottom of the sidebar */}
-          <div className="flex items-center justify-between px-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                {/* Fallback to initials if no image, but using a generic gradient/initials for aesthetic */}
-                <div className="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center font-extrabold text-sm uppercase">
-                  {session?.user?.name ? session.user.name.charAt(0) : "Y"}
-                </div>
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="font-bold text-sm text-slate-900 truncate">{session?.user?.name || "youssef Bennett"}</span>
-                <span className="text-[11px] text-slate-500 font-semibold truncate">Manager</span>
-              </div>
-            </div>
-            {/* Optional logout button or menu dot icon - making it very subtle to match the clean design */}
-            <button
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              title="Sign Out"
-              className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Viewport */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 relative">
-        {/* Top Navbar */}
-        <header className="flex items-center justify-between px-6 h-16 shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
-          <div className="flex items-center gap-4">
-            <button className="items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-150 disabled:pointer-events-none disabled:opacity-50 hover:text-slate-900 hover:bg-slate-50 size-10 hidden md:inline-flex rounded-lg border border-slate-200 bg-transparent text-slate-500">
-              <PanelLeft className="h-4 w-4" />
-            </button>
-            <button onClick={() => setSearchOpen(true)} className="inline-flex h-10 w-64 md:w-80 items-center justify-between gap-2 rounded-full border border-slate-200 bg-slate-50/80 px-3 text-slate-500 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none">
-              <div className="flex items-center gap-2 text-xs">
-                <Search className="h-4 w-4 text-slate-400" />
-                <span>Search...</span>
-              </div>
-              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 font-mono text-[10px] font-medium text-slate-400">
-                <span>⌘</span>K
-              </kbd>
-            </button>
-          </div>
-
+    <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 pb-20">
+      {pricingTier && subscriptionStatus?.toLowerCase() !== "active" && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 text-sm font-bold shadow-sm flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-semibold transition-all duration-150 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-9 w-9 rounded-lg relative text-slate-500" />
-              }>
-                <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white shadow-sm border border-white">8</span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-0">
-                 {/* Empty content just for visual parity dropdown behavior */}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <button className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-150 border border-slate-200 bg-white shadow-sm hover:bg-slate-50 hover:shadow-md h-9 w-9 text-slate-500 hover:text-slate-900">
-              <Settings className="h-4 w-4" />
-            </button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-150 relative h-9 w-9 rounded-full border border-slate-200 ml-1 hover:ring-2 ring-slate-200 ring-offset-1" />
-              }>
-                <div className="h-full w-full rounded-full bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center font-extrabold text-xs uppercase overflow-hidden">
-                  {session?.user?.name ? session.user.name.charAt(0) : "O"}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-slate-100 p-1">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel className="font-normal p-2">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold leading-none text-slate-900">{session?.user?.name || "Owner"}</p>
-                      <p className="text-xs leading-none text-slate-500">Landlord</p>
-                    </div>
-                  </DropdownMenuLabel>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator className="bg-slate-100" />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer rounded-lg text-sm font-medium focus:bg-slate-50 p-2">
-                    <User className="mr-2 h-4 w-4 text-slate-400" /> Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer rounded-lg text-sm font-medium focus:bg-slate-50 p-2">
-                    <Settings className="mr-2 h-4 w-4 text-slate-400" /> Settings
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator className="bg-slate-100" />
-                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/login" })} className="cursor-pointer rounded-lg text-sm font-medium text-red-600 focus:bg-red-50 focus:text-red-700 p-2">
-                  <LogOut className="mr-2 h-4 w-4" /> Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+            <span>Your subscription has expired or payment failed. Your account is in limited mode and penalty transaction fees apply.</span>
           </div>
-        </header>
-
-        {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-[1600px] mx-auto w-full">
-            {/* Dashboard Dynamic Tabs Content */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Button onClick={handlePortal} variant="outline" className="bg-white border-red-200 text-red-600 hover:bg-red-50 h-8 text-xs shrink-0">
+            Reactivate Plan / Update Billing
+          </Button>
+        </div>
+      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Navigation Tab lists for Mobile */}
           <TabsList className="bg-white border border-[#E2E3E0] p-1.5 rounded-full flex gap-1 h-auto shadow-sm max-w-2xl overflow-x-auto md:hidden">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-[#111111] data-[state=active]:text-white text-[#7F817F] rounded-full font-bold px-4 py-2 text-xs">Dash</TabsTrigger>
@@ -1382,6 +1169,15 @@ export default function OwnerDashboard() {
                 </Button>
               </div>
             </div>
+            
+            {!(session?.user as any)?.hasCompletedOnboarding && (
+              <OwnerOnboardingChecklist 
+                onComplete={() => fetchOwnerData()} 
+                properties={properties} 
+                leases={leases} 
+                isProfileComplete={!!(profilePhone && bankName && accountNumber && emergencyPhone)}
+              />
+            )}
 
             {/* Alerts Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1563,7 +1359,7 @@ export default function OwnerDashboard() {
                 <Button onClick={fetchOwnerData} variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
                   <RefreshCw className="h-3.5 w-3.5" /> Refresh
                 </Button>
-                <Button onClick={() => setActiveTab('add-property')} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
+                <Button onClick={handleAddPropertyClick} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
                   <Plus className="h-4 w-4" /> Add Property
                 </Button>
               </div>
@@ -1930,7 +1726,7 @@ export default function OwnerDashboard() {
                 <Button onClick={() => fetchOwnerData()} variant="outline" className="flex-1 md:flex-none border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold h-10 rounded-xl transition-all shadow-sm">
                   <RefreshCw className="h-4 w-4 mr-2" /> Refresh
                 </Button>
-                <Button onClick={() => setActiveTab('add-property')} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 rounded-xl transition-all shadow-sm px-6">
+                <Button onClick={handleAddPropertyClick} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 rounded-xl transition-all shadow-sm px-6">
                   <Plus className="h-4 w-4 mr-2" /> Add Property
                 </Button>
               </div>
@@ -3061,6 +2857,7 @@ export default function OwnerDashboard() {
                           <p className="text-sm text-slate-500 max-w-md mb-8">This unit is currently marked as vacant. You can create a new lease to assign a tenant and update its status.</p>
                           <div className="flex gap-3">
                             <Button onClick={() => { setLUnitId(u.id); setActiveTab('leases'); setLeaseSubTab("new"); }} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-600/20 font-bold h-11 px-6"><Plus className="h-4 w-4 mr-2" /> Create Lease</Button>
+                            <InviteTenantModal unitId={u.id} unitName={u.name} propertyName={p?.name || 'Unknown Property'} rentAmount={Number(u.rentAmount)} />
                           </div>
                         </Card>
                       )}
@@ -4061,30 +3858,391 @@ export default function OwnerDashboard() {
             <div className="flex justify-between items-center">
               <div><h2 className="text-2xl font-black text-[#111111]">Account Settings</h2><p className="text-sm text-[#7F817F] mt-0.5">Manage your preferences and profile</p></div>
             </div>
-            <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-2xl">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-4">Profile Information</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between"><span className="text-sm font-semibold text-slate-500">Name</span><span className="text-sm font-bold text-[#111111]">{session?.user?.name || "Landlord"}</span></div>
-                    <div className="flex items-center justify-between"><span className="text-sm font-semibold text-slate-500">Email</span><span className="text-sm font-bold text-[#111111]">{session?.user?.email || "landlord@example.com"}</span></div>
-                    <div className="flex items-center justify-between"><span className="text-sm font-semibold text-slate-500">Role</span><Badge className="bg-slate-900 text-white rounded-full">OWNER</Badge></div>
+
+            <div className="flex items-center space-x-6 border-b border-[#E2E8F0] mb-6">
+              <button
+                type="button"
+                onClick={() => setActiveSettingsTab("profile")}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                  activeSettingsTab === "profile" 
+                    ? "border-blue-600 text-blue-600" 
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                Profile Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSettingsTab("security")}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                  activeSettingsTab === "security" 
+                    ? "border-blue-600 text-blue-600" 
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                Security & Password
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSettingsTab("subscription")}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                  activeSettingsTab === "subscription" 
+                    ? "border-blue-600 text-blue-600" 
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                Subscription Plan
+              </button>
+            </div>
+
+            {activeSettingsTab === "subscription" && (
+              <div className="space-y-6 mt-6 max-w-4xl">
+                {pricingTier ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Left Column: Plan Details */}
+                    <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-0 rounded-3xl shadow-xl p-8 col-span-2 text-white relative overflow-hidden">
+                      <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
+                      
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-8">
+                          <div>
+                            <Badge className="bg-white/10 text-white hover:bg-white/20 border-0 rounded-lg px-3 py-1 font-bold text-xs uppercase tracking-widest backdrop-blur-md mb-3 inline-block">
+                              Current Plan
+                            </Badge>
+                            <h3 className="text-3xl font-black text-white">{pricingTier.name}</h3>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-3xl font-black text-white">${pricingTier.price}</span>
+                            <span className="text-slate-400 font-medium text-sm">/mo</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8 mb-8">
+                          <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Cycle</p>
+                            <p className="font-semibold text-white flex items-center gap-2"><Calendar className="h-4 w-4 text-blue-400"/> Monthly</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Status</p>
+                            <div className="flex items-center gap-2">
+                              <span className="relative flex h-3 w-3">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${subscriptionStatus.toLowerCase() === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                                <span className={`relative inline-flex rounded-full h-3 w-3 ${subscriptionStatus.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                              </span>
+                              <span className="font-semibold text-white capitalize">{subscriptionStatus}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-auto bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                          <div className="flex justify-between items-end mb-3">
+                            <div>
+                              <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Unit Usage</p>
+                              <p className="text-2xl font-black text-white">{units.length} <span className="text-sm font-medium text-slate-400">/ {pricingTier.maxUnits} Units</span></p>
+                            </div>
+                            <span className="text-sm font-bold text-blue-400">
+                              {Math.round((units.length / pricingTier.maxUnits) * 100)}% Used
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                            <div 
+                              className={`h-2.5 rounded-full transition-all duration-1000 ${
+                                (units.length / pricingTier.maxUnits) > 0.9 ? 'bg-red-500' : 
+                                (units.length / pricingTier.maxUnits) > 0.75 ? 'bg-amber-400' : 'bg-blue-500'
+                              }`} 
+                              style={{ width: `${Math.min((units.length / pricingTier.maxUnits) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          {(units.length / pricingTier.maxUnits) >= 0.9 && (
+                            <p className="text-xs text-red-400 font-medium mt-3 flex items-center gap-1.5">
+                              <AlertTriangle className="h-3.5 w-3.5" /> You are approaching your unit limit. Upgrade to add more units.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Right Column: Features & Upgrade */}
+                    <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm flex flex-col">
+                      <div className="p-6 pb-4 border-b border-slate-100">
+                        <h4 className="text-lg font-bold text-[#111111]">Plan Features</h4>
+                      </div>
+                      <div className="p-6 flex-1 flex flex-col">
+                        <ul className="space-y-4 mb-8 flex-1">
+                          {pricingTier.features && Array.isArray(pricingTier.features) && pricingTier.features.map((feature: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-3">
+                              <div className="mt-0.5 bg-emerald-50 text-emerald-500 rounded-full p-0.5 shrink-0">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </div>
+                              <span className="text-sm font-medium text-slate-600 leading-snug">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-auto space-y-3">
+                          <Button onClick={() => setShowPricingModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-md shadow-blue-600/20 transition-all">
+                            View & Purchase Plans
+                          </Button>
+                          <Button onClick={handlePortal} variant="outline" className="w-full bg-white hover:bg-slate-50 border-slate-200 text-slate-700 font-bold h-12 rounded-xl transition-all">
+                            Stripe Customer Portal
+                          </Button>
+                          <p className="text-center text-[11px] font-medium text-slate-400 mt-1">Stripe Portal is used for changing cards & billing details.</p>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-4">Preferences</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between"><span className="text-sm font-semibold text-slate-500">Email Notifications</span><Button variant="outline" size="sm" className="rounded-full text-xs h-7">Enabled</Button></div>
-                    <div className="flex items-center justify-between"><span className="text-sm font-semibold text-slate-500">Currency</span><span className="text-sm font-bold text-[#111111]">USD ($)</span></div>
+                ) : (
+                  <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm p-12 text-center flex flex-col items-center justify-center">
+                    <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                      <Activity className="h-10 w-10 text-slate-300" />
+                    </div>
+                    <h3 className="text-2xl font-black text-[#111111] mb-2">No Active Subscription</h3>
+                    <p className="text-slate-500 max-w-md mx-auto mb-8">You are currently not on an active plan. Upgrade your account to list properties, manage units, and start collecting rent.</p>
+                    <div className="flex gap-4 justify-center">
+                      <Button onClick={() => handleCheckout("starter")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 px-8 rounded-xl shadow-md shadow-blue-600/20">
+                        View Pricing Plans
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Billing History Section */}
+                <div className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-bold text-[#111111]">Billing History</h4>
+                    <Button variant="outline" className="text-xs font-bold h-8 rounded-lg border-slate-200">
+                      Download All
+                    </Button>
                   </div>
+                  <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-slate-50/50">
+                        <TableRow className="border-slate-100 hover:bg-transparent">
+                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3 pl-6">Date</TableHead>
+                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Description</TableHead>
+                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Amount</TableHead>
+                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Status</TableHead>
+                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3 text-right pr-6">Receipt</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pricingTier ? (
+                          <TableRow className="border-slate-100 hover:bg-slate-50/50">
+                            <TableCell className="py-4 pl-6 text-sm font-semibold text-slate-700">Oct 01, 2026</TableCell>
+                            <TableCell className="text-sm font-bold text-slate-900">{pricingTier.name} Subscription</TableCell>
+                            <TableCell className="text-sm font-black text-slate-900">${pricingTier.price}</TableCell>
+                            <TableCell>
+                              <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-50 rounded-full font-bold px-2.5 py-0.5 shadow-sm">Paid</Badge>
+                            </TableCell>
+                            <TableCell className="text-right pr-6">
+                              <Button variant="ghost" className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="py-8 text-center text-sm font-medium text-slate-500">
+                              No billing history available.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 </div>
               </div>
-            </Card>
+            )}
+
+            {activeSettingsTab === "profile" && (
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
+                
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl mt-6">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Personal Information</h3>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 mb-6 border-b border-slate-100">
+                    <div className="h-24 w-24 shrink-0 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center relative">
+                      {profileAvatar ? (
+                        <img src={profileAvatar} alt="Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-10 w-10 text-slate-400" />
+                      )}
+                      {avatarUploading && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="relative inline-block">
+                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-bold rounded-lg border-slate-300">
+                            Change Photo
+                          </Button>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleAvatarUpload} 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                        </div>
+                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => setProfileAvatar("")}>
+                          Remove
+                        </Button>
+                      </div>
+                      <p className="text-xs text-slate-500">JPG, PNG or GIF. Max size 5MB.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="profName" className="text-sm font-bold text-slate-700">Full Name</Label>
+                      <Input 
+                        id="profName"
+                        placeholder="Your Name"
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="profPhone" className="text-sm font-bold text-slate-700">Phone Number</Label>
+                      <Input 
+                        id="profPhone"
+                        type="tel"
+                        placeholder="+1 555-0000"
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Email Address</Label>
+                      <div className="relative">
+                        <Input 
+                          disabled
+                          value={session?.user?.email || ""}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-slate-500 pl-10 cursor-not-allowed"
+                        />
+                        <Shield className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Entity & Tax Profile</h3>
+                  
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-bold text-slate-700">How are you operating?</Label>
+                      <div className="flex items-center gap-4">
+                        <label className={`flex-1 flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${entityType === "INDIVIDUAL" ? "border-blue-500 bg-blue-50/50" : "border-slate-200 hover:border-slate-300 bg-white"}`}>
+                          <input type="radio" name="entityType" value="INDIVIDUAL" checked={entityType === "INDIVIDUAL"} onChange={() => setEntityType("INDIVIDUAL")} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300" />
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-900 text-sm">Individual</span>
+                            <span className="text-xs text-slate-500">Sole proprietor or personal ownership</span>
+                          </div>
+                        </label>
+                        <label className={`flex-1 flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${entityType === "BUSINESS" ? "border-blue-500 bg-blue-50/50" : "border-slate-200 hover:border-slate-300 bg-white"}`}>
+                          <input type="radio" name="entityType" value="BUSINESS" checked={entityType === "BUSINESS"} onChange={() => setEntityType("BUSINESS")} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300" />
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-900 text-sm">Business</span>
+                            <span className="text-xs text-slate-500">LLC, Corporation, or Partnership</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {entityType === "BUSINESS" && (
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Legal Business Name</Label>
+                        <Input 
+                          placeholder="e.g. Acme Properties LLC"
+                          value={profileEmployer}
+                          onChange={(e) => setProfileEmployer(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">{entityType === "BUSINESS" ? "Tax ID / EIN" : "Social Security Number (SSN)"}</Label>
+                      <Input 
+                        placeholder={entityType === "BUSINESS" ? "e.g. 12-3456789" : "e.g. XXX-XX-XXXX"}
+                        value={profilePosition}
+                        onChange={(e) => setProfilePosition(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                      <p className="text-xs text-slate-500">Required for verification and year-end 1099 tax document generation.</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Bank Payout Details</h3>
+                  <p className="text-sm text-slate-600 mb-6">
+                    Connect your bank account to receive automatic rental payouts from Stripe. Note: This data will be securely synced with Stripe Connect.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-bold text-slate-700">Bank Name</Label>
+                      <Input 
+                        placeholder="e.g. Chase Bank"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Account Name</Label>
+                        <Input 
+                          placeholder="John Doe"
+                          value={accountName}
+                          onChange={(e) => setAccountName(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold text-slate-700">Account / Routing Number</Label>
+                        <Input 
+                          placeholder="**** **** **** 1234"
+                          value={accountNumber}
+                          onChange={(e) => setAccountNumber(e.target.value)}
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <div className="pt-2 max-w-3xl flex justify-end">
+                  <Button 
+                    type="submit" 
+                    disabled={profileSubmitting}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
+                  >
+                    {profileSubmitting ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>
+                    ) : (
+                      "Save Profile Settings"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {activeSettingsTab === "security" && (
+              <div className="mt-6">
+                <SecuritySettings />
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-          </div>
-        </main>
-      </div>
 
       {/* Assign Inspector Dialog Modal */}
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
@@ -4189,6 +4347,61 @@ export default function OwnerDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Subscription Upgrade / Lockout Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="bg-white border-0 rounded-[28px] max-w-md p-8 shadow-2xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
+              <Lock className="h-8 w-8" />
+            </div>
+            <DialogTitle className="text-2xl font-black text-slate-900 mb-2">Upgrade Required</DialogTitle>
+            <DialogDescription className="text-slate-500 font-medium mb-8">
+              {upgradeReason}
+            </DialogDescription>
+            <div className="w-full space-y-3">
+              <Button onClick={() => {
+                setShowUpgradeModal(false);
+                setActiveTab('settings');
+                setActiveSettingsTab('subscription');
+              }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl">
+                View Subscription Settings
+              </Button>
+              <Button onClick={() => setShowUpgradeModal(false)} variant="ghost" className="w-full text-slate-500 hover:text-slate-700 font-bold h-12 rounded-xl">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pending Draft Banner */}
+      {pendingPropertyDraft && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold animate-pulse">
+          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+          Creating your property "{pendingPropertyDraft.name}"...
+        </div>
+      )}
+
+      {/* Embedded Subscribe Modal (replaces redirect-based pricing modal) */}
+      <EmbeddedSubscribeModal
+        open={showPricingModal}
+        onOpenChange={(open) => { setShowPricingModal(open); if (!open) setPricingModalContext("general"); }}
+        pricingTiers={pricingTiers}
+        currentTierId={pricingTier?.id}
+        title={pricingModalContext === "blocked_property" ? "One Step Away from Listing!" : "Choose Your Plan"}
+        contextMessage={
+          pricingModalContext === "blocked_property"
+            ? "Your property details are saved. Subscribe below — your property will be created automatically right after payment. 🚀"
+            : undefined
+        }
+        onSuccess={() => {
+          setShowPricingModal(false);
+          setPricingModalContext("general");
+          fetchOwnerData();
+          toast.success("Subscription activated! Your account is now fully unlocked.", { duration: 5000 });
+        }}
+      />
     </div>
   );
 }
