@@ -45,16 +45,38 @@ export async function POST(req: NextRequest) {
 
     const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/dashboard/owner`,
-    });
+    try {
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${origin}/dashboard/owner`,
+      });
+      return NextResponse.json({ url: portalSession.url });
+    } catch (stripeErr: any) {
+      // Auto-heal if the developer swapped API keys and the customer no longer exists in Stripe
+      if (stripeErr.message?.includes("No such customer")) {
+        const newCustomer = await stripe.customers.create({
+          email: user.email,
+          name: user.name || undefined,
+          metadata: { userId: user.id },
+        });
+        
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { stripeCustomerId: newCustomer.id, stripeSubscriptionId: null, subscriptionStatus: "Inactive" },
+        });
 
-    return NextResponse.json({ url: portalSession.url });
+        const newPortalSession = await stripe.billingPortal.sessions.create({
+          customer: newCustomer.id,
+          return_url: `${origin}/dashboard/owner`,
+        });
+        return NextResponse.json({ url: newPortalSession.url });
+      }
+      throw stripeErr;
+    }
   } catch (error: any) {
     console.error("Stripe Portal Error:", error);
     return NextResponse.json(
-      { error: "Failed to create portal session." },
+      { error: error?.message || "Failed to create portal session." },
       { status: 500 }
     );
   }

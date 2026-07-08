@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -164,12 +165,57 @@ export async function POST(req: NextRequest) {
       data: {
         userId: userId,
         title: "Property Created",
-        message: `Your property "${property.name}" has been successfully added to your portfolio.`,
+        message: `Your property "${property.name}" has been successfully added to your portfolio and is pending approval.`,
         type: "SYSTEM",
         priority: "LOW",
         relatedEntityId: property.id,
       }
     });
+
+    // Send confirmation email to the owner
+    if (owner?.email) {
+      await sendEmail({
+        to: owner.email,
+        subject: "Property Registered Successfully - Pending Approval",
+        html: `
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                  <tr>
+                    <td align="center" style="background-color: #2563eb; padding: 40px 20px;">
+                      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Property Registered</h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 40px 32px;">
+                      <p style="margin: 0 0 16px; font-size: 16px; color: #0f172a; font-weight: 600;">Hi ${owner.name || 'Owner'},</p>
+                      <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
+                        Your property <strong>${property.name}</strong> has been successfully registered on PropertyPro. It is currently pending admin approval. We will notify you once it has been reviewed.
+                      </p>
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <p style="margin: 0 0 8px; font-size: 14px; color: #64748b;"><strong>Address:</strong> ${property.address}, ${property.city}, ${property.country}</p>
+                            <p style="margin: 0 0 8px; font-size: 14px; color: #64748b;"><strong>Type:</strong> ${property.type}</p>
+                            <p style="margin: 0; font-size: 14px; color: #64748b;"><strong>Units:</strong> ${unitsPayload.length}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="background-color: #f8fafc; padding: 20px; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0; color: #94a3b8; font-size: 12px;">© ${new Date().getFullYear()} PropertyPro Inc. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        `
+      });
+    }
 
     return NextResponse.json(property, { status: 201 });
   } catch (error: any) {

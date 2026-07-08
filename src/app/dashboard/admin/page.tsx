@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const [payouts, setPayouts] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [owners, setOwners] = useState<any[]>([]);
+  const [profitData, setProfitData] = useState({ totalProfit: 0, totalVolumeProcessed: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,14 +25,16 @@ export default function AdminDashboard() {
 
   const fetchAdminData = async () => {
     try {
-      const [payoutRes, propRes, ownerRes] = await Promise.all([
+      const [payoutRes, propRes, ownerRes, profitRes] = await Promise.all([
         fetch("/api/payouts"),
         fetch("/api/properties"),
         fetch("/api/admin/owners/list"),
+        fetch("/api/admin/profit")
       ]);
       setPayouts(await payoutRes.json());
       setProperties(await propRes.json());
       if (ownerRes.ok) setOwners(await ownerRes.json());
+      if (profitRes.ok) setProfitData(await profitRes.json());
     } catch (err) {
       console.error(err);
       toast.error("Failed to load platform data.");
@@ -119,12 +122,14 @@ export default function AdminDashboard() {
         <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-semibold text-[#0F172A]">Total Revenue</p>
-              <DollarSign className="h-5 w-5 text-[#94A3B8]" />
+              <p className="text-sm font-semibold text-[#0F172A]">Platform Profit</p>
+              <DollarSign className="h-5 w-5 text-green-600" />
             </div>
-            <p className="text-3xl font-bold text-[#0F172A] mb-1">${settledVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="text-3xl font-bold text-green-600 mb-1">
+              ${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
             <p className="text-sm text-[#64748B] flex items-center gap-1">
-              <Activity className="h-3.5 w-3.5 text-[#94A3B8]" /> Disbursed Landlord Payouts
+              <Activity className="h-3.5 w-3.5 text-[#94A3B8]" /> Net commissions collected
             </p>
           </CardContent>
         </Card>

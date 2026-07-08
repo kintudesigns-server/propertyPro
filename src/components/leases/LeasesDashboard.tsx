@@ -107,14 +107,25 @@ export default function LeasesDashboard({
     }
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const hasUnpaidDeposit = (l: any) => {
+    return l.invoices?.some((inv: any) => 
+      l.securityDeposit &&
+      Number(inv.amount) === Number(l.securityDeposit) &&
+      inv.status === "UNPAID"
+    );
+  };
+
+  const getStatusBadge = (l: any) => {
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) {
+      return <span className="flex items-center gap-1 text-[11px] font-bold text-blue-600"><Clock className="h-3 w-3" /> Awaiting Deposit</span>;
+    }
+    switch (l.status) {
       case "ACTIVE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#10B981]"><CheckCircle className="h-3 w-3" /> Active</span>;
       case "PENDING_SIGNATURE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#F59E0B]"><Clock className="h-3 w-3" /> Pending</span>;
       case "DRAFT": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#64748B]"><FileText className="h-3 w-3" /> Draft</span>;
       case "TERMINATED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Terminated</span>;
       case "EXPIRED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Expired</span>;
-      default: return <span className="flex items-center gap-1 text-[11px] font-bold text-gray-500">{status}</span>;
+      default: return <span className="flex items-center gap-1 text-[11px] font-bold text-gray-500">{l.status}</span>;
     }
   };
 
@@ -149,8 +160,9 @@ export default function LeasesDashboard({
     }
   };
 
-  const getStatusBgColor = (status: string) => {
-    switch (status) {
+  const getStatusBgColor = (l: any) => {
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50";
+    switch (l.status) {
       case "ACTIVE": return "bg-[#DCFCE7]";
       case "PENDING_SIGNATURE": return "bg-[#FEF3C7]";
       case "DRAFT": return "bg-[#F1F5F9]";
@@ -361,8 +373,8 @@ export default function LeasesDashboard({
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className={`px-2 py-1 rounded-md ${getStatusBgColor(l.status)} border border-transparent`}>
-                      {getStatusBadge(l.status)}
+                    <div className={`px-2 py-1 rounded-md ${getStatusBgColor(l)} border border-transparent`}>
+                      {getStatusBadge(l)}
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger className="h-7 w-7 rounded-lg hover:bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] transition-colors focus:outline-none opacity-0 group-hover:opacity-100 border border-transparent hover:border-[#E2E8F0]">
@@ -518,9 +530,9 @@ export default function LeasesDashboard({
                         </div>
                       </TableCell>
                       <TableCell className="py-4">
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${l.status === 'ACTIVE' ? 'border-[#10B981]/20 bg-[#10B981]/10 text-[#10B981]' : l.status === 'TERMINATED' ? 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444]' : 'border-[#64748B]/20 bg-[#F1F5F9] text-[#64748B]'}`}>
-                          {l.status === 'ACTIVE' ? <CheckCircle className="h-3.5 w-3.5" /> : l.status === 'TERMINATED' ? <XCircle className="h-3.5 w-3.5" /> : null}
-                          <span className="text-xs font-bold capitalize">{l.status.toLowerCase()}</span>
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? 'border-blue-200 bg-blue-50 text-blue-700' : l.status === 'ACTIVE' ? 'border-[#10B981]/20 bg-[#10B981]/10 text-[#10B981]' : l.status === 'TERMINATED' ? 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444]' : 'border-[#64748B]/20 bg-[#F1F5F9] text-[#64748B]'}`}>
+                          {l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? <Clock className="h-3.5 w-3.5" /> : l.status === 'ACTIVE' ? <CheckCircle className="h-3.5 w-3.5" /> : l.status === 'TERMINATED' ? <XCircle className="h-3.5 w-3.5" /> : null}
+                          <span className="text-xs font-bold capitalize">{l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? 'Awaiting Deposit' : l.status.toLowerCase()}</span>
                         </div>
                       </TableCell>
                       <TableCell className="py-4">

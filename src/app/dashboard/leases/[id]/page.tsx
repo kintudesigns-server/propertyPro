@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { generateLeasePDF } from "@/lib/pdfGenerator";
 import Link from "next/link";
@@ -25,6 +25,12 @@ export default function LeaseDetailsPage() {
   const [showSignModal, setShowSignModal] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [signatureConsent, setSignatureConsent] = useState(false);
+  const [signStep, setSignStep] = useState(1); // 1=terms, 2=draw signature, 3=confirm
+  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
+  const [canvasSignatureData, setCanvasSignatureData] = useState<string | null>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = React.useRef(false);
+  const lastPosRef = React.useRef({ x: 0, y: 0 });
 
   const fetchLease = async () => {
     try {
@@ -56,14 +62,22 @@ export default function LeaseDetailsPage() {
       return;
     }
 
+    // Use the captured signature from state (since canvas is unmounted in Step 3)
+    const signatureImageUrl = canvasSignatureData;
+
     setSigning(true);
     try {
       const res = await fetch(`/api/leases/${lease.id}/sign`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signatureImageUrl }),
       });
       if (res.ok) {
         toast.success("Lease signed successfully! Welcome to your new home.");
         setShowSignModal(false);
+        setSignStep(1);
+        setHasScrolledTerms(false);
+        setCanvasSignatureData(null);
         fetchLease();
       } else {
         const err = await res.json();
@@ -73,6 +87,50 @@ export default function LeaseDetailsPage() {
       toast.error("Error signing lease.");
     } finally {
       setSigning(false);
+    }
+  };
+
+  // Canvas drawing helpers
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    isDrawingRef.current = true;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    lastPosRef.current = { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawingRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = "#1E293B";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+    lastPosRef.current = { x, y };
+    setCanvasSignatureData(canvas.toDataURL());
+  };
+
+  const stopDrawing = () => { isDrawingRef.current = false; };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setCanvasSignatureData(null);
     }
   };
 
@@ -129,16 +187,6 @@ export default function LeaseDetailsPage() {
     </div>;
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "ACTIVE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#DCFCE7] text-[#10B981] rounded-full text-xs font-bold shadow-sm"><CheckCircle className="h-3.5 w-3.5" /> Active Lease</span>;
-      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEF3C7] text-[#F59E0B] rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Pending Signature</span>;
-      case "EXPIRED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Expired</span>;
-      case "TERMINATED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Terminated</span>;
-      case "DRAFT": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#F1F5F9] text-[#64748B] rounded-full text-xs font-bold shadow-sm"><FileText className="h-3.5 w-3.5" /> Draft</span>;
-      default: return <span className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shadow-sm">{status}</span>;
-    }
-  };
 
   const calculateProgress = () => {
     if (!lease.startDate || !lease.endDate) return 0;
@@ -178,6 +226,20 @@ export default function LeaseDetailsPage() {
       inv.status === "UNPAID"
   );
 
+  const getStatusBadge = (status: string) => {
+    if (status === "ACTIVE" && unpaidDepositInvoice) {
+      return <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Awaiting Deposit</span>;
+    }
+    switch (status) {
+      case "ACTIVE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#DCFCE7] text-[#10B981] border border-[#A7F3D0] rounded-full text-xs font-bold shadow-sm"><CheckCircle className="h-3.5 w-3.5" /> Active Lease</span>;
+      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEF3C7] text-[#F59E0B] border border-[#FDE68A] rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Pending Signature</span>;
+      case "EXPIRED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Expired</span>;
+      case "TERMINATED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Terminated</span>;
+      case "DRAFT": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0] rounded-full text-xs font-bold shadow-sm"><FileText className="h-3.5 w-3.5" /> Draft</span>;
+      default: return <span className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shadow-sm">{status}</span>;
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-2 sm:px-0">
       {/* Top Nav */}
@@ -189,40 +251,46 @@ export default function LeaseDetailsPage() {
         <span className="text-[#0F172A] truncate max-w-[200px]">Lease {lease.id.substring(0, 8)}...</span>
       </div>
 
-      {/* Action Banner for pending signature leases */}
+      {/* Action Banner — Step 1: Sign first, Step 2: Pay deposit */}
       {isTenant && lease.status === "PENDING_SIGNATURE" && (
-        <Card className={`p-5 rounded-[20px] shadow-sm border ${
-          unpaidDepositInvoice 
-            ? "bg-red-50 border-red-200 text-red-900" 
-            : "bg-amber-50 border-amber-200 text-amber-900"
-        } flex flex-col md:flex-row justify-between items-start md:items-center gap-4`}>
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h4 className="font-extrabold text-base flex items-center gap-2">
-              <ShieldAlert className={`h-5 w-5 ${unpaidDepositInvoice ? "text-red-500" : "text-amber-500"}`} />
-              {unpaidDepositInvoice ? "Security Deposit Required" : "Signature Required"}
+              <ShieldAlert className="h-5 w-5 text-amber-500" />
+              Step 1 of 2 — Signature Required
             </h4>
             <p className="text-sm font-semibold opacity-90 mt-1">
-              {unpaidDepositInvoice 
-                ? `You must pay the security deposit of $${Number(lease.securityDeposit).toFixed(2)} before you can sign your lease.`
-                : "You have verified your lease agreement and paid the security deposit. Please sign the lease contract to activate your tenancy."
-              }
+              Please review your lease agreement below and sign it to activate your tenancy.
+              {unpaidDepositInvoice && ` After signing, you'll be prompted to pay the $${Number(lease.securityDeposit).toFixed(2)} security deposit.`}
             </p>
           </div>
-          {unpaidDepositInvoice ? (
-            <Button
-              onClick={() => handlePayInvoice(unpaidDepositInvoice.id)}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
-            >
-              Pay Security Deposit
-            </Button>
-          ) : (
-            <Button
-              onClick={() => setShowSignModal(true)}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
-            >
-              Review & Sign Lease
-            </Button>
-          )}
+          <Button
+            onClick={() => setShowSignModal(true)}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+          >
+            Review & Sign Lease
+          </Button>
+        </Card>
+      )}
+
+      {/* Action Banner — Step 2: Pay deposit after signing */}
+      {isTenant && lease.status === "ACTIVE" && unpaidDepositInvoice && (
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-blue-50 border-blue-200 text-blue-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h4 className="font-extrabold text-base flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-blue-500" />
+              Step 2 of 2 — Security Deposit Due
+            </h4>
+            <p className="text-sm font-semibold opacity-90 mt-1">
+              Lease signed! Now please pay your security deposit of <strong>${Number(lease.securityDeposit).toFixed(2)}</strong> to complete your move-in.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push('/dashboard/payments/pay-rent')}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+          >
+            Pay Security Deposit
+          </Button>
         </Card>
       )}
 
@@ -243,34 +311,67 @@ export default function LeaseDetailsPage() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           {isTenant ? (
             <>
+              {/* Step 1: Always show Sign button when pending */}
               {lease.status === "PENDING_SIGNATURE" && (
-                <>
-                  {unpaidDepositInvoice ? (
-                    <Button
-                      onClick={() => handlePayInvoice(unpaidDepositInvoice.id)}
-                      className="h-10 rounded-xl font-bold bg-[#10B981] hover:bg-[#059669] text-white shadow-sm flex-1 md:flex-none"
-                    >
-                      <CreditCard className="mr-2 h-4 w-4" /> Pay Deposit (${Number(lease.securityDeposit).toFixed(2)})
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => setShowSignModal(true)}
-                      className="h-10 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex-1 md:flex-none"
-                    >
-                      Sign Lease
-                    </Button>
-                  )}
-                </>
+                <Button
+                  onClick={() => setShowSignModal(true)}
+                  className="h-10 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex-1 md:flex-none"
+                >
+                  Sign Lease
+                </Button>
               )}
-              <Button 
-                onClick={() => generateLeasePDF(lease)}
-                className="h-10 rounded-xl font-bold bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm flex-1 md:flex-none"
-              >
-                <FileDown className="mr-2 h-4 w-4" /> Download PDF
-              </Button>
+              {/* Step 2: Show Pay Deposit only after lease is ACTIVE */}
+              {lease.status === "ACTIVE" && unpaidDepositInvoice && (
+                <Button
+                  onClick={() => router.push('/dashboard/payments/pay-rent')}
+                  className="h-10 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex-1 md:flex-none"
+                >
+                  <CreditCard className="mr-2 h-4 w-4" /> Pay Deposit (${Number(lease.securityDeposit).toFixed(2)})
+                </Button>
+              )}
+              {unpaidDepositInvoice ? (
+                <div className="group relative flex-1 md:flex-none">
+                  <Button 
+                    disabled
+                    className="w-full h-10 rounded-xl font-bold bg-slate-100 text-slate-400 shadow-sm opacity-100"
+                  >
+                    <Lock className="mr-2 h-4 w-4" /> Locked
+                  </Button>
+                  <div className="absolute top-full mt-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 text-center">
+                    Pay security deposit to unlock lease documents
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => generateLeasePDF(lease)}
+                  className="h-10 rounded-xl font-bold bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm flex-1 md:flex-none"
+                >
+                  <FileDown className="mr-2 h-4 w-4" /> Download PDF
+                </Button>
+              )}
             </>
           ) : (
             <>
+              {unpaidDepositInvoice ? (
+                <div className="group relative flex-1 md:flex-none">
+                  <Button 
+                    disabled
+                    className="w-full h-10 rounded-xl font-bold bg-slate-100 text-slate-400 shadow-sm opacity-100"
+                  >
+                    <Lock className="mr-2 h-4 w-4" /> Locked
+                  </Button>
+                  <div className="absolute top-full mt-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 text-center right-0">
+                    Awaiting tenant security deposit payment
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => generateLeasePDF(lease)}
+                  className="h-10 rounded-xl font-bold bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm flex-1 md:flex-none"
+                >
+                  <FileDown className="mr-2 h-4 w-4" /> Download PDF
+                </Button>
+              )}
               <Button variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A] shadow-sm flex-1 md:flex-none">
                 Manage Payments
               </Button>
@@ -729,31 +830,88 @@ export default function LeaseDetailsPage() {
           </div>
 
           {(lease.status === "ACTIVE" || lease.status === "EXPIRED" || lease.status === "TERMINATED") ? (
-            <Card className="p-0 rounded-[24px] shadow-sm border-[#E2E8F0] overflow-hidden">
-              <div className="p-6">
-                <div className="flex justify-between items-center py-4 border-b border-[#F1F5F9] last:border-0 last:pb-0">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0 border border-red-100">
-                      <FileDown className="h-6 w-6" />
+            <div className="space-y-4">
+              <Card className="p-0 rounded-[24px] shadow-sm border-[#E2E8F0] overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center py-4 border-b border-[#F1F5F9] last:border-0 last:pb-0">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0 border border-red-100">
+                        <FileDown className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[#0F172A] text-base truncate">Signed Lease Agreement</p>
+                        <p className="text-xs font-medium text-[#64748B] mt-0.5 truncate">Auto-generated PDF • {new Date(lease.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-[#0F172A] text-base truncate">Signed Lease Agreement</p>
-                      <p className="text-xs font-medium text-[#64748B] mt-0.5 truncate">Auto-generated PDF • {new Date(lease.createdAt).toLocaleDateString()}</p>
+                    <div className="flex items-center gap-2">
+                      {unpaidDepositInvoice ? (
+                        <>
+                          <span className="hidden md:inline-flex px-2.5 py-1 bg-slate-100 text-slate-500 text-[11px] font-bold rounded-lg uppercase tracking-wider mr-2 border border-slate-200">Locked</span>
+                          <Button 
+                            disabled
+                            variant="outline" 
+                            className="h-10 rounded-xl text-sm font-bold border-[#E2E8F0] text-slate-400 bg-slate-50 shadow-sm opacity-100 cursor-not-allowed"
+                          >
+                            <Lock className="h-4 w-4 mr-2" /> Locked
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="hidden md:inline-flex px-2.5 py-1 bg-[#ECFDF5] text-[#10B981] text-[11px] font-bold rounded-lg uppercase tracking-wider mr-2">Signed</span>
+                          <Button 
+                            onClick={() => generateLeasePDF(lease)}
+                            variant="outline" 
+                            className="h-10 rounded-xl text-sm font-bold border-[#E2E8F0] text-[#0F172A] hover:bg-slate-50 shadow-sm"
+                          >
+                            Download
+                          </Button>
+                        </>
+                      )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="hidden md:inline-flex px-2.5 py-1 bg-[#ECFDF5] text-[#10B981] text-[11px] font-bold rounded-lg uppercase tracking-wider mr-2">Signed</span>
-                    <Button 
-                      onClick={() => generateLeasePDF(lease)}
-                      variant="outline" 
-                      className="h-10 rounded-xl text-sm font-bold border-[#E2E8F0] text-[#0F172A] hover:bg-slate-50 shadow-sm"
-                    >
-                      Download
-                    </Button>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+
+              {/* Tenant Signature Record */}
+              {lease.signatureImageUrl && (
+                <Card className="p-0 rounded-[24px] shadow-sm border-[#E2E8F0] overflow-hidden relative">
+                  {unpaidDepositInvoice && (
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center border border-slate-200 rounded-[24px]">
+                      <div className="bg-slate-800 text-white p-4 rounded-2xl shadow-xl flex flex-col items-center max-w-[280px] text-center">
+                        <Lock className="h-8 w-8 text-slate-300 mb-2" />
+                        <p className="font-bold text-sm">Signature Locked</p>
+                        <p className="text-xs text-slate-300 mt-1">Pay the security deposit to unlock the full signature record.</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="px-6 py-4 border-b border-[#F1F5F9] flex justify-between items-center bg-slate-50/50">
+                    <div>
+                      <h3 className="font-bold text-[#0F172A]">Tenant Signature Record</h3>
+                      <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                        Signed by {lease.tenant?.name} on {lease.signedAt ? new Date(lease.signedAt).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded-lg border border-emerald-200 uppercase tracking-wider">Verified ✓</span>
+                  </div>
+                  <div className="p-6 flex flex-col items-center gap-4">
+                    <div className="w-full max-w-sm bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-inner">
+                      <img
+                        src={lease.signatureImageUrl}
+                        alt="Tenant Signature"
+                        className="w-full h-32 object-contain p-3"
+                      />
+                      <div className="border-t border-slate-100 px-4 py-2 bg-slate-50/50">
+                        <p className="text-xs font-black text-slate-700">{lease.tenant?.name}</p>
+                        <p className="text-[10px] text-slate-400 font-semibold">{lease.signedAt ? new Date(lease.signedAt).toLocaleString() : ''}</p>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-semibold text-center max-w-sm">
+                      This signature was electronically captured and is legally binding under the ESIGN Act / UETA.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
           ) : (
             <Card className="p-10 rounded-[24px] shadow-sm border-[#E2E8F0] flex flex-col items-center justify-center text-center min-h-[300px]">
               <div className="h-20 w-20 bg-[#F1F5F9] rounded-full flex items-center justify-center text-[#94A3B8] mb-6">
@@ -824,71 +982,215 @@ export default function LeaseDetailsPage() {
         </div>
       )}
 
-      {/* E-Signature Modal */}
+      {/* ─── 3-STEP E-SIGNATURE MODAL ─── */}
       {showSignModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-[24px] shadow-2xl overflow-hidden flex flex-col border border-slate-200">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h2 className="text-xl font-black text-slate-900">Sign Lease Agreement</h2>
-              <button 
-                onClick={() => setShowSignModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <XCircle className="h-5 w-5" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col border border-slate-200 overflow-hidden" style={{ maxHeight: '92vh' }}>
             
-            <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-sm font-semibold text-amber-900">
-                <p>By electronically signing this document, you are legally binding yourself to the terms and conditions outlined in the lease agreement for <strong>Unit {lease.unit?.name}</strong> at <strong>{lease.unit?.property?.name}</strong>.</p>
+            {/* Modal Header with Step Indicator */}
+            <div className="px-7 py-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
+              <div>
+                <h2 className="text-xl font-black text-slate-900">Sign Lease Agreement</h2>
+                <p className="text-xs font-semibold text-slate-400 mt-0.5">Unit {lease.unit?.name} · {lease.unit?.property?.name}</p>
               </div>
-
-              <div className="space-y-3">
-                <label className="block text-sm font-bold text-slate-700">Digital Signature <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  placeholder="Type your full legal name"
-                  value={signatureName}
-                  onChange={(e) => setSignatureName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-medium text-slate-900"
-                />
-                <p className="text-[11px] font-medium text-slate-500">Must exactly match: <strong>{lease.tenant?.name}</strong></p>
-              </div>
-
-              <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <input
-                  type="checkbox"
-                  id="consent"
-                  checked={signatureConsent}
-                  onChange={(e) => setSignatureConsent(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
-                />
-                <label htmlFor="consent" className="text-sm font-medium text-slate-700 cursor-pointer leading-snug">
-                  I acknowledge that this electronic signature is the legally binding equivalent of my handwritten signature. I have read, understand, and agree to all terms outlined in the Residential Lease Agreement.
-                </label>
+              <div className="flex items-center gap-3">
+                {[1, 2, 3].map(s => (
+                  <div key={s} className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-black transition-all ${
+                    s < signStep ? 'bg-emerald-500 text-white' : s === signStep ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {s < signStep ? <CheckCircle className="h-4 w-4" /> : s}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowSignModal(false)}
-                className="h-11 px-6 rounded-xl font-bold border-slate-200 text-slate-700"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmSignLease}
-                disabled={signing || !signatureName.trim() || !signatureConsent}
-                className="h-11 px-6 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {signing ? (
-                  <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Signing...</span>
-                ) : (
-                  "Confirm & Sign Lease"
-                )}
-              </Button>
-            </div>
+            {/* ── STEP 1: Terms & Conditions ── */}
+            {signStep === 1 && (
+              <>
+                <div className="px-7 pt-5 pb-2">
+                  <h3 className="text-base font-black text-slate-800">Read & Agree to Lease Terms</h3>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Scroll to the bottom to proceed.</p>
+                </div>
+                <div
+                  className="mx-7 mb-4 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50"
+                  style={{ maxHeight: '50vh' }}
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+                      setHasScrolledTerms(true);
+                    }
+                  }}
+                >
+                  <div className="p-5 space-y-5 text-sm text-slate-600 leading-relaxed">
+                    {/* Platform Standard Terms */}
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-2">
+                        <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-[10px] font-black">P</span>
+                        Platform Standard Terms
+                      </h4>
+                      <div className="space-y-2 text-xs">
+                        <p><strong className="text-slate-800">1. Rent Payment:</strong> Rent is due on Day {lease.rentDueDay || 1} of each month. A grace period of {lease.gracePeriodDays || 5} days applies. Late fees of {lease.lateFeeType === 'PERCENTAGE' ? `${lease.lateFeeAmount}%` : `$${Number(lease.lateFeeAmount || 0).toFixed(2)}`} will be charged after the grace period.</p>
+                        <p><strong className="text-slate-800">2. Security Deposit:</strong> A security deposit of ${Number(lease.securityDeposit || 0).toFixed(2)} is required. This will be held and refunded subject to the unit condition upon move-out.</p>
+                        <p><strong className="text-slate-800">3. Maintenance:</strong> Tenants must report any maintenance issues promptly. Damage caused by tenant negligence may be deducted from the security deposit.</p>
+                        <p><strong className="text-slate-800">4. Early Termination:</strong> Early termination before {new Date(lease.endDate).toLocaleDateString()} may result in a fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)}.</p>
+                        <p><strong className="text-slate-800">5. Renewal:</strong> You will be notified {lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.</p>
+                        <p><strong className="text-slate-800">6. Privacy & Data:</strong> Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.</p>
+                        <p><strong className="text-slate-800">7. Electronic Signature:</strong> By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).</p>
+                        <p><strong className="text-slate-800">8. Governing Law:</strong> This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
+                      </div>
+                    </div>
+
+                    {/* Owner Custom Terms */}
+                    {lease.customTerms && (
+                      <div>
+                        <h4 className="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-2">
+                          <span className="w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[10px] font-black">O</span>
+                          Property-Specific Terms (Added by Owner)
+                        </h4>
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 whitespace-pre-wrap">
+                          {lease.customTerms}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Lease Financial Summary */}
+                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                      <h4 className="font-extrabold text-indigo-900 text-sm mb-3">Lease Financial Summary</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                        <div><span className="text-slate-500">Monthly Rent:</span> <strong className="text-slate-900">${Number(lease.monthlyRent || 0).toLocaleString()}</strong></div>
+                        <div><span className="text-slate-500">Security Deposit:</span> <strong className="text-slate-900">${Number(lease.securityDeposit || 0).toLocaleString()}</strong></div>
+                        <div><span className="text-slate-500">Start Date:</span> <strong className="text-slate-900">{new Date(lease.startDate).toLocaleDateString()}</strong></div>
+                        <div><span className="text-slate-500">End Date:</span> <strong className="text-slate-900">{new Date(lease.endDate).toLocaleDateString()}</strong></div>
+                      </div>
+                    </div>
+
+                    <div className="text-center py-2 text-[11px] text-slate-400 font-semibold border-t border-slate-200 pt-4">
+                      ✓ You've reached the end of the terms.
+                    </div>
+                  </div>
+                </div>
+                <div className="px-7 py-4 border-t border-slate-100 flex justify-between items-center">
+                  <button onClick={() => setShowSignModal(false)} className="text-sm font-bold text-slate-400 hover:text-slate-600">Cancel</button>
+                  <Button
+                    onClick={() => setSignStep(2)}
+                    disabled={!hasScrolledTerms}
+                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40"
+                  >
+                    {hasScrolledTerms ? 'I Have Read — Continue →' : 'Scroll to Read All Terms'}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* ── STEP 2: Draw Signature ── */}
+            {signStep === 2 && (
+              <>
+                <div className="px-7 pt-5 pb-3">
+                  <h3 className="text-base font-black text-slate-800">Draw Your Signature</h3>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Use your mouse or finger to sign in the box below.</p>
+                </div>
+                <div className="px-7 pb-4 space-y-4 flex-1 overflow-y-auto">
+                  {/* Signature Pad */}
+                  <div className="border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50 relative">
+                    <canvas
+                      ref={canvasRef}
+                      width={600}
+                      height={200}
+                      className="w-full touch-none cursor-crosshair"
+                      onMouseDown={startDrawing}
+                      onMouseMove={draw}
+                      onMouseUp={stopDrawing}
+                      onMouseLeave={stopDrawing}
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={stopDrawing}
+                    />
+                    {!canvasSignatureData && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <p className="text-slate-300 text-sm font-bold">Sign here...</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end">
+                    <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:text-red-600 underline">Clear & Redraw</button>
+                  </div>
+
+                  {/* Legal Name Confirmation */}
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-bold text-slate-700">Confirm Full Legal Name <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="Type your full legal name to confirm"
+                      value={signatureName}
+                      onChange={(e) => setSignatureName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium text-slate-900 text-sm"
+                    />
+                    <p className="text-[11px] font-semibold text-slate-400">Must exactly match: <strong className="text-slate-700">{lease.tenant?.name}</strong></p>
+                  </div>
+                </div>
+                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
+                  <Button variant="outline" onClick={() => setSignStep(1)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                  <Button
+                    onClick={() => {
+                      if (!canvasSignatureData) { toast.error("Please draw your signature first."); return; }
+                      if (!signatureName.trim()) { toast.error("Please type your legal name."); return; }
+                      setSignStep(3);
+                    }}
+                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    Continue →
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* ── STEP 3: Final Confirmation ── */}
+            {signStep === 3 && (
+              <>
+                <div className="px-7 pt-5 pb-3">
+                  <h3 className="text-base font-black text-slate-800">Confirm & Sign</h3>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Review your signature before final submission.</p>
+                </div>
+                <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
+                  {/* Signature Preview */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Signature Preview</p>
+                    </div>
+                    {canvasSignatureData && (
+                      <img src={canvasSignatureData} alt="Signature Preview" className="w-full h-28 object-contain p-2 bg-white" />
+                    )}
+                    <div className="bg-slate-50 px-4 py-2 border-t border-slate-200">
+                      <p className="text-xs font-bold text-slate-800">{signatureName}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{new Date().toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Final Checkbox */}
+                  <div className="flex items-start gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <input
+                      type="checkbox" id="finalConsent"
+                      checked={signatureConsent}
+                      onChange={(e) => setSignatureConsent(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 cursor-pointer"
+                    />
+                    <label htmlFor="finalConsent" className="text-xs font-semibold text-indigo-900 cursor-pointer leading-relaxed">
+                      I, <strong>{signatureName || '___'}</strong>, acknowledge that this electronic signature is the legally binding equivalent of my handwritten signature under ESIGN/UETA law. I have read and agree to all terms of this lease agreement for <strong>Unit {lease.unit?.name}</strong> at <strong>{lease.unit?.property?.name}</strong>.
+                    </label>
+                  </div>
+                </div>
+                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
+                  <Button variant="outline" onClick={() => setSignStep(2)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                  <Button
+                    onClick={handleConfirmSignLease}
+                    disabled={signing || !signatureConsent}
+                    className="h-11 px-8 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-40"
+                  >
+                    {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing...</> : '✓ Confirm & Sign Lease'}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

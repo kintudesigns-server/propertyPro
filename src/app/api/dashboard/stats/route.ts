@@ -102,10 +102,69 @@ export async function GET(req: NextRequest) {
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
     const expiringLeases = activeLeases.filter((l) => l.endDate <= thirtyDaysFromNow).length;
 
-    // 5. Check Onboarding Progress
+    // 8. 6-Month Paid Revenue History
+    const revenueHistory = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const year = d.getFullYear();
+      const monthIndex = d.getMonth();
+      const monthLabel = d.toLocaleString("default", { month: "short" });
+      
+      const startOfMonth = new Date(year, monthIndex, 1);
+      const endOfMonth = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+      
+      const monthlyPaidInvoices = invoices.filter(
+        (inv) => inv.status === "PAID" && inv.createdAt >= startOfMonth && inv.createdAt <= endOfMonth
+      );
+      
+      const revenue = monthlyPaidInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0);
+      
+      revenueHistory.push({
+        name: monthLabel,
+        revenue: parseFloat(revenue.toFixed(2)),
+      });
+    }
+
+    // 9. 3 Most Recent Maintenance Requests
+    const recentMaintenance = await prisma.maintenanceRequest.findMany({
+      where: {
+        unit: { property: ownerFilter },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
+      include: {
+        unit: {
+          select: {
+            name: true,
+            property: {
+              select: {
+                name: true,
+              }
+            }
+          }
+        },
+        tenant: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
+
+    // 5. Check Onboarding Progress and Subscription
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { employmentStatus: true, bankName: true }
+      select: { 
+        employmentStatus: true, 
+        bankName: true,
+        subscriptionStatus: true,
+        pricingTier: {
+          select: { name: true }
+        }
+      }
     });
     
     const profileComplete = !!user?.employmentStatus;
@@ -129,6 +188,10 @@ export async function GET(req: NextRequest) {
       recentEvents: 0, // Placeholder
       profileComplete,
       bankConnected,
+      subscriptionTier: user?.pricingTier?.name || "Hobbyist",
+      subscriptionStatus: user?.subscriptionStatus || "Inactive",
+      revenueHistory,
+      recentMaintenanceRequests: recentMaintenance,
     });
   } catch (err: any) {
     console.error("Dashboard Stats Error:", err);

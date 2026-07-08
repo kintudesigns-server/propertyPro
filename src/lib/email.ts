@@ -38,25 +38,6 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     }
   }
 
-  // 2. Try Resend if configured
-  if (process.env.RESEND_API_KEY) {
-    try {
-      // @ts-expect-error resend is dynamically imported and optional
-      const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || "PropertyPro <noreply@propertypro.com>",
-        to,
-        subject,
-        text: text || "",
-        html: html || text || "",
-      });
-      console.log(`[Email] Sent via Resend to ${to}: "${subject}"`);
-      return;
-    } catch (err) {
-      console.error("[Email] Failed to send via Resend:", err);
-    }
-  }
 
   // Fallback: log to console for development
   console.log("─────────────────────────────────────────────");

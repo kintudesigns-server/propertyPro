@@ -234,7 +234,8 @@ export default function InvoicesPage() {
                 <TableHead className="font-bold text-[#64748B]">Property & Tenant</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Issue Date</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Due Date</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Amount</TableHead>
+                <TableHead className="font-bold text-[#64748B]">Gross Amount</TableHead>
+                {!isTenant && <TableHead className="font-bold text-[#64748B]">Net Earnings</TableHead>}
                 <TableHead className="font-bold text-[#64748B]">Status</TableHead>
                 <TableHead className="text-right font-bold text-[#64748B]">Actions</TableHead>
               </TableRow>
@@ -267,6 +268,13 @@ export default function InvoicesPage() {
                     <TableCell className="font-black text-[#0F172A]">
                       ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
+                    {!isTenant && (
+                      <TableCell className="font-bold text-green-600">
+                        {inv.netToOwner 
+                          ? `$${Number(inv.netToOwner).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                          : "-"}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {getStatusBadge(inv.status)}
                     </TableCell>
@@ -455,12 +463,29 @@ export default function InvoicesPage() {
                     <div className="mt-1">{getStatusBadge(selectedInvoice.status)}</div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Amount Due</p>
+                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Gross Rent Billed</p>
                     <p className="text-xl font-black text-[#0F172A] mt-0.5">
                       ${Number(selectedInvoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </div>
                 </div>
+
+                {!isTenant && selectedInvoice.status === "PAID" && selectedInvoice.adminFee !== null && (
+                  <div className="grid grid-cols-2 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                    <div>
+                      <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Platform Fee (Commission)</p>
+                      <p className="text-base font-bold text-blue-900 mt-0.5">
+                        -${Number(selectedInvoice.adminFee).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-green-700 uppercase tracking-wider">Net Payout Received</p>
+                      <p className="text-xl font-black text-green-700 mt-0.5">
+                        ${Number(selectedInvoice.netToOwner).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Key Dates */}
                 <div className="grid grid-cols-2 gap-4">

@@ -722,6 +722,8 @@ export default function TransactionsPage() {
                           { label: "Status", value: isRefund ? "Refunded" : isSuccess ? "Succeeded (Paid)" : "Failed" },
                           { label: "Category", value: selectedTx.category },
                           { label: "Type", value: isTenant ? (isIncome ? "Rent Payment (Outflow)" : "Refund Received (Inflow)") : (isIncome ? "Ledger Credit (Inflow)" : "Ledger Debit (Outflow)") },
+                          { label: "Gross Rent Billed", value: selectedTx.feeDeducted ? `$${(Number(selectedTx.amount) + Number(selectedTx.feeDeducted)).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "N/A" },
+                          { label: "Platform Fee Deducted", value: selectedTx.feeDeducted ? `-$${Number(selectedTx.feeDeducted).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "N/A" },
                           { label: "Tenant Name", value: selectedTx.tenant?.name || "N/A" },
                           { label: "Tenant Email", value: selectedTx.tenant?.email || "N/A" },
                           { label: "Created Date", value: new Date(selectedTx.createdAt).toLocaleString() },

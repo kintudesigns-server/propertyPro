@@ -34,11 +34,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pricing tier not found" }, { status: 404 });
     }
 
+    // Backend validation: Prevent downgrade if they exceed the new tier's unit limit
+    const unitCount = await prisma.unit.count({
+      where: { property: { ownerId: userId } }
+    });
+
+    if (unitCount > tier.maxUnits) {
+      return NextResponse.json({ 
+        error: `Limit Exceeded: You currently have ${unitCount} units, but the ${tier.name} plan only allows up to ${tier.maxUnits}. Please delete units before downgrading.`
+      }, { status: 400 });
+    }
+
     const stripe = getStripe();
     if (!stripe) throw new Error("Stripe not initialized");
 
     // Create or retrieve Stripe Customer
     let customerId = user.stripeCustomerId;
+    
+    // Auto-heal logic: Check if the customer actually exists in Stripe (handles developers swapping API keys)
+    if (customerId) {
+      try {
+        await stripe.customers.retrieve(customerId);
+      } catch (err: any) {
+        if (err.message?.includes("No such customer")) {
+          customerId = null; // Force recreation
+        } else {
+          throw err;
+        }
+      }
+    }
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -48,7 +73,7 @@ export async function POST(req: NextRequest) {
       customerId = customer.id;
       await prisma.user.update({
         where: { id: user.id },
-        data: { stripeCustomerId: customerId },
+        data: { stripeCustomerId: customerId, stripeSubscriptionId: null, subscriptionStatus: "Inactive" },
       });
     }
 
@@ -141,18 +166,25 @@ export async function POST(req: NextRequest) {
     const invoice = subscription.latest_invoice as any;
     const paymentIntent = invoice?.payment_intent as any;
 
-    if (!paymentIntent?.client_secret) {
-      return NextResponse.json({ error: "Could not create payment intent for subscription" }, { status: 500 });
-    }
-
-    // Store the subscription ID on the user so webhook can update status
+    // Store the subscription ID on the user
     await prisma.user.update({
       where: { id: user.id },
       data: {
         stripeSubscriptionId: subscription.id,
         currentTierId: tier.id,
+        // If price is 0, there is no payment intent, so we instantly mark it active
+        subscriptionStatus: Number(tier.price) === 0 ? "Active" : user.subscriptionStatus,
       },
     });
+
+    if (Number(tier.price) === 0 || (paymentIntent && paymentIntent.status === 'succeeded')) {
+       // It's a free tier or somehow instantly succeeded, no frontend checkout needed
+       return NextResponse.json({ upgraded: true });
+    }
+
+    if (!paymentIntent?.client_secret) {
+      return NextResponse.json({ error: "Could not create payment intent for subscription" }, { status: 500 });
+    }
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

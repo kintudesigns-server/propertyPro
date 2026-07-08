@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wrench, MapPin, Calendar, Camera, UploadCloud, FileText, ArrowLeft, Loader2, User, X, ImageIcon } from "lucide-react";
+import { Wrench, MapPin, Calendar, Camera, UploadCloud, FileText, ArrowLeft, Loader2, User, X, ImageIcon, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -49,10 +49,28 @@ export default function NewMaintenanceRequestPage() {
     scheduledDate: "",
     photos: [] as string[],
     entryPermission: false,
+    hasPets: "No",
     preferredTimes: ""
   });
 
   const [selectedTenant, setSelectedTenant] = useState<any>(null);
+
+  const [prefDate, setPrefDate] = useState("");
+  const [prefTime, setPrefTime] = useState("");
+
+  useEffect(() => {
+    if (formData.entryPermission) {
+      setFormData(prev => ({ ...prev, preferredTimes: "Anytime (Permission Granted)" }));
+    } else if (prefDate && prefTime) {
+      setFormData(prev => ({ ...prev, preferredTimes: `${prefDate} | Window: ${prefTime}` }));
+    } else if (prefDate) {
+      setFormData(prev => ({ ...prev, preferredTimes: prefDate }));
+    } else if (prefTime) {
+      setFormData(prev => ({ ...prev, preferredTimes: prefTime }));
+    } else {
+      setFormData(prev => ({ ...prev, preferredTimes: "" }));
+    }
+  }, [prefDate, prefTime, formData.entryPermission]);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -195,10 +213,18 @@ export default function NewMaintenanceRequestPage() {
     setLoading(true);
 
     try {
+      // Append pet info to description if they have pets
+      const finalDescription = formData.hasPets === "Yes" 
+        ? `${formData.description}\n\n[Tenant Note: Pets are present in the unit]` 
+        : formData.description;
+        
+      const submitData = { ...formData, description: finalDescription };
+      delete (submitData as any).hasPets; // Remove before sending to API
+
       const res = await fetch("/api/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
 
       if (!res.ok) {
@@ -249,6 +275,17 @@ export default function NewMaintenanceRequestPage() {
                 className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
               />
             </div>
+
+            <div className="space-y-2.5">
+              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Description <span className="text-[#EF4444]">*</span></Label>
+              <Textarea 
+                required
+                placeholder="Please describe the issue in detail. What is happening? When did it start?"
+                value={formData.description}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({...formData, description: e.target.value})}
+                className="min-h-[120px] rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm resize-y"
+              />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2.5">
@@ -280,7 +317,7 @@ export default function NewMaintenanceRequestPage() {
                 <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Priority <span className="text-[#EF4444]">*</span></Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v || "MEDIUM"})} required>
                   <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
-                    <SelectValue />
+                    <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[#E2E8F0]">
                     <SelectItem value="LOW">Low - Routine</SelectItem>
@@ -289,15 +326,49 @@ export default function NewMaintenanceRequestPage() {
                     <SelectItem value="EMERGENCY">Emergency - Immediate Action</SelectItem>
                   </SelectContent>
                 </Select>
+                {formData.priority === "EMERGENCY" && (
+                  <div className="mt-2 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-red-700">Emergency Protocol</p>
+                      <p className="text-xs font-medium text-red-600 mt-0.5">For life-threatening issues, severe flooding, or active fires, immediately call 911 or the 24/7 property emergency hotline.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Permission to Enter <span className="text-[#EF4444]">*</span></Label>
-                <Select value={formData.entryPermission ? "true" : "false"} onValueChange={(v) => setFormData({...formData, entryPermission: v === "true"})} required>
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Pets in Unit? <span className="text-[#EF4444]">*</span></Label>
+                <Select value={formData.hasPets} onValueChange={(v) => setFormData({...formData, hasPets: v || "No"})} required>
                   <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
-                    <SelectValue />
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                    <SelectItem value="No">No pets</SelectItem>
+                    <SelectItem value="Yes">Yes, pets are present</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2.5">
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Permission to Enter <span className="text-[#EF4444]">*</span></Label>
+                <Select 
+                  value={formData.entryPermission ? "true" : "false"} 
+                  onValueChange={(v) => {
+                    const granted = v === "true";
+                    setFormData({
+                      ...formData, 
+                      entryPermission: granted,
+                      preferredTimes: granted ? "Anytime (Permission Granted)" : ""
+                    });
+                  }} 
+                  required
+                >
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                    <SelectValue placeholder="Select permission">
+                      {formData.entryPermission ? "Yes, enter if I am not home" : "No, I must be home"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[#E2E8F0]">
                     <SelectItem value="true">Yes, enter if I am not home</SelectItem>
@@ -306,27 +377,40 @@ export default function NewMaintenanceRequestPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Preferred Times <span className="text-[#EF4444]">*</span></Label>
-                <Input 
-                  required
-                  placeholder="e.g. Weekdays after 3PM"
-                  value={formData.preferredTimes}
-                  onChange={(e) => setFormData({...formData, preferredTimes: e.target.value})}
-                  className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
-                />
+              <div className="space-y-2.5 md:col-span-2">
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Preferred Scheduling <span className="text-[#EF4444]">*</span></Label>
+                <div className="flex gap-3">
+                  <div className="w-1/2">
+                    <Input
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      value={prefDate}
+                      onChange={(e) => setPrefDate(e.target.value)}
+                      disabled={formData.entryPermission}
+                      className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80"
+                      required={!formData.entryPermission}
+                    />
+                  </div>
+                  <div className="w-1/2">
+                    <Select 
+                      value={prefTime} 
+                      onValueChange={(v) => setPrefTime(v || "")} 
+                      disabled={formData.entryPermission}
+                      required={!formData.entryPermission}
+                    >
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
+                        <SelectValue placeholder="Time Window" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-[#E2E8F0]">
+                        <SelectItem value="Morning (8 AM - 12 PM)">Morning (8 AM - 12 PM)</SelectItem>
+                        <SelectItem value="Afternoon (12 PM - 4 PM)">Afternoon (12 PM - 4 PM)</SelectItem>
+                        <SelectItem value="Evening (4 PM - 7 PM)">Evening (4 PM - 7 PM)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {formData.entryPermission && <p className="text-xs text-emerald-600 font-bold mt-1">Permission to enter granted. Vendor will schedule automatically.</p>}
               </div>
-            </div>
-
-            <div className="space-y-2.5">
-              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Description <span className="text-[#EF4444]">*</span></Label>
-              <Textarea 
-                required
-                placeholder="Please describe the issue in detail..."
-                value={formData.description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({...formData, description: e.target.value})}
-                className="min-h-[120px] rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm resize-y"
-              />
             </div>
           </CardContent>
         </Card>

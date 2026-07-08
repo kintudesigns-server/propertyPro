@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +15,7 @@ import {
   Square,
   CheckCircle2,
   Building,
+  Building2,
   Search,
   ArrowRight,
   Calendar,
@@ -31,7 +32,9 @@ import {
   Upload,
   Trash2,
   Users,
-  ImageIcon
+  ImageIcon,
+  Map as MapIcon,
+  Sparkle
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -56,6 +59,7 @@ interface VacantUnit {
     coverPhoto: string | null;
     amenities: string[];
     type: string;
+    zoningType?: string | null;
   };
 }
 
@@ -74,10 +78,14 @@ export default function ListingsPage() {
   const [searchCity, setSearchCity] = useState("");
   const [maxRent, setMaxRent] = useState<string>("");
   const [minRooms, setMinRooms] = useState<string>("all");
+  const [propertyType, setPropertyType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("featured");
 
-  // Favorites State (Stored locally or in-memory)
+  // Favorites State (Stored in localStorage)
   const [favorites, setFavorites] = useState<string[]>([]);
+  
+  // Hovered Property ID to link map interaction
+  const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
 
   // Detailed View State
   const [selectedDetailUnit, setSelectedDetailUnit] = useState<VacantUnit | null>(null);
@@ -97,6 +105,7 @@ export default function ListingsPage() {
       if ((session.user as any).phone) setApplicantPhone((session.user as any).phone);
     }
   }, [session]);
+
   const [selectedUnit, setSelectedUnit] = useState<VacantUnit | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -176,7 +185,7 @@ export default function ListingsPage() {
     }
   }, [session]);
 
-  // Load listings
+  // Load listings & favorites
   useEffect(() => {
     async function fetchListings() {
       try {
@@ -190,8 +199,73 @@ export default function ListingsPage() {
         setLoading(false);
       }
     }
+    
+    // Load favorites from local storage
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("propertypro_favorites");
+      if (saved) {
+        try {
+          setFavorites(JSON.parse(saved));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    
     fetchListings();
   }, []);
+
+  // Check URL parameters to auto-open application or tour modal
+  useEffect(() => {
+    if (units.length > 0 && typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const applyUnitId = searchParams.get('applyUnitId');
+      const tourUnitId = searchParams.get('tourUnitId');
+
+      if (applyUnitId && !dialogOpen) {
+        const targetUnit = units.find(u => u.id === applyUnitId);
+        if (targetUnit) {
+          setSelectedUnit(targetUnit);
+          setDialogOpen(true);
+          window.history.replaceState(null, '', '/listings'); // Clean URL
+        }
+      }
+
+      if (tourUnitId && !tourDialogOpen) {
+        const targetUnit = units.find(u => u.id === tourUnitId);
+        if (targetUnit) {
+          setSelectedTourUnit(targetUnit);
+          setTourDialogOpen(true);
+          window.history.replaceState(null, '', '/listings'); // Clean URL
+        }
+      }
+    }
+  }, [units]);
+
+  // Favorite toggle handler
+  const toggleFavorite = (propertyId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    let updated;
+    if (favorites.includes(propertyId)) {
+      updated = favorites.filter(id => id !== propertyId);
+      toast.success("Removed from saved homes");
+    } else {
+      updated = [...favorites, propertyId];
+      toast.success("Saved to your favorites!");
+    }
+    setFavorites(updated);
+    localStorage.setItem("propertypro_favorites", JSON.stringify(updated));
+  };
+
+  // Copy share link handler
+  const copyShareLink = (unitId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/listings/${unitId}`;
+      navigator.clipboard.writeText(url);
+      toast.success("Property link copied to clipboard!");
+    }
+  };
 
   // Filter & Sort Logic
   const processedUnits = [...units]
@@ -205,8 +279,9 @@ export default function ListingsPage() {
 
       const matchesRent = maxRent === "" || Number(u.rentAmount) <= Number(maxRent);
       const matchesRooms = minRooms === "all" || u.rooms >= Number(minRooms);
+      const matchesType = propertyType === "all" || u.property.type.toLowerCase() === propertyType.toLowerCase();
 
-      return matchesCity && matchesRent && matchesRooms;
+      return matchesCity && matchesRent && matchesRooms && matchesType;
     })
     .sort((a, b) => {
       if (sortBy === "rent_asc") return Number(a.rentAmount) - Number(b.rentAmount);
@@ -215,7 +290,7 @@ export default function ListingsPage() {
       return 0; // Featured
     });
 
-  // Group units by property to avoid flooding the page with 50 identical apartment cards
+  // Group units by property to avoid flooding the page
   const groupedProperties = [...processedUnits].reduce((acc, unit) => {
     const pid = unit.property.id;
     if (!acc[pid]) {
@@ -248,7 +323,15 @@ export default function ListingsPage() {
   const groupedList = Object.values(groupedProperties);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
 
-  // Handlers
+  // Map representation data
+  const mapCoordinates: Record<string, { x: number; y: number }> = {
+    // Mapping seeded property coordinates dynamically
+    "Grand Horizon Towers": { x: 72, y: 38 },
+    "Sunset Villa": { x: 38, y: 22 },
+    "Downtown Tech Plaza": { x: 50, y: 68 }
+  };
+
+
   const handleTourSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tourName || !tourEmail || !tourPhone || !tourDate || !selectedTourUnit) {
@@ -293,6 +376,7 @@ export default function ListingsPage() {
       setSchedulingTour(false);
     }
   };
+
   const handleApplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!applicantName || !applicantEmail || !applicantPhone || !selectedUnit) {
@@ -358,21 +442,21 @@ export default function ListingsPage() {
         }
       }
 
-        const res = await fetch("/api/applications", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            unitId: selectedUnit.id,
-            name: applicantName,
-            email: applicantEmail,
-            phone: applicantPhone,
-            documents: documentUrls,
-            leaseDuration,
-            moveInDate: moveInDate || null,
-            occupantsCount,
-            employerName: employmentStatus === "EMPLOYED" ? employerName : (employmentStatus === "STUDENT" ? "Student (Source: " + employerName + ")" : "Unemployed (Source: " + employerName + ")"),
-            jobTitle: employmentStatus === "EMPLOYED" ? jobTitle : employmentStatus,
-            monthlyIncome: monthlyIncome || null,
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          unitId: selectedUnit.id,
+          name: applicantName,
+          email: applicantEmail,
+          phone: applicantPhone,
+          documents: documentUrls,
+          leaseDuration,
+          moveInDate: moveInDate || null,
+          occupantsCount,
+          employerName: employmentStatus === "EMPLOYED" ? employerName : (employmentStatus === "STUDENT" ? "Student (Source: " + employerName + ")" : "Unemployed (Source: " + employerName + ")"),
+          jobTitle: employmentStatus === "EMPLOYED" ? jobTitle : employmentStatus,
+          monthlyIncome: monthlyIncome || null,
           prevLandlordName: prevLandlordName || null,
           prevLandlordPhone: prevLandlordPhone || null,
           prevLandlordEmail: prevLandlordEmail || null,
@@ -424,251 +508,172 @@ export default function ListingsPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#E2E8F0] px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-black text-xl text-blue-600">
-          <Building className="h-6 w-6 text-blue-600" />
-          <span>Property<span className="text-[#0F172A]">Pro</span></span>
+      
+      {/* Premium Header Aligned with Landing Page */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/50 px-6 py-3 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-black tracking-tight text-[#0F172A]">PropertyPro</span>
         </Link>
         <Link href={session ? "/dashboard" : "/auth/login"}>
-          <Button variant="outline" className="border-[#E2E8F0] text-slate-700 hover:bg-slate-50 rounded-full px-5 py-2 font-bold shadow-sm transition-colors text-xs">
-            {session ? "Dashboard" : "Sign In"}
+          <Button className="bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold px-6 py-2 rounded-xl text-xs transition-colors shadow-sm">
+            {session ? "Workspace Dashboard" : "Sign In"}
           </Button>
         </Link>
       </header>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden py-16 px-6 text-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/40 via-transparent to-transparent pointer-events-none" />
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3 text-slate-800">
-          Find Your Next Home
-        </h1>
-        <p className="text-xs text-slate-400 max-w-xl mx-auto mb-8 font-extrabold uppercase tracking-wider">
-          Browse verified premium rental units listed directly by authorized property owners.
-        </p>
+      {/* Hero Header Section */}
+      <div className="relative overflow-hidden py-14 px-6 text-center bg-slate-50 border-b border-slate-200/40">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.06),transparent_50%)] pointer-events-none" />
+        <div className="max-w-4xl mx-auto space-y-4">
+          <Badge className="bg-blue-50 border border-blue-200/80 text-blue-700 font-extrabold px-3 py-1 rounded-full text-[10px] tracking-wider uppercase shadow-sm">
+            <Sparkle className="h-3 w-3 fill-current mr-1 text-blue-600 animate-pulse" /> Verified Listings Only
+          </Badge>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-[#0F172A] leading-none">
+            Discover Verified Rental Homes
+          </h1>
+          <p className="text-slate-500 text-sm font-semibold max-w-xl mx-auto leading-relaxed">
+            Browse active apartments, single-family houses, and commercial spaces listed directly by verified owners.
+          </p>
+        </div>
       </div>
 
-      {/* Terms & Onboarding Explanation Banner */}
-      <div className="max-w-7xl mx-auto px-6 mb-8 w-full">
-        <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-100 rounded-3xl p-6 md:p-8 flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl text-left">
-            <Badge className="bg-blue-100 text-blue-700 font-extrabold hover:bg-blue-100 border-0 rounded-full text-[10px] tracking-wider uppercase mb-1">
-              Frictionless Onboarding
-            </Badge>
-            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              Platform Terms & Checkout Process
+      {/* Quick Info & Checkout Steps Bar */}
+      <div className="max-w-7xl mx-auto px-6 mt-8 w-full">
+        <div className="bg-white border border-slate-200/60 rounded-3xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+          <div className="space-y-1 text-left max-w-lg">
+            <h3 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-emerald-500" />
+              100% Free Application Checkout
             </h3>
-            <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-              Applying is always 100% free. Once approved, you sign the lease contract online and secure the property by depositing the bond via Stripe.
+            <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+              No deposit or application fees required. Once a landlord approves your profile, sign the agreement digitally and make secure bond payouts using Stripe.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto shrink-0">
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm mb-2">1</div>
-              <span className="text-[11px] font-extrabold text-slate-700">Apply Free</span>
-              <span className="text-[9px] text-slate-400 font-semibold mt-0.5">Submit profile</span>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm mb-2">2</div>
-              <span className="text-[11px] font-extrabold text-slate-700">Get Approved</span>
-              <span className="text-[9px] text-slate-400 font-semibold mt-0.5">Owner review</span>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="h-8 w-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center font-black text-sm mb-2">3</div>
-              <span className="text-[11px] font-extrabold text-slate-700">Sign Online</span>
-              <span className="text-[9px] text-slate-400 font-semibold mt-0.5">Digital contract</span>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-              <div className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm mb-2">4</div>
-              <span className="text-[11px] font-extrabold text-slate-700">Pay Bond</span>
-              <span className="text-[9px] text-slate-400 font-semibold mt-0.5">Secure with Stripe</span>
-            </div>
+          <div className="flex gap-2 text-center text-[10px] font-bold text-slate-500 bg-slate-50 p-2 rounded-2xl border border-slate-200/40 shrink-0 w-full md:w-auto overflow-x-auto">
+            {["1. Apply Free", "2. Approval", "3. Digital Sign", "4. Stripe Bond"].map((step, idx) => (
+              <span key={idx} className="bg-white px-3 py-1.5 rounded-lg border border-slate-250/30 whitespace-nowrap shadow-sm">
+                {step}
+              </span>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 py-4 w-full">
-        {/* Filters and Search Bar Container */}
-        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 mb-8 shadow-sm space-y-4">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search by city, property name or unit type..."
-                value={searchCity}
-                onChange={(e) => setSearchCity(e.target.value)}
-                className="pl-11 bg-slate-50 border-0 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-2xl h-12 text-sm font-medium"
-              />
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:flex items-center gap-3 w-full md:w-auto">
-              <div className="relative w-full md:w-44">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+      {/* Main Split Layout Container */}
+      <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full flex flex-col lg:flex-row gap-8">
+        
+        {/* Left Side: Filter bar + Listings Grid (65% width) */}
+        <div className="lg:w-[65%] space-y-6 flex flex-col">
+          
+          {/* Advanced Filter Toolbar */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  type="number"
-                  placeholder="Max rent..."
-                  value={maxRent}
-                  onChange={(e) => setMaxRent(e.target.value)}
-                  className="pl-8 bg-slate-50 border-0 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-2xl h-12 text-sm font-semibold"
+                  placeholder="Search by city, property, or unit name..."
+                  value={searchCity}
+                  onChange={(e) => setSearchCity(e.target.value)}
+                  className="pl-10 bg-slate-50/50 border-slate-200 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-xl h-11 text-xs font-semibold"
                 />
               </div>
-              <select
-                value={minRooms}
-                onChange={(e) => setMinRooms(e.target.value)}
-                className="w-full md:w-36 bg-slate-50 border-0 text-slate-700 rounded-2xl h-12 px-3 text-sm focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
-              >
-                <option value="all">Any Beds</option>
-                <option value="1">1+ Bed</option>
-                <option value="2">2+ Beds</option>
-                <option value="3">3+ Beds</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full md:w-44 bg-slate-50 border-0 text-slate-700 rounded-2xl h-12 px-3 text-sm focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer col-span-2 sm:col-span-1"
-              >
-                <option value="featured">Sort: Featured</option>
-                <option value="rent_asc">Rent: Low to High</option>
-                <option value="rent_desc">Rent: High to Low</option>
-                <option value="sqft_desc">Size: Large to Small</option>
-              </select>
+              <div className="grid grid-cols-2 md:flex items-center gap-2">
+                <select
+                  value={propertyType}
+                  onChange={(e) => setPropertyType(e.target.value)}
+                  className="bg-slate-50/50 border border-slate-200 text-slate-700 rounded-xl h-11 px-3 text-xs focus:ring-1 focus:ring-blue-500 font-extrabold cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="apartment">Apartments</option>
+                  <option value="house">Houses</option>
+                  <option value="commercial">Commercial</option>
+                </select>
+                
+                <div className="relative">
+                  <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <Input
+                    type="number"
+                    placeholder="Max Rent"
+                    value={maxRent}
+                    onChange={(e) => setMaxRent(e.target.value)}
+                    className="pl-7 bg-slate-50/50 border-slate-200 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-xl h-11 text-xs font-semibold w-full md:w-28"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-bold text-slate-400">
+              <div className="flex gap-4">
+                <span>{processedUnits.length} units matching</span>
+                <span className="text-slate-350">|</span>
+                <select
+                  value={minRooms}
+                  onChange={(e) => setMinRooms(e.target.value)}
+                  className="bg-transparent border-none text-slate-500 hover:text-[#0F172A] font-bold cursor-pointer text-[11px] p-0 focus:ring-0"
+                >
+                  <option value="all">Any Bedroom Count</option>
+                  <option value="1">1+ Bed</option>
+                  <option value="2">2+ Beds</option>
+                  <option value="3">3+ Beds</option>
+                </select>
+                <span className="text-slate-350">|</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent border-none text-slate-500 hover:text-[#0F172A] font-bold cursor-pointer text-[11px] p-0 focus:ring-0"
+                >
+                  <option value="featured">Featured First</option>
+                  <option value="rent_asc">Rent: Low to High</option>
+                  <option value="rent_desc">Rent: High to Low</option>
+                  <option value="sqft_desc">Size: Large First</option>
+                </select>
+              </div>
+
+              {(searchCity || maxRent || minRooms !== "all" || propertyType !== "all") && (
+                <button
+                  onClick={() => {
+                    setSearchCity("");
+                    setMaxRent("");
+                    setMinRooms("all");
+                    setPropertyType("all");
+                    setSortBy("featured");
+                  }}
+                  className="text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                >
+                  Clear Filters <X className="h-3 w-3" />
+                </button>
+              )}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400 px-1">
-            <span>Showing {processedUnits.length} verified listings</span>
-            {(searchCity || maxRent || minRooms !== "all") && (
-              <button
-                onClick={() => {
-                  setSearchCity("");
-                  setMaxRent("");
-                  setMinRooms("all");
-                  setSortBy("featured");
-                }}
-                className="text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
-        </div>
 
-        {/* Listings Display */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="h-[26rem] rounded-[2rem] bg-white animate-pulse border border-[#E2E8F0] shadow-sm" />
-            ))}
-          </div>
-        ) : groupedList.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-[#E2E8F0] max-w-md mx-auto shadow-sm">
-            <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-extrabold mb-1">No Listings Found</h3>
-            <p className="text-xs text-slate-400 font-semibold">Try modifying your search query or filters.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groupedList.map((group: any) => {
-              const isMultiUnit = group.units.length > 1;
-              const unit = group.units[0]; // fallback for single unit
-              
-              return (
-              <div 
-                key={group.property.id} 
-                className="block group"
-                onClick={() => {
-                  if (isMultiUnit) {
-                    setSelectedGroup(group);
-                  } else {
-                    window.location.href = `/listings/${unit.id}`;
-                  }
-                }}
-              >
-                <Card
-                  className="overflow-hidden bg-white border border-[#E2E8F0] rounded-[2rem] shadow-sm hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 flex flex-col text-left cursor-pointer h-full"
-                >
-                {/* Cover Image Container */}
-                <div className="h-56 overflow-hidden relative bg-slate-100">
-                  <img
-                    src={group.property.coverPhoto || unit.images?.[0] || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
-                    alt={group.property.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+          {/* Results Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="h-80 rounded-3xl bg-white border border-slate-200/80 animate-pulse shadow-sm" />
+              ))}
+            </div>
+          ) : groupedList.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 max-w-md mx-auto shadow-sm w-full">
+              <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-extrabold text-[#0F172A] mb-1">No Listings Match</h3>
+              <p className="text-xs text-slate-400 font-semibold px-4">Adjust your filters, budget parameters, or try a different city query.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {groupedList.map((group: any) => {
+                const isMultiUnit = group.units.length > 1;
+                const unit = group.units[0];
+                const isFav = favorites.includes(group.property.id);
 
-                  {/* Floating Badges */}
-                  <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-                    <Badge className={`font-extrabold text-[10px] px-2.5 py-1 border-0 rounded-full shadow-sm flex items-center gap-1 backdrop-blur-sm ${
-                      group.property.type === "House" ? "bg-amber-500/90 text-white" :
-                      group.property.type === "Commercial" ? "bg-indigo-500/90 text-white" :
-                      "bg-emerald-500/90 text-white"
-                    }`}>
-                      {group.property.type === "House" && <Home className="h-3.5 w-3.5" />}
-                      {group.property.type === "Commercial" && <Building className="h-3.5 w-3.5" />}
-                      {group.property.type === "Apartment" && <Building className="h-3.5 w-3.5" />}
-                      {group.property.type === "House" ? "Single Family Home" :
-                       group.property.type === "Commercial" ? "Commercial Space" : "Apartment Complex"}
-                    </Badge>
-                  </div>
-
-                  {/* Rent badge overlay */}
-                  <div className="absolute bottom-4 left-4 flex flex-col gap-1">
-                    <span className="text-white font-black text-xl drop-shadow-md">
-                      {isMultiUnit ? (
-                        group.minRent === group.maxRent ? `$${group.minRent.toLocaleString()}` : `$${group.minRent.toLocaleString()} - $${group.maxRent.toLocaleString()}`
-                      ) : (
-                        `$${Number(unit.rentAmount).toLocaleString()}`
-                      )}
-                      <span className="text-xs font-bold text-slate-200"> / month</span>
-                    </span>
-                  </div>
-                </div>
-
-                <CardHeader className="pb-3 px-6 pt-5">
-                  <div className="flex items-center gap-1 text-[11px] text-blue-600 font-bold mb-1.5 uppercase tracking-wider">
-                    <MapPin className="h-3.5 w-3.5" />
-                    <span>{group.property.city}, {group.property.country}</span>
-                  </div>
-                  <CardTitle className="text-lg text-slate-800 font-extrabold group-hover:text-blue-600 transition-colors">
-                    {group.property.name}
-                  </CardTitle>
-                  <CardDescription className="text-slate-400 font-semibold flex items-center gap-1.5 mt-1 text-xs">
-                    <Building className="h-3.5 w-3.5 text-slate-400" />
-                    {group.property.address}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="pb-4 px-6 flex-1">
-                  <div className="flex items-center gap-4 text-slate-400 text-xs mb-4 border-y border-slate-100 py-3 font-semibold">
-                    {group.property.type !== "Commercial" && (
-                      <span className="flex items-center gap-1">
-                        <BedDouble className="h-4 w-4 text-blue-600" />
-                        <strong className="text-slate-800">
-                          {isMultiUnit 
-                            ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}-${group.maxBeds}`) 
-                            : unit.rooms}
-                        </strong> Beds
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Square className="h-4 w-4 text-blue-600" />
-                      <strong className="text-slate-800">
-                        {isMultiUnit 
-                          ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}-${group.maxSqft}`)
-                          : unit.sqFootage}
-                      </strong> sq ft
-                    </span>
-                  </div>
-                  
-                  {isMultiUnit && (
-                     <div className="bg-blue-50 text-blue-700 font-bold text-xs px-3 py-2 rounded-lg inline-block mb-2">
-                       {group.units.length} Units Available Now
-                     </div>
-                  )}
-                </CardContent>
-
-                <CardFooter className="pt-0 p-6 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Button
+                return (
+                  <Card
+                    key={group.property.id}
+                    onMouseEnter={() => setHoveredPropertyId(group.property.id)}
+                    onMouseLeave={() => setHoveredPropertyId(null)}
                     onClick={() => {
                       if (isMultiUnit) {
                         setSelectedGroup(group);
@@ -676,17 +681,216 @@ export default function ListingsPage() {
                         window.location.href = `/listings/${unit.id}`;
                       }
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-11 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
+                    className={`overflow-hidden bg-white border rounded-[2rem] shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-300 flex flex-col text-left cursor-pointer group ${
+                      hoveredPropertyId === group.property.id ? "border-blue-400 scale-[1.01]" : "border-slate-200/70"
+                    }`}
                   >
-                    {isMultiUnit ? "View Floor Plans & Units" : "View Details & Apply"}
-                    <ArrowRight className="h-3 w-3" />
-                  </Button>
-                </CardFooter>
-              </Card>
+                    {/* Visual Media Cover */}
+                    <div className="h-48 overflow-hidden relative bg-slate-100 shrink-0">
+                      <img
+                        src={group.property.coverPhoto || unit.images?.[0] || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
+                        alt={group.property.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                        }}
+                      />
+                      
+                      {/* Dark gradient shadow */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+                      {/* Top Action Buttons (Favorite + Share) */}
+                      <div className="absolute top-4 right-4 flex gap-1.5 z-10">
+                        <button
+                          onClick={(e) => copyShareLink(unit.id, e)}
+                          className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-650 hover:text-blue-600 flex items-center justify-center shadow-sm backdrop-blur-sm transition-all"
+                          title="Copy Link"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => toggleFavorite(group.property.id, e)}
+                          className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-650 flex items-center justify-center shadow-sm backdrop-blur-sm transition-all"
+                          title="Save Home"
+                        >
+                          <Heart className={`h-3.5 w-3.5 transition-colors ${isFav ? "fill-rose-500 text-rose-500" : "text-slate-500 hover:text-rose-500"}`} />
+                        </button>
+                      </div>
+
+                      {/* Property Type Badge */}
+                      <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
+                        <Badge className={`font-black text-[9px] px-2.5 py-1 border-0 rounded-lg shadow-sm uppercase tracking-wider backdrop-blur-sm ${
+                          group.property.type === "House" ? "bg-amber-500/90 text-white" :
+                          group.property.type === "Commercial" ? "bg-indigo-500/90 text-white" :
+                          "bg-emerald-500/90 text-white"
+                        }`}>
+                          {group.property.type}
+                        </Badge>
+                        {group.property.type === "Commercial" && group.property.zoningType && (
+                          <Badge className="bg-blue-600/90 text-white border-0 shadow-sm rounded-lg px-2.5 py-1 font-bold text-[9px] uppercase tracking-wider backdrop-blur-sm">
+                            Zoning: {group.property.zoningType}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Rent details overlay */}
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <span className="font-black text-lg drop-shadow-md">
+                          {isMultiUnit ? (
+                            group.minRent === group.maxRent ? `$${group.minRent.toLocaleString()}` : `$${group.minRent.toLocaleString()} - $${group.maxRent.toLocaleString()}`
+                          ) : (
+                            `$${Number(unit.rentAmount).toLocaleString()}`
+                          )}
+                          <span className="text-[10px] text-slate-200 font-semibold">/mo</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <CardHeader className="pb-2 px-5 pt-4">
+                      <div className="flex items-center gap-1 text-[10px] text-blue-600 font-black uppercase tracking-wider">
+                        <MapPin className="h-3 w-3" />
+                        <span>{group.property.city}, {group.property.country}</span>
+                      </div>
+                      <CardTitle className="text-base text-[#0F172A] font-extrabold group-hover:text-blue-600 transition-colors line-clamp-1">
+                        {group.property.name}
+                      </CardTitle>
+                      <CardDescription className="text-slate-450 font-semibold truncate text-[11px] flex items-center gap-1">
+                        {group.property.address}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="pb-3 px-5 flex-1 flex flex-col justify-between">
+                      <div className="flex items-center gap-3 text-slate-500 text-xs border-y border-slate-100 py-2.5 font-bold">
+                        {group.property.type !== "Commercial" && (
+                          <span className="flex items-center gap-1">
+                            <BedDouble className="h-4 w-4 text-blue-500" />
+                            <strong className="text-[#0F172A]">
+                              {isMultiUnit 
+                                ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}-${group.maxBeds}`) 
+                                : unit.rooms}
+                            </strong> Beds
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Square className="h-4 w-4 text-blue-500" />
+                          <strong className="text-[#0F172A]">
+                            {isMultiUnit 
+                              ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}-${group.maxSqft}`)
+                              : unit.sqFootage}
+                          </strong> sqft
+                        </span>
+                      </div>
+                      
+                      {isMultiUnit && (
+                        <div className="mt-2.5 text-[10px] font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg self-start">
+                          {group.units.length} Floorplans Available
+                        </div>
+                      )}
+                    </CardContent>
+
+                    <CardFooter className="pt-0 p-5 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        onClick={() => {
+                          if (isMultiUnit) {
+                            setSelectedGroup(group);
+                          } else {
+                            window.location.href = `/listings/${unit.id}`;
+                          }
+                        }}
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl h-10 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
+                      >
+                        {isMultiUnit ? "Browse Floor Plans" : "Details & Checkout"}
+                        <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Sticky Premium Interactive Map Visual (35% width) */}
+        <div className="hidden lg:block lg:w-[35%]">
+          <div className="sticky top-24 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
+                <MapIcon className="h-4 w-4 text-blue-600" /> Interactive Neighborhood Directory
+              </span>
+              <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Los Angeles</span>
+            </div>
+
+            {/* Stylized Vector Map representation */}
+            <div className="flex-1 bg-[#EBF1F6] rounded-2xl relative overflow-hidden border border-slate-300/80 flex flex-col justify-between shadow-inner">
+              
+              {/* Styled Mock Water bodies & Parks */}
+              <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#C8DFFC]/90 rounded-tl-[180px] pointer-events-none" />
+              <div className="absolute top-0 left-0 w-32 h-32 bg-[#C8DFFC]/70 rounded-br-[120px] pointer-events-none" />
+              <div className="absolute top-1/4 right-8 w-28 h-20 bg-[#E2F0D9]/80 rounded-[36px] pointer-events-none" />
+              
+              {/* Styled Roads / Streets */}
+              <div className="absolute top-1/2 left-0 w-full h-3.5 bg-white shadow-sm transform -rotate-12 pointer-events-none" />
+              <div className="absolute top-0 left-1/4 w-3.5 h-full bg-white shadow-sm transform rotate-45 pointer-events-none" />
+              <div className="absolute top-0 right-1/3 w-3 h-full bg-white shadow-sm transform -rotate-12 pointer-events-none" />
+              
+              {/* Dynamic Coordinate Pins based on database properties */}
+              {groupedList.map((group: any) => {
+                const coords = mapCoordinates[group.property.name] || { x: 50, y: 50 };
+                const isHovered = hoveredPropertyId === group.property.id;
+                
+                return (
+                  <div
+                    key={group.property.id}
+                    onMouseEnter={() => setHoveredPropertyId(group.property.id)}
+                    onMouseLeave={() => setHoveredPropertyId(null)}
+                    onClick={() => {
+                      if (group.units.length > 1) {
+                        setSelectedGroup(group);
+                      } else {
+                        window.location.href = `/listings/${group.units[0].id}`;
+                      }
+                    }}
+                    style={{ left: `${coords.x}%`, top: `${coords.y}%` }}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group/pin"
+                  >
+                    {/* Ring highlight animation */}
+                    <div className={`absolute -inset-2.5 rounded-full transition-all duration-300 ${
+                      isHovered ? "bg-blue-500/30 scale-100 animate-ping" : "bg-transparent scale-0"
+                    }`} />
+                    
+                    {/* Hover Card preview tooltip */}
+                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 border border-slate-800 text-white rounded-xl py-1.5 px-3 whitespace-nowrap shadow-xl transition-all duration-200 pointer-events-none ${
+                      isHovered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-1 scale-95"
+                    }`}>
+                      <p className="text-[10px] font-black">{group.property.name}</p>
+                      <p className="text-[9px] text-blue-400 font-extrabold mt-0.5">${group.minRent.toLocaleString()}+/mo</p>
+                    </div>
+ 
+                    {/* Styled pin bubble */}
+                    <div className={`px-2.5 py-1 rounded-full font-black text-[9px] shadow-md flex items-center justify-center transition-all ${
+                      isHovered 
+                        ? "bg-blue-600 text-white border-2 border-white scale-110 shadow-lg shadow-blue-600/30" 
+                        : "bg-white text-slate-800 border-2 border-slate-300 hover:border-slate-400"
+                    }`}>
+                      ${group.minRent >= 1000 ? `${(group.minRent / 1000).toFixed(1)}k` : group.minRent}
+                    </div>
+                  </div>
+                );
+              })}
+ 
+              {/* Map Footer Helper */}
+              <div className="absolute bottom-4 left-4 right-4 bg-slate-900/95 backdrop-blur-md border border-slate-800/80 p-3 rounded-xl z-10 flex items-center gap-3 text-white">
+                <div className="h-6 w-6 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <MapPin className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex-1 leading-tight">
+                  <span className="text-[9px] text-slate-200 font-bold block uppercase tracking-wider">Hover pins to preview</span>
+                  <span className="text-[8px] text-slate-400 font-semibold">Properties mapped based on verified street location.</span>
+                </div>
               </div>
-            )})}
+            </div>
           </div>
-        )}
+        </div>
       </main>
 
       {/* Property Group Dialog */}
@@ -732,8 +936,6 @@ export default function ListingsPage() {
           )}
         </DialogContent>
       </Dialog>
-
-
 
       {/* ── TOUR SCHEDULING DIALOG ── */}
       <Dialog open={tourDialogOpen} onOpenChange={setTourDialogOpen}>
@@ -786,7 +988,7 @@ export default function ListingsPage() {
                   <option value="09:00:00">9:00 AM</option>
                   <option value="10:30:00">10:30 AM</option>
                   <option value="12:00:00">12:00 PM</option>
-                  <option value="13:30:00">1:30 PM</option>
+                  <option value="13:30:00">1:35 PM</option>
                   <option value="15:00:00">3:00 PM</option>
                   <option value="16:30:00">4:30 PM</option>
                 </select>
@@ -830,7 +1032,7 @@ export default function ListingsPage() {
               />
             </div>
 
-            <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-600/90 text-white font-bold h-11 rounded-xl transition-colors mt-2">
+            <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors mt-2">
               {schedulingTour ? "Scheduling..." : "Request Tour Slot"}
             </Button>
           </form>
@@ -1126,7 +1328,7 @@ export default function ListingsPage() {
                         <Input
                           id="sourceOfIncome"
                           placeholder={employmentStatus === "STUDENT" ? "e.g., Financial Aid, Parents, Scholarships" : "e.g., Savings, Trust, Guarantor"}
-                          value={employerName} // Reusing employerName for the source
+                          value={employerName}
                           onChange={(e) => setEmployerName(e.target.value)}
                           className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
                           required
@@ -1416,7 +1618,7 @@ export default function ListingsPage() {
                         }
                         setFormStep(formStep + 1);
                       }}
-                      className="flex-1 bg-blue-600 hover:bg-blue-600/90 text-white font-bold h-11 rounded-xl transition-all"
+                      className="flex-1 bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-all"
                     >
                       Continue
                     </Button>
@@ -1426,7 +1628,7 @@ export default function ListingsPage() {
                       key="btn-submit"
                       type="submit"
                       disabled={applying}
-                      className="flex-1 bg-blue-600 hover:bg-blue-600/90 text-white font-bold h-11 rounded-xl transition-all"
+                      className="flex-1 bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-all"
                     >
                       {applying ? "Submitting Application..." : "Submit Application"}
                     </Button>
@@ -1435,11 +1637,11 @@ export default function ListingsPage() {
               </form>
             </>
           )}
-      </DialogContent>
+        </DialogContent>
       </Dialog>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#E2E8F0] py-8 text-center text-slate-400 text-xs font-bold mt-auto">
+      <footer className="bg-white border-t border-slate-200 py-8 text-center text-slate-400 text-xs font-bold mt-auto">
         <p>© 2026 PropertyPro. All rights reserved.</p>
       </footer>
     </div>

@@ -99,6 +99,15 @@ export default function PropertiesPage() {
           <p className="text-[#64748B] mt-1">Manage your property portfolio</p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/listings">
+            <Button
+              variant="outline"
+              className="bg-white border border-[#E2E8F0] shadow-sm text-blue-600 hover:text-blue-700 hover:bg-[#EFF6FF] rounded-xl flex items-center gap-2 font-semibold h-11 px-5"
+            >
+              <Eye className="h-4 w-4" />
+              View Public Search Map
+            </Button>
+          </Link>
           <Button
             variant="outline"
             onClick={fetchProperties}
@@ -225,8 +234,11 @@ export default function PropertiesPage() {
                               </div>
                             )}
                           </div>
-                          <div>
-                            <p className="font-extrabold text-[#0F172A] text-sm group-hover:text-[#3B82F6] transition-colors cursor-pointer">{p.name}</p>
+                          <div 
+                            className="cursor-pointer" 
+                            onClick={() => router.push(`/dashboard/properties/${p.id}`)}
+                          >
+                            <p className="font-extrabold text-[#0F172A] text-sm group-hover:text-[#3B82F6] transition-colors">{p.name}</p>
                             <p className="text-xs text-[#64748B] font-medium mt-0.5">ID: {p.id.slice(0, 8)}</p>
                           </div>
                         </div>
@@ -251,7 +263,9 @@ export default function PropertiesPage() {
                               <Badge className="bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-lg px-2 py-0.5 font-bold text-[11px]">Rejected</Badge>
                             )}
                           </div>
-                          <span className="text-xs text-[#64748B] mt-0.5">{p.type}</span>
+                          <span className="text-xs text-[#64748B] mt-0.5">
+                            {p.type} {p.type === "Commercial" && p.zoningType && <span className="text-blue-600 font-bold ml-1">• {p.zoningType}</span>}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -355,11 +369,16 @@ export default function PropertiesPage() {
                         <Badge className="bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Rejected</Badge>
                       )}
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
                       <Badge className="bg-white/90 text-[#475569] hover:bg-white border-0 shadow-sm rounded-full px-3 py-1 font-bold text-xs backdrop-blur-md flex items-center gap-1.5">
                         <Building className="h-3.5 w-3.5" />
                         {p.type || "Apartment"}
                       </Badge>
+                      {p.type === "Commercial" && p.zoningType && (
+                        <Badge className="bg-blue-600/90 text-white hover:bg-blue-600 border-0 shadow-sm rounded-full px-2.5 py-0.5 font-bold text-[10px] backdrop-blur-md">
+                          Zoning: {p.zoningType}
+                        </Badge>
+                      )}
                     </div>
                     
                     {/* Hover Overlay Buttons */}
@@ -374,8 +393,11 @@ export default function PropertiesPage() {
                   </div>
                   
                   {/* Card Body */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="font-extrabold text-[#0F172A] text-lg leading-tight">{p.name}</h3>
+                  <div 
+                    className="p-5 flex-1 flex flex-col cursor-pointer" 
+                    onClick={() => router.push(`/dashboard/properties/${p.id}`)}
+                  >
+                    <h3 className="font-extrabold text-[#0F172A] text-lg leading-tight group-hover:text-[#3B82F6] transition-colors">{p.name}</h3>
                     <p className="text-sm text-[#64748B] font-medium mt-1 truncate">{p.description || "No description provided"}</p>
                     
                     <div className="flex items-center gap-1.5 text-sm text-[#64748B] mt-3 font-medium">

@@ -27,9 +27,15 @@ import {
   Unlock,
   PenTool,
   Key,
-  Banknote
+  Banknote,
+  Plus,
+  Activity,
+  TrendingUp,
+  ChevronRight,
+  Settings
 } from "lucide-react";
 import { toast } from "sonner";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -605,41 +611,73 @@ export default function DashboardPage() {
   }
 
   // Owner/Admin view
+  const defaultChartData = [
+    { name: "Jan", revenue: 0 },
+    { name: "Feb", revenue: 0 },
+    { name: "Mar", revenue: 0 },
+    { name: "Apr", revenue: 0 },
+    { name: "May", revenue: 0 },
+    { name: "Jun", revenue: 0 },
+  ];
+  const chartData = stats?.revenueHistory?.length ? stats.revenueHistory : defaultChartData;
+
+  const getGreeting = () => {
+    const hr = new Date().getHours();
+    if (hr < 12) return "Good morning";
+    if (hr < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
-            Good afternoon, {session?.user?.name ? session.user.name.split(' ')[0] : "Admin"}!
-          </h1>
-          <p className="text-[#64748B] mt-1.5 text-sm font-medium">Here's what's happening with your property portfolio</p>
-        </div>
-        {(stats?.totalProperties ?? 0) > 0 && (
-          <div className="flex items-center gap-3">
+    <div className="w-full max-w-7xl mx-auto pt-6 space-y-8 pb-20">
+      {/* Premium Header Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-[#0F172A] p-8 md:p-10 shadow-2xl border border-slate-800">
+        {/* Glowing Gradient Background Blobs */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs font-black text-white tracking-wide uppercase">
+                {stats?.subscriptionTier || "Hobbyist"} Plan • {stats?.subscriptionStatus === "active" ? "Active" : "Trial"}
+              </span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+              {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">{session?.user?.name ? session.user.name.split(' ')[0] : "Admin"}</span>!
+            </h1>
+            <p className="text-slate-300 text-base md:text-lg max-w-xl font-medium">
+              Here's what's happening with your property portfolio today.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
             <Button
               variant="outline"
               onClick={fetchLandlordStats}
               disabled={statsLoading}
-              className="bg-white border border-[#E2E8F0] shadow-sm text-[#0F172A] hover:bg-[#F8FAFC] rounded-xl flex items-center gap-2 font-semibold h-11 px-5"
+              className="bg-white/10 hover:bg-white/15 transition-colors border border-white/20 text-white font-bold rounded-2xl shadow-sm backdrop-blur-md cursor-pointer text-sm w-full sm:w-auto h-[50px] px-6"
             >
-              <RefreshCw className={`h-4 w-4 ${statsLoading ? "animate-spin" : ""}`} />
-              Refresh
+              <RefreshCw className={`h-4 w-4 mr-2 ${statsLoading ? "animate-spin" : ""}`} /> Refresh
             </Button>
-            <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
-              <BarChart3 className="h-4 w-4" />
-              Reports
+            <Button 
+              onClick={() => router.push("/dashboard/accounting/invoices")}
+              className="bg-white hover:bg-slate-100 text-[#0F172A] border-0 rounded-2xl font-bold flex items-center gap-2 h-[50px] px-6 shadow-xl w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-95"
+            >
+              <BarChart3 className="h-4 w-4" /> Financials
             </Button>
           </div>
-        )}
+        </div>
       </div>
 
+      {/* Setup Checklist if no properties */}
       {stats?.totalProperties === 0 && (
-        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-[32px] shadow-2xl mb-8 overflow-hidden">
-          {/* Abstract Background Shapes */}
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl pointer-events-none"></div>
-
+        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-[32px] shadow-2xl overflow-hidden mb-6">
           <div className="relative z-10 p-8 md:p-10 border-b border-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-4">
@@ -668,8 +706,7 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          <div className="p-8 md:p-10 space-y-4">
-          <div className="relative z-10 p-8 md:p-10 space-y-4 bg-slate-900/30">
+          <div className="p-8 md:p-10 space-y-4 bg-slate-900/30">
             <div 
               className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
               onClick={() => router.push('/dashboard/owner#settings')}
@@ -683,7 +720,7 @@ export default function DashboardPage() {
                   <p className={`text-sm mt-1 font-medium ${stats?.profileComplete ? 'text-emerald-500/60' : 'text-slate-400'}`}>Set your entity type (Individual or Business) and support contact info.</p>
                 </div>
               </div>
-              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
+              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
             </div>
 
             <div 
@@ -699,7 +736,7 @@ export default function DashboardPage() {
                   <p className={`text-sm mt-1 font-medium ${stats?.totalProperties > 0 ? 'text-emerald-500/60' : 'text-slate-400'}`}>Create a property, set up rentable units, and track occupancy.</p>
                 </div>
               </div>
-              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
+              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
             </div>
 
             <div 
@@ -715,62 +752,221 @@ export default function DashboardPage() {
                   <p className={`text-sm mt-1 font-medium ${stats?.bankConnected ? 'text-emerald-500/60' : 'text-slate-400'}`}>Link your account to securely receive online rent payments via Stripe.</p>
                 </div>
               </div>
-              <ChevronDown className={`h-6 w-6 -rotate-90 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
+              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
             </div>
-          </div>
           </div>
         </Card>
       )}
 
-      {/* Alerts */}
+      {/* Critical Status Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#FEF9C3] border border-[#FEF08A] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3 text-[#CA8A04]">
-            <AlertTriangle className="h-5 w-5" />
+        <div 
+          onClick={() => router.push('/dashboard/accounting/invoices')}
+          className="bg-gradient-to-r from-amber-50 to-amber-100/50 hover:from-amber-100 hover:to-amber-200/50 transition-all border border-amber-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+        >
+          <div className="flex items-center gap-4 text-amber-800">
+            <div className="p-3 bg-amber-500/10 rounded-2xl">
+              <AlertTriangle className="h-6 w-6 text-amber-600" />
+            </div>
             <div>
-              <p className="font-bold">Overdue Payments</p>
-              <p className="text-xs mt-0.5 opacity-90">{stats?.overduePayments || 0} payments are overdue</p>
+              <p className="font-black text-lg">Overdue Invoices</p>
+              <p className="text-sm mt-0.5 text-amber-700/80 font-medium">{stats?.overduePayments || 0} tenants are behind schedule</p>
             </div>
           </div>
-          <span className="text-xl font-black text-[#CA8A04]">{stats?.overduePayments || 0}</span>
+          <span className="text-3xl font-black text-amber-700 group-hover:translate-x-1 transition-transform">{stats?.overduePayments || 0}</span>
         </div>
-        <div className="bg-[#FEE2E2] border border-[#FECACA] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3 text-[#DC2626]">
-            <AlertTriangle className="h-5 w-5" />
+
+        <div 
+          onClick={() => router.push('/dashboard/maintenance')}
+          className="bg-gradient-to-r from-red-50 to-red-100/50 hover:from-red-100 hover:to-red-200/50 transition-all border border-red-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+        >
+          <div className="flex items-center gap-4 text-red-800">
+            <div className="p-3 bg-red-500/10 rounded-2xl">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+            </div>
             <div>
-              <p className="font-bold">Urgent Maintenance</p>
-              <p className="text-xs mt-0.5 opacity-90">
-                {stats?.urgentMaintenance ? `${stats.urgentMaintenance} urgent maintenance requests` : "No urgent maintenance requests"}
+              <p className="font-black text-lg">Urgent Repairs</p>
+              <p className="text-sm mt-0.5 text-red-700/80 font-medium">
+                {stats?.urgentMaintenance ? `${stats.urgentMaintenance} emergency issues open` : "All systems working normally"}
               </p>
             </div>
           </div>
-          <span className="text-xl font-black text-[#DC2626]">{stats?.urgentMaintenance || 0}</span>
+          <span className="text-3xl font-black text-red-700 group-hover:translate-x-1 transition-transform">{stats?.urgentMaintenance || 0}</span>
         </div>
-        <div className="bg-[#E0F2FE] border border-[#BAE6FD] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3 text-[#0284C7]">
-            <AlertTriangle className="h-5 w-5" />
+
+        <div 
+          onClick={() => router.push('/dashboard/leases')}
+          className="bg-gradient-to-r from-sky-50 to-sky-100/50 hover:from-sky-100 hover:to-sky-200/50 transition-all border border-sky-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+        >
+          <div className="flex items-center gap-4 text-sky-800">
+            <div className="p-3 bg-sky-500/10 rounded-2xl">
+              <FileText className="h-6 w-6 text-sky-600" />
+            </div>
             <div>
-              <p className="font-bold">Expiring Leases</p>
-              <p className="text-xs mt-0.5 opacity-90">{stats?.leaseRenewals || 0} leases expiring within the next 30 days</p>
+              <p className="font-black text-lg">Expiring Leases</p>
+              <p className="text-sm mt-0.5 text-sky-700/80 font-medium">Renewals needed within 30 days</p>
             </div>
           </div>
-          <span className="text-xl font-black text-[#0284C7]">{stats?.leaseRenewals || 0}</span>
+          <span className="text-3xl font-black text-sky-700 group-hover:translate-x-1 transition-transform">{stats?.leaseRenewals || 0}</span>
         </div>
       </div>
 
-      {/* 10 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 pt-2">
-        <MetricCard title="Total Properties" value={stats?.totalProperties ?? "-"} subtext="Active properties in portfolio" Icon={Building} iconBg="bg-[#EFF6FF]" iconColor="text-[#3B82F6]" />
-        <MetricCard title="Occupancy Rate" value={stats ? `${stats.occupancyRate}%` : "-"} subtext={`${stats?.occupiedUnits ?? 0} of ${stats?.totalUnits ?? 0} units occupied`} Icon={Home} iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" />
-        <MetricCard title="Monthly Revenue" value={stats ? `$${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Current month collected" Icon={DollarSign} iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" />
-        <MetricCard title="Collection Rate" value={stats ? `${stats.collectionRate}%` : "-"} subtext="Payment collection efficiency" Icon={Wallet} iconBg="bg-[#E0F2FE]" iconColor="text-[#0EA5E9]" />
-        <MetricCard title="Active Tenants" value={stats?.activeTenantsCount ?? "-"} subtext="0 pending applications" Icon={Users} iconBg="bg-[#EFF6FF]" iconColor="text-[#3B82F6]" />
+      {/* Top 5 Core Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <MetricCard title="Properties Managed" value={stats?.totalProperties ?? "-"} subtext="Active properties in portfolio" Icon={Building} iconBg="bg-blue-50" iconColor="text-blue-600" />
+        <MetricCard title="Occupancy Rate" value={stats ? `${stats.occupancyRate}%` : "-"} subtext={`${stats?.occupiedUnits ?? 0} of ${stats?.totalUnits ?? 0} units occupied`} Icon={Home} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+        <MetricCard title="Monthly Revenue" value={stats ? `$${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Current month collected" Icon={DollarSign} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+        <MetricCard title="Collection Rate" value={stats ? `${stats.collectionRate}%` : "-"} subtext="Payment collection efficiency" Icon={Wallet} iconBg="bg-sky-50" iconColor="text-sky-600" />
+        <MetricCard title="Active Tenants" value={stats?.activeTenantsCount ?? "-"} subtext="Occupants under contract" Icon={Users} iconBg="bg-violet-50" iconColor="text-violet-600" />
+      </div>
 
-        <MetricCard title="Maintenance Requests" value={stats?.totalMaintenance ?? "-"} subtext={`${stats?.urgentMaintenance ?? 0} urgent`} Icon={Wrench} iconBg="bg-[#FEF9C3]" iconColor="text-[#EAB308]" />
-        <MetricCard title="Vacant Units" value={stats?.vacantUnits ?? "-"} subtext={stats ? `${stats.vacancyRate}% vacancy rate` : "-"} Icon={Home} iconBg="bg-[#FEE2E2]" iconColor="text-[#EF4444]" />
-        <MetricCard title="Average Rent" value={stats ? `$${stats.averageRent?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Per unit monthly average" Icon={DollarSign} iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" />
-        <MetricCard title="Lease Renewals" value={stats?.leaseRenewals ?? "-"} subtext="Due in next 30 days" Icon={FileText} iconBg="bg-[#FEF9C3]" iconColor="text-[#EAB308]" />
-        <MetricCard title="Recent Events" value={stats?.recentEvents ?? "-"} subtext="0 urgent activities" Icon={Calendar} iconBg="bg-[#E0F2FE]" iconColor="text-[#0EA5E9]" />
+      {/* Split Analytics and Operations Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Revenue trend chart & secondary metrics (8 cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          
+          {/* Revenue Chart Card */}
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-100">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                    Revenue Trend
+                  </h2>
+                  <span className="text-sm font-medium text-slate-500 mt-1 block">Monthly collected rent payments</span>
+                </div>
+                <span className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-black rounded-xl border border-emerald-100">
+                  Last 6 Months
+                </span>
+              </div>
+
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94A3B8" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: "#0F172A", borderRadius: "16px", border: "none" }}
+                      labelStyle={{ color: "#94A3B8", fontWeight: 800, fontSize: "12px" }}
+                      itemStyle={{ color: "#FFFFFF", fontWeight: 700, fontSize: "14px" }}
+                      formatter={(value: any) => [`$${Number(value).toLocaleString()}`, "Revenue"]}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </Card>
+
+          {/* Secondary Metrics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <MetricCard title="Vacant Units" value={stats?.vacantUnits ?? "-"} subtext={stats ? `${stats.vacancyRate}% vacancy` : "-"} Icon={Home} iconBg="bg-red-50" iconColor="text-red-600" />
+            <MetricCard title="Average Rent" value={stats ? `$${stats.averageRent?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Per unit average" Icon={DollarSign} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+            <MetricCard title="Total Maintenance" value={stats?.totalMaintenance ?? "-"} subtext={`${stats?.urgentMaintenance ?? 0} urgent requests`} Icon={Wrench} iconBg="bg-amber-50" iconColor="text-amber-600" />
+            <MetricCard title="Events & Logs" value={stats?.recentEvents ?? "-"} subtext="Recent activities logged" Icon={Calendar} iconBg="bg-sky-50" iconColor="text-sky-600" />
+          </div>
+
+        </div>
+
+        {/* Right Column: Quick Operations & Recent Tickets (4 cols) */}
+        <div className="lg:col-span-4 space-y-8">
+          
+          {/* Quick Actions Panel */}
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8">
+            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
+              <Activity className="h-5 w-5 text-indigo-500" />
+              Quick Actions
+            </h2>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                onClick={() => router.push("/dashboard/properties/new")}
+                className="h-24 bg-blue-50/50 hover:bg-blue-50 border border-blue-100/50 text-blue-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              >
+                <Plus className="h-5 w-5 text-blue-600" />
+                <span className="text-xs">Add Property</span>
+              </Button>
+              <Button
+                onClick={() => router.push("/dashboard/owner#settings")}
+                className="h-24 bg-violet-50/50 hover:bg-violet-50 border border-violet-100/50 text-violet-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              >
+                <Users className="h-5 w-5 text-violet-600" />
+                <span className="text-xs">Invite Tenant</span>
+              </Button>
+              <Button
+                onClick={() => router.push("/dashboard/accounting/wallet")}
+                className="h-24 bg-amber-50/50 hover:bg-amber-50 border border-amber-100/50 text-amber-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              >
+                <Wallet className="h-5 w-5 text-amber-600" />
+                <span className="text-xs">Payout Wallet</span>
+              </Button>
+              <Button
+                onClick={() => router.push("/dashboard/owner#settings-subscription")}
+                className="h-24 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100/50 text-emerald-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              >
+                <Settings className="h-5 w-5 text-emerald-600" />
+                <span className="text-xs">Stripe Billing</span>
+              </Button>
+            </div>
+          </Card>
+
+          {/* Recent Maintenance Tickets Feed */}
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8 flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Wrench className="h-4 w-4 text-amber-600" />
+                </div>
+                Recent Tickets
+              </h2>
+
+              <div className="space-y-4">
+                {!stats?.recentMaintenanceRequests?.length ? (
+                  <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <p className="text-slate-500 font-semibold text-sm">No maintenance requests open.</p>
+                  </div>
+                ) : (
+                  stats.recentMaintenanceRequests.map((req: any) => (
+                    <div 
+                      key={req.id} 
+                      onClick={() => router.push("/dashboard/maintenance")}
+                      className="p-4 border border-slate-100 rounded-2xl bg-slate-50/30 hover:border-indigo-100 hover:shadow-md transition-all group flex flex-col gap-2 cursor-pointer animate-fade-in"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-extrabold text-sm text-slate-900 truncate max-w-[150px]">{req.title}</span>
+                        <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest border ${
+                          req.priority === "HIGH" || req.priority === "EMERGENCY"
+                            ? "bg-red-50 text-red-700 border-red-100"
+                            : req.priority === "MEDIUM"
+                            ? "bg-amber-50 text-amber-700 border-amber-100"
+                            : "bg-blue-50 text-blue-700 border-blue-100"
+                        }`}>
+                          {req.priority}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-xs text-slate-400 font-semibold mt-1">
+                        <span>Unit {req.unit?.name || "N/A"}</span>
+                        <span>{new Date(req.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </Card>
+
+        </div>
+
       </div>
     </div>
   );
@@ -778,7 +974,7 @@ export default function DashboardPage() {
 
 function MetricCard({ title, value, subtext, Icon, iconBg, iconColor }: any) {
   return (
-    <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
       <CardContent className="p-5 flex flex-col justify-between h-full">
         <div className="flex justify-between items-start mb-4">
           <p className="text-sm font-extrabold text-[#0F172A] leading-tight pr-4">{title}</p>

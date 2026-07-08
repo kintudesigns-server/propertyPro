@@ -9,10 +9,12 @@ export async function POST(req: NextRequest, ctx: any) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  // Next.js 15 route handler parameter handling
   const { id } = await ctx.params;
 
   try {
+    const body = await req.json().catch(() => ({}));
+    const { signatureImageUrl } = body;
+
     const lease = await prisma.lease.findUnique({
       where: { id },
       include: { unit: true },
@@ -26,20 +28,24 @@ export async function POST(req: NextRequest, ctx: any) {
       return NextResponse.json({ error: "Lease is not pending signature" }, { status: 400 });
     }
 
-    // Security Deposit logic: We no longer block signing before deposit.
-    // Tenant reviews terms, signs, and THEN pays deposit.
+    // Update lease to ACTIVE and unit to OCCUPIED, store signature
+    // Use raw SQL for new fields (signedAt, signatureImageUrl) since Prisma client
+    // may not have regenerated yet. Status + unit update via normal Prisma.
+    await prisma.$executeRaw`
+      UPDATE "Lease"
+      SET
+        status = 'ACTIVE',
+        "signedAt" = NOW(),
+        "signatureImageUrl" = ${signatureImageUrl ?? null}
+      WHERE id = ${id}
+    `;
 
-    // Update lease to ACTIVE and unit to OCCUPIED
-    const [updatedLease] = await prisma.$transaction([
-      prisma.lease.update({
-        where: { id },
-        data: { status: "ACTIVE" },
-      }),
-      prisma.unit.update({
-        where: { id: lease.unitId },
-        data: { status: "OCCUPIED" },
-      }),
-    ]);
+    await prisma.unit.update({
+      where: { id: lease.unitId },
+      data: { status: "OCCUPIED" },
+    });
+
+    const updatedLease = await prisma.lease.findUnique({ where: { id } });
 
     return NextResponse.json(updatedLease);
   } catch (error: any) {

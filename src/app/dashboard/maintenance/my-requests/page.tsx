@@ -151,6 +151,8 @@ export default function MyRequestsPage() {
                 <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="SUBMITTED">Submitted</SelectItem>
                 <SelectItem value="ASSIGNED">Assigned</SelectItem>
+                <SelectItem value="AWAITING_APPROVAL">Awaiting Approval</SelectItem>
+                <SelectItem value="PENDING_TENANT_CONFIRMATION">Pending Confirmation</SelectItem>
                 <SelectItem value="RESOLVED">Resolved</SelectItem>
                 <SelectItem value="CLOSED">Closed</SelectItem>
               </SelectContent>
@@ -203,7 +205,7 @@ export default function MyRequestsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="rounded-full font-bold px-2.5 py-0.5 capitalize text-[10px]">
-                        {m.status === "CLOSED" ? "completed" : m.status.toLowerCase()}
+                        {m.status === "CLOSED" ? "completed" : m.status.toLowerCase().replace(/_/g, ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs font-bold text-slate-700">

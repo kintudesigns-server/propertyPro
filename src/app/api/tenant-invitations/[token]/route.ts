@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 // GET - fetch invitation details by token
-export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ token: string }> }) {
+  const { token } = await context.params;
   const invitation = await prisma.tenantInvitation.findUnique({
-    where: { token: params.token },
+    where: { token: token },
     include: { unit: { include: { property: true } }, invitedByOwner: { select: { name: true } } },
   });
 
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
   }
 
   if (new Date() > invitation.expiresAt) {
-    await prisma.tenantInvitation.update({ where: { token: params.token }, data: { status: "EXPIRED" } });
+    await prisma.tenantInvitation.update({ where: { token: token }, data: { status: "EXPIRED" } });
     return NextResponse.json({ error: "This invitation has expired" }, { status: 400 });
   }
 
@@ -24,12 +25,13 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
 }
 
 // POST - Accept invitation (create account + lease)
-export async function POST(req: NextRequest, { params }: { params: { token: string } }) {
+export async function POST(req: NextRequest, context: { params: Promise<{ token: string }> }) {
+  const { token } = await context.params;
   try {
     const { name, phone, password } = await req.json();
 
     const invitation = await prisma.tenantInvitation.findUnique({
-      where: { token: params.token },
+      where: { token: token },
       include: { unit: { include: { property: true } } },
     });
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     }
 
     if (new Date() > invitation.expiresAt) {
-      await prisma.tenantInvitation.update({ where: { token: params.token }, data: { status: "EXPIRED" } });
+      await prisma.tenantInvitation.update({ where: { token: token }, data: { status: "EXPIRED" } });
       return NextResponse.json({ error: "This invitation has expired" }, { status: 400 });
     }
 
@@ -83,7 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
 
     // Mark invitation as accepted
     await prisma.tenantInvitation.update({
-      where: { token: params.token },
+      where: { token: token },
       data: { status: "ACCEPTED", acceptedByTenantId: tenant.id },
     });
 

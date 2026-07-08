@@ -37,6 +37,8 @@ const stripePromise = getStripeClient();
 function CheckoutForm({
   invoiceId,
   amount,
+  baseAmount,
+  processingFee,
   propertyName,
   unitName,
   onSuccess,
@@ -44,7 +46,9 @@ function CheckoutForm({
   email,
 }: {
   invoiceId: string;
-  amount: number;
+  amount: number; // This is now gross (cents)
+  baseAmount: number; // Base rent before fees
+  processingFee: number;
   propertyName: string;
   unitName: string;
   onSuccess: () => void;
@@ -55,6 +59,7 @@ function CheckoutForm({
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [stripeReady, setStripeReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,20 +133,40 @@ function CheckoutForm({
           <span className="text-slate-500 font-medium">Unit</span>
           <span className="font-bold text-[#0F172A]">{unitName}</span>
         </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-500 font-medium">Base Rent</span>
+          <span className="font-semibold text-[#0F172A]">{formatCurrency(baseAmount * 100)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-500 font-medium">Card Processing Fee (2.9%)</span>
+          <span className="font-semibold text-slate-500">{formatCurrency(processingFee * 100)}</span>
+        </div>
         <div className="flex justify-between text-sm border-t border-[#E2E8F0] pt-2 mt-2">
-          <span className="text-slate-500 font-medium">Total Due</span>
+          <span className="text-[#0F172A] font-bold">Total Due</span>
           <span className="font-black text-[#0F172A] text-base">{formatCurrency(amount)}</span>
         </div>
       </div>
 
       {/* Stripe Payment Element */}
-      <div className="rounded-xl overflow-hidden border border-[#E2E8F0] p-4 bg-white">
+      <div className="rounded-xl overflow-hidden border border-[#E2E8F0] p-4 bg-white relative min-h-[280px]">
+        {!stripeReady && (
+          <div className="absolute inset-0 p-4 bg-white z-10 flex flex-col gap-4">
+            <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-full"></div>
+            <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-full"></div>
+            <div className="flex gap-4">
+              <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-1/2"></div>
+              <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-1/2"></div>
+            </div>
+            <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-full mt-2"></div>
+          </div>
+        )}
         <PaymentElement
+          onReady={() => setStripeReady(true)}
           options={{
             layout: "tabs",
             fields: {
               billingDetails: {
-                address: "never",
+                address: "auto", // Essential for AVS fraud prevention
               },
             },
           }}
@@ -207,6 +232,8 @@ export default function PayRentPage() {
     clientSecret: string;
     invoiceId: string;
     amount: number;
+    baseAmount: number;
+    processingFee: number;
     propertyName: string;
     unitName: string;
   } | null>(null);
@@ -282,6 +309,8 @@ export default function PayRentPage() {
         clientSecret: data.clientSecret,
         invoiceId: data.invoiceId,
         amount: data.amount,
+        baseAmount: data.baseAmount,
+        processingFee: data.processingFee,
         propertyName: data.propertyName,
         unitName: data.unitName,
       });
@@ -553,16 +582,53 @@ export default function PayRentPage() {
                             appearance: {
                               theme: "stripe",
                               variables: {
-                                colorPrimary: "#635BFF",
-                                borderRadius: "12px",
+                                colorPrimary: "#3B82F6",
+                                colorBackground: "#ffffff",
+                                colorText: "#0F172A",
+                                colorDanger: "#EF4444",
                                 fontFamily: "Inter, system-ui, sans-serif",
+                                spacingUnit: "4px",
+                                borderRadius: "12px",
                               },
+                              rules: {
+                                '.Input': {
+                                  border: '1px solid #E2E8F0',
+                                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                                  padding: '12px 16px',
+                                },
+                                '.Input:focus': {
+                                  border: '1px solid #3B82F6',
+                                  boxShadow: '0 0 0 1px #3B82F6',
+                                },
+                                '.Label': {
+                                  fontWeight: '700',
+                                  color: '#64748B',
+                                  fontSize: '11px',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px',
+                                  marginBottom: '8px',
+                                },
+                                '.Tab': {
+                                  border: '1px solid #E2E8F0',
+                                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                                },
+                                '.Tab--selected': {
+                                  borderColor: '#3B82F6',
+                                  boxShadow: '0 0 0 1px #3B82F6',
+                                },
+                                '.Block': {
+                                  border: '1px solid #E2E8F0',
+                                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                                }
+                              }
                             },
                           }}
                         >
                           <CheckoutForm
                             invoiceId={checkoutState.invoiceId}
                             amount={checkoutState.amount}
+                            baseAmount={checkoutState.baseAmount}
+                            processingFee={checkoutState.processingFee}
                             propertyName={checkoutState.propertyName}
                             unitName={checkoutState.unitName}
                             onSuccess={handlePaymentSuccess}

@@ -1,3 +1,4 @@
+// Force TS Server reload
 import { PrismaClient } from "@prisma/client";
 
 const createPrismaClient = () => new PrismaClient();

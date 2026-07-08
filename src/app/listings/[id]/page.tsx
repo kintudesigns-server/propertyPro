@@ -203,14 +203,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </div>
 
                 <div className="space-y-3">
-                  <Link href="/listings" className="block">
+                  <Link href={`/listings?applyUnitId=${unit.id}`} className="block">
                     <Button className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex justify-center items-center gap-2">
                       Apply Now <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-slate-700 border-[#E2E8F0] hover:bg-slate-50 flex justify-center items-center gap-2">
-                    <Calendar className="h-4 w-4" /> Schedule a Tour
-                  </Button>
+                  <Link href={`/listings?tourUnitId=${unit.id}`} className="block">
+                    <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-slate-700 border-[#E2E8F0] hover:bg-slate-50 flex justify-center items-center gap-2">
+                      <Calendar className="h-4 w-4" /> Schedule a Tour
+                    </Button>
+                  </Link>
                 </div>
                 
                 <p className="text-[11px] text-center text-slate-400 font-semibold mt-4">

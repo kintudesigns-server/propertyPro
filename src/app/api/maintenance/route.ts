@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -18,15 +19,31 @@ export async function GET(req: NextRequest) {
 
   try {
     if (id) {
-      const request = await prisma.maintenanceRequest.findUnique({
+      let request = (await prisma.maintenanceRequest.findUnique({
         where: { id },
         include: {
           unit: { include: { property: true } },
           tenant: { select: { name: true, email: true, phone: true } },
-          inspector: { select: { name: true, email: true, phone: true } }
-        }
-      });
+          inspector: { select: { name: true, email: true, phone: true } },
+          externalVendor: true
+        } as any
+      })) as any;
       if (!request) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+      if (!request.vendorMagicToken) {
+        const crypto = require("crypto");
+        const token = crypto.randomBytes(16).toString("hex");
+        request = (await prisma.maintenanceRequest.update({
+          where: { id },
+          data: { vendorMagicToken: token } as any,
+          include: {
+            unit: { include: { property: true } },
+            tenant: { select: { name: true, email: true, phone: true } },
+            inspector: { select: { name: true, email: true, phone: true } },
+            externalVendor: true
+          } as any
+        })) as any;
+      }
       return NextResponse.json(request);
     }
 
@@ -55,8 +72,9 @@ export async function GET(req: NextRequest) {
         },
         inspector: {
           select: { name: true, email: true }
-        }
-      },
+        },
+        externalVendor: true
+      } as any,
       orderBy: { createdAt: 'desc' }
     });
 
@@ -99,6 +117,9 @@ export async function POST(req: NextRequest) {
         priority: data.priority || "MEDIUM",
         status: data.inspectorId ? "ASSIGNED" : "SUBMITTED",
         photos: Array.isArray(data.photos) ? data.photos : [],
+        entryPermission: data.entryPermission !== undefined ? Boolean(data.entryPermission) : false,
+        hasPets: data.hasPets || "No",
+        preferredTimes: data.preferredTimes || "",
         ...(data.inspectorId ? { inspectorId: data.inspectorId } : {}),
         ...(data.estimatedCost ? { estimatedCost: parseFloat(data.estimatedCost) } : {}),
         ...(data.scheduledDate ? { scheduledDate: new Date(data.scheduledDate) } : {}),
@@ -143,16 +164,38 @@ export async function PUT(req: NextRequest) {
 
   try {
     const data = await req.json();
-    const { id, ...updateData } = data;
+    const { id, action, ...updateData } = data;
 
     if (!id) {
       return NextResponse.json({ error: "Missing request ID" }, { status: 400 });
     }
 
+    // Fetch full request details first for validations and metadata
+    const fullRequest: any = await prisma.maintenanceRequest.findUnique({
+      where: { id },
+      include: { unit: { include: { property: { include: { owner: true } } } }, externalVendor: true } as any,
+    });
+
+    if (!fullRequest) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    const owner = fullRequest.unit.property.owner;
+    const requesterRole = (session.user as any).role;
+
     // Process dates or numbers if present
     if (updateData.estimatedCost) {
       updateData.estimatedCost = parseFloat(updateData.estimatedCost);
+      const isEmergency = (updateData.priority || fullRequest.priority) === "EMERGENCY";
+      const limit = isEmergency
+        ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
+        : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
+
+      if (updateData.estimatedCost > limit && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
+        updateData.status = "AWAITING_APPROVAL";
+      }
     }
+
     if (updateData.scheduledDate) {
       updateData.scheduledDate = new Date(updateData.scheduledDate);
     }
@@ -166,6 +209,92 @@ export async function PUT(req: NextRequest) {
     // Auto-update status based on inspector assignment if not explicitly set
     if (updateData.inspectorId && !updateData.status) {
       updateData.status = "ASSIGNED";
+    }
+
+    // Set to PENDING_TENANT_CONFIRMATION if resolving
+    if (updateData.status === "RESOLVED") {
+      updateData.status = "PENDING_TENANT_CONFIRMATION";
+    }
+
+    if (action === "DISPATCH_VENDOR" && updateData.externalVendorId) {
+      const vendor = await (prisma as any).externalVendor.findUnique({ where: { id: updateData.externalVendorId }});
+      if (vendor) {
+        // 1. Send actual email to vendor
+        const magicLink = `http://localhost:3000/vendor/ticket/${fullRequest.vendorMagicToken}`;
+        await sendEmail({
+          to: vendor.email,
+          subject: `New Maintenance Work Order: ${fullRequest.unit.property.name}`,
+          html: `
+            <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
+              <h2 style="color: #0F172A;">New Work Order Dispatched</h2>
+              <p style="color: #334155; font-size: 16px;">Hello ${vendor.name},</p>
+              <p style="color: #334155; font-size: 16px;">You have been assigned a new maintenance request at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong>.</p>
+              
+              <div style="background-color: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #E2E8F0; margin: 24px 0;">
+                <p style="margin: 0 0 8px 0; font-weight: bold; color: #0F172A;">Issue: ${fullRequest.title}</p>
+                <p style="margin: 0; color: #475569;">${fullRequest.description}</p>
+              </div>
+              
+              <p style="color: #334155; font-size: 16px;">Click the secure button below to view the job details, upload an estimate, or attach your final receipts. You do not need to log in.</p>
+              
+              <a href="${magicLink}" style="display: inline-block; background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; margin-top: 16px;">View Work Order</a>
+            </div>
+          `,
+        });
+
+        // 2. Notify Owner internally
+        await notify({
+          userId: owner.id,
+          title: "Vendor Dispatched",
+          message: `Dispatched ${vendor.name} to ${fullRequest.unit.property.name}. An email with the Magic Link was sent to ${vendor.email}.`,
+          type: "SYSTEM",
+          priority: "MEDIUM",
+        });
+      }
+    }
+
+    // Handle Owner approving chargebacks
+    if (updateData.ownerApprovedChargeback === true && !fullRequest.ownerApprovedChargeback) {
+      const lease = await prisma.lease.findFirst({
+        where: { unitId: fullRequest.unitId, tenantId: fullRequest.tenantId, status: "ACTIVE" },
+      });
+
+      if (lease) {
+        const amount = Number(updateData.finalLabor || fullRequest.finalLabor || 0) + Number(updateData.finalMaterials || fullRequest.finalMaterials || 0);
+        
+        const invoice = await prisma.invoice.create({
+          data: {
+            leaseId: lease.id,
+            amount: amount,
+            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+            status: "UNPAID",
+          },
+        });
+        updateData.chargebackInvoiceId = invoice.id;
+
+        const transaction = await prisma.transaction.create({
+          data: {
+            type: "EXPENSE",
+            category: "MAINTENANCE",
+            amount: amount,
+            status: "COMPLETED",
+            reference: `VENDOR_PAY_${id.slice(-6)}`,
+            tenantId: fullRequest.tenantId,
+          },
+        });
+        updateData.vendorExpenseTransactionId = transaction.id;
+
+        try {
+          await notify({
+            userId: fullRequest.tenantId,
+            title: "Maintenance Chargeback Issued",
+            message: `You have been charged $${amount.toFixed(2)} for repair work on "${fullRequest.title}" determined to be tenant responsibility.`,
+            type: "PAYMENT",
+            priority: "HIGH",
+            relatedEntityId: invoice.id,
+          });
+        } catch (_) {}
+      }
     }
 
     const updatedRequest = await prisma.maintenanceRequest.update({
@@ -188,7 +317,9 @@ export async function PUT(req: NextRequest) {
             APPROVED: `The repair estimate for "${fullRequest.title}" has been approved. Repairs will be scheduled shortly.`,
             REPAIR_SCHEDULED: `Inspector ${fullRequest.inspector?.name || "assigned"} is scheduled to come for a repair visit for "${fullRequest.title}" on ${updateData.repairDate ? new Date(updateData.repairDate).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' }) : 'soon'}.`,
             IN_PROGRESS: `Work has started on your maintenance request "${fullRequest.title}".`,
-            RESOLVED: `Your maintenance request "${fullRequest.title}" has been resolved. Please check and confirm everything is in order.`,
+            RESOLVED: `Your maintenance request "${fullRequest.title}" has been resolved.`,
+            PENDING_TENANT_CONFIRMATION: `Your maintenance request "${fullRequest.title}" has been completed. Please confirm if it is fixed.`,
+            AWAITING_APPROVAL: `Your maintenance request "${fullRequest.title}" estimate is awaiting owner cost approval.`,
             CLOSED: `Your maintenance request "${fullRequest.title}" has been closed.`,
           };
           const msg = statusMessages[updateData.status] ||

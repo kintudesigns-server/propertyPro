@@ -155,9 +155,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, email, phone, role } = await req.json();
+    const { name, email, phone, role, password } = await req.json();
 
-    if (!name || !email || !role) {
+    if (!name || !email || !role || !password) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User with this email already exists" }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash("password123", 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
       data: {

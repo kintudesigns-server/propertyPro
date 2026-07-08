@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const data = await req.json();
     const updatedTier = await prisma.pricingTier.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name: data.name,
         description: data.description,
@@ -30,7 +31,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -38,7 +40,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
   try {
     await prisma.pricingTier.delete({
-      where: { id: params.id }
+      where: { id: id }
     });
     return NextResponse.json({ message: "Pricing tier deleted successfully" });
   } catch (error: any) {

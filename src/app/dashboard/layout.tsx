@@ -531,6 +531,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {isAdmin && (
                   <>
+                    {/* CORE ADMIN */}
                     {sidebarOpen && (
                       <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
                         ADMINISTRATION
@@ -548,6 +549,52 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       {sidebarOpen && <span>Admin Overview</span>}
                     </Link>
 
+                    {/* FINANCIALS */}
+                    {sidebarOpen && (
+                      <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                        FINANCIALS
+                      </span>
+                    )}
+                    <Link
+                      href="/dashboard/admin/profit"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/profit"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                      {sidebarOpen && <span className="text-green-700">Platform Profit</span>}
+                    </Link>
+                    <Link
+                      href="/dashboard/admin/payouts"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/payouts"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <CreditCard className="h-5 w-5" />
+                      {sidebarOpen && <span>Payout Requests</span>}
+                    </Link>
+
+                    {/* APPROVALS & MODERATION */}
+                    {sidebarOpen && (
+                      <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                        MODERATION
+                      </span>
+                    )}
+                    <Link
+                      href="/dashboard/admin/owner-applications"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/owner-applications"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <FileText className="h-5 w-5" />
+                      {sidebarOpen && <span>Owner Applications</span>}
+                    </Link>
                     <Link
                       href="/dashboard/admin/properties"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -560,30 +607,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       {sidebarOpen && <span>Approve Properties</span>}
                     </Link>
 
-                    <Link
-                      href="/dashboard/admin/payouts"
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                        pathname === "/dashboard/admin/payouts"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
-                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                      }`}
-                    >
-                      <DollarSign className="h-5 w-5" />
-                      {sidebarOpen && <span>Payouts</span>}
-                    </Link>
-
-                    <Link
-                      href="/dashboard/admin/owner-applications"
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                        pathname === "/dashboard/admin/owner-applications"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
-                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                      }`}
-                    >
-                      <FileText className="h-5 w-5" />
-                      {sidebarOpen && <span>Owner Applications</span>}
-                    </Link>
-
+                    {/* PLATFORM SETTINGS */}
+                    {sidebarOpen && (
+                      <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                        PLATFORM CONFIG
+                      </span>
+                    )}
                     <Link
                       href="/dashboard/admin/settings/pricing"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -593,9 +622,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       <Settings className="h-5 w-5" />
-                      {sidebarOpen && <span>Pricing Tiers</span>}
+                      {sidebarOpen && <span>Pricing Tiers & Fees</span>}
                     </Link>
-
                     <Link
                       href="/dashboard/admin/subscriptions"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -605,7 +633,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       <CreditCard className="h-5 w-5" />
-                      {sidebarOpen && <span>Subscriptions</span>}
+                      {sidebarOpen && <span>Active Subscriptions</span>}
                     </Link>
 
                     <div className="flex flex-col">
@@ -1038,6 +1066,19 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             Emergency
                           </div>
                         </Link>
+                        <Link
+                          href="/dashboard/vendors"
+                          className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            pathname === "/dashboard/vendors"
+                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            Vendors Directory
+                          </div>
+                        </Link>
                       </div>
                     )}
                   </div>
@@ -1102,7 +1143,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
-                    FINANCIALS
+                    ACCOUNTING
                   </span>
                 )}
 
@@ -1147,7 +1188,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
-                    ADMINISTRATION
+                    ACCOUNT SETTINGS
                   </span>
                 )}
                 

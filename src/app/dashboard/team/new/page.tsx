@@ -15,7 +15,8 @@ export default function AddTeamMember() {
     name: "",
     email: "",
     phone: "",
-    role: "INSPECTOR", // Default to Inspector for now
+    password: "",
+    role: "INSPECTOR",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,10 +95,9 @@ export default function AddTeamMember() {
                     <ShieldCheck className={`h-8 w-8 mb-2 ${formData.role === "INSPECTOR" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
                     <span className={`text-sm font-bold ${formData.role === "INSPECTOR" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Technician</span>
                   </div>
-                  {/* Future roles can be added here, like MANAGER */}
-                  <div className="flex-1 flex flex-col items-center justify-center p-4 border-2 border-[#E2E8F0] rounded-xl opacity-50 cursor-not-allowed">
-                    <Briefcase className="h-8 w-8 mb-2 text-[#94A3B8]" />
-                    <span className="text-sm font-bold text-[#64748B]">Manager (Pro)</span>
+                  <div className={`flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.role === "ACCOUNTANT" ? "border-[#3B82F6] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"}`} onClick={() => setFormData({...formData, role: "ACCOUNTANT"})}>
+                    <Briefcase className={`h-8 w-8 mb-2 ${formData.role === "ACCOUNTANT" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
+                    <span className={`text-sm font-bold ${formData.role === "ACCOUNTANT" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Accountant</span>
                   </div>
                 </div>
               </div>
@@ -132,11 +132,23 @@ export default function AddTeamMember() {
                   className="h-12 bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] rounded-xl shadow-sm font-medium text-[#0F172A]" 
                 />
               </div>
+              <div className="space-y-2.5">
+                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Temporary Password <span className="text-[#EF4444]">*</span></Label>
+                <Input 
+                  name="password" 
+                  type="password"
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  placeholder="Set an initial password" 
+                  className="h-12 bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] rounded-xl shadow-sm font-medium text-[#0F172A]" 
+                  required
+                />
+              </div>
               
               <div className="p-4 bg-slate-50 border border-[#E2E8F0] rounded-xl">
                 <p className="text-xs font-medium text-[#64748B] leading-relaxed">
                   <strong className="text-[#0F172A] block mb-1">Login Credentials:</strong>
-                  The new team member will be able to log in using their email address and the default password <code className="bg-slate-200 px-1 py-0.5 rounded text-[#0F172A]">password123</code>.
+                  Provide this email and password to your new team member securely. They can change their password anytime after their first login.
                 </p>
               </div>
             </div>

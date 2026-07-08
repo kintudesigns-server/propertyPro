@@ -51,25 +51,36 @@ export default function NewPropertyPage() {
     houseRooms: "",
     houseBaths: "",
     houseSqft: "",
-    houseOccupants: "1"
+    houseOccupants: "1",
+    // Commercial specific top-level fields
+    zoningType: "",
+    parkingSpaces: ""
   });
 
-  const [units, setUnits] = useState<any[]>([{ name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", maxOccupants: "2", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }]);
+  const [units, setUnits] = useState<any[]>([{ name: "Unit 1", type: "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", maxOccupants: "2", rentAmount: "", depositAmt: "", status: "VACANT", leaseStructure: "NNN", camCharges: "", images: [] as string[] }]);
   
   // Track manual deposit overrides so we don't clobber them with rent mirroring
   const [depositEditedMap, setDepositEditedMap] = useState<Record<number, boolean>>({});
   const [houseDepositEdited, setHouseDepositEdited] = useState(false);
+  const [customZoning, setCustomZoning] = useState("");
 
   // Bulk Generator State
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [bulkQty, setBulkQty] = useState("10");
   const [bulkPrefix, setBulkPrefix] = useState("Apt ");
   const [bulkStartNum, setBulkStartNum] = useState("101");
+  const [bulkFloor, setBulkFloor] = useState("");
+  const [bulkMaxOccupants, setBulkMaxOccupants] = useState("2");
   const [bulkRent, setBulkRent] = useState("1500");
+  const [bulkDeposit, setBulkDeposit] = useState("");
   const [bulkBeds, setBulkBeds] = useState("2");
   const [bulkBaths, setBulkBaths] = useState("1");
   const [bulkSqft, setBulkSqft] = useState("800");
+  const [bulkLeaseStructure, setBulkLeaseStructure] = useState("NNN");
+  const [bulkCam, setBulkCam] = useState("");
   const [bulkCloneImages, setBulkCloneImages] = useState(true);
+  const [bulkImages, setBulkImages] = useState<string[]>([]);
+  const [uploadingBulkImages, setUploadingBulkImages] = useState(false);
 
   // Check subscription status on mount
   useEffect(() => {
@@ -321,6 +332,29 @@ export default function NewPropertyPage() {
   const addUnit = () => setUnits([...units, { name: formData.type === "Commercial" ? `Suite ${units.length + 1}` : `Unit ${units.length + 1}`, type: formData.type === "Commercial" ? "Commercial" : "Apartment", floor: "", rooms: "", bathrooms: "", sqFootage: "", maxOccupants: "2", rentAmount: "", depositAmt: "", status: "VACANT", images: [] as string[] }]);
   const removeUnit = (index: number) => setUnits(units.filter((_, i) => i !== index));
 
+  const handleBulkImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>, category: string) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingBulkImages(true);
+    const newUrls: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const formDataObj = new FormData(); formDataObj.append("file", files[i]);
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: formDataObj });
+        if (res.ok) {
+          const data = await res.json();
+          newUrls.push(`${data.url}#category=${category}`);
+        }
+      } catch (err) {}
+    }
+    setBulkImages(prev => [...prev, ...newUrls]);
+    setUploadingBulkImages(false);
+  };
+  
+  const removeBulkImage = (url: string) => {
+    setBulkImages(prev => prev.filter(u => u !== url));
+  };
+
   const handleBulkGenerate = () => {
     const qty = Number(bulkQty);
     const start = Number(bulkStartNum);
@@ -331,15 +365,17 @@ export default function NewPropertyPage() {
       newGeneratedUnits.push({
         name: `${bulkPrefix}${start + i}`,
         type: formData.type === "Commercial" ? "Commercial" : "Apartment",
-        floor: "",
+        floor: bulkFloor,
         rooms: bulkBeds,
         bathrooms: bulkBaths,
         sqFootage: bulkSqft,
-        maxOccupants: "2",
+        maxOccupants: formData.type === "Commercial" ? "0" : bulkMaxOccupants,
         rentAmount: bulkRent,
-        depositAmt: bulkRent, // Smart default match
+        depositAmt: bulkDeposit || bulkRent, // Smart default match
         status: "VACANT",
-        images: (bulkCloneImages && units[0]?.images) ? [...units[0].images] : []
+        leaseStructure: formData.type === "Commercial" ? bulkLeaseStructure : undefined,
+        camCharges: (formData.type === "Commercial" && bulkLeaseStructure === "NNN") ? bulkCam : undefined,
+        images: bulkImages.length > 0 ? [...bulkImages] : ((bulkCloneImages && units[0]?.images) ? [...units[0].images] : [])
       });
     }
     
@@ -387,6 +423,7 @@ export default function NewPropertyPage() {
             bathrooms: "0",
             maxOccupants: "0",
             leaseStructure: leaseType,
+            camCharges: (leaseType === "NNN" && u.camCharges) ? Number(u.camCharges) : null,
             amenities: unitAmenities
           };
         });
@@ -394,7 +431,9 @@ export default function NewPropertyPage() {
 
       const payload = {
         ...formData,
+        zoningType: formData.zoningType === "Other" ? customZoning : formData.zoningType,
         yearBuilt: formData.yearBuilt ? Number(formData.yearBuilt) : null,
+        parkingSpaces: formData.parkingSpaces ? Number(formData.parkingSpaces) : null,
         units: finalUnits.map(u => ({
           ...u,
           rentAmount: Number(u.rentAmount) || 0,
@@ -403,7 +442,8 @@ export default function NewPropertyPage() {
           maxOccupants: Number(u.maxOccupants) || 1,
           sqFootage: Number(u.sqFootage) || 0,
           depositAmt: Number(u.depositAmt || u.rentAmount || 0),
-          floor: u.floor ? Number(u.floor) : null
+          floor: u.floor ? Number(u.floor) : null,
+          camCharges: u.camCharges ? Number(u.camCharges) : null
         }))
       };
 
@@ -498,9 +538,38 @@ export default function NewPropertyPage() {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0F172A]">Year Built (Optional)</label>
-              <Input name="yearBuilt" type="number" value={formData.yearBuilt} onChange={handleChange} placeholder="e.g. 2015" className="h-11 rounded-xl bg-white border-[#E2E8F0] md:w-1/2" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Year Built (Optional)</label>
+                <Input name="yearBuilt" type="number" value={formData.yearBuilt} onChange={handleChange} placeholder="e.g. 2015" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+              </div>
+              
+              {formData.type === "Commercial" && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-[#0F172A]">Zoning Type (Optional)</label>
+                    <div className="flex gap-2">
+                      <select name="zoningType" value={formData.zoningType} onChange={handleChange} className="flex-1 h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                        <option value="">Select a zoning type...</option>
+                        <option value="Retail & Commercial">Retail & Commercial (Shops, Restaurants)</option>
+                        <option value="Light Industrial">Light Industrial (Warehouse, Auto)</option>
+                        <option value="Heavy Industrial">Heavy Industrial (Manufacturing)</option>
+                        <option value="Office / Professional">Office / Professional</option>
+                        <option value="Mixed-Use">Mixed-Use (Retail & Residential)</option>
+                        <option value="Other">Other (Custom Code)</option>
+                      </select>
+                      {formData.zoningType === "Other" && (
+                        <Input value={customZoning} onChange={(e) => setCustomZoning(e.target.value)} placeholder="e.g. C-1" className="w-1/3 h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                      )}
+                    </div>
+                    <p className="text-[10px] text-[#64748B] font-medium leading-tight">Indicates what types of businesses are legally permitted to operate here.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-[#0F172A]">Total Parking Spaces (Optional)</label>
+                    <Input name="parkingSpaces" type="number" value={formData.parkingSpaces} onChange={handleChange} placeholder="e.g. 50" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* IF SINGLE FAMILY HOUSE: ABSORB UNIT FIELDS HERE */}
@@ -826,9 +895,9 @@ export default function NewPropertyPage() {
                 <p className="text-sm text-[#64748B]">Add the initial {formData.type === "Commercial" ? "suites" : "units"} for this property.</p>
               </div>
               <div className="flex gap-2 shrink-0">
-                {formData.type === "Apartment" && (
+                {formData.type !== "House" && (
                   <Button type="button" onClick={() => setBulkDialogOpen(true)} className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2 border border-emerald-200">
-                    <Layers className="h-4 w-4" /> Bulk Add Units
+                    <Layers className="h-4 w-4" /> Bulk Add {formData.type === "Commercial" ? "Suites" : "Units"}
                   </Button>
                 )}
                 <Button type="button" onClick={addUnit} className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2">
@@ -906,16 +975,24 @@ export default function NewPropertyPage() {
                     )}
 
                     {formData.type === "Commercial" && (
-                      <div className="space-y-1.5 md:col-span-3">
-                        <label className="text-xs font-bold text-[#0F172A]">Lease Structure <span className="text-red-500">*</span></label>
-                        <select value={unit.leaseStructure || "NNN"} onChange={(e) => handleUnitChange(index, "leaseStructure", e.target.value)} className="w-full h-10 bg-white border border-[#E2E8F0] rounded-xl px-3 text-sm outline-none font-semibold text-blue-600">
-                          <option value="NNN">Triple Net (NNN)</option>
-                          <option value="Gross">Full Service Gross</option>
-                        </select>
-                      </div>
+                      <>
+                        <div className="space-y-1.5 md:col-span-2">
+                          <label className="text-xs font-bold text-[#0F172A]">Lease Structure <span className="text-red-500">*</span></label>
+                          <select value={unit.leaseStructure || "NNN"} onChange={(e) => handleUnitChange(index, "leaseStructure", e.target.value)} className="w-full h-10 bg-white border border-[#E2E8F0] rounded-xl px-3 text-sm outline-none font-semibold text-blue-600">
+                            <option value="NNN">Triple Net (NNN)</option>
+                            <option value="Gross">Full Service Gross</option>
+                          </select>
+                        </div>
+                        {unit.leaseStructure === "NNN" && (
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label className="text-xs font-bold text-[#0F172A]">Est. Monthly CAM ($)</label>
+                            <Input type="number" value={unit.camCharges} onChange={(e) => handleUnitChange(index, "camCharges", e.target.value)} placeholder="500" className="h-10 rounded-xl" />
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    <div className={`space-y-1.5 ${formData.type === "Commercial" ? "md:col-span-3" : ""}`}>
+                    <div className={`space-y-1.5 ${formData.type === "Commercial" && unit.leaseStructure === "NNN" ? "md:col-span-4" : (formData.type === "Commercial" ? "md:col-span-2" : "")}`}>
                       <label className="text-xs font-bold text-[#0F172A]">Square Footage <span className="text-red-500">*</span></label>
                       <Input required type="number" value={unit.sqFootage} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} placeholder="800" className="h-10 rounded-xl" />
                     </div>
@@ -923,6 +1000,11 @@ export default function NewPropertyPage() {
                     <div className="space-y-1.5 md:col-span-2">
                       <label className="text-xs font-bold text-[#0F172A]">Monthly Rent ($) <span className="text-red-500">*</span></label>
                       <Input required type="number" value={unit.rentAmount} onChange={(e) => handleUnitChange(index, "rentAmount", e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
+                      {formData.type === "Commercial" && unit.rentAmount && unit.sqFootage && (
+                        <p className="text-[10px] font-semibold text-blue-600 mt-1 pl-1">
+                          (${( (Number(unit.rentAmount) * 12) / Number(unit.sqFootage) ).toFixed(2)} / sqft / yr)
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
                       <label className="text-xs font-bold text-[#0F172A]">Security Deposit ($)</label>
@@ -1105,14 +1187,14 @@ export default function NewPropertyPage() {
         </Dialog>
       )}
 
-      {/* Bulk Generate Modal */}
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-        <DialogContent className="max-w-md bg-white border-[#E2E8F0] rounded-3xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2"><Layers className="h-5 w-5 text-emerald-500"/> Bulk Generate Units</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
+        <DialogContent className="max-w-md bg-white border-[#E2E8F0] rounded-3xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2"><Layers className="h-5 w-5 text-emerald-500"/> Bulk Generate Units</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#0F172A]">Quantity to Create</label>
                 <Input type="number" value={bulkQty} onChange={(e) => setBulkQty(e.target.value)} placeholder="10" className="h-10 rounded-xl" />
@@ -1122,48 +1204,179 @@ export default function NewPropertyPage() {
                 <Input type="number" value={bulkStartNum} onChange={(e) => setBulkStartNum(e.target.value)} placeholder="101" className="h-10 rounded-xl" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#0F172A]">Prefix (Optional)</label>
-              <Input value={bulkPrefix} onChange={(e) => setBulkPrefix(e.target.value)} placeholder="e.g. Apt " className="h-10 rounded-xl" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#0F172A]">Prefix (Optional)</label>
+                <Input value={bulkPrefix} onChange={(e) => setBulkPrefix(e.target.value)} placeholder="e.g. Apt " className="h-10 rounded-xl" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#0F172A]">Floor Assignment</label>
+                <Input type="number" value={bulkFloor} onChange={(e) => setBulkFloor(e.target.value)} placeholder="e.g. 1" className="h-10 rounded-xl" />
+              </div>
             </div>
             
             <div className="pt-4 border-t border-slate-100">
               <p className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Base Template Settings</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                
+                {formData.type !== "Commercial" && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#0F172A]">Bedrooms</label>
+                      <Input type="number" value={bulkBeds} onChange={(e) => setBulkBeds(e.target.value)} placeholder="2" className="h-10 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#0F172A]">Bathrooms</label>
+                      <Input type="number" value={bulkBaths} onChange={(e) => setBulkBaths(e.target.value)} placeholder="1" className="h-10 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#0F172A]">Max Occupants</label>
+                      <Input type="number" value={bulkMaxOccupants} onChange={(e) => setBulkMaxOccupants(e.target.value)} placeholder="2" className="h-10 rounded-xl" />
+                    </div>
+                  </>
+                )}
+
+                {formData.type === "Commercial" && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#0F172A]">Lease Structure</label>
+                      <select value={bulkLeaseStructure} onChange={(e) => setBulkLeaseStructure(e.target.value)} className="w-full h-10 bg-white border border-[#E2E8F0] rounded-xl px-3 text-sm outline-none font-semibold text-blue-600">
+                        <option value="NNN">Triple Net (NNN)</option>
+                        <option value="Gross">Full Service Gross</option>
+                      </select>
+                    </div>
+                    {bulkLeaseStructure === "NNN" && (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#0F172A]">Monthly CAM ($)</label>
+                        <Input type="number" value={bulkCam} onChange={(e) => setBulkCam(e.target.value)} placeholder="500" className="h-10 rounded-xl" />
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#0F172A]">Bedrooms</label>
-                  <Input type="number" value={bulkBeds} onChange={(e) => setBulkBeds(e.target.value)} placeholder="2" className="h-10 rounded-xl" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#0F172A]">Bathrooms</label>
-                  <Input type="number" value={bulkBaths} onChange={(e) => setBulkBaths(e.target.value)} placeholder="1" className="h-10 rounded-xl" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#0F172A]">Square Footage</label>
+                  <label className="text-xs font-bold text-[#0F172A]">Sq Footage</label>
                   <Input type="number" value={bulkSqft} onChange={(e) => setBulkSqft(e.target.value)} placeholder="800" className="h-10 rounded-xl" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#0F172A]">Default Rent ($)</label>
+                  <label className="text-xs font-bold text-[#0F172A]">Default Rent</label>
                   <Input type="number" value={bulkRent} onChange={(e) => setBulkRent(e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#0F172A]">Sec. Deposit</label>
+                  <Input type="number" value={bulkDeposit} onChange={(e) => setBulkDeposit(e.target.value)} placeholder={bulkRent || "1500"} className="h-10 rounded-xl" />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex items-center gap-3 bg-[#F8FAFC] p-3 rounded-xl border">
-              <input 
-                type="checkbox" 
-                id="clone-images" 
-                checked={bulkCloneImages} 
-                onChange={(e) => setBulkCloneImages(e.target.checked)}
-                className="w-4 h-4 rounded text-[#0F172A] focus:ring-[#0F172A] border-gray-300 cursor-pointer"
-              />
-              <div>
-                <label htmlFor="clone-images" className="text-sm font-bold text-[#0F172A] cursor-pointer">Clone layout images from Unit 1</label>
-                <p className="text-xs text-[#64748B]">Newly generated units will share the exact same interior photos.</p>
+            <div className="pt-4 border-t border-slate-100">
+              <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Unit Photos (Applies to all generated units)</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {(() => {
+                  let categories = [];
+                  if (formData.type === "Apartment") {
+                    categories = [
+                      { id: "LIVING_AREA", label: "Living Area" },
+                      { id: "KITCHEN", label: "Kitchen Area" },
+                      { id: "BATHROOM", label: "Bathroom(s)" },
+                      { id: "BEDROOM", label: "Bedroom(s)" }
+                    ];
+                  } else {
+                    categories = [
+                      { id: "FLOORPLAN", label: "Floorplan" },
+                      { id: "INTERIOR", label: "Interior Space" }
+                    ];
+                  }
+
+                  return categories.map((cat) => {
+                    const catImages = bulkImages.filter(url => url.includes(`#category=${cat.id}`));
+                    const hasImages = catImages.length > 0;
+
+                    return (
+                      <div key={cat.id} className="relative">
+                        <input 
+                          type="file" 
+                          multiple 
+                          accept="image/*" 
+                          id={`bulk-upload-${cat.id}`}
+                          className="hidden" 
+                          onChange={(e) => handleBulkImagesUpload(e, cat.id)} 
+                        />
+                        <div 
+                          onClick={() => document.getElementById(`bulk-upload-${cat.id}`)?.click()}
+                          className={`h-full border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
+                            hasImages 
+                            ? "border-[#3B82F6] bg-[#EFF6FF] hover:bg-[#DBEAFE]" 
+                            : "border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white"
+                          }`}
+                        >
+                          {uploadingBulkImages ? (
+                             <Loader2 className="h-5 w-5 animate-spin text-[#3B82F6] mb-1" />
+                          ) : hasImages ? (
+                            <div className="h-6 w-6 bg-[#3B82F6] text-white rounded-full flex items-center justify-center mb-1 shadow-sm">
+                              <span className="font-bold text-xs">✓</span>
+                            </div>
+                          ) : (
+                            <div className="h-6 w-6 bg-white shadow-sm border border-[#E2E8F0] text-[#94A3B8] rounded-full flex items-center justify-center mb-1">
+                              <ImageIcon className="h-3 w-3" />
+                            </div>
+                          )}
+                          <h3 className={`text-xs font-bold ${hasImages ? "text-[#1E40AF]" : "text-[#0F172A]"}`}>
+                            {cat.label}
+                          </h3>
+                          
+                          {hasImages && (
+                            <div className="flex gap-1 mt-2">
+                              {catImages.slice(0, 3).map((url, i) => (
+                                <div key={i} className="h-6 w-6 rounded-md overflow-hidden border border-[#3B82F6]/30 bg-white group relative">
+                                  <img src={url} className="h-full w-full object-cover" alt="" />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity" onClick={(e) => { e.stopPropagation(); removeBulkImage(url); }}>
+                                    <Trash2 className="h-2 w-2 text-white" />
+                                  </div>
+                                </div>
+                              ))}
+                              {catImages.length > 3 && (
+                                <div className="h-6 w-6 rounded-md bg-[#3B82F6]/20 text-[#1E40AF] flex items-center justify-center text-[8px] font-bold">
+                                  +{catImages.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
+              
+              {bulkImages.length === 0 && (
+                <div className="mt-3 flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="clone-images" 
+                    checked={bulkCloneImages} 
+                    onChange={(e) => setBulkCloneImages(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#0F172A] focus:ring-[#0F172A] border-gray-300 cursor-pointer"
+                  />
+                  <div>
+                    <label htmlFor="clone-images" className="text-xs font-bold text-[#0F172A] cursor-pointer">Or fallback to clone from Unit 1</label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <p className="text-xs font-medium text-blue-600 flex items-center gap-2 bg-blue-50 p-2.5 rounded-xl w-full">
+                <span className="font-bold text-blue-700">Preview:</span> 
+                {Number(bulkQty) > 0 && bulkStartNum ? (
+                  `Generates "${bulkPrefix}${bulkStartNum}" to "${bulkPrefix}${Number(bulkStartNum) + Number(bulkQty) - 1}"`
+                ) : "Enter a valid quantity and start number"}
+              </p>
             </div>
           </div>
-          <DialogFooter className="mt-6 border-t border-slate-100 pt-4">
+          </div>
+          <DialogFooter className="p-4 border-t border-slate-100 bg-slate-50 shrink-0 rounded-b-3xl">
             <Button variant="ghost" onClick={() => setBulkDialogOpen(false)} className="h-10 font-bold rounded-xl text-slate-500">Cancel</Button>
             <Button onClick={handleBulkGenerate} className="bg-[#0F172A] hover:bg-[#1E293B] text-white h-10 font-bold rounded-xl px-6">Generate {bulkQty} Units</Button>
           </DialogFooter>

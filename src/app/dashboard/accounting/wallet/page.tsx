@@ -18,6 +18,7 @@ export default function WalletPage() {
   
   const [payouts, setPayouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ grossRevenue: 0, totalPlatformFees: 0, totalNetEarnings: 0 });
   
   // Withdrawal Form State
   const [amount, setAmount] = useState("");
@@ -32,7 +33,19 @@ export default function WalletPage() {
   useEffect(() => {
     fetchPayouts();
     fetchUserProfile();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("/api/wallet/stats");
+      if (res.ok) {
+        setStats(await res.json());
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -131,6 +144,25 @@ export default function WalletPage() {
               <p className="text-xs text-slate-400 mt-2 font-medium">Ready for withdrawal to your bank account.</p>
             </CardContent>
           </Card>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-slate-50 border-[#E2E8F0] shadow-sm rounded-2xl">
+              <CardContent className="p-4">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gross Income</p>
+                <p className="text-xl font-black text-slate-800 mt-1">
+                  ${stats.grossRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-blue-50/50 border-blue-100 shadow-sm rounded-2xl">
+              <CardContent className="p-4">
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Platform Fees</p>
+                <p className="text-xl font-black text-blue-800 mt-1">
+                  -${stats.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
           <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
             <CardHeader className="bg-[#F8FAFC] border-b border-[#E2E8F0] rounded-t-2xl pb-4">

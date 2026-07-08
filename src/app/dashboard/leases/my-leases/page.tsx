@@ -228,21 +228,33 @@ export default function MyLeasesPage() {
       return 0;
     });
 
-  const statusBadge = (s: string) => {
-    if (s === "ACTIVE") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
-    if (s === "PENDING_SIGNATURE") return "bg-amber-50 text-amber-700 border border-amber-200";
-    if (s === "EXPIRED" || s === "TERMINATED") return "bg-red-50 text-red-700 border border-red-200";
+  const hasUnpaidDeposit = (l: any) => {
+    return l.invoices?.some((inv: any) => 
+      l.securityDeposit &&
+      Number(inv.amount) === Number(l.securityDeposit) &&
+      inv.status === "UNPAID"
+    );
+  };
+
+  const statusBadge = (l: any) => {
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50 text-blue-700 border border-blue-200";
+    if (l.status === "ACTIVE") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    if (l.status === "PENDING_SIGNATURE") return "bg-amber-50 text-amber-700 border border-amber-200";
+    if (l.status === "EXPIRED" || l.status === "TERMINATED") return "bg-red-50 text-red-700 border border-red-200";
     return "bg-slate-100 text-slate-600 border border-slate-200";
   };
 
-  const statusDot = (s: string) => {
-    if (s === "ACTIVE") return "bg-emerald-500";
-    if (s === "PENDING_SIGNATURE") return "bg-amber-500";
+  const statusDot = (l: any) => {
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-500";
+    if (l.status === "ACTIVE") return "bg-emerald-500";
+    if (l.status === "PENDING_SIGNATURE") return "bg-amber-500";
     return "bg-slate-400";
   };
 
-  const formatStatus = (s: string) =>
-    s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const formatStatus = (l: any) => {
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "Awaiting Deposit";
+    return l.status.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
@@ -557,9 +569,9 @@ export default function MyLeasesPage() {
                           <p className="text-[11px] text-[#94A3B8]">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${statusBadge(l.status)}`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${statusDot(l.status)}`} />
-                            {formatStatus(l.status)}
+                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${statusBadge(l)}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${statusDot(l)}`} />
+                            {formatStatus(l)}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -620,14 +632,16 @@ export default function MyLeasesPage() {
                       {/* Status badge overlay */}
                       <div className="absolute top-3 left-3">
                         <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm ${
-                          l.status === "ACTIVE"
+                          l.status === "ACTIVE" && hasUnpaidDeposit(l)
+                            ? "bg-blue-500 text-white"
+                            : l.status === "ACTIVE"
                             ? "bg-emerald-500 text-white"
                             : l.status === "PENDING_SIGNATURE"
                             ? "bg-amber-500 text-white"
                             : "bg-slate-500 text-white"
                         }`}>
                           <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-                          {formatStatus(l.status)}
+                          {formatStatus(l)}
                         </span>
                       </div>
                       {expiringSoon && (

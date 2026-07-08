@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
             coverPhoto: true,
             amenities: true,
             type: true,
+            zoningType: true,
           },
         },
       },

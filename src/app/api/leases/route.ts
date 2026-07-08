@@ -19,17 +19,17 @@ export async function GET(req: NextRequest) {
     let leases: any[] = [];
     if (role === "SUPERADMIN") {
       leases = await prisma.lease.findMany({
-        include: { tenant: true, unit: { include: { property: true } } },
+        include: { tenant: true, unit: { include: { property: true } }, invoices: true },
       });
     } else if (role === "OWNER") {
       leases = await prisma.lease.findMany({
         where: { unit: { property: { ownerId: userId } } },
-        include: { tenant: true, unit: { include: { property: true } } },
+        include: { tenant: true, unit: { include: { property: true } }, invoices: true },
       });
     } else if (role === "TENANT") {
       leases = await prisma.lease.findMany({
         where: { tenantId: userId },
-        include: { tenant: true, unit: { include: { property: true } } },
+        include: { tenant: true, unit: { include: { property: true } }, invoices: true },
       });
     } else {
       leases = [];
@@ -51,7 +51,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const owner = await prisma.user.findUnique({ where: { id: ownerId } });
-    if (owner?.subscriptionStatus !== "Active") {
+    const subStatus = owner?.subscriptionStatus?.toLowerCase() ?? "";
+    const hasActiveSubscription = subStatus === "active" || subStatus === "active (canceling)";
+    if (!hasActiveSubscription) {
       return NextResponse.json({ error: "Active subscription required to create leases." }, { status: 403 });
     }
 

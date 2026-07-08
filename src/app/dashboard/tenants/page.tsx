@@ -270,8 +270,16 @@ export default function TenantsPage() {
                         <div className="text-xs text-[#64748B] mt-0.5 truncate">{t.email}</div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm font-semibold text-[#0F172A]">-</div>
-                        <div className="text-xs text-[#64748B] mt-0.5">-</div>
+                        <div className="text-sm font-semibold text-[#0F172A] truncate max-w-[150px]" title={t.position || t.employmentStatus}>
+                          {t.employmentStatus === "EMPLOYED" 
+                            ? (t.position || "Employed") 
+                            : t.employmentStatus 
+                              ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') 
+                              : "-"}
+                        </div>
+                        <div className="text-xs text-[#64748B] mt-0.5 truncate max-w-[150px]" title={`${t.employer || ''} ${t.annualIncome ? `$${t.annualIncome}/yr` : ''}`}>
+                          {t.employer ? t.employer : "-"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -358,6 +366,14 @@ export default function TenantsPage() {
                     </div>
                     <h3 className="font-extrabold text-[#0F172A] text-lg truncate w-full">{t.name}</h3>
                     <p className="text-sm text-[#64748B] truncate w-full">{t.email}</p>
+                    <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2 w-full text-center">
+                      <p className="text-xs font-bold text-slate-700 truncate">
+                        {t.employmentStatus === "EMPLOYED" ? t.position || "Employed" : t.employmentStatus ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') : "Employment N/A"}
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                        {t.employer ? t.employer : "No details"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="mt-auto pt-4 border-t border-[#F1F5F9] flex justify-between items-center">

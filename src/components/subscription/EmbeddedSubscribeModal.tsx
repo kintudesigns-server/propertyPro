@@ -35,6 +35,8 @@ interface EmbeddedSubscribeModalProps {
   onOpenChange: (open: boolean) => void;
   pricingTiers: PricingTier[];
   currentTierId?: string;
+  currentUserUnitCount?: number;
+  currentTierPrice?: number;
   /** Called after a successful subscription payment is confirmed */
   onSuccess?: () => void;
   /** Context message shown at top of modal */
@@ -176,11 +178,14 @@ export default function EmbeddedSubscribeModal({
   onOpenChange,
   pricingTiers: propTiers,
   currentTierId,
+  currentUserUnitCount = 0,
+  currentTierPrice = 0,
   onSuccess,
   contextMessage,
   title = "Choose Your Plan",
 }: EmbeddedSubscribeModalProps) {
-  const [step, setStep] = useState<"plans" | "payment">("plans");
+  const [step, setStep] = useState<"plans" | "confirm" | "payment">("plans");
+  const [confirmTier, setConfirmTier] = useState<PricingTier | null>(null);
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
@@ -212,13 +217,24 @@ export default function EmbeddedSubscribeModal({
       setTimeout(() => {
         setStep("plans");
         setSelectedTier(null);
+        setConfirmTier(null);
         setClientSecret(null);
         setLoadingTierId(null);
       }, 300);
     }
   }, [open]);
 
-  const handleSelectPlan = async (tier: PricingTier) => {
+  const handleSelectPlan = (tier: PricingTier) => {
+    // If user already has a plan and is switching, show confirmation
+    if (currentTierId && tier.id !== currentTierId) {
+      setConfirmTier(tier);
+      setStep("confirm");
+    } else {
+      processPlanSwitch(tier);
+    }
+  };
+
+  const processPlanSwitch = async (tier: PricingTier) => {
     setLoadingTierId(tier.id);
     try {
       const res = await fetch("/api/stripe/subscribe", {
@@ -234,7 +250,7 @@ export default function EmbeddedSubscribeModal({
       }
 
       if (data.upgraded) {
-        toast.success(`🎉 Successfully upgraded to ${tier.name}!`);
+        toast.success(`🎉 Successfully switched to ${tier.name}!`);
         handleSuccess();
         return;
       }
@@ -325,6 +341,7 @@ export default function EmbeddedSubscribeModal({
                 pricingTiers.map((tier) => {
                   const isCurrent = tier.id === currentTierId;
                   const isLoading = loadingTierId === tier.id;
+                  const isDowngradeBlocked = !isCurrent && currentUserUnitCount > tier.maxUnits;
 
                   return (
                     <div
@@ -332,6 +349,8 @@ export default function EmbeddedSubscribeModal({
                       className={`border-2 rounded-2xl p-5 transition-all ${
                         isCurrent
                           ? "border-slate-200 bg-slate-50 opacity-70 cursor-default"
+                          : isDowngradeBlocked
+                          ? "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed"
                           : "border-slate-200 hover:border-blue-400 hover:shadow-md hover:shadow-blue-50 cursor-pointer"
                       }`}
                     >
@@ -366,11 +385,13 @@ export default function EmbeddedSubscribeModal({
                             <span className="text-slate-500 text-xs font-medium">/mo</span>
                           </div>
                           <Button
-                            onClick={() => handleSelectPlan(tier)}
-                            disabled={isCurrent || !!loadingTierId}
+                            onClick={() => !isDowngradeBlocked && handleSelectPlan(tier)}
+                            disabled={isCurrent || !!loadingTierId || isDowngradeBlocked}
                             className={`h-9 px-5 rounded-xl font-bold text-sm transition-all ${
                               isCurrent
                                 ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                : isDowngradeBlocked
+                                ? "bg-red-50 text-red-500 cursor-not-allowed hover:bg-red-50"
                                 : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
                             }`}
                           >
@@ -378,6 +399,8 @@ export default function EmbeddedSubscribeModal({
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : isCurrent ? (
                               "Active"
+                            ) : isDowngradeBlocked ? (
+                              `Limit Exceeded (${currentUserUnitCount}/${tier.maxUnits})`
                             ) : (
                               "Select Plan"
                             )}
@@ -393,6 +416,49 @@ export default function EmbeddedSubscribeModal({
                 <Lock className="h-3 w-3" />
                 All plans are billed monthly · Cancel anytime
               </p>
+            </div>
+          )}
+
+          {/* ── STEP 1.5: Plan Switch Confirmation ── */}
+          {step === "confirm" && confirmTier && (
+            <div className="space-y-6">
+              <div className={`p-6 rounded-2xl border ${confirmTier.price > currentTierPrice ? 'bg-blue-50 border-blue-100 text-blue-900' : 'bg-amber-50 border-amber-100 text-amber-900'}`}>
+                <h3 className="text-lg font-black mb-2">
+                  {confirmTier.price > currentTierPrice ? 'Upgrading to ' : 'Downgrading to '} {confirmTier.name}
+                </h3>
+                <p className="text-sm font-medium leading-relaxed opacity-90">
+                  {confirmTier.price > currentTierPrice ? (
+                    "You are about to upgrade your subscription. You will be immediately charged a prorated amount to cover the remainder of your current billing cycle."
+                  ) : (
+                    "You are about to downgrade your subscription. You will not be charged today. The unused time from your current plan will be automatically deposited into your Stripe wallet as a credit, which will be applied to your future invoices."
+                  )}
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep("plans")}
+                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  disabled={!!loadingTierId}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1.5" />
+                  Back to Plans
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => processPlanSwitch(confirmTier)}
+                  disabled={!!loadingTierId}
+                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-60"
+                >
+                  {loadingTierId ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing...</>
+                  ) : (
+                    "Confirm & Switch Plan"
+                  )}
+                </Button>
+              </div>
             </div>
           )}
 

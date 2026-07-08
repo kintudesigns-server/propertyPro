@@ -92,9 +92,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-slate-700 font-bold text-xs uppercase tracking-wider">Password</Label>
-              </div>
+              <Label htmlFor="password" className="text-slate-700 font-bold text-xs uppercase tracking-wider">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -104,6 +102,11 @@ export default function LoginPage() {
                 className="bg-slate-50 border-0 text-slate-800 placeholder-slate-400 focus-visible:ring-primary/20 rounded-xl h-11"
                 required
               />
+              <div className="flex justify-end pt-1">
+                <Link href="/auth/forgot-password" className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
             <Button
               type="submit"

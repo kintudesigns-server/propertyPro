@@ -119,30 +119,65 @@ export const generateLeasePDF = (lease: any) => {
 
   currentY = (doc as any).lastAutoTable.finalY + 30;
 
+  // Helper to check for page break
+  const checkPageBreak = (neededSpace: number) => {
+    if (currentY + neededSpace > 800) {
+      doc.addPage();
+      currentY = 40;
+    }
+  };
+
   // --- STANDARD TERMS & CONDITIONS ---
+  checkPageBreak(100);
   doc.setFontSize(14);
   doc.setTextColor(textColor);
-  doc.text("Standard Terms & Conditions", 40, currentY);
+  doc.text("Platform Standard Terms", 40, currentY);
   currentY += 15;
 
   doc.setFontSize(10);
   doc.setTextColor(lightText);
-  const termsText = `1. RENT PAYMENTS: Rent is due on or before the due date specified. Late fees will be applied for payments received after the grace period.
-2. MAINTENANCE: Tenant is responsible for keeping the premises clean and sanitary. Major repairs must be reported to management immediately.
-3. ALTERATIONS: Tenant shall not make any material alterations to the unit without prior written consent from the Landlord.
-4. SECURITY DEPOSIT REFUND POLICY: The Security Deposit of $${Number(lease.securityDeposit || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} shall be held by the Landlord to secure the performance of the Tenant's obligations. Upon move-out, the property must be returned in its original condition (ordinary wear and tear excepted). The deposit will be refunded within the legally required timeframe, less any itemized deductions for damages, unpaid rent, or cleaning fees.
-5. EARLY TERMINATION POLICY: In the event the Tenant terminates this lease prior to the End Date, the Tenant shall be liable for an Early Termination Fee of $${Number(lease.earlyTerminationFee || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}. ${
-    lease.isProratedRefundAllowed 
-    ? "The Landlord shall refund a prorated portion of prepaid rent for any unused days in the month of move-out." 
-    : "Pre-paid rent is non-refundable for partial months in the event of early termination."
-  }`;
+  const standardTermsText = `1. Rent Payment: Rent is due on Day ${lease.rentDueDay || 1} of each month. A grace period of ${lease.gracePeriodDays || 5} days applies. Late fees of ${lease.lateFeeType === 'PERCENTAGE' ? `${lease.lateFeeAmount}%` : `$${Number(lease.lateFeeAmount || 0).toFixed(2)}`} will be charged after the grace period.
+2. Security Deposit: A security deposit of $${Number(lease.securityDeposit || 0).toFixed(2)} is required. This will be held and refunded subject to the unit condition upon move-out.
+3. Maintenance: Tenants must report any maintenance issues promptly. Damage caused by tenant negligence may be deducted from the security deposit.
+4. Early Termination: Early termination before ${new Date(lease.endDate).toLocaleDateString()} may result in a fee of $${Number(lease.earlyTerminationFee || 0).toFixed(2)}.
+5. Renewal: You will be notified ${lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.
+6. Privacy & Data: Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.
+7. Electronic Signature: By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).
+8. Governing Law: This agreement shall be governed by the laws of the jurisdiction where the property is located.`;
 
-  const splitTerms = doc.splitTextToSize(termsText, pageWidth - 80);
-  doc.text(splitTerms, 40, currentY);
+  const splitStandardTerms = doc.splitTextToSize(standardTermsText, pageWidth - 80);
   
-  currentY += (splitTerms.length * 12) + 30;
+  // Print standard terms with manual page break checking per line
+  for (let i = 0; i < splitStandardTerms.length; i++) {
+    checkPageBreak(15);
+    doc.text(splitStandardTerms[i], 40, currentY);
+    currentY += 12;
+  }
+  currentY += 20;
+
+  // --- OWNER CUSTOM TERMS ---
+  if (lease.customTerms) {
+    checkPageBreak(60);
+    doc.setFontSize(12);
+    doc.setTextColor(textColor);
+    doc.text("Property-Specific Terms (Added by Owner)", 40, currentY);
+    currentY += 15;
+    
+    doc.setFontSize(10);
+    doc.setTextColor(lightText);
+    const splitCustomTerms = doc.splitTextToSize(lease.customTerms, pageWidth - 80);
+    
+    for (let i = 0; i < splitCustomTerms.length; i++) {
+      checkPageBreak(15);
+      doc.text(splitCustomTerms[i], 40, currentY);
+      currentY += 12;
+    }
+    currentY += 30;
+  }
+
 
   // --- E-SIGNATURE SECTION ---
+  checkPageBreak(150); // Ensure the whole signature block fits
   doc.setFontSize(14);
   doc.setTextColor(textColor);
   doc.text("Signatures", 40, currentY);
@@ -154,18 +189,36 @@ export const generateLeasePDF = (lease: any) => {
   if (lease.status === "ACTIVE" || lease.status === "EXPIRED" || lease.status === "TERMINATED") {
     // Show E-Signature
     doc.text("TENANT E-SIGNATURE (Electronic Signature on File):", 40, currentY);
+    
+    let textOffsetY = currentY + 15;
+    
+    // Embed the drawn signature image if available
+    if (lease.signatureImageUrl) {
+      try {
+        // Add image (approx 150x50 size)
+        doc.addImage(lease.signatureImageUrl, "PNG", 40, currentY + 5, 150, 50);
+        textOffsetY += 60; // Push text down to make room for image
+      } catch (e) {
+        console.error("Failed to add signature image to PDF:", e);
+      }
+    }
+    
     doc.setFont("helvetica", "bold");
-    doc.text(`Signed by: ${lease.tenant?.name || "N/A"}`, 40, currentY + 15);
+    doc.text(`Signed by: ${lease.tenant?.name || "N/A"}`, 40, textOffsetY);
     doc.setFont("helvetica", "normal");
-    doc.text(`IP / Consent: Verified electronically`, 40, currentY + 30);
-    doc.text(`Date Signed: ${new Date(lease.createdAt).toLocaleString()}`, 40, currentY + 45);
+    doc.text(`IP / Consent: Verified electronically`, 40, textOffsetY + 15);
+    
+    // Use signedAt if available, fallback to createdAt or current date
+    const signDateStr = lease.signedAt ? new Date(lease.signedAt).toLocaleString() : (lease.createdAt ? new Date(lease.createdAt).toLocaleString() : new Date().toLocaleString());
+    doc.text(`Date Signed: ${signDateStr}`, 40, textOffsetY + 30);
+    
+    currentY = textOffsetY + 55;
   } else {
     doc.text("TENANT E-SIGNATURE:", 40, currentY);
     doc.text("_________________________________________________", 40, currentY + 15);
     doc.text("Status: Pending Signature", 40, currentY + 30);
+    currentY += 55;
   }
-
-  currentY += 70;
 
   // --- FOOTER NOTE ---
   doc.setFontSize(9);

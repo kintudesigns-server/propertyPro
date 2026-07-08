@@ -14,6 +14,27 @@ export default function AdminSubscriptionsClient({ owners, mrr }: { owners: any[
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [tierFilter, setTierFilter] = useState("ALL");
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+
+  const handleSyncStripe = async (userId: string) => {
+    try {
+      setSyncingId(userId);
+      const res = await fetch("/api/admin/subscriptions/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      alert(`Sync complete. Status is now: ${data.status}`);
+      window.location.reload(); // Refresh data to show changes
+    } catch (err: any) {
+      alert(`Failed to sync: ${err.message}`);
+    } finally {
+      setSyncingId(null);
+    }
+  };
 
   const filteredOwners = owners.filter(o => {
     if (search && !o.name?.toLowerCase().includes(search.toLowerCase()) && !o.email?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -197,10 +218,21 @@ export default function AdminSubscriptionsClient({ owners, mrr }: { owners: any[
                         <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-[#E2E8F0]">
                           <DropdownMenuGroup>
                             <DropdownMenuLabel className="font-bold text-[#64748B] text-xs uppercase tracking-wider py-2">Quick Actions</DropdownMenuLabel>
-                            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer font-medium text-sm text-[#0F172A] focus:bg-[#F8FAFC]" onClick={() => alert("Sync triggered.")}>
-                              <RefreshCw className="h-4 w-4 text-blue-500" /> Force Sync with Stripe
+                            
+                            <DropdownMenuItem 
+                              className="flex items-center gap-2 cursor-pointer font-medium text-sm text-[#0F172A] focus:bg-[#F8FAFC]" 
+                              disabled={syncingId === owner.id || !owner.stripeSubscriptionId}
+                              onClick={() => handleSyncStripe(owner.id)}
+                            >
+                              <RefreshCw className={`h-4 w-4 text-blue-500 ${syncingId === owner.id ? 'animate-spin' : ''}`} /> 
+                              {syncingId === owner.id ? "Syncing..." : "Force Sync with Stripe"}
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer font-medium text-sm text-[#0F172A] focus:bg-[#F8FAFC]" onClick={() => window.open(`https://dashboard.stripe.com/customers/${owner.stripeCustomerId || ''}`, '_blank')}>
+                            
+                            <DropdownMenuItem 
+                              className="flex items-center gap-2 cursor-pointer font-medium text-sm text-[#0F172A] focus:bg-[#F8FAFC]" 
+                              disabled={!owner.stripeCustomerId}
+                              onClick={() => window.open(`https://dashboard.stripe.com/customers/${owner.stripeCustomerId || ''}`, '_blank')}
+                            >
                               <ExternalLink className="h-4 w-4 text-emerald-500" /> View in Stripe
                             </DropdownMenuItem>
                           </DropdownMenuGroup>

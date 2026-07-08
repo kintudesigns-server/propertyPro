@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Wrench, Search, Clock, Calendar, CheckCircle2, MoreHorizontal, Eye, Edit, UserPlus, XCircle, LayoutList, LayoutGrid, Check, CheckCircle, HelpCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from "@/components/ui/dropdown-menu";
+import { Wrench, Search, Clock, Calendar, CheckCircle2, MoreHorizontal, Eye, Edit, UserPlus, XCircle, LayoutList, LayoutGrid, Check, CheckCircle, HelpCircle, Send, MessageSquare, Activity } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -97,6 +97,21 @@ export default function MaintenancePage() {
     setAssignModalOpen(true);
   };
 
+  const handleQuickStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/maintenance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      toast.success(`Status updated successfully`);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred");
+    }
+  };
+
   const filteredRequests = requests.filter(req => {
     const matchesSearch = req.title.toLowerCase().includes(search.toLowerCase()) || 
                           req.unit.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -130,37 +145,51 @@ export default function MaintenancePage() {
     switch (status) {
       case "SUBMITTED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 whitespace-nowrap">
             <Clock className="h-3.5 w-3.5" />
-            submitted
+            Submitted
           </span>
         );
       case "ASSIGNED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-600 border border-purple-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-600 border border-purple-200 whitespace-nowrap">
             <UserPlus className="h-3.5 w-3.5" />
-            assigned
+            Assigned
+          </span>
+        );
+      case "AWAITING_APPROVAL": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+            <Clock className="h-3.5 w-3.5" />
+            Awaiting Approval
+          </span>
+        );
+      case "PENDING_TENANT_CONFIRMATION": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+            <HelpCircle className="h-3.5 w-3.5" />
+            Pending Confirmation
           </span>
         );
       case "RESOLVED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200 whitespace-nowrap">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            resolved
+            Resolved
           </span>
         );
       case "CLOSED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200 whitespace-nowrap">
             <CheckCircle className="h-3.5 w-3.5" />
-            closed
+            Closed
           </span>
         );
       default: 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200 whitespace-nowrap capitalize">
             <HelpCircle className="h-3.5 w-3.5" />
-            {status.toLowerCase()}
+            {status.toLowerCase().replace(/_/g, ' ')}
           </span>
         );
     }
@@ -220,6 +249,8 @@ export default function MaintenancePage() {
                 <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="SUBMITTED">Submitted</SelectItem>
                 <SelectItem value="ASSIGNED">Assigned</SelectItem>
+                <SelectItem value="AWAITING_APPROVAL">Awaiting Approval</SelectItem>
+                <SelectItem value="PENDING_TENANT_CONFIRMATION">Pending Confirmation</SelectItem>
                 <SelectItem value="RESOLVED">Resolved</SelectItem>
                 <SelectItem value="CLOSED">Closed</SelectItem>
               </SelectContent>
@@ -318,6 +349,8 @@ export default function MaintenancePage() {
                       <td className="px-4 py-4">
                         {req.inspector ? (
                           <span className="font-medium text-[#0F172A]">{req.inspector.name}</span>
+                        ) : req.externalVendor ? (
+                          <span className="font-medium text-blue-600 flex items-center gap-1"><Wrench className="h-3 w-3" /> {req.externalVendor.name}</span>
                         ) : (
                           <span className="text-[#64748B] font-medium">Unassigned</span>
                         )}
@@ -370,9 +403,9 @@ export default function MaintenancePage() {
               filteredRequests.map((req) => (
                 <Card key={req.id} className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
                   <div className="p-5 border-b border-[#F1F5F9] flex justify-between items-start gap-4">
-                    <div className="flex flex-col space-y-1">
-                      <h3 className="font-bold text-[#0F172A] text-lg leading-tight line-clamp-1">{req.title}</h3>
-                      <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px]">
+                    <div className="flex flex-col space-y-1 w-full overflow-hidden">
+                      <h3 className="font-bold text-[#0F172A] text-lg leading-tight truncate">{req.title}</h3>
+                      <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px] truncate block w-full">
                         {req.unit.property.name} - {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`}
                       </Link>
                     </div>
@@ -380,20 +413,51 @@ export default function MaintenancePage() {
                       <DropdownMenuTrigger className="h-8 w-8 shrink-0 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
                         <MoreHorizontal className="h-5 w-5" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                          <Eye className="h-4 w-4 text-[#64748B]" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                      <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1.5 z-50 relative">
+                        {/* 1. Dispatch Vendor & Assignments (Only if not closed) */}
+                        {req.status !== "CLOSED" && req.status !== "RESOLVED" && (
+                          <>
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
+                              <Send className="h-4 w-4" /> Dispatch Vendor
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
+                              <UserPlus className="h-4 w-4 text-[#64748B]" /> {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                            </DropdownMenuItem>
+                            <div className="h-px bg-[#E2E8F0] my-1" />
+                          </>
+                        )}
+
+                        {/* 2. Quick Status Updates */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
+                            <Activity className="h-4 w-4 text-[#64748B]" /> Change Status
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent className="w-40 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1.5 z-50">
+                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "ASSIGNED")} className="cursor-pointer text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">Mark Assigned</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "AWAITING_APPROVAL")} className="cursor-pointer text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">Mark Awaiting</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "RESOLVED")} className="cursor-pointer text-sm font-medium text-green-700 p-2 rounded-lg hover:bg-green-50 focus:bg-green-50 focus:text-green-800">Mark Resolved</DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
                           <Edit className="h-4 w-4 text-[#64748B]" /> Edit Request
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                          <UserPlus className="h-4 w-4" /> {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                        
+                        <DropdownMenuItem onClick={() => { window.location.href = `mailto:${req.tenant?.email || ''}?subject=Regarding Maintenance Ticket: ${req.title}`; }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
+                          <MessageSquare className="h-4 w-4 text-[#64748B]" /> Contact Tenant
                         </DropdownMenuItem>
-                        <div className="h-px bg-[#E2E8F0] my-1" />
-                        <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
-                          <XCircle className="h-4 w-4" /> Cancel Request
-                        </DropdownMenuItem>
+
+                        {/* 3. Destructive Action */}
+                        {req.status !== "CLOSED" && req.status !== "RESOLVED" && (
+                          <>
+                            <div className="h-px bg-[#E2E8F0] my-1" />
+                            <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
+                              <XCircle className="h-4 w-4" /> Cancel Request
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -414,6 +478,8 @@ export default function MaintenancePage() {
                           <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Technician</p>
                           {req.inspector ? (
                             <p className="font-semibold text-[#0F172A] text-sm">{req.inspector.name}</p>
+                          ) : req.externalVendor ? (
+                            <p className="font-semibold text-blue-600 text-sm flex items-center gap-1.5"><Wrench className="h-3.5 w-3.5" /> {req.externalVendor.name}</p>
                           ) : (
                             <p className="text-[#94A3B8] font-medium text-sm italic">Unassigned</p>
                           )}
@@ -429,6 +495,12 @@ export default function MaintenancePage() {
                           <p className="font-semibold text-[#0F172A] text-sm">{format(new Date(req.createdAt), "MMM d, yyyy")}</p>
                         </div>
                       </div>
+                    </div>
+                    
+                    <div className="pt-4 mt-2 border-t border-[#F1F5F9]">
+                      <Button onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} variant="outline" className="w-full text-blue-600 border-blue-200 hover:bg-blue-50 font-semibold rounded-xl">
+                        View Details
+                      </Button>
                     </div>
                   </div>
                 </Card>

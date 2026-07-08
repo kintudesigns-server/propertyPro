@@ -4389,6 +4389,8 @@ export default function OwnerDashboard() {
         onOpenChange={(open) => { setShowPricingModal(open); if (!open) setPricingModalContext("general"); }}
         pricingTiers={pricingTiers}
         currentTierId={pricingTier?.id}
+        currentUserUnitCount={units.length}
+        currentTierPrice={pricingTier?.price ? Number(pricingTier.price) : 0}
         title={pricingModalContext === "blocked_property" ? "One Step Away from Listing!" : "Choose Your Plan"}
         contextMessage={
           pricingModalContext === "blocked_property"
