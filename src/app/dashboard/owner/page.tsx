@@ -4253,7 +4253,7 @@ export default function OwnerDashboard() {
               Assign Inspector
             </DialogTitle>
             <DialogDescription className="text-[#7F817F] text-xs">
-              Assign an on-site technician to inspect: "{selectedTicket?.title}"
+              Assign an on-site inspector to inspect: "{selectedTicket?.title}"
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAssignInspector} className="space-y-4 pt-4">

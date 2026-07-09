@@ -600,140 +600,182 @@ export default function LeaseDetailsPage() {
               </div>
             </Card>
 
-            <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] p-6 space-y-6">
+            <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] p-6 space-y-5">
               <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2 pb-3 border-b border-[#F1F5F9]">
                 <ShieldAlert className="h-5 w-5 text-indigo-500" /> Security Deposit Ledger
               </h2>
-              
-              {/* Deposit Status Badge */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Deposit Status</span>
-                {(() => {
-                  const status = lease.depositStatus || "HELD";
-                  const payout = lease.payoutRequests?.[0];
-                  
-                  if (status === "HELD") {
-                    return <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200">Held (Collected)</span>;
-                  }
-                  if (status === "PENDING_ADMIN_PAYOUT" || (payout && payout.status === "PENDING")) {
-                    return <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-200 animate-pulse">Pending Admin Payout</span>;
-                  }
-                  if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || (payout && payout.status === "COMPLETED")) {
-                    return <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200">Completed (Disbursed)</span>;
-                  }
-                  if (status === "FULLY_DEDUCTED") {
-                    return <span className="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-200">Fully Forfeited</span>;
-                  }
-                  return <span className="px-2.5 py-1 bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">{status}</span>;
-                })()}
+
+              {/* ── SECTION 1: Deposit Collection ── */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Deposit Collection</p>
+                <div className="space-y-1.5 text-xs font-semibold text-slate-600">
+                  <div className="flex justify-between items-center">
+                    <span>Required Amount:</span>
+                    <span className="font-extrabold text-slate-900">${Number(lease.securityDeposit || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Paid:</span>
+                    {(lease as any).depositPaidAt ? (
+                      <span className="font-extrabold text-emerald-700 flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        ${Number((lease as any).depositPaidAmount || lease.securityDeposit || 0).toFixed(2)}
+                        <span className="text-[10px] text-slate-400 font-normal ml-1">
+                          {new Date((lease as any).depositPaidAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> Awaiting Payment
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Status:</span>
+                    {(() => {
+                      const status = lease.depositStatus || "HELD";
+                      const payout = lease.payoutRequests?.[0];
+                      if (status === "HELD") return <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded border border-indigo-200">Held in Escrow</span>;
+                      if (status === "PENDING_ADMIN_PAYOUT" || payout?.status === "PENDING") return <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-200 animate-pulse">Pending Disbursement</span>;
+                      if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || payout?.status === "COMPLETED") return <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">Refunded</span>;
+                      if (status === "FULLY_DEDUCTED") return <span className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded border border-red-200">Fully Forfeited</span>;
+                      return <span className="px-2 py-0.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded border border-slate-200">{status}</span>;
+                    })()}
+                  </div>
+                </div>
               </div>
 
-              {/* Deposit Amount Breakdown */}
-              <div className="space-y-2 text-xs font-semibold text-slate-600">
-                <div className="flex justify-between">
-                  <span>Original Security Deposit:</span>
-                  <span className="font-extrabold text-slate-900">${Number(lease.securityDeposit || lease.deposit || 0).toFixed(2)}</span>
+              {/* ── SECTION 2: Mid-Tenancy Deductions ── */}
+              <div className="space-y-2 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Mid-Tenancy Deductions</p>
+                  {(lease as any).depositDeductions?.length > 0 && (
+                    <span className="text-[10px] text-red-600 font-bold">
+                      -{(lease as any).depositDeductions.reduce((s: number, d: any) => s + Number(d.amount), 0).toFixed(2)}
+                    </span>
+                  )}
                 </div>
+                {(lease as any).depositDeductions?.length > 0 ? (
+                  <div className="space-y-2">
+                    {(lease as any).depositDeductions.map((d: any) => {
+                      // Extract maintenance ticket ID from reference like DEPOSIT_DEDUCT_xxxxxx
+                      const ticketRef = d.reference?.replace("DEPOSIT_DEDUCT_", "") || "";
+                      return (
+                        <div key={d.id} className="bg-red-50/60 border border-red-100 rounded-lg p-2.5 space-y-1">
+                          <div className="flex justify-between items-center text-[11px]">
+                            <span className="text-slate-600 font-semibold">
+                              {new Date(d.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} — Maintenance (Tenant Fault)
+                            </span>
+                            <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400">
+                            <span className="font-mono">Ref: {d.reference}</span>
+                            <Link
+                              href={isTenant ? "/dashboard/maintenance/my-requests" : `/dashboard/maintenance?search=${ticketRef}`}
+                              className="text-indigo-600 hover:underline font-bold"
+                            >
+                              View Ticket →
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">No deductions during tenancy.</p>
+                )}
 
-                {/* Render Deductions if present */}
-                {Array.isArray(lease.deductions) && lease.deductions.length > 0 && (
-                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Itemized Damage Deductions</p>
+                {/* Current Balance */}
+                <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-xs font-bold">
+                  <span className="text-slate-700">Current Balance:</span>
+                  <span className={`text-base font-black ${Number((lease as any).depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                    ${Number((lease as any).depositBalance || 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* ── SECTION 3: Move-Out Deductions ── */}
+              <div className="space-y-2 pt-3 border-t border-slate-100">
+                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Move-Out Deductions</p>
+                {Array.isArray(lease.deductions) && lease.deductions.length > 0 ? (
+                  <div className="space-y-1.5">
                     {lease.deductions.map((d: any, idx: number) => (
                       <div key={idx} className="flex justify-between items-center bg-red-50/50 p-2 rounded-lg border border-red-100/50 text-[11px]">
                         <span className="text-red-950 font-bold">
                           {d.description}
                           {d.photoUrl && (
-                            <a href={d.photoUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-indigo-600 hover:underline">
-                              (Proof)
-                            </a>
+                            <a href={d.photoUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-indigo-600 hover:underline">(Proof)</a>
                           )}
                         </span>
                         <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">
+                    {lease.moveOutStatus === "NONE" ? "None logged — completed at move-out inspection." : "No move-out deductions recorded."}
+                  </p>
                 )}
-
-                {/* Final Refund Calculation */}
-                {(() => {
-                  const original = Number(lease.securityDeposit || lease.deposit || 0);
-                  const totalDeductions = Array.isArray(lease.deductions) 
-                    ? lease.deductions.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
-                    : 0;
-                  const refundAmount = original - totalDeductions;
-
-                  return (
-                    <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-sm">
-                      <span className="font-bold text-slate-900">Calculated Refund:</span>
-                      <span className="text-base font-black text-emerald-600">${Math.max(0, refundAmount).toFixed(2)}</span>
-                    </div>
-                  );
-                })()}
               </div>
 
-              {/* Payout & Receipt Audit Trail */}
+              {/* ── SECTION 4: Deposit Summary ── */}
+              {(() => {
+                const original = Number(lease.securityDeposit || 0);
+                const midDeductions = (lease as any).depositDeductions?.reduce((s: number, d: any) => s + Number(d.amount), 0) || 0;
+                const moveOutDeductions = Array.isArray(lease.deductions) ? lease.deductions.reduce((s: number, d: any) => s + Number(d.amount), 0) : 0;
+                const estimatedRefund = Math.max(0, original - midDeductions - moveOutDeductions);
+                const isFinalised = ["REFUNDED", "PARTIALLY_REFUNDED", "FULLY_DEDUCTED"].includes(lease.depositStatus || "");
+
+                return (
+                  <div className="space-y-1.5 pt-3 border-t border-slate-100">
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Deposit Summary</p>
+                    <div className="space-y-1 text-[11px] font-semibold text-slate-600">
+                      <div className="flex justify-between"><span>Original Deposit:</span><span className="font-extrabold text-slate-900">${original.toFixed(2)}</span></div>
+                      {midDeductions > 0 && <div className="flex justify-between"><span>Mid-Tenancy Deductions:</span><span className="font-extrabold text-red-600">-${midDeductions.toFixed(2)}</span></div>}
+                      {moveOutDeductions > 0 && <div className="flex justify-between"><span>Move-Out Deductions:</span><span className="font-extrabold text-red-600">-${moveOutDeductions.toFixed(2)}</span></div>}
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-sm">
+                      <span className="font-bold text-slate-900">{isFinalised ? "Final Refund:" : "Estimated Refund:"}</span>
+                      <span className="text-base font-black text-emerald-600">${estimatedRefund.toFixed(2)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Payout Disbursement Details */}
               {(() => {
                 const payout = lease.payoutRequests?.[0];
                 if (!payout) return null;
-
                 return (
-                  <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <div className="pt-3 border-t border-slate-100 space-y-3">
                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Refund Disbursement Details</p>
                     <div className="space-y-1.5 text-[11px] font-semibold text-slate-600">
-                      <div className="flex justify-between">
-                        <span>Payout Method:</span>
-                        <span className="font-bold text-slate-900">{payout.bankName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Recipient Account:</span>
-                        <span className="font-bold text-slate-900">{payout.accountName} (***{payout.accountNumber?.slice(-4) || "N/A"})</span>
-                      </div>
-                      {payout.disbursedAt && (
-                        <div className="flex justify-between">
-                          <span>Disbursed Date:</span>
-                          <span className="font-bold text-slate-900">{new Date(payout.disbursedAt).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                      {lease.refundRef && (
-                        <div className="flex justify-between">
-                          <span>Reference / Check #:</span>
-                          <span className="font-bold text-slate-900">{lease.refundRef}</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between"><span>Payout Method:</span><span className="font-bold text-slate-900">{payout.bankName}</span></div>
+                      <div className="flex justify-between"><span>Recipient Account:</span><span className="font-bold text-slate-900">{payout.accountName} (***{payout.accountNumber?.slice(-4) || "N/A"})</span></div>
+                      {payout.disbursedAt && <div className="flex justify-between"><span>Disbursed Date:</span><span className="font-bold text-slate-900">{new Date(payout.disbursedAt).toLocaleDateString()}</span></div>}
+                      {lease.refundRef && <div className="flex justify-between"><span>Reference / Check #:</span><span className="font-bold text-slate-900">{lease.refundRef}</span></div>}
                     </div>
-
-                    {/* View Proof & Refund Receipt button */}
-                    {payout.status === "COMPLETED" && (
-                      <div className="space-y-2 pt-2">
-                        {payout.proofUrl && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full text-[11px] h-8 font-bold border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg flex items-center justify-center gap-1.5"
-                            onClick={() => window.open(payout.proofUrl, "_blank")}
-                          >
-                            <FileText className="h-3.5 w-3.5" /> View Admin Payout Proof
-                          </Button>
-                        )}
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-[11px] h-8 font-bold border-slate-200 text-slate-700 bg-slate-50/50 hover:bg-slate-100 rounded-lg flex items-center justify-center gap-1.5"
-                          onClick={() => {
-                            // Find receipt document in lease documents or fall back
-                            toast.info("Notice document is accessible in the Documents tab.");
-                          }}
-                        >
-                          <FileDown className="h-3.5 w-3.5" /> View Refund Receipt Document
-                        </Button>
-                      </div>
+                    {payout.status === "COMPLETED" && payout.proofUrl && (
+                      <Button variant="outline" size="sm" className="w-full text-[11px] h-8 font-bold border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg" onClick={() => window.open(payout.proofUrl, "_blank")}>
+                        <FileText className="h-3.5 w-3.5 mr-1.5" /> View Admin Payout Proof
+                      </Button>
                     )}
                   </div>
                 );
               })()}
+
+              {/* Process Move-Out button — owner only */}
+              {!isTenant && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-9 text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl mt-1"
+                  onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" /> Process Move-Out &amp; Refund
+                </Button>
+              )}
             </Card>
+
           </div>
         </div>
       )}

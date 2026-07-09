@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Wrench, Clock, Calendar, CheckCircle2, User, Home, Building, FileText, X, Camera } from "lucide-react";
+import { ArrowLeft, Wrench, Clock, Calendar, CheckCircle2, User, Home, Building, FileText, X, Camera, Building2, AlertCircle, ArrowRight, Star } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,12 +21,34 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
   const [rating, setRating] = useState<number>(5);
   const [feedback, setFeedback] = useState<string>("");
 
+  const [grantEntry, setGrantEntry] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleReason, setRescheduleReason] = useState("");
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("CASH"); // STRIPE, CASH, CHECK
+  const [referenceNote, setReferenceNote] = useState("");
+  const isTenant = (session?.user as any)?.role === "TENANT";
+
   const fetchTicket = () => {
     setLoading(true);
     fetch(`/api/maintenance?id=${id}`)
       .then(res => res.json())
       .then(data => {
-        if (data && !data.error) setRequest(data);
+        if (data && !data.error) {
+          setRequest(data);
+          setGrantEntry(data.entryPermission || false);
+          if (data.externalVendor) {
+            if (data.externalVendor.bankName === "CASH") {
+              setPaymentMethod("CASH");
+            } else if (data.externalVendor.bankName === "CHECK") {
+              setPaymentMethod("CHECK");
+            } else if (data.externalVendor.bankName) {
+              setPaymentMethod("STRIPE");
+            } else {
+              setPaymentMethod("CASH");
+            }
+          }
+        }
       })
       .finally(() => setLoading(false));
   };
@@ -88,21 +110,181 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
     }
   };
 
+  const getStepState = (stepIndex: number) => {
+    const status = request.status;
+    const isPaid = !!request.vendorExpenseTransactionId;
+
+    if (stepIndex === 0) {
+      // Submitted
+      return { completed: true, active: false };
+    }
+    if (stepIndex === 1) {
+      // Scheduled
+      const hasSchedule = !!request.scheduledDate || status !== "SUBMITTED";
+      return {
+        completed: hasSchedule && status !== "SUBMITTED",
+        active: status === "SUBMITTED" && !request.scheduledDate,
+      };
+    }
+    if (stepIndex === 2) {
+      // In Progress / Approval
+      return {
+        completed: ["RESOLVED", "PENDING_TENANT_CONFIRMATION", "CLOSED"].includes(status),
+        active: ["AWAITING_APPROVAL", "APPROVED", "IN_PROGRESS"].includes(status),
+      };
+    }
+    if (stepIndex === 3) {
+      // Resolved / Pending Tenant Confirmation
+      return {
+        completed: status === "CLOSED",
+        active: ["RESOLVED", "PENDING_TENANT_CONFIRMATION"].includes(status),
+      };
+    }
+    if (stepIndex === 4) {
+      // Closed & Paid
+      return {
+        completed: status === "CLOSED" && isPaid,
+        active: status === "CLOSED" && !isPaid,
+      };
+    }
+    return { completed: false, active: false };
+  };
+
+  const showUnpaidWarning = (request.status === "CLOSED" || request.status === "RESOLVED" || request.status === "PENDING_TENANT_CONFIRMATION") && request.externalVendor && !request.vendorExpenseTransactionId;
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 pt-6 pb-20">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="h-10 w-10 bg-white border border-[#E2E8F0] rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] shadow-sm transition-all"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-black text-[#0F172A] tracking-tight">Request Details</h1>
-          <p className="text-sm font-medium text-[#64748B] mt-0.5">Ticket ID: {request.id.split("-")[0]}</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.back()}
+            className="h-10 w-10 bg-white border border-[#E2E8F0] rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] shadow-sm transition-all"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-black text-[#0F172A] tracking-tight">Request Details</h1>
+            <p className="text-sm font-medium text-[#64748B] mt-0.5">Ticket ID: {request.id.split("-")[0]}</p>
+          </div>
+        </div>
+        
+        {/* Unpaid badge for Owner */}
+        {showUnpaidWarning && !isTenant && (
+          <span className="px-3 py-1 bg-red-50 text-red-750 border border-red-200 text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 animate-pulse">
+            <AlertCircle className="h-4 w-4" /> Vendor Payout Pending
+          </span>
+        )}
+      </div>
+
+      {/* Dynamic Progress Stepper */}
+      <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-200 p-6 space-y-6">
+        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          <Clock className="h-4 w-4 text-blue-600" /> Ticket Guided Progress
+        </h3>
+        
+        {/* Horizontal Steps */}
+        <div className="grid grid-cols-5 gap-2 relative">
+          {[
+            { label: "Submitted", desc: "Ticket opened" },
+            { label: "Scheduled", desc: "Visit scheduled" },
+            { label: "In Progress", desc: "Repairs active" },
+            { label: "Resolved", desc: "Work completed" },
+            { label: "Closed & Paid", desc: "Settled & locked" }
+          ].map((step, idx) => {
+            const { completed, active } = getStepState(idx);
+            
+            return (
+              <div key={idx} className="flex flex-col items-center text-center relative group">
+                {/* Connecting Line */}
+                {idx < 4 && (
+                  <div className={`absolute top-5 left-1/2 right-[-50%] h-[2px] z-0 transition-colors duration-300 ${
+                    getStepState(idx + 1).completed || getStepState(idx + 1).active
+                      ? "bg-blue-600"
+                      : completed
+                        ? "bg-blue-300"
+                        : "bg-slate-200"
+                  }`} />
+                )}
+                
+                {/* Step Circle */}
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm relative z-10 transition-all duration-300 ${
+                  completed
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-200 scale-105"
+                    : active
+                      ? "bg-amber-500 text-white shadow-md shadow-amber-200 scale-105 animate-pulse"
+                      : "bg-slate-100 text-slate-400 border border-slate-200"
+                }`}>
+                  {completed ? "✓" : idx + 1}
+                </div>
+                
+                {/* Labels */}
+                <div className="mt-3 space-y-0.5">
+                  <p className={`text-xs font-black transition-colors ${
+                    completed || active ? "text-slate-800" : "text-slate-400"
+                  }`}>
+                    {step.label}
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-400 block md:inline max-w-[90px] mx-auto leading-tight">
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Current status explanation */}
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-blue-600 animate-ping shrink-0" />
+            <p className="text-xs font-semibold text-slate-600">
+              <span className="font-extrabold text-slate-800">Current Action:</span>{" "}
+              {request.status === "SUBMITTED" && "Awaiting assignment or dispatch."}
+              {request.status === "ASSIGNED" && "Assigned to inspector/vendor. Scheduling diagnosis or visit details."}
+              {request.status === "AWAITING_APPROVAL" && "Estimate submitted. Awaiting owner cost & budget approval."}
+              {request.status === "APPROVED" && "Estimate approved. Repairs will begin shortly."}
+              {request.status === "IN_PROGRESS" && "Work is in progress on site."}
+              {(request.status === "RESOLVED" || request.status === "PENDING_TENANT_CONFIRMATION") && "Repairs resolved by vendor. Awaiting tenant satisfaction confirmation."}
+              {request.status === "CLOSED" && !request.vendorExpenseTransactionId && "Ticket closed. Awaiting vendor payout settlement."}
+              {request.status === "CLOSED" && request.vendorExpenseTransactionId && "Ticket closed, finalized, and vendor payout completed."}
+            </p>
+          </div>
+          {request.status === "AWAITING_APPROVAL" && !isTenant && (
+            <span className="text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-800 px-3 py-1 rounded-full animate-pulse border border-orange-200">
+              Requires Approval
+            </span>
+          )}
+          {request.status === "CLOSED" && !request.vendorExpenseTransactionId && !isTenant && (
+            <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 px-3 py-1 rounded-full border border-rose-200">
+              Payout Pending
+            </span>
+          )}
         </div>
       </div>
+
+      {/* Prominent Vendor Payout Warning Banner */}
+      {showUnpaidWarning && !isTenant && (
+        <div className="bg-[#FFF8F6] border border-[#FFE2DC] rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600 shrink-0">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-rose-950 text-sm">Action Required: Vendor Payout Pending</h4>
+              <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
+                The repair has been completed/closed, but payment has not been recorded for {request.externalVendor.name}. Please disburse or record payout.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setShowPayoutModal(true)}
+            className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-sm shrink-0"
+          >
+            Pay Vendor Now
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -142,6 +324,147 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             </div>
 
             <div className="p-8 space-y-8">
+              {request.scheduledDate && (
+                <div className={`p-6 rounded-2xl border ${
+                  request.tenantConfirmedSchedule 
+                    ? 'bg-emerald-50 border-emerald-200' 
+                    : request.rescheduleRequested 
+                      ? 'bg-rose-50 border-rose-200' 
+                      : 'bg-amber-50 border-amber-200'
+                } space-y-4`}>
+                  <div className="flex justify-between items-start gap-4 flex-wrap">
+                    <div className="space-y-1">
+                      <p className={`text-[10px] font-black uppercase tracking-wider ${
+                        request.tenantConfirmedSchedule 
+                          ? 'text-emerald-700' 
+                          : request.rescheduleRequested 
+                            ? 'text-rose-700' 
+                            : 'text-amber-800'
+                      }`}>
+                        {request.tenantConfirmedSchedule 
+                          ? "✓ Confirmed Appointment" 
+                          : request.rescheduleRequested 
+                            ? "🚨 Reschedule Requested" 
+                            : "⚠️ Appointment Scheduled"}
+                      </p>
+                      <p className="text-base font-bold text-slate-800">
+                        {new Date(request.scheduledDate).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })}
+                      </p>
+                      {request.externalVendor ? (
+                        <p className="text-xs font-semibold text-slate-600">
+                          Assigned Vendor: <span className="font-bold text-blue-600">{request.externalVendor.name}</span> {request.externalVendor.phone && `(${request.externalVendor.phone})`}
+                        </p>
+                      ) : request.inspector ? (
+                        <p className="text-xs font-semibold text-slate-600">
+                          Assigned Inspector: <span className="font-bold text-slate-800">{request.inspector.name}</span> {request.inspector.phone && `(${request.inspector.phone})`}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div>
+                      {request.tenantConfirmedSchedule ? (
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm">
+                          {isTenant ? "Confirmed by you" : "Confirmed by tenant"}
+                        </span>
+                      ) : request.rescheduleRequested ? (
+                        <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm animate-pulse">
+                          Reschedule Pending
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm animate-pulse">
+                          {isTenant ? "Awaiting your confirmation" : "Awaiting tenant confirmation"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Confirmation button for Tenant */}
+                  {isTenant && !request.tenantConfirmedSchedule && (
+                    request.rescheduleRequested ? (
+                      <div className="pt-3 border-t border-rose-200/60 space-y-2">
+                        <p className="text-xs font-semibold text-rose-850 flex items-center gap-1.5">
+                          <AlertCircle className="h-4 w-4 text-rose-600" /> Reschedule Request Submitted
+                        </p>
+                        <p className="text-xs text-rose-700 leading-normal">
+                          You have requested to reschedule this appointment. Reason: <span className="italic font-bold">"{request.rescheduleReason}"</span>. 
+                          The vendor/inspector has been notified and will update the slot shortly.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="pt-3 border-t border-amber-200/60 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="grantEntry"
+                            checked={grantEntry}
+                            onChange={(e) => setGrantEntry(e.target.checked)}
+                            className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                          />
+                          <label htmlFor="grantEntry" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                            🔑 I won't be home, but I grant entry permission using management master key.
+                          </label>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                          <p className="text-xs font-medium text-amber-800">
+                            Please confirm if you will be available at this time or grant key release access.
+                          </p>
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button
+                              size="sm"
+                              onClick={async () => {
+                                setProcessing(true);
+                                try {
+                                  const res = await fetch("/api/maintenance", {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ 
+                                      id: request.id, 
+                                      tenantConfirmedSchedule: true,
+                                      entryPermission: grantEntry
+                                    }),
+                                  });
+                                  if (!res.ok) throw new Error("Failed to confirm appointment");
+                                  toast.success("Appointment confirmed! The vendor has been notified.");
+                                  fetchTicket();
+                                } catch (err: any) {
+                                  toast.error(err.message);
+                                } finally {
+                                  setProcessing(false);
+                                }
+                              }}
+                              disabled={processing}
+                              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs h-9 px-4 shadow-sm"
+                            >
+                              Confirm Appointment
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowRescheduleModal(true)}
+                              className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-100/50 font-bold rounded-xl text-xs h-9 px-4"
+                            >
+                              Request Reschedule
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+
+                  {/* Reschedule notice for Owner / Admin */}
+                  {!isTenant && request.rescheduleRequested && (
+                    <div className="pt-3 border-t border-rose-200/60 space-y-2">
+                      <p className="text-xs font-semibold text-rose-850 flex items-center gap-1.5">
+                        <AlertCircle className="h-4 w-4 text-rose-600 animate-pulse" /> Reschedule Request Pending
+                      </p>
+                      <p className="text-xs text-rose-700 leading-normal">
+                        The tenant has requested to reschedule this appointment. Reason: <span className="italic font-bold">"{request.rescheduleReason}"</span>. 
+                        The vendor/inspector has been notified to pick a new date/time slot.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="">
                 <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -186,11 +509,59 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   </div>
                 </div>
               )}
+
+              {request.diagnosisPhotos && request.diagnosisPhotos.length > 0 && (
+                <div className="pt-6 border-t border-slate-100 mt-6">
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-blue-500" /> Diagnosis Photos (Before Repair)
+                  </h3>
+                  <div className="flex flex-wrap gap-4">
+                    {request.diagnosisPhotos.map((photo: string, i: number) => (
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <img src={photo} alt="Diagnosis photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {request.repairPhotos && request.repairPhotos.length > 0 && (
+                <div className="pt-6 border-t border-slate-100 mt-6">
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-emerald-500" /> Repair Completion Photos (After Repair)
+                  </h3>
+                  <div className="flex flex-wrap gap-4">
+                    {request.repairPhotos.map((photo: string, i: number) => (
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <img src={photo} alt="Repair photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {request.receiptPhotos && request.receiptPhotos.length > 0 && (
+                <div className="pt-6 border-t border-slate-100 mt-6">
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-slate-500" /> Material & Parts Receipts
+                  </h3>
+                  <div className="flex flex-wrap gap-4">
+                    {request.receiptPhotos.map((photo: string, i: number) => (
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <img src={photo} alt="Receipt photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
             {/* Financial Approval Block for Owner */}
-            {(session?.user as any)?.role === "OWNER" && request.status === "AWAITING_APPROVAL" && (
+            {!isTenant && request.status === "AWAITING_APPROVAL" && (
               <div className="p-5 bg-orange-50 border border-orange-200 rounded-xl mt-6">
                 <h3 className="font-bold text-orange-900 mb-2">Estimate Requires Approval</h3>
                 <p className="text-sm text-orange-800 mb-4">The inspector has submitted a repair estimate. You must approve it before work can begin.</p>
@@ -217,7 +588,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             {(session?.user as any)?.role === "TENANT" && request.status === "PENDING_TENANT_CONFIRMATION" && (
               <div className="p-5 bg-blue-50 border border-blue-200 rounded-xl mt-6">
                 <h3 className="font-bold text-blue-950 mb-2">Confirm Repair Completion</h3>
-                <p className="text-sm text-blue-800 mb-4">The technician has marked the issue as fixed. Please confirm if everything is resolved to your satisfaction.</p>
+                <p className="text-sm text-blue-800 mb-4">The inspector/vendor has marked the issue as fixed. Please confirm if everything is resolved to your satisfaction.</p>
                 <div className="flex flex-col gap-4">
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Rate your experience (1 to 5 stars)</label>
@@ -239,7 +610,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Feedback (Optional)</label>
                     <textarea
                       className="w-full text-sm border border-slate-200 rounded-lg p-2 bg-white"
-                      placeholder="e.g. Technician was polite and clean..."
+                      placeholder="e.g. Service was polite and clean..."
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
                     />
@@ -304,11 +675,44 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
               </div>
             )}
 
-            {/* Chargeback & Vendor Expense Block for Owner */}
-            {(session?.user as any)?.role === "OWNER" && (request.status === "PENDING_TENANT_CONFIRMATION" || request.status === "CLOSED") && (
+            {/* Tenant Review & Feedback */}
+            {request.tenantRating !== null && request.tenantRating !== undefined && (
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4 mt-6">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Star className="h-4 w-4 text-amber-500 fill-amber-500" /> Tenant Feedback &amp; Rating
+                </h3>
+                
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= (request.tenantRating || 0)
+                            ? "text-amber-550 fill-amber-500"
+                            : "text-slate-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold text-slate-700">({request.tenantRating} / 5)</span>
+                </div>
+
+                {request.tenantFeedback ? (
+                  <p className="text-xs font-medium text-slate-600 italic bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed">
+                    &ldquo;{request.tenantFeedback}&rdquo;
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-400 italic">No written feedback was provided by the tenant.</p>
+                )}
+              </div>
+            )}
+
+            {/* Cost & Liability Control — 3-State Smart Panel for Owner */}
+            {!isTenant && (request.status === "PENDING_TENANT_CONFIRMATION" || request.status === "CLOSED") && (
               <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl mt-6 space-y-4">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                  <Wrench className="h-4 w-4 text-blue-600" /> Cost & Liability Control
+                  <Wrench className="h-4 w-4 text-blue-600" /> Cost &amp; Liability Control
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-3 rounded-lg border border-slate-200">
@@ -320,79 +724,230 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     <p className="font-black text-lg text-slate-900">${request.finalMaterials || request.estimatedMaterials || "0.00"}</p>
                   </div>
                 </div>
-                
-                <div className="pt-2 border-t border-slate-200">
-                  <p className="text-xs font-bold text-slate-500 uppercase mb-1">Liability Determination</p>
-                  <p className="text-sm font-medium text-slate-800">
-                    Technician opinion: <span className="font-bold">{request.vendorReportedFault ? "Tenant Negligence" : "Normal Wear & Tear"}</span>
-                  </p>
-                </div>
 
-                {!request.ownerApprovedChargeback ? (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs text-slate-500">If you determine this damage was tenant fault, approving chargeback will automatically generate an invoice of ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)} for the tenant.</p>
-                    <div className="flex gap-2">
+                {/* ── STATE 1: Wear & Tear — no chargeback allowed ── */}
+                {!request.vendorReportedFault && !request.ownerChargebackDecision && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 text-lg">✅</span>
+                      <p className="text-sm font-bold text-emerald-800">Normal Wear &amp; Tear — No Tenant Charge</p>
+                    </div>
+                    <p className="text-xs text-emerald-700 leading-relaxed">
+                      The inspector/vendor confirmed this damage is normal wear and tear. This is the owner&apos;s maintenance responsibility. No charge will be applied to the tenant.
+                    </p>
+                    <Button
+                      size="sm"
+                      disabled={processing}
+                      onClick={async () => {
+                        setProcessing(true);
+                        try {
+                          const res = await fetch("/api/maintenance", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: request.id, action: "RECORD_LIABILITY_RULING", ruling: "WEAR_AND_TEAR" }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error || "Failed");
+                          toast.success("Ticket closed. No tenant charge applied.");
+                          fetchTicket();
+                        } catch (err: any) { toast.error(err.message); }
+                        finally { setProcessing(false); }
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 rounded-xl"
+                    >
+                      Confirm &amp; Close Ticket
+                    </Button>
+                  </div>
+                )}
+
+                {/* ── STATE 2: Tenant damage flagged, ruling not made yet ── */}
+                {request.vendorReportedFault && !request.ownerChargebackDecision && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-4">
+                    <div className="flex items-start gap-2">
+                      <span className="text-amber-500 text-lg mt-0.5">⚠️</span>
+                      <div>
+                        <p className="text-sm font-bold text-amber-900">Liability Ruling Required — Cannot Close Yet</p>
+                        <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                          The inspector/vendor suspects <strong>tenant damage or negligence</strong>. As the owner, you must make the final liability ruling before this ticket can be closed.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Cost & Deposit Summary */}
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="bg-white rounded-lg p-3 border border-amber-100">
+                        <p className="text-slate-500 font-bold uppercase">Repair Cost</p>
+                        <p className="text-lg font-black text-slate-900 mt-0.5">
+                          ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-amber-100">
+                        <p className="text-slate-500 font-bold uppercase">Deposit Balance</p>
+                        <p className={`text-lg font-black mt-0.5 ${Number(request.activeLease?.depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                          ${Number(request.activeLease?.depositBalance || 0).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {request.activeLease && Number(request.activeLease.depositBalance) > 0 && (
+                      <p className="text-[11px] text-amber-700 bg-amber-100 rounded-lg p-2.5 leading-relaxed">
+                        💡 If you rule Tenant Fault, ${Math.min(Number(request.activeLease.depositBalance), Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)} will be automatically deducted from the tenant&apos;s security deposit.
+                        {Number(request.activeLease.depositBalance) < (Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)) && (
+                          <> The remaining ${((Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)) - Number(request.activeLease.depositBalance)).toFixed(2)} will become a tenant invoice.</>
+                        )}
+                      </p>
+                    )}
+
+                    <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
+                        disabled={processing}
                         onClick={async () => {
+                          if (!confirm("Confirm: Rule this as Tenant's Fault? This will deduct from their security deposit and/or generate an invoice.")) return;
                           setProcessing(true);
                           try {
                             const res = await fetch("/api/maintenance", {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: request.id, ownerApprovedChargeback: true }),
+                              body: JSON.stringify({ id: request.id, action: "RECORD_LIABILITY_RULING", ruling: "TENANT_FAULT" }),
                             });
-                            if (!res.ok) throw new Error("Failed to approve chargeback");
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || "Failed");
+                            toast.success("Ruling recorded. Tenant has been notified and deposit/invoice updated.");
                             fetchTicket();
-                          } catch (err: any) {
-                            toast.error(err.message);
-                          } finally {
-                            setProcessing(false);
-                          }
+                          } catch (err: any) { toast.error(err.message); }
+                          finally { setProcessing(false); }
                         }}
-                        disabled={processing}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs h-9 rounded-xl flex-1"
                       >
-                        Approve Chargeback to Tenant
+                        ✓ This Is Tenant&apos;s Fault
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
+                        disabled={processing}
                         onClick={async () => {
                           setProcessing(true);
                           try {
                             const res = await fetch("/api/maintenance", {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: request.id, status: "CLOSED" }),
+                              body: JSON.stringify({ id: request.id, action: "RECORD_LIABILITY_RULING", ruling: "WEAR_AND_TEAR" }),
                             });
-                            if (!res.ok) throw new Error("Failed to close");
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || "Failed");
+                            toast.success("Ruled as Normal Wear & Tear. Ticket closed.");
                             fetchTicket();
-                          } catch (err: any) {
-                            toast.error(err.message);
-                          } finally {
-                            setProcessing(false);
-                          }
+                          } catch (err: any) { toast.error(err.message); }
+                          finally { setProcessing(false); }
                         }}
-                        disabled={processing}
-                        className="border-slate-200 text-slate-800 hover:bg-slate-100"
+                        className="border-amber-300 text-amber-800 hover:bg-amber-100 font-bold text-xs h-9 rounded-xl flex-1"
                       >
-                        Close without Tenant Chargeback
+                        This Is Normal Wear &amp; Tear
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  <div className="p-3 bg-emerald-50 text-emerald-800 rounded-lg text-xs font-semibold flex items-center justify-between">
-                    <span>✓ Tenant Chargeback Approved & Invoiced</span>
-                    {request.chargebackInvoiceId && (
-                      <Link href={`/dashboard/invoices`} className="underline font-bold hover:text-emerald-950">
-                        View Invoice
-                      </Link>
+                )}
+
+                {/* ── STATE 3: Ruling already made — read-only summary ── */}
+                {request.ownerChargebackDecision && (
+                  <div className={`rounded-xl border p-4 space-y-2 ${request.ownerChargebackDecision === "WEAR_AND_TEAR" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                    {request.ownerChargebackDecision === "WEAR_AND_TEAR" && (
+                      <>
+                        <p className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                          <span>✅</span> Ruled: Normal Wear &amp; Tear
+                        </p>
+                        <p className="text-xs text-emerald-700">Owner absorbed the cost. No charge was applied to the tenant.</p>
+                      </>
+                    )}
+                    {request.ownerChargebackDecision === "TENANT_FAULT" && request.chargebackSource === "DEPOSIT" && (
+                      <>
+                        <p className="text-xs font-bold text-red-800 flex items-center gap-1.5"><span>🔴</span> Ruled: Tenant Fault</p>
+                        <p className="text-xs text-red-700">${Number(request.chargebackDepositAmount || 0).toFixed(2)} was deducted from tenant&apos;s security deposit.</p>
+                        <p className="text-[10px] text-red-500 font-mono">Ref: DEPOSIT_DEDUCT_{request.id.slice(-6)}</p>
+                      </>
+                    )}
+                    {request.ownerChargebackDecision === "TENANT_FAULT" && request.chargebackSource === "SPLIT" && (
+                      <>
+                        <p className="text-xs font-bold text-red-800 flex items-center gap-1.5"><span>🔴</span> Ruled: Tenant Fault (Split)</p>
+                        <p className="text-xs text-red-700">${Number(request.chargebackDepositAmount || 0).toFixed(2)} deducted from deposit (exhausted) + ${Number(request.chargebackInvoiceAmount || 0).toFixed(2)} invoice issued.</p>
+                        {request.chargebackInvoiceId && (
+                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-bold text-red-700">View Invoice →</Link>
+                        )}
+                      </>
+                    )}
+                    {request.ownerChargebackDecision === "TENANT_FAULT" && request.chargebackSource === "INVOICE" && (
+                      <>
+                        <p className="text-xs font-bold text-red-800 flex items-center gap-1.5"><span>🔴</span> Ruled: Tenant Fault</p>
+                        <p className="text-xs text-red-700">Invoice of ${Number(request.chargebackInvoiceAmount || 0).toFixed(2)} has been generated and sent to the tenant.</p>
+                        {request.chargebackInvoiceId && (
+                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-bold text-red-700">View Invoice →</Link>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
+
+                {/* Vendor Payout Settlement Block */}
+                <div className="pt-4 border-t border-slate-200 space-y-3">
+                  <p className="text-xs font-bold text-slate-500 uppercase">Vendor Payout Settlement</p>
+                  {request.vendorExpenseTransactionId ? (() => {
+                    const txRef = request.vendorExpenseTransaction?.reference || "";
+                    const parts = txRef.split("_");
+                    const methodCode = parts[3] || "";
+                    const methodLabel = methodCode === "STRIPE" ? "Direct Deposit (ACH)" : methodCode === "CHECK" ? "Written Check" : methodCode === "CASH" ? "Physical Cash" : "Direct Payout";
+                    const memoNote = parts[4] === "REF" ? parts.slice(5).join("_") : "";
+                    
+                    return (
+                      <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl space-y-3">
+                        <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
+                          <span>✓ Payout Completed</span>
+                          <span className="font-mono text-[10px] bg-emerald-100 px-2 py-0.5 rounded">
+                            Ref: VENDOR_PAY_{request.id.slice(-6)}
+                          </span>
+                        </div>
+                        
+                        <div className="bg-white p-3 rounded-lg border border-emerald-100/50 space-y-1.5 font-semibold text-slate-700 text-[11px]">
+                          <div className="flex justify-between">
+                            <span className="text-slate-450">Settlement Method:</span>
+                            <span className="text-slate-800">{methodLabel}</span>
+                          </div>
+                          {memoNote && (
+                            <div className="flex flex-col gap-0.5 pt-1.5 border-t border-slate-100 mt-1.5">
+                              <span className="text-slate-450 block">Payment Memo / Reference:</span>
+                              <span className="text-slate-800 font-bold bg-slate-50 p-2 rounded border border-slate-100 italic">
+                                &ldquo;{memoNote}&rdquo;
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-emerald-700 leading-relaxed font-medium">
+                          This payout is recorded and logged in your accounting ledger.
+                        </p>
+                        <Link href={`/dashboard/accounting/transactions?search=VENDOR_PAY_${request.id.slice(-6)}`}>
+                          <Button variant="outline" size="sm" className="w-full border-emerald-200 text-emerald-850 hover:bg-emerald-100/50 bg-white font-bold rounded-xl text-xs h-9 flex items-center justify-center gap-1.5 shadow-sm">
+                            <ArrowRight className="h-3.5 w-3.5" /> View Transaction in Ledger
+                          </Button>
+                        </Link>
+                      </div>
+                    );
+                  })() : (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-slate-500">No payment has been recorded for this repair yet. Click below to disburse funds electronically or record offline cash/check settlement.</p>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowPayoutModal(true)}
+                        className="bg-slate-900 hover:bg-slate-950 text-white font-bold w-full rounded-xl text-xs h-9 shadow-sm"
+                      >
+                        💸 Pay Vendor / Record Payout
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
+
           </div>
 
 
@@ -442,7 +997,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
               <div className="flex gap-3">
                 <Wrench className="h-5 w-5 text-[#94A3B8] shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-[#64748B] uppercase">Technician</p>
+                  <p className="text-xs font-bold text-[#64748B] uppercase">{request.externalVendor ? "Vendor" : "Inspector"}</p>
                   {request.inspector ? (
                     <>
                       <p className="font-semibold text-[#0F172A] text-sm">{request.inspector.name}</p>
@@ -478,71 +1033,352 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Vendor Dispatch Section for Owner/Inspector */}
-          {((session?.user as any)?.role === "OWNER" || (session?.user as any)?.role === "SUPERADMIN") && (
+          {!isTenant && (
             <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
                 <h3 className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide flex items-center gap-2">
                   <Wrench className="h-4 w-4 text-[#3B82F6]" /> External Vendor Dispatch
                 </h3>
               </div>
-              <p className="text-xs text-[#64748B]">Automatically notify a 3rd-party vendor (e.g. plumbing company) to handle this request. They will receive a magic link to view details and submit estimates without needing to log in.</p>
-              
-              <div className="flex gap-2 items-center">
-                <DispatchVendorModal ticketId={request.id} onDispatched={fetchTicket} isReassign={!!request.externalVendor} />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-11 border-[#E2E8F0] text-[#64748B]"
-                  onClick={() => {
-                    navigator.clipboard.writeText(typeof window !== "undefined" ? `${window.location.origin}/vendor/ticket/${request.vendorMagicToken || ""}` : "");
-                    toast.success("Magic link copied to clipboard!");
-                  }}
-                >
-                  Copy Link Manually
-                </Button>
-              </div>
 
-              {request.externalVendor && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl flex justify-between items-center group">
-                  <div>
-                    <p className="text-[11px] font-bold text-blue-800 uppercase">Dispatched To</p>
-                    <p className="text-sm font-bold text-blue-900">{request.externalVendor.name}</p>
-                    <p className="text-xs font-medium text-blue-700">{request.externalVendor.email}</p>
+              {request.status === "CLOSED" ? (
+                request.externalVendor ? (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned Vendor</p>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">{request.externalVendor.name}</p>
+                      <p className="text-xs font-medium text-slate-500">{request.externalVendor.email}</p>
+                    </div>
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-150 text-[10px] font-black rounded uppercase tracking-wider">
+                      Completed
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="px-2 py-1 bg-blue-200 text-blue-800 text-[10px] font-bold rounded uppercase">Active</span>
-                    <button 
-                      onClick={async () => {
-                        if (!confirm("Are you sure you want to cancel the dispatch for this vendor?")) return;
-                        setProcessing(true);
-                        try {
-                          const res = await fetch("/api/maintenance", {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: request.id, externalVendorId: null, status: "SUBMITTED" }),
-                          });
-                          if (!res.ok) throw new Error("Failed to remove vendor");
-                          toast.success("Vendor dispatch cancelled");
-                          fetchTicket();
-                        } catch (err: any) {
-                          toast.error(err.message);
-                        } finally {
-                          setProcessing(false);
-                        }
+                ) : (
+                  <p className="text-xs text-slate-400 italic">No external vendor was assigned to this request.</p>
+                )
+              ) : (
+                <>
+                  <p className="text-xs text-[#64748B] leading-relaxed">Automatically notify a 3rd-party vendor (e.g. plumbing company) to handle this request. They will receive a magic link to view details and submit estimates without needing to log in.</p>
+                  
+                  <div className="flex gap-2 items-center">
+                    <DispatchVendorModal ticketId={request.id} onDispatched={fetchTicket} isReassign={!!request.externalVendor} />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-11 border-[#E2E8F0] text-[#64748B]"
+                      onClick={() => {
+                        navigator.clipboard.writeText(typeof window !== "undefined" ? `${window.location.origin}/vendor/ticket/${request.vendorMagicToken || ""}` : "");
+                        toast.success("Magic link copied to clipboard!");
                       }}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 w-7 flex items-center justify-center rounded border border-red-200 bg-white transition-colors"
-                      title="Cancel Dispatch"
                     >
-                      <X className="h-4 w-4" />
-                    </button>
+                      Copy Link Manually
+                    </Button>
                   </div>
-                </div>
+
+                  {request.externalVendor && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl flex justify-between items-center group">
+                      <div>
+                        <p className="text-[11px] font-bold text-blue-800 uppercase">Dispatched To</p>
+                        <p className="text-sm font-bold text-blue-900">{request.externalVendor.name}</p>
+                        <p className="text-xs font-medium text-blue-700">{request.externalVendor.email}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-1 bg-blue-200 text-blue-800 text-[10px] font-bold rounded uppercase">Active</span>
+                        <button 
+                          onClick={async () => {
+                            if (!confirm("Are you sure you want to cancel the dispatch for this vendor?")) return;
+                            setProcessing(true);
+                            try {
+                              const res = await fetch("/api/maintenance", {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: request.id, externalVendorId: null, status: "SUBMITTED" }),
+                              });
+                              if (!res.ok) throw new Error("Failed to remove vendor");
+                              toast.success("Vendor dispatch cancelled");
+                              fetchTicket();
+                            } catch (err: any) {
+                              toast.error(err.message);
+                            } finally {
+                              setProcessing(false);
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 w-7 flex items-center justify-center rounded border border-red-200 bg-white transition-colors"
+                          title="Cancel Dispatch"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
         </div>
 
       </div>
+
+      {showRescheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-slate-900 text-base">Request Reschedule</h3>
+              <button onClick={() => setShowRescheduleModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-500">
+              Please provide your reason and list some alternative times/days you will be available for the visit.
+            </p>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase text-slate-500 block">Reason & Availability</label>
+              <textarea
+                className="w-full text-sm border border-slate-200 rounded-xl p-3 bg-white min-h-[100px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                placeholder="e.g. I am not available on Wednesday. Please schedule for Friday afternoon instead..."
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRescheduleModal(false)}
+                className="rounded-xl text-xs h-9 px-4"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!rescheduleReason.trim()) {
+                    toast.error("Please enter a reason or availability preference.");
+                    return;
+                  }
+                  setProcessing(true);
+                  try {
+                    const res = await fetch("/api/maintenance", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ 
+                        id: request.id, 
+                        rescheduleRequested: true,
+                        rescheduleReason: rescheduleReason
+                      }),
+                    });
+                    if (!res.ok) throw new Error("Failed to request reschedule");
+                    toast.success("Reschedule request submitted to vendor!");
+                    setShowRescheduleModal(false);
+                    setRescheduleReason("");
+                    fetchTicket();
+                  } catch (err: any) {
+                    toast.error(err.message);
+                  } finally {
+                    setProcessing(false);
+                  }
+                }}
+                disabled={processing}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs h-9 px-4"
+              >
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPayoutModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-slate-900 text-base">Disburse Vendor Payout</h3>
+              <button onClick={() => setShowPayoutModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Building2 className="h-4 w-4 text-indigo-500" /> Vendor Bank Account Details
+              </h4>
+              {request.externalVendor?.bankName ? (
+                request.externalVendor.bankName === "CASH" ? (
+                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg text-xs text-emerald-800 font-semibold flex items-center gap-2">
+                    <span>💵 Vendor Payout Preference: <strong>CASH (Pay vendor physically)</strong></span>
+                  </div>
+                ) : request.externalVendor.bankName === "CHECK" ? (
+                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-800 font-semibold flex items-center gap-2">
+                    <span>✉️ Vendor Payout Preference: <strong>PAPER CHECK (Offline check payout)</strong></span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-xs text-indigo-800 font-semibold flex items-center gap-2">
+                      <span>🏦 Vendor Payout Preference: <strong>DIRECT DEPOSIT (ACH Payout)</strong></span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-2 text-xs pt-2 border-t border-slate-200/50">
+                      <div>
+                        <span className="text-slate-450 block uppercase font-bold text-[9px]">Vendor Name</span>
+                        <span className="font-semibold text-slate-850">{request.externalVendor.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-450 block uppercase font-bold text-[9px]">Bank Name</span>
+                        <span className="font-semibold text-slate-850">{request.externalVendor.bankName}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-450 block uppercase font-bold text-[9px]">Routing Number</span>
+                        <span className="font-mono font-semibold text-slate-850">{request.externalVendor.routingNumber}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-450 block uppercase font-bold text-[9px]">Account Number</span>
+                        <span className="font-mono font-semibold text-slate-855">{request.externalVendor.accountNumber}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <p className="text-xs text-rose-600 font-semibold italic">⚠️ The vendor has not supplied payout details yet. Physical cash/check payout is recommended.</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase text-slate-500 block">Select Payout Method</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("STRIPE")}
+                  disabled={!request.externalVendor?.bankName || request.externalVendor.bankName === "CASH" || request.externalVendor.bankName === "CHECK"}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition ${
+                    (!request.externalVendor?.bankName || request.externalVendor.bankName === "CASH" || request.externalVendor.bankName === "CHECK")
+                      ? "opacity-50 cursor-not-allowed bg-slate-50 border-slate-100" 
+                      : paymentMethod === "STRIPE"
+                        ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-350"
+                  }`}
+                >
+                  <span className="text-xs font-bold block">Direct Deposit</span>
+                  <span className="text-[9px] text-slate-400">Electronic ACH</span>
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("CASH")}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition ${
+                    paymentMethod === "CASH"
+                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-350"
+                  }`}
+                >
+                  <span className="text-xs font-bold block">Physical Cash</span>
+                  <span className="text-[9px] text-slate-400">Handled Offline</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("CHECK")}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition ${
+                    paymentMethod === "CHECK"
+                      ? "border-amber-600 bg-amber-50 text-amber-700"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-350"
+                  }`}
+                >
+                  <span className="text-xs font-bold block">Written Check</span>
+                  <span className="text-[9px] text-slate-400">Handled Offline</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Payment Method Explanatory Note */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 leading-relaxed font-semibold">
+              {paymentMethod === "STRIPE" && (
+                <p>
+                  ℹ️ <strong>Ledger Logging (ACH)</strong>: Recording this payout creates a completed transaction in your accounting ledger and sends an email notification to the vendor. Please ensure you make the actual transfer to their bank account listed above (via Zelle or online banking).
+                </p>
+              )}
+              {paymentMethod === "CASH" && (
+                <p>
+                  ℹ️ <strong>Ledger Logging (Cash)</strong>: Recording this payout marks the maintenance expense as paid in cash. Please ensure you physically hand over the cash amount to the vendor.
+                </p>
+              )}
+              {paymentMethod === "CHECK" && (
+                <p>
+                  ℹ️ <strong>Ledger Logging (Paper Check)</strong>: Recording this payout registers the check expense. Make sure you hand over or mail the check to the vendor.
+                </p>
+              )}
+            </div>
+
+            {/* Reference Memo / Note Input */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-slate-500 block">
+                Reference / Memo (Optional)
+              </label>
+              <Input
+                type="text"
+                placeholder={
+                  paymentMethod === "STRIPE" 
+                    ? "e.g., Zelle transfer ID, ACH Ref #" 
+                    : paymentMethod === "CHECK" 
+                      ? "e.g., Check #1043" 
+                      : "e.g., Handed to technician, cash receipt note"
+                }
+                value={referenceNote}
+                onChange={(e) => setReferenceNote(e.target.value)}
+                className="bg-white border-slate-200 rounded-xl text-xs h-9"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Amount to Disburse</span>
+                <span className="text-lg font-black text-slate-900">
+                  ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}
+                </span>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPayoutModal(false);
+                    setReferenceNote("");
+                  }}
+                  className="rounded-xl text-xs h-9 px-4"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setProcessing(true);
+                    try {
+                      const res = await fetch("/api/maintenance", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                          id: request.id, 
+                          action: "PAY_VENDOR",
+                          paymentMethod: paymentMethod,
+                          referenceNote: referenceNote
+                        }),
+                      });
+                      if (!res.ok) throw new Error("Payout transaction failed");
+                      toast.success(`Payout successfully recorded via ${paymentMethod === "STRIPE" ? "Direct Deposit" : paymentMethod}!`);
+                      setShowPayoutModal(false);
+                      setReferenceNote("");
+                      fetchTicket();
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    } finally {
+                      setProcessing(false);
+                    }
+                  }}
+                  disabled={processing}
+                  className="bg-slate-900 hover:bg-slate-950 text-white font-bold rounded-xl text-xs h-9 px-4"
+                >
+                  Confirm Payout
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

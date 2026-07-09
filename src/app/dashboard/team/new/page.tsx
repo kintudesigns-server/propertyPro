@@ -61,7 +61,7 @@ export default function AddTeamMember() {
         </Link>
         <div>
           <h1 className="text-2xl font-black text-[#0F172A] tracking-tight">Add Team Member</h1>
-          <p className="text-sm font-medium text-[#64748B] mt-0.5">Invite a new technician or staff member to your organization</p>
+          <p className="text-sm font-medium text-[#64748B] mt-0.5">Invite a new inspector or staff member to your organization</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function AddTeamMember() {
                 <div className="flex gap-4">
                   <div className={`flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.role === "INSPECTOR" ? "border-[#3B82F6] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"}`} onClick={() => setFormData({...formData, role: "INSPECTOR"})}>
                     <ShieldCheck className={`h-8 w-8 mb-2 ${formData.role === "INSPECTOR" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
-                    <span className={`text-sm font-bold ${formData.role === "INSPECTOR" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Technician</span>
+                    <span className={`text-sm font-bold ${formData.role === "INSPECTOR" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Inspector</span>
                   </div>
                   <div className={`flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.role === "ACCOUNTANT" ? "border-[#3B82F6] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"}`} onClick={() => setFormData({...formData, role: "ACCOUNTANT"})}>
                     <Briefcase className={`h-8 w-8 mb-2 ${formData.role === "ACCOUNTANT" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />

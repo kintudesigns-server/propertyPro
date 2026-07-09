@@ -45,7 +45,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json(lease);
+    // Fetch mid-tenancy deposit deductions for the full audit trail
+    const depositDeductions = await prisma.transaction.findMany({
+      where: {
+        tenantId: lease.tenantId,
+        category: "DEPOSIT_DEDUCTION",
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        amount: true,
+        reference: true,
+        createdAt: true,
+        status: true,
+      },
+    });
+
+    return NextResponse.json({ ...lease, depositDeductions });
+
   } catch (error: any) {
     console.error("Error fetching lease:", error);
     return NextResponse.json({ error: "Failed to fetch lease" }, { status: 500 });

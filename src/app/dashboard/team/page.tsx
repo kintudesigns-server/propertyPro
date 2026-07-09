@@ -56,7 +56,7 @@ export default function TeamDashboard() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#0F172A] tracking-tight">Team & Staff</h1>
-            <p className="text-sm font-medium text-[#64748B] mt-1">Manage technicians and staff members</p>
+            <p className="text-sm font-medium text-[#64748B] mt-1">Manage inspectors and staff members</p>
           </div>
         </div>
         <Link href="/dashboard/team/new">
@@ -117,7 +117,7 @@ export default function TeamDashboard() {
                       <div className="flex items-center gap-1.5">
                         <div className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                           <ShieldCheck className="h-3 w-3" />
-                          Technician
+                          Inspector
                         </div>
                       </div>
                     </td>

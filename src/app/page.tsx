@@ -122,7 +122,7 @@ export default function LandingPage() {
     {
       icon: <Wrench className="h-6 w-6 text-rose-500" />,
       title: "Maintenance Ticketing",
-      desc: "Streamline repairs with a dedicated ticketing system, technician assignment, and photo uploads."
+      desc: "Streamline repairs with a dedicated ticketing system, inspector assignment, and photo uploads."
     },
     {
       icon: <CreditCard className="h-6 w-6 text-emerald-500" />,

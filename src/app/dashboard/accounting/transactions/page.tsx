@@ -81,6 +81,17 @@ export default function TransactionsPage() {
       return;
     }
     fetchTransactions();
+
+    // Pre-populate search query if passed in URL
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("search");
+      if (query) {
+        setSearchQuery(query);
+        // If searching for a specific transaction, show all tabs
+        setActiveTab("all");
+      }
+    }
   }, [status, router]);
 
   // Dynamic details mapper

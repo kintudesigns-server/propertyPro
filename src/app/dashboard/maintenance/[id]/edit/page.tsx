@@ -358,7 +358,7 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2.5">
-              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Assign Technician (Optional)</Label>
+              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Assign Inspector (Optional)</Label>
               <Select value={formData.inspectorId} onValueChange={(v) => setFormData({...formData, inspectorId: v === "none" ? "" : (v || "")})}>
                 <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
                   <SelectValue placeholder="Leave unassigned">

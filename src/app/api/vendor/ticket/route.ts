@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
       include: {
         unit: { include: { property: { include: { owner: true } } } },
         tenant: { select: { name: true, email: true, phone: true } },
+        externalVendor: true,
       },
     });
 
@@ -23,7 +24,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token or ticket not found" }, { status: 404 });
     }
 
-    return NextResponse.json(request);
+    let transaction = null;
+    if (request.vendorExpenseTransactionId) {
+      transaction = await prisma.transaction.findUnique({
+        where: { id: request.vendorExpenseTransactionId }
+      });
+    }
+
+    return NextResponse.json({
+      ...request,
+      transaction
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -32,7 +43,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { token, status, estimatedLabor, estimatedMaterials, finalLabor, finalMaterials, vendorReportedFault, inspectorNotes, receiptPhotos, scheduledDate } = body;
+    const { token, status, estimatedLabor, estimatedMaterials, finalLabor, finalMaterials, vendorReportedFault, inspectorNotes, receiptPhotos, scheduledDate, diagnosisPhotos, repairPhotos, bankName, routingNumber, accountNumber } = body;
 
     if (!token) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
@@ -40,7 +51,7 @@ export async function PUT(req: NextRequest) {
 
     const fullRequest = await (prisma as any).maintenanceRequest.findFirst({
       where: { vendorMagicToken: token },
-      include: { unit: { include: { property: { include: { owner: true } } } }, tenant: true },
+      include: { unit: { include: { property: { include: { owner: true } } } }, tenant: true, externalVendor: true },
     });
 
     if (!fullRequest) {
@@ -58,7 +69,36 @@ export async function PUT(req: NextRequest) {
     if (vendorReportedFault !== undefined) updateData.vendorReportedFault = Boolean(vendorReportedFault);
     if (inspectorNotes !== undefined) updateData.inspectorNotes = inspectorNotes;
     if (receiptPhotos !== undefined && Array.isArray(receiptPhotos)) updateData.receiptPhotos = receiptPhotos;
-    if (scheduledDate) updateData.scheduledDate = new Date(scheduledDate);
+    if (diagnosisPhotos !== undefined && Array.isArray(diagnosisPhotos)) updateData.diagnosisPhotos = diagnosisPhotos;
+    if (repairPhotos !== undefined && Array.isArray(repairPhotos)) updateData.repairPhotos = repairPhotos;
+    if (scheduledDate) {
+      updateData.scheduledDate = new Date(scheduledDate);
+      // Reset tenant confirmation and reschedule flags as we scheduled a new time
+      updateData.tenantConfirmedSchedule = false;
+      updateData.rescheduleRequested = false;
+      updateData.rescheduleReason = null;
+      
+      if (fullRequest.status === "SUBMITTED" || fullRequest.status === "ASSIGNED") {
+        updateData.status = "DIAGNOSIS_SCHEDULED";
+      } else if (fullRequest.status === "APPROVED") {
+        updateData.status = "REPAIR_SCHEDULED";
+      }
+    }
+
+    // Direct deposit details saving logic
+    if (bankName !== undefined || routingNumber !== undefined || accountNumber !== undefined) {
+      const vendorUpdate: any = {};
+      if (bankName !== undefined) vendorUpdate.bankName = bankName;
+      if (routingNumber !== undefined) vendorUpdate.routingNumber = routingNumber;
+      if (accountNumber !== undefined) vendorUpdate.accountNumber = accountNumber;
+
+      if (fullRequest.externalVendorId) {
+        await prisma.externalVendor.update({
+          where: { id: fullRequest.externalVendorId },
+          data: vendorUpdate,
+        });
+      }
+    }
 
     // Check estimate cost controls if estimates are provided/updated
     if (updateData.estimatedLabor !== undefined || updateData.estimatedMaterials !== undefined) {
@@ -81,7 +121,21 @@ export async function PUT(req: NextRequest) {
     // Explicit status updates
     if (status) {
       if (status === "RESOLVED") {
-        updateData.status = "PENDING_TENANT_CONFIRMATION";
+        // Enforce approval threshold for direct resolution (Quick-fix bypass check)
+        const laborCost = finalLabor !== undefined ? parseFloat(finalLabor) : Number(fullRequest.finalLabor || 0);
+        const materialsCost = finalMaterials !== undefined ? parseFloat(finalMaterials) : Number(fullRequest.finalMaterials || 0);
+        const finalCost = laborCost + materialsCost;
+        
+        const isEmergency = fullRequest.priority === "EMERGENCY";
+        const limit = isEmergency
+          ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
+          : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
+
+        if (finalCost > limit && fullRequest.status !== "APPROVED" && fullRequest.status !== "REPAIR_SCHEDULED" && fullRequest.status !== "IN_PROGRESS") {
+          updateData.status = "AWAITING_APPROVAL"; // Exceeds threshold without pre-approved estimate
+        } else {
+          updateData.status = "PENDING_TENANT_CONFIRMATION";
+        }
       } else if (status === "SUBMIT_ESTIMATE") {
         // If they just submit estimate, let the limit check handle whether it is awaiting approval or approved
         if (!updateData.status) {

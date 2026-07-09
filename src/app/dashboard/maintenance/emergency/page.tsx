@@ -72,11 +72,11 @@ export default function EmergencyMaintenancePage() {
         body: JSON.stringify({ id: selectedReqForAssign.id, inspectorId: selectedInspectorId })
       });
       if (res.ok) {
-        toast.success("Technician assigned successfully");
+        toast.success("Inspector assigned successfully");
         setAssignModalOpen(false);
         fetchData();
       } else {
-        toast.error("Failed to assign technician");
+        toast.error("Failed to assign inspector");
       }
     } catch (err) {
       toast.error("An error occurred");
@@ -316,7 +316,7 @@ export default function EmergencyMaintenancePage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50">
                             <UserPlus className="h-4 w-4" />
-                            Assign Technician
+                            Assign Inspector
                           </DropdownMenuItem>
                           <div className="h-px bg-red-100 my-1" />
                           <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
@@ -339,14 +339,14 @@ export default function EmergencyMaintenancePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-red-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Technician</h2>
+              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Inspector</h2>
               <p className="text-sm font-medium text-[#64748B] mb-6">Select a team member to handle this emergency.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Technician</label>
+                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
                 <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
                   <SelectTrigger className="w-full h-12 bg-white border-red-200 rounded-xl focus:ring-red-500 font-medium text-[#0F172A] shadow-sm">
-                    <SelectValue placeholder="Select a technician" />
+                    <SelectValue placeholder="Select an inspector" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-red-200">
                     <SelectItem value="none">Leave unassigned</SelectItem>

@@ -73,7 +73,7 @@ function resolveNavActions(notification: any): NavAction[] {
       color: "bg-blue-50",
       textColor: "text-blue-600",
     });
-  } else if (t.includes("application")) {
+  } else if (type === "APPLICATION" || t.includes("application")) {
     if (id) {
       actions.push({
         href: `/dashboard/applications/${id}`,
@@ -95,7 +95,7 @@ function resolveNavActions(notification: any): NavAction[] {
   }
 
   // ── Maintenance ────────────────────────────
-  else if (t.includes("maintenance")) {
+  else if (type === "MAINTENANCE" || t.includes("maintenance") || t.includes("repair")) {
     if (id) {
       actions.push({
         href: `/dashboard/maintenance/${id}`,
@@ -148,8 +148,18 @@ function resolveNavActions(notification: any): NavAction[] {
     });
   }
 
-  // ── Payments / Invoices / Transactions / Refunds ──
-  else if (t.includes("payment") || t.includes("invoice") || t.includes("transaction") || t.includes("refund")) {
+  // ── Payments / Invoices / Transactions / Refunds / Billing ──
+  else if (type === "PAYMENT" || type === "BILLING" || t.includes("payment") || t.includes("invoice") || t.includes("transaction") || t.includes("refund") || t.includes("chargeback") || t.includes("billing") || t.includes("deposit")) {
+    if (id) {
+      actions.push({
+        href: `/dashboard/leases/${id}`,
+        label: "View Security Deposit Ledger",
+        description: "Open the linked lease details to view the Security Deposit Ledger and mid-tenancy deductions.",
+        Icon: Home,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    }
     actions.push({
       href: `/dashboard/accounting/invoices`,
       label: "Go to Invoices",
@@ -169,7 +179,7 @@ function resolveNavActions(notification: any): NavAction[] {
   }
 
   // ── Lease ──────────────────────────────────
-  else if (t.includes("lease")) {
+  else if (type === "LEASE" || t.includes("lease")) {
     if (id) {
       actions.push({
         href: `/dashboard/leases/${id}`,

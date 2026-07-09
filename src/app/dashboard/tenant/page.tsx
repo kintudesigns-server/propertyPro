@@ -809,7 +809,7 @@ export default function TenantDashboard() {
                   <div className="absolute -right-8 -top-8 h-28 w-28 bg-white/10 rounded-full blur-xl" />
                   <h3 className="text-sm font-extrabold mb-2">Need Help or Repairs?</h3>
                   <p className="text-[11px] text-emerald-100 leading-relaxed mb-4">
-                    Submit a ticket with description and pictures, and we will assign a certified technician immediately.
+                    Submit a ticket with description and pictures, and we will assign a certified inspector immediately.
                   </p>
                   <Button 
                     onClick={() => setActiveTab("submit-request")}
@@ -1074,7 +1074,7 @@ export default function TenantDashboard() {
                 <Wrench className="h-5 w-5 text-[#496E5C]" />
                 Log a Maintenance Request
               </h2>
-              <span className="text-xs text-[#64748B]">Describe the issue in detail, and certified inspectors will check the problem.</span>
+              <span className="text-xs text-[#64748B]">Describe the issue in detail, and certified inspectors or vendors will check the problem.</span>
             </div>
 
             <form onSubmit={handleCreateMaintenance} className="space-y-4">
@@ -1620,7 +1620,7 @@ export default function TenantDashboard() {
 
                 {maintenance.filter(m => m.scheduledDate).map((m) => (
                   <div key={m.id} className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">Technician Appointment</span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">Inspector/Vendor Appointment</span>
                     <h4 className="text-xs font-bold text-[#0F172A]">{m.title}</h4>
                     <p className="text-[11px] text-[#64748B] mt-1 flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" /> Date: {new Date(m.scheduledDate).toLocaleString()}

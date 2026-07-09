@@ -80,11 +80,11 @@ export default function MaintenancePage() {
         body: JSON.stringify({ id: selectedReqForAssign.id, inspectorId: selectedInspectorId })
       });
       if (res.ok) {
-        toast.success("Technician assigned successfully");
+        toast.success("Inspector assigned successfully");
         setAssignModalOpen(false);
         fetchData();
       } else {
-        toast.error("Failed to assign technician");
+        toast.error("Failed to assign inspector");
       }
     } catch (err) {
       toast.error("An error occurred");
@@ -118,7 +118,8 @@ export default function MaintenancePage() {
                           req.tenant?.name?.toLowerCase().includes(search.toLowerCase()) ||
                           req.unit.property.name.toLowerCase().includes(search.toLowerCase());
     
-    const matchesStatus = statusFilter === "ALL" || req.status === statusFilter;
+    const matchesStatus = statusFilter === "ALL" || 
+                          (statusFilter === "UNASSIGNED" ? (!req.inspector && !req.externalVendor) : req.status === statusFilter);
     const matchesPriority = priorityFilter === "ALL" || req.priority === priorityFilter;
     const matchesCategory = categoryFilter === "ALL" || req.category === categoryFilter;
     
@@ -195,8 +196,91 @@ export default function MaintenancePage() {
     }
   };
 
+  const totalCount = requests.length;
+  const unassignedCount = requests.filter(r => !r.inspector && !r.externalVendor).length;
+  const awaitingCount = requests.filter(r => r.status === "AWAITING_APPROVAL").length;
+  const activeCount = requests.filter(r => r.status === "ASSIGNED" || r.status === "PENDING_TENANT_CONFIRMATION").length;
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pb-20 relative">
+      
+      {/* Overview Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Total */}
+        <button
+          onClick={() => setStatusFilter("ALL")}
+          className={`p-5 bg-white border rounded-2xl shadow-sm hover:shadow transition-all text-left flex items-center justify-between group cursor-pointer outline-none focus:ring-2 focus:ring-blue-100 ${
+            statusFilter === "ALL" ? "border-blue-500 ring-2 ring-blue-50" : "border-[#E2E8F0]"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Total Tickets</p>
+            <p className="text-3xl font-extrabold text-[#0F172A]">{totalCount}</p>
+          </div>
+          <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${statusFilter === "ALL" ? "bg-blue-500 text-white" : "bg-blue-50 text-blue-500"}`}>
+            <Wrench className="h-6 w-6" />
+          </div>
+        </button>
+
+        {/* Card 2: Needs Assignment */}
+        <button
+          onClick={() => setStatusFilter("UNASSIGNED")}
+          className={`p-5 bg-white border rounded-2xl shadow-sm hover:shadow transition-all text-left flex items-center justify-between group cursor-pointer outline-none focus:ring-2 focus:ring-orange-100 ${
+            statusFilter === "UNASSIGNED" ? "border-orange-500 ring-2 ring-orange-50" : "border-[#E2E8F0]"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Needs Assignment</p>
+            <div className="flex items-center gap-2">
+              <p className="text-3xl font-extrabold text-[#0F172A]">{unassignedCount}</p>
+              {unassignedCount > 0 && (
+                <span className="h-2.5 w-2.5 rounded-full bg-orange-500 animate-pulse" />
+              )}
+            </div>
+          </div>
+          <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+            statusFilter === "UNASSIGNED" ? "bg-orange-500 text-white" : "bg-orange-50 text-orange-500"
+          }`}>
+            <UserPlus className="h-6 w-6" />
+          </div>
+        </button>
+
+        {/* Card 3: Awaiting Approval */}
+        <button
+          onClick={() => setStatusFilter("AWAITING_APPROVAL")}
+          className={`p-5 bg-white border rounded-2xl shadow-sm hover:shadow transition-all text-left flex items-center justify-between group cursor-pointer outline-none focus:ring-2 focus:ring-amber-100 ${
+            statusFilter === "AWAITING_APPROVAL" ? "border-amber-500 ring-2 ring-amber-50" : "border-[#E2E8F0]"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Awaiting Approval</p>
+            <p className="text-3xl font-extrabold text-[#0F172A]">{awaitingCount}</p>
+          </div>
+          <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+            statusFilter === "AWAITING_APPROVAL" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"
+          }`}>
+            <Clock className="h-6 w-6" />
+          </div>
+        </button>
+
+        {/* Card 4: Active Repairs */}
+        <button
+          onClick={() => setStatusFilter("ASSIGNED")}
+          className={`p-5 bg-white border rounded-2xl shadow-sm hover:shadow transition-all text-left flex items-center justify-between group cursor-pointer outline-none focus:ring-2 focus:ring-green-100 ${
+            statusFilter === "ASSIGNED" ? "border-green-500 ring-2 ring-green-50" : "border-[#E2E8F0]"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Active Repairs</p>
+            <p className="text-3xl font-extrabold text-[#0F172A]">{activeCount}</p>
+          </div>
+          <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+            statusFilter === "ASSIGNED" ? "bg-green-500 text-white" : "bg-green-50 text-green-600"
+          }`}>
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+        </button>
+      </div>
       
       {/* Exact Header matching screenshot */}
       <div className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl p-6">
@@ -247,6 +331,7 @@ export default function MaintenancePage() {
               </SelectTrigger>
               <SelectContent className="rounded-lg">
                 <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="UNASSIGNED">⚠️ Needs Assignment</SelectItem>
                 <SelectItem value="SUBMITTED">Submitted</SelectItem>
                 <SelectItem value="ASSIGNED">Assigned</SelectItem>
                 <SelectItem value="AWAITING_APPROVAL">Awaiting Approval</SelectItem>
@@ -352,7 +437,19 @@ export default function MaintenancePage() {
                         ) : req.externalVendor ? (
                           <span className="font-medium text-blue-600 flex items-center gap-1"><Wrench className="h-3 w-3" /> {req.externalVendor.name}</span>
                         ) : (
-                          <span className="text-[#64748B] font-medium">Unassigned</span>
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              Unassigned
+                            </span>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
+                              className="h-7 px-2 text-xs font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg"
+                            >
+                              Assign
+                            </Button>
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-4">
@@ -377,7 +474,7 @@ export default function MaintenancePage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
                               <UserPlus className="h-4 w-4" />
-                              {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                              {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
                             </DropdownMenuItem>
                             <div className="h-px bg-[#E2E8F0] my-1" />
                             <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
@@ -421,7 +518,7 @@ export default function MaintenancePage() {
                               <Send className="h-4 w-4" /> Dispatch Vendor
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                              <UserPlus className="h-4 w-4 text-[#64748B]" /> {req.inspector ? "Reassign Technician" : "Assign Technician"}
+                              <UserPlus className="h-4 w-4 text-[#64748B]" /> {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
                             </DropdownMenuItem>
                             <div className="h-px bg-[#E2E8F0] my-1" />
                           </>
@@ -475,13 +572,25 @@ export default function MaintenancePage() {
                           <UserPlus className="h-4 w-4 text-slate-500" />
                         </div>
                         <div>
-                          <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Technician</p>
+                          <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">{req.externalVendor ? "Vendor" : "Inspector"}</p>
                           {req.inspector ? (
                             <p className="font-semibold text-[#0F172A] text-sm">{req.inspector.name}</p>
                           ) : req.externalVendor ? (
                             <p className="font-semibold text-blue-600 text-sm flex items-center gap-1.5"><Wrench className="h-3.5 w-3.5" /> {req.externalVendor.name}</p>
                           ) : (
-                            <p className="text-[#94A3B8] font-medium text-sm italic">Unassigned</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                Needs Assignment
+                              </span>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
+                                className="h-6 px-2 text-[11px] font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg"
+                              >
+                                Assign
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -515,14 +624,14 @@ export default function MaintenancePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Technician</h2>
-              <p className="text-sm font-medium text-[#64748B] mb-6">Select a team member to handle this maintenance request.</p>
+              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Inspector</h2>
+              <p className="text-sm font-medium text-[#64748B] mb-6">Select an inspector to handle this maintenance request.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Technician</label>
+                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
                 <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
                   <SelectTrigger className="w-full h-12 bg-white border-[#E2E8F0] rounded-xl focus:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm">
-                    <SelectValue placeholder="Select a technician">
+                    <SelectValue placeholder="Select an inspector">
                       {selectedInspectorId === "none" || !selectedInspectorId
                         ? ""
                         : inspectors.find((i) => i.id === selectedInspectorId)?.name || selectedInspectorId}

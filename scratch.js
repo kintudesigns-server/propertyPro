@@ -2,17 +2,19 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  const owner = await prisma.user.findUnique({where: {email: 'owner@example.com'}});
-  if (owner) {
-    const existing = await prisma.externalVendor.findFirst({ where: { email: 'bob@plumbingpro.com' } });
-    if (!existing) {
-      await prisma.externalVendor.create({
-        data: { name: "Bob's Plumbing Pro", email: 'bob@plumbingpro.com', phone: '555-0123', specialty: 'Plumbing', ownerId: owner.id }
-      });
-      console.log('Vendor created');
-    } else {
-      console.log('Vendor already exists');
+  const requests = await prisma.maintenanceRequest.findMany({
+    where: {
+      vendorMagicToken: { not: null }
+    },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      vendorMagicToken: true
     }
-  }
+  });
+  console.log("Maintenance Requests with Vendor Magic Tokens:");
+  console.log(JSON.stringify(requests, null, 2));
 }
+
 main().catch(console.error).finally(() => prisma.$disconnect());

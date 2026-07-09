@@ -44,7 +44,37 @@ export async function GET(req: NextRequest) {
           } as any
         })) as any;
       }
-      return NextResponse.json(request);
+
+      // Attach active lease deposit info for the chargeback panel
+      const activeLease = await (prisma.lease as any).findFirst({
+        where: { unitId: request.unitId, tenantId: request.tenantId, status: "ACTIVE" },
+        select: {
+          id: true,
+          securityDeposit: true,
+          depositBalance: true,
+          depositPaidAt: true,
+          depositPaidAmount: true,
+          depositStatus: true,
+        },
+      });
+
+      let vendorExpenseTransaction = null;
+      if (request.vendorExpenseTransactionId) {
+        vendorExpenseTransaction = await prisma.transaction.findUnique({
+          where: { id: request.vendorExpenseTransactionId },
+          select: {
+            id: true,
+            type: true,
+            category: true,
+            amount: true,
+            reference: true,
+            status: true,
+            createdAt: true,
+          }
+        });
+      }
+
+      return NextResponse.json({ ...request, activeLease, vendorExpenseTransaction });
     }
 
     let whereClause: any = {};
@@ -164,7 +194,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const data = await req.json();
-    const { id, action, ...updateData } = data;
+    const { id, action, paymentMethod, referenceNote, ...updateData } = data;
 
     if (!id) {
       return NextResponse.json({ error: "Missing request ID" }, { status: 400 });
@@ -182,6 +212,148 @@ export async function PUT(req: NextRequest) {
 
     const owner = fullRequest.unit.property.owner;
     const requesterRole = (session.user as any).role;
+
+    // Handle tenant confirmation of scheduled visit
+    if (updateData.tenantConfirmedSchedule === true && !fullRequest.tenantConfirmedSchedule) {
+      updateData.rescheduleRequested = false;
+      updateData.rescheduleReason = null;
+      if (fullRequest.externalVendor) {
+        try {
+          const magicLink = `http://localhost:3000/vendor/ticket/${fullRequest.vendorMagicToken}`;
+          await sendEmail({
+            to: fullRequest.externalVendor.email,
+            subject: `Tenant Confirmed Appointment: ${fullRequest.unit.property.name}`,
+            html: `
+              <p>Hello <strong>${fullRequest.externalVendor.name}</strong>,</p>
+              <p>The tenant at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong> has confirmed they will be available for your scheduled visit on <strong>${fullRequest.scheduledDate ? new Date(fullRequest.scheduledDate).toLocaleString() : 'the scheduled time'}</strong>.</p>
+              <p><a href="${magicLink}">Click here to view the ticket</a></p>
+            `
+          });
+        } catch (_) {}
+      }
+    }
+
+    // Handle tenant reschedule request
+    if (updateData.rescheduleRequested === true && !fullRequest.rescheduleRequested) {
+      updateData.tenantConfirmedSchedule = false;
+      updateData.rescheduleReason = data.rescheduleReason || "No reason provided";
+      if (fullRequest.externalVendor) {
+        try {
+          const magicLink = `http://localhost:3000/vendor/ticket/${fullRequest.vendorMagicToken}`;
+          await sendEmail({
+            to: fullRequest.externalVendor.email,
+            subject: `Tenant Requested Reschedule: ${fullRequest.unit.property.name}`,
+            html: `
+              <p>Hello <strong>${fullRequest.externalVendor.name}</strong>,</p>
+              <p>The tenant at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong> has requested to reschedule the visit scheduled for <strong>${fullRequest.scheduledDate ? new Date(fullRequest.scheduledDate).toLocaleString() : 'the scheduled time'}</strong>.</p>
+              <p><strong>Tenant's Reason / Availability:</strong> ${updateData.rescheduleReason}</p>
+              <p>Please click the button below to schedule a new time slot based on the tenant's preferences.</p>
+              <p><a href="${magicLink}">View ticket & Reschedule</a></p>
+            `
+          });
+        } catch (_) {}
+      }
+    }
+
+    // Handle Owner payment to vendor (Direct Bank / Cash / Check)
+    if (action === "PAY_VENDOR") {
+      const method = paymentMethod || "CASH";
+      const amount = Number(fullRequest.finalLabor || 0) + Number(fullRequest.finalMaterials || 0);
+
+      // Only create transaction if one doesn't exist
+      if (!fullRequest.vendorExpenseTransactionId) {
+        const refString = `VENDOR_PAY_${id.slice(-6)}_${method}${referenceNote ? `_REF_${referenceNote}` : ""}`;
+        const transaction = await prisma.transaction.create({
+          data: {
+            type: "EXPENSE",
+            category: "MAINTENANCE",
+            amount: amount,
+            status: "COMPLETED",
+            reference: refString.slice(0, 255), // safety limit for database VARCHAR if applicable
+            tenantId: fullRequest.tenantId,
+          },
+        });
+        updateData.vendorExpenseTransactionId = transaction.id;
+      }
+      
+      updateData.status = "CLOSED";
+
+      // Notify vendor via email of payment details
+      if (fullRequest.externalVendor) {
+        try {
+          const methodLabel = method === "STRIPE" ? "Direct Deposit (ACH)" : method === "CHECK" ? "Written Check" : "Physical Cash";
+          await sendEmail({
+            to: fullRequest.externalVendor.email,
+            subject: `Payment Disbursed: Repair Work at ${fullRequest.unit.property.name}`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <title>Payment Disbursed</title>
+              </head>
+              <body style="font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center">
+                      <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <tr>
+                          <td style="background-color: #10b981; padding: 30px 40px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px;">Payment Disbursed</h1>
+                            <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 14px;">Work Order: ${fullRequest.title}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 40px;">
+                            <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 20px;">Your Payout is Confirmed</h2>
+                            <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">Hello <strong>${fullRequest.externalVendor.name}</strong>,</p>
+                            <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">We are pleased to inform you that payment for your maintenance services on ticket "<strong>${fullRequest.title}</strong>" has been completed and disbursed by the property owner.</p>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+                              <tr>
+                                <td style="padding: 20px;">
+                                  <p style="margin: 0 0 10px 0; color: #64748b; font-size: 14px;"><strong>Disbursement Summary:</strong></p>
+                                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 14px; color: #0f172a;">
+                                    <tr>
+                                      <td style="padding: 4px 0; font-weight: 650;">Total Payout:</td>
+                                      <td style="padding: 4px 0; text-align: right; font-weight: 800; color: #10b981;">$${amount.toFixed(2)} USD</td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 4px 0;">Payment Method:</td>
+                                      <td style="padding: 4px 0; text-align: right; font-weight: 600;">${methodLabel}</td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 4px 0;">Reference Code:</td>
+                                      <td style="padding: 4px 0; text-align: right; font-family: monospace; font-size: 12px; color: #64748b;">VENDOR_PAY_${id.slice(-6)}_${method}</td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
+                            
+                            <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 30px 0;">
+                              ${method === "STRIPE" 
+                                ? "Please allow 1-3 business days for electronic ACH transfers to settle in your registered bank account." 
+                                : "For cash or check payments, please coordinate directly with the property owner to collect your receipt/funds offline."}
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="color: #94a3b8; font-size: 13px; margin: 0;">This is an automated message from PropertyPro. Please do not reply directly to this email.</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+              </html>
+            `
+          });
+        } catch (_) {}
+      }
+    }
 
     // Process dates or numbers if present
     if (updateData.estimatedCost) {
@@ -225,20 +397,60 @@ export async function PUT(req: NextRequest) {
           to: vendor.email,
           subject: `New Maintenance Work Order: ${fullRequest.unit.property.name}`,
           html: `
-            <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
-              <h2 style="color: #0F172A;">New Work Order Dispatched</h2>
-              <p style="color: #334155; font-size: 16px;">Hello ${vendor.name},</p>
-              <p style="color: #334155; font-size: 16px;">You have been assigned a new maintenance request at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong>.</p>
-              
-              <div style="background-color: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #E2E8F0; margin: 24px 0;">
-                <p style="margin: 0 0 8px 0; font-weight: bold; color: #0F172A;">Issue: ${fullRequest.title}</p>
-                <p style="margin: 0; color: #475569;">${fullRequest.description}</p>
-              </div>
-              
-              <p style="color: #334155; font-size: 16px;">Click the secure button below to view the job details, upload an estimate, or attach your final receipts. You do not need to log in.</p>
-              
-              <a href="${magicLink}" style="display: inline-block; background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; margin-top: 16px;">View Work Order</a>
-            </div>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>New Work Order</title>
+            </head>
+            <body style="font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                      <tr>
+                        <td style="background-color: #0f172a; padding: 30px 40px; text-align: center;">
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px;">PropertyPro</h1>
+                          <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Maintenance Dispatch</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 40px;">
+                          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 20px;">New Work Order Dispatched</h2>
+                          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">Hello <strong>${vendor.name}</strong>,</p>
+                          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">You have been assigned a new maintenance request at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong>.</p>
+                          
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <p style="margin: 0 0 10px 0; font-weight: 600; color: #0f172a; font-size: 16px;">Issue: ${fullRequest.title}</p>
+                                <p style="margin: 0; color: #64748b; font-size: 15px; line-height: 1.5;">${fullRequest.description}</p>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                          <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 30px 0;">Click the secure button below to view the job details, upload an estimate, or attach your final receipts. <strong>No login required.</strong></p>
+                          
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td align="center">
+                                <a href="${magicLink}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 14px 32px; text-decoration: none; font-weight: 600; border-radius: 8px; font-size: 16px; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);">View Work Order</a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+                          <p style="color: #94a3b8; font-size: 13px; margin: 0;">This is an automated message from PropertyPro. Please do not reply directly to this email.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
           `,
         });
 
@@ -253,48 +465,198 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    // Handle Owner approving chargebacks
-    if (updateData.ownerApprovedChargeback === true && !fullRequest.ownerApprovedChargeback) {
-      const lease = await prisma.lease.findFirst({
-        where: { unitId: fullRequest.unitId, tenantId: fullRequest.tenantId, status: "ACTIVE" },
-      });
+    // ── RECORD_LIABILITY_RULING: Smart chargeback with deposit-first logic ──
+    if (action === "RECORD_LIABILITY_RULING") {
+      const { ruling } = data; // "WEAR_AND_TEAR" | "TENANT_FAULT"
 
-      if (lease) {
-        const amount = Number(updateData.finalLabor || fullRequest.finalLabor || 0) + Number(updateData.finalMaterials || fullRequest.finalMaterials || 0);
-        
-        const invoice = await prisma.invoice.create({
+      if (ruling === "WEAR_AND_TEAR") {
+        // Owner absorbs the cost — no tenant charge
+        const closed = await prisma.maintenanceRequest.update({
+          where: { id },
           data: {
-            leaseId: lease.id,
-            amount: amount,
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
-            status: "UNPAID",
-          },
+            ownerChargebackDecision: "WEAR_AND_TEAR",
+            ownerApprovedChargeback: false,
+            status: "CLOSED",
+          } as any,
         });
-        updateData.chargebackInvoiceId = invoice.id;
+        return NextResponse.json(closed);
+      }
 
-        const transaction = await prisma.transaction.create({
-          data: {
-            type: "EXPENSE",
-            category: "MAINTENANCE",
-            amount: amount,
-            status: "COMPLETED",
-            reference: `VENDOR_PAY_${id.slice(-6)}`,
-            tenantId: fullRequest.tenantId,
-          },
+      if (ruling === "TENANT_FAULT") {
+        const repairCost =
+          Number(fullRequest.finalLabor || 0) + Number(fullRequest.finalMaterials || 0);
+
+        const activeLease: any = await (prisma.lease as any).findFirst({
+          where: { unitId: fullRequest.unitId, tenantId: fullRequest.tenantId, status: "ACTIVE" },
         });
-        updateData.vendorExpenseTransactionId = transaction.id;
 
+        const depositBalance = Number((activeLease as any)?.depositBalance || 0);
+        const fourteenDays = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        let chargebackSource = "INVOICE";
+        let chargebackDepositAmount = 0;
+        let chargebackInvoiceAmount = repairCost;
+        let chargebackInvoiceId: string | undefined;
+
+        if (activeLease && depositBalance >= repairCost) {
+          // ── Full cost from deposit — no invoice needed ──
+          await (prisma.lease as any).update({
+            where: { id: activeLease.id },
+            data: { depositBalance: depositBalance - repairCost },
+          });
+          await prisma.transaction.create({
+            data: {
+              type: "EXPENSE",
+              category: "DEPOSIT_DEDUCTION",
+              amount: repairCost,
+              reference: `DEPOSIT_DEDUCT_${id.slice(-6)}`,
+              tenantId: fullRequest.tenantId,
+              status: "COMPLETED",
+            },
+          });
+          chargebackSource = "DEPOSIT";
+          chargebackDepositAmount = repairCost;
+          chargebackInvoiceAmount = 0;
+
+        } else if (activeLease && depositBalance > 0) {
+          // ── SPLIT: drain deposit + invoice for remainder ──
+          const fromDeposit = depositBalance;
+          const invoiceAmt = repairCost - fromDeposit;
+          await (prisma.lease as any).update({
+            where: { id: activeLease.id },
+            data: { depositBalance: 0 },
+          });
+          await prisma.transaction.create({
+            data: {
+              type: "EXPENSE",
+              category: "DEPOSIT_DEDUCTION",
+              amount: fromDeposit,
+              reference: `DEPOSIT_DEDUCT_${id.slice(-6)}`,
+              tenantId: fullRequest.tenantId,
+              status: "COMPLETED",
+            },
+          });
+          const inv = await prisma.invoice.create({
+            data: {
+              leaseId: activeLease.id,
+              amount: invoiceAmt,
+              dueDate: fourteenDays,
+              status: "UNPAID",
+            },
+          });
+          chargebackSource = "SPLIT";
+          chargebackDepositAmount = fromDeposit;
+          chargebackInvoiceAmount = invoiceAmt;
+          chargebackInvoiceId = inv.id;
+
+        } else {
+          // ── No deposit — generate full invoice ──
+          if (activeLease) {
+            const inv = await prisma.invoice.create({
+              data: {
+                leaseId: activeLease.id,
+                amount: repairCost,
+                dueDate: fourteenDays,
+                status: "UNPAID",
+              },
+            });
+            chargebackInvoiceId = inv.id;
+          }
+          chargebackSource = "INVOICE";
+          chargebackInvoiceAmount = repairCost;
+        }
+
+        // ── Build the final update payload ──
+        const chargebackUpdate: any = {
+          ownerChargebackDecision: "TENANT_FAULT",
+          ownerApprovedChargeback: true,
+          chargebackSource,
+          chargebackDepositAmount,
+          chargebackInvoiceAmount,
+          status: "CLOSED",
+        };
+        if (chargebackInvoiceId) chargebackUpdate.chargebackInvoiceId = chargebackInvoiceId;
+
+        // ── Email tenant with deduction details ──
         try {
+          const tenantUser = await prisma.user.findUnique({ where: { id: fullRequest.tenantId } });
+          if (tenantUser?.email) {
+            const depositMsg =
+              chargebackSource === "DEPOSIT"
+                ? `<p>The full amount of <strong>$${repairCost.toFixed(2)}</strong> has been deducted from your security deposit on file.</p>`
+                : chargebackSource === "SPLIT"
+                ? `<p><strong>$${chargebackDepositAmount.toFixed(2)}</strong> was deducted from your security deposit (now exhausted), and a separate invoice of <strong>$${chargebackInvoiceAmount.toFixed(2)}</strong> has been generated for the remaining balance.</p>`
+                : `<p>An invoice of <strong>$${repairCost.toFixed(2)}</strong> has been generated and added to your account.</p>`;
+
+            await sendEmail({
+              to: tenantUser.email,
+              subject: `Security Deposit Deduction Notice – ${fullRequest.title}`,
+              html: `
+                <!DOCTYPE html><html><head><meta charset="utf-8"></head>
+                <body style="font-family: Arial, sans-serif; background: #f4f7f6; padding: 40px 0;">
+                  <table width="100%"><tr><td align="center">
+                    <table width="600" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.05);">
+                      <tr><td style="background:#dc2626; padding:30px 40px; text-align:center;">
+                        <h1 style="color:#fff; margin:0; font-size:22px;">Maintenance Liability Notice</h1>
+                        <p style="color:#fca5a5; margin:8px 0 0; font-size:14px;">${fullRequest.title}</p>
+                      </td></tr>
+                      <tr><td style="padding:40px;">
+                        <p style="color:#475569; font-size:15px;">Hello <strong>${tenantUser.name || "Tenant"}</strong>,</p>
+                        <p style="color:#475569; font-size:15px;">The property owner has determined that the recent maintenance issue <strong>"${fullRequest.title}"</strong> was caused by tenant negligence or damage.</p>
+                        <p style="color:#475569; font-size:15px;"><strong>Total Repair Cost: $${repairCost.toFixed(2)}</strong></p>
+                        ${depositMsg}
+                        <p style="color:#64748b; font-size:13px;">Please log in to your PropertyPro account to view the full details and your updated deposit balance.</p>
+                      </td></tr>
+                      <tr><td style="background:#f8fafc; padding:20px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+                        <p style="color:#94a3b8; font-size:12px; margin:0;">This is an automated notice from PropertyPro.</p>
+                      </td></tr>
+                    </table>
+                  </td></tr></table>
+                </body></html>
+              `,
+            });
+          }
+        } catch (_) {/* non-fatal */}
+
+        // ── In-app notification to tenant ──
+        try {
+          const notifMsg =
+            chargebackSource === "DEPOSIT"
+              ? `$${repairCost.toFixed(2)} has been deducted from your security deposit for "${fullRequest.title}" (tenant fault ruling).`
+              : chargebackSource === "SPLIT"
+              ? `Your security deposit was exhausted ($${chargebackDepositAmount.toFixed(2)} deducted). An invoice of $${chargebackInvoiceAmount.toFixed(2)} has been generated for the balance.`
+              : `An invoice of $${repairCost.toFixed(2)} has been issued for maintenance damage on "${fullRequest.title}".`;
+
           await notify({
             userId: fullRequest.tenantId,
-            title: "Maintenance Chargeback Issued",
-            message: `You have been charged $${amount.toFixed(2)} for repair work on "${fullRequest.title}" determined to be tenant responsibility.`,
+            title: "Deposit Deduction Notice",
+            message: notifMsg,
             type: "PAYMENT",
             priority: "HIGH",
-            relatedEntityId: invoice.id,
+            relatedEntityId: id,
           });
-        } catch (_) {}
+        } catch (_) {/* non-fatal */}
+
+        const closed = await prisma.maintenanceRequest.update({
+          where: { id },
+          data: chargebackUpdate,
+        });
+        return NextResponse.json(closed);
       }
+
+      return NextResponse.json({ error: "Invalid ruling value" }, { status: 400 });
+    }
+
+    // ── Guard: block CLOSED if vendor fault and ruling not yet made ──
+    if (
+      (updateData.status === "CLOSED" || data.status === "CLOSED") &&
+      fullRequest.vendorReportedFault &&
+      !fullRequest.ownerChargebackDecision &&
+      action !== "PAY_VENDOR"
+    ) {
+      return NextResponse.json(
+        { error: "Liability ruling required. Please rule 'Tenant Fault' or 'Normal Wear & Tear' in the Cost & Liability section before closing this ticket." },
+        { status: 400 }
+      );
     }
 
     const updatedRequest = await prisma.maintenanceRequest.update({

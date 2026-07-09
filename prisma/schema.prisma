@@ -274,6 +274,12 @@ model Lease {
   
   invoices    Invoice[]
   payoutRequests PayoutRequest[]
+
+  // Live Deposit Balance Tracking (mid-tenancy)
+  depositPaidAt            DateTime?           // When tenant actually paid the deposit
+  depositPaidAmount        Decimal?  @db.Decimal(10, 2) // Actual amount received
+  depositBalance           Decimal   @default(0.00) @db.Decimal(10, 2) // Current remaining balance in escrow
+  depositTransactionId     String?             // Transaction.id for the deposit payment record
 }
 
 model Invoice {
@@ -317,6 +323,7 @@ model MaintenanceRequest {
   
   // Phase 2: Real-World Maintenance Enhancements
   entryPermission     Boolean   @default(false)
+  hasPets             String    @default("No")
   preferredTimes      String?
   diagnosisDate       DateTime?
   repairDate          DateTime?
@@ -342,6 +349,15 @@ model MaintenanceRequest {
 
   tenantRating            Int?
   tenantFeedback          String?   @db.Text
+  tenantConfirmedSchedule Boolean   @default(false)
+  rescheduleRequested     Boolean   @default(false)
+  rescheduleReason        String?   @db.Text
+
+  // Smart Liability Ruling (replaces simple ownerApprovedChargeback boolean)
+  ownerChargebackDecision  String?   // "TENANT_FAULT" | "WEAR_AND_TEAR" | null (undecided)
+  chargebackSource         String?   // "DEPOSIT" | "INVOICE" | "SPLIT"
+  chargebackDepositAmount  Decimal?  @db.Decimal(10, 2) // Amount deducted from deposit
+  chargebackInvoiceAmount  Decimal?  @db.Decimal(10, 2) // Amount billed as invoice
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
@@ -512,6 +528,12 @@ model ExternalVendor {
   ownerId             String
   owner               User                 @relation("OwnerVendors", fields: [ownerId], references: [id])
   maintenanceRequests MaintenanceRequest[]
+  
+  // Direct Deposit Details
+  bankName            String?
+  routingNumber       String?
+  accountNumber       String?
+  
   createdAt           DateTime             @default(now())
 }
 
