@@ -93,14 +93,13 @@ export async function POST(req: NextRequest) {
     });
 
     let isAutoCreated = false;
-    let autoCreatedPassword = "";
+    let setupToken = "";
 
     if (!tenantUser) {
-      // Auto-create tenant
+      // Auto-create tenant with a random placeholder password (they'll set it via secure link)
       isAutoCreated = true;
-      autoCreatedPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(autoCreatedPassword, 10);
-      
+      const placeholderPassword = await bcrypt.hash(Math.random().toString(36), 10);
+
       // We will try to fetch the name and phone from the application if it exists
       let tenantName = "New Tenant";
       let tenantPhone = null;
@@ -115,10 +114,24 @@ export async function POST(req: NextRequest) {
       tenantUser = await prisma.user.create({
         data: {
           email: tenantEmail,
-          password: hashedPassword,
+          password: placeholderPassword,
           name: tenantName,
           phone: tenantPhone,
           role: "TENANT",
+        },
+      });
+
+      // Create a secure one-time setup token (expires in 7 days)
+      const { randomBytes } = await import("crypto");
+      setupToken = randomBytes(32).toString("hex");
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      await prisma.passwordResetToken.create({
+        data: {
+          token: setupToken,
+          userId: tenantUser.id,
+          expiresAt,
+          used: false,
         },
       });
     } else if (tenantUser.role !== "TENANT") {
@@ -168,6 +181,8 @@ export async function POST(req: NextRequest) {
         amount: Number(firstMonthRentAmount.toFixed(2)),
         dueDate: start,
         status: "UNPAID",
+        invoiceType: startDay > 1 ? "PRORATED" : "RENT",
+        note: startDay > 1 ? `Prorated rent for first month (${new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate() - startDay + 1} days)` : undefined,
       },
     });
 
@@ -178,6 +193,8 @@ export async function POST(req: NextRequest) {
           amount: Number(securityDeposit),
           dueDate: new Date(), // Due immediately
           status: "UNPAID",
+          invoiceType: "DEPOSIT",
+          note: "Security deposit — due before signing",
         },
       });
     }
@@ -190,55 +207,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 1. If auto-created, send welcome email & welcome system notification
-    if (isAutoCreated) {
+    // 1. If auto-created, send SECURE setup-link email (no plain-text password in email)
+    if (isAutoCreated && setupToken) {
       try {
+        const setupLink = `${origin}/auth/set-password?token=${setupToken}`;
         await sendEmail({
           to: tenantEmail,
-          subject: "Welcome to PropertyPro! Your tenant account credentials",
-          text: `Hello ${tenantUser.name || "Tenant"},\n\nA tenant account has been created for you on PropertyPro.\n\nYour username: ${tenantEmail}\nTemporary Password: ${autoCreatedPassword}\n\nPlease log in to change your password.\n\nBest regards,\nPropertyPro Team`,
-          html: `<div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 20px; background-color: #F8FAFC; color: #1E293B; border-radius: 16px; border: 1px solid #E2E8F0;">
-            <div style="text-align: center; margin-bottom: 28px;">
-              <div style="font-size: 24px; font-weight: 800; color: #2563EB; letter-spacing: -0.5px;">Property<span style="color: #0F172A;">Pro</span></div>
-              <div style="font-size: 13px; font-weight: 600; color: #64748B; margin-top: 4px;">Premium Property Management Platform</div>
-            </div>
-            <div style="background-color: #FFFFFF; border-radius: 12px; padding: 28px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-              <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0 0 16px 0;">Welcome to your new home!</h2>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                Hello ${tenantUser.name || "Tenant"},<br/><br/>
-                Your property manager has set up a tenant portal for you on PropertyPro. You can use this secure portal to sign your lease agreement, make rent payments, and submit maintenance requests.
-              </p>
-              <div style="background-color: #F8FAFC; border-radius: 8px; padding: 18px; border: 1px solid #E2E8F0; margin-bottom: 24px;">
-                <div style="font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Your Portal Login Credentials</div>
-                <div style="font-size: 14px; margin-bottom: 8px;">
-                  <span style="color: #64748B; font-weight: 600; width: 140px; display: inline-block;">Username:</span>
-                  <strong style="color: #0F172A; font-family: monospace; font-size: 15px;">${tenantEmail}</strong>
-                </div>
-                <div style="font-size: 14px;">
-                  <span style="color: #64748B; font-weight: 600; width: 140px; display: inline-block;">Temporary Password:</span>
-                  <strong style="color: #2563EB; font-family: monospace; font-size: 15px;">${autoCreatedPassword}</strong>
-                </div>
-              </div>
-              <div style="text-align: center; margin-bottom: 20px;">
-                <a href="${loginLink}" style="background-color: #2563EB; color: #FFFFFF; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); transition: background-color 0.2s;">
-                  Log In to Tenant Portal
-                </a>
-              </div>
-              <p style="font-size: 12px; line-height: 1.5; color: #64748B; margin: 0; text-align: center;">
-                For security reasons, you will be prompted to change your temporary password immediately upon your first login.
-              </p>
-            </div>
-            <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #94A3B8;">
-              &copy; 2026 PropertyPro. All rights reserved.<br/>
-              If you did not expect this email, please ignore it or contact support.
-            </div>
-          </div>`
+          subject: "Welcome to PropertyPro! Set Up Your Account",
+          text: `Hello ${tenantUser.name || "Tenant"},\n\nYour tenant account has been created. Set your password here (valid 7 days):\n${setupLink}\n\nYour login email: ${tenantEmail}\n\nBest regards,\nPropertyPro Team`,
+          html: `<div style="font-family:sans-serif;max-width:580px;margin:0 auto;padding:32px 20px;background:#F8FAFC;color:#1E293B;border-radius:16px;border:1px solid #E2E8F0"><div style="text-align:center;margin-bottom:28px"><div style="font-size:24px;font-weight:800;color:#2563EB">Property<span style="color:#0F172A">Pro</span></div></div><div style="background:#FFF;border-radius:12px;padding:28px;border:1px solid #E2E8F0"><h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:0 0 16px 0">Welcome, ${tenantUser.name || "Tenant"}!</h2><p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 20px 0">Your property manager has created a tenant portal account for you. Click below to set your password and access your dashboard.</p><div style="background:#EFF6FF;border-radius:8px;padding:16px;border:1px solid #BFDBFE;margin-bottom:24px"><p style="font-size:13px;font-weight:600;color:#1D4ED8;margin:0">🔒 For your security, we never send passwords by email.</p></div><div style="text-align:center;margin-bottom:20px"><a href="${setupLink}" style="background:#2563EB;color:#FFF;font-weight:700;font-size:14px;text-decoration:none;padding:14px 32px;border-radius:10px;display:inline-block">Set Up My Password →</a></div><p style="font-size:11px;color:#94A3B8;text-align:center">Link valid for 7 days. Login email: <strong>${tenantEmail}</strong></p></div><div style="text-align:center;margin-top:24px;font-size:11px;color:#94A3B8">&copy; ${new Date().getFullYear()} PropertyPro</div></div>`,
         });
-
         await notify({
           userId: tenantUser.id,
           title: "Welcome to PropertyPro!",
-          message: "Welcome! Your tenant account has been created. Please update your profile.",
+          message: "Your account is ready. Check your email to set your password and access your dashboard.",
           type: "SYSTEM",
           priority: "HIGH",
         });

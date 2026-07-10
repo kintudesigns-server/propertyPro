@@ -70,6 +70,18 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    // Subtract completed Stripe refunds from total processed volume
+    const totalRefunds = await prisma.transaction.aggregate({
+      where: {
+        status: "COMPLETED",
+        type: "EXPENSE",
+        reference: { startsWith: "STRIPE_REFUND" }
+      },
+      _sum: {
+        amount: true
+      }
+    });
+
     // Calculate Monthly Recurring Revenue (MRR) from active owner subscriptions
     const activeSubscribers = await prisma.user.findMany({
       where: {
@@ -91,11 +103,13 @@ export async function GET(req: NextRequest) {
       joinedAt: owner.createdAt
     }));
 
+    const netVolume = Math.max(0, Number(totalVolume._sum.amount || 0) - Number(totalRefunds._sum.amount || 0));
+
     return NextResponse.json({
       totalCommissionProfit: totalProfit,
       subscriptionMRR,
       totalProfit: totalProfit + subscriptionMRR,
-      totalVolumeProcessed: Number(totalVolume._sum.amount || 0) + totalProfit, // gross volume
+      totalVolumeProcessed: netVolume + totalProfit, // gross volume net of refunds
       detailedProfits,
       detailedSubscriptions
     });

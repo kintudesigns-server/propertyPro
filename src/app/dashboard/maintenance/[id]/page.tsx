@@ -177,6 +177,20 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         )}
       </div>
 
+      {request.isDuplicateSuspect && (
+        <div className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl px-5 py-4 text-sm font-semibold shadow-xs">
+          <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
+          <span>
+            This ticket is flagged as a possible duplicate of a recent open request for the same unit and category.
+            {request.duplicateOfId && (
+              <Link href={`/dashboard/maintenance/${request.duplicateOfId}`} className="underline font-bold ml-1.5 text-blue-600 hover:text-blue-700">
+                View original ticket →
+              </Link>
+            )}
+          </span>
+        </div>
+      )}
+
       {/* Dynamic Progress Stepper */}
       <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-200 p-6 space-y-6">
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">

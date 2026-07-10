@@ -1,15 +1,59 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/email";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any).role !== "SUPERADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const pageVal = searchParams.get("page");
+    const limitVal = searchParams.get("limit");
+
+    if (pageVal || limitVal) {
+      const page = parseInt(pageVal || "1", 10);
+      const limit = parseInt(limitVal || "20", 10);
+      const skip = (page - 1) * limit;
+
+      const [users, total] = await prisma.$transaction([
+        prisma.user.findMany({
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+            tenantStatus: true,
+            pricingTier: {
+              select: {
+                name: true,
+                maxUnits: true
+              }
+            }
+          },
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limit,
+        }),
+        prisma.user.count(),
+      ]);
+
+      return NextResponse.json({
+        users,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        }
+      });
     }
 
     const users = await prisma.user.findMany({
@@ -69,6 +113,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // 🔒 Generate one-time setup token for password setup via set-password link
+    const { randomBytes } = await import("crypto");
+    const setupToken = randomBytes(32).toString("hex");
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await prisma.passwordResetToken.create({
+      data: {
+        token: setupToken,
+        userId: newUser.id,
+        expiresAt,
+        used: false,
+      },
+    });
+
     const getRoleDetails = (userRole: string) => {
       switch (userRole) {
         case "SUPERADMIN":
@@ -91,11 +150,6 @@ export async function POST(req: Request) {
             title: "Property Inspector",
             desc: "You have field inspector access. You can review scheduled inspections, check unit checklists, and submit compliance reports directly from the field."
           };
-        case "ACCOUNTANT":
-          return {
-            title: "Financial Accountant",
-            desc: "You have accounting privileges. You can manage rent invoicing schedules, generate financial reports, audit ledgers, and approve payout requests."
-          };
         default:
           return {
             title: userRole,
@@ -106,6 +160,7 @@ export async function POST(req: Request) {
 
     const roleInfo = getRoleDetails(role);
     const appUrl = process.env.APP_URL || "http://localhost:3000";
+    const setupLink = `${appUrl}/auth/set-password?token=${setupToken}`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -132,22 +187,22 @@ export async function POST(req: Request) {
                   <td style="padding: 40px 32px;">
                     <h2 style="font-size: 20px; font-weight: 700; color: #0F172A; margin: 0 0 16px 0;">Hello ${fullName},</h2>
                     <p style="font-size: 15px; color: #475569; line-height: 1.6; margin: 0 0 24px 0;">
-                      An administrator has created your new account on the <strong>PropertyPro</strong> portal. Below are your account credentials and role configuration details.
+                      An administrator has created your new account on the <strong>PropertyPro</strong> portal. Please click the button below to set up your password and access your dashboard.
                     </p>
 
                     <!-- Account Card -->
                     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F1F5F9; border-radius: 12px; margin-bottom: 28px;">
                       <tr>
                         <td style="padding: 20px;">
-                          <h3 style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">Your Credentials</h3>
+                          <h3 style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0;">Your Account</h3>
                           <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                               <td width="30%" style="font-size: 14px; font-weight: 700; color: #0F172A; padding: 4px 0;">Login Email:</td>
                               <td style="font-size: 14px; color: #334155; padding: 4px 0; font-family: monospace;">${email}</td>
                             </tr>
                             <tr>
-                              <td style="font-size: 14px; font-weight: 700; color: #0F172A; padding: 4px 0;">Temporary Password:</td>
-                              <td style="font-size: 14px; color: #334155; padding: 4px 0; font-family: monospace;">${password}</td>
+                              <td style="font-size: 14px; font-weight: 700; color: #0F172A; padding: 4px 0;">Setup Link:</td>
+                              <td style="font-size: 14px; color: #334155; padding: 4px 0;"><a href="${setupLink}" style="color: #3B82F6; font-weight: bold; text-decoration: none;">Set Password Link</a></td>
                             </tr>
                           </table>
                         </td>
@@ -168,8 +223,8 @@ export async function POST(req: Request) {
                     <table border="0" cellpadding="0" cellspacing="0" width="100%">
                       <tr>
                         <td align="center">
-                          <a href="${appUrl}/auth/login" target="_blank" style="display: inline-block; background-color: #3B82F6; color: #FFFFFF; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1);">
-                            Access Your Account
+                          <a href="${setupLink}" target="_blank" style="display: inline-block; background-color: #3B82F6; color: #FFFFFF; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1);">
+                            Set Up My Account & Password →
                           </a>
                         </td>
                       </tr>
@@ -191,7 +246,7 @@ export async function POST(req: Request) {
       </html>
     `;
 
-    const emailText = `Hi ${fullName},\n\nYour account has been created by the Admin.\n\nRole: ${roleInfo.title}\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease login to access the platform: ${appUrl}/auth/login`;
+    const emailText = `Hi ${fullName},\n\nYour account has been created by the Admin.\n\nRole: ${roleInfo.title}\n\nLogin Email: ${email}\n\nPlease set your password here:\n${setupLink}`;
 
     try {
       if (typeof sendEmail === "function") {

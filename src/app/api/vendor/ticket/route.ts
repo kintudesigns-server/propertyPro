@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { sanitizeVendor } from "@/lib/utils";
+import { encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -24,11 +26,23 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token or ticket not found" }, { status: 404 });
     }
 
+    // FIX #10 — Check if the vendor token has expired
+    if (request.vendorTokenExpiresAt && new Date() > new Date(request.vendorTokenExpiresAt)) {
+      return NextResponse.json(
+        { error: "This work order link has expired. Please contact the property manager for a new access link." },
+        { status: 403 }
+      );
+    }
+
     let transaction = null;
     if (request.vendorExpenseTransactionId) {
       transaction = await prisma.transaction.findUnique({
         where: { id: request.vendorExpenseTransactionId }
       });
+    }
+
+    if (request.externalVendor) {
+      request.externalVendor = sanitizeVendor(request.externalVendor);
     }
 
     return NextResponse.json({
@@ -89,8 +103,8 @@ export async function PUT(req: NextRequest) {
     if (bankName !== undefined || routingNumber !== undefined || accountNumber !== undefined) {
       const vendorUpdate: any = {};
       if (bankName !== undefined) vendorUpdate.bankName = bankName;
-      if (routingNumber !== undefined) vendorUpdate.routingNumber = routingNumber;
-      if (accountNumber !== undefined) vendorUpdate.accountNumber = accountNumber;
+      if (routingNumber !== undefined) vendorUpdate.routingNumber = encrypt(routingNumber);
+      if (accountNumber !== undefined) vendorUpdate.accountNumber = encrypt(accountNumber);
 
       if (fullRequest.externalVendorId) {
         await prisma.externalVendor.update({

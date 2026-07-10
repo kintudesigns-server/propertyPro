@@ -19,6 +19,27 @@ export default function AdminDashboard() {
   const [profitData, setProfitData] = useState({ totalProfit: 0, totalVolumeProcessed: 0 });
   const [loading, setLoading] = useState(true);
 
+  const triggerCron = async (endpoint: string) => {
+    const loadingToast = toast.loading(`Running cron: ${endpoint}...`);
+    try {
+      const res = await fetch("/api/admin/trigger-cron", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint }),
+      });
+      const data = await res.json();
+      toast.dismiss(loadingToast);
+      if (res.ok) {
+        toast.success(data.message || "Cron job run successfully!");
+      } else {
+        toast.error(data.error || "Failed to execute cron job.");
+      }
+    } catch (err: any) {
+      toast.dismiss(loadingToast);
+      toast.error(err.message || "Network error.");
+    }
+  };
+
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/login");
   }, [status, router]);
@@ -237,6 +258,119 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* System Operations (Manual Cron Trigger Buttons) */}
+      <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
+        <CardHeader className="border-b border-[#E2E8F0] pb-4">
+          <CardTitle className="text-lg font-bold text-[#0F172A]">System Operations &amp; Cron Jobs</CardTitle>
+          <CardDescription className="text-[#64748B]">
+            Trigger background system tasks and cron utilities on-demand. Run these manually during testing or to recover from missed schedules.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            {/* 🟢 Critical Revenue */}
+            <div className="space-y-3 p-4 rounded-xl border border-emerald-100 bg-emerald-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <h4 className="font-bold text-sm text-slate-800">Monthly Invoice Generation</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Creates rent invoices for all ACTIVE leases for the upcoming billing period. Run on the 1st of every month.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/generate-invoices")}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Invoice Generation
+              </Button>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-xl border border-red-100 bg-red-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-red-500" />
+                <h4 className="font-bold text-sm text-slate-800">Late Fee Automation</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Marks overdue invoices past their grace period and auto-creates late fee invoices per lease configuration.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/late-fees")}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Late Fee Check
+              </Button>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-xl border border-amber-100 bg-amber-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-amber-500" />
+                <h4 className="font-bold text-sm text-slate-800">Lease Expiry Engine</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Auto-expires ACTIVE leases past their end date, frees units to VACANT, and notifies all parties.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/expire-leases")}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Expiry Engine
+              </Button>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-xl border border-blue-100 bg-blue-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                <h4 className="font-bold text-sm text-slate-800">Lease Activation Cron</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Scans SIGNED leases with current or past move-in dates, auto-activates them with prorated invoice logic.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/lease-activate")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Lease Activation
+              </Button>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-slate-400" />
+                <h4 className="font-bold text-sm text-slate-800">Renewals Engine</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Analyzes expiring ACTIVE leases, marks them PENDING_DECISION, and sends renewal notice emails to tenants.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/renewals")}
+                className="w-full bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Renewals Engine
+              </Button>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-slate-400" />
+                <h4 className="font-bold text-sm text-slate-800">Maintenance Link Expiry</h4>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                Auto-closes maintenance requests in PENDING_TENANT_CONFIRMATION with no response within 72 hours.
+              </p>
+              <Button
+                onClick={() => triggerCron("/api/cron/maintenance")}
+                className="w-full bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold text-xs h-9 rounded-xl"
+              >
+                Run Maintenance Audit
+              </Button>
+            </div>
+
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
+

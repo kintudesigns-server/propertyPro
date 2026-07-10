@@ -51,7 +51,6 @@ export default function UserProfilePage() {
       case "OWNER": return "Property Owner";
       case "TENANT": return "Tenant";
       case "INSPECTOR": return "Inspector";
-      case "ACCOUNTANT": return "Accountant";
       default: return role;
     }
   };

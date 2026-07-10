@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sanitizeUser } from "@/lib/utils";
+import { encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest) {
         );
         if (!hasLease) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
-      return NextResponse.json(tenant);
+      return NextResponse.json(sanitizeUser(tenant));
     }
 
     // Tenant listing themselves
@@ -51,7 +53,7 @@ export async function GET(req: NextRequest) {
           }
         }
       });
-      return NextResponse.json(self ? [self] : []);
+      return NextResponse.json(self ? [sanitizeUser(self)] : []);
     }
 
     // Owner sees only their tenants
@@ -66,7 +68,7 @@ export async function GET(req: NextRequest) {
         },
         orderBy: { createdAt: "desc" }
       });
-      return NextResponse.json(tenants);
+      return NextResponse.json(tenants.map((t: any) => sanitizeUser(t)));
     }
 
     // SUPERADMIN sees all
@@ -78,7 +80,7 @@ export async function GET(req: NextRequest) {
         },
         orderBy: { createdAt: "desc" }
       });
-      return NextResponse.json(tenants);
+      return NextResponse.json(tenants.map((t: any) => sanitizeUser(t)));
     }
 
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -131,7 +133,7 @@ export async function POST(req: NextRequest) {
         role: "TENANT",
         tenantStatus: data.status || "Application Submitted",
         dob: data.dob || null,
-        ssn: data.ssn || null,
+        ssn: data.ssn ? encrypt(data.ssn) : null,
         employer: data.employer || null,
         position: data.position || null,
         annualIncome: data.annualIncome ? parseFloat(data.annualIncome) : null,
@@ -146,7 +148,7 @@ export async function POST(req: NextRequest) {
       } as any
     });
 
-    return NextResponse.json(tenant, { status: 201 });
+    return NextResponse.json(sanitizeUser(tenant), { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to create tenant" }, { status: 500 });
   }
@@ -192,7 +194,7 @@ export async function PUT(req: NextRequest) {
       phone: data.phone || null,
       tenantStatus: data.tenantStatus || "Pending Review",
       dob: data.dob || null,
-      ssn: data.ssn || null,
+      ssn: data.ssn ? encrypt(data.ssn) : null,
       employer: data.employer || null,
       position: data.position || null,
       annualIncome: data.annualIncome ? parseFloat(data.annualIncome) : null,
@@ -215,7 +217,7 @@ export async function PUT(req: NextRequest) {
       data: updateData as any,
     });
 
-    return NextResponse.json(tenant);
+    return NextResponse.json(sanitizeUser(tenant));
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to update tenant" }, { status: 500 });
   }

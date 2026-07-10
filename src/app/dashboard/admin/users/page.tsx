@@ -217,8 +217,6 @@ export default function AdminUsersPage() {
         return "Tenant";
       case "INSPECTOR":
         return "Inspector";
-      case "ACCOUNTANT":
-        return "Accountant";
       default:
         return role;
     }
@@ -361,7 +359,6 @@ export default function AdminUsersPage() {
                 <DropdownMenuItem onClick={() => setRoleFilter("OWNER")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Property Owner</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRoleFilter("TENANT")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Tenant</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRoleFilter("INSPECTOR")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Inspector</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("ACCOUNTANT")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Accountant</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -556,7 +553,6 @@ export default function AdminUsersPage() {
                   <option value="TENANT">Tenant</option>
                   <option value="OWNER">Property Owner</option>
                   <option value="INSPECTOR">Inspector</option>
-                  <option value="ACCOUNTANT">Accountant</option>
                   <option value="SUPERADMIN">Admin</option>
                 </select>
               </div>

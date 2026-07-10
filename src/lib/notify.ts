@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { notificationEmitter } from "@/lib/notification-events";
 
 type NotificationType = "PAYMENT" | "MAINTENANCE" | "LEASE" | "SYSTEM";
 type NotificationPriority = "HIGH" | "MEDIUM" | "LOW";
@@ -18,7 +19,9 @@ interface CreateNotificationInput {
  */
 export async function notify(data: CreateNotificationInput): Promise<void> {
   try {
-    await prisma.notification.create({ data });
+    const notif = await prisma.notification.create({ data });
+    // Emit notification event to live SSE connections
+    notificationEmitter.emit(`notification:${data.userId}`, notif);
   } catch (err) {
     // Non-fatal – log but do not propagate
     console.error("[notify] Failed to create notification:", err);

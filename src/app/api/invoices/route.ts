@@ -13,34 +13,53 @@ export async function GET(req: NextRequest) {
   const role = (session.user as any).role;
   const userId = (session.user as any).id;
 
+  // Pagination params — defaults to page 1, 50 per page
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50", 10)));
+  const skip = (page - 1) * limit;
+  const statusFilter = searchParams.get("status"); // Optional filter
+
   try {
-    let invoices: any[] = [];
-    if (role === "SUPERADMIN") {
-      invoices = await prisma.invoice.findMany({
-        include: { lease: { include: { tenant: true, unit: { include: { property: true } } } } },
-        orderBy: { dueDate: "desc" },
-      });
-    } else if (role === "OWNER") {
-      invoices = await prisma.invoice.findMany({
-        where: { lease: { unit: { property: { ownerId: userId } } } },
-        include: { lease: { include: { tenant: true, unit: { include: { property: true } } } } },
-        orderBy: { dueDate: "desc" },
-      });
+    let whereClause: any = {};
+
+    if (role === "OWNER") {
+      whereClause = { lease: { unit: { property: { ownerId: userId } } } };
     } else if (role === "TENANT") {
-      invoices = await prisma.invoice.findMany({
-        where: { lease: { tenantId: userId } },
-        include: { lease: { include: { tenant: true, unit: { include: { property: true } } } } },
-        orderBy: { dueDate: "desc" },
-      });
-    } else {
-      invoices = [];
+      whereClause = { lease: { tenantId: userId } };
+    } else if (role !== "SUPERADMIN") {
+      return NextResponse.json([]);
     }
 
-    return NextResponse.json(invoices);
+    // Apply optional status filter
+    if (statusFilter && statusFilter !== "ALL") {
+      whereClause.status = statusFilter;
+    }
+
+    const [invoices, total] = await prisma.$transaction([
+      prisma.invoice.findMany({
+        where: whereClause,
+        include: { lease: { include: { tenant: true, unit: { include: { property: true } } } } },
+        orderBy: { dueDate: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.invoice.count({ where: whereClause }),
+    ]);
+
+    return NextResponse.json(invoices, {
+      headers: {
+        "X-Total-Count": total.toString(),
+        "X-Page": page.toString(),
+        "X-Limit": limit.toString(),
+        "X-Total-Pages": Math.ceil(total / limit).toString(),
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to fetch invoices" }, { status: 500 });
   }
 }
+
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -70,16 +89,18 @@ export async function POST(req: NextRequest) {
         amount: Number(amount),
         dueDate: new Date(dueDate),
         status: status || "UNPAID",
+        invoiceType: "FEE",
       },
     });
 
-    // If created as PAID, increment owner balance
+    // If created as PAID, increment owner balance using platform settings fee
     if (invoice.status === "PAID") {
+      const settings = await prisma.platformSettings.findFirst();
+      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
+      const netToOwner = Number(amount) * (1 - adminFeePercent / 100);
       await prisma.user.update({
         where: { id: (session.user as any).id },
-        data: {
-          balance: { increment: Number(amount) * 0.9 },
-        },
+        data: { balance: { increment: netToOwner } },
       });
     }
 
@@ -114,6 +135,14 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // FIX #9 — Require payment method for an auditable ledger
+    if (status === "PAID" && !paymentMethod) {
+      return NextResponse.json(
+        { error: "A payment method (e.g. STRIPE, CASH, BANK_TRANSFER) is required when marking an invoice as Paid." },
+        { status: 400 }
+      );
+    }
+
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: { lease: { include: { unit: { include: { property: true } } } } },
@@ -134,22 +163,33 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    // Balance update logic
+    // Balance update logic — use real platform fee, not hardcoded 10%
     if (oldStatus !== "PAID" && status === "PAID") {
+      const settings = await prisma.platformSettings.findFirst();
+      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
+      const netToOwner = amount * (1 - adminFeePercent / 100);
       // Credited to owner
       await prisma.user.update({
         where: { id: (session.user as any).id },
+        data: { balance: { increment: netToOwner } },
+      });
+      // Update invoice with fee details
+      await prisma.invoice.update({
+        where: { id },
         data: {
-          balance: { increment: amount * 0.9 },
+          adminFee: amount * (adminFeePercent / 100),
+          netToOwner,
+          grossPaid: amount,
         },
       });
     } else if (oldStatus === "PAID" && status !== "PAID") {
-      // Debited from owner
+      const settings = await prisma.platformSettings.findFirst();
+      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
+      const netToOwner = amount * (1 - adminFeePercent / 100);
+      // Debited from owner on reversal
       await prisma.user.update({
         where: { id: (session.user as any).id },
-        data: {
-          balance: { decrement: amount * 0.9 },
-        },
+        data: { balance: { decrement: netToOwner } },
       });
     }
 

@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import crypto from "crypto";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const limiter = rateLimit(req, 5, 60000); // 5 attempts per minute
+    if (!limiter.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again in a minute." }, { status: 429 });
+    }
     const { email } = await req.json();
     if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
 

@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { auditLog } from "@/lib/audit-log";
 
 export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV !== "production",
@@ -26,16 +27,50 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
+          await auditLog({
+            entityType: "USER",
+            entityId: "SYSTEM",
+            action: "LOGIN_FAILED",
+            note: `Failed login attempt: no user found with email ${credentials.email}`,
+          });
           throw new Error("No account found with this email");
         }
 
         if (user.accountStatus === "PENDING_APPROVAL") {
+          await auditLog({
+            entityType: "USER",
+            entityId: user.id,
+            action: "LOGIN_FAILED",
+            actorId: user.id,
+            actorRole: user.role,
+            note: `Failed login attempt: account status is PENDING_APPROVAL`,
+          });
           throw new Error("Your account is pending admin approval.");
+        }
+
+        if (user.accountStatus === "SUSPENDED") {
+          await auditLog({
+            entityType: "USER",
+            entityId: user.id,
+            action: "LOGIN_FAILED",
+            actorId: user.id,
+            actorRole: user.role,
+            note: `Failed login attempt: account status is SUSPENDED`,
+          });
+          throw new Error("Your account has been suspended. Please contact support@propertypro.com for assistance.");
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValid) {
+          await auditLog({
+            entityType: "USER",
+            entityId: user.id,
+            action: "LOGIN_FAILED",
+            actorId: user.id,
+            actorRole: user.role,
+            note: `Failed login attempt: invalid password for email ${credentials.email}`,
+          });
           throw new Error("Invalid password");
         }
 
@@ -60,16 +95,16 @@ export const authOptions: NextAuthOptions = {
       } else if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, phone: true, name: true, balance: true, hasCompletedOnboarding: true },
+          select: { role: true, phone: true, name: true, balance: true, hasCompletedOnboarding: true, accountStatus: true },
         });
-        if (dbUser) {
+        if (dbUser && dbUser.accountStatus !== "SUSPENDED") {
           token.role = dbUser.role;
           token.phone = dbUser.phone;
           token.name = dbUser.name;
           token.balance = dbUser.balance;
           token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
         } else {
-          // User no longer exists (e.g. after DB re-seed) — return empty object to invalidate
+          // User no longer exists or is suspended — return empty object to invalidate
           return {} as any;
         }
       }
@@ -105,5 +140,17 @@ export const authOptions: NextAuthOptions = {
       }
     }
   } : undefined,
+  events: {
+    async signIn({ user }) {
+      await auditLog({
+        entityType: "USER",
+        entityId: user.id,
+        action: "LOGIN_SUCCESS",
+        actorId: user.id,
+        actorRole: (user as any).role,
+        note: `User logged in successfully.`,
+      });
+    }
+  },
   secret: process.env.NEXTAUTH_SECRET,
 };

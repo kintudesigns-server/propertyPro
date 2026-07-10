@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Briefcase, Mail, Phone, ShieldCheck, User } from "lucide-react";
+import { ArrowLeft, Mail, Phone, ShieldCheck, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -91,13 +91,9 @@ export default function AddTeamMember() {
               <div className="space-y-2.5">
                 <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Role <span className="text-[#EF4444]">*</span></Label>
                 <div className="flex gap-4">
-                  <div className={`flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.role === "INSPECTOR" ? "border-[#3B82F6] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"}`} onClick={() => setFormData({...formData, role: "INSPECTOR"})}>
-                    <ShieldCheck className={`h-8 w-8 mb-2 ${formData.role === "INSPECTOR" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
-                    <span className={`text-sm font-bold ${formData.role === "INSPECTOR" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Inspector</span>
-                  </div>
-                  <div className={`flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.role === "ACCOUNTANT" ? "border-[#3B82F6] bg-[#EFF6FF]" : "border-[#E2E8F0] hover:border-[#CBD5E1]"}`} onClick={() => setFormData({...formData, role: "ACCOUNTANT"})}>
-                    <Briefcase className={`h-8 w-8 mb-2 ${formData.role === "ACCOUNTANT" ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
-                    <span className={`text-sm font-bold ${formData.role === "ACCOUNTANT" ? "text-[#1D4ED8]" : "text-[#64748B]"}`}>Accountant</span>
+                  <div className="flex-1 flex flex-col items-center justify-center p-4 border-2 rounded-xl border-[#3B82F6] bg-[#EFF6FF]">
+                    <ShieldCheck className="h-8 w-8 mb-2 text-[#3B82F6]" />
+                    <span className="text-sm font-bold text-[#1D4ED8]">Inspector</span>
                   </div>
                 </div>
               </div>

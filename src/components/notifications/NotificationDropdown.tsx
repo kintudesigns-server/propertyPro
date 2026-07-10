@@ -43,12 +43,20 @@ export function NotificationDropdown() {
   useEffect(() => {
     fetchNotifications();
     
-    // Set up polling every 30 seconds
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000);
+    // Set up Server-Sent Events (SSE) for real-time notification delivery
+    const eventSource = new EventSource("/api/notifications/sse");
 
-    return () => clearInterval(interval);
+    eventSource.addEventListener("notification", (event) => {
+      fetchNotifications();
+    });
+
+    eventSource.onerror = () => {
+      // Silent fail – EventSource automatically retries connection
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   useEffect(() => {

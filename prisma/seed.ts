@@ -5,6 +5,26 @@ import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
+const ALGORITHM = "aes-256-gcm";
+const IV_LENGTH = 12;
+
+const ENCRYPTION_KEY = (() => {
+  const keyStr = process.env.ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || "default-fallback-secret-propertypro-32-chars";
+  return crypto.scryptSync(keyStr, "propertypro-salt", 32);
+})();
+
+function encrypt(text: string): string {
+  if (!text) return "";
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+  
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  
+  const authTag = cipher.getAuthTag().toString("hex");
+  return `${iv.toString("hex")}:${authTag.toString()}:${encrypted}`;
+}
+
 async function main() {
   console.log("Wiping existing database...");
   await prisma.notification.deleteMany();
@@ -49,7 +69,7 @@ async function main() {
   const owner = await prisma.user.create({
     data: {
       email: "owner@example.com", name: "Premium Properties LLC", password: passwordHash, role: Role.OWNER,
-      bankName: "Chase Bank", accountNumber: "111122223333", accountName: "Premium Props", balance: 15680.50,
+      bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Premium Props", balance: 15680.50,
       currentTierId: proTierId, subscriptionStatus: "Active", accountStatus: "ACTIVE",
       creditScore: 780, hasCompletedOnboarding: true, onboardingStep: 4
     }
@@ -58,7 +78,7 @@ async function main() {
   const owner2 = await prisma.user.create({
     data: {
       email: "owner2@example.com", name: "Secondary Owner LLC", password: passwordHash, role: Role.OWNER,
-      bankName: "Wells Fargo", accountNumber: "444455556666", accountName: "Secondary Props", balance: 3450.00,
+      bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Secondary Props", balance: 3450.00,
       currentTierId: starterTierId, subscriptionStatus: "Active", accountStatus: "ACTIVE",
       creditScore: 710, hasCompletedOnboarding: true, onboardingStep: 4
     }
@@ -68,34 +88,30 @@ async function main() {
     data: { email: "inspector@example.com", name: "Mike The Inspector", password: passwordHash, role: Role.INSPECTOR, phone: "+1 555-111-2222" }
   });
 
-  const accountant = await prisma.user.create({
-    data: { email: "accountant@example.com", name: "Sarah Accountant", password: passwordHash, role: Role.ACCOUNTANT }
-  });
-
   // Tenants
   const tOnboarding = await prisma.user.create({
-    data: { email: "newtenant@example.com", name: "Onboarding Olivia", password: passwordHash, role: Role.TENANT, tenantStatus: "Pending Onboarding", creditScore: 680, annualIncome: 24000 }
+    data: { email: "newtenant@example.com", name: "Onboarding Olivia", password: passwordHash, role: Role.TENANT, tenantStatus: "Pending Onboarding", creditScore: 680, annualIncome: 24000, ssn: encrypt("000-12-3456") }
   });
 
   const tActive = await prisma.user.create({
-    data: { email: "activetenant@example.com", name: "Active Adam", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 750, annualIncome: 110000 }
+    data: { email: "activetenant@example.com", name: "Active Adam", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 750, annualIncome: 110000, ssn: encrypt("000-34-5678") }
   });
 
   const tOverdue = await prisma.user.create({
-    data: { email: "overdue@example.com", name: "Overdue Oscar", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 610, annualIncome: 48000 }
+    data: { email: "overdue@example.com", name: "Overdue Oscar", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 610, annualIncome: 48000, ssn: encrypt("000-56-7890") }
   });
 
   const tLeaving = await prisma.user.create({
-    data: { email: "leavingtenant@example.com", name: "Leaving Liam", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 640, annualIncome: 55000 }
+    data: { email: "leavingtenant@example.com", name: "Leaving Liam", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 640, annualIncome: 55000, ssn: encrypt("000-78-9012") }
   });
 
   const tExpired = await prisma.user.create({
-    data: { email: "expired@example.com", name: "Expired Eve", password: passwordHash, role: Role.TENANT, tenantStatus: "Inactive", creditScore: 790, annualIncome: 85000 }
+    data: { email: "expired@example.com", name: "Expired Eve", password: passwordHash, role: Role.TENANT, tenantStatus: "Inactive", creditScore: 790, annualIncome: 85000, ssn: encrypt("000-90-1234") }
   });
 
   // 2. External Vendors
   const vendorPlumber = await prisma.externalVendor.create({
-    data: { name: "FastFix Plumbing Co.", email: "plumber@vendor.com", phone: "+1 555-300-1111", specialty: "Plumbing", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 75.0, ownerId: owner.id, bankName: "Bank of America", routingNumber: "026009593", accountNumber: "987654321" }
+    data: { name: "FastFix Plumbing Co.", email: "plumber@vendor.com", phone: "+1 555-300-1111", specialty: "Plumbing", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 75.0, ownerId: owner.id, bankName: "Bank of America", routingNumber: encrypt("026009593"), accountNumber: encrypt("987654321") }
   });
 
   const vendorSpark = await prisma.externalVendor.create({
@@ -162,6 +178,17 @@ async function main() {
 
   // Tours & Applications
   await prisma.tour.create({ data: { propertyId: propA.id, unitId: u101.id, tenantName: "Applicant Andy", tenantEmail: "applicant@example.com", tenantPhone: "555-999-0000", scheduledAt: new Date(), status: TourStatus.COMPLETED, tourType: TourType.IN_PERSON, feedbackRating: 5, feedbackComments: "Beautiful!" } });
+  
+  // Seed a pending tour for owners to confirm/cancel
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  await prisma.tour.create({ data: { propertyId: propA.id, unitId: u101.id, tenantName: "Sarah Connor", tenantEmail: "sarah@example.com", tenantPhone: "555-111-2222", scheduledAt: tomorrow, status: TourStatus.PENDING, tourType: TourType.VIDEO_CALL } });
+
+  // Seed a confirmed tour
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  await prisma.tour.create({ data: { propertyId: propA.id, unitId: u102.id, tenantName: "John Doe", tenantEmail: "john@example.com", tenantPhone: "555-222-3333", scheduledAt: nextWeek, status: TourStatus.CONFIRMED, tourType: TourType.IN_PERSON } });
+
   await prisma.application.create({ data: { unitId: u101.id, name: "Applicant Andy", email: "applicant@example.com", phone: "555-999-0000", status: "APPROVED", monthlyIncome: 7500, employerName: "Acme Corp", jobTitle: "Engineer", occupantsCount: 1, moveInDate: new Date(), leaseDuration: 12 } });
 
   // 5. Leases Lifecycle & Deposit Balances
@@ -177,8 +204,8 @@ async function main() {
       depositStatus: "HELD", depositBalance: 0.00
     }
   });
-  const invOnboarding = await prisma.invoice.create({
-    data: { leaseId: leaseOnboarding.id, amount: 2500, dueDate: new Date(), status: "UNPAID" }
+  await prisma.invoice.create({
+    data: { leaseId: leaseOnboarding.id, amount: 2500, dueDate: new Date(), status: "UNPAID", invoiceType: "DEPOSIT" }
   });
 
   // Lease B: Active Perfect Tenant (Deposit fully paid, balance holds deductions)
@@ -191,15 +218,41 @@ async function main() {
     }
   });
   // Active invoices
-  const inv1 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3500, dueDate: dateBefore(2), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3601.50 } });
-  const inv2 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: dateBefore(1), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3087.00 } });
-  const inv3 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: new Date(), status: "UNPAID" } });
+  const inv1 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3500, dueDate: dateBefore(2), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3601.50, invoiceType: "DEPOSIT" } });
+  const inv2 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: dateBefore(1), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3087.00, invoiceType: "RENT" } });
+  const inv3 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: new Date(), status: "UNPAID", invoiceType: "RENT" } });
 
   const activeDepositTx = await prisma.transaction.create({
     data: { type: "INCOME", category: "DEPOSIT", amount: 3500, status: "COMPLETED", tenantId: tActive.id, invoiceId: inv1.id }
   });
   await prisma.lease.update({ where: { id: leaseActive.id }, data: { depositTransactionId: activeDepositTx.id } });
   await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 3000, status: "COMPLETED", tenantId: tActive.id, invoiceId: inv2.id } });
+
+  // Seed a refunded invoice to test profit charts and refund adjustments
+  const invRefunded = await prisma.invoice.create({
+    data: {
+      leaseId: leaseActive.id,
+      amount: 500,
+      dueDate: dateBefore(3),
+      status: "REFUNDED",
+      paymentMethod: "STRIPE",
+      invoiceType: "FEE",
+      adminFee: 10,
+      netToOwner: 490
+    }
+  });
+
+  await prisma.transaction.create({
+    data: {
+      type: "EXPENSE",
+      category: "OTHER",
+      amount: 500,
+      reference: "STRIPE_REFUND_seed123",
+      tenantId: tActive.id,
+      status: "COMPLETED",
+      invoiceId: invRefunded.id
+    }
+  });
 
   // Lease C: Overdue tenant
   const leaseOverdue = await prisma.lease.create({
@@ -209,7 +262,7 @@ async function main() {
       depositPaidAt: dateBefore(1), depositPaidAmount: 3500, depositBalance: 3500, depositStatus: "HELD"
     }
   });
-  const invOverdue1 = await prisma.invoice.create({ data: { leaseId: leaseOverdue.id, amount: 3200, dueDate: dateBefore(1), status: "OVERDUE" } });
+  await prisma.invoice.create({ data: { leaseId: leaseOverdue.id, amount: 3200, dueDate: dateBefore(1), status: "OVERDUE", invoiceType: "RENT" } });
 
   // Lease D: Early termination / Moving out
   const leaseLeaving = await prisma.lease.create({
@@ -240,7 +293,7 @@ async function main() {
   await prisma.payoutRequest.create({
     data: {
       tenantId: tExpired.id, leaseId: leaseExpired.id, amount: 2650, status: PayoutStatus.COMPLETED,
-      bankName: "Wells Fargo", accountNumber: "999988887777", accountName: "Eve Expired", disbursedAt: dateBefore(2)
+      bankName: "Wells Fargo", accountNumber: encrypt("999988887777"), accountName: "Eve Expired", disbursedAt: dateBefore(2)
     }
   });
 
@@ -330,7 +383,7 @@ async function main() {
       unitId: u102.id, tenantId: tActive.id, title: "Broken Patio Glass",
       description: "Patio sliding glass shattered.", priority: "HIGH", status: "PENDING_TENANT_CONFIRMATION",
       category: "GENERAL", finalLabor: 250.00, finalMaterials: 300.00, // Total $550
-      vendorReportedFault: true, ownerChargebackDecision: null // Undecided -> Amber alert box triggers
+      vendorReportedFault: true, ownerChargebackDecision: null // Undecided
     }
   });
 
@@ -357,15 +410,13 @@ async function main() {
   // Record transaction for this deduction
   await prisma.transaction.create({
     data: {
-      type: "EXPENSE", category: "DEPOSIT_DEDUCTION", amount: 30.00,
+      type: "EXPENSE", category: "DEPOSIT", amount: 30.00,
       reference: `DEPOSIT_DEDUCT_${ticketDeduct.id.slice(-6)}`, status: "COMPLETED",
       tenantId: tActive.id
     }
   });
 
   // Scenario 12: CLOSED - STATE 3C: Ruled Tenant Fault, Split (Deposit exhausted + remaining invoiced)
-  // Let's assume tenant deposit was drained to 0 and rest invoice. Here tActive has enough deposit,
-  // but we seed a split scenario on a separate ticket to test the split UI state.
   await prisma.maintenanceRequest.create({
     data: {
       unitId: u102.id, tenantId: tActive.id, title: "Flooring Water Damage",
@@ -415,10 +466,10 @@ async function main() {
   await prisma.transaction.create({ data: { type: "EXPENSE", category: "OTHER", amount: 79.00, reference: "Stripe monthly subscription fee", status: "COMPLETED" } });
 
   await prisma.payoutRequest.create({
-    data: { ownerId: owner.id, amount: 8000, status: PayoutStatus.PENDING, bankName: "Chase Bank", accountNumber: "111122223333", accountName: "Premium Props LLC" }
+    data: { ownerId: owner.id, amount: 8000, status: PayoutStatus.PENDING, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Premium Props LLC" }
   });
   await prisma.payoutRequest.create({
-    data: { ownerId: owner.id, amount: 12000, status: PayoutStatus.COMPLETED, bankName: "Chase Bank", accountNumber: "111122223333", accountName: "Premium Props LLC", disbursedAt: dateBefore(4), proofUrl: "https://example.com/receipt.pdf" }
+    data: { ownerId: owner.id, amount: 12000, status: PayoutStatus.COMPLETED, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Premium Props LLC", disbursedAt: dateBefore(4), proofUrl: "https://example.com/receipt.pdf" }
   });
 
   // 8. Documents
@@ -427,8 +478,10 @@ async function main() {
   await prisma.document.create({ data: { name: "ID_Olivia.jpg", url: "https://example.com/id.jpg", category: "IDENTIFICATION", type: "Identification", fileSize: "320 KB", tenantId: tOnboarding.id, propertyId: propA.id } });
 
   // 9. Messages
-  await prisma.message.create({ data: { senderId: tActive.id, receiverId: owner.id, content: "Just submitted the HVAC issue. Thanks!" } });
-  await prisma.message.create({ data: { senderId: owner.id, receiverId: tActive.id, content: "Sure, Mike is assigned and will be there tomorrow.", isRead: true } });
+  console.log("Creating Messages...");
+  const conversationId = [tActive.id, owner.id].sort().join("_");
+  await prisma.message.create({ data: { senderId: tActive.id, receiverId: owner.id, content: "Just submitted the HVAC issue. Thanks!", conversationId } });
+  await prisma.message.create({ data: { senderId: owner.id, receiverId: tActive.id, content: "Sure, Mike is assigned and will be there tomorrow.", isRead: true, conversationId } });
 
   // 10. Notifications
   console.log("Creating Notifications...");

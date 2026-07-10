@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { auditLog } from "@/lib/audit-log";
+import { decrypt } from "@/lib/encryption";
 
 export async function GET(
   req: NextRequest,
@@ -76,7 +78,11 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    const decryptedUser = { ...user };
+    if (decryptedUser.ssn) decryptedUser.ssn = decrypt(decryptedUser.ssn);
+    if (decryptedUser.accountNumber) decryptedUser.accountNumber = decrypt(decryptedUser.accountNumber);
+
+    return NextResponse.json(decryptedUser);
   } catch (error: any) {
     console.error("Fetch user details error:", error);
     return NextResponse.json(
@@ -111,7 +117,18 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(updatedUser);
+    await auditLog({
+      entityType: "USER",
+      entityId: id,
+      action: "UPDATED",
+      actorId: (session.user as any).id,
+      actorRole: "SUPERADMIN",
+      newValue: { name, email, phone, role, tenantStatus },
+      note: `Admin updated user details.`,
+    });
+
+    const { password: _, ...sanitizedUser } = updatedUser;
+    return NextResponse.json(sanitizedUser);
   } catch (error: any) {
     console.error("Update user error:", error);
     return NextResponse.json(
@@ -142,6 +159,15 @@ export async function DELETE(
     }
 
     try {
+      await auditLog({
+        entityType: "USER",
+        entityId: id,
+        action: "DELETED",
+        actorId: (session.user as any).id,
+        actorRole: "SUPERADMIN",
+        note: `Admin deleted user account.`,
+      });
+
       await prisma.user.delete({
         where: { id },
       });

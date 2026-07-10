@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -94,6 +95,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // GUARD: Never allow deletion of financially-active leases
+    const protectedStatuses = ["ACTIVE", "SIGNED", "TERMINATED"];
+    if (protectedStatuses.includes(lease.status)) {
+      return NextResponse.json(
+        { error: `Cannot delete a lease in ${lease.status} status. Active, signed, or terminated leases are legally protected records. Use the Terminate workflow instead.` },
+        { status: 400 }
+      );
+    }
+
     // Delete invoices first because of foreign key constraints
     await prisma.invoice.deleteMany({
       where: { leaseId: id }
@@ -106,6 +116,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         data: { status: "VACANT" }
       });
     }
+
+    await auditLog({
+      entityType: "LEASE",
+      entityId: id,
+      action: "DELETED",
+      actorId: userId,
+      actorRole: role,
+      oldValue: { id: lease.id, status: lease.status },
+      note: `Lease deleted by user.`,
+    });
 
     await prisma.lease.delete({
       where: { id }

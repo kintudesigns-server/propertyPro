@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
+import { sanitizeVendor } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -74,6 +75,15 @@ export async function GET(req: NextRequest) {
         });
       }
 
+      // FIX #4 — Block tenants from viewing other tenants' maintenance data
+      if (role === "TENANT" && request.tenantId !== userId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      if (request.externalVendor) {
+        request.externalVendor = sanitizeVendor(request.externalVendor);
+      }
+
       return NextResponse.json({ ...request, activeLease, vendorExpenseTransaction });
     }
 
@@ -108,7 +118,14 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(requests);
+    const sanitizedRequests = requests.map((req: any) => {
+      if (req.externalVendor) {
+        req.externalVendor = sanitizeVendor(req.externalVendor);
+      }
+      return req;
+    });
+
+    return NextResponse.json(sanitizedRequests);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to fetch maintenance requests" }, { status: 500 });
   }
@@ -127,6 +144,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: unitId, title, description" }, { status: 400 });
     }
 
+    // FIX #3A — Verify the tenant has an ACTIVE lease for the unit they're filing against
+    if ((session.user as any).role === "TENANT") {
+      const activeLease = await prisma.lease.findFirst({
+        where: {
+          unitId: data.unitId,
+          tenantId: (session.user as any).id,
+          status: "ACTIVE",
+        },
+      });
+      if (!activeLease) {
+        return NextResponse.json(
+          { error: "You can only submit maintenance requests for units you actively occupy." },
+          { status: 403 }
+        );
+      }
+    }
+
+    // FIX #3B — Rate limit: max 5 requests per tenant per 24 hours
+    if ((session.user as any).role === "TENANT") {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentCount = await prisma.maintenanceRequest.count({
+        where: { tenantId: (session.user as any).id, createdAt: { gte: since } },
+      });
+      if (recentCount >= 5) {
+        return NextResponse.json(
+          { error: "You have reached the daily limit of 5 maintenance requests. For urgent issues, please contact your landlord directly." },
+          { status: 429 }
+        );
+      }
+    }
+
+    // FIX #3C — Require at least one photo for EMERGENCY or HIGH priority tickets
+    if (
+      ["EMERGENCY", "HIGH"].includes((data.priority || "").toUpperCase()) &&
+      (!Array.isArray(data.photos) || data.photos.length === 0)
+    ) {
+      return NextResponse.json(
+        { error: "At least one photo is required for Emergency or High priority maintenance requests. Please upload a photo of the issue." },
+        { status: 400 }
+      );
+    }
+
     // Use tenantId from body if provided (landlord/admin submitting on behalf of tenant),
     // otherwise use the session user's own ID (tenant submitting their own request)
     const tenantId = (data.tenantId && data.tenantId !== "") 
@@ -135,6 +194,29 @@ export async function POST(req: NextRequest) {
 
     if (!tenantId) {
       return NextResponse.json({ error: "Could not determine tenant ID" }, { status: 400 });
+    }
+
+    // DUPLICATE DETECTION: Check for recent requests of same category on same unit within 7 days
+    let isDuplicateSuspect = false;
+    let duplicateOfId: string | null = null;
+
+    if ((session.user as any).role === "TENANT") {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const duplicateCheck = await prisma.maintenanceRequest.findFirst({
+        where: {
+          tenantId: (session.user as any).id,
+          unitId: data.unitId,
+          category: data.category || "GENERAL",
+          createdAt: { gte: sevenDaysAgo },
+          status: { notIn: ["CLOSED", "RESOLVED"] },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (duplicateCheck) {
+        isDuplicateSuspect = true;
+        duplicateOfId = duplicateCheck.id;
+      }
     }
 
     const request = await prisma.maintenanceRequest.create({
@@ -150,6 +232,8 @@ export async function POST(req: NextRequest) {
         entryPermission: data.entryPermission !== undefined ? Boolean(data.entryPermission) : false,
         hasPets: data.hasPets || "No",
         preferredTimes: data.preferredTimes || "",
+        isDuplicateSuspect,
+        duplicateOfId,
         ...(data.inspectorId ? { inspectorId: data.inspectorId } : {}),
         ...(data.estimatedCost ? { estimatedCost: parseFloat(data.estimatedCost) } : {}),
         ...(data.scheduledDate ? { scheduledDate: new Date(data.scheduledDate) } : {}),
@@ -175,6 +259,17 @@ export async function POST(req: NextRequest) {
           priority: notifPriority,
           relatedEntityId: request.id,
         });
+
+        if (isDuplicateSuspect) {
+          await notify({
+            userId: unit.property.ownerId,
+            title: `⚠️ Possible Duplicate Ticket — ${data.title}`,
+            message: `This maintenance request may be a duplicate of an existing open ticket (#${duplicateOfId?.slice(-6)}). Please review before assigning.`,
+            type: "MAINTENANCE",
+            priority: "HIGH",
+            relatedEntityId: request.id,
+          });
+        }
       }
     } catch (_) {/* non-fatal */}
 
@@ -391,6 +486,11 @@ export async function PUT(req: NextRequest) {
     if (action === "DISPATCH_VENDOR" && updateData.externalVendorId) {
       const vendor = await (prisma as any).externalVendor.findUnique({ where: { id: updateData.externalVendorId }});
       if (vendor) {
+        // Set token expiry: 14 days from now (covers scheduling + completion window)
+        const tokenExpiry = new Date();
+        tokenExpiry.setDate(tokenExpiry.getDate() + 14);
+        updateData.vendorTokenExpiresAt = tokenExpiry;
+
         // 1. Send actual email to vendor
         const magicLink = `http://localhost:3000/vendor/ticket/${fullRequest.vendorMagicToken}`;
         await sendEmail({

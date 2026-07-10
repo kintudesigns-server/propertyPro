@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { auditLog } from "@/lib/audit-log";
 
 export async function POST(
   req: NextRequest,
@@ -41,6 +42,53 @@ export async function POST(
         data: { status: "VACANT" },
       }),
     ]);
+
+    // Write audit log
+    await auditLog({
+      entityType: "LEASE",
+      entityId: id,
+      action: "TERMINATED",
+      actorId: (session.user as any).id,
+      actorRole: "OWNER",
+      oldValue: { status: lease.status },
+      newValue: { status: "TERMINATED" },
+      note: `Lease manually terminated by owner.`,
+    });
+
+    // FIX #7 — Auto-invoice early termination fee if applicable
+    const today = new Date();
+    const earlyTermFee = Number(lease.earlyTerminationFee || 0);
+    const endDate = new Date(lease.endDate);
+
+    if (earlyTermFee > 0 && today < endDate) {
+      try {
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 14); // Due in 14 days
+
+        const invoice = await prisma.invoice.create({
+          data: {
+            leaseId: lease.id,
+            amount: earlyTermFee,
+            dueDate,
+            status: "UNPAID",
+          },
+        });
+
+        // Notify tenant of early termination fee
+        await notify({
+          userId: lease.tenantId,
+          title: "Early Termination Fee Invoiced",
+          message: `Your lease has been terminated before its end date (${endDate.toLocaleDateString()}). An early termination fee of $${earlyTermFee.toFixed(2)} has been invoiced and is due by ${dueDate.toLocaleDateString()}.`,
+          type: "PAYMENT",
+          priority: "HIGH",
+          relatedEntityId: invoice.id,
+        });
+
+        console.log(`[TERMINATE] Early termination invoice created: $${earlyTermFee} for lease ${id}`);
+      } catch (e) {
+        console.error("Failed to create early termination invoice:", e);
+      }
+    }
 
     // Create system notification for tenant
     try {

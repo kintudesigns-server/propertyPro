@@ -53,11 +53,7 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     if (!stripe) throw new Error("Stripe not initialized");
 
-    const isSecurityDeposit = 
-      Number(invoice.amount) === Number(invoice.lease.securityDeposit) &&
-      new Date(invoice.dueDate).getTime() === new Date(invoice.lease.startDate).getTime();
-    
-    const paymentCategory = isSecurityDeposit ? "DEPOSIT" : "RENT";
+    const paymentCategory = invoice.invoiceType === "DEPOSIT" ? "DEPOSIT" : "RENT";
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
@@ -74,7 +70,7 @@ export async function POST(req: NextRequest) {
         netToOwner: netToOwner.toString(),
         grossPaid: grossTotal.toString(),
       },
-      description: `${isSecurityDeposit ? "Security Deposit" : "Rent"} - ${invoice.lease.unit.property.name} (${invoice.lease.unit.name})`,
+      description: `${paymentCategory === "DEPOSIT" ? "Security Deposit" : "Rent"} - ${invoice.lease.unit.property.name} (${invoice.lease.unit.name})`,
       automatic_payment_methods: { enabled: true },
     });
 

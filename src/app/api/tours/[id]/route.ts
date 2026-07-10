@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { auditLog } from "@/lib/audit-log";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -47,6 +48,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       data: updateData,
     });
 
+    await auditLog({
+      entityType: "TOUR",
+      entityId: id,
+      action: "UPDATED",
+      actorId: userId,
+      actorRole: role,
+      oldValue: { status: tour.status },
+      newValue: updateData,
+      note: `Tour request updated by user.`,
+    });
+
     return NextResponse.json(updatedTour);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to update tour" }, { status: 500 });
@@ -79,6 +91,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!isOwner && !isSuperAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
+
+    await auditLog({
+      entityType: "TOUR",
+      entityId: id,
+      action: "DELETED",
+      actorId: userId,
+      actorRole: role,
+      oldValue: { id: tour.id, status: tour.status },
+      note: `Tour request deleted by user.`,
+    });
 
     await prisma.tour.delete({
       where: { id },

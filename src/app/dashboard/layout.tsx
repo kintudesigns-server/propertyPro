@@ -548,6 +548,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       <ShieldCheck className="h-5 w-5" />
                       {sidebarOpen && <span>Admin Overview</span>}
                     </Link>
+                    <Link
+                      href="/dashboard/admin/audit-logs"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/audit-logs"
+                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <FileText className="h-5 w-5" />
+                      {sidebarOpen && <span>Audit Logs</span>}
+                    </Link>
 
                     {/* FINANCIALS */}
                     {sidebarOpen && (

@@ -32,8 +32,12 @@ export default function ApplicationDetailsPage() {
         body: JSON.stringify({ status: newStatus, reason }),
       });
       if (res.ok) {
+        const data = await res.json();
         toast.success(`Application ${newStatus.toLowerCase()} successfully!`);
         setApp((prev: any) => ({ ...prev, status: newStatus }));
+        if (data.redirectUrl) {
+          router.push(data.redirectUrl);
+        }
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to update application status.");

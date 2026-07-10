@@ -10,7 +10,6 @@ generator client {
 enum Role {
   SUPERADMIN
   OWNER        // Landlord/Property Owner
-  ACCOUNTANT   // Financial Staff
   INSPECTOR    // On-site Inspections
   TENANT       // Renter
 }
@@ -226,7 +225,7 @@ model Lease {
   startDate   DateTime
   endDate     DateTime
   monthlyRent Decimal   @db.Decimal(10, 2)
-  status      String    @default("DRAFT") // DRAFT, ACTIVE, TERMINATED, EXPIRED
+  status      String    @default("DRAFT") // DRAFT, PENDING_SIGNATURE, SIGNED, ACTIVE, TERMINATED, EXPIRED
   
   // Extended configuration fields
   rentDueDay           Int       @default(1)
@@ -267,10 +266,12 @@ model Lease {
   renewalNoticeDays    Int       @default(60) // Days before endDate to trigger renewal offer
   renewalStatus        String    @default("NOT_ELIGIBLE") // NOT_ELIGIBLE, PENDING_DECISION, RENEWED, NON_RENEWAL
 
-  // Lease Signing
+  // Lease Signing & Move-In Gate
   signatureImageUrl    String?   @db.Text  // Base64 canvas signature drawn by tenant
   signedAt             DateTime?           // Timestamp of when tenant signed
   customTerms          String?   @db.Text  // Owner-added custom terms shown to tenant before signing
+  moveInDate           DateTime?           // Planned physical move-in date (can differ from startDate)
+  keysHandedOverAt     DateTime?           // When owner confirms keys were handed over → triggers ACTIVE
   
   invoices    Invoice[]
   payoutRequests PayoutRequest[]
@@ -290,6 +291,7 @@ model Invoice {
   dueDate       DateTime
   status        String   @default("UNPAID") // UNPAID, PAID, OVERDUE, VOID
   paymentMethod String?  // STRIPE, CASH, BANK_TRANSFER
+  invoiceType   String   @default("RENT") // RENT, DEPOSIT, FEE, PRORATED, EARLY_TERMINATION, LATE_FEE
   
   // Financial Tracking (Phase 4 Monetization)
   processingFee Decimal? @db.Decimal(10, 2) // E.g. Stripe 2.9% fee passed to tenant
@@ -298,6 +300,7 @@ model Invoice {
   grossPaid     Decimal? @db.Decimal(10, 2) // Total swiped (amount + processingFee)
 
   createdAt     DateTime @default(now())
+  note          String?
 
   transactions  Transaction[]
 }
@@ -344,6 +347,7 @@ model MaintenanceRequest {
   vendorExpenseTransactionId String?
   isMoveOutInspection     Boolean   @default(false)
   vendorMagicToken        String?   @unique
+  vendorTokenExpiresAt    DateTime?           // Token expires after job completion + 7 days
   externalVendorId        String?
   externalVendor          ExternalVendor? @relation(fields: [externalVendorId], references: [id])
 
@@ -359,6 +363,8 @@ model MaintenanceRequest {
   chargebackDepositAmount  Decimal?  @db.Decimal(10, 2) // Amount deducted from deposit
   chargebackInvoiceAmount  Decimal?  @db.Decimal(10, 2) // Amount billed as invoice
   
+  isDuplicateSuspect      Boolean   @default(false)
+  duplicateOfId           String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 }
@@ -418,14 +424,17 @@ model Application {
 }
 
 model Message {
-  id         String   @id @default(uuid())
-  senderId   String
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiverId String
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  content    String
-  isRead     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id             String   @id @default(uuid())
+  senderId       String
+  sender         User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId     String
+  receiver       User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content        String
+  isRead         Boolean  @default(false)
+  conversationId String?  // Sort-joined user IDs e.g. "userId1_userId2"
+  attachmentUrl  String?  // Document or photo attachment link
+  messageType    String   @default("TEXT") // TEXT, SYSTEM, IMAGE, FILE
+  createdAt      DateTime @default(now())
 }
 
 model Document {
@@ -537,3 +546,15 @@ model ExternalVendor {
   createdAt           DateTime             @default(now())
 }
 
+model AuditLog {
+  id           String   @id @default(uuid())
+  entityType   String   // LEASE, INVOICE, MAINTENANCE, USER, PAYOUT, PROPERTY
+  entityId     String
+  action       String   // CREATED, UPDATED, DELETED, STATUS_CHANGED, SIGNED, ACTIVATED, TERMINATED
+  actorId      String?  // User who performed the action (null = system/cron)
+  actorRole    String?  // OWNER, TENANT, SUPERADMIN, SYSTEM
+  oldValue     Json?    // Previous state (key fields only)
+  newValue     Json?    // New state (key fields only)
+  note         String?  // Human readable summary
+  createdAt    DateTime @default(now())
+}

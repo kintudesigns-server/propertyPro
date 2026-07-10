@@ -1,9 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { auditLog } from "@/lib/audit-log";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const limiter = rateLimit(req, 5, 60000); // 5 attempts per minute
+    if (!limiter.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again in a minute." }, { status: 429 });
+    }
     const { name, email, phone, size } = await req.json();
 
     if (!name || !email || !phone) {
@@ -29,6 +35,16 @@ export async function POST(req: Request) {
         accountStatus: "PENDING_APPROVAL",
         notes: `Applied for owner access. Portfolio size: ${size}`,
       }
+    });
+
+    await auditLog({
+      entityType: "USER",
+      entityId: newUser.id,
+      action: "CREATED",
+      actorId: newUser.id,
+      actorRole: "OWNER",
+      newValue: { name, email, phone, role: "OWNER", accountStatus: "PENDING_APPROVAL" },
+      note: `Owner registered new account (pending approval). Portfolio size: ${size}`,
     });
 
     // Notify the Admins (create a notification)

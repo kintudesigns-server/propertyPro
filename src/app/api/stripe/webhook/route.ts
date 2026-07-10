@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import { headers } from "next/headers";
+import { auditLog } from "@/lib/audit-log";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-04-10" as any,
@@ -25,6 +26,103 @@ export async function POST(req: NextRequest) {
     }
 
     switch (event.type) {
+      case "payment_intent.succeeded": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const { invoiceId, tenantId, category } = pi.metadata || {};
+
+        if (!invoiceId || !tenantId) break;
+
+        // Update the invoice to PAID
+        const invoice = await prisma.invoice.findUnique({
+          where: { id: invoiceId },
+          include: {
+            lease: {
+              include: { unit: { include: { property: true } } },
+            },
+          },
+        });
+
+        if (!invoice || invoice.status === "PAID") break;
+
+        await prisma.invoice.update({
+          where: { id: invoiceId },
+          data: { status: "PAID", paymentMethod: "STRIPE" },
+        });
+
+        await auditLog({
+          entityType: "INVOICE",
+          entityId: invoiceId,
+          action: "STATUS_CHANGED",
+          actorId: tenantId,
+          actorRole: "TENANT",
+          oldValue: { status: invoice.status },
+          newValue: { status: "PAID", paymentMethod: "STRIPE" },
+          note: `Stripe PaymentIntent ${pi.id} succeeded. Invoice marked as PAID.`,
+        });
+
+        // Increment owner balance (net of platform fee)
+        const netToOwner = Number(pi.metadata.netToOwner || 0);
+        if (netToOwner > 0 && invoice.lease.unit.property.ownerId) {
+          await prisma.user.update({
+            where: { id: invoice.lease.unit.property.ownerId },
+            data: { balance: { increment: netToOwner } },
+          });
+        }
+
+        // If this was a DEPOSIT payment, update the lease deposit fields
+        if (category === "DEPOSIT") {
+          const paidAmount = pi.amount_received / 100; // cents -> dollars
+          await prisma.lease.update({
+            where: { id: invoice.leaseId },
+            data: {
+              depositPaidAt: new Date(),
+              depositPaidAmount: paidAmount,
+              depositBalance: paidAmount,
+              depositStatus: "HELD",
+              depositTransactionId: pi.id,
+            } as any,
+          });
+
+          // Notify tenant
+          await prisma.notification.create({
+            data: {
+              userId: tenantId,
+              title: "Security Deposit Confirmed ✅",
+              message: `Your security deposit of $${paidAmount.toFixed(2)} has been received and is now held in escrow. You are now ready to sign your lease.`,
+              type: "PAYMENT",
+              priority: "HIGH",
+              isRead: false,
+            },
+          });
+
+          // Notify owner
+          await prisma.notification.create({
+            data: {
+              userId: invoice.lease.unit.property.ownerId,
+              title: "Tenant Deposit Received",
+              message: `The security deposit of $${paidAmount.toFixed(2)} for Unit ${invoice.lease.unit.name} has been confirmed via Stripe.`,
+              type: "PAYMENT",
+              priority: "MEDIUM",
+              isRead: false,
+            },
+          });
+        }
+
+        // Record transaction in ledger
+        await prisma.transaction.create({
+          data: {
+            type: "INCOME",
+            category: category === "DEPOSIT" ? "DEPOSIT" : "RENT",
+            amount: pi.amount_received / 100,
+            reference: `STRIPE_PI_${pi.id.slice(-8)}`,
+            tenantId,
+            status: "COMPLETED",
+          },
+        });
+
+        break;
+      }
+
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode === "subscription") {
@@ -40,6 +138,16 @@ export async function POST(req: NextRequest) {
                 currentTierId: tierId,
                 subscriptionStatus: "Active",
               },
+            });
+
+            await auditLog({
+              entityType: "USER",
+              entityId: userId,
+              action: "UPDATED",
+              actorId: userId,
+              actorRole: "OWNER",
+              newValue: { currentTierId: tierId, subscriptionStatus: "Active" },
+              note: `Stripe subscription checkout succeeded. Subscription activated.`,
             });
           }
         }
@@ -94,6 +202,73 @@ export async function POST(req: NextRequest) {
             where: { stripeSubscriptionId: subscription.id },
             data: { subscriptionStatus: "Active" },
           });
+        }
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const piId = charge.payment_intent as string;
+
+        if (piId) {
+          try {
+            const pi = await stripe.paymentIntents.retrieve(piId);
+            const { invoiceId, tenantId } = pi.metadata || {};
+
+            if (invoiceId) {
+              const invoice = await prisma.invoice.findUnique({
+                where: { id: invoiceId },
+                include: {
+                  lease: {
+                    include: { unit: { include: { property: true } } },
+                  },
+                },
+              });
+
+              if (invoice) {
+                // Update invoice status to REFUNDED
+                await prisma.invoice.update({
+                  where: { id: invoiceId },
+                  data: { status: "REFUNDED" },
+                });
+
+                // Decrement owner balance by the netToOwner amount previously credited
+                const netToOwner = Number(pi.metadata.netToOwner || 0);
+                if (netToOwner > 0 && invoice.lease.unit.property.ownerId) {
+                  await prisma.user.update({
+                    where: { id: invoice.lease.unit.property.ownerId },
+                    data: { balance: { decrement: netToOwner } },
+                  });
+                }
+
+                // Create expense transaction for ledger tracking
+                await prisma.transaction.create({
+                  data: {
+                    type: "EXPENSE",
+                    category: "OTHER",
+                    amount: charge.amount_refunded / 100, // cents to dollars
+                    reference: `STRIPE_REFUND_${charge.id.slice(-8)}`,
+                    tenantId: tenantId || null,
+                    status: "COMPLETED",
+                    invoiceId: invoiceId,
+                  },
+                });
+
+                await auditLog({
+                  entityType: "INVOICE",
+                  entityId: invoiceId,
+                  action: "STATUS_CHANGED",
+                  actorId: tenantId || null,
+                  actorRole: "SYSTEM",
+                  oldValue: { status: invoice.status },
+                  newValue: { status: "REFUNDED" },
+                  note: `Stripe Charge ${charge.id} was refunded. Invoice status updated to REFUNDED. Balance adjusted for owner.`,
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Error processing charge.refunded event:", err);
+          }
         }
         break;
       }

@@ -204,7 +204,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       console.error("Error sending application status notification/email:", err);
     }
 
-    return NextResponse.json(updatedApp);
+    const redirectUrl = status === "APPROVED" ? `/dashboard/leases/new?appId=${application.id}` : null;
+    return NextResponse.json({ ...updatedApp, redirectUrl });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to update application" }, { status: 500 });
   }

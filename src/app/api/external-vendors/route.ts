@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
 // Force TS reload for Prisma
 import { prisma } from "@/lib/prisma";
+import { sanitizeVendor } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -28,7 +29,8 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(vendors);
+    const sanitizedVendors = vendors.map(v => sanitizeVendor(v));
+    return NextResponse.json(sanitizedVendors);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(newVendor, { status: 201 });
+    return NextResponse.json(sanitizeVendor(newVendor), { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

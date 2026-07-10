@@ -142,7 +142,8 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(updatedUser);
+    const { password: _, ...sanitizedUser } = updatedUser;
+    return NextResponse.json(sanitizedUser);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to update profile" }, { status: 500 });
   }

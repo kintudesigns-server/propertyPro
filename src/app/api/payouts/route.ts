@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { PayoutStatus } from "@prisma/client";
 import { notify } from "@/lib/notify";
 import { getStripe } from "@/lib/stripe";
+import { maskBankDetails } from "@/lib/utils";
+import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -55,8 +57,15 @@ export async function GET(req: NextRequest) {
         },
         orderBy: { createdAt: "desc" },
       });
-    } else {
-      payouts = [];
+    }
+    if (role !== "SUPERADMIN") {
+      payouts = payouts.map(p => {
+        if (p.accountNumber) {
+          const masked = maskBankDetails(p.accountNumber, null);
+          return { ...p, accountNumber: masked.accountNumber };
+        }
+        return p;
+      });
     }
 
     return NextResponse.json(payouts);
@@ -120,6 +129,16 @@ export async function POST(req: NextRequest) {
         },
       }),
     ]);
+
+    await auditLog({
+      entityType: "PAYOUT",
+      entityId: payout.id,
+      action: "CREATED",
+      actorId: ownerId,
+      actorRole: "OWNER",
+      newValue: { amount: withdrawAmount, bankName },
+      note: `Owner created payout request for $${withdrawAmount.toFixed(2)} to bank: ${bankName}`,
+    });
 
     return NextResponse.json(payout, { status: 201 });
   } catch (error: any) {
@@ -288,6 +307,17 @@ export async function PUT(req: NextRequest) {
           console.error("Failed to send payout notifications:", err);
         }
 
+        await auditLog({
+          entityType: "PAYOUT",
+          entityId: payoutId,
+          action: "STATUS_CHANGED",
+          actorId: (session.user as any).id,
+          actorRole: "SUPERADMIN",
+          oldValue: { status: payout.status },
+          newValue: { status: PayoutStatus.COMPLETED },
+          note: `Admin approved payout of $${Number(payout.amount).toFixed(2)}`,
+        });
+
         return NextResponse.json(updatedPayout);
       } else {
         // 2. Regular Owner Payout
@@ -302,6 +332,18 @@ export async function PUT(req: NextRequest) {
             accountName: accountName || payout.accountName,
           },
         });
+
+        await auditLog({
+          entityType: "PAYOUT",
+          entityId: payoutId,
+          action: "STATUS_CHANGED",
+          actorId: (session.user as any).id,
+          actorRole: "SUPERADMIN",
+          oldValue: { status: payout.status },
+          newValue: { status: PayoutStatus.COMPLETED },
+          note: `Admin approved payout of $${Number(payout.amount).toFixed(2)}`,
+        });
+
         return NextResponse.json(updated);
       }
     } else if (status === PayoutStatus.REJECTED) {
@@ -351,6 +393,17 @@ export async function PUT(req: NextRequest) {
           console.error(err);
         }
 
+        await auditLog({
+          entityType: "PAYOUT",
+          entityId: payoutId,
+          action: "STATUS_CHANGED",
+          actorId: (session.user as any).id,
+          actorRole: "SUPERADMIN",
+          oldValue: { status: payout.status },
+          newValue: { status: PayoutStatus.REJECTED },
+          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}`,
+        });
+
         return NextResponse.json(updated);
       } else {
         // Return the money back to the owner balance for owner payout
@@ -368,6 +421,18 @@ export async function PUT(req: NextRequest) {
             },
           }),
         ]);
+
+        await auditLog({
+          entityType: "PAYOUT",
+          entityId: payoutId,
+          action: "STATUS_CHANGED",
+          actorId: (session.user as any).id,
+          actorRole: "SUPERADMIN",
+          oldValue: { status: payout.status },
+          newValue: { status: PayoutStatus.REJECTED },
+          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}`,
+        });
+
         return NextResponse.json(updated);
       }
     } else {

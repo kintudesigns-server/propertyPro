@@ -95,6 +95,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // If this was a DEPOSIT payment, update the lease deposit fields
+    if (category === "DEPOSIT") {
+      await prisma.lease.update({
+        where: { id: invoice.leaseId },
+        data: {
+          depositPaidAt: new Date(),
+          depositPaidAmount: grossPaid,
+          depositBalance: grossPaid,
+          depositStatus: "HELD",
+          depositTransactionId: paymentIntentId || null,
+        } as any,
+      });
+    }
+
     // Fire automatic notifications
     const unitLabel = invoice.lease.unit.name
       ? `Unit ${invoice.lease.unit.name}`

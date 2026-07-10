@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { generateLeasePDF } from "@/lib/pdfGenerator";
 import Link from "next/link";
@@ -20,6 +20,27 @@ export default function LeaseDetailsPage() {
 
   const { data: session } = useSession();
   const isTenant = (session?.user as any)?.role === "TENANT";
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const [activatingLease, setActivatingLease] = useState(false);
+
+  const handleActivateLease = async () => {
+    if (!confirm("Confirm that the tenant has physically received the keys and has moved in. This will activate the lease and mark the unit as Occupied.")) return;
+    setActivatingLease(true);
+    try {
+      const res = await fetch(`/api/leases/${lease.id}/activate`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Lease activated! The unit is now marked as Occupied.");
+        fetchLease();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to activate lease");
+      }
+    } catch {
+      toast.error("Error activating lease");
+    } finally {
+      setActivatingLease(false);
+    }
+  };
 
   const [signing, setSigning] = useState(false);
   const [showSignModal, setShowSignModal] = useState(false);
@@ -233,6 +254,7 @@ export default function LeaseDetailsPage() {
     switch (status) {
       case "ACTIVE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#DCFCE7] text-[#10B981] border border-[#A7F3D0] rounded-full text-xs font-bold shadow-sm"><CheckCircle className="h-3.5 w-3.5" /> Active Lease</span>;
       case "PENDING_SIGNATURE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEF3C7] text-[#F59E0B] border border-[#FDE68A] rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Pending Signature</span>;
+      case "SIGNED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-full text-xs font-bold shadow-sm"><KeyRound className="h-3.5 w-3.5" /> Signed – Awaiting Move-In</span>;
       case "EXPIRED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Expired</span>;
       case "TERMINATED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Terminated</span>;
       case "DRAFT": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0] rounded-full text-xs font-bold shadow-sm"><FileText className="h-3.5 w-3.5" /> Draft</span>;
@@ -290,6 +312,29 @@ export default function LeaseDetailsPage() {
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
           >
             Pay Security Deposit
+          </Button>
+        </Card>
+      )}
+
+      {/* Owner banner: lease is SIGNED, awaiting physical move-in confirmation */}
+      {isOwner && lease.status === "SIGNED" && (
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-indigo-50 border-indigo-200 text-indigo-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h4 className="font-extrabold text-base flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-indigo-500" />
+              Tenant Has Signed — Confirm Key Handover
+            </h4>
+            <p className="text-sm font-semibold opacity-90 mt-1">
+              The tenant has signed the lease. Once you hand over the physical keys, click the button to activate the lease and mark the unit as Occupied.
+            </p>
+          </div>
+          <Button
+            onClick={handleActivateLease}
+            disabled={activatingLease}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+          >
+            {activatingLease ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <KeyRound className="h-4 w-4 mr-2" />}
+            Confirm Keys Handed Over
           </Button>
         </Card>
       )}
@@ -398,6 +443,14 @@ export default function LeaseDetailsPage() {
                   >
                     <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out & Refund
                   </DropdownMenuItem>
+                  {lease.status === "SIGNED" && (
+                    <DropdownMenuItem
+                      onClick={handleActivateLease}
+                      className="cursor-pointer font-bold text-indigo-600 rounded-lg py-2.5"
+                    >
+                      <KeyRound className="mr-2 h-4 w-4" /> Confirm Key Handover
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     onClick={handleTerminateLease}
                     disabled={lease.status === "TERMINATED" || lease.status === "EXPIRED" || lease.status === "DRAFT"}
