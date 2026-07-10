@@ -17,19 +17,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Server-side validation of file type (MIME)
-    const allowedMimeTypes = ["image/jpeg", "image/png", "application/pdf"];
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"];
     if (!allowedMimeTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPG, PNG, and PDF are allowed." },
+        { error: "Invalid file type. Allowed: JPG, PNG, WEBP, HEIC, PDF." },
         { status: 400 }
       );
     }
 
-    // Server-side validation of file size (max 5MB)
-    const maxSizeBytes = 5 * 1024 * 1024;
+    // Server-side validation of file size (max 15MB)
+    const maxSizeBytes = 15 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       return NextResponse.json(
-        { error: "File too large. Maximum allowed size is 5MB." },
+        { error: "File too large. Maximum allowed size is 15MB." },
         { status: 400 }
       );
     }

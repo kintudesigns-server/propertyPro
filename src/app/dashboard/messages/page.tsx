@@ -14,7 +14,9 @@ import {
   X,
   ShieldCheck,
   Check,
-  CheckCheck
+  CheckCheck,
+  Paperclip,
+  FileText
 } from "lucide-react";
 import { NewChatModal } from "@/components/messages/NewChatModal";
 import { Button } from "@/components/ui/button";
@@ -34,6 +36,10 @@ interface Message {
   content: string;
   isRead: boolean;
   createdAt: string;
+  attachmentUrl?: string | null;
+  messageType?: string;
+  ticketId?: string | null;
+  leaseId?: string | null;
   sender: UserInfo;
   receiver: UserInfo;
 }
@@ -58,22 +64,34 @@ export default function MessagesPage() {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [sending, setSending] = useState(false);
+  const [newContact, setNewContact] = useState<UserInfo | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Initial Fetch & Setup Polling
+  // Initial Fetch & Setup SSE
   useEffect(() => {
     fetchMessages(true);
 
-    pollIntervalRef.current = setInterval(() => {
-      fetchMessages(false);
-    }, 5000);
+    const eventSource = new EventSource("/api/notifications/sse");
+    
+    eventSource.addEventListener("message", (e) => {
+      try {
+        const newMessage = JSON.parse(e.data);
+        setMessages((prev) => {
+          // Prevent duplicates if already in state
+          if (prev.some((m) => m.id === newMessage.id)) return prev;
+          return [...prev, newMessage];
+        });
+      } catch (err) {
+        console.error("Error parsing incoming message", err);
+      }
+    });
 
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
+      eventSource.close();
     };
   }, []);
 
@@ -123,6 +141,7 @@ export default function MessagesPage() {
             m.senderId === contactId && m.receiverId === currentUserId ? { ...m, isRead: true } : m
           )
         );
+        window.dispatchEvent(new CustomEvent("messagesRead"));
       }
     } catch (err) {
       console.error("Error marking messages as read:", err);
@@ -176,41 +195,107 @@ export default function MessagesPage() {
     return matchesSearch;
   });
 
-  const activeThread = allThreads.find((t) => t.contact.id === activeThreadId);
+  let activeThread = allThreads.find((t) => t.contact.id === activeThreadId);
+  if (!activeThread && activeThreadId && newContact && newContact.id === activeThreadId) {
+    activeThread = {
+      contact: newContact,
+      messages: [],
+      lastMessage: null as any,
+      unreadCount: 0
+    };
+  }
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!newMessage.trim() || !activeThreadId || sending) return;
+    if ((!newMessage.trim() && !attachmentFile) || !activeThreadId || sending || isUploading) return;
 
     setSending(true);
-    const content = newMessage.trim();
+    setIsUploading(!!attachmentFile);
+    const content = newMessage.trim() || (attachmentFile?.type.startsWith("image/") ? "Shared an image" : "Shared a document");
     setNewMessage("");
 
     try {
+      let attachmentUrl = null;
+      let messageType = "TEXT";
+
+      // Upload file right before sending the message if exists
+      if (attachmentFile) {
+        const formData = new FormData();
+        formData.append("file", attachmentFile);
+        formData.append("category", "GENERAL");
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Upload failed");
+        const uploadData = await uploadRes.json();
+        attachmentUrl = uploadData.url;
+        messageType = attachmentFile.type.startsWith("image/") ? "IMAGE" : "FILE";
+      }
+
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ receiverId: activeThreadId, content }),
+        body: JSON.stringify({ 
+          receiverId: activeThreadId, 
+          content,
+          attachmentUrl,
+          messageType
+        }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setMessages((prev) => [...prev, data]);
+        setAttachmentFile(null);
+        setAttachmentPreview(null);
       } else {
         toast.error("Failed to send message");
         setNewMessage(content); // Restore input on failure
       }
     } catch (err) {
       console.error("Error sending message:", err);
-      toast.error("An error occurred");
+      toast.error("Failed to upload and send message.");
       setNewMessage(content);
     } finally {
       setSending(false);
+      setIsUploading(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeThreadId) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("File exceeds 15MB limit.");
+      return;
+    }
+
+    setAttachmentFile(file);
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => setAttachmentPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setAttachmentPreview("FILE"); // Marker for non-image preview
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const cancelAttachment = () => {
+    setAttachmentFile(null);
+    setAttachmentPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleStartNewChat = (contact: UserInfo) => {
     setActiveThreadId(contact.id);
+    if (!allThreads.find((t) => t.contact.id === contact.id)) {
+      setNewContact(contact);
+    }
   };
 
   const getRoleColor = (role: string) => {
@@ -420,6 +505,22 @@ export default function MessagesPage() {
                           }`}
                         >
                           <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                          {message.attachmentUrl && message.messageType === "IMAGE" && (
+                            <div className="mt-2 rounded-lg overflow-hidden border border-black/10">
+                              <img src={message.attachmentUrl} alt="Attachment" className="max-w-full max-h-48 object-cover" />
+                            </div>
+                          )}
+                          {message.attachmentUrl && message.messageType === "FILE" && (
+                            <a 
+                              href={message.attachmentUrl} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="mt-2 flex items-center gap-2 p-2 rounded bg-black/5 hover:bg-black/10 transition-colors text-xs font-semibold"
+                            >
+                              <FileText className="h-4 w-4" />
+                              View Document
+                            </a>
+                          )}
                         </div>
                         <div className={`flex items-center gap-1.5 mt-1 text-[9px] text-[#94A3B8] ${isOwn ? "justify-end" : "justify-start"}`}>
                           <span>{formatMessageTime(message.createdAt)}</span>
@@ -439,19 +540,58 @@ export default function MessagesPage() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Attachment Preview Box */}
+            {attachmentPreview && (
+              <div className="px-4 py-3 bg-[#F8FAFC] border-t border-[#E2E8F0] relative">
+                <div className="relative inline-block border border-black/10 rounded-lg overflow-hidden bg-white shadow-sm p-1 pr-8">
+                  <button
+                    type="button"
+                    onClick={cancelAttachment}
+                    className="absolute top-1 right-1 bg-black/5 text-slate-500 rounded-full p-1 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  {attachmentPreview === "FILE" ? (
+                    <div className="flex items-center gap-2 p-2 px-4">
+                      <FileText className="h-6 w-6 text-[#3B82F6]" />
+                      <span className="text-sm font-semibold text-[#0F172A] truncate max-w-[200px]">{attachmentFile?.name}</span>
+                    </div>
+                  ) : (
+                    <img src={attachmentPreview} alt="Preview" className="h-20 max-w-[200px] object-cover rounded" />
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Composer */}
-            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-[#E2E8F0] flex gap-3 sticky bottom-0 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
+            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-[#E2E8F0] flex gap-3 sticky bottom-0 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] items-center">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || isUploading}
+                className="p-2 text-[#94A3B8] hover:text-[#3B82F6] hover:bg-[#EFF6FF] rounded-xl transition-colors shrink-0 disabled:opacity-50"
+                title="Attach file"
+              >
+                <Paperclip className="h-5 w-5" />
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload}
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
+                className="hidden" 
+              />
               <input
                 type="text"
-                placeholder="Type a message..."
+                placeholder={isUploading ? "Uploading attachment..." : "Type a message..."}
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                disabled={sending}
+                disabled={sending || isUploading}
                 className="flex-1 px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] transition-all disabled:opacity-50"
               />
               <Button
                 type="submit"
-                disabled={!newMessage.trim() || sending}
+                disabled={(!newMessage.trim() && !attachmentFile) || sending || isUploading}
                 className="h-11 w-11 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center justify-center shadow-md shadow-blue-500/10 p-0"
               >
                 <Send className="h-5 w-5" />

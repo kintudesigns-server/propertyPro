@@ -281,6 +281,7 @@ model Lease {
   depositPaidAmount        Decimal?  @db.Decimal(10, 2) // Actual amount received
   depositBalance           Decimal   @default(0.00) @db.Decimal(10, 2) // Current remaining balance in escrow
   depositTransactionId     String?             // Transaction.id for the deposit payment record
+  messages                 Message[]
 }
 
 model Invoice {
@@ -367,6 +368,7 @@ model MaintenanceRequest {
   duplicateOfId           String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
+  messages      Message[]
 }
 
 model PayoutRequest {
@@ -434,6 +436,13 @@ model Message {
   conversationId String?  // Sort-joined user IDs e.g. "userId1_userId2"
   attachmentUrl  String?  // Document or photo attachment link
   messageType    String   @default("TEXT") // TEXT, SYSTEM, IMAGE, FILE
+  
+  // Phase 2 Context Relationships
+  ticketId       String?
+  ticket         MaintenanceRequest? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  leaseId        String?
+  lease          Lease?              @relation(fields: [leaseId], references: [id], onDelete: SetNull)
+  
   createdAt      DateTime @default(now())
 }
 

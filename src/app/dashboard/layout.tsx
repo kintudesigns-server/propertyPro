@@ -28,6 +28,8 @@ import {
   CreditCard,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { MessageBadge } from "@/components/notifications/MessageBadge";
+import { toast } from "sonner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -90,6 +92,36 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       router.push("/dashboard/inspector");
     }
   }, [status, isInspector, pathname, router]);
+
+  // Global Real-Time SSE Listener
+  React.useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const eventSource = new EventSource("/api/notifications/sse");
+    
+    eventSource.addEventListener("message", (e) => {
+      try {
+        const newMessage = JSON.parse(e.data);
+        // Only show toast if user is not already looking at the messages page
+        if (!pathname.startsWith("/dashboard/messages")) {
+          toast.success(`New Message from ${newMessage.sender?.name || "User"}`, {
+            description: newMessage.messageType === "IMAGE" ? "Sent an image" : (newMessage.messageType === "FILE" ? "Sent a document" : newMessage.content),
+            duration: 6000,
+            action: {
+              label: "Reply",
+              onClick: () => router.push("/dashboard/messages")
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Error parsing incoming global message", err);
+      }
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [status, pathname, router]);
 
   React.useEffect(() => {
     if (!isOwnerOrAdmin) return;
@@ -1280,6 +1312,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
+            <MessageBadge />
             <NotificationDropdown />
             <button className="p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] transition-colors hidden md:block">
               <Settings className="h-5 w-5" />

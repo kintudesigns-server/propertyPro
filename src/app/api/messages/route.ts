@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { notificationEmitter } from "@/lib/notification-events";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
   const userRole = (session.user as any).role;
 
   try {
-    const { receiverId, content, attachmentUrl, messageType } = await req.json();
+    const { receiverId, content, attachmentUrl, messageType, ticketId, leaseId } = await req.json();
 
     if (!receiverId || !content) {
       return NextResponse.json({ error: "Missing receiver ID or message content" }, { status: 400 });
@@ -127,6 +128,14 @@ export async function POST(req: NextRequest) {
       }
       if (receiver.role === "SUPERADMIN") {
         // Always allowed to message admin
+      } else if (receiver.role === "INSPECTOR") {
+        // Verify inspector is assigned to their ticket
+        const validTicket = await prisma.maintenanceRequest.findFirst({
+          where: { tenantId: userId, inspectorId: receiverId }
+        });
+        if (!validTicket) {
+          return NextResponse.json({ error: "You can only message inspectors assigned to your tickets." }, { status: 403 });
+        }
       } else if (receiver.role === "OWNER") {
         // Verify tenant rents from this owner
         const validRelationship = await prisma.lease.findFirst({
@@ -152,8 +161,8 @@ export async function POST(req: NextRequest) {
       if (!receiver) {
         return NextResponse.json({ error: "Recipient not found" }, { status: 404 });
       }
-      if (receiver.role !== "SUPERADMIN" && receiver.role !== "TENANT") {
-        return NextResponse.json({ error: "Owners can only message their tenants or admin." }, { status: 403 });
+      if (receiver.role !== "SUPERADMIN" && receiver.role !== "TENANT" && receiver.role !== "INSPECTOR") {
+        return NextResponse.json({ error: "Owners can only message their tenants, inspectors, or admin." }, { status: 403 });
       }
       if (receiver.role === "TENANT") {
         const validRelationship = await prisma.lease.findFirst({
@@ -169,6 +178,25 @@ export async function POST(req: NextRequest) {
           );
         }
       }
+    } else if (userRole === "INSPECTOR") {
+      const receiver = await prisma.user.findUnique({
+        where: { id: receiverId },
+        select: { id: true, role: true },
+      });
+      if (receiver?.role !== "SUPERADMIN") {
+        const valid = await prisma.maintenanceRequest.findFirst({
+          where: {
+            inspectorId: userId,
+            OR: [
+              { tenantId: receiverId },
+              { unit: { property: { ownerId: receiverId } } }
+            ]
+          }
+        });
+        if (!valid) {
+          return NextResponse.json({ error: "You can only message users related to your assigned tickets." }, { status: 403 });
+        }
+      }
     }
 
     const conversationId = [userId, receiverId].sort().join("_");
@@ -182,12 +210,17 @@ export async function POST(req: NextRequest) {
         conversationId,
         attachmentUrl: attachmentUrl || null,
         messageType: messageType || "TEXT",
+        ticketId: ticketId || null,
+        leaseId: leaseId || null,
       },
       include: {
         sender: { select: { id: true, name: true, email: true, role: true } },
         receiver: { select: { id: true, name: true, email: true, role: true } },
       },
     });
+
+    // Phase 1: Real-time broadcast to the receiver
+    notificationEmitter.emit(`message:${receiverId}`, message);
 
     return NextResponse.json(message, { status: 201 });
   } catch (error: any) {

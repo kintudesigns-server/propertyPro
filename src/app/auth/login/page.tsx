@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fillDemoAccount = (emailValue: string, passwordValue: string = "password123") => {
+  const fillDemoAccount = (emailValue: string, passwordValue: string = "Test@1234") => {
     setEmail(emailValue);
     setPassword(passwordValue);
   };
@@ -84,7 +84,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="owner1@propertypro.app"
+                placeholder="owner_full@propertypro.test"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-slate-50 border-0 text-slate-800 placeholder-slate-400 focus-visible:ring-primary/20 rounded-xl h-11"
@@ -129,15 +129,17 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-4 pt-4 text-center text-xs text-slate-400 bg-slate-50/50 border-t border-slate-100 p-8">
           <p className="font-bold text-slate-600">
-            Demo Accounts (Password: <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">password123</code>):
+            Demo Accounts (Password: <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">Test@1234</code>):
           </p>
-          <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 w-full text-left bg-white p-3.5 rounded-xl border border-slate-100">
-            <div>Admin: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("admin@example.com")}>admin@example.com</span></div>
-            <div>Owner: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner@example.com")}>owner@example.com</span></div>
-            <div>Tenant (Onboarding): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("newtenant@example.com")}>newtenant@example.com</span></div>
-            <div>Tenant (Active): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("activetenant@example.com")}>activetenant@example.com</span></div>
-            <div>Tenant (Leaving): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("leavingtenant@example.com")}>leavingtenant@example.com</span></div>
-            <div>Inspector: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("inspector@example.com")}>inspector@example.com</span></div>
+          <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 w-full text-left bg-white p-3.5 rounded-xl border border-slate-100 max-h-56 overflow-y-auto">
+            <div>Admin: <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("admin@propertypro.test")}>admin@propertypro.test</span></div>
+            <div>Owner (Full): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner_full@propertypro.test")}>owner_full@propertypro.test</span></div>
+            <div>Owner (New): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner_new@propertypro.test")}>owner_new@propertypro.test</span></div>
+            <div>Tenant (Perfect): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant_perfect@propertypro.test")}>tenant_perfect@propertypro.test</span></div>
+            <div>Tenant (New): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant_new@propertypro.test")}>tenant_new@propertypro.test</span></div>
+            <div>Tenant (Overdue): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant_overdue@propertypro.test")}>tenant_overdue@propertypro.test</span></div>
+            <div>Tenant (Moveout): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant_moveout@propertypro.test")}>tenant_moveout@propertypro.test</span></div>
+            <div>Inspector (Busy): <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => fillDemoAccount("inspector_busy@propertypro.test")}>inspector_busy@propertypro.test</span></div>
           </div>
           <Link href="/listings" className="text-primary hover:underline font-bold mt-1">
             ← Back to Listings

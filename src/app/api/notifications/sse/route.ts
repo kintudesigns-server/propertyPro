@@ -31,6 +31,16 @@ export async function GET(req: NextRequest) {
   const eventName = `notification:${userId}`;
   notificationEmitter.on(eventName, onNotification);
 
+  const onMessage = (message: any) => {
+    try {
+      writer.write(encoder.encode(`event: message\ndata: ${JSON.stringify(message)}\n\n`));
+    } catch (err) {
+      console.error("Error writing message to SSE stream:", err);
+    }
+  };
+  const messageEventName = `message:${userId}`;
+  notificationEmitter.on(messageEventName, onMessage);
+
   // Keep-alive heartbeat every 15 seconds to prevent gateway timeouts (e.g. Vercel, Nginx)
   const heartbeatInterval = setInterval(() => {
     try {
@@ -44,6 +54,7 @@ export async function GET(req: NextRequest) {
   req.signal.addEventListener("abort", () => {
     clearInterval(heartbeatInterval);
     notificationEmitter.off(eventName, onNotification);
+    notificationEmitter.off(messageEventName, onMessage);
     try {
       writer.close();
     } catch (err) {
