@@ -119,11 +119,53 @@ export default function WalletPage() {
     }
   };
 
+  const totalWithdrawals = payouts.reduce((sum, p) => {
+    if (p.status === "COMPLETED" || p.status === "PENDING") {
+      return sum + Number(p.amount);
+    }
+    return sum;
+  }, 0);
+
+  const initialBalance = balance - stats.totalNetEarnings + totalWithdrawals;
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 pt-6 pb-20">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Wallet & Payouts</h1>
         <p className="text-[#64748B] font-medium">Manage your earnings and request withdrawals.</p>
+      </div>
+
+      {/* 3-Column Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
+          <CardContent className="p-5">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gross Income</p>
+            <p className="text-2xl font-black text-slate-800 mt-2">
+              ${stats.grossRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-[#64748B] mt-1 font-medium">Total payments received from tenants.</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-rose-50/30 border-rose-100 shadow-sm rounded-2xl">
+          <CardContent className="p-5">
+            <p className="text-xs font-bold text-rose-600 uppercase tracking-wider">Platform Fees</p>
+            <p className="text-2xl font-black text-rose-800 mt-2">
+              -${stats.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-rose-600/80 mt-1 font-medium">Platform commission fee deducted.</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-emerald-50/30 border-emerald-100 shadow-sm rounded-2xl">
+          <CardContent className="p-5">
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Net Earnings</p>
+            <p className="text-2xl font-black text-emerald-800 mt-2">
+              ${stats.totalNetEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-emerald-600/80 mt-1 font-medium">Net amount added to your available balance.</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -136,33 +178,32 @@ export default function WalletPage() {
                 <Wallet className="h-4 w-4" /> Available Balance
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-black tracking-tight mt-2 flex items-center">
-                <DollarSign className="h-8 w-8 text-slate-400 mr-1" />
-                {Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <CardContent className="space-y-4">
+              <div>
+                <div className="text-4xl font-black tracking-tight mt-2 flex items-center">
+                  <DollarSign className="h-8 w-8 text-slate-400 mr-1" />
+                  {Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-slate-400 mt-2 font-medium">Ready for withdrawal to your bank account.</p>
               </div>
-              <p className="text-xs text-slate-400 mt-2 font-medium">Ready for withdrawal to your bank account.</p>
+
+              {/* Ledger breakdown explanation */}
+              <div className="pt-4 border-t border-slate-700/50 space-y-2 text-xs text-slate-300">
+                <div className="flex justify-between">
+                  <span>Starting Ledger Balance:</span>
+                  <span className="font-semibold text-white">${initialBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Net Earnings Added:</span>
+                  <span className="font-semibold text-emerald-400">+${stats.totalNetEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Pending/Paid Payouts:</span>
+                  <span className="font-semibold text-rose-400">-${totalWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-slate-50 border-[#E2E8F0] shadow-sm rounded-2xl">
-              <CardContent className="p-4">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gross Income</p>
-                <p className="text-xl font-black text-slate-800 mt-1">
-                  ${stats.grossRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-blue-50/50 border-blue-100 shadow-sm rounded-2xl">
-              <CardContent className="p-4">
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Platform Fees</p>
-                <p className="text-xl font-black text-blue-800 mt-1">
-                  -${stats.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
 
           <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
             <CardHeader className="bg-[#F8FAFC] border-b border-[#E2E8F0] rounded-t-2xl pb-4">

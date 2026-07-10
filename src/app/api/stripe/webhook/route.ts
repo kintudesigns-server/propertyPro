@@ -44,9 +44,21 @@ export async function POST(req: NextRequest) {
 
         if (!invoice || invoice.status === "PAID") break;
 
+        const adminFee = pi.metadata.adminFee ? parseFloat(pi.metadata.adminFee) : 0;
+        const netToOwner = pi.metadata.netToOwner ? parseFloat(pi.metadata.netToOwner) : 0;
+        const grossPaid = pi.metadata.grossPaid ? parseFloat(pi.metadata.grossPaid) : 0;
+        const processingFee = pi.metadata.processingFee ? parseFloat(pi.metadata.processingFee) : 0;
+
         await prisma.invoice.update({
           where: { id: invoiceId },
-          data: { status: "PAID", paymentMethod: "STRIPE" },
+          data: {
+            status: "PAID",
+            paymentMethod: "STRIPE",
+            adminFee,
+            netToOwner,
+            grossPaid,
+            processingFee,
+          },
         });
 
         await auditLog({
@@ -61,7 +73,6 @@ export async function POST(req: NextRequest) {
         });
 
         // Increment owner balance (net of platform fee)
-        const netToOwner = Number(pi.metadata.netToOwner || 0);
         if (netToOwner > 0 && invoice.lease.unit.property.ownerId) {
           await prisma.user.update({
             where: { id: invoice.lease.unit.property.ownerId },

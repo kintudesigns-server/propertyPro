@@ -46,3 +46,53 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message || "Failed to fetch transactions" }, { status: 500 });
   }
 }
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || (session.user as any).role !== "OWNER") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const ownerId = (session.user as any).id;
+
+  try {
+    const { type, category, amount, reference, tenantId, status } = await req.json();
+    if (!type || !category || !amount || !tenantId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Verify tenant has a lease belonging to this owner
+    const lease = await prisma.lease.findFirst({
+      where: {
+        tenantId,
+        unit: {
+          property: {
+            ownerId
+          }
+        }
+      }
+    });
+
+    if (!lease) {
+      return NextResponse.json({ error: "Tenant does not have a lease under your properties" }, { status: 400 });
+    }
+
+    const numericAmount = Number(amount);
+    const isCompleted = status === "COMPLETED";
+
+    const tx = await prisma.transaction.create({
+      data: {
+        type,
+        category,
+        amount: numericAmount,
+        reference: reference || null,
+        status: status || "COMPLETED",
+        tenantId,
+      },
+    });
+
+    return NextResponse.json(tx, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Failed to record transaction" }, { status: 500 });
+  }
+}

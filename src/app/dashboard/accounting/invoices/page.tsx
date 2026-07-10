@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Receipt, Search, Plus, MoreVertical, CheckCircle, XCircle, Trash2, FileText, Download, TrendingUp, AlertCircle, Clock, Eye } from "lucide-react";
+import { Receipt, Search, Plus, MoreVertical, CheckCircle, XCircle, Trash2, FileText, Download, TrendingUp, AlertCircle, Clock, Eye, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSession } from "next-auth/react";
@@ -24,6 +24,8 @@ export default function InvoicesPage() {
   const [leases, setLeases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
@@ -33,7 +35,8 @@ export default function InvoicesPage() {
     leaseId: "",
     amount: "",
     dueDate: "",
-    status: "UNPAID"
+    status: "UNPAID",
+    invoiceType: "RENT"
   });
 
   const fetchData = async () => {
@@ -78,7 +81,7 @@ export default function InvoicesPage() {
       if (res.ok) {
         toast.success("Invoice created successfully");
         setIsModalOpen(false);
-        setFormData({ leaseId: "", amount: "", dueDate: "", status: "UNPAID" });
+        setFormData({ leaseId: "", amount: "", dueDate: "", status: "UNPAID", invoiceType: "RENT" });
         fetchData();
       } else {
         const err = await res.json();
@@ -129,8 +132,17 @@ export default function InvoicesPage() {
   };
 
   const filteredInvoices = invoices.filter(inv => {
+    // 1. Search Query Filter
     const searchString = `${inv.id} ${inv.lease?.tenant?.name} ${inv.lease?.unit?.property?.name}`.toLowerCase();
-    return searchString.includes(searchTerm.toLowerCase());
+    if (!searchString.includes(searchTerm.toLowerCase())) return false;
+
+    // 2. Status Filter
+    if (statusFilter !== "all" && inv.status !== statusFilter) return false;
+
+    // 3. Invoice Type Filter
+    if (typeFilter !== "all" && inv.invoiceType !== typeFilter) return false;
+
+    return true;
   });
 
   // Calculate KPIs
@@ -145,6 +157,17 @@ export default function InvoicesPage() {
       case "OVERDUE": return <Badge className="bg-[#FEE2E2] text-[#DC2626] border-0 hover:bg-[#FEE2E2]">Overdue</Badge>;
       case "VOID": return <Badge className="bg-gray-100 text-gray-600 border-0 hover:bg-gray-100">Void</Badge>;
       default: return <Badge>{status}</Badge>;
+    }
+  };
+
+  const getTypeBadge = (type: string) => {
+    const safeType = type || "RENT";
+    switch (safeType) {
+      case "RENT": return <Badge className="bg-blue-50 text-blue-700 border border-blue-100/50 hover:bg-blue-50">Rent</Badge>;
+      case "DEPOSIT": return <Badge className="bg-purple-50 text-purple-700 border border-purple-100/50 hover:bg-purple-50">Deposit</Badge>;
+      case "LATE_FEE": return <Badge className="bg-amber-50 text-amber-700 border border-amber-100/50 hover:bg-amber-50">Late Fee</Badge>;
+      case "MAINTENANCE": return <Badge className="bg-rose-50 text-rose-700 border border-rose-100/50 hover:bg-rose-50">Maintenance</Badge>;
+      default: return <Badge className="bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-100">{safeType}</Badge>;
     }
   };
 
@@ -216,14 +239,46 @@ export default function InvoicesPage() {
 
       <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-[#E2E8F0] flex flex-col md:flex-row justify-between items-center gap-4 bg-[#F8FAFC]/50">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-            <Input 
-              placeholder="Search by invoice ID, tenant, or property..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6]"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+              <Input 
+                placeholder="Search by invoice ID, tenant, or property..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6]"
+              />
+            </div>
+            
+            <div className="relative w-full sm:w-44">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full h-11 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#3B82F6] transition-all appearance-none cursor-pointer"
+              >
+                <option value="all">Status: All</option>
+                <option value="PAID">Paid</option>
+                <option value="UNPAID">Unpaid</option>
+                <option value="OVERDUE">Overdue</option>
+                <option value="VOID">Void</option>
+              </select>
+              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
+
+            <div className="relative w-full sm:w-44">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="w-full h-11 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#3B82F6] transition-all appearance-none cursor-pointer"
+              >
+                <option value="all">Type: All</option>
+                <option value="RENT">Rent</option>
+                <option value="DEPOSIT">Deposit</option>
+                <option value="LATE_FEE">Late Fee</option>
+                <option value="MAINTENANCE">Maintenance</option>
+              </select>
+              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
           </div>
         </div>
         <CardContent className="p-0">
@@ -232,6 +287,7 @@ export default function InvoicesPage() {
               <TableRow className="border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#F8FAFC]">
                 <TableHead className="font-bold text-[#64748B]">Invoice ID</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Property & Tenant</TableHead>
+                <TableHead className="font-bold text-[#64748B]">Type</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Issue Date</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Due Date</TableHead>
                 <TableHead className="font-bold text-[#64748B]">Gross Amount</TableHead>
@@ -243,11 +299,11 @@ export default function InvoicesPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-[#64748B] font-bold">Loading invoices...</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#64748B] font-bold">Loading invoices...</TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-[#64748B] font-bold">No invoices found.</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#64748B] font-bold">No invoices found.</TableCell>
                 </TableRow>
               ) : (
                 filteredInvoices.map((inv) => (
@@ -258,6 +314,9 @@ export default function InvoicesPage() {
                     <TableCell>
                       <div className="font-bold text-[#0F172A]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
                       <div className="text-sm font-semibold text-[#64748B]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
+                    </TableCell>
+                    <TableCell>
+                      {getTypeBadge(inv.invoiceType)}
                     </TableCell>
                     <TableCell className="font-semibold text-[#64748B]">
                       {new Date(inv.createdAt).toLocaleDateString()}
@@ -386,6 +445,20 @@ export default function InvoicesPage() {
                   onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
                   className="h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Invoice Type</label>
+                <select 
+                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  value={formData.invoiceType}
+                  onChange={(e) => setFormData({...formData, invoiceType: e.target.value})}
+                >
+                  <option value="RENT">Rent</option>
+                  <option value="DEPOSIT">Security Deposit</option>
+                  <option value="LATE_FEE">Late Fee</option>
+                  <option value="MAINTENANCE">Maintenance</option>
+                </select>
               </div>
 
               <div className="space-y-2">

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
 // Force TS reload for Prisma
 import { prisma } from "@/lib/prisma";
-import { sanitizeVendor } from "@/lib/utils";
+import { sanitizeVendor } from "@/lib/sanitization";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);

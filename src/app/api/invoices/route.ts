@@ -60,7 +60,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "OWNER") {
@@ -68,7 +67,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { leaseId, amount, dueDate, status } = await req.json();
+    const { leaseId, amount, dueDate, status, invoiceType } = await req.json();
     if (!leaseId || !amount || !dueDate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -83,24 +82,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Lease not found or access denied" }, { status: 404 });
     }
 
+    const numericAmount = Number(amount);
+    const isPaid = status === "PAID";
+
+    let adminFee = 0;
+    let netToOwner = 0;
+    let grossPaid = 0;
+
+    if (isPaid) {
+      const settings = await prisma.platformSettings.findFirst();
+      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
+      adminFee = numericAmount * (adminFeePercent / 100);
+      netToOwner = numericAmount - adminFee;
+      grossPaid = numericAmount;
+    }
+
     const invoice = await prisma.invoice.create({
       data: {
         leaseId,
-        amount: Number(amount),
+        amount: numericAmount,
         dueDate: new Date(dueDate),
         status: status || "UNPAID",
-        invoiceType: "FEE",
+        invoiceType: invoiceType || "RENT",
+        adminFee: isPaid ? adminFee : null,
+        netToOwner: isPaid ? netToOwner : null,
+        grossPaid: isPaid ? grossPaid : null,
       },
     });
 
-    // If created as PAID, increment owner balance using platform settings fee
-    if (invoice.status === "PAID") {
-      const settings = await prisma.platformSettings.findFirst();
-      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
-      const netToOwner = Number(amount) * (1 - adminFeePercent / 100);
-      await prisma.user.update({
-        where: { id: (session.user as any).id },
-        data: { balance: { increment: netToOwner } },
+    // If created as PAID, record a ledger transaction
+    if (isPaid) {
+      // Log transaction
+      await prisma.transaction.create({
+        data: {
+          type: "INCOME",
+          category: invoiceType || "RENT",
+          amount: numericAmount,
+          reference: `MANUAL_PAY_${invoice.id.substring(0, 8).toUpperCase()}`,
+          status: "COMPLETED",
+          tenantId: lease.tenantId,
+          invoiceId: invoice.id,
+          feeDeducted: adminFee,
+        },
       });
     }
 
@@ -111,7 +134,7 @@ export async function POST(req: NextRequest) {
     await notify({
       userId: lease.tenantId,
       title: "New Invoice Issued",
-      message: `A new invoice of $${Number(amount).toFixed(2)} has been issued for ${lease.unit?.property?.name || "your property"}. Payment due: ${dueDateLabel}.`,
+      message: `A new invoice of $${numericAmount.toFixed(2)} has been issued for ${lease.unit?.property?.name || "your property"}. Payment due: ${dueDateLabel}.`,
       type: "PAYMENT",
       priority: "MEDIUM",
       relatedEntityId: invoice.id,
@@ -163,17 +186,12 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    // Balance update logic — use real platform fee, not hardcoded 10%
+    // Fee calculation logic for manual payments (Bookkeeping only)
     if (oldStatus !== "PAID" && status === "PAID") {
       const settings = await prisma.platformSettings.findFirst();
       const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
       const netToOwner = amount * (1 - adminFeePercent / 100);
-      // Credited to owner
-      await prisma.user.update({
-        where: { id: (session.user as any).id },
-        data: { balance: { increment: netToOwner } },
-      });
-      // Update invoice with fee details
+      
       await prisma.invoice.update({
         where: { id },
         data: {
@@ -183,13 +201,15 @@ export async function PUT(req: NextRequest) {
         },
       });
     } else if (oldStatus === "PAID" && status !== "PAID") {
-      const settings = await prisma.platformSettings.findFirst();
-      const adminFeePercent = settings ? Number(settings.adminFeePercent) : 2.0;
-      const netToOwner = amount * (1 - adminFeePercent / 100);
-      // Debited from owner on reversal
-      await prisma.user.update({
-        where: { id: (session.user as any).id },
-        data: { balance: { decrement: netToOwner } },
+      // Reversal of manual payment status
+      // We don't touch the platform balance since it was an offline collection.
+      await prisma.invoice.update({
+        where: { id },
+        data: {
+          adminFee: null,
+          netToOwner: null,
+          grossPaid: null,
+        },
       });
     }
 

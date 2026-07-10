@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { PayoutStatus } from "@prisma/client";
 import { notify } from "@/lib/notify";
 import { getStripe } from "@/lib/stripe";
-import { maskBankDetails } from "@/lib/utils";
+import { maskBankDetails } from "@/lib/sanitization";
 import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {

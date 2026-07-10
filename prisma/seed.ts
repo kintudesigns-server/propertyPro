@@ -69,7 +69,7 @@ async function main() {
   const owner = await prisma.user.create({
     data: {
       email: "owner@example.com", name: "Premium Properties LLC", password: passwordHash, role: Role.OWNER,
-      bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Premium Props", balance: 15680.50,
+      bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Premium Props", balance: 2050.50,
       currentTierId: proTierId, subscriptionStatus: "Active", accountStatus: "ACTIVE",
       creditScore: 780, hasCompletedOnboarding: true, onboardingStep: 4
     }
@@ -218,8 +218,8 @@ async function main() {
     }
   });
   // Active invoices
-  const inv1 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3500, dueDate: dateBefore(2), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3601.50, invoiceType: "DEPOSIT" } });
-  const inv2 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: dateBefore(1), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3087.00, invoiceType: "RENT" } });
+  const inv1 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3500, dueDate: dateBefore(2), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3601.50, processingFee: 101.50, adminFee: 70.00, netToOwner: 3430.00, invoiceType: "DEPOSIT" } });
+  const inv2 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: dateBefore(1), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3087.00, processingFee: 87.00, adminFee: 60.00, netToOwner: 2940.00, invoiceType: "RENT" } });
   const inv3 = await prisma.invoice.create({ data: { leaseId: leaseActive.id, amount: 3000, dueDate: new Date(), status: "UNPAID", invoiceType: "RENT" } });
 
   const activeDepositTx = await prisma.transaction.create({

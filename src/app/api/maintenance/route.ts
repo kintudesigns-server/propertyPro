@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
-import { sanitizeVendor } from "@/lib/utils";
+import { sanitizeVendor } from "@/lib/sanitization";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);

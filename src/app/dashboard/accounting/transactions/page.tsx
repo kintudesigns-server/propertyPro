@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   Loader2,
   RefreshCw,
@@ -54,6 +55,19 @@ export default function TransactionsPage() {
   // Modal / Detailed view state
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
 
+  // Manual Transaction creation states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [leases, setLeases] = useState<any[]>([]);
+  const [txFormData, setTxFormData] = useState({
+    type: "INCOME",
+    category: "RENT",
+    amount: "",
+    reference: "",
+    tenantId: "",
+    status: "COMPLETED"
+  });
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -74,6 +88,55 @@ export default function TransactionsPage() {
     }
   };
 
+  const fetchLeases = async () => {
+    try {
+      const res = await fetch("/api/leases");
+      if (res.ok) {
+        const data = await res.json();
+        // Only keep active leases to find current tenants
+        setLeases(data.filter((l: any) => l.status === "ACTIVE"));
+      }
+    } catch (e) {}
+  };
+
+  const handleCreateTransaction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!txFormData.tenantId || !txFormData.amount) {
+      toast.error("Please select a tenant and enter an amount.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(txFormData),
+      });
+
+      if (res.ok) {
+        toast.success("Transaction recorded successfully!");
+        setIsCreateModalOpen(false);
+        setTxFormData({
+          type: "INCOME",
+          category: "RENT",
+          amount: "",
+          reference: "",
+          tenantId: "",
+          status: "COMPLETED"
+        });
+        fetchTransactions();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to record transaction");
+      }
+    } catch (e) {
+      toast.error("An error occurred while saving the transaction.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     if (status === "loading") return;
     if (status === "unauthenticated") {
@@ -81,6 +144,9 @@ export default function TransactionsPage() {
       return;
     }
     fetchTransactions();
+    if (role === "OWNER") {
+      fetchLeases();
+    }
 
     // Pre-populate search query if passed in URL
     if (typeof window !== "undefined") {
@@ -343,10 +409,10 @@ export default function TransactionsPage() {
           </Button>
           {!isTenant && (
             <Button
-              onClick={() => toast.info("Create custom transaction available in invoices page.")}
+              onClick={() => setIsCreateModalOpen(true)}
               className="flex-1 sm:flex-none bg-[#635BFF] hover:bg-[#5249E0] text-white rounded-xl font-bold flex items-center justify-center gap-2 h-11 px-5 shadow-xs transition-all"
             >
-              <Plus className="h-4 w-4" /> Create payment
+              <Plus className="h-4 w-4" /> Record Transaction
             </Button>
           )}
         </div>
@@ -578,7 +644,11 @@ export default function TransactionsPage() {
                             {tx.reference || `Direct Ref: ${tx.id.substring(0, 8)}`}
                           </div>
                           <div className="text-[10px] text-slate-500 mt-0.5">
-                            {tx.category === "RENT" ? "Stripe Checkout" : "Direct Admin Transfer"}
+                            {tx.reference?.startsWith("pi_") || tx.reference?.startsWith("cs_") || (!tx.reference && tx.category === "RENT")
+                              ? "Stripe Checkout"
+                              : tx.reference?.includes("MANUAL_PAY") || tx.reference
+                                ? "Manual Ledger"
+                                : "Direct Admin Transfer"}
                           </div>
                         </div>
                       </TableCell>
@@ -789,6 +859,115 @@ export default function TransactionsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── RECORD MANUAL TRANSACTION DIALOG ── */}
+      {!isTenant && (
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent className="sm:max-w-md bg-white rounded-2xl p-0 border-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <DialogTitle className="text-xl font-bold text-[#0F172A]">Record Transaction</DialogTitle>
+            </div>
+            
+            <form onSubmit={handleCreateTransaction} className="p-6 space-y-5 overflow-y-auto">
+              {/* Tenant Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Select Tenant <span className="text-red-500">*</span></label>
+                <select 
+                  required
+                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  value={txFormData.tenantId}
+                  onChange={(e) => setTxFormData({...txFormData, tenantId: e.target.value})}
+                >
+                  <option value="">Select a tenant...</option>
+                  {leases.map((l: any) => (
+                    <option key={l.id} value={l.tenant?.id}>
+                      {l.tenant?.name || "Unknown Tenant"} - {l.unit?.property?.name || "Unknown Property"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Transaction Type */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Transaction Type</label>
+                <select 
+                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  value={txFormData.type}
+                  onChange={(e) => setTxFormData({...txFormData, type: e.target.value})}
+                >
+                  <option value="INCOME">Income (Funds Collected / Rent Inflow)</option>
+                  <option value="EXPENSE">Expense (Outflow / Repairs / Refunds)</option>
+                </select>
+              </div>
+
+              {/* Category */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Category</label>
+                <select 
+                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  value={txFormData.category}
+                  onChange={(e) => setTxFormData({...txFormData, category: e.target.value})}
+                >
+                  <option value="RENT">Rent</option>
+                  <option value="DEPOSIT">Security Deposit</option>
+                  <option value="MAINTENANCE">Maintenance</option>
+                  <option value="FEE">Fee / Charge</option>
+                  <option value="OTHER">Other / Miscellaneous</option>
+                </select>
+              </div>
+
+              {/* Amount */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Amount ($) <span className="text-red-500">*</span></label>
+                <Input 
+                  required
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 250.00" 
+                  value={txFormData.amount}
+                  onChange={(e) => setTxFormData({...txFormData, amount: e.target.value})}
+                  className="h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold"
+                />
+              </div>
+
+              {/* Reference */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Reference ID / Memo</label>
+                <Input 
+                  type="text"
+                  placeholder="e.g. Check #1204, Bank Transfer, cash recpt..." 
+                  value={txFormData.reference}
+                  onChange={(e) => setTxFormData({...txFormData, reference: e.target.value})}
+                  className="h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold"
+                />
+              </div>
+
+              {/* Status */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0F172A]">Status</label>
+                <select 
+                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  value={txFormData.status}
+                  onChange={(e) => setTxFormData({...txFormData, status: e.target.value})}
+                >
+                  <option value="COMPLETED">Completed (Paid)</option>
+                  <option value="PENDING">Pending (Awaiting clearance)</option>
+                  <option value="FAILED">Failed</option>
+                </select>
+              </div>
+
+              <DialogFooter className="pt-4 border-t border-[#F1F5F9] mt-6">
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} className="rounded-xl h-11 font-bold px-6 border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC]">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 font-bold px-6 bg-[#635BFF] hover:bg-[#5249E0] text-white">
+                  {isSubmitting ? "Recording..." : "Record Transaction"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

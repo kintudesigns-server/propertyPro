@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sanitizeUser } from "@/lib/utils";
+import { sanitizeUser } from "@/lib/sanitization";
 import { encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
