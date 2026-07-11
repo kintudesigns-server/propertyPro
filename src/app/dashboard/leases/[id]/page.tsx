@@ -1128,10 +1128,11 @@ export default function LeaseDetailsPage() {
                         <p><strong className="text-slate-800">2. Security Deposit:</strong> A security deposit of ${Number(lease.securityDeposit || 0).toFixed(2)} is required. This will be held and refunded subject to the unit condition upon move-out.</p>
                         <p><strong className="text-slate-800">3. Maintenance:</strong> Tenants must report any maintenance issues promptly. Damage caused by tenant negligence may be deducted from the security deposit.</p>
                         <p><strong className="text-slate-800">4. Early Termination:</strong> Early termination before {new Date(lease.endDate).toLocaleDateString()} may result in a fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)}.</p>
-                        <p><strong className="text-slate-800">5. Renewal:</strong> You will be notified {lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.</p>
-                        <p><strong className="text-slate-800">6. Privacy & Data:</strong> Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.</p>
-                        <p><strong className="text-slate-800">7. Electronic Signature:</strong> By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).</p>
-                        <p><strong className="text-slate-800">8. Governing Law:</strong> This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
+                        <p><strong className="text-slate-800">5. Move-Out Notice:</strong> The Tenant agrees to provide a minimum of {lease.moveOutNoticeDays || 30} days written notice prior to terminating this lease or moving out.</p>
+                        <p><strong className="text-slate-800">6. Renewal:</strong> You will be notified {lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.</p>
+                        <p><strong className="text-slate-800">7. Privacy & Data:</strong> Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.</p>
+                        <p><strong className="text-slate-800">8. Electronic Signature:</strong> By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).</p>
+                        <p><strong className="text-slate-800">9. Governing Law:</strong> This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
                       </div>
                     </div>
 

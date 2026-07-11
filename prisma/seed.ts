@@ -252,6 +252,59 @@ async function main() {
     }
   });
 
+  // Create additional tenants for deep move-out testing
+  const tenantMoveOutScheduled = await prisma.user.create({ data: { email: "tenant_mo_scheduled@propertypro.test", name: "Scheduled Sam", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 700, annualIncome: 60000, ssn: encrypt("111-22-3333") } });
+  const tenantMoveOutCompleted = await prisma.user.create({ data: { email: "tenant_mo_inspected@propertypro.test", name: "Inspected Ian", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 710, annualIncome: 62000, ssn: encrypt("222-33-4444") } });
+  const tenantMoveOutAccepted = await prisma.user.create({ data: { email: "tenant_mo_accepted@propertypro.test", name: "Accepted Amy", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 720, annualIncome: 65000, ssn: encrypt("333-44-5555") } });
+  const tenantMoveOutDisputed = await prisma.user.create({ data: { email: "tenant_mo_disputed@propertypro.test", name: "Disputed Dan", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 730, annualIncome: 68000, ssn: encrypt("444-55-6666") } });
+
+  // Additional units for these leases
+  const propB = await prisma.property.create({
+    data: {
+      name: "Move-Out Sandbox Estates", address: "999 Testing Ln", city: "Los Angeles", state: "CA", zip: "90001", country: "USA",
+      ownerId: ownerFull.id, approvalStatus: "APPROVED", type: "Apartment",
+      units: { create: [
+        { name: "201", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "202", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "203", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "204", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
+      ]}
+    },
+    include: { units: true }
+  });
+
+  // Lease E1: INSPECTION_SCHEDULED
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[0].id, tenantId: tenantMoveOutScheduled.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "INSPECTION_SCHEDULED", moveOutRequestDate: dateBefore(1), moveOutDate: new Date(), moveOutReason: "End of lease", inspectionDate: dateAfter(1)
+    }
+  });
+
+  // Lease E2: INSPECTION_COMPLETED
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[1].id, tenantId: tenantMoveOutCompleted.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "INSPECTION_COMPLETED", moveOutRequestDate: dateBefore(2), moveOutDate: dateBefore(1), moveOutReason: "End of lease", inspectionDate: dateBefore(1), inspectionNotes: "Stains on carpet in bedroom.", deductions: [{ amount: 300, description: "Carpet cleaning" }]
+    }
+  });
+
+  // Lease E3: TENANT_ACCEPTED
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[2].id, tenantId: tenantMoveOutAccepted.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "TENANT_ACCEPTED", moveOutRequestDate: dateBefore(3), moveOutDate: dateBefore(2), moveOutReason: "End of lease", inspectionDate: dateBefore(2), inspectionNotes: "Minor wall scuffs.", deductions: [{ amount: 100, description: "Paint touch-up" }]
+    }
+  });
+
+  // Lease E4: TENANT_DISPUTED
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[3].id, tenantId: tenantMoveOutDisputed.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "TENANT_DISPUTED", moveOutRequestDate: dateBefore(4), moveOutDate: dateBefore(3), moveOutReason: "End of lease", inspectionDate: dateBefore(3), inspectionNotes: "Broken window blind.", tenantDisputeNote: "I have photos proving the blind was broken before I moved in.", deductions: [{ amount: 150, description: "Window blind replacement" }]
+    }
+  });
+
   // Lease F: tenant_expired - Expired lease, deposit returned with deductions
   const leaseExpired = await prisma.lease.create({
     data: {

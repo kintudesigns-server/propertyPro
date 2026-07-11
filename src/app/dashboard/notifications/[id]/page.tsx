@@ -56,23 +56,26 @@ type NavAction = {
   textColor: string;
 };
 
-function resolveNavActions(notification: any): NavAction[] {
+function resolveNavActions(notification: any, userRole: string): NavAction[] {
   const { title, type, relatedEntityId } = notification;
   const id = relatedEntityId;
   const actions: NavAction[] = [];
 
   const t = (title as string).toLowerCase();
+  const isAdmin = userRole === "SUPERADMIN";
 
   // ── Applications ───────────────────────────
   if (t.includes("owner application")) {
-    actions.push({
-      href: `/dashboard/admin/owner-applications`,
-      label: "View Owner Applications",
-      description: "Review pending owner requests, approve access, and assign limits.",
-      Icon: Building2,
-      color: "bg-blue-50",
-      textColor: "text-blue-600",
-    });
+    if (isAdmin) {
+      actions.push({
+        href: `/dashboard/admin/owner-applications`,
+        label: "View Owner Applications",
+        description: "Review pending owner requests, approve access, and assign limits.",
+        Icon: Building2,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    }
   } else if (type === "APPLICATION" || t.includes("application")) {
     if (id) {
       actions.push({
@@ -118,64 +121,89 @@ function resolveNavActions(notification: any): NavAction[] {
 
   // ── Mediation & Disputes ───────────────────
   else if (t.includes("mediation") || t.includes("dispute")) {
-    actions.push({
-      href: `/dashboard/admin/payouts`, // Or any mediation ledger if exists
-      label: "View Mediation Dashboard",
-      description: "Review disputes, inspect tenant move-out notes, and resolve conflicts.",
-      Icon: AlertCircle,
-      color: "bg-red-50",
-      textColor: "text-red-600",
-    });
+    if (isAdmin) {
+      actions.push({
+        href: `/dashboard/admin/payouts`, // Or any mediation ledger if exists
+        label: "View Mediation Dashboard",
+        description: "Review disputes, inspect tenant move-out notes, and resolve conflicts.",
+        Icon: AlertCircle,
+        color: "bg-red-50",
+        textColor: "text-red-600",
+      });
+    }
   }
 
   // ── Payouts ────────────────────────────────
   else if (t.includes("payout")) {
-    actions.push({
-      href: `/dashboard/admin/payouts`,
-      label: "View Payout Requests",
-      description: "Review pending payouts, process disbursements, and check owner balances.",
-      Icon: CreditCard,
-      color: "bg-emerald-50",
-      textColor: "text-emerald-600",
-    });
-    actions.push({
-      href: `/dashboard/accounting/wallet`,
-      label: "Go to Owner Wallet",
-      description: "Check your current balance and view your payout history.",
-      Icon: FileText,
-      color: "bg-slate-50",
-      textColor: "text-slate-600",
-    });
+    if (isAdmin) {
+      actions.push({
+        href: `/dashboard/admin/payouts`,
+        label: "View Payout Requests",
+        description: "Review pending payouts, process disbursements, and check owner balances.",
+        Icon: CreditCard,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      });
+    } else {
+      actions.push({
+        href: `/dashboard/accounting/wallet`,
+        label: "Go to Owner Wallet",
+        description: "Check your current balance and view your payout history.",
+        Icon: FileText,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
+    }
   }
 
   // ── Payments / Invoices / Transactions / Refunds / Billing ──
   else if (type === "PAYMENT" || type === "BILLING" || t.includes("payment") || t.includes("invoice") || t.includes("transaction") || t.includes("refund") || t.includes("chargeback") || t.includes("billing") || t.includes("deposit")) {
-    if (id) {
+    if (userRole === "TENANT") {
       actions.push({
-        href: `/dashboard/leases/${id}`,
-        label: "View Security Deposit Ledger",
-        description: "Open the linked lease details to view the Security Deposit Ledger and mid-tenancy deductions.",
+        href: `/dashboard/accounting/invoices`,
+        label: "Go to Invoices",
+        description: "View your outstanding statements, download invoice PDFs, and verify your account balance.",
+        Icon: CreditCard,
+        color: "bg-green-50",
+        textColor: "text-green-600",
+      });
+      actions.push({
+        href: `/dashboard/payments/pay-rent`,
+        label: "Pay Rent Online",
+        description: "Directly checkout and pay your current outstanding invoices via credit card.",
         Icon: Home,
-        color: "bg-purple-50",
-        textColor: "text-purple-600",
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    } else {
+      const isDepositEvent = t.includes("deposit") || t.includes("refund");
+      if (id && isDepositEvent) {
+        actions.push({
+          href: `/dashboard/leases/${id}`,
+          label: "View Security Deposit Ledger",
+          description: "Open the linked lease details to view the Security Deposit Ledger and mid-tenancy deductions.",
+          Icon: Home,
+          color: "bg-purple-50",
+          textColor: "text-purple-600",
+        });
+      }
+      actions.push({
+        href: `/dashboard/accounting/invoices`,
+        label: "Go to Invoices",
+        description: "View the invoice ledger, download PDFs, and confirm payment status.",
+        Icon: CreditCard,
+        color: "bg-green-50",
+        textColor: "text-green-600",
+      });
+      actions.push({
+        href: `/dashboard/accounting/transactions`,
+        label: "View Transactions",
+        description: "Review the full transaction history and Stripe payment records.",
+        Icon: FileText,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
       });
     }
-    actions.push({
-      href: `/dashboard/accounting/invoices`,
-      label: "Go to Invoices",
-      description: "View the invoice ledger, download PDFs, and confirm payment status.",
-      Icon: CreditCard,
-      color: "bg-green-50",
-      textColor: "text-green-600",
-    });
-    actions.push({
-      href: `/dashboard/accounting/transactions`,
-      label: "View Transactions",
-      description: "Review the full transaction history and Stripe payment records.",
-      Icon: FileText,
-      color: "bg-emerald-50",
-      textColor: "text-emerald-600",
-    });
   }
 
   // ── Lease ──────────────────────────────────
@@ -212,14 +240,16 @@ function resolveNavActions(notification: any): NavAction[] {
         textColor: "text-indigo-600",
       });
     }
-    actions.push({
-      href: `/dashboard/admin/properties`,
-      label: "Property Approvals",
-      description: "Review pending property listings waiting for admin approval.",
-      Icon: CheckCircle2,
-      color: "bg-slate-50",
-      textColor: "text-slate-600",
-    });
+    if (isAdmin) {
+      actions.push({
+        href: `/dashboard/admin/properties`,
+        label: "Property Approvals",
+        description: "Review pending property listings waiting for admin approval.",
+        Icon: CheckCircle2,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
+    }
   }
 
   // ── Generic SYSTEM fallback ────────────────
@@ -249,6 +279,7 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
   if (!session?.user) redirect("/auth/login");
 
   const userId = (session.user as any).id;
+  const userRole = (session.user as any).role || "";
   const { id } = await params;
 
   const db = prisma as any;
@@ -261,7 +292,7 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
     notification.isRead = true;
   }
 
-  const navActions = resolveNavActions(notification);
+  const navActions = resolveNavActions(notification, userRole);
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-6">

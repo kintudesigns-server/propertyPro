@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       unitId, tenantEmail, startDate, endDate, monthlyRent, applicationId,
       rentDueDay, securityDeposit, lateFeeAmount, gracePeriodDays, lateFeeType, 
       autoGenerateInvoices, autoEmailInvoices, renewalNoticeDays,
-      earlyTerminationFee, isProratedRefundAllowed
+      earlyTerminationFee, isProratedRefundAllowed, moveOutNoticeDays
     } = await req.json();
 
     if (!unitId || !tenantEmail || !startDate || !endDate || !monthlyRent) {
@@ -158,6 +158,7 @@ export async function POST(req: NextRequest) {
         renewalNoticeDays: renewalNoticeDays ? Number(renewalNoticeDays) : 60,
         earlyTerminationFee: earlyTerminationFee ? Number(earlyTerminationFee) : 0,
         isProratedRefundAllowed: isProratedRefundAllowed !== undefined ? isProratedRefundAllowed : false,
+        moveOutNoticeDays: moveOutNoticeDays ? Number(moveOutNoticeDays) : 30,
       },
     });
 

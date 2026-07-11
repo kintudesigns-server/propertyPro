@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
+import { notify } from "@/lib/notify";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -25,6 +27,32 @@ export async function POST(req: NextRequest) {
 
     if (process.env.NODE_ENV === "production" && (!smtpHost || !smtpPort || !smtpUser || !smtpPass)) {
       return NextResponse.json({ error: "SMTP credentials are not configured in production environment" }, { status: 500 });
+    }
+
+    // Create in-app Database Notification for Tenant so it appears in their bell icon
+    if (invoiceId) {
+      try {
+        const invoice = await prisma.invoice.findUnique({
+          where: { id: invoiceId },
+          include: { lease: { include: { unit: true } } }
+        });
+        if (invoice?.lease?.tenantId) {
+          const propertyName = invoice.lease.unit?.propertyId 
+            ? (await prisma.property.findUnique({ where: { id: invoice.lease.unit.propertyId } }))?.name 
+            : "";
+            
+          await notify({
+            userId: invoice.lease.tenantId,
+            title: "Urgent Payment Reminder",
+            message: `You have an outstanding invoice of $${Number(invoice.amount).toFixed(2)} due on ${invoice.dueDate.toLocaleDateString()}. Property: ${propertyName || "your unit"}.`,
+            type: "PAYMENT",
+            priority: "HIGH",
+            relatedEntityId: invoice.id
+          });
+        }
+      } catch (notifyErr) {
+        console.error("Failed to create in-app notification for invoice reminder:", notifyErr);
+      }
     }
 
     if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
@@ -99,6 +127,8 @@ export async function POST(req: NextRequest) {
     });
 
     console.log("Message sent: %s", info.messageId);
+
+
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
+import { notifyMany } from "@/lib/notify";
 
 // GET all owner applications (Admin only)
 export async function GET(req: NextRequest) {
@@ -132,20 +133,23 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    // Notify all admins
-    const admins = await prisma.user.findMany({ where: { role: "SUPERADMIN" } });
-    await Promise.all(admins.map(admin =>
-      prisma.notification.create({
-        data: {
-          userId: admin.id,
-          title: "New Owner Application",
-          message: `${name} (${entityType}) has applied for owner access. Portfolio: ${finalPortfolioSize}.`,
-          type: "SYSTEM",
-          priority: "HIGH",
-          relatedEntityId: application.id,
-        }
-      })
-    ));
+    // Notify all admins via live-updating notifications
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: "SUPERADMIN" },
+        select: { id: true }
+      });
+      const adminIds = admins.map(a => a.id);
+      await notifyMany(adminIds, {
+        title: "New Owner Application",
+        message: `${name} (${entityType}) has applied for owner access. Portfolio: ${finalPortfolioSize}.`,
+        type: "SYSTEM",
+        priority: "HIGH",
+        relatedEntityId: application.id,
+      });
+    } catch (err) {
+      console.error("[owner-applications] Failed to notify admins of new owner application:", err);
+    }
 
     return NextResponse.json({ trackingId: application.trackingId, message: "Application submitted successfully" }, { status: 201 });
   } catch (error: any) {

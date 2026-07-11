@@ -574,7 +574,7 @@ export default function TransactionsPage() {
       {/* ── TRANSACTION LEDGER TABLE ── */}
       <Card className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="w-full table-fixed">
             <TableHeader className="bg-[#F8FAFC]">
               <TableRow className="border-b border-[#E2E8F0]">
                 <TableHead className="w-12 text-center">
@@ -584,11 +584,11 @@ export default function TransactionsPage() {
                     readOnly
                   />
                 </TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Transaction</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Reference & Channel</TableHead>
-                {!isTenant && <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Customer</TableHead>}
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Amount</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6">Date</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[25%]">Transaction</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[25%]">Reference &amp; Channel</TableHead>
+                {!isTenant && <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[20%]">Customer</TableHead>}
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[15%]">Amount</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[15%]">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -620,7 +620,7 @@ export default function TransactionsPage() {
                       </TableCell>
 
                       {/* Transaction details & Category */}
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="py-4 px-6 w-[25%]">
                         <div className="flex items-center gap-3">
                           <div className={`h-9 w-9 rounded-xl ${details.iconBg} flex items-center justify-center shrink-0`}>
                             {details.icon}
@@ -638,7 +638,7 @@ export default function TransactionsPage() {
                       </TableCell>
 
                       {/* Reference & Channel */}
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="py-4 px-6 w-[25%]">
                         <div>
                           <div className="font-bold text-xs text-[#635BFF] hover:underline truncate max-w-[150px]">
                             {tx.reference || `Direct Ref: ${tx.id.substring(0, 8)}`}
@@ -655,7 +655,7 @@ export default function TransactionsPage() {
 
                       {/* Customer info */}
                       {!isTenant && (
-                        <TableCell className="py-4 px-6">
+                        <TableCell className="py-4 px-6 w-[20%]">
                           <div>
                             <div className="font-bold text-slate-800 text-xs">{tx.tenant?.name || "N/A"}</div>
                             <div className="text-[10px] text-[#64748B] font-medium">{tx.tenant?.email || "No email"}</div>
@@ -664,7 +664,7 @@ export default function TransactionsPage() {
                       )}
 
                       {/* Amount column with sign dynamically set based on user role */}
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="py-4 px-6 w-[15%]">
                         {(() => {
                           // DB INCOME -> Tenant Paid (Outflow) -> Negative (-)
                           // DB EXPENSE -> Tenant Received (Inflow) -> Positive (+)
@@ -698,7 +698,7 @@ export default function TransactionsPage() {
                       </TableCell>
 
                       {/* Date Paid */}
-                      <TableCell className="py-4 px-6 text-[#64748B] text-xs font-semibold">
+                      <TableCell className="py-4 px-6 text-[#64748B] text-xs font-semibold w-[15%]">
                         {new Date(tx.createdAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",

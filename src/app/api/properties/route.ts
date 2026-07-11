@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { notifyMany } from "@/lib/notify";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -171,6 +172,24 @@ export async function POST(req: NextRequest) {
         relatedEntityId: property.id,
       }
     });
+
+    // Notify all admins
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: "SUPERADMIN" },
+        select: { id: true }
+      });
+      const adminIds = admins.map(a => a.id);
+      await notifyMany(adminIds, {
+        title: "New Property Created",
+        message: `Owner "${owner?.name || 'Owner'}" has added a new property "${property.name}" that is pending approval.`,
+        type: "SYSTEM",
+        priority: "MEDIUM",
+        relatedEntityId: property.id,
+      });
+    } catch (err) {
+      console.error("[properties] Failed to notify admins of new property:", err);
+    }
 
     // Send confirmation email to the owner
     if (owner?.email) {

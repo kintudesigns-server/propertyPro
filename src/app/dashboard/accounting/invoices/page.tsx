@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Receipt, Search, Plus, MoreVertical, CheckCircle, XCircle, Trash2, FileText, Download, TrendingUp, AlertCircle, Clock, Eye, SlidersHorizontal } from "lucide-react";
+import { Receipt, Search, Plus, MoreVertical, CheckCircle, XCircle, Trash2, FileText, Download, TrendingUp, AlertCircle, Clock, Eye, SlidersHorizontal, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSession } from "next-auth/react";
@@ -130,6 +130,37 @@ export default function InvoicesPage() {
       toast.error("Error deleting invoice");
     }
   };
+
+  const handleSendReminder = async (inv: any) => {
+    if (!inv.lease?.tenant?.email) {
+      toast.error("Tenant has no email address on file.");
+      return;
+    }
+
+    const toastId = toast.loading("Sending payment reminder to tenant...");
+    try {
+      // 1. Send simulated or actual email reminder
+      const emailRes = await fetch("/api/invoices/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: inv.lease.tenant.email,
+          subject: `Urgent: Payment Reminder for Invoice INV-${inv.id.substring(0, 6).toUpperCase()}`,
+          message: `Dear ${inv.lease.tenant.name},\n\nThis is a friendly reminder that you have an outstanding payment of $${Number(inv.amount).toFixed(2)} due on ${new Date(inv.dueDate).toLocaleDateString()} for property Unit ${inv.lease.unit?.name || ""}.\n\nPlease log in to your portal to make a payment online.\n\nThank you,\nManagement`,
+          invoiceId: inv.id
+        })
+      });
+
+      if (emailRes.ok) {
+        toast.success("Payment reminder sent successfully!", { id: toastId });
+      } else {
+        throw new Error("Failed to dispatch email");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send reminder", { id: toastId });
+    }
+  };
+
 
   const filteredInvoices = invoices.filter(inv => {
     // 1. Search Query Filter
@@ -319,10 +350,10 @@ export default function InvoicesPage() {
                       {getTypeBadge(inv.invoiceType)}
                     </TableCell>
                     <TableCell className="font-semibold text-[#64748B]">
-                      {new Date(inv.createdAt).toLocaleDateString()}
+                      {new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </TableCell>
                     <TableCell className="font-semibold text-[#64748B]">
-                      {new Date(inv.dueDate).toLocaleDateString()}
+                      {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </TableCell>
                     <TableCell className="font-black text-[#0F172A]">
                       ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -371,6 +402,11 @@ export default function InvoicesPage() {
                             )
                           ) : (
                             <>
+                              {inv.status !== "PAID" && (
+                                <DropdownMenuItem onClick={() => handleSendReminder(inv)} className="cursor-pointer font-semibold text-[#CA8A04] rounded-lg">
+                                  <Bell className="mr-2 h-4 w-4 text-[#94A3B8]" /> Send Reminder
+                                </DropdownMenuItem>
+                              )}
                               {inv.status !== "PAID" && (
                                 <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "PAID")} className="cursor-pointer font-semibold text-[#16A34A] rounded-lg">
                                   <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid

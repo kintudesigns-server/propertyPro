@@ -384,10 +384,12 @@ model PayoutRequest {
   bankName      String
   accountNumber String
   accountName   String
-  proofUrl      String?      // Cloudinary receipt or verification link
-  disbursedAt   DateTime?    // When the admin disbursed the payout
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  proofUrl        String?      // Cloudinary receipt or verification link
+  disbursedAt     DateTime?    // When the admin disbursed the payout
+  refNumber       String?      // Bank transfer reference / check number
+  rejectionReason String?      // Admin-provided reason when rejecting
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
 model Application {
@@ -399,6 +401,7 @@ model Application {
   phone       String
   documents   String[] // Array of Cloudinary URLs
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, LEASE_CREATED
+  rejectionReason String? @db.Text
   
   // Real-world application preferences
   leaseDuration  Int       @default(12)

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { PayoutStatus } from "@prisma/client";
-import { notify } from "@/lib/notify";
+import { notify, notifyMany } from "@/lib/notify";
 import { getStripe } from "@/lib/stripe";
 import { maskBankDetails } from "@/lib/sanitization";
 import { auditLog } from "@/lib/audit-log";
@@ -17,58 +17,197 @@ export async function GET(req: NextRequest) {
   const role = (session.user as any).role;
   const userId = (session.user as any).id;
 
+  // Parse query params for filtering / pagination / export
+  const { searchParams } = new URL(req.url);
+  const page       = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const pageSize   = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") || "25", 10)));
+  const statusFilter = searchParams.get("status") || "ALL";       // ALL | PENDING | COMPLETED | REJECTED
+  const typeFilter   = searchParams.get("type") || "ALL";         // ALL | OWNER | TENANT
+  const fromDate     = searchParams.get("from");                  // ISO date string
+  const toDate       = searchParams.get("to");                    // ISO date string
+  const searchTerm   = searchParams.get("search") || "";
+  const exportCsv    = searchParams.get("export") === "csv";
+
   try {
-    let payouts: any[] = [];
-    if (role === "SUPERADMIN") {
-      payouts = await prisma.payoutRequest.findMany({
-        include: {
-          owner: { select: { name: true, email: true } },
-          tenant: { select: { name: true, email: true } },
-          lease: {
-            include: {
-              unit: {
-                include: {
-                  property: true
-                }
-              }
-            }
-          }
-        },
-        orderBy: { createdAt: "desc" },
-      });
-    } else if (role === "OWNER") {
-      payouts = await prisma.payoutRequest.findMany({
-        where: { ownerId: userId },
-        orderBy: { createdAt: "desc" },
-      });
+    const baseWhere: any = {};
+
+    // Role-level scoping
+    if (role === "OWNER") {
+      baseWhere.ownerId = userId;
     } else if (role === "TENANT") {
-      payouts = await prisma.payoutRequest.findMany({
-        where: { tenantId: userId },
+      baseWhere.tenantId = userId;
+    } else if (role !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Status filter
+    if (statusFilter !== "ALL") {
+      baseWhere.status = statusFilter as PayoutStatus;
+    }
+
+    // Type filter (owner withdrawal vs tenant refund)
+    if (typeFilter === "OWNER") {
+      baseWhere.tenantId = null;
+      baseWhere.ownerId = { not: null };
+    } else if (typeFilter === "TENANT") {
+      baseWhere.tenantId = { not: null };
+    }
+
+    // Date range filter
+    if (fromDate || toDate) {
+      baseWhere.createdAt = {};
+      if (fromDate) baseWhere.createdAt.gte = new Date(fromDate);
+      if (toDate) {
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        baseWhere.createdAt.lte = to;
+      }
+    }
+
+    // Search filter — applied via OR on relations
+    let searchWhere: any = baseWhere;
+    if (searchTerm) {
+      searchWhere = {
+        AND: [
+          baseWhere,
+          {
+            OR: [
+              { bankName: { contains: searchTerm, mode: "insensitive" } },
+              { accountName: { contains: searchTerm, mode: "insensitive" } },
+              { owner: { name: { contains: searchTerm, mode: "insensitive" } } },
+              { owner: { email: { contains: searchTerm, mode: "insensitive" } } },
+              { tenant: { name: { contains: searchTerm, mode: "insensitive" } } },
+              { tenant: { email: { contains: searchTerm, mode: "insensitive" } } },
+            ],
+          },
+        ],
+      };
+    }
+
+    const include = {
+      owner: { select: { name: true, email: true, balance: true } },
+      tenant: { select: { name: true, email: true } },
+      lease: {
         include: {
-          lease: {
+          unit: {
             include: {
-              unit: {
-                include: {
-                  property: true
-                }
-              }
-            }
-          }
+              property: { select: { id: true, name: true, ownerId: true } },
+            },
+          },
         },
+      },
+    };
+
+    // CSV Export — return all matching records streamed as CSV
+    if (exportCsv && role === "SUPERADMIN") {
+      const allPayouts = await prisma.payoutRequest.findMany({
+        where: searchWhere,
+        include,
         orderBy: { createdAt: "desc" },
       });
-    }
-    if (role !== "SUPERADMIN") {
-      payouts = payouts.map(p => {
-        if (p.accountNumber) {
-          const masked = maskBankDetails(p.accountNumber, null);
-          return { ...p, accountNumber: masked.accountNumber };
-        }
-        return p;
+
+      const header = "Date,Type,Recipient Name,Recipient Email,Bank,Account (Masked),Amount,Status,Disbursed At,Reference,Rejection Reason\n";
+      const rows = allPayouts.map((p: any) => {
+        const isTenant = !!p.tenantId;
+        const recipient = isTenant ? p.tenant : p.owner;
+        const maskedAcc = p.accountNumber ? `***${p.accountNumber.slice(-4)}` : "N/A";
+        const disbursed = p.disbursedAt ? new Date(p.disbursedAt).toLocaleDateString() : "";
+        const reason = p.rejectionReason || "";
+        return [
+          new Date(p.createdAt).toLocaleDateString(),
+          isTenant ? "Tenant Refund" : "Owner Withdrawal",
+          recipient?.name || "N/A",
+          recipient?.email || "N/A",
+          p.bankName,
+          maskedAcc,
+          Number(p.amount).toFixed(2),
+          p.status,
+          disbursed,
+          p.refNumber || "",
+          `"${reason}"`,
+        ].join(",");
+      });
+
+      const csv = header + rows.join("\n");
+      return new NextResponse(csv, {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="payouts-ledger-${new Date().toISOString().split("T")[0]}.csv"`,
+        },
       });
     }
 
-    return NextResponse.json(payouts);
+    // Count for pagination
+    const totalCount = await prisma.payoutRequest.count({ where: searchWhere });
+
+    // Paginated query
+    const payouts = await prisma.payoutRequest.findMany({
+      where: searchWhere,
+      include,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+
+    // Summary stats (always from unfiltered owner scope for accurate totals)
+    const statWhere: any = role === "SUPERADMIN" ? {} : role === "OWNER" ? { ownerId: userId } : { tenantId: userId };
+    const [pendingCount, completedAgg, rejectedAgg, processedCount] = await Promise.all([
+      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING" } }),
+      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "COMPLETED" }, _sum: { amount: true }, _count: true }),
+      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "REJECTED" }, _sum: { amount: true } }),
+      prisma.payoutRequest.count({ where: { ...statWhere, status: { not: "PENDING" } } }),
+    ]);
+
+    // Avg processing time (createdAt → disbursedAt) for completed payouts
+    const completedWithDates = await prisma.payoutRequest.findMany({
+      where: { ...statWhere, status: "COMPLETED", disbursedAt: { not: null } },
+      select: { createdAt: true, disbursedAt: true },
+    });
+    let avgProcessingHours = 0;
+    if (completedWithDates.length > 0) {
+      const totalMs = completedWithDates.reduce((acc: number, p: any) => {
+        return acc + (new Date(p.disbursedAt).getTime() - new Date(p.createdAt).getTime());
+      }, 0);
+      avgProcessingHours = Math.round(totalMs / completedWithDates.length / (1000 * 60 * 60));
+    }
+
+    // Pending breakdown (owner vs tenant) for stats
+    const [pendingOwnerCount, pendingTenantCount, pendingAmountAgg] = await Promise.all([
+      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING", tenantId: null, ownerId: { not: null } } }),
+      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING", tenantId: { not: null } } }),
+      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "PENDING" }, _sum: { amount: true } }),
+    ]);
+
+    // Mask account numbers for non-admins
+    const maskedPayouts = role !== "SUPERADMIN"
+      ? payouts.map((p: any) => {
+          if (p.accountNumber) {
+            const masked = maskBankDetails(p.accountNumber, null);
+            return { ...p, accountNumber: masked.accountNumber };
+          }
+          return p;
+        })
+      : payouts;
+
+    return NextResponse.json({
+      payouts: maskedPayouts,
+      pagination: {
+        page,
+        pageSize,
+        totalCount,
+        totalPages: Math.ceil(totalCount / pageSize),
+      },
+      stats: {
+        pendingCount,
+        pendingAmountAtRisk: Number(pendingAmountAgg._sum.amount || 0),
+        pendingOwnerCount,
+        pendingTenantCount,
+        settledVolume: Number(completedAgg._sum.amount || 0),
+        rejectedVolume: Number(rejectedAgg._sum.amount || 0),
+        processedCount,
+        avgProcessingHours,
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to fetch payouts" }, { status: 500 });
   }
@@ -140,6 +279,24 @@ export async function POST(req: NextRequest) {
       note: `Owner created payout request for $${withdrawAmount.toFixed(2)} to bank: ${bankName}`,
     });
 
+    // Notify all admins of the new payout/withdrawal request
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: "SUPERADMIN" },
+        select: { id: true }
+      });
+      const adminIds = admins.map(a => a.id);
+      await notifyMany(adminIds, {
+        title: "New Payout Request",
+        message: `Owner "${owner?.name || 'Owner'}" has requested a payout of $${withdrawAmount.toFixed(2)} to ${bankName}.`,
+        type: "PAYMENT",
+        priority: "HIGH",
+        relatedEntityId: payout.id,
+      });
+    } catch (err) {
+      console.error("[payouts] Failed to notify admins of new payout request:", err);
+    }
+
     return NextResponse.json(payout, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to create payout request" }, { status: 500 });
@@ -153,7 +310,7 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { payoutId, status, proofUrl, refNumber, bankName, accountNumber, accountName, amount } = await req.json();
+    const { payoutId, status, proofUrl, refNumber, bankName, accountNumber, accountName, amount, rejectionReason } = await req.json();
 
     if (!payoutId || !status) {
       return NextResponse.json({ error: "Missing payoutId or status" }, { status: 400 });
@@ -184,7 +341,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Payout is already processed" }, { status: 400 });
     }
 
-    const finalRef = refNumber || payout.accountNumber || `TX-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const finalRef = refNumber || `TX-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
     if (status === PayoutStatus.COMPLETED) {
       // 1. Check if it's a Tenant Refund
@@ -245,6 +402,7 @@ export async function PUT(req: NextRequest) {
               amount: amount ? Number(amount) : payout.amount,
               proofUrl: proofUrl || null,
               disbursedAt: new Date(),
+              refNumber: disbursementRef,
               bankName: bankName || payout.bankName,
               accountNumber: stripeRefundId || accountNumber || payout.accountNumber,
               accountName: accountName || payout.accountName,
@@ -314,7 +472,7 @@ export async function PUT(req: NextRequest) {
           actorId: (session.user as any).id,
           actorRole: "SUPERADMIN",
           oldValue: { status: payout.status },
-          newValue: { status: PayoutStatus.COMPLETED },
+          newValue: { status: PayoutStatus.COMPLETED, refNumber: disbursementRef },
           note: `Admin approved payout of $${Number(payout.amount).toFixed(2)}`,
         });
 
@@ -327,11 +485,28 @@ export async function PUT(req: NextRequest) {
             status: PayoutStatus.COMPLETED,
             proofUrl: proofUrl || null,
             disbursedAt: new Date(),
+            refNumber: finalRef,
             bankName: bankName || payout.bankName,
             accountNumber: accountNumber || payout.accountNumber,
             accountName: accountName || payout.accountName,
           },
         });
+
+        // Notify owner on completion
+        try {
+          if (payout.ownerId) {
+            await notify({
+              userId: payout.ownerId,
+              title: "Payout Authorized & Disbursed",
+              message: `Your withdrawal of $${Number(payout.amount).toFixed(2)} has been approved and disbursed. Reference: ${finalRef}.`,
+              type: "PAYMENT",
+              priority: "HIGH",
+              relatedEntityId: payoutId,
+            });
+          }
+        } catch (err) {
+          console.error("Failed to send owner payout completion notification:", err);
+        }
 
         await auditLog({
           entityType: "PAYOUT",
@@ -340,20 +515,21 @@ export async function PUT(req: NextRequest) {
           actorId: (session.user as any).id,
           actorRole: "SUPERADMIN",
           oldValue: { status: payout.status },
-          newValue: { status: PayoutStatus.COMPLETED },
+          newValue: { status: PayoutStatus.COMPLETED, refNumber: finalRef },
           note: `Admin approved payout of $${Number(payout.amount).toFixed(2)}`,
         });
 
         return NextResponse.json(updated);
       }
     } else if (status === PayoutStatus.REJECTED) {
+      const rejectReason = rejectionReason || "No reason provided";
+
       if (payout.tenantId && payout.leaseId) {
-        // Rejecting a tenant refund means returning the lease deposit status to HELD (since it wasn't refunded)
-        // and refunding landlord balance
+        // Rejecting a tenant refund means returning the lease deposit status to HELD
         const [updated] = await prisma.$transaction([
           prisma.payoutRequest.update({
             where: { id: payoutId },
-            data: { status: PayoutStatus.REJECTED },
+            data: { status: PayoutStatus.REJECTED, rejectionReason: rejectReason },
           }),
           prisma.lease.update({
             where: { id: payout.leaseId },
@@ -369,7 +545,7 @@ export async function PUT(req: NextRequest) {
             },
             data: { status: "FAILED" },
           }),
-          // Re-credit the landlord's balance since payout was rejected/refund failed
+          // Re-credit the landlord's balance since payout was rejected
           prisma.user.update({
             where: { id: payout.lease!.unit.property.ownerId },
             data: {
@@ -384,7 +560,16 @@ export async function PUT(req: NextRequest) {
           await notify({
             userId: payout.lease!.unit.property.ownerId,
             title: "Tenant Refund Payout Rejected",
-            message: `The security deposit refund payout of $${Number(payout.amount).toFixed(2)} for ${payout.tenant!.name} was rejected by the admin. The balance has been credited back to your ledger.`,
+            message: `The security deposit refund payout of $${Number(payout.amount).toFixed(2)} for ${payout.tenant!.name} was rejected. Reason: ${rejectReason}. The balance has been credited back to your ledger.`,
+            type: "PAYMENT",
+            priority: "HIGH",
+            relatedEntityId: payout.leaseId!,
+          });
+          // Also notify the tenant
+          await notify({
+            userId: payout.tenantId,
+            title: "Deposit Refund Request Rejected",
+            message: `Your deposit refund request of $${Number(payout.amount).toFixed(2)} has been rejected by the admin. Reason: ${rejectReason}. Please contact support for further assistance.`,
             type: "PAYMENT",
             priority: "HIGH",
             relatedEntityId: payout.leaseId!,
@@ -400,8 +585,8 @@ export async function PUT(req: NextRequest) {
           actorId: (session.user as any).id,
           actorRole: "SUPERADMIN",
           oldValue: { status: payout.status },
-          newValue: { status: PayoutStatus.REJECTED },
-          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}`,
+          newValue: { status: PayoutStatus.REJECTED, rejectionReason: rejectReason },
+          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}. Reason: ${rejectReason}`,
         });
 
         return NextResponse.json(updated);
@@ -410,7 +595,7 @@ export async function PUT(req: NextRequest) {
         const [updated] = await prisma.$transaction([
           prisma.payoutRequest.update({
             where: { id: payoutId },
-            data: { status: PayoutStatus.REJECTED },
+            data: { status: PayoutStatus.REJECTED, rejectionReason: rejectReason },
           }),
           prisma.user.update({
             where: { id: payout.ownerId! },
@@ -422,6 +607,22 @@ export async function PUT(req: NextRequest) {
           }),
         ]);
 
+        // Notify owner about rejection
+        try {
+          if (payout.ownerId) {
+            await notify({
+              userId: payout.ownerId,
+              title: "Payout Request Rejected",
+              message: `Your withdrawal request of $${Number(payout.amount).toFixed(2)} has been rejected. Reason: ${rejectReason}. The funds have been returned to your ledger balance.`,
+              type: "PAYMENT",
+              priority: "HIGH",
+              relatedEntityId: payoutId,
+            });
+          }
+        } catch (err) {
+          console.error("Failed to send rejection notification:", err);
+        }
+
         await auditLog({
           entityType: "PAYOUT",
           entityId: payoutId,
@@ -429,8 +630,8 @@ export async function PUT(req: NextRequest) {
           actorId: (session.user as any).id,
           actorRole: "SUPERADMIN",
           oldValue: { status: payout.status },
-          newValue: { status: PayoutStatus.REJECTED },
-          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}`,
+          newValue: { status: PayoutStatus.REJECTED, rejectionReason: rejectReason },
+          note: `Admin rejected payout of $${Number(payout.amount).toFixed(2)}. Reason: ${rejectReason}`,
         });
 
         return NextResponse.json(updated);

@@ -42,6 +42,7 @@ export default function CreateLeasePage() {
     renewalNoticeDays: "7",
     earlyTerminationFee: "",
     isProratedRefundAllowed: false,
+    moveOutNoticeDays: "30",
   });
 
   useEffect(() => {
@@ -553,8 +554,8 @@ export default function CreateLeasePage() {
                 <AlertCircle className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-[#0F172A] tracking-tight">Early Termination Policy</h2>
-                <p className="text-xs text-[#64748B] font-medium mt-0.5">Define penalties and prorated refund rules if tenant breaks lease</p>
+                <h2 className="text-lg font-black text-[#0F172A] tracking-tight">Termination & Notice Policy</h2>
+                <p className="text-xs text-[#64748B] font-medium mt-0.5">Define notice periods, penalties and prorated refund rules if tenant breaks lease</p>
               </div>
             </div>
             
@@ -577,7 +578,23 @@ export default function CreateLeasePage() {
                     <p className="text-[10px] text-slate-500 font-medium">Penalty tenant pays to break lease early.</p>
                   </div>
 
-                  <div className="space-y-3 flex flex-col justify-center pt-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Move-Out Notice Period</Label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="30"
+                        value={formData.moveOutNoticeDays}
+                        onChange={(e) => setFormData({ ...formData, moveOutNoticeDays: e.target.value })}
+                        className="pr-16 pl-4 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-red-500 font-semibold text-[#0F172A] shadow-xs"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">Days</div>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">Required notice before moving out.</p>
+                  </div>
+
+                  <div className="space-y-3 flex flex-col justify-center pt-2 md:col-span-2">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide cursor-pointer">Allow Prorated Refund?</Label>
                       <Switch

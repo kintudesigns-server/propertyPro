@@ -126,6 +126,18 @@ export default function ApplicationDetailsPage() {
         )}
       </div>
 
+      {app.status === "REJECTED" && app.rejectionReason && (
+        <div className="bg-[#FEF2F2] border border-[#FCA5A5] rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 text-[#991B1B] font-bold text-lg mb-2">
+            <XCircle className="h-5 w-5" />
+            Rejection Details
+          </div>
+          <p className="text-[#7F1D1D] text-sm leading-relaxed">
+            {app.rejectionReason}
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
           <CardContent className="p-5 flex items-center gap-4">

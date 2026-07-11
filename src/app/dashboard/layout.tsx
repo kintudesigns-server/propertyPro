@@ -26,6 +26,8 @@ import {
   Calendar,
   DollarSign,
   CreditCard,
+  X,
+  ClipboardList,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MessageBadge } from "@/components/notifications/MessageBadge";
@@ -379,6 +381,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     EXPLORE
                   </span>
                 )}
+                
+                <Link
+                  href="/dashboard/tenant/applications"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    pathname === "/dashboard/tenant/applications"
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <ClipboardList className="h-5 w-5" />
+                  {sidebarOpen && <span>My Applications</span>}
+                </Link>
                 
                 <Link
                   href="/listings"

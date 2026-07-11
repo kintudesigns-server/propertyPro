@@ -119,7 +119,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const updatedApp = await prisma.application.update({
       where: { id },
-      data: { status },
+      data: { 
+        status,
+        ...(status === "REJECTED" && reason ? { rejectionReason: reason } : {})
+      },
     });
 
     // Notify the user or tenant (optional notifications)
