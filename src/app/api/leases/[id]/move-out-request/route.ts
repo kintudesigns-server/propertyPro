@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const { id: leaseId } = await params;
-  const { moveOutDate, moveOutReason } = await req.json();
+  const { moveOutDate, moveOutReason, forwardingAddress } = await req.json();
 
   try {
     const lease = await prisma.lease.findUnique({
@@ -31,30 +31,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Only ACTIVE leases can request move-out" }, { status: 400 });
     }
 
-    // FIX #6 — Enforce the notice period defined on the lease
+    if (!forwardingAddress) {
+      return NextResponse.json({ error: "A forwarding address is legally required." }, { status: 400 });
+    }
+
+    // Calculate if it's a short notice (for potential penalty tracking later)
     const noticeDays = lease.moveOutNoticeDays || 30;
     const requestedDate = new Date(moveOutDate);
     const earliestAllowed = new Date();
     earliestAllowed.setDate(earliestAllowed.getDate() + noticeDays);
     earliestAllowed.setHours(0, 0, 0, 0);
-
-    if (requestedDate < earliestAllowed) {
-      return NextResponse.json(
-        {
-          error: `Your lease requires ${noticeDays} days notice before moving out. The earliest allowed move-out date is ${earliestAllowed.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`,
-        },
-        { status: 400 }
-      );
-    }
+    
+    const isShortNotice = requestedDate < earliestAllowed;
 
     const updatedLease = await prisma.lease.update({
       where: { id: leaseId },
       data: {
+        status: "NOTICE_GIVEN", // Important: Transition lease from ACTIVE to NOTICE_GIVEN
         moveOutStatus: "MOVE_OUT_REQUESTED",
         moveOutRequestDate: new Date(),
         moveOutDate: requestedDate,
         moveOutReason,
+        forwardingAddress,
+        isShortNotice
       },
+    });
+
+    // Automatically update the Unit status to NOTICE_GIVEN so the owner can begin marketing it
+    await prisma.unit.update({
+      where: { id: lease.unitId },
+      data: { status: "NOTICE_GIVEN" }
     });
 
     // Notify owner of move-out request

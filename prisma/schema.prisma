@@ -254,7 +254,10 @@ model Lease {
   moveOutRequestDate   DateTime?
   moveOutDate          DateTime?
   moveOutReason        String?
+  forwardingAddress    String?   @db.Text
+  isShortNotice        Boolean   @default(false)
   moveOutNoticeDays    Int       @default(30)
+  depositReturnDays    Int       @default(21)
   moveOutInspectorId   String?
   inspectionDate       DateTime?
   inspectionNotes      String?   @db.Text

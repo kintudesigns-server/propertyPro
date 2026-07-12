@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
         dueDate: start,
         status: "UNPAID",
         invoiceType: startDay > 1 ? "PRORATED" : "RENT",
-        note: startDay > 1 ? `Prorated rent for first month (${new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate() - startDay + 1} days)` : undefined,
+        note: startDay > 1 ? `Prorated rent for first month (${new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate() - startDay + 1} days)` : undefined,
       },
     });
 

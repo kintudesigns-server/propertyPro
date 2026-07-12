@@ -32,18 +32,6 @@ export async function POST(
       return NextResponse.json({ error: "Deposit already processed" }, { status: 400 });
     }
 
-    if (lease.moveOutStatus !== "TENANT_ACCEPTED") {
-      return NextResponse.json({ error: "Tenant must review and accept deductions first" }, { status: 400 });
-    }
-
-    if (
-      !lease.tenant.bankName ||
-      !lease.tenant.accountNumber ||
-      !lease.tenant.accountName
-    ) {
-      return NextResponse.json({ error: "Tenant bank details are missing" }, { status: 400 });
-    }
-
     const totalDeducted = (deductions || []).reduce((sum: number, d: any) => sum + Number(d.amount), 0);
     const originalDeposit = Number(lease.securityDeposit || 0);
     const refundAmount = originalDeposit - totalDeducted;
@@ -52,36 +40,26 @@ export async function POST(
       return NextResponse.json({ error: "Deductions cannot exceed security deposit" }, { status: 400 });
     }
 
-    const newStatus = totalDeducted === originalDeposit ? "FULLY_DEDUCTED" : "PENDING_ADMIN_PAYOUT";
+    const newDepositStatus = totalDeducted === originalDeposit ? "FULLY_DEDUCTED" : 
+                             (totalDeducted > 0 ? "PARTIALLY_REFUNDED" : "REFUNDED");
 
     // Perform database transactions in a single batch
     const [updatedLease] = await prisma.$transaction([
       prisma.lease.update({
         where: { id: leaseId },
         data: {
-          depositStatus: newStatus,
-          moveOutStatus: newStatus === "FULLY_DEDUCTED" ? "COMPLETED" : "PENDING_ADMIN_PAYOUT",
+          depositStatus: newDepositStatus,
+          moveOutStatus: "COMPLETED",
           deductions: deductions,
-          refundMethod: refundMethod || null,
+          refundMethod: refundMethod || "OFFLINE", // Track how owner refunded
           refundRef: refundRef || null,
-          status: "EXPIRED", // Mark lease as officially moved out/expired
+          status: "TERMINATED", // Mark lease as officially terminated
         },
       }),
       prisma.unit.update({
         where: { id: lease.unitId },
         data: { status: "VACANT" },
       }),
-      // Decrement owner balance by refund amount if refundAmount > 0
-      ...(refundAmount > 0 ? [
-        prisma.user.update({
-          where: { id: lease.unit.property.ownerId },
-          data: {
-            balance: {
-              decrement: refundAmount,
-            },
-          },
-        })
-      ] : []),
       // Create Transaction record for the refund if refundAmount > 0
       ...(refundAmount > 0 ? [
         prisma.transaction.create({
@@ -89,23 +67,22 @@ export async function POST(
             type: "EXPENSE",
             category: "DEPOSIT",
             amount: refundAmount,
-            reference: refundRef || `PENDING_ADMIN_${leaseId.slice(-8)}`,
-            status: "PENDING",
+            reference: refundRef || `REFUND_${leaseId.slice(-8)}`,
+            status: "COMPLETED", // Offline refunds are marked complete immediately in Model 1
             tenantId: lease.tenantId,
           },
         })
       ] : []),
-      // Create PayoutRequest for the tenant if refundAmount > 0
-      ...(refundAmount > 0 ? [
-        prisma.payoutRequest.create({
+      // Create Transaction record for the retained deductions if totalDeducted > 0
+      ...(totalDeducted > 0 ? [
+        prisma.transaction.create({
           data: {
+            type: "INCOME",
+            category: "DEPOSIT",
+            amount: totalDeducted,
+            reference: `DEDUCTIONS_${leaseId.slice(-8)}`,
+            status: "COMPLETED", 
             tenantId: lease.tenantId,
-            leaseId: lease.id,
-            amount: refundAmount,
-            status: "PENDING",
-            bankName: lease.tenant.bankName || refundMethod || "BANK_TRANSFER",
-            accountNumber: lease.tenant.accountNumber || "PENDING ADMIN PAYOUT",
-            accountName: lease.tenant.accountName || lease.tenant.name || "Tenant",
           },
         })
       ] : []),
@@ -115,8 +92,8 @@ export async function POST(
     try {
       await notify({
         userId: lease.tenantId,
-        title: "Move-Out Processed - Refund Pending Admin Review",
-        message: `Your move-out for Unit ${lease.unit.name} at ${lease.unit.property.name} has been processed. A deposit refund of $${refundAmount.toFixed(2)} is pending admin approval and disbursement.`,
+        title: "Move-Out Processed",
+        message: `Your move-out for Unit ${lease.unit.name} at ${lease.unit.property.name} has been processed. A deposit refund of $${refundAmount.toFixed(2)} has been issued.`,
         type: "LEASE",
         priority: "HIGH",
         relatedEntityId: lease.id,

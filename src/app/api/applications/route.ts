@@ -65,6 +65,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Check if the tenant already has an active application for this unit
+    const existingApplication = await prisma.application.findFirst({
+      where: {
+        unitId,
+        email,
+        status: {
+          in: ["PENDING", "APPROVED"]
+        }
+      }
+    });
+
+    if (existingApplication) {
+      return NextResponse.json({ 
+        error: "You have already submitted an application for this unit." 
+      }, { status: 400 });
+    }
+
     const application = await prisma.application.create({
       data: {
         unitId,

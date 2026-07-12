@@ -103,6 +103,24 @@ export default function ListingsPage() {
       setApplicantName((session.user as any).name || "");
       setApplicantEmail((session.user as any).email || "");
       if ((session.user as any).phone) setApplicantPhone((session.user as any).phone);
+
+      fetch("/api/users")
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to fetch profile");
+        })
+        .then((profileData) => {
+          if (profileData) {
+            if (profileData.employmentStatus) setEmploymentStatus(profileData.employmentStatus);
+            if (profileData.employer) setEmployerName(profileData.employer);
+            if (profileData.position) setJobTitle(profileData.position);
+            if (profileData.annualIncome) {
+              const monthly = Math.round(Number(profileData.annualIncome) / 12);
+              setMonthlyIncome(monthly.toString());
+            }
+          }
+        })
+        .catch((err) => console.error("Error loading user profile details:", err));
     }
   }, [session]);
 

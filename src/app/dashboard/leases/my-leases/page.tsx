@@ -54,6 +54,7 @@ export default function MyLeasesPage() {
   const [activeLeaseForMoveOut, setActiveLeaseForMoveOut] = useState<any>(null);
   const [moveOutDate, setMoveOutDate] = useState("");
   const [moveOutReason, setMoveOutReason] = useState("");
+  const [forwardingAddress, setForwardingAddress] = useState("");
   const [moveOutSubmitting, setMoveOutSubmitting] = useState(false);
 
   useEffect(() => {
@@ -156,7 +157,7 @@ export default function MyLeasesPage() {
       const res = await fetch(`/api/leases/${activeLeaseForMoveOut.id}/move-out-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ moveOutDate, moveOutReason }),
+        body: JSON.stringify({ moveOutDate, moveOutReason, forwardingAddress }),
       });
       if (res.ok) {
         toast.success("Move-out request submitted");
@@ -753,11 +754,7 @@ export default function MyLeasesPage() {
                   />
                   {moveOutDate && activeLeaseForMoveOut?.moveOutNoticeDays && (
                     <div className="mt-2 text-xs">
-                      {(new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < activeLeaseForMoveOut.moveOutNoticeDays ? (
-                        <p className="text-amber-600 font-semibold flex items-center gap-1">
-                          <ShieldAlert className="h-3 w-3" /> Short notice — you may be subject to penalties.
-                        </p>
-                      ) : (
+                      {(new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) >= activeLeaseForMoveOut.moveOutNoticeDays && (
                         <p className="text-emerald-600 font-semibold">Notice period met.</p>
                       )}
                     </div>
@@ -782,6 +779,29 @@ export default function MyLeasesPage() {
                     <option value="Other">Other</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Forwarding Address</label>
+                  <p className="text-[10px] text-slate-500 mb-1.5">Required for the return of your security deposit.</p>
+                  <textarea 
+                    required
+                    rows={2}
+                    value={forwardingAddress}
+                    onChange={(e) => setForwardingAddress(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none resize-none"
+                    placeholder="Enter your new mailing address..."
+                  />
+                </div>
+
+                {moveOutDate && activeLeaseForMoveOut?.moveOutNoticeDays && 
+                 (new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < activeLeaseForMoveOut.moveOutNoticeDays && (
+                  <div className="bg-red-50 border border-red-100 p-3 rounded-xl mt-4">
+                    <p className="text-red-700 font-semibold text-xs flex items-start gap-2">
+                      <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" /> 
+                      <span>By submitting a notice of less than {activeLeaseForMoveOut.moveOutNoticeDays} days, you acknowledge that you may be subject to an Early Termination Fee as per your lease agreement.</span>
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex gap-3 pt-4">
                   <Button 

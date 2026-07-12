@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
         employmentStatus: true,
         employer: true,
         position: true,
+        annualIncome: true,
         avatar: true,
         subscriptionStatus: true,
         pricingTier: {

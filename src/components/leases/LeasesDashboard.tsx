@@ -28,7 +28,7 @@ export default function LeasesDashboard({
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(initialFilter);
-  const [sortOrder, setSortOrder] = useState("NEWEST");
+  const [sortOrder, setSortOrder] = useState("ACTION_REQUIRED");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list"); // Default to list for replica
 
   const fetchData = async () => {
@@ -53,8 +53,8 @@ export default function LeasesDashboard({
 
   // Stats calculation
   const totalCount = leases.length;
+  const actionNeededCount = leases.filter(l => l.status === "NOTICE_GIVEN" || l.status === "PENDING_SIGNATURE").length;
   const activeCount = leases.filter(l => l.status === "ACTIVE").length;
-  const pendingCount = leases.filter(l => l.status === "PENDING_SIGNATURE").length;
   const expiredCount = leases.filter(l => l.status === "EXPIRED").length;
   const terminatedCount = leases.filter(l => l.status === "TERMINATED").length;
   
@@ -69,7 +69,7 @@ export default function LeasesDashboard({
   const expiringCount = leases.filter(l => {
     if (l.status !== "ACTIVE") return false;
     const diffDays = getDaysLeft(l.endDate);
-    return diffDays <= 30 && diffDays > 0;
+    return diffDays <= 60 && diffDays > 0;
   }).length;
 
   // Filter & Sort
@@ -80,7 +80,9 @@ export default function LeasesDashboard({
     if (statusFilter === "EXPIRING") {
       if (l.status !== "ACTIVE") return false;
       const diffDays = getDaysLeft(l.endDate);
-      return diffDays <= 30 && diffDays > 0;
+      return diffDays <= 60 && diffDays > 0;
+    } else if (statusFilter === "ACTION_NEEDED") {
+      return l.status === "NOTICE_GIVEN" || l.status === "PENDING_SIGNATURE";
     } else if (statusFilter !== "ALL" && l.status !== statusFilter) {
       return false;
     }
@@ -97,6 +99,16 @@ export default function LeasesDashboard({
     const rentB = Number(b.monthlyRent) || 0;
 
     switch (sortOrder) {
+      case "ACTION_REQUIRED": 
+        const statusWeight = (s: string) => {
+          if (s === "NOTICE_GIVEN") return 4;
+          if (s === "PENDING_SIGNATURE") return 3;
+          if (s === "EXPIRED") return 2;
+          return 1;
+        };
+        const weightDiff = statusWeight(b.status) - statusWeight(a.status);
+        if (weightDiff !== 0) return weightDiff;
+        return dateB - dateA;
       case "NEWEST": return dateB - dateA;
       case "OLDEST": return dateA - dateB;
       case "START_DESC": return startB - startA;
@@ -160,6 +172,31 @@ export default function LeasesDashboard({
     }
   };
 
+  const getQuickAction = (l: any) => {
+    if (l.status === "NOTICE_GIVEN") {
+      return (
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-bold h-8 text-xs px-3 shadow-none border border-red-200 w-full md:w-auto">
+          Process Move-Out
+        </Button>
+      );
+    }
+    if (l.status === "PENDING_SIGNATURE") {
+      return (
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 font-bold h-8 text-xs px-3 shadow-none border border-amber-200 w-full md:w-auto">
+          View & Resend
+        </Button>
+      );
+    }
+    if (l.status === "ACTIVE" && getDaysLeft(l.endDate) <= 60) {
+      return (
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold h-8 text-xs px-3 shadow-none border border-blue-200 w-full md:w-auto">
+          Offer Renewal
+        </Button>
+      );
+    }
+    return null;
+  };
+
   const getStatusBgColor = (l: any) => {
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50";
     switch (l.status) {
@@ -189,7 +226,7 @@ export default function LeasesDashboard({
       {/* 6 KPI Cards matching screenshot exactly */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* Total */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
+        <Card onClick={() => setStatusFilter("ALL")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#3B82F6] ${statusFilter === "ALL" ? "ring-2 ring-[#3B82F6]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-[13px] font-bold text-[#0F172A]">Total</h3>
             <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
@@ -199,8 +236,30 @@ export default function LeasesDashboard({
           <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{totalCount}</div>
         </Card>
 
+        {/* Action Needed */}
+        <Card onClick={() => setStatusFilter("ACTION_NEEDED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-red-500 ${statusFilter === "ACTION_NEEDED" ? "ring-2 ring-red-500 bg-red-50" : ""}`}>
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-[13px] font-bold text-[#0F172A]">Action Needed</h3>
+            <div className="h-7 w-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+              <ShieldAlert className="h-3.5 w-3.5" />
+            </div>
+          </div>
+          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{actionNeededCount}</div>
+        </Card>
+
+        {/* Renewals Needed */}
+        <Card onClick={() => setStatusFilter("EXPIRING")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#F59E0B] ${statusFilter === "EXPIRING" ? "ring-2 ring-[#F59E0B] bg-amber-50" : ""}`}>
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-[13px] font-bold text-[#0F172A]">Renewals Needed</h3>
+            <div className="h-7 w-7 rounded-lg bg-[#FEF3C7] flex items-center justify-center text-[#F59E0B]">
+              <AlertTriangle className="h-3.5 w-3.5" />
+            </div>
+          </div>
+          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{expiringCount}</div>
+        </Card>
+
         {/* Active */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
+        <Card onClick={() => setStatusFilter("ACTIVE")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#10B981] ${statusFilter === "ACTIVE" ? "ring-2 ring-[#10B981]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-[13px] font-bold text-[#0F172A]">Active</h3>
             <div className="h-7 w-7 rounded-lg bg-[#DCFCE7] flex items-center justify-center text-[#10B981]">
@@ -210,19 +269,8 @@ export default function LeasesDashboard({
           <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{activeCount}</div>
         </Card>
 
-        {/* Pending */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Pending</h3>
-            <div className="h-7 w-7 rounded-lg bg-[#FEF3C7] flex items-center justify-center text-[#F59E0B]">
-              <Clock className="h-3.5 w-3.5" />
-            </div>
-          </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{pendingCount}</div>
-        </Card>
-
         {/* Expired */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
+        <Card onClick={() => setStatusFilter("EXPIRED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "EXPIRED" ? "ring-2 ring-[#EF4444]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-[13px] font-bold text-[#0F172A]">Expired</h3>
             <div className="h-7 w-7 rounded-lg bg-[#FEE2E2] flex items-center justify-center text-[#EF4444]">
@@ -233,7 +281,7 @@ export default function LeasesDashboard({
         </Card>
 
         {/* Terminated */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
+        <Card onClick={() => setStatusFilter("TERMINATED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "TERMINATED" ? "ring-2 ring-[#EF4444]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-[13px] font-bold text-[#0F172A]">Terminated</h3>
             <div className="h-7 w-7 rounded-lg bg-[#FEE2E2] flex items-center justify-center text-[#EF4444]">
@@ -241,17 +289,6 @@ export default function LeasesDashboard({
             </div>
           </div>
           <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{terminatedCount}</div>
-        </Card>
-
-        {/* Expiring */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Expiring</h3>
-            <div className="h-7 w-7 rounded-lg bg-[#FEF3C7] flex items-center justify-center text-[#F59E0B]">
-              <AlertTriangle className="h-3.5 w-3.5" />
-            </div>
-          </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{expiringCount}</div>
         </Card>
       </div>
 
@@ -451,13 +488,16 @@ export default function LeasesDashboard({
                 </div>
 
                 {/* Quick Actions */}
-                <div className="mt-4 pt-4 border-t border-[#F1F5F9] flex gap-2">
-                  <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
-                    <Eye className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Details
-                  </Button>
-                  <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
-                    <FileText className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Invoice
-                  </Button>
+                <div className="mt-4 pt-4 border-t border-[#F1F5F9] flex flex-col gap-2">
+                  {getQuickAction(l)}
+                  <div className="flex gap-2 w-full">
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
+                      <Eye className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Details
+                    </Button>
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
+                      <FileText className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Invoice
+                    </Button>
+                  </div>
                 </div>
               </Card>
             )})}
@@ -485,7 +525,9 @@ export default function LeasesDashboard({
                     if (l.status === "ACTIVE") {
                       if (daysLeft <= 0) {
                         daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
-                      } else if (daysLeft <= 30) {
+                      } else if (daysLeft <= 15) {
+                        daysBadge = <span className="text-[#EF4444] font-black text-sm">{daysLeft} days</span>;
+                      } else if (daysLeft <= 60) {
                         daysBadge = <span className="text-[#F59E0B] font-medium text-sm">{daysLeft} days</span>;
                       } else {
                         daysBadge = <span className="text-[#10B981] font-medium text-sm">{daysLeft} days</span>;
@@ -549,34 +591,37 @@ export default function LeasesDashboard({
                         {daysBadge}
                       </TableCell>
                       <TableCell className="py-4 text-right pr-6">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#64748B] transition-colors focus:outline-none">
-                            <MoreVertical className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg">
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
-                              <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
-                              <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
-                              <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
-                              <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
-                            </DropdownMenuItem>
-                            {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
-                              <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                        <div className="flex justify-end items-center gap-2">
+                          {getQuickAction(l)}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#64748B] transition-colors focus:outline-none border border-transparent hover:border-[#E2E8F0]">
+                              <MoreVertical className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                                <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                               </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                                <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
                               </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                                <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                                <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
+                              </DropdownMenuItem>
+                              {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
+                                <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                  <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                  <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )})}

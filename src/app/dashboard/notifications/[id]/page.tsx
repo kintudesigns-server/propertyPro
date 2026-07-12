@@ -77,24 +77,35 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       });
     }
   } else if (type === "APPLICATION" || t.includes("application")) {
-    if (id) {
+    if (userRole === "TENANT") {
       actions.push({
-        href: `/dashboard/applications/${id}`,
-        label: "View Application Details",
-        description: "Open the full tenant application, review submitted documents, and approve or reject.",
+        href: `/dashboard/tenant/applications`,
+        label: "View My Applications",
+        description: "Track the status of your submitted rental applications.",
         Icon: ClipboardList,
         color: "bg-blue-50",
         textColor: "text-blue-600",
       });
+    } else {
+      if (id) {
+        actions.push({
+          href: `/dashboard/applications/${id}`,
+          label: "View Application Details",
+          description: "Open the full tenant application, review submitted documents, and approve or reject.",
+          Icon: ClipboardList,
+          color: "bg-blue-50",
+          textColor: "text-blue-600",
+        });
+      }
+      actions.push({
+        href: `/dashboard/applications`,
+        label: "Go to Applications Ledger",
+        description: "Browse all pending, approved, and rejected applications in one place.",
+        Icon: Users,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
     }
-    actions.push({
-      href: `/dashboard/tenants/applications`,
-      label: "Go to Applications Ledger",
-      description: "Browse all pending, approved, and rejected applications in one place.",
-      Icon: Users,
-      color: "bg-slate-50",
-      textColor: "text-slate-600",
-    });
   }
 
   // ── Maintenance ────────────────────────────

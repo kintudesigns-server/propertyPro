@@ -257,6 +257,7 @@ async function main() {
   const tenantMoveOutCompleted = await prisma.user.create({ data: { email: "tenant_mo_inspected@propertypro.test", name: "Inspected Ian", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 710, annualIncome: 62000, ssn: encrypt("222-33-4444") } });
   const tenantMoveOutAccepted = await prisma.user.create({ data: { email: "tenant_mo_accepted@propertypro.test", name: "Accepted Amy", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 720, annualIncome: 65000, ssn: encrypt("333-44-5555") } });
   const tenantMoveOutDisputed = await prisma.user.create({ data: { email: "tenant_mo_disputed@propertypro.test", name: "Disputed Dan", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 730, annualIncome: 68000, ssn: encrypt("444-55-6666") } });
+  const tenantMoveOutPending = await prisma.user.create({ data: { email: "tenant_mo_pending@propertypro.test", name: "Pending Penny", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 700, annualIncome: 60000, ssn: encrypt("555-66-7777") } });
 
   // Additional units for these leases
   const propB = await prisma.property.create({
@@ -267,7 +268,8 @@ async function main() {
         { name: "201", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
         { name: "202", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
         { name: "203", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
-        { name: "204", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
+        { name: "204", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "205", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
       ]}
     },
     include: { units: true }
@@ -302,6 +304,20 @@ async function main() {
     data: {
       unitId: propB.units[3].id, tenantId: tenantMoveOutDisputed.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
       moveOutStatus: "TENANT_DISPUTED", moveOutRequestDate: dateBefore(4), moveOutDate: dateBefore(3), moveOutReason: "End of lease", inspectionDate: dateBefore(3), inspectionNotes: "Broken window blind.", tenantDisputeNote: "I have photos proving the blind was broken before I moved in.", deductions: [{ amount: 150, description: "Window blind replacement" }]
+    }
+  });
+
+  // Lease E5: NOTICE_GIVEN (Limbo State with unpaid invoice)
+  const leasePending = await prisma.lease.create({
+    data: {
+      unitId: propB.units[4].id, tenantId: tenantMoveOutPending.id, status: "NOTICE_GIVEN", startDate: dateBefore(12), endDate: dateAfter(14), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "MOVE_OUT_REQUESTED", moveOutRequestDate: dateBefore(1), moveOutDate: dateAfter(14), moveOutReason: "Job transfer"
+    }
+  });
+
+  await prisma.invoice.create({
+    data: {
+      leaseId: leasePending.id, amount: 2000, dueDate: dateBefore(5), status: "UNPAID", invoiceType: "RENT", note: "Final month rent unpaid"
     }
   });
 

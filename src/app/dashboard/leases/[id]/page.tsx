@@ -339,6 +339,57 @@ export default function LeaseDetailsPage() {
         </Card>
       )}
 
+      {/* Owner banner: Limbo State for Move-Out */}
+      {isOwner && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h4 className="font-extrabold text-base flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
+              {lease.status === "NOTICE_GIVEN" ? "Move-Out Pending" : "Lease Terminated"}
+            </h4>
+            <p className="text-sm font-semibold opacity-90 mt-1">
+              {lease.status === "NOTICE_GIVEN" 
+                ? `Tenant is scheduled to move out on ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Reminder: Schedule a final walkthrough and prepare to process their final disposition statement.`
+                : "This lease has ended and the unit is vacant."}
+            </p>
+          </div>
+          {lease.status === "NOTICE_GIVEN" && (
+            <Button
+              onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+            >
+              Process Final Statement
+            </Button>
+          )}
+        </Card>
+      )}
+
+      {/* Tenant banner: Limbo State for Move-Out */}
+      {isTenant && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h4 className="font-extrabold text-base flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
+              {lease.status === "NOTICE_GIVEN" ? "Move-Out Scheduled" : "Lease Terminated"}
+            </h4>
+            <p className="text-sm font-semibold opacity-90 mt-1">
+              {lease.status === "NOTICE_GIVEN" 
+                ? `Your move-out is scheduled for ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Please ensure the unit is deep cleaned, all personal items are removed, and keys are left on the kitchen counter to ensure a full deposit refund.`
+                : "Your lease is officially terminated and the final security deposit statement has been processed."}
+            </p>
+          </div>
+          {lease.status === "TERMINATED" && (
+            <Button
+              onClick={() => router.push(`/dashboard/tenant/leases/${lease.id}/move-out`)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              View Final Deposit Statement
+            </Button>
+          )}
+        </Card>
+      )}
+
       {/* Header Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-[24px] shadow-sm border border-[#E2E8F0]">
         <div className="flex items-center gap-4">
@@ -467,7 +518,13 @@ export default function LeaseDetailsPage() {
 
       {/* Tabs */}
       <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1 bg-[#F1F5F9] rounded-[16px] w-max">
-        {(isTenant ? ['overview', 'payments', 'documents'] : ['overview', 'payments', 'documents', 'settings']).map(tab => (
+        {(() => {
+          let baseTabs = isTenant ? ['overview', 'payments', 'documents'] : ['overview', 'payments', 'documents', 'settings'];
+          if (lease.moveOutStatus !== "NONE") {
+            baseTabs.push('move-out');
+          }
+          return baseTabs;
+        })().map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -1016,6 +1073,53 @@ export default function LeaseDetailsPage() {
               <p className="text-[#64748B] max-w-sm font-medium">The lease agreement must be signed and activated before the official PDF is available.</p>
             </Card>
           )}
+        </div>
+      )}
+
+      {/* Move-Out Tab Content */}
+      {activeTab === 'move-out' && lease.moveOutStatus !== "NONE" && (
+        <div className="space-y-6">
+          <Card className="p-6 rounded-[24px] shadow-sm border-[#E2E8F0]">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-[#F59E0B]" /> Move-Out Request Details
+                </h2>
+                <p className="text-sm text-[#64748B] mt-1 font-medium">Review the tenant's move-out request and generate a final disposition statement.</p>
+              </div>
+              <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-xl font-bold h-10 px-5 shadow-sm">
+                Generate Final Statement
+              </Button>
+            </div>
+
+            {lease.isShortNotice && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-bold text-red-900">Short Notice Detected</h3>
+                    <p className="text-sm text-red-700 mt-1">The tenant requested a move-out date that is less than the required {lease.moveOutNoticeDays} days notice. You may apply an Early Termination Fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)} on their final statement.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Requested Move-Out Date</p>
+                <p className="text-base font-black text-[#0F172A] mt-1">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : 'N/A'}</p>
+              </div>
+              <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Reason for Moving</p>
+                <p className="text-base font-bold text-[#0F172A] mt-1">{lease.moveOutReason || 'N/A'}</p>
+              </div>
+              <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] md:col-span-2">
+                <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Forwarding Address</p>
+                <p className="text-sm font-bold text-[#0F172A] mt-1 whitespace-pre-wrap">{lease.forwardingAddress || 'Not provided'}</p>
+                <p className="text-[10px] text-amber-600 font-bold uppercase mt-2">* Required for mailing the security deposit refund</p>
+              </div>
+            </div>
+          </Card>
         </div>
       )}
 
