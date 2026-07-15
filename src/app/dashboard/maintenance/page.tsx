@@ -10,9 +10,12 @@ import { Wrench, Search, Clock, Calendar, CheckCircle2, MoreHorizontal, Eye, Edi
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 
 export default function MaintenancePage() {
+  const { data: session } = useSession();
+  const ownerId = (session?.user as any)?.id;
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
   const [inspectors, setInspectors] = useState<any[]>([]);
@@ -432,25 +435,33 @@ export default function MaintenancePage() {
                         {getStatusBadge(req.status)}
                       </td>
                       <td className="px-4 py-4">
-                        {req.inspector ? (
-                          <span className="font-medium text-[#0F172A]">{req.inspector.name}</span>
-                        ) : req.externalVendor ? (
-                          <span className="font-medium text-blue-600 flex items-center gap-1"><Wrench className="h-3 w-3" /> {req.externalVendor.name}</span>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                              Unassigned
+                        <div className="flex flex-col gap-1">
+                          {req.inspector && (
+                            <span className="text-xs font-medium text-[#0F172A] flex items-center gap-1">
+                              🕵️ {req.inspector.name} <span className="text-[10px] text-slate-400 font-bold">(Inspector)</span>
                             </span>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
-                              className="h-7 px-2 text-xs font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg"
-                            >
-                              Assign
-                            </Button>
-                          </div>
-                        )}
+                          )}
+                          {req.externalVendor && (
+                            <span className="text-xs font-medium text-blue-600 flex items-center gap-1">
+                              <Wrench className="h-3 w-3" /> {req.externalVendor.name} <span className="text-[10px] text-blue-400 font-bold">(Vendor)</span>
+                            </span>
+                          )}
+                          {!req.inspector && !req.externalVendor && (
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                Unassigned
+                              </span>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
+                                className="h-6 px-1.5 text-xs font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg shadow-none border-none"
+                              >
+                                Assign
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-1.5 text-[#64748B] font-medium text-[13px]">
@@ -463,19 +474,26 @@ export default function MaintenancePage() {
                           <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
+                          <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1.5 z-50">
                             <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
                               <Eye className="h-4 w-4 text-[#64748B]" />
                               View Details
                             </DropdownMenuItem>
+                            {req.status === "AWAITING_APPROVAL" && (
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-bold text-amber-600 p-2 rounded-lg hover:bg-amber-50 focus:bg-amber-50">
+                                ⚡ Review &amp; Approve
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
                               <Edit className="h-4 w-4 text-[#64748B]" />
                               Edit Request
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                              <UserPlus className="h-4 w-4" />
-                              {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
-                            </DropdownMenuItem>
+                            {!req.externalVendorId && (
+                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
+                                <UserPlus className="h-4 w-4" />
+                                {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
+                              </DropdownMenuItem>
+                            )}
                             <div className="h-px bg-[#E2E8F0] my-1" />
                             <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
                               <XCircle className="h-4 w-4" />
@@ -514,12 +532,19 @@ export default function MaintenancePage() {
                         {/* 1. Dispatch Vendor & Assignments (Only if not closed) */}
                         {req.status !== "CLOSED" && req.status !== "RESOLVED" && (
                           <>
+                            {req.status === "AWAITING_APPROVAL" && (
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-bold text-amber-600 p-2 rounded-lg hover:bg-amber-50 focus:bg-amber-50">
+                                ⚡ Review &amp; Approve
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
                               <Send className="h-4 w-4" /> Dispatch Vendor
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                              <UserPlus className="h-4 w-4 text-[#64748B]" /> {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
-                            </DropdownMenuItem>
+                            {!req.externalVendorId && (
+                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
+                                <UserPlus className="h-4 w-4 text-[#64748B]" /> {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
+                              </DropdownMenuItem>
+                            )}
                             <div className="h-px bg-[#E2E8F0] my-1" />
                           </>
                         )}
@@ -567,33 +592,53 @@ export default function MaintenancePage() {
                     </div>
                     
                     <div className="space-y-3 pt-2">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                          <UserPlus className="h-4 w-4 text-slate-500" />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">{req.externalVendor ? "Vendor" : "Inspector"}</p>
-                          {req.inspector ? (
+                      {req.inspector && (
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                            <UserPlus className="h-4 w-4 text-slate-500" />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Inspector</p>
                             <p className="font-semibold text-[#0F172A] text-sm">{req.inspector.name}</p>
-                          ) : req.externalVendor ? (
-                            <p className="font-semibold text-blue-600 text-sm flex items-center gap-1.5"><Wrench className="h-3.5 w-3.5" /> {req.externalVendor.name}</p>
-                          ) : (
+                          </div>
+                        </div>
+                      )}
+
+                      {req.externalVendor && (
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                            <Wrench className="h-4 w-4 text-blue-500" />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Vendor</p>
+                            <p className="font-semibold text-blue-600 text-sm flex items-center gap-1.5">{req.externalVendor.name}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {!req.inspector && !req.externalVendor && (
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                            <UserPlus className="h-4 w-4 text-slate-500" />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Assignment</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
                                 Needs Assignment
                               </span>
                               <Button 
                                 size="sm" 
                                 variant="ghost" 
                                 onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
-                                className="h-6 px-2 text-[11px] font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg"
+                                className="h-6 px-2 text-[11px] font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg shadow-none border-none"
                               >
                                 Assign
                               </Button>
                             </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
@@ -607,9 +652,61 @@ export default function MaintenancePage() {
                     </div>
                     
                     <div className="pt-4 mt-2 border-t border-[#F1F5F9]">
-                      <Button onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} variant="outline" className="w-full text-blue-600 border-blue-200 hover:bg-blue-50 font-semibold rounded-xl">
-                        View Details
-                      </Button>
+                      {req.status === "SUBMITTED" ? (
+                        <div className="flex gap-2 w-full">
+                          <Button 
+                            onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
+                            variant="outline" 
+                            className="flex-1 text-slate-700 border-slate-200 hover:bg-slate-50 font-bold rounded-xl text-xs h-10 shadow-none text-center"
+                          >
+                            Assign Inspector
+                          </Button>
+                          <Button 
+                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
+                          >
+                            Dispatch Vendor
+                          </Button>
+                        </div>
+                      ) : req.status === "AWAITING_APPROVAL" ? (
+                        <Button 
+                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                          className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none animate-pulse text-center"
+                        >
+                          ⚡ Review &amp; Approve Estimate
+                        </Button>
+                      ) : req.status === "RESOLVED" ? (
+                        <Button 
+                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
+                        >
+                          💳 Settle &amp; Close Ticket
+                        </Button>
+                      ) : req.status === "ASSIGNED" && !req.externalVendor ? (
+                        <div className="flex gap-2 w-full">
+                          <Button 
+                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                            variant="outline" 
+                            className="flex-1 text-slate-500 border-slate-200 hover:bg-slate-50 font-bold rounded-xl text-xs h-10 shadow-none text-center"
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            disabled 
+                            className="flex-1 bg-slate-105 text-slate-400 font-bold rounded-xl text-xs h-10 shadow-none cursor-not-allowed text-center"
+                          >
+                            Awaiting Diagnosis...
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                          variant="outline" 
+                          className="w-full text-slate-600 border-slate-200 hover:bg-slate-50 font-bold rounded-xl text-xs h-10 shadow-none text-center"
+                        >
+                          {req.status === "CLOSED" ? "View History" : "Track Progress..."}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -631,14 +728,13 @@ export default function MaintenancePage() {
                 <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
                 <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
                   <SelectTrigger className="w-full h-12 bg-white border-[#E2E8F0] rounded-xl focus:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm">
-                    <SelectValue placeholder="Select an inspector">
-                      {selectedInspectorId === "none" || !selectedInspectorId
-                        ? ""
-                        : inspectors.find((i) => i.id === selectedInspectorId)?.name || selectedInspectorId}
-                    </SelectValue>
+                    <SelectValue placeholder="Select an inspector" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[#E2E8F0]">
                     <SelectItem value="none">Leave unassigned</SelectItem>
+                    {ownerId && (
+                      <SelectItem value={ownerId}>Assign to Me (Self)</SelectItem>
+                    )}
                     {inspectors.map((ins) => (
                       <SelectItem key={ins.id} value={ins.id}>{ins.name}</SelectItem>
                     ))}

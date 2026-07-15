@@ -95,6 +95,7 @@ export async function GET(req: NextRequest) {
       whereClause.tenantId = userId;
     } else if (role === "INSPECTOR") {
       whereClause.inspectorId = userId;
+      whereClause.externalVendorId = null;
     }
 
     if (isEmergency) {
@@ -308,6 +309,16 @@ export async function PUT(req: NextRequest) {
     const owner = fullRequest.unit.property.owner;
     const requesterRole = (session.user as any).role;
 
+    // Handle Quick Resolve (Skip Diagnosis/Estimates)
+    if (action === "QUICK_RESOLVE") {
+      updateData.status = "RESOLVED";
+      updateData.finalLabor = updateData.finalLabor !== undefined ? parseFloat(updateData.finalLabor) : 0;
+      updateData.finalMaterials = updateData.finalMaterials !== undefined ? parseFloat(updateData.finalMaterials) : 0;
+      updateData.inspectorNotes = updateData.inspectorNotes || "Resolved directly without preliminary estimate.";
+      updateData.rescheduleRequested = false;
+      updateData.tenantConfirmedSchedule = false;
+    }
+
     // Handle tenant confirmation of scheduled visit
     if (updateData.tenantConfirmedSchedule === true && !fullRequest.tenantConfirmedSchedule) {
       updateData.rescheduleRequested = false;
@@ -451,15 +462,26 @@ export async function PUT(req: NextRequest) {
     }
 
     // Process dates or numbers if present
-    if (updateData.estimatedCost) {
-      updateData.estimatedCost = parseFloat(updateData.estimatedCost);
+    const estLabor = updateData.estimatedLabor !== undefined ? Number(updateData.estimatedLabor) : Number(fullRequest.estimatedLabor || 0);
+    const estMaterials = updateData.estimatedMaterials !== undefined ? Number(updateData.estimatedMaterials) : Number(fullRequest.estimatedMaterials || 0);
+    const totalEstimate = estLabor + estMaterials;
+
+    if (updateData.estimatedLabor !== undefined || updateData.estimatedMaterials !== undefined) {
+      updateData.estimatedLabor = estLabor;
+      updateData.estimatedMaterials = estMaterials;
+      
       const isEmergency = (updateData.priority || fullRequest.priority) === "EMERGENCY";
       const limit = isEmergency
         ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
         : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
 
-      if (updateData.estimatedCost > limit && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
-        updateData.status = "AWAITING_APPROVAL";
+      // If frontend asks for approval but it's under the limit, auto-approve it
+      if ((updateData.status === "PENDING_APPROVAL" || updateData.status === "AWAITING_APPROVAL") && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
+        if (totalEstimate <= limit) {
+          updateData.status = "APPROVED";
+        } else {
+          updateData.status = "AWAITING_APPROVAL"; // Standardize on AWAITING_APPROVAL
+        }
       }
     }
 

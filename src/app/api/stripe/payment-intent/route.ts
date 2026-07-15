@@ -54,8 +54,11 @@ export async function POST(req: NextRequest) {
     if (!stripe) throw new Error("Stripe not initialized");
 
     const paymentCategory = invoice.invoiceType === "DEPOSIT" ? "DEPOSIT" : "RENT";
+    
+    // Fetch user to get stripeCustomerId
+    const user = await prisma.user.findUnique({ where: { id: (session.user as any).id } });
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntentParams: any = {
       amount: amountInCents,
       currency: "usd",
       metadata: {
@@ -72,7 +75,13 @@ export async function POST(req: NextRequest) {
       },
       description: `${paymentCategory === "DEPOSIT" ? "Security Deposit" : "Rent"} - ${invoice.lease.unit.property.name} (${invoice.lease.unit.name})`,
       automatic_payment_methods: { enabled: true },
-    });
+    };
+
+    if (user?.stripeCustomerId) {
+      paymentIntentParams.customer = user.stripeCustomerId;
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

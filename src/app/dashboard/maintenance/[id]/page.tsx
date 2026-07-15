@@ -28,6 +28,8 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
   const [paymentMethod, setPaymentMethod] = useState("CASH"); // STRIPE, CASH, CHECK
   const [referenceNote, setReferenceNote] = useState("");
   const isTenant = (session?.user as any)?.role === "TENANT";
+  const role = (session?.user as any)?.role;
+  const isOwnerOrAdmin = role === "OWNER" || role === "SUPERADMIN";
 
   const fetchTicket = () => {
     setLoading(true);
@@ -575,7 +577,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
 
             {/* Financial Approval Block for Owner */}
-            {!isTenant && request.status === "AWAITING_APPROVAL" && (
+            {isOwnerOrAdmin && request.status === "AWAITING_APPROVAL" && (
               <div className="p-5 bg-orange-50 border border-orange-200 rounded-xl mt-6">
                 <h3 className="font-bold text-orange-900 mb-2">Estimate Requires Approval</h3>
                 <p className="text-sm text-orange-800 mb-4">The inspector has submitted a repair estimate. You must approve it before work can begin.</p>
@@ -1047,7 +1049,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Vendor Dispatch Section for Owner/Inspector */}
-          {!isTenant && (
+          {isOwnerOrAdmin && (
             <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
                 <h3 className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide flex items-center gap-2">

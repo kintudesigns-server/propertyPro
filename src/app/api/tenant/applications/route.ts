@@ -31,7 +31,28 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    return NextResponse.json(applications);
+    const tenantUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    const enrichedApplications = await Promise.all(
+      applications.map(async (app) => {
+        let lease = null;
+        if (tenantUser && (app.status === "APPROVED" || app.status === "LEASE_CREATED")) {
+          lease = await prisma.lease.findFirst({
+            where: {
+              unitId: app.unitId,
+              tenantId: tenantUser.id,
+              status: { notIn: ["TERMINATED", "EXPIRED"] }
+            },
+            orderBy: { startDate: 'desc' }
+          });
+        }
+        return { ...app, lease };
+      })
+    );
+
+    return NextResponse.json(enrichedApplications);
   } catch (error: any) {
     console.error("Error fetching tenant applications:", error);
     return NextResponse.json({ error: "Failed to fetch applications" }, { status: 500 });

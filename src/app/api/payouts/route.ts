@@ -6,6 +6,7 @@ import { PayoutStatus } from "@prisma/client";
 import { notify, notifyMany } from "@/lib/notify";
 import { getStripe } from "@/lib/stripe";
 import { maskBankDetails } from "@/lib/sanitization";
+import { encryptSymmetric } from "@/lib/encryption";
 import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {
@@ -178,16 +179,18 @@ export async function GET(req: NextRequest) {
       prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "PENDING" }, _sum: { amount: true } }),
     ]);
 
-    // Mask account numbers for non-admins
-    const maskedPayouts = role !== "SUPERADMIN"
-      ? payouts.map((p: any) => {
-          if (p.accountNumber) {
-            const masked = maskBankDetails(p.accountNumber, null);
-            return { ...p, accountNumber: masked.accountNumber };
-          }
-          return p;
-        })
-      : payouts;
+    // Mask account numbers for ALL ROLES via DB-level obfuscation,
+    // Since the actual DB record is AES encrypted, we just return a masked string here.
+    const maskedPayouts = payouts.map((p: any) => {
+      // If it's a tenant refund via STRIPE, it's not encrypted bank data, but token.
+      if (p.bankName === "STRIPE") return p;
+      if (p.accountNumber) {
+         // Since it is an encrypted string in the DB (like hex string), we can't do slice(-4) on the raw number.
+         // We'll just display a standard mask.
+         return { ...p, accountNumber: "••••••••" };
+      }
+      return p;
+    });
 
     return NextResponse.json({
       payouts: maskedPayouts,
@@ -247,6 +250,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Insufficient balance in ledger" }, { status: 400 });
     }
 
+    // Encrypt the sensitive bank account number securely at rest
+    const encryptedAccountNumber = encryptSymmetric(accountNumber);
+
     // Create payout request and subtract from owner active balance in a transaction
     const [payout] = await prisma.$transaction([
       prisma.payoutRequest.create({
@@ -254,7 +260,7 @@ export async function POST(req: NextRequest) {
           ownerId,
           amount: withdrawAmount,
           bankName,
-          accountNumber,
+          accountNumber: encryptedAccountNumber,
           accountName,
           status: PayoutStatus.PENDING,
         },

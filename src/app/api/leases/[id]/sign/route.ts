@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { auditLog } from "@/lib/audit-log";
 
+import { otpStore } from "@/lib/otpStore";
+
 export async function POST(req: NextRequest, ctx: any) {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "TENANT") {
@@ -15,15 +17,36 @@ export async function POST(req: NextRequest, ctx: any) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { signatureImageUrl } = body;
+    const { signatureImageUrl, otp } = body;
 
     // FIX #11 — Block empty/missing signatures
-    if (!signatureImageUrl || typeof signatureImageUrl !== "string" || signatureImageUrl.length < 100) {
+    if (!signatureImageUrl || typeof signatureImageUrl !== "string" || signatureImageUrl.length < 10) {
       return NextResponse.json(
-        { error: "A valid drawn signature is required to execute this lease." },
+        { error: "A valid signature is required to execute this lease." },
         { status: 400 }
       );
     }
+
+    if (!otp) {
+      return NextResponse.json({ error: "OTP verification code is required." }, { status: 400 });
+    }
+
+    const storedOtpData = otpStore.get(id as string);
+    if (!storedOtpData) {
+      return NextResponse.json({ error: "OTP not found or expired. Please request a new one." }, { status: 400 });
+    }
+
+    if (Date.now() > storedOtpData.expiresAt) {
+      otpStore.delete(id as string);
+      return NextResponse.json({ error: "OTP has expired. Please request a new one." }, { status: 400 });
+    }
+
+    if (storedOtpData.code !== otp.toString().trim()) {
+      return NextResponse.json({ error: "Invalid OTP code." }, { status: 400 });
+    }
+
+    // OTP verified successfully, clear it
+    otpStore.delete(id as string);
 
     const lease = await prisma.lease.findUnique({
       where: { id },
@@ -38,19 +61,9 @@ export async function POST(req: NextRequest, ctx: any) {
       return NextResponse.json({ error: "Lease is not pending signature" }, { status: 400 });
     }
 
-    // FIX #2 — Require security deposit to be paid before signing
-    if (
-      lease.securityDeposit &&
-      Number(lease.securityDeposit) > 0 &&
-      (!lease.depositPaidAt || Number(lease.depositPaidAmount || 0) <= 0)
-    ) {
-      return NextResponse.json(
-        {
-          error: `Your security deposit of $${Number(lease.securityDeposit).toFixed(2)} must be paid before you can sign this lease. Please complete your deposit payment first.`,
-        },
-        { status: 400 }
-      );
-    }
+    // In the real world, tenants usually sign the lease first to legally bind the agreement, 
+    // and then the security deposit becomes due. 
+    // We removed the code that blocked signing before the deposit was paid.
 
     // FIX #1 — Lease goes SIGNED (not ACTIVE). Unit becomes RESERVED (not OCCUPIED).
     // Lease activates only when the owner confirms key handover OR via cron on moveInDate/startDate.

@@ -34,7 +34,12 @@ import {
   Users,
   ImageIcon,
   Map as MapIcon,
-  Sparkle
+  Sparkle,
+  Briefcase,
+  GraduationCap,
+  Wallet,
+  Lock,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -138,10 +143,33 @@ export default function ListingsPage() {
   const [jobTitle, setJobTitle] = useState("");
   const [monthlyIncome, setMonthlyIncome] = useState("");
   const [employmentStatus, setEmploymentStatus] = useState("EMPLOYED");
+  
+  // Guarantor States
+  const [hasGuarantor, setHasGuarantor] = useState(false);
+  const [guarantorName, setGuarantorName] = useState("");
+  const [guarantorEmail, setGuarantorEmail] = useState("");
+  const [guarantorPhone, setGuarantorPhone] = useState("");
+  const [guarantorIncome, setGuarantorIncome] = useState("");
+
   const [prevLandlordName, setPrevLandlordName] = useState("");
   const [prevLandlordPhone, setPrevLandlordPhone] = useState("");
   const [prevLandlordEmail, setPrevLandlordEmail] = useState("");
   const [reasonForMoving, setReasonForMoving] = useState("");
+
+  // Emergency Contact States
+  const [emergencyContactName, setEmergencyContactName] = useState("");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [emergencyContactRelation, setEmergencyContactRelation] = useState("");
+
+  // Consent States
+  const [backgroundCheckConsent, setBackgroundCheckConsent] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // Document States
+  const [idDocument, setIdDocument] = useState<File | null>(null);
+  const [incomeProofDocument, setIncomeProofDocument] = useState<File | null>(null);
+  const [guarantorIdDocument, setGuarantorIdDocument] = useState<File | null>(null);
+  const [guarantorIncomeProofDocument, setGuarantorIncomeProofDocument] = useState<File | null>(null);
   const [petsCount, setPetsCount] = useState("0");
   const [petDetails, setPetDetails] = useState("");
   const [vehicleInfo, setVehicleInfo] = useState("");
@@ -150,8 +178,24 @@ export default function ListingsPage() {
   const [customMake, setCustomMake] = useState("");
   const [customModel, setCustomModel] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  const [hasVehicle, setHasVehicle] = useState(false);
   const [models, setModels] = useState<string[]>([]);
   const [modelsLoading, setModelsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (employmentStatus === "STUDENT") {
+      setHasGuarantor(true);
+    }
+  }, [employmentStatus]);
+
+  useEffect(() => {
+    if (monthlyIncome && selectedUnit) {
+      const ratio = Number(monthlyIncome) / Number(selectedUnit.rentAmount);
+      if (ratio < 1.5) {
+        setHasGuarantor(true);
+      }
+    }
+  }, [monthlyIncome, selectedUnit]);
 
   useEffect(() => {
     setVehicleModel("");
@@ -413,8 +457,30 @@ export default function ListingsPage() {
       toast.error("Please provide your monthly income.");
       return;
     }
-    if (!applicantDoc) {
-      toast.error("Please upload a supporting document (ID or pay stub) to submit your application.");
+    if (hasGuarantor) {
+      if (!guarantorName || !guarantorEmail || !guarantorPhone || !guarantorIncome) {
+        toast.error("Please fill in all guarantor details.");
+        return;
+      }
+    }
+
+    if (!emergencyContactName || !emergencyContactPhone || !emergencyContactRelation) {
+      toast.error("Please provide an emergency contact.");
+      return;
+    }
+
+    if (!backgroundCheckConsent || !agreedToTerms) {
+      toast.error("You must agree to the background check and terms to apply.");
+      return;
+    }
+
+    if (!idDocument || !incomeProofDocument) {
+      const docErr = employmentStatus === "STUDENT" 
+        ? "Please upload both Government ID and Proof of Student Enrollment to submit your application." 
+        : (employmentStatus === "UNEMPLOYED" 
+            ? "Please upload both Government ID and Proof of Assets/Bank Statement to submit your application." 
+            : "Please upload both Government ID and Proof of Income to submit your application.");
+      toast.error(docErr);
       return;
     }
 
@@ -443,20 +509,59 @@ export default function ListingsPage() {
 
     setApplying(true);
     try {
-      let documentUrls: string[] = [];
-      if (applicantDoc) {
-        const formData = new FormData();
-        formData.append("file", applicantDoc);
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+      let idUrl = "";
+      let incomeUrl = "";
 
+      // Upload ID Document
+      if (idDocument) {
+        const formData = new FormData();
+        formData.append("file", idDocument);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
         if (uploadRes.ok) {
           const { url } = await uploadRes.json();
-          documentUrls.push(url);
+          idUrl = url;
         } else {
-          toast.error("Failed to upload document. Proceeding without it.");
+          toast.error("Failed to upload Government ID.");
+          setApplying(false);
+          return;
+        }
+      }
+
+      // Upload Income Proof
+      if (incomeProofDocument) {
+        const formData = new FormData();
+        formData.append("file", incomeProofDocument);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          incomeUrl = url;
+        } else {
+          toast.error("Failed to upload Proof of Income.");
+          setApplying(false);
+          return;
+        }
+      }
+
+      let guarantorIdUrl = "";
+      let guarantorIncomeUrl = "";
+
+      if (hasGuarantor && guarantorIdDocument) {
+        const formData = new FormData();
+        formData.append("file", guarantorIdDocument);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          guarantorIdUrl = url;
+        }
+      }
+
+      if (hasGuarantor && guarantorIncomeProofDocument) {
+        const formData = new FormData();
+        formData.append("file", guarantorIncomeProofDocument);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          guarantorIncomeUrl = url;
         }
       }
 
@@ -468,13 +573,20 @@ export default function ListingsPage() {
           name: applicantName,
           email: applicantEmail,
           phone: applicantPhone,
-          documents: documentUrls,
+          documents: [idUrl, incomeUrl, guarantorIdUrl, guarantorIncomeUrl].filter(Boolean),
+          idDocumentUrl: idUrl,
+          incomeProofUrl: incomeUrl,
           leaseDuration,
           moveInDate: moveInDate || null,
           occupantsCount,
           employerName: employmentStatus === "EMPLOYED" ? employerName : (employmentStatus === "STUDENT" ? "Student (Source: " + employerName + ")" : "Unemployed (Source: " + employerName + ")"),
           jobTitle: employmentStatus === "EMPLOYED" ? jobTitle : employmentStatus,
           monthlyIncome: monthlyIncome || null,
+          hasGuarantor,
+          guarantorName,
+          guarantorEmail,
+          guarantorPhone,
+          guarantorIncome,
           prevLandlordName: prevLandlordName || null,
           prevLandlordPhone: prevLandlordPhone || null,
           prevLandlordEmail: prevLandlordEmail || null,
@@ -482,6 +594,11 @@ export default function ListingsPage() {
           petsCount,
           petDetails: petDetails || null,
           vehicleInfo: combinedVehicleInfo || null,
+          emergencyContactName,
+          emergencyContactPhone,
+          emergencyContactRelation,
+          backgroundCheckConsent,
+          agreedToTerms
         }),
       });
 
@@ -512,6 +629,21 @@ export default function ListingsPage() {
         setCustomMake("");
         setCustomModel("");
         setVehiclePlate("");
+        setHasVehicle(false);
+        setHasGuarantor(false);
+        setGuarantorName("");
+        setGuarantorEmail("");
+        setGuarantorPhone("");
+        setGuarantorIncome("");
+        setEmergencyContactName("");
+        setEmergencyContactPhone("");
+        setEmergencyContactRelation("");
+        setBackgroundCheckConsent(false);
+        setAgreedToTerms(false);
+        setIdDocument(null);
+        setIncomeProofDocument(null);
+        setGuarantorIdDocument(null);
+        setGuarantorIncomeProofDocument(null);
         setFormStep(1);
       } else {
         const err = await res.json();
@@ -1064,102 +1196,154 @@ export default function ListingsPage() {
           setSubmittedAppId(null);
         }
       }}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white border-0 text-slate-800 !w-screen !h-[100dvh] !max-w-none sm:!max-w-none !rounded-none !p-0 !flex flex-col md:flex-row !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-hidden shadow-none outline-none">
           {submittedAppId ? (
-            <div className="space-y-6 py-4 text-center w-full max-w-full overflow-hidden">
-              <div className="mx-auto h-16 w-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-2">
-                <CheckCircle2 className="h-10 w-10 text-blue-600 animate-bounce" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-800 tracking-tight">Application Submitted!</h3>
-                <p className="text-xs text-slate-400 font-semibold max-w-sm mx-auto leading-relaxed px-4">
-                  Your application for {selectedUnit?.name} is successfully received and under landlord review.
-                </p>
-              </div>
-
-              {/* Secure tracking link widget */}
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl space-y-2 text-left w-full min-w-0">
-                <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  <span>Guest Tracking Link</span>
-                  <span className="text-blue-600 font-bold">Secure</span>
+            <div className="flex-1 flex items-center justify-center p-6 bg-slate-50">
+              <div className="bg-white p-10 rounded-3xl border border-slate-100 shadow-xl max-w-md w-full text-center space-y-6">
+                <div className="mx-auto h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-2 shadow-inner">
+                  <CheckCircle2 className="h-10 w-10 text-blue-600 animate-bounce" />
                 </div>
-                <div className="flex items-center gap-2 bg-white border border-slate-100 p-2 rounded-xl min-w-0">
-                  <span className="text-[11px] font-semibold text-slate-600 truncate flex-1 min-w-0">
-                    {typeof window !== "undefined" ? `${window.location.origin}/listings/apply/track?id=${submittedAppId}` : `http://localhost:3000/listings/apply/track?id=${submittedAppId}`}
-                  </span>
-                  <button
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">Application Received!</h3>
+                  <p className="text-sm text-slate-500 font-semibold leading-relaxed">
+                    Your application for <strong>{selectedUnit?.name}</strong> has been securely submitted to the landlord for review.
+                  </p>
+                </div>
+
+                {/* Secure tracking link widget */}
+                <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3 text-left w-full shadow-sm">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <span>Secure Tracking Link</span>
+                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Encrypted</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white border border-slate-200 p-2.5 rounded-xl shadow-inner">
+                    <span className="text-xs font-semibold text-slate-600 truncate flex-1 pl-1">
+                      {typeof window !== "undefined" ? `${window.location.origin}/listings/apply/track?id=${submittedAppId}` : `http://localhost:3000/listings/apply/track?id=${submittedAppId}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/listings/apply/track?id=${submittedAppId}`);
+                        toast.success("Tracking link copied to clipboard!");
+                      }}
+                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 shrink-0 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                    Bookmark this link to securely track landlord decisions, background check status, and to sign lease drafts.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 pt-4">
+                  <Link href={`/listings/apply/track?id=${submittedAppId}`} className="w-full">
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                      onClick={() => {
+                        setDialogOpen(false);
+                        setSubmittedAppId(null);
+                      }}
+                    >
+                      Go to Live Tracker
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
                     type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/listings/apply/track?id=${submittedAppId}`);
-                      toast.success("Tracking link copied to clipboard!");
-                    }}
-                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
-                  >
-                    <Share2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <p className="text-[9px] text-slate-400 font-semibold leading-relaxed">
-                  * Bookmark this link to view landlord decisions, sign lease drafts, and secure the property. We've also logged a confirmation request details.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 pt-2">
-                <Link href={`/listings/apply/track?id=${submittedAppId}`} className="w-full">
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-600/90 text-white font-bold h-11 rounded-xl transition-colors flex items-center justify-center gap-2 text-xs"
                     onClick={() => {
                       setDialogOpen(false);
                       setSubmittedAppId(null);
                     }}
+                    className="text-slate-500 hover:text-slate-700 font-bold text-sm h-12"
                   >
-                    Go to Live Status Tracker
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    Return to Listings
                   </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    setSubmittedAppId(null);
-                  }}
-                  className="text-slate-400 hover:text-slate-500 font-bold text-xs"
-                >
-                  Close Window
-                </Button>
+                </div>
               </div>
             </div>
           ) : (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-lg font-extrabold flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-blue-600" />
-                  Apply for {selectedUnit?.name}
-                </DialogTitle>
-                <DialogDescription className="text-slate-400 text-xs font-semibold">
-                  Complete the 3-step screening form. The landlord of {selectedUnit?.property.name} will review your application.
-                </DialogDescription>
-              </DialogHeader>
+              {/* Left Sidebar - Context & Stepper (Hidden on mobile) */}
+              <div className="hidden md:flex flex-col w-[350px] lg:w-[450px] bg-slate-50 border-r border-slate-200 shrink-0 relative overflow-y-auto overflow-x-hidden">
+                {/* Background Image Accent */}
+                <div className="absolute top-0 left-0 right-0 h-64 z-0">
+                  <img src={selectedUnit?.images?.[0] || selectedUnit?.property?.coverPhoto || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80'} className="w-full h-full object-cover opacity-30" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50"></div>
+                </div>
+                
+                <div className="relative z-10 flex flex-col h-full p-8 lg:p-12">
+                  <div className="mb-12">
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight mb-2">Apply for<br/>{selectedUnit?.property?.name || 'Property'}</h2>
+                    <div className="flex items-center gap-2 text-slate-600 font-bold mb-6">
+                      <span className="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-sm">Unit {selectedUnit?.name}</span>
+                      <span className="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-sm text-blue-700">${Number(selectedUnit?.rentAmount || 0).toLocaleString()}/mo</span>
+                    </div>
+                  </div>
 
-              {/* Step indicator */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mt-4 mb-3">
-                <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">
-                  Step {formStep} of 3
-                </span>
-                <span className="text-xs text-slate-500 font-bold">
-                  {formStep === 1 && "Personal & Preferences"}
-                  {formStep === 2 && "Finances & Verification"}
-                  {formStep === 3 && "References & Compliance"}
-                </span>
+                  {/* Vertical Stepper */}
+                  <div className="flex-1 space-y-8">
+                    {[
+                      { step: 1, title: "Personal & Preferences", desc: "Basic contact info" },
+                      { step: 2, title: "Finances & Guarantor", desc: "Income verification" },
+                      { step: 3, title: "History & Contacts", desc: "Previous landlord" },
+                      { step: 4, title: "Document Upload", desc: "ID & Proof of Income" },
+                      { step: 5, title: "Review & Consent", desc: "Background check authorization" }
+                    ].map((s) => (
+                      <div key={s.step} className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+                            formStep > s.step ? 'bg-blue-600 text-white shadow-md' :
+                            formStep === s.step ? 'bg-blue-100 text-blue-700 ring-4 ring-blue-50' :
+                            'bg-white text-slate-400 border border-slate-200'
+                          }`}>
+                            {formStep > s.step ? <CheckCircle2 className="h-4 w-4" /> : s.step}
+                          </div>
+                          {s.step < 5 && <div className={`w-0.5 h-full my-1 rounded-full ${formStep > s.step ? 'bg-blue-600' : 'bg-slate-200'}`}></div>}
+                        </div>
+                        <div className={`pb-8 ${formStep === s.step ? 'opacity-100' : 'opacity-60'}`}>
+                          <h4 className={`text-sm font-extrabold ${formStep === s.step ? 'text-slate-900' : 'text-slate-500'}`}>{s.title}</h4>
+                          <p className="text-xs font-semibold text-slate-400 mt-0.5">{s.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto bg-blue-50 rounded-2xl p-4 border border-blue-100 flex gap-3 items-start">
+                    <Lock className="h-5 w-5 text-blue-600 shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-blue-900">256-bit Encryption</p>
+                      <p className="text-[10px] font-semibold text-blue-600 mt-0.5">Your sensitive data is encrypted in transit and at rest.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              {/* Simple progress bar */}
-              <div className="w-full bg-slate-100 h-1.5 rounded-full mb-6 overflow-hidden">
-                <div 
-                  className="bg-blue-600 h-full transition-all duration-300"
-                  style={{ width: `${(formStep / 3) * 100}%` }}
-                />
-              </div>
+
+              {/* Right Panel - Form */}
+              <div className="flex-1 flex flex-col h-full overflow-y-auto bg-white relative">
+                <div className="max-w-2xl w-full mx-auto p-6 md:p-12 lg:p-16 flex flex-col min-h-full">
+                  
+                  {/* Mobile Header (Hidden on Desktop) */}
+                  <div className="md:hidden mb-8 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-black text-slate-900">Apply</h2>
+                      <Button variant="ghost" size="icon" onClick={() => setDialogOpen(false)} className="rounded-full bg-slate-50 text-slate-500"><X className="h-5 w-5"/></Button>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">Step {formStep} of 5</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${(formStep / 5) * 100}%` }} />
+                    </div>
+                  </div>
+                  
+                  {/* Desktop close button */}
+                  <div className="hidden md:flex justify-end mb-8">
+                    <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold text-sm bg-slate-50 hover:bg-slate-100 rounded-full px-4 h-9">
+                      Close
+                    </Button>
+                  </div>
 
               <form onSubmit={handleApplySubmit} className="space-y-4 text-left">
                 {formStep === 1 && (
@@ -1253,6 +1437,7 @@ export default function ListingsPage() {
                           id="moveInDate"
                           type="date"
                           value={moveInDate}
+                          min={new Date().toISOString().split('T')[0]}
                           onChange={(e) => setMoveInDate(e.target.value)}
                           className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 text-xs focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
                           required
@@ -1288,25 +1473,34 @@ export default function ListingsPage() {
                 )}
 
                 {formStep === 2 && (
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="employmentStatus" className="text-xs font-bold text-slate-700">
-                        Current Status <span className="text-red-500 font-extrabold">*</span>
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-black text-slate-900">
+                        What is your primary status? <span className="text-red-500">*</span>
                       </Label>
-                      <select
-                        id="employmentStatus"
-                        value={employmentStatus}
-                        onChange={(e) => {
-                          setEmploymentStatus(e.target.value);
-                          setEmployerName("");
-                          setJobTitle("");
-                        }}
-                        className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                      >
-                        <option value="EMPLOYED">Employed / Self-Employed</option>
-                        <option value="STUDENT">Student</option>
-                        <option value="UNEMPLOYED">Unemployed / Other</option>
-                      </select>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                          { id: 'EMPLOYED', label: 'Employed', desc: 'W2 or 1099', icon: <Briefcase className="h-5 w-5"/> },
+                          { id: 'STUDENT', label: 'Student', desc: 'Financial Aid / Loans', icon: <GraduationCap className="h-5 w-5"/> },
+                          { id: 'UNEMPLOYED', label: 'Other', desc: 'Savings / Benefits', icon: <Wallet className="h-5 w-5"/> }
+                        ].map((s) => (
+                          <div 
+                            key={s.id}
+                            onClick={() => {
+                              setEmploymentStatus(s.id);
+                              setEmployerName("");
+                              setJobTitle("");
+                            }}
+                            className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all ${employmentStatus === s.id ? 'border-blue-600 bg-blue-50 shadow-sm' : 'border-slate-100 hover:border-blue-200 bg-white'}`}
+                          >
+                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${employmentStatus === s.id ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                              {s.icon}
+                            </div>
+                            <span className={`text-sm font-bold ${employmentStatus === s.id ? 'text-blue-900' : 'text-slate-700'}`}>{s.label}</span>
+                            <span className={`text-xs font-semibold mt-0.5 ${employmentStatus === s.id ? 'text-blue-600' : 'text-slate-400'}`}>{s.desc}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {employmentStatus === "EMPLOYED" ? (
@@ -1366,63 +1560,164 @@ export default function ListingsPage() {
                         className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
                         required
                       />
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>Supporting Document (ID / Pay Stub) <span className="text-red-500 font-extrabold">*</span></span>
-                        <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-full">Required</span>
-                      </Label>
+                      {monthlyIncome && selectedUnit && (() => {
+                        const ratio = Number(monthlyIncome) / Number(selectedUnit.rentAmount);
+                        let alertClass = 'bg-emerald-50 border-emerald-100';
+                        let textClass = 'text-emerald-800';
+                        let subTextClass = 'text-emerald-600';
+                        let icon = <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />;
+                        let message = "Strong applicant profile. Meets the standard 2.5x requirement.";
 
-                      {applicantDoc ? (
-                        <div className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-2xl">
-                          <div className="flex items-center gap-2 truncate">
-                            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
-                            <div className="truncate">
-                              <p className="text-xs font-bold text-slate-700 truncate max-w-[220px]">{applicantDoc.name}</p>
-                              <p className="text-[10px] text-slate-400 font-semibold">{(applicantDoc.size / 1024 / 1024).toFixed(2)} MB</p>
+                        if (ratio < 1.5) {
+                          alertClass = 'bg-rose-50 border-rose-100';
+                          textClass = 'text-rose-800';
+                          subTextClass = 'text-rose-600';
+                          icon = <Info className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />;
+                          message = "Income is severely below requirements. A Guarantor is REQUIRED.";
+                        } else if (ratio < 2.5) {
+                          alertClass = 'bg-amber-50 border-amber-100';
+                          textClass = 'text-amber-800';
+                          subTextClass = 'text-amber-700';
+                          icon = <Info className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />;
+                          message = "Income is below the recommended 2.5x threshold. We strongly suggest adding a Guarantor.";
+                        }
+
+                        return (
+                          <div className={`mt-2 p-3 rounded-xl border flex items-start gap-2 ${alertClass}`}>
+                            {icon}
+                            <div>
+                              <p className={`text-xs font-bold ${textClass}`}>
+                                Income Ratio: {ratio.toFixed(1)}x Rent
+                              </p>
+                              <p className={`text-[10px] font-semibold mt-0.5 ${subTextClass}`}>
+                                {message}
+                              </p>
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setApplicantDoc(null)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="relative group border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-2xl p-4 transition-all flex flex-col items-center justify-center gap-1.5 bg-slate-50/50 cursor-pointer">
-                          <input
-                            id="document"
-                            type="file"
-                            accept=".pdf,.png,.jpg,.jpeg"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0] || null;
-                              if (file && file.size > 5 * 1024 * 1024) {
-                                toast.error("File is too large. Max size is 5MB.");
-                                return;
-                              }
-                              setApplicantDoc(file);
-                            }}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
-                          <div className="p-2.5 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
-                            <Upload className="h-5 w-5" />
-                          </div>
-                          <p className="text-xs font-bold text-slate-700 text-center">Drag & drop or click to upload</p>
-                          <p className="text-[10px] text-slate-400 font-semibold text-center">Supported formats: PDF, PNG, JPG (Max 5MB)</p>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
+
+                    <div className="pt-6 border-t border-slate-100">
+                      {(() => {
+                        const isStudent = employmentStatus === "STUDENT";
+                        const isLowIncome = monthlyIncome && selectedUnit ? (Number(monthlyIncome) / Number(selectedUnit.rentAmount) < 1.5) : false;
+                        const isForced = isStudent || isLowIncome;
+                        
+                        return (
+                          <label className={`flex items-center justify-between p-4 bg-white border-2 border-slate-100 rounded-2xl transition-colors shadow-sm ${isForced ? "opacity-75 cursor-not-allowed" : "cursor-pointer hover:border-blue-200"}`}>
+                            <div className="flex items-center gap-3">
+                              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${hasGuarantor ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                                <Users className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <span className="text-sm font-bold text-slate-800 block">Add a Co-Signer / Guarantor</span>
+                                <span className="text-[10px] font-semibold text-slate-500">
+                                  {isForced ? (isStudent ? "Required for Student applicants" : "Required due to low income ratio") : "Recommended if income is below 2.5x rent"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${hasGuarantor ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                              <input
+                                type="checkbox"
+                                checked={hasGuarantor}
+                                disabled={isForced as boolean}
+                                onChange={(e) => setHasGuarantor(e.target.checked)}
+                                className="sr-only"
+                              />
+                              <div className={`w-4 h-4 bg-white rounded-full absolute shadow-sm transition-transform ${hasGuarantor ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </div>
+                          </label>
+                        );
+                      })()}
+                    </div>
+
+                    {hasGuarantor && (
+                      <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Guarantor Information</p>
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-bold text-slate-700">Full Name</Label>
+                            <Input
+                              placeholder="e.g. John Doe Sr."
+                              value={guarantorName}
+                              onChange={(e) => setGuarantorName(e.target.value)}
+                              className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-slate-700">Phone Number</Label>
+                              <Input
+                                placeholder="(555) 000-0000"
+                                value={guarantorPhone}
+                                onChange={(e) => setGuarantorPhone(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-slate-700">Email Address</Label>
+                              <Input
+                                placeholder="guarantor@example.com"
+                                type="email"
+                                value={guarantorEmail}
+                                onChange={(e) => setGuarantorEmail(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-bold text-slate-700">Guarantor Monthly Income ($)</Label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                              <Input
+                                placeholder="10000"
+                                type="number"
+                                value={guarantorIncome}
+                                onChange={(e) => setGuarantorIncome(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 pl-7 focus-visible:ring-1 focus-visible:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {formStep === 3 && (
                   <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label className="text-xs font-bold text-slate-700">
+                        Emergency Contact <span className="text-red-500 font-extrabold">*</span>
+                      </Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <Input
+                          placeholder="Full Name"
+                          value={emergencyContactName}
+                          onChange={(e) => setEmergencyContactName(e.target.value)}
+                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        />
+                        <Input
+                          placeholder="Phone Number"
+                          value={emergencyContactPhone}
+                          onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        />
+                        <Input
+                          placeholder="Relationship"
+                          value={emergencyContactRelation}
+                          onChange={(e) => setEmergencyContactRelation(e.target.value)}
+                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        />
+                      </div>
+                    </div>
                     <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl space-y-3">
                       <div className="flex justify-between items-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Previous Landlord Reference</p>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Previous Landlord Reference</p>
+                          <p className="text-[10px] text-blue-600 font-semibold mt-0.5">Applicants with rental history are 40% more likely to be approved.</p>
+                        </div>
                         <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider bg-slate-200/50 px-2 py-0.5 rounded-md">Optional</span>
                       </div>
                       <div className="space-y-2.5">
@@ -1458,17 +1753,28 @@ export default function ListingsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="petsCount" className="text-xs font-bold text-slate-700">
+                        <Label className="text-xs font-bold text-slate-700">
                           Number of Pets
                         </Label>
-                        <Input
-                          id="petsCount"
-                          type="number"
-                          min="0"
-                          value={petsCount}
-                          onChange={(e) => setPetsCount(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
-                        />
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPetsCount(prev => Math.max(0, Number(prev) - 1).toString())}
+                            className="h-11 w-11 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors"
+                          >
+                            <span className="text-lg font-bold">-</span>
+                          </button>
+                          <div className="flex-1 h-11 bg-white border border-slate-200 rounded-xl flex items-center justify-center font-bold text-slate-800 shadow-sm">
+                            {petsCount}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setPetsCount(prev => (Number(prev) + 1).toString())}
+                            className="h-11 w-11 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors"
+                          >
+                            <span className="text-lg font-bold">+</span>
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="petDetails" className="text-xs font-bold text-slate-700">
@@ -1476,115 +1782,355 @@ export default function ListingsPage() {
                         </Label>
                         <Input
                           id="petDetails"
-                          placeholder={Number(petsCount) > 0 ? "e.g. Golden Retriever, 40lbs (Required)" : "e.g. Golden Retriever, 40lbs"}
+                          placeholder={Number(petsCount) > 0 ? "e.g. Dog: Golden Retriever, 40lbs (Required)" : "Not applicable"}
                           value={petDetails}
                           disabled={Number(petsCount) <= 0}
                           onChange={(e) => setPetDetails(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white disabled:opacity-50"
+                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white disabled:opacity-50 disabled:bg-slate-50"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-xs font-bold text-slate-700">
-                        Vehicle Information
-                      </Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="vehicleMake" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            Make
-                          </Label>
-                          <select
-                            id="vehicleMake"
-                            value={vehicleMake}
-                            onChange={(e) => {
-                              setVehicleMake(e.target.value);
-                              setVehicleModel("");
-                              setCustomMake("");
-                              setCustomModel("");
-                            }}
-                            className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                          >
-                            <option value="">No Vehicle</option>
-                            {CAR_MAKES.map((make) => (
-                              <option key={make} value={make}>{make}</option>
-                            ))}
-                          </select>
-                        </div>
 
-                        {vehicleMake && vehicleMake !== "Other" && (
+                    <div className="pt-6 border-t border-slate-100">
+                      <label className="flex items-center justify-between cursor-pointer p-4 bg-white border-2 border-slate-100 rounded-2xl hover:border-blue-200 transition-colors shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${hasVehicle ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H8.3a2 2 0 0 0-1.6.8L4 11l-5.16.86a1 1 0 0 0-.84.99V16h3m10 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0m-6 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0"/></svg>
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-slate-800 block">Do you own a vehicle?</span>
+                            <span className="text-[10px] font-semibold text-slate-500">We need this for parking assignments</span>
+                          </div>
+                        </div>
+                        <div className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${hasVehicle ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                          <input
+                            type="checkbox"
+                            checked={hasVehicle}
+                            onChange={(e) => {
+                              setHasVehicle(e.target.checked);
+                              if (!e.target.checked) {
+                                setVehicleMake("");
+                                setVehicleModel("");
+                                setCustomMake("");
+                                setCustomModel("");
+                                setVehiclePlate("");
+                              }
+                            }}
+                            className="sr-only"
+                          />
+                          <div className={`w-4 h-4 bg-white rounded-full absolute shadow-sm transition-transform ${hasVehicle ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </div>
+                      </label>
+                    </div>
+
+                    {hasVehicle && (
+                      <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Vehicle Details</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="space-y-1.5">
-                            <Label htmlFor="vehicleModel" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              Model
+                            <Label htmlFor="vehicleMake" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Make
                             </Label>
                             <select
-                              id="vehicleModel"
-                              value={vehicleModel}
+                              id="vehicleMake"
+                              value={vehicleMake}
                               onChange={(e) => {
-                                setVehicleModel(e.target.value);
+                                setVehicleMake(e.target.value);
+                                setVehicleModel("");
+                                setCustomMake("");
                                 setCustomModel("");
                               }}
-                              disabled={modelsLoading}
-                              className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                              className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                             >
-                              {modelsLoading ? (
-                                <option value="">Loading models...</option>
-                              ) : (
-                                <>
-                                  <option value="">Select Model</option>
-                                  {models.map((model) => (
-                                    <option key={model} value={model}>{model}</option>
-                                  ))}
-                                </>
-                              )}
+                              <option value="">Select Make</option>
+                              {CAR_MAKES.map((make) => (
+                                <option key={make} value={make}>{make}</option>
+                              ))}
                             </select>
                           </div>
-                        )}
 
-                        {vehicleMake && (
-                          <div className="space-y-1.5">
-                            <Label htmlFor="vehiclePlate" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              License Plate
-                            </Label>
-                            <Input
-                              id="vehiclePlate"
-                              placeholder="e.g. ABC-123"
-                              value={vehiclePlate}
-                              onChange={(e) => setVehiclePlate(e.target.value)}
-                              className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
-                            />
+                          {vehicleMake && vehicleMake !== "Other" && (
+                            <div className="space-y-1.5">
+                              <Label htmlFor="vehicleModel" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Model
+                              </Label>
+                              <select
+                                id="vehicleModel"
+                                value={vehicleModel}
+                                onChange={(e) => {
+                                  setVehicleModel(e.target.value);
+                                  setCustomModel("");
+                                }}
+                                disabled={modelsLoading}
+                                className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                              >
+                                {modelsLoading ? (
+                                  <option value="">Loading models...</option>
+                                ) : (
+                                  <>
+                                    <option value="">Select Model</option>
+                                    {models.map((model) => (
+                                      <option key={model} value={model}>{model}</option>
+                                    ))}
+                                  </>
+                                )}
+                              </select>
+                            </div>
+                          )}
+
+                          {vehicleMake && (
+                            <div className="space-y-1.5">
+                              <Label htmlFor="vehiclePlate" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                License Plate
+                              </Label>
+                              <Input
+                                id="vehiclePlate"
+                                placeholder="e.g. ABC-123"
+                                value={vehiclePlate}
+                                onChange={(e) => setVehiclePlate(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {vehicleMake === "Other" && (
+                          <div className="grid grid-cols-2 gap-3 pt-1">
+                            <div className="space-y-1.5">
+                              <Label htmlFor="customMake" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Custom Make Name
+                              </Label>
+                              <Input
+                                id="customMake"
+                                placeholder="e.g. Kia"
+                                value={customMake}
+                                onChange={(e) => setCustomMake(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label htmlFor="customModel" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                Custom Model Name
+                              </Label>
+                              <Input
+                                id="customModel"
+                                placeholder="e.g. Telluride"
+                                value={customModel}
+                                onChange={(e) => setCustomModel(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
+                    )}
+                  </div>
+                )}
 
-                      {vehicleMake === "Other" && (
-                        <div className="grid grid-cols-2 gap-3 pt-1">
-                          <div className="space-y-1.5">
-                            <Label htmlFor="customMake" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              Custom Make Name
-                            </Label>
-                            <Input
-                              id="customMake"
-                              placeholder="e.g. Kia"
-                              value={customMake}
-                              onChange={(e) => setCustomMake(e.target.value)}
-                              className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
-                            />
+                {formStep === 4 && (
+                  <div className="space-y-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>Government ID <span className="text-red-500 font-extrabold">*</span></span>
+                        <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-full">Required</span>
+                      </Label>
+
+                      {idDocument ? (
+                        <div className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                          <div className="flex items-center gap-2 truncate">
+                            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+                            <div className="truncate">
+                              <p className="text-xs font-bold text-slate-700 truncate max-w-[220px]">{idDocument.name}</p>
+                              <p className="text-[10px] font-semibold text-slate-500">{(idDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
                           </div>
-                          <div className="space-y-1.5">
-                            <Label htmlFor="customModel" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              Custom Model Name
-                            </Label>
-                            <Input
-                              id="customModel"
-                              placeholder="e.g. Telluride"
-                              value={customModel}
-                              onChange={(e) => setCustomModel(e.target.value)}
-                              className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
-                            />
+                          <Button type="button" variant="ghost" size="sm" onClick={() => setIdDocument(null)} className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50">
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative group flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-2xl transition-colors">
+                          <input
+                            type="file" accept=".pdf,image/png,image/jpeg"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              if (file && file.size > 5 * 1024 * 1024) { toast.error("Max size is 5MB."); return; }
+                              setIdDocument(file);
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                          <div className="p-2.5 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
+                            <Upload className="h-5 w-5" />
                           </div>
+                          <p className="text-xs font-bold text-slate-700 text-center">Drag & drop Government ID</p>
+                          <p className="text-[10px] text-slate-400 font-semibold text-center">PDF, PNG, JPG (Max 5MB)</p>
                         </div>
                       )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>{employmentStatus === "STUDENT" ? "Proof of Student Enrollment / Student ID" : employmentStatus === "UNEMPLOYED" ? "Proof of Assets / Bank Statement" : "Proof of Income"} <span className="text-red-500 font-extrabold">*</span></span>
+                        <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-full">Required</span>
+                      </Label>
+
+                      {incomeProofDocument ? (
+                        <div className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                          <div className="flex items-center gap-2 truncate">
+                            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+                            <div className="truncate">
+                              <p className="text-xs font-bold text-slate-700 truncate max-w-[220px]">{incomeProofDocument.name}</p>
+                              <p className="text-[10px] font-semibold text-slate-500">{(incomeProofDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                          </div>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => setIncomeProofDocument(null)} className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50">
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative group flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-2xl transition-colors">
+                          <input
+                            type="file" accept=".pdf,image/png,image/jpeg"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              if (file && file.size > 5 * 1024 * 1024) { toast.error("Max size is 5MB."); return; }
+                              setIncomeProofDocument(file);
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                          <div className="p-2.5 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
+                            <Upload className="h-5 w-5" />
+                          </div>
+                          <p className="text-xs font-bold text-slate-700 text-center">
+                            {employmentStatus === "STUDENT" ? "Drag & drop Enrollment Letter or Student ID" : employmentStatus === "UNEMPLOYED" ? "Drag & drop Bank Statement or Asset Proof" : "Drag & drop Pay Stubs or Tax Return"}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-semibold text-center">PDF, PNG, JPG (Max 5MB)</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {hasGuarantor && (
+                      <div className="pt-6 border-t border-slate-100 space-y-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Users className="h-5 w-5 text-blue-600" />
+                          <h4 className="text-sm font-bold text-slate-800">Guarantor Documents</h4>
+                        </div>
+                        
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span>Guarantor Government ID <span className="text-red-500 font-extrabold">*</span></span>
+                            <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-full">Required</span>
+                          </Label>
+
+                          {guarantorIdDocument ? (
+                            <div className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                              <div className="flex items-center gap-2 truncate">
+                                <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+                                <div className="truncate">
+                                  <p className="text-xs font-bold text-slate-700 truncate max-w-[220px]">{guarantorIdDocument.name}</p>
+                                  <p className="text-[10px] font-semibold text-slate-500">{(guarantorIdDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                                </div>
+                              </div>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setGuarantorIdDocument(null)} className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50">
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative group flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-2xl transition-colors">
+                              <input
+                                type="file" accept=".pdf,image/png,image/jpeg"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] || null;
+                                  if (file && file.size > 5 * 1024 * 1024) { toast.error("Max size is 5MB."); return; }
+                                  setGuarantorIdDocument(file);
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                              <div className="p-2.5 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
+                                <Upload className="h-5 w-5" />
+                              </div>
+                              <p className="text-xs font-bold text-slate-700 text-center">Drag & drop Guarantor's ID</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span>Guarantor Proof of Income <span className="text-red-500 font-extrabold">*</span></span>
+                            <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-full">Required</span>
+                          </Label>
+
+                          {guarantorIncomeProofDocument ? (
+                            <div className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                              <div className="flex items-center gap-2 truncate">
+                                <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+                                <div className="truncate">
+                                  <p className="text-xs font-bold text-slate-700 truncate max-w-[220px]">{guarantorIncomeProofDocument.name}</p>
+                                  <p className="text-[10px] font-semibold text-slate-500">{(guarantorIncomeProofDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                                </div>
+                              </div>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setGuarantorIncomeProofDocument(null)} className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50">
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative group flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-2xl transition-colors">
+                              <input
+                                type="file" accept=".pdf,image/png,image/jpeg"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] || null;
+                                  if (file && file.size > 5 * 1024 * 1024) { toast.error("Max size is 5MB."); return; }
+                                  setGuarantorIncomeProofDocument(file);
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                              <div className="p-2.5 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
+                                <Upload className="h-5 w-5" />
+                              </div>
+                              <p className="text-xs font-bold text-slate-700 text-center">Drag & drop Guarantor's Pay Stubs</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {formStep === 5 && (
+                  <div className="space-y-6">
+                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl space-y-4">
+                      <p className="text-xs font-bold text-slate-800">Final Step: Legal Consents</p>
+                      
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={backgroundCheckConsent}
+                          onChange={(e) => setBackgroundCheckConsent(e.target.checked)}
+                          className="mt-1 h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300"
+                        />
+                        <div>
+                          <span className="text-xs font-bold text-slate-800">Background & Credit Check Consent</span>
+                          <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            By checking this box, I authorize PropertyPro and the landlord to run a background check, credit check, and verify my income and rental history via third-party services.
+                          </p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agreedToTerms}
+                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                          className="mt-1 h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300"
+                        />
+                        <div>
+                          <span className="text-xs font-bold text-slate-800">Terms and Conditions</span>
+                          <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            I certify that all information provided is true and correct. I understand that providing false information may result in application denial or lease termination.
+                          </p>
+                        </div>
+                      </label>
                     </div>
                   </div>
                 )}
@@ -1601,7 +2147,7 @@ export default function ListingsPage() {
                       Back
                     </Button>
                   )}
-                  {formStep < 3 && (
+                  {formStep < 5 && (
                     <Button
                       key="btn-continue"
                       type="button"
@@ -1629,30 +2175,58 @@ export default function ListingsPage() {
                             toast.error("Please provide your monthly income/allowance.");
                             return;
                           }
-                          if (!applicantDoc) {
-                            toast.error("Please upload a supporting document to verify your application.");
+                          if (hasGuarantor && (!guarantorName || !guarantorEmail || !guarantorPhone || !guarantorIncome)) {
+                            toast.error("Please fill in all guarantor details.");
+                            return;
+                          }
+                        } else if (formStep === 3) {
+                          if (!emergencyContactName || !emergencyContactPhone || !emergencyContactRelation) {
+                            toast.error("Please provide an emergency contact.");
+                            return;
+                          }
+                        } else if (formStep === 4) {
+                           if (!idDocument || !incomeProofDocument) {
+                            const docErr = employmentStatus === "STUDENT" 
+                              ? "Please upload both Government ID and Proof of Student Enrollment to submit your application." 
+                              : (employmentStatus === "UNEMPLOYED" 
+                                  ? "Please upload both Government ID and Proof of Assets/Bank Statement to submit your application." 
+                                  : "Please upload both Government ID and Proof of Income to submit your application.");
+                            toast.error(docErr);
+                            return;
+                          }
+                          if (hasGuarantor && (!guarantorIdDocument || !guarantorIncomeProofDocument)) {
+                            toast.error("Please upload both Guarantor Government ID and Guarantor Proof of Income.");
                             return;
                           }
                         }
                         setFormStep(formStep + 1);
                       }}
-                      className="flex-1 bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-all"
+                      className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-xl font-bold shadow-sm hover:shadow-md transition-all shadow-blue-600/20"
                     >
                       Continue
                     </Button>
                   )}
-                  {formStep === 3 && (
+                  {formStep === 5 && (
                     <Button
                       key="btn-submit"
                       type="submit"
-                      disabled={applying}
-                      className="flex-1 bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-all"
+                      disabled={applying || !backgroundCheckConsent || !agreedToTerms}
+                      className="flex-[2] bg-slate-900 hover:bg-slate-800 text-white h-11 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2"
                     >
-                      {applying ? "Submitting Application..." : "Submit Application"}
+                      {applying ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Application"
+                      )}
                     </Button>
                   )}
                 </div>
               </form>
+                </div>
+              </div>
             </>
           )}
         </DialogContent>

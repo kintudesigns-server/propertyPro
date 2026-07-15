@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { UnmaskAccountNumber } from "@/components/UnmaskAccountNumber";
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface PayoutRecord {
@@ -587,9 +588,9 @@ export default function AdminPayoutsPage() {
                       <TableCell className="py-5 align-top">
                         <p className="font-semibold text-slate-800 text-sm leading-snug">{po.bankName}</p>
                         <p className="text-xs text-slate-500 mt-1">{po.accountName}</p>
-                        <p className="text-[11px] text-slate-400 font-mono mt-1.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded w-fit inline-block">
-                          â€¢â€¢â€¢â€¢ {po.accountNumber?.slice(-4) || "N/A"}
-                        </p>
+                        <div className="mt-1.5">
+                          <UnmaskAccountNumber apiUrl={`/api/payouts/${po.id}/unmask`} maskedNumber={po.accountNumber || "N/A"} />
+                        </div>
                       </TableCell>
 
                       {/* Amount */}
@@ -739,7 +740,7 @@ export default function AdminPayoutsPage() {
             key: "accountConfirmed",
             icon: "ðŸ¦",
             label: "Bank details verified",
-            sublabel: `${selectedPayout.bankName} Â·Â·Â·Â· ${selectedPayout.accountNumber?.slice(-4)} confirmed with recipient`,
+            sublabel: `${selectedPayout.bankName} confirmed with recipient`,
           },
           {
             key: "amountReconciled",
@@ -859,19 +860,7 @@ export default function AdminPayoutsPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-slate-400 font-semibold">Account Number</span>
-                      <span className="text-sm font-bold text-slate-800 flex items-center gap-2 font-mono">
-                        â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ {selectedPayout.accountNumber?.slice(-4) || "N/A"}
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(selectedPayout.accountNumber);
-                            toast.success("Account number copied to clipboard");
-                          }}
-                          className="text-slate-300 hover:text-slate-500 transition-colors"
-                          title="Copy account number"
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
-                      </span>
+                      <UnmaskAccountNumber apiUrl={`/api/payouts/${selectedPayout.id}/unmask`} maskedNumber={selectedPayout.accountNumber || "N/A"} />
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                       <span className="text-xs font-bold text-slate-600">Disbursement Amount</span>
@@ -1290,17 +1279,24 @@ export default function AdminPayoutsPage() {
                   <DollarSign className="h-3.5 w-3.5" /> Bank Details
                 </p>
                 <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
-                  {[
-                    ["Bank", drawerPayout.bankName],
-                    ["Account Holder", drawerPayout.accountName],
-                    ["Account Number", `***${drawerPayout.accountNumber?.slice(-4) || "N/A"}`],
-                    ...(drawerPayout.refNumber ? [["Reference", drawerPayout.refNumber]] : []),
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between text-sm">
-                      <span className="text-slate-400 font-semibold">{label}</span>
-                      <span className="font-bold text-slate-800">{value}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400 font-semibold">Bank</span>
+                    <span className="font-bold text-slate-800">{drawerPayout.bankName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400 font-semibold">Account Holder</span>
+                    <span className="font-bold text-slate-800">{drawerPayout.accountName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400 font-semibold">Account Number</span>
+                    <UnmaskAccountNumber apiUrl={`/api/payouts/${drawerPayout.id}/unmask`} maskedNumber={drawerPayout.accountNumber || "N/A"} />
+                  </div>
+                  {drawerPayout.refNumber && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400 font-semibold">Reference</span>
+                      <span className="font-bold text-slate-800">{drawerPayout.refNumber}</span>
                     </div>
-                  ))}
+                  )}
                 </div>
               </section>
 

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sanitizeUser } from "@/lib/sanitization";
-import { encrypt } from "@/lib/encryption";
+import { encryptSymmetric as encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);

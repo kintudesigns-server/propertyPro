@@ -141,13 +141,15 @@ async function main() {
     data: {
       name: "Grand Horizon Towers", address: "100 Grand Ave", city: "Los Angeles", state: "CA", zip: "90015", country: "USA",
       ownerId: ownerFull.id, approvalStatus: "APPROVED", type: "Apartment",
+      coverPhoto: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200",
+      images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200"],
       units: { create: [
-        { name: "101", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "VACANT" },
-        { name: "102", type: "Apartment", rentAmount: 3000, depositAmt: 3500, rooms: 2, sqFootage: 1200, status: "OCCUPIED" },
-        { name: "103", type: "Apartment", rentAmount: 4500, depositAmt: 5000, rooms: 3, sqFootage: 1800, status: "OCCUPIED" },
-        { name: "104", type: "Apartment", rentAmount: 3200, depositAmt: 3500, rooms: 2, sqFootage: 1300, status: "OCCUPIED" },
-        { name: "105", type: "Apartment", rentAmount: 2800, depositAmt: 3000, rooms: 2, sqFootage: 1100, status: "OCCUPIED" },
-        { name: "106", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 1, sqFootage: 900, status: "OCCUPIED" }
+        { name: "101", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "VACANT", images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200"] },
+        { name: "102", type: "Apartment", rentAmount: 3000, depositAmt: 3500, rooms: 2, sqFootage: 1200, status: "OCCUPIED", images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200"] },
+        { name: "103", type: "Apartment", rentAmount: 4500, depositAmt: 5000, rooms: 3, sqFootage: 1800, status: "OCCUPIED", images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200"] },
+        { name: "104", type: "Apartment", rentAmount: 3200, depositAmt: 3500, rooms: 2, sqFootage: 1300, status: "OCCUPIED", images: ["https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200"] },
+        { name: "105", type: "Apartment", rentAmount: 2800, depositAmt: 3000, rooms: 2, sqFootage: 1100, status: "OCCUPIED", images: ["https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=1200"] },
+        { name: "106", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 1, sqFootage: 900, status: "OCCUPIED", images: ["https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200"] }
       ]}
     },
     include: { units: true }
@@ -163,8 +165,10 @@ async function main() {
     data: {
       name: "Sunset Villa", address: "400 Sunset Blvd", city: "Los Angeles", state: "CA", zip: "90028", country: "USA",
       ownerId: ownerFull.id, approvalStatus: "APPROVED", type: "House",
+      coverPhoto: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200",
+      images: ["https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200"],
       units: { create: [
-        { name: "Main House", type: "House", rentAmount: 5500, depositAmt: 5500, rooms: 4, sqFootage: 2800, status: "VACANT" }
+        { name: "Main House", type: "House", rentAmount: 5500, depositAmt: 5500, rooms: 4, sqFootage: 2800, status: "VACANT", images: ["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200"] }
       ]}
     },
     include: { units: true }
@@ -175,7 +179,9 @@ async function main() {
     data: {
       name: "Miami Luxury Villa", address: "500 Ocean Dr", city: "Miami", state: "FL", zip: "33139", country: "USA",
       ownerId: owner2.id, approvalStatus: "PENDING", type: "House",
-      units: { create: [{ name: "Villa A", type: "House", rentAmount: 12000, depositAmt: 20000, rooms: 6, sqFootage: 5500, status: "VACANT" }] }
+      coverPhoto: "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200",
+      images: ["https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200"],
+      units: { create: [{ name: "Villa A", type: "House", rentAmount: 12000, depositAmt: 20000, rooms: 6, sqFootage: 5500, status: "VACANT", images: ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200"] }] }
     }
   });
 
@@ -258,6 +264,8 @@ async function main() {
   const tenantMoveOutAccepted = await prisma.user.create({ data: { email: "tenant_mo_accepted@propertypro.test", name: "Accepted Amy", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 720, annualIncome: 65000, ssn: encrypt("333-44-5555") } });
   const tenantMoveOutDisputed = await prisma.user.create({ data: { email: "tenant_mo_disputed@propertypro.test", name: "Disputed Dan", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 730, annualIncome: 68000, ssn: encrypt("444-55-6666") } });
   const tenantMoveOutPending = await prisma.user.create({ data: { email: "tenant_mo_pending@propertypro.test", name: "Pending Penny", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 700, annualIncome: 60000, ssn: encrypt("555-66-7777") } });
+  const tenantMoveOutKeys = await prisma.user.create({ data: { email: "tenant_mo_keys@propertypro.test", name: "Keys Kelly", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 700, annualIncome: 60000, ssn: encrypt("666-77-8888") } });
+  const tenantMoveOutSkipped = await prisma.user.create({ data: { email: "tenant_mo_skipped@propertypro.test", name: "Skipped Scott", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 710, annualIncome: 62000, ssn: encrypt("777-88-9999") } });
 
   // Additional units for these leases
   const propB = await prisma.property.create({
@@ -269,7 +277,9 @@ async function main() {
         { name: "202", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
         { name: "203", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
         { name: "204", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
-        { name: "205", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
+        { name: "205", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "206", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "207", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
       ]}
     },
     include: { units: true }
@@ -283,11 +293,11 @@ async function main() {
     }
   });
 
-  // Lease E2: INSPECTION_COMPLETED
+  // Lease E2: OWNER_REVIEWING (Inspection Completed, zero deductions)
   await prisma.lease.create({
     data: {
       unitId: propB.units[1].id, tenantId: tenantMoveOutCompleted.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
-      moveOutStatus: "INSPECTION_COMPLETED", moveOutRequestDate: dateBefore(2), moveOutDate: dateBefore(1), moveOutReason: "End of lease", inspectionDate: dateBefore(1), inspectionNotes: "Stains on carpet in bedroom.", deductions: [{ amount: 300, description: "Carpet cleaning" }]
+      moveOutStatus: "OWNER_REVIEWING", moveOutRequestDate: dateBefore(2), moveOutDate: dateBefore(1), moveOutReason: "End of lease", inspectionDate: dateBefore(1), inspectionNotes: "Stains on carpet in bedroom.", deductions: [{ amount: 0.00, description: "Carpet cleaning", category: "CLEANING" }]
     }
   });
 
@@ -312,6 +322,23 @@ async function main() {
     data: {
       unitId: propB.units[4].id, tenantId: tenantMoveOutPending.id, status: "NOTICE_GIVEN", startDate: dateBefore(12), endDate: dateAfter(14), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
       moveOutStatus: "MOVE_OUT_REQUESTED", moveOutRequestDate: dateBefore(1), moveOutDate: dateAfter(14), moveOutReason: "Job transfer"
+    }
+  });
+
+  // Lease E6: KEYS_RETURNED (Decoupled state awaiting owner decision)
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[5].id, tenantId: tenantMoveOutKeys.id, status: "NOTICE_GIVEN", startDate: dateBefore(12), endDate: dateAfter(5), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "KEYS_RETURNED", moveOutRequestDate: dateBefore(2), moveOutDate: dateAfter(5), moveOutReason: "Bought a house", actualMoveOutDate: dateBefore(1), keyReturnConfirmedAt: dateBefore(1), depositDueBy: dateAfter(20)
+    }
+  });
+
+  // Lease E7: Skipped Inspection (Bypassed directly to owner reviewing)
+  await prisma.lease.create({
+    data: {
+      unitId: propB.units[6].id, tenantId: tenantMoveOutSkipped.id, status: "ACTIVE", startDate: dateBefore(12), endDate: dateAfter(5), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "OWNER_REVIEWING", moveOutRequestDate: dateBefore(2), moveOutDate: dateAfter(5), moveOutReason: "End of lease", actualMoveOutDate: dateBefore(1), keyReturnConfirmedAt: dateBefore(1), depositDueBy: dateAfter(20),
+      moveOutBypassReason: "Skipped physical inspection - returning full deposit", moveOutBypassAcknowledgedAt: dateBefore(1), deductions: []
     }
   });
 
@@ -431,6 +458,16 @@ async function main() {
     }
   });
 
+  // Scenario 9: Dispatched to External Vendor (Assigned to Inspector but should be filtered out of active tasks)
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u106.id, tenantId: tenantMaintenance.id, title: "Burst Pipe in Basement",
+      description: "Water leaking fast, emergency plumber dispatched.", priority: "EMERGENCY", status: "ASSIGNED",
+      category: "PLUMBING", inspectorId: inspectorBusy.id, externalVendorId: vendorPlumber.id,
+      entryPermission: true
+    }
+  });
+
   // 9. Financial Ledger Data (Historical records for dashboard charts)
   console.log("Seeding financial ledger records...");
   const rentPayments = [
@@ -501,10 +538,168 @@ async function main() {
   await prisma.notification.create({ data: { userId: tenantOverdue.id, title: "Late Fee Applied", message: "A $50.00 late fee was added to your invoice.", type: "BILLING" } });
   await prisma.notification.create({ data: { userId: admin.id, title: "Payout Request", message: "Atlas Properties LLC requested a $8,000 disbursement.", type: "BILLING" } });
 
-  // 14. Owner Applications (Admin queue)
+  // 14. Tenant Applications
+  console.log("Seeding tenant applications...");
+  await prisma.application.create({
+    data: {
+      unitId: u104.id,
+      name: "Alice Applicant",
+      email: "alice.app@example.com",
+      phone: "555-111-2222",
+      status: "PENDING",
+      leaseDuration: 12,
+      moveInDate: dateAfter(1),
+      occupantsCount: 2,
+      employerName: "Tech Corp",
+      jobTitle: "Software Engineer",
+      monthlyIncome: 8500,
+      hasGuarantor: false,
+      prevLandlordName: "Bob Builder",
+      prevLandlordPhone: "555-999-8888",
+      reasonForMoving: "Looking for a larger space",
+      petsCount: 1,
+      petDetails: "1 small dog (Pug)",
+      vehicleInfo: "2020 Honda Civic (ABC-1234)",
+      emergencyContactName: "Alan Applicant",
+      emergencyContactPhone: "555-222-3333",
+      emergencyContactRelation: "Father",
+      backgroundCheckConsent: true,
+      agreedToTerms: true,
+      idDocumentUrl: "https://example.com/alice_id.jpg",
+      incomeProofUrl: "https://example.com/alice_paystub.pdf"
+    }
+  });
+
+  await prisma.application.create({
+    data: {
+      unitId: u105.id,
+      name: "Charlie Co-Signer",
+      email: "charlie.app@example.com",
+      phone: "555-333-4444",
+      status: "APPROVED",
+      leaseDuration: 6,
+      moveInDate: dateAfter(0),
+      occupantsCount: 1,
+      employerName: "Cafe Local",
+      jobTitle: "Barista",
+      monthlyIncome: 2000,
+      hasGuarantor: true,
+      guarantorName: "Daddy Warbucks",
+      guarantorEmail: "daddy@warbucks.com",
+      guarantorPhone: "555-100-1000",
+      guarantorIncome: 25000,
+      prevLandlordName: "N/A",
+      reasonForMoving: "First apartment",
+      petsCount: 0,
+      emergencyContactName: "Daddy Warbucks",
+      emergencyContactPhone: "555-100-1000",
+      emergencyContactRelation: "Father",
+      backgroundCheckConsent: true,
+      agreedToTerms: true,
+      idDocumentUrl: "https://example.com/charlie_id.jpg",
+      incomeProofUrl: "https://example.com/charlie_bank.pdf"
+    }
+  });
+
+  await prisma.application.create({
+    data: {
+      unitId: propHouse.units[0].id,
+      name: "Denise Denied",
+      email: "denise.app@example.com",
+      phone: "555-555-5555",
+      status: "REJECTED",
+      rejectionReason: "Credit score below minimum requirement and negative landlord reference.",
+      leaseDuration: 24,
+      moveInDate: dateAfter(2),
+      occupantsCount: 4,
+      employerName: "Self Employed",
+      jobTitle: "Consultant",
+      monthlyIncome: 4000,
+      hasGuarantor: false,
+      prevLandlordName: "Angry Andy",
+      prevLandlordPhone: "555-666-7777",
+      reasonForMoving: "Evicted",
+      petsCount: 3,
+      petDetails: "3 large dogs",
+      emergencyContactName: "Brother Denied",
+      emergencyContactPhone: "555-555-5556",
+      emergencyContactRelation: "Brother",
+      backgroundCheckConsent: false, // Refused consent
+      agreedToTerms: true,
+      idDocumentUrl: "https://example.com/denise_id.jpg",
+      incomeProofUrl: "https://example.com/denise_taxes.pdf"
+    }
+  });
+
+  // 15. Owner Applications (Admin queue)
   await prisma.ownerApplication.create({ data: { name: "Pending LLC", email: "pending_owner@example.com", phone: "555-123-4567", entityType: "Property Management", portfolioSize: "1-5", status: "PENDING", trackingId: "trk_pending123" } });
   await prisma.ownerApplication.create({ data: { name: "Review Corp", email: "review_owner@example.com", phone: "555-987-6543", entityType: "Real Estate Investor", portfolioSize: "50+", status: "UNDER_REVIEW", trackingId: "trk_review456" } });
   await prisma.ownerApplication.create({ data: { name: "Rejected Solo", email: "rejected@example.com", phone: "555-000-0000", entityType: "Independent Landlord", portfolioSize: "1-5", status: "REJECTED", rejectionReason: "Invalid business license details.", trackingId: "trk_reject789" } });
+
+  // 16. Move-out Flow specific credentials
+  console.log("Seeding move-out flow specific credentials...");
+  
+  const ownerMoveOut = await prisma.user.create({
+    data: { email: "owner_moveout@propertypro.test", name: "Move-out Owner", password: passwordHash, role: Role.OWNER, bankName: "Chase Bank", accountNumber: encrypt("123123123"), accountName: "Owner Escrow", balance: 50000, currentTierId: proTierId, subscriptionStatus: "Active", accountStatus: "ACTIVE", creditScore: 780, hasCompletedOnboarding: true, onboardingStep: 4 }
+  });
+
+  const inspectorMoveOut = await prisma.user.create({
+    data: { email: "inspector_moveout@propertypro.test", name: "Inspector Moveout", password: passwordHash, role: Role.INSPECTOR, phone: "+1 555-444-5555" }
+  });
+
+  const tenantOwnerInspect = await prisma.user.create({
+    data: { email: "tenant_owner_inspect@propertypro.test", name: "Owner Inspect Tenant", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 750, annualIncome: 90000, ssn: encrypt("111-22-3333") }
+  });
+
+  const tenantDamages = await prisma.user.create({
+    data: { email: "tenant_damages@propertypro.test", name: "Damages Tenant", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 750, annualIncome: 90000, ssn: encrypt("111-22-3334") }
+  });
+
+  const tenantNoDamage = await prisma.user.create({
+    data: { email: "tenant_nodamage@propertypro.test", name: "No Damage Tenant", password: passwordHash, role: Role.TENANT, tenantStatus: "Active", creditScore: 750, annualIncome: 90000, ssn: encrypt("111-22-3335") }
+  });
+
+  const propMoveOut = await prisma.property.create({
+    data: {
+      name: "Move-Out Focus Apartments", address: "100 Moveout Ave", city: "Los Angeles", state: "CA", zip: "90001", country: "USA", ownerId: ownerMoveOut.id, approvalStatus: "APPROVED", type: "Apartment",
+      units: { create: [
+        { name: "M101", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "M102", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" },
+        { name: "M103", type: "Apartment", rentAmount: 2000, depositAmt: 2500, rooms: 1, sqFootage: 800, status: "OCCUPIED" }
+      ]}
+    },
+    include: { units: true }
+  });
+
+  // Scenario 1: Owner self inspect (no inspector assigned)
+  await prisma.lease.create({
+    data: {
+      unitId: propMoveOut.units[0].id, tenantId: tenantOwnerInspect.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "MOVE_OUT_REQUESTED", moveOutRequestDate: dateBefore(2), moveOutDate: dateAfter(0), moveOutReason: "End of lease",
+      forwardingAddress: "789 Tenant Move Way, San Jose, CA 95112", refundMethod: "OFFLINE", refundBankName: "Chase Bank", refundAccountName: "Owner Inspect Refund", refundAccountNumber: encrypt("123456789"),
+      cleaningAcknowledgedAt: dateBefore(2), utilitiesAcknowledgedAt: dateBefore(2)
+    }
+  });
+
+  // Scenario 2: Inspector sees damages (INSPECTION_SCHEDULED, inspector assigned)
+  await prisma.lease.create({
+    data: {
+      unitId: propMoveOut.units[1].id, tenantId: tenantDamages.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "INSPECTION_SCHEDULED", moveOutRequestDate: dateBefore(3), moveOutDate: dateBefore(1), moveOutReason: "End of lease", moveOutInspectorId: inspectorMoveOut.id, preliminaryInspectorId: inspectorMoveOut.id, preliminaryInspectionStatus: "SCHEDULED", inspectionDate: dateAfter(1),
+      forwardingAddress: "456 Damages Rd, Los Angeles, CA 90025", refundMethod: "OFFLINE", refundBankName: "Bank of America", refundAccountName: "Damages Tenant Refund", refundAccountNumber: encrypt("987654321"),
+      cleaningAcknowledgedAt: dateBefore(3), utilitiesAcknowledgedAt: dateBefore(3)
+    }
+  });
+
+  // Scenario 3: No damage there (INSPECTION_SCHEDULED, inspector assigned)
+  await prisma.lease.create({
+    data: {
+      unitId: propMoveOut.units[2].id, tenantId: tenantNoDamage.id, status: "ACTIVE", startDate: dateBefore(12), endDate: new Date(), monthlyRent: 2000, securityDeposit: 2500, depositPaidAt: dateBefore(12), depositPaidAmount: 2500, depositBalance: 2500, depositStatus: "HELD",
+      moveOutStatus: "INSPECTION_SCHEDULED", moveOutRequestDate: dateBefore(4), moveOutDate: dateBefore(2), moveOutReason: "End of lease", moveOutInspectorId: inspectorMoveOut.id, preliminaryInspectorId: inspectorMoveOut.id, preliminaryInspectionStatus: "SCHEDULED", inspectionDate: dateAfter(1),
+      forwardingAddress: "321 Clean Street, San Francisco, CA 94103", refundMethod: "OFFLINE", refundBankName: "Wells Fargo", refundAccountName: "No Damage Tenant Refund", refundAccountNumber: encrypt("555444333"),
+      cleaningAcknowledgedAt: dateBefore(4), utilitiesAcknowledgedAt: dateBefore(4)
+    }
+  });
 
   console.log("==========================================");
   console.log("✅ SANDBOX COMPREHENSIVE SEED COMPLETE!");

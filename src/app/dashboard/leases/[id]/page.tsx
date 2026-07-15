@@ -5,11 +5,16 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound } from "lucide-react";
+import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, CheckCircle2, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { generateLeasePDF } from "@/lib/pdfGenerator";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { ScheduleInspectionModal } from "@/components/modals/ScheduleInspectionModal";
+import { SelfInspectionModal } from "@/components/modals/SelfInspectionModal";
 
 export default function LeaseDetailsPage() {
   const params = useParams();
@@ -22,6 +27,88 @@ export default function LeaseDetailsPage() {
   const isTenant = (session?.user as any)?.role === "TENANT";
   const isOwner = (session?.user as any)?.role === "OWNER";
   const [activatingLease, setActivatingLease] = useState(false);
+
+  const [inspectors, setInspectors] = useState<any[]>([]);
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [schedulingInspection, setSchedulingInspection] = useState(false);
+
+  // Self-Inspection State
+  const [showSelfInspectionModal, setShowSelfInspectionModal] = useState(false);
+  const [submittingSelfInspection, setSubmittingSelfInspection] = useState(false);
+
+  // Preliminary Walkthrough State
+  const [showSchedulePreliminaryModal, setShowSchedulePreliminaryModal] = useState(false);
+  const [showPreliminarySelfInspectModal, setShowPreliminarySelfInspectModal] = useState(false);
+  const [showPrelimResultsModal, setShowPrelimResultsModal] = useState(false);
+
+  const [showKeyReturnModal, setShowKeyReturnModal] = useState(false);
+  const [actualMoveOutDate, setActualMoveOutDate] = useState("");
+  const [confirmingKeyReturn, setConfirmingKeyReturn] = useState(false);
+
+  useEffect(() => {
+    if (isOwner) {
+      fetch("/api/users?role=INSPECTOR")
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to load inspectors");
+        })
+        .then((data) => setInspectors(data))
+        .catch((err) => console.error(err));
+    }
+  }, [isOwner]);
+
+
+
+  const handleConfirmKeyReturn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actualMoveOutDate) {
+      toast.error("Please select the actual move-out date");
+      return;
+    }
+    setConfirmingKeyReturn(true);
+    try {
+      const res = await fetch(`/api/leases/${lease.id}/confirm-key-return`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actualMoveOutDate })
+      });
+      if (res.ok) {
+        toast.success("Key return confirmed and legal deadline set!");
+        setShowKeyReturnModal(false);
+        setActualMoveOutDate("");
+        fetchLease();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to confirm key return");
+      }
+    } catch {
+      toast.error("Error confirming key return");
+    } finally {
+      setConfirmingKeyReturn(false);
+    }
+  };
+
+  const [skippingInspection, setSkippingInspection] = useState(false);
+
+  const handleSkipInspection = async () => {
+    if (!confirm("Are you sure you want to skip the inspection? This will advance the move-out process directly to settlement with ZERO deductions. You will not be able to claim damages later. Proceed?")) return;
+    
+    setSkippingInspection(true);
+    try {
+      const res = await fetch(`/api/leases/${lease.id}/skip-inspection`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Inspection skipped. No deductions recorded.");
+        fetchLease();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to skip inspection");
+      }
+    } catch {
+      toast.error("Error skipping inspection");
+    } finally {
+      setSkippingInspection(false);
+    }
+  };
 
   const handleActivateLease = async () => {
     if (!confirm("Confirm that the tenant has physically received the keys and has moved in. This will activate the lease and mark the unit as Occupied.")) return;
@@ -46,9 +133,13 @@ export default function LeaseDetailsPage() {
   const [showSignModal, setShowSignModal] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [signatureConsent, setSignatureConsent] = useState(false);
-  const [signStep, setSignStep] = useState(1); // 1=terms, 2=draw signature, 3=confirm
+  const [signStep, setSignStep] = useState(1); // 1=terms, 2=draw/type, 3=confirm, 4=otp
   const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
   const [canvasSignatureData, setCanvasSignatureData] = useState<string | null>(null);
+  const [signatureMode, setSignatureMode] = useState<"draw" | "type">("draw");
+  const [typedSignature, setTypedSignature] = useState("");
+  const [otp, setOtp] = useState("");
+  
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const isDrawingRef = React.useRef(false);
   const lastPosRef = React.useRef({ x: 0, y: 0 });
@@ -73,7 +164,7 @@ export default function LeaseDetailsPage() {
     if (params.id) fetchLease();
   }, [params.id]);
 
-  const handleConfirmSignLease = async () => {
+  const handleRequestOtp = async () => {
     if (!signatureName.trim() || !signatureConsent) {
       toast.error("Please provide your signature and agree to the terms.");
       return;
@@ -83,15 +174,55 @@ export default function LeaseDetailsPage() {
       return;
     }
 
-    // Use the captured signature from state (since canvas is unmounted in Step 3)
-    const signatureImageUrl = canvasSignatureData;
+    setSigning(true);
+    try {
+      const res = await fetch(`/api/leases/${lease.id}/send-otp`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Verification code sent to your email.");
+        setSignStep(4);
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to send verification code.");
+      }
+    } catch (err) {
+      toast.error("Error sending OTP.");
+    } finally {
+      setSigning(false);
+    }
+  };
+
+  const handleVerifyOtpAndSign = async () => {
+    if (!otp.trim() || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit verification code.");
+      return;
+    }
+
+    // Determine the signature image URL
+    let signatureImageUrl = canvasSignatureData;
+    if (signatureMode === "type") {
+      // Create a temporary canvas to render the typed signature
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 600;
+      tempCanvas.height = 200;
+      const ctx = tempCanvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#F8FAFC"; // Light background
+        ctx.fillRect(0, 0, 600, 200);
+        ctx.fillStyle = "#1E293B"; // Dark ink
+        ctx.font = "60px 'Caveat', cursive, Brush Script MT";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(typedSignature || signatureName, 300, 100);
+        signatureImageUrl = tempCanvas.toDataURL();
+      }
+    }
 
     setSigning(true);
     try {
       const res = await fetch(`/api/leases/${lease.id}/sign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signatureImageUrl }),
+        body: JSON.stringify({ signatureImageUrl, otp }),
       });
       if (res.ok) {
         toast.success("Lease signed successfully! Welcome to your new home.");
@@ -99,6 +230,7 @@ export default function LeaseDetailsPage() {
         setSignStep(1);
         setHasScrolledTerms(false);
         setCanvasSignatureData(null);
+        setOtp("");
         fetchLease();
       } else {
         const err = await res.json();
@@ -262,6 +394,15 @@ export default function LeaseDetailsPage() {
     }
   };
 
+  const getDaysUntilMoveIn = () => {
+    if (!lease?.startDate) return 0;
+    const start = new Date(lease.startDate);
+    start.setHours(0,0,0,0);
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    return Math.ceil((start.getTime() - now.getTime()) / (1000 * 3600 * 24));
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-2 sm:px-0">
       {/* Top Nav */}
@@ -272,6 +413,79 @@ export default function LeaseDetailsPage() {
         <span>/</span>
         <span className="text-[#0F172A] truncate max-w-[200px]">Lease {lease.id.substring(0, 8)}...</span>
       </div>
+
+      {/* ── PRE-MOVE-IN DASHBOARD ── */}
+      {isTenant && lease.status === "SIGNED" && getDaysUntilMoveIn() > 0 && (
+        <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 sm:p-10 shadow-xl text-white relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10">
+            <KeyRound className="w-64 h-64" />
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
+              <div>
+                <span className="bg-white/20 text-indigo-50 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-white/10">Pre-Move-In Journey</span>
+                <h2 className="text-3xl font-black mt-3">Welcome to your new home!</h2>
+                <p className="text-indigo-100 mt-1 max-w-xl text-sm leading-relaxed">Your lease is signed and your move-in date is locked. Complete the onboarding checklist below to ensure a smooth transition into your new unit.</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl text-center min-w-[140px] shrink-0">
+                <p className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Move-in Date</p>
+                <p className="text-4xl font-black">{getDaysUntilMoveIn()}</p>
+                <p className="text-indigo-200 text-sm font-semibold">Days to go</p>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><CheckCircle2 className="w-5 h-5" /> Your Onboarding Checklist</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 opacity-70">
+                  <div className="h-8 w-8 rounded-full bg-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle className="h-5 w-5 text-indigo-900" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-white line-through">Sign Lease Agreement</p>
+                    <p className="text-xs text-indigo-200">Completed on {new Date(lease.updatedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${!unpaidDepositInvoice ? 'bg-emerald-400' : 'bg-amber-400 border-2 border-white'}`}>
+                    {!unpaidDepositInvoice ? <CheckCircle className="h-5 w-5 text-indigo-900" /> : <div className="h-2 w-2 rounded-full bg-amber-900" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-bold ${!unpaidDepositInvoice ? 'text-white line-through opacity-70' : 'text-amber-300'}`}>Pay Security Deposit</p>
+                    <p className="text-xs text-indigo-200">{!unpaidDepositInvoice ? 'Payment received' : 'Action required to secure the unit'}</p>
+                  </div>
+                  {unpaidDepositInvoice && (
+                    <Button onClick={() => router.push(`/dashboard/payments/pay-rent`)} size="sm" className="bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-lg text-xs">
+                      Pay Now
+                    </Button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 opacity-50">
+                   <div className="h-8 w-8 rounded-full border-2 border-indigo-200 flex items-center justify-center shrink-0">
+                   </div>
+                   <div className="flex-1">
+                     <p className="font-bold text-white">Pay First Month's Rent</p>
+                     <p className="text-xs text-indigo-200">Invoice will be available on your start date ({new Date(lease.startDate).toLocaleDateString()})</p>
+                   </div>
+                </div>
+
+                <div className="flex items-center gap-4 opacity-50">
+                   <div className="h-8 w-8 rounded-full border-2 border-indigo-200 flex items-center justify-center shrink-0">
+                   </div>
+                   <div className="flex-1">
+                     <p className="font-bold text-white">Pick up keys</p>
+                     <p className="text-xs text-indigo-200">Available on move-in day after all payments clear</p>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Action Banner — Step 1: Sign first, Step 2: Pay deposit */}
       {isTenant && lease.status === "PENDING_SIGNATURE" && (
@@ -296,7 +510,7 @@ export default function LeaseDetailsPage() {
       )}
 
       {/* Action Banner — Step 2: Pay deposit after signing */}
-      {isTenant && lease.status === "ACTIVE" && unpaidDepositInvoice && (
+      {isTenant && (lease.status === "ACTIVE" || lease.status === "SIGNED") && unpaidDepositInvoice && (
         <Card className="p-5 rounded-[20px] shadow-sm border bg-blue-50 border-blue-200 text-blue-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h4 className="font-extrabold text-base flex items-center gap-2">
@@ -348,19 +562,360 @@ export default function LeaseDetailsPage() {
               {lease.status === "NOTICE_GIVEN" ? "Move-Out Pending" : "Lease Terminated"}
             </h4>
             <p className="text-sm font-semibold opacity-90 mt-1">
-              {lease.status === "NOTICE_GIVEN" 
-                ? `Tenant is scheduled to move out on ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Reminder: Schedule a final walkthrough and prepare to process their final disposition statement.`
+              {lease.status === "NOTICE_GIVEN"
+                ? `Tenant is scheduled to move out on ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Use the pipeline below to manage each step.`
                 : "This lease has ended and the unit is vacant."}
             </p>
           </div>
-          {lease.status === "NOTICE_GIVEN" && (
+          {lease.status === "TERMINATED" && (
             <Button
               onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
               className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
             >
-              Process Final Statement
+              View Final Statement
             </Button>
           )}
+        </Card>
+      )}
+
+      {/* Optional: Preliminary Walkthrough */}
+      {isOwner && ["MOVE_OUT_REQUESTED", "KEYS_RETURNED"].includes(lease.moveOutStatus) && lease.preliminaryInspectionStatus !== "SKIPPED" && (
+        <Card className="p-5 rounded-[20px] shadow-sm border bg-purple-50 border-purple-200 text-purple-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h4 className="font-extrabold text-base flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-purple-600" />
+              Optional: Preliminary Walkthrough
+            </h4>
+            <p className="text-sm font-semibold opacity-90 mt-1">
+              {lease.preliminaryInspectionStatus === "NONE" 
+                ? "Offer the tenant a preliminary walkthrough to identify issues before they move out." 
+                : lease.preliminaryInspectionStatus === "SCHEDULED" 
+                  ? `Preliminary Walkthrough is scheduled for ${lease.preliminaryInspectionDate ? new Date(lease.preliminaryInspectionDate).toLocaleString() : "TBD"}.`
+                  : "Preliminary Walkthrough has been completed."}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            {lease.preliminaryInspectionStatus === "NONE" && (
+              <>
+                <Button
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to skip the preliminary walkthrough?")) {
+                      try {
+                        const res = await fetch(`/api/leases/${lease.id}/preliminary-inspection`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action: "SKIP" })
+                        });
+                        if (res.ok) {
+                          toast.success("Preliminary Walkthrough skipped.");
+                          fetchLease();
+                        } else throw new Error();
+                      } catch {
+                        toast.error("Failed to skip.");
+                      }
+                    }
+                  }}
+                  variant="outline"
+                  className="bg-transparent border-purple-300 text-purple-700 hover:bg-purple-100 font-bold h-10 px-4 rounded-xl text-xs"
+                >
+                  Skip
+                </Button>
+                <Button
+                  onClick={() => setShowSchedulePreliminaryModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+                >
+                  Schedule Walkthrough
+                </Button>
+              </>
+            )}
+            {lease.preliminaryInspectionStatus === "SCHEDULED" && (
+              <Button
+                onClick={() => {
+                  if (lease.preliminaryInspectorId === (session?.user as any)?.id || !lease.preliminaryInspectorId) {
+                    setShowPreliminarySelfInspectModal(true);
+                  } else {
+                    toast.error("This is assigned to another inspector.");
+                  }
+                }}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+              >
+                Start Walkthrough
+              </Button>
+            )}
+            {lease.preliminaryInspectionStatus === "COMPLETED" && (
+              <Button
+                onClick={() => setShowPrelimResultsModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+              >
+                View Results
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* Owner Move-Out Pipeline — 4-Step Linear Wizard */}
+      {isOwner && lease.status === "NOTICE_GIVEN" && (
+        <Card className="rounded-[24px] shadow-sm border bg-white text-slate-800 overflow-hidden">
+          {/* Panel Header */}
+          <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                Move-Out Pipeline
+              </span>
+              <h3 className="text-lg font-black mt-2 text-slate-900">Unit Turnover — 4 Steps</h3>
+              <p className="text-slate-500 text-xs mt-0.5 font-medium">
+                Tenant: <strong className="text-slate-900">{lease.tenant?.name}</strong>
+                {" · "}Requested: <strong className="text-slate-900">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}</strong>
+              </p>
+            </div>
+            {lease.depositDueBy && (() => {
+              const daysLeft = Math.ceil((new Date(lease.depositDueBy).getTime() - Date.now()) / 86400000);
+              const urgent = daysLeft <= 5;
+              return (
+                <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black shrink-0 ${urgent ? "bg-red-50 border-red-200 text-red-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}>
+                  <Clock className="h-4 w-4" />
+                  <div>
+                    <p className="text-[9px] uppercase tracking-widest opacity-70">Deposit Deadline</p>
+                    <p>{daysLeft <= 0 ? "⚠️ OVERDUE" : `${daysLeft} days left`}</p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Steps — always all 4 visible, just states change */}
+          <div className="divide-y divide-slate-100">
+
+            {/* ── STEP 1: Key Return ── */}
+            {(() => {
+              const done = !!lease.actualMoveOutDate;
+              return (
+                <div className={`px-6 py-4 flex items-start gap-4 ${done ? "opacity-60" : ""}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${done ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-blue-500 text-blue-600"}`}>
+                    {done ? "✓" : "1"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900">Key Return &amp; Move-Out Date</p>
+                      {done
+                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Done</span>
+                        : <span className="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shrink-0">Action Needed</span>
+                      }
+                    </div>
+                    {done ? (
+                      <p className="text-xs text-slate-500 font-semibold mt-1">
+                        Keys confirmed on {new Date(lease.actualMoveOutDate).toLocaleDateString()}.
+                        {lease.depositDueBy && <> Deposit due by <strong className="text-amber-600">{new Date(lease.depositDueBy).toLocaleDateString()}</strong>.</>}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">
+                          Confirm when keys are physically returned. This locks the move-out date and starts the 21-day legal deposit deadline.
+                        </p>
+                        <Button onClick={() => setShowKeyReturnModal(true)} className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold h-9 px-4 rounded-xl shadow-none">
+                          <KeyRound className="h-3.5 w-3.5 mr-1.5" />Confirm Key Return
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── STEP 2: Inspection ── */}
+            {(() => {
+              const keysReturned = !!lease.actualMoveOutDate;
+              const DONE_STATUSES = ["INSPECTION_COMPLETED", "OWNER_REVIEWING", "TENANT_ACCEPTED", "TENANT_DISPUTED", "DISPUTE_FINALIZED", "COMPLETED"];
+              const inspectionDone = DONE_STATUSES.includes(lease.moveOutStatus);
+              const inspectionScheduled = lease.moveOutStatus === "INSPECTION_SCHEDULED";
+              const locked = !keysReturned;
+              const current = keysReturned && !inspectionDone;
+              return (
+                <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : inspectionDone ? "opacity-60" : ""}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${inspectionDone ? "bg-emerald-500 border-emerald-500 text-white" : current ? "bg-white border-blue-500 text-blue-600" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                    {inspectionDone ? "✓" : "2"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900">Property Inspection</p>
+                      {inspectionDone
+                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Completed</span>
+                        : inspectionScheduled
+                        ? <span className="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shrink-0">Scheduled</span>
+                        : locked
+                        ? <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">Locked</span>
+                        : <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Action Needed</span>
+                      }
+                    </div>
+                    {inspectionDone ? (
+                      <p className="text-xs text-slate-500 font-semibold mt-1">
+                        Inspection report submitted{lease.inspectionDate ? ` on ${new Date(lease.inspectionDate).toLocaleDateString()}` : ""}.
+                      </p>
+                    ) : inspectionScheduled ? (
+                      <p className="text-xs text-slate-500 font-semibold mt-1">
+                        Scheduled for {new Date(lease.inspectionDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}.
+                        {lease.moveOutInspector && <> Inspector: {lease.moveOutInspector.name}.</>}
+                      </p>
+                    ) : locked ? (
+                      <p className="text-xs text-slate-400 font-semibold mt-1">Confirm key return first to unlock inspection.</p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">
+                          Keys returned. You can now schedule an inspection or skip it if no damages are suspected.
+                        </p>
+                        <div className="flex flex-col gap-3 mt-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            <button onClick={() => setShowSelfInspectionModal(true)} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200 hover:border-indigo-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
+                              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <CheckCircle2 className="h-12 w-12 text-indigo-600" />
+                              </div>
+                              <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs mb-1.5 z-10">
+                                <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                </div>
+                                Self-Inspect
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-medium leading-relaxed max-w-[85%] z-10">Use our guided room-by-room checklist with photo uploads.</p>
+                            </button>
+                            
+                            <button onClick={() => setShowInspectionModal(true)} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-slate-50 to-white border border-slate-200 hover:border-slate-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
+                              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <Settings className="h-12 w-12 text-slate-600" />
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-900 font-bold text-xs mb-1.5 z-10">
+                                <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                                  <Settings className="h-3.5 w-3.5" />
+                                </div>
+                                Assign Inspector
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-medium leading-relaxed max-w-[85%] z-10">Send a professional inspector from your team to the unit.</p>
+                            </button>
+                          </div>
+
+                          <button onClick={handleSkipInspection} disabled={skippingInspection} className="relative overflow-hidden flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-50 to-white border border-amber-200 hover:border-amber-400 hover:shadow-sm rounded-xl text-left transition-all duration-300 group disabled:opacity-50">
+                            <div className="flex flex-col z-10">
+                              <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs mb-0.5">
+                                {skippingInspection ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />} 
+                                Skip Inspection (Refund Full Deposit)
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-medium">Bypass the physical inspection and advance directly to closing with zero deductions.</p>
+                            </div>
+                            <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors shrink-0 z-10">
+                              <ArrowUpRight className="h-4 w-4" />
+                            </div>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── STEP 3: Review & Price Deductions ── */}
+            {(() => {
+              const INSPECTION_DONE = ["INSPECTION_COMPLETED", "OWNER_REVIEWING", "TENANT_ACCEPTED", "TENANT_DISPUTED", "DISPUTE_FINALIZED", "COMPLETED"];
+              const inspectionDone = INSPECTION_DONE.includes(lease.moveOutStatus);
+              const settled = ["TENANT_ACCEPTED", "DISPUTE_FINALIZED"].includes(lease.moveOutStatus) || lease.status === "TERMINATED";
+              const locked = !inspectionDone;
+              const needsAction = ["OWNER_REVIEWING", "TENANT_DISPUTED"].includes(lease.moveOutStatus);
+              return (
+                <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : settled ? "opacity-60" : ""}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${settled ? "bg-emerald-500 border-emerald-500 text-white" : needsAction ? "bg-white border-blue-500 text-blue-600" : inspectionDone ? "bg-white border-amber-500 text-amber-600" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                    {settled ? "✓" : "3"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900">Review &amp; Price Deductions</p>
+                      {settled
+                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Done</span>
+                        : lease.moveOutStatus === "TENANT_DISPUTED"
+                        ? <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Disputed</span>
+                        : lease.moveOutStatus === "INSPECTION_COMPLETED"
+                        ? <span className="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shrink-0">Tenant Reviewing</span>
+                        : needsAction
+                        ? <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Action Needed</span>
+                        : locked
+                        ? <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">Locked</span>
+                        : null
+                      }
+                    </div>
+                    {locked ? (
+                      <p className="text-xs text-slate-400 font-semibold mt-1">Complete the inspection first to unlock this step.</p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">
+                          {lease.moveOutStatus === "OWNER_REVIEWING"
+                            ? "Inspection done. Price each damage item and send the statement to the tenant."
+                            : lease.moveOutStatus === "TENANT_DISPUTED"
+                            ? "Tenant disputed the charges. Review their reason and respond or revise amounts."
+                            : lease.moveOutStatus === "INSPECTION_COMPLETED"
+                            ? "Statement sent. Awaiting tenant acceptance (72-hour window)."
+                            : settled
+                            ? "Statement accepted by tenant."
+                            : "Review and finalise deductions before sending to tenant."}
+                        </p>
+                        {!settled && (
+                          <Button
+                            onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
+                            className={`mt-3 text-white text-xs font-bold h-9 px-4 rounded-xl shadow-none ${lease.moveOutStatus === "TENANT_DISPUTED" ? "bg-amber-600 hover:bg-amber-700" : "bg-blue-600 hover:bg-blue-700"}`}
+                          >
+                            {lease.moveOutStatus === "OWNER_REVIEWING" ? "Price & Send Statement" : lease.moveOutStatus === "TENANT_DISPUTED" ? "Resolve Dispute" : "Open Final Statement"}
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── STEP 4: Settle Deposit & Close ── */}
+            {(() => {
+              const settled = lease.status === "TERMINATED";
+              const ready = ["TENANT_ACCEPTED", "DISPUTE_FINALIZED"].includes(lease.moveOutStatus);
+              const locked = !ready && !settled;
+              const originalDeposit = Number(lease.securityDeposit || 0);
+              const totalDeducted = (lease.deductions || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
+              const refund = Math.max(0, originalDeposit - totalDeducted);
+              return (
+                <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : ""}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${settled ? "bg-emerald-500 border-emerald-500 text-white" : ready ? "bg-emerald-50 border-emerald-500 text-emerald-600" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                    {settled ? "✓" : "4"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900">Settle Deposit &amp; Close Lease</p>
+                      {settled
+                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Closed</span>
+                        : ready
+                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Ready</span>
+                        : <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">Locked</span>
+                      }
+                    </div>
+                    {settled ? (
+                      <p className="text-xs text-slate-500 font-semibold mt-1">
+                        Lease closed. Refund of <strong className="text-emerald-600">${refund.toFixed(2)}</strong> issued via {lease.refundMethod === "ORIGINAL" ? "original payment method" : lease.refundMethod === "CHECK" ? "mailed check" : "bank transfer"}.
+                      </p>
+                    ) : ready ? (
+                      <>
+                        <p className="text-xs text-slate-500 font-semibold mt-1">
+                          Tenant accepted. Issue the refund of <strong className="text-emerald-600">${refund.toFixed(2)}</strong> and officially close the lease.
+                        </p>
+                        <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-9 px-4 rounded-xl shadow-none">
+                          Finalize &amp; Process Refund
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="text-xs text-slate-400 font-semibold mt-1">Tenant must accept the statement before you can settle the deposit.</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+          </div>
         </Card>
       )}
 
@@ -416,8 +971,8 @@ export default function LeaseDetailsPage() {
                   Sign Lease
                 </Button>
               )}
-              {/* Step 2: Show Pay Deposit only after lease is ACTIVE */}
-              {lease.status === "ACTIVE" && unpaidDepositInvoice && (
+              {/* Step 2: Show Pay Deposit after lease is SIGNED or ACTIVE */}
+              {(lease.status === "ACTIVE" || lease.status === "SIGNED") && unpaidDepositInvoice && (
                 <Button
                   onClick={() => router.push('/dashboard/payments/pay-rent')}
                   className="h-10 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex-1 md:flex-none"
@@ -544,6 +1099,70 @@ export default function LeaseDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
+            {isOwner && lease.moveOutStatus !== "NONE" && (
+              <Card className="bg-white border-amber-200 bg-amber-50/10 shadow-sm rounded-[24px] p-6 border-l-4 border-l-amber-500">
+                <div className="flex justify-between items-start mb-4 gap-4">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                      <ShieldAlert className="h-5 w-5 text-amber-500" /> Active Move-Out Pipeline
+                    </h2>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">
+                      Current Status: <strong className="text-slate-800">{
+                        lease.status === "TERMINATED" ? "Lease Closed / Terminated" :
+                        lease.moveOutStatus === "MOVE_OUT_REQUESTED" ? "Move-Out Requested (Awaiting Action)" :
+                        lease.moveOutStatus === "INSPECTION_SCHEDULED" ? "Inspection Scheduled" :
+                        lease.moveOutStatus === "OWNER_REVIEWING" ? "Inspection Completed (Pending Your Price Review)" :
+                        lease.moveOutStatus === "INSPECTION_COMPLETED" ? "Awaiting Tenant Review" :
+                        lease.moveOutStatus === "TENANT_ACCEPTED" ? "Statement Accepted" :
+                        lease.moveOutStatus === "TENANT_DISPUTED" ? "Deductions Disputed" :
+                        lease.moveOutStatus === "DISPUTE_FINALIZED" ? "Dispute Finalized" :
+                        lease.moveOutStatus
+                      }</strong>
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-9 text-xs rounded-xl shadow-none shrink-0"
+                  >
+                    Manage Move-Out
+                  </Button>
+                </div>
+                
+                {/* Stepper bar */}
+                <div className="flex items-center justify-between w-full mt-4 pt-4 border-t border-slate-100">
+                  {["Request", "Inspection", "Owner Review", "Tenant Review", "Settle", "Closed"].map((lbl, idx) => {
+                    const activeIdx = (() => {
+                      if (lease.status === "TERMINATED") return 5;
+                      if (["TENANT_ACCEPTED", "DISPUTE_FINALIZED"].includes(lease.moveOutStatus)) return 4;
+                      if (lease.moveOutStatus === "INSPECTION_COMPLETED") return 3;
+                      if (lease.moveOutStatus === "OWNER_REVIEWING") return 2;
+                      if (lease.moveOutStatus === "INSPECTION_SCHEDULED") return 1;
+                      return 0;
+                    })();
+                    const isCompleted = idx < activeIdx;
+                    const isActive = idx === activeIdx;
+
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-1.5 flex-1 relative">
+                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center text-[10px] font-black ${
+                          isCompleted ? "bg-blue-600 border-blue-600 text-white" :
+                          isActive ? "bg-white border-blue-600 text-blue-600 font-extrabold scale-110" :
+                          "bg-white border-slate-200 text-slate-400"
+                        }`}>
+                          {isCompleted ? "✓" : idx + 1}
+                        </div>
+                        <span className={`text-[9px] font-black text-center ${
+                          isActive ? "text-blue-600 font-bold" : "text-slate-400"
+                        }`}>
+                          {lbl}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
             <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] p-6">
               <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2 mb-6">
                 <Building className="h-5 w-5 text-[#3B82F6]" /> Property Information
@@ -674,6 +1293,135 @@ export default function LeaseDetailsPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Tenant Preliminary Walkthrough Remedy List */}
+            {isTenant && lease.preliminaryInspectionStatus === "COMPLETED" && lease.preliminaryDeductions && (
+              <Card className="bg-white border-purple-200 shadow-sm rounded-[24px] p-6 space-y-4">
+                <h2 className="text-lg font-bold text-purple-900 flex items-center gap-2 pb-3 border-b border-purple-100">
+                  <ShieldAlert className="h-5 w-5 text-purple-600" /> Preliminary Walkthrough Results
+                </h2>
+                <div className="bg-purple-50 p-4 rounded-xl text-purple-800 text-sm font-medium mb-2">
+                  <p>Your preliminary walkthrough was completed on {lease.preliminaryInspectionDate ? new Date(lease.preliminaryInspectionDate).toLocaleDateString() : "TBD"}. The following issues were flagged by the inspector.</p>
+                  <p className="mt-2 font-bold text-purple-900">Please remedy these items before your final move-out date to avoid security deposit deductions.</p>
+                </div>
+                
+                {Array.isArray(lease.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
+                  <div className="space-y-3">
+                    {lease.preliminaryDeductions.map((d: any, idx: number) => (
+                      <div key={idx} className="flex gap-3 items-start p-3 bg-white border border-slate-200 rounded-xl">
+                        <div className="bg-amber-100 text-amber-600 h-6 w-6 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertCircle className="h-3 w-3" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800 text-sm">{d.description}</p>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">Category: {d.category}</p>
+                          {d.photoUrl && (
+                            <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 max-w-[200px] shadow-sm bg-slate-50">
+                              <img 
+                                src={d.photoUrl} 
+                                alt="Damage evidence" 
+                                className="w-full h-32 object-cover cursor-zoom-in hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(d.photoUrl, '_blank')}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <p className="font-bold text-sm">No issues were flagged during the preliminary walkthrough!</p>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* Tenant Move-Out Status Timeline Widget */}
+            {isTenant && lease.moveOutStatus !== "NONE" && (
+              <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] p-6 space-y-6">
+                <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2 pb-3 border-b border-[#F1F5F9]">
+                  <Clock className="h-5 w-5 text-indigo-500" /> Move-Out Progress
+                </h2>
+                <div className="relative pl-6 border-l-2 border-slate-200 ml-3 space-y-6 text-sm">
+                  {/* Step 1: Notice Submitted */}
+                  <div className="relative">
+                    <div className="absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 bg-white border-emerald-500 bg-emerald-500" />
+                    <p className="font-bold text-slate-800">Notice Submitted</p>
+                    <p className="text-xs text-slate-500">
+                      {lease.moveOutRequestDate ? new Date(lease.moveOutRequestDate).toLocaleDateString() : ""}
+                    </p>
+                  </div>
+                  {/* Step 2: Keys Confirmed */}
+                  <div className="relative">
+                    <div className={`absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 bg-white ${
+                      lease.keyReturnConfirmedAt ? "border-emerald-500 bg-emerald-500" : "border-slate-300 bg-white"
+                    }`} />
+                    <p className="font-bold text-slate-800">Keys Confirmed</p>
+                    <p className="text-xs text-slate-500">
+                      {lease.keyReturnConfirmedAt
+                        ? `Confirmed on ${new Date(lease.keyReturnConfirmedAt).toLocaleDateString()}`
+                        : "Pending (Owner key return confirmation)"}
+                    </p>
+                  </div>
+                  {/* Step 3: Inspection Completed */}
+                  <div className="relative">
+                    <div className={`absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 bg-white ${
+                      ["INSPECTION_COMPLETED", "TENANT_ACCEPTED", "TENANT_DISPUTED", "DISPUTE_FINALIZED", "COMPLETED"].includes(lease.moveOutStatus)
+                        ? "border-emerald-500 bg-emerald-500"
+                        : "border-slate-300 bg-white"
+                    }`} />
+                    <p className="font-bold text-slate-800">Inspection Completed</p>
+                    <p className="text-xs text-slate-500">
+                      {["INSPECTION_COMPLETED", "TENANT_ACCEPTED", "TENANT_DISPUTED", "DISPUTE_FINALIZED", "COMPLETED"].includes(lease.moveOutStatus)
+                        ? "Inspection report ready for review"
+                        : "Pending (Walkthrough scheduled)"}
+                    </p>
+                  </div>
+                  {/* Step 4: Your Review */}
+                  <div className="relative">
+                    <div className={`absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 bg-white ${
+                      ["TENANT_ACCEPTED", "COMPLETED"].includes(lease.moveOutStatus)
+                        ? "border-emerald-500 bg-emerald-500"
+                        : lease.moveOutStatus === "TENANT_DISPUTED"
+                        ? "border-amber-500 bg-amber-500"
+                        : lease.moveOutStatus === "DISPUTE_FINALIZED"
+                        ? "border-red-500 bg-red-500"
+                        : "border-slate-300 bg-white"
+                    }`} />
+                    <p className="font-bold text-slate-800">Your Review</p>
+                    <div className="text-xs text-slate-500">
+                      {lease.moveOutStatus === "INSPECTION_COMPLETED" && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-amber-600 font-bold">Action Required: Please review statement</p>
+                          <Link href={`/dashboard/tenant/leases/${lease.id}/move-out`}>
+                            <Button size="sm" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-xs h-8 rounded-lg mt-1">
+                              Review Statement
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                      {lease.moveOutStatus === "TENANT_ACCEPTED" && <p className="text-emerald-600 font-bold">Accepted</p>}
+                      {lease.moveOutStatus === "TENANT_DISPUTED" && <p className="text-amber-600 font-bold">Disputed</p>}
+                      {lease.moveOutStatus === "DISPUTE_FINALIZED" && <p className="text-red-650 font-bold">Dispute Finalized</p>}
+                      {lease.moveOutStatus === "COMPLETED" && <p className="text-emerald-600 font-bold">Accepted</p>}
+                      {!["INSPECTION_COMPLETED", "TENANT_ACCEPTED", "TENANT_DISPUTED", "DISPUTE_FINALIZED", "COMPLETED"].includes(lease.moveOutStatus) && "Pending inspection results"}
+                    </div>
+                  </div>
+                  {/* Step 5: Deposit Refund Issued */}
+                  <div className="relative">
+                    <div className={`absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 bg-white ${
+                      lease.moveOutStatus === "COMPLETED" ? "border-emerald-500 bg-emerald-500" : "border-slate-300 bg-white"
+                    }`} />
+                    <p className="font-bold text-slate-800">Deposit Issued</p>
+                    <p className="text-xs text-slate-500">
+                      {lease.moveOutStatus === "COMPLETED" ? "Completed" : "Pending final statement processing"}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
 
             <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] p-6">
@@ -981,7 +1729,7 @@ export default function LeaseDetailsPage() {
             </Button>
           </div>
 
-          {(lease.status === "ACTIVE" || lease.status === "EXPIRED" || lease.status === "TERMINATED") ? (
+          {(lease.status === "ACTIVE" || lease.status === "SIGNED" || lease.status === "EXPIRED" || lease.status === "TERMINATED" || lease.status === "NOTICE_GIVEN") ? (
             <div className="space-y-4">
               <Card className="p-0 rounded-[24px] shadow-sm border-[#E2E8F0] overflow-hidden">
                 <div className="p-6">
@@ -1070,7 +1818,7 @@ export default function LeaseDetailsPage() {
                 <FileText className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-bold text-[#0F172A] mb-2">No signed lease available</h3>
-              <p className="text-[#64748B] max-w-sm font-medium">The lease agreement must be signed and activated before the official PDF is available.</p>
+              <p className="text-[#64748B] max-w-sm font-medium">The lease agreement must be signed before the official document is available.</p>
             </Card>
           )}
         </div>
@@ -1085,11 +1833,17 @@ export default function LeaseDetailsPage() {
                 <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
                   <ShieldAlert className="h-5 w-5 text-[#F59E0B]" /> Move-Out Request Details
                 </h2>
-                <p className="text-sm text-[#64748B] mt-1 font-medium">Review the tenant's move-out request and generate a final disposition statement.</p>
+                <p className="text-sm text-[#64748B] mt-1 font-medium">
+                  {isOwner 
+                    ? "Review the tenant's move-out request and generate a final disposition statement."
+                    : "Your move-out request has been submitted and is currently being processed."}
+                </p>
               </div>
-              <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-xl font-bold h-10 px-5 shadow-sm">
-                Generate Final Statement
-              </Button>
+              {isOwner && (
+                <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-xl font-bold h-10 px-5 shadow-sm">
+                  Generate Final Statement
+                </Button>
+              )}
             </div>
 
             {lease.isShortNotice && (
@@ -1282,41 +2036,83 @@ export default function LeaseDetailsPage() {
               </>
             )}
 
-            {/* ── STEP 2: Draw Signature ── */}
+            {/* ── STEP 2: Draw or Type Signature ── */}
             {signStep === 2 && (
               <>
+                <style>{`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');`}</style>
                 <div className="px-7 pt-5 pb-3">
-                  <h3 className="text-base font-black text-slate-800">Draw Your Signature</h3>
-                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Use your mouse or finger to sign in the box below.</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-black text-slate-800">Your Signature</h3>
+                      <p className="text-xs font-semibold text-slate-400 mt-0.5">Choose how you want to sign your lease.</p>
+                    </div>
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                      <button
+                        onClick={() => setSignatureMode('draw')}
+                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-colors ${signatureMode === 'draw' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        Draw
+                      </button>
+                      <button
+                        onClick={() => setSignatureMode('type')}
+                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-colors ${signatureMode === 'type' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        Type
+                      </button>
+                    </div>
+                  </div>
                 </div>
+                
                 <div className="px-7 pb-4 space-y-4 flex-1 overflow-y-auto">
-                  {/* Signature Pad */}
-                  <div className="border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50 relative">
-                    <canvas
-                      ref={canvasRef}
-                      width={600}
-                      height={200}
-                      className="w-full touch-none cursor-crosshair"
-                      onMouseDown={startDrawing}
-                      onMouseMove={draw}
-                      onMouseUp={stopDrawing}
-                      onMouseLeave={stopDrawing}
-                      onTouchStart={startDrawing}
-                      onTouchMove={draw}
-                      onTouchEnd={stopDrawing}
-                    />
-                    {!canvasSignatureData && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <p className="text-slate-300 text-sm font-bold">Sign here...</p>
+                  {/* Signature Input Area */}
+                  <div className="border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50 relative h-[200px] flex items-center justify-center">
+                    {signatureMode === 'draw' ? (
+                      <>
+                        <canvas
+                          ref={canvasRef}
+                          width={600}
+                          height={200}
+                          className="w-full h-full touch-none cursor-crosshair z-10"
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                          onTouchStart={startDrawing}
+                          onTouchMove={draw}
+                          onTouchEnd={stopDrawing}
+                        />
+                        {!canvasSignatureData && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                            <p className="text-slate-300 text-sm font-bold">Sign here...</p>
+                          </div>
+                        )}
+                        <div className="absolute bottom-3 right-4 z-20">
+                          <button onClick={clearCanvas} className="text-xs font-bold text-slate-400 hover:text-slate-600 bg-white/80 px-2 py-1 rounded backdrop-blur">Clear</button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full p-6 flex flex-col justify-center">
+                        <input
+                          type="text"
+                          placeholder="Type your name here..."
+                          value={typedSignature}
+                          onChange={(e) => setTypedSignature(e.target.value)}
+                          className="w-full bg-transparent text-center outline-none text-[#1E293B] placeholder:text-slate-300"
+                          style={{ fontFamily: "'Caveat', cursive", fontSize: "56px" }}
+                        />
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-end">
-                    <button onClick={clearCanvas} className="text-xs font-bold text-red-500 hover:text-red-600 underline">Clear & Redraw</button>
+                  
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                      <ShieldAlert className="inline h-3.5 w-3.5 text-slate-400 mr-1 -mt-0.5" />
+                      By signing, you consent to legally binding electronic signatures. Your IP address and timestamp will be cryptographically attached to the final record to ensure non-repudiation under the ESIGN Act and UETA.
+                    </p>
                   </div>
 
                   {/* Legal Name Confirmation */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 pt-2">
                     <label className="block text-sm font-bold text-slate-700">Confirm Full Legal Name <span className="text-red-500">*</span></label>
                     <input
                       type="text"
@@ -1332,13 +2128,14 @@ export default function LeaseDetailsPage() {
                   <Button variant="outline" onClick={() => setSignStep(1)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
                   <Button
                     onClick={() => {
-                      if (!canvasSignatureData) { toast.error("Please draw your signature first."); return; }
+                      if (signatureMode === 'draw' && !canvasSignatureData) { toast.error("Please draw your signature first."); return; }
+                      if (signatureMode === 'type' && !typedSignature.trim()) { toast.error("Please type your signature first."); return; }
                       if (!signatureName.trim()) { toast.error("Please type your legal name."); return; }
                       setSignStep(3);
                     }}
                     className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white"
                   >
-                    Continue →
+                    Review & Continue →
                   </Button>
                 </div>
               </>
@@ -1357,8 +2154,14 @@ export default function LeaseDetailsPage() {
                     <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Signature Preview</p>
                     </div>
-                    {canvasSignatureData && (
+                    {signatureMode === 'draw' && canvasSignatureData ? (
                       <img src={canvasSignatureData} alt="Signature Preview" className="w-full h-28 object-contain p-2 bg-white" />
+                    ) : (
+                      <div className="w-full h-28 flex items-center justify-center bg-white">
+                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "48px" }} className="text-[#1E293B]">
+                          {typedSignature || signatureName}
+                        </span>
+                      </div>
                     )}
                     <div className="bg-slate-50 px-4 py-2 border-t border-slate-200">
                       <p className="text-xs font-bold text-slate-800">{signatureName}</p>
@@ -1382,11 +2185,51 @@ export default function LeaseDetailsPage() {
                 <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
                   <Button variant="outline" onClick={() => setSignStep(2)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
                   <Button
-                    onClick={handleConfirmSignLease}
+                    onClick={handleRequestOtp}
                     disabled={signing || !signatureConsent}
+                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md disabled:opacity-40"
+                  >
+                    {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : 'Request OTP & Continue →'}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* ── STEP 4: OTP Verification ── */}
+            {signStep === 4 && (
+              <>
+                <div className="px-7 pt-5 pb-3">
+                  <h3 className="text-base font-black text-slate-800">Verify Your Identity</h3>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">We sent a 6-digit code to your email.</p>
+                </div>
+                <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
+                  <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <Mail className="h-12 w-12 text-indigo-500 mb-4" />
+                    <p className="text-sm font-bold text-slate-700 text-center mb-4">
+                      Enter the 6-digit verification code sent to <br />
+                      <span className="text-indigo-600">{lease.tenant?.email}</span>
+                    </p>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      placeholder="------"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      className="w-[280px] text-center text-4xl tracking-[0.4em] font-mono font-black px-4 py-4 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none text-slate-900 bg-white placeholder:text-slate-300"
+                    />
+                    <button onClick={handleRequestOtp} className="text-xs font-bold text-indigo-600 hover:text-indigo-700 underline mt-4">
+                      Didn't receive it? Resend Code
+                    </button>
+                  </div>
+                </div>
+                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
+                  <Button variant="outline" onClick={() => setSignStep(3)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                  <Button
+                    onClick={handleVerifyOtpAndSign}
+                    disabled={signing || otp.length !== 6}
                     className="h-11 px-8 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-40"
                   >
-                    {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing...</> : '✓ Confirm & Sign Lease'}
+                    {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying...</> : '✓ Verify & Sign Lease'}
                   </Button>
                 </div>
               </>
@@ -1394,6 +2237,135 @@ export default function LeaseDetailsPage() {
           </div>
         </div>
       )}
+
+      <ScheduleInspectionModal
+        leaseId={params.id as string}
+        open={showInspectionModal}
+        onOpenChange={setShowInspectionModal}
+        onSuccess={fetchLease}
+        moveOutDate={lease?.moveOutDate}
+      />
+      <SelfInspectionModal
+        leaseId={params.id as string}
+        unit={lease?.unit}
+        open={showSelfInspectionModal}
+        onOpenChange={setShowSelfInspectionModal}
+        onSuccess={fetchLease}
+        preliminaryDeductions={lease?.preliminaryDeductions}
+      />
+      <Dialog open={showKeyReturnModal} onOpenChange={setShowKeyReturnModal}>
+        <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-slate-900">Confirm Key Handover</DialogTitle>
+            <DialogDescription className="text-xs font-semibold text-slate-400">
+              Record the actual move-out date to start the deposit return timer.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleConfirmKeyReturn} className="space-y-4 mt-4">
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Actual Move-Out Date</Label>
+              <Input
+                type="date"
+                required
+                value={actualMoveOutDate}
+                onChange={(e) => setActualMoveOutDate(e.target.value)}
+                className="bg-slate-50 border-slate-200 rounded-xl h-11"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowKeyReturnModal(false)}
+                className="flex-1 border border-slate-200 rounded-xl h-11 text-xs font-bold text-slate-500 hover:bg-slate-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={confirmingKeyReturn}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 text-xs font-bold"
+              >
+                {confirmingKeyReturn ? "Confirming..." : "Confirm Key Return"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preliminary Walkthrough Modals */}
+      <ScheduleInspectionModal
+        leaseId={lease?.id}
+        open={showSchedulePreliminaryModal}
+        onOpenChange={setShowSchedulePreliminaryModal}
+        onSuccess={fetchLease}
+        moveOutDate={lease?.moveOutDate}
+        defaultType="PRELIMINARY"
+      />
+
+      <SelfInspectionModal
+        leaseId={lease?.id}
+        unit={lease?.unit}
+        open={showPreliminarySelfInspectModal}
+        onOpenChange={setShowPreliminarySelfInspectModal}
+        onSuccess={fetchLease}
+        isPreliminary={true}
+      />
+
+      <Dialog open={showPrelimResultsModal} onOpenChange={setShowPrelimResultsModal}>
+        <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-lg p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-purple-900">
+              <ShieldAlert className="h-5 w-5 text-purple-600" /> Preliminary Walkthrough Results
+            </DialogTitle>
+            <DialogDescription className="text-slate-500 font-medium">
+              Findings logged during the preliminary walkthrough inspection.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-4 max-h-[60vh] overflow-y-auto pr-1">
+            {lease?.preliminaryInspectionNotes && (
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">General Notes</p>
+                <p className="text-sm font-semibold text-slate-700">{lease.preliminaryInspectionNotes}</p>
+              </div>
+            )}
+            
+            <div className="space-y-3">
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Flagged Issues ({lease?.preliminaryDeductions?.length || 0})</p>
+              {Array.isArray(lease?.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
+                lease.preliminaryDeductions.map((d: any, idx: number) => (
+                  <div key={idx} className="flex gap-3 items-start p-3 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                    <div className="bg-amber-100 text-amber-600 h-6 w-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
+                      <AlertCircle className="h-3 w-3" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-800 text-sm">{d.description}</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">Category: {d.category}</p>
+                      {d.photoUrl && (
+                        <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 max-w-[150px]">
+                          <img 
+                            src={d.photoUrl} 
+                            alt="Damage evidence" 
+                            className="w-full h-24 object-cover cursor-zoom-in"
+                            onClick={() => window.open(d.photoUrl, '_blank')}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                  <CheckCircle className="h-5 w-5" />
+                  <p className="font-bold text-sm">No issues were flagged during the preliminary walkthrough!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

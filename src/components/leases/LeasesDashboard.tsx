@@ -128,6 +128,12 @@ export default function LeasesDashboard({
   };
 
   const getStatusBadge = (l: any) => {
+    if (l.status === "SIGNED") {
+      if (hasUnpaidDeposit(l)) {
+        return <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600"><AlertTriangle className="h-3 w-3" /> Deposit Pending</span>;
+      }
+      return <span className="flex items-center gap-1 text-[11px] font-bold text-indigo-600"><Home className="h-3 w-3" /> Awaiting Move-in</span>;
+    }
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) {
       return <span className="flex items-center gap-1 text-[11px] font-bold text-blue-600"><Clock className="h-3 w-3" /> Awaiting Deposit</span>;
     }
@@ -198,6 +204,9 @@ export default function LeasesDashboard({
   };
 
   const getStatusBgColor = (l: any) => {
+    if (l.status === "SIGNED") {
+      return hasUnpaidDeposit(l) ? "bg-amber-50" : "bg-indigo-50";
+    }
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50";
     switch (l.status) {
       case "ACTIVE": return "bg-[#DCFCE7]";
@@ -390,6 +399,11 @@ export default function LeasesDashboard({
                 }
               } else if (l.status === "EXPIRED") {
                 daysBadge = <span className="px-2 py-1 bg-[#FEE2E2] text-[#EF4444] rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">Expired</span>;
+              } else if (l.status === "SIGNED" && l.startDate) {
+                const startDiff = Math.ceil((new Date(l.startDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                if (startDiff > 0) {
+                  daysBadge = <span className="px-2 py-1 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">Move-in: {startDiff}d</span>;
+                }
               }
               
               return (
@@ -572,9 +586,8 @@ export default function LeasesDashboard({
                         </div>
                       </TableCell>
                       <TableCell className="py-4">
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? 'border-blue-200 bg-blue-50 text-blue-700' : l.status === 'ACTIVE' ? 'border-[#10B981]/20 bg-[#10B981]/10 text-[#10B981]' : l.status === 'TERMINATED' ? 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444]' : 'border-[#64748B]/20 bg-[#F1F5F9] text-[#64748B]'}`}>
-                          {l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? <Clock className="h-3.5 w-3.5" /> : l.status === 'ACTIVE' ? <CheckCircle className="h-3.5 w-3.5" /> : l.status === 'TERMINATED' ? <XCircle className="h-3.5 w-3.5" /> : null}
-                          <span className="text-xs font-bold capitalize">{l.status === 'ACTIVE' && hasUnpaidDeposit(l) ? 'Awaiting Deposit' : l.status.toLowerCase()}</span>
+                        <div className={`inline-flex items-center px-2.5 py-1 rounded-full border border-transparent ${getStatusBgColor(l)}`}>
+                          {getStatusBadge(l)}
                         </div>
                       </TableCell>
                       <TableCell className="py-4">

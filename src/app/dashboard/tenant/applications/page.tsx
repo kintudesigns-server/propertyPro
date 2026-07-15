@@ -122,24 +122,43 @@ function ApplicationCard({ application }: { application: any }) {
         </div>
 
         {/* Action Button if Approved */}
-        {isApproved && (
+        {isApproved && application.lease && (
           <div className="mt-8">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
-              <div className="flex items-center gap-2 text-green-700 font-bold text-sm mb-1">
-                <CheckCircle2 className="h-4 w-4" />
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4 shadow-sm">
+              <div className="flex items-center gap-2 text-emerald-800 font-black text-sm mb-1">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 Application Approved!
               </div>
-              <p className="text-xs text-green-600 leading-relaxed">
-                Congratulations! The owner has generated a lease for you.
+              <p className="text-xs text-emerald-700 leading-relaxed font-medium">
+                {application.lease.status === "PENDING_SIGNATURE" 
+                  ? "Congratulations! The owner has generated a lease for you. Please review and sign."
+                  : "Your lease is fully signed and secured!"}
               </p>
             </div>
             <Link 
-              href="/dashboard/tenant" 
-              className="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-900 text-white font-bold text-sm rounded-xl hover:bg-slate-800 transition-colors shadow-sm gap-2"
+              href={`/dashboard/leases/${application.lease.id}`}
+              className={`w-full inline-flex items-center justify-center px-4 py-3.5 text-white font-bold text-sm rounded-xl shadow-md transition-all hover:scale-[1.02] gap-2 ${
+                application.lease.status === "PENDING_SIGNATURE" 
+                  ? "bg-indigo-600 hover:bg-indigo-700" 
+                  : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
             >
-              Sign Lease Now
+              {application.lease.status === "PENDING_SIGNATURE" ? "Review & Sign Lease" : "View Lease Details"}
               <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+        )}
+        {isApproved && !application.lease && (
+          <div className="mt-8">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 shadow-sm">
+              <div className="flex items-center gap-2 text-amber-800 font-black text-sm mb-1">
+                <Clock className="h-5 w-5 text-amber-600" />
+                Approved & Awaiting Lease
+              </div>
+              <p className="text-xs text-amber-700 leading-relaxed font-medium">
+                You're approved! The property manager is currently drafting your lease agreement. Check back soon.
+              </p>
+            </div>
           </div>
         )}
 
@@ -164,17 +183,22 @@ function ApplicationCard({ application }: { application: any }) {
       </div>
 
       {/* Tracker Side */}
-      <div className="md:w-2/3 p-8 md:p-10 flex flex-col justify-center">
-        <h4 className="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-10">Application Status Tracker</h4>
+      <div className="md:w-2/3 p-8 md:p-10 flex flex-col justify-center bg-white">
+        <div className="flex items-center justify-between mb-10">
+          <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+            Application Status Tracker
+          </h4>
+        </div>
         
-        <div className="relative">
+        <div className="relative px-4">
           {/* Progress Line Background */}
-          <div className="absolute top-5 left-6 right-6 h-1 bg-slate-100 rounded-full z-0"></div>
+          <div className="absolute top-6 left-12 right-12 h-1.5 bg-slate-100 rounded-full z-0"></div>
           
           {/* Active Progress Line */}
           <div 
-            className={`absolute top-5 left-6 h-1 rounded-full z-0 transition-all duration-1000 ease-out ${
-              isRejected ? 'bg-red-500' : 'bg-indigo-600'
+            className={`absolute top-6 left-12 h-1.5 rounded-full z-0 transition-all duration-1000 ease-out shadow-sm ${
+              isRejected ? 'bg-red-500 shadow-red-200' : 'bg-indigo-500 shadow-indigo-200'
             }`}
             style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%' }}
           ></div>
@@ -182,46 +206,46 @@ function ApplicationCard({ application }: { application: any }) {
           {/* Steps */}
           <div className="relative z-10 flex justify-between">
             {/* Step 1: Submitted */}
-            <div className="flex flex-col items-center gap-3">
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm border-4 outline outline-2 outline-white shadow-sm transition-colors duration-300 ${
-                currentStep >= 1 ? 'bg-indigo-600 text-white border-indigo-100' : 'bg-white text-slate-400 border-slate-100'
+            <div className="flex flex-col items-center gap-3 w-24">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
+                currentStep >= 1 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
               }`}>
-                {currentStep > 1 ? <CheckCircle2 className="h-5 w-5" /> : 1}
+                {currentStep > 1 ? <CheckCircle2 className="h-6 w-6" /> : 1}
               </div>
               <div className="text-center">
-                <p className={`font-bold text-sm ${currentStep >= 1 ? 'text-slate-900' : 'text-slate-400'}`}>Submitted</p>
-                {currentStep === 1 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mt-1 animate-pulse">Current</p>}
+                <p className={`font-black text-sm ${currentStep >= 1 ? 'text-slate-900' : 'text-slate-400'}`}>Submitted</p>
+                {currentStep === 1 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1 bg-indigo-50 px-2 py-0.5 rounded-full inline-block">Current</p>}
               </div>
             </div>
 
             {/* Step 2: Under Review */}
-            <div className="flex flex-col items-center gap-3">
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm border-4 outline outline-2 outline-white shadow-sm transition-colors duration-300 ${
-                currentStep >= 2 ? 'bg-indigo-600 text-white border-indigo-100' : 'bg-white text-slate-400 border-slate-100'
+            <div className="flex flex-col items-center gap-3 w-24">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
+                currentStep >= 2 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
               }`}>
-                {currentStep > 2 ? <CheckCircle2 className="h-5 w-5" /> : 2}
+                {currentStep > 2 ? <CheckCircle2 className="h-6 w-6" /> : 2}
               </div>
               <div className="text-center">
-                <p className={`font-bold text-sm ${currentStep >= 2 ? 'text-slate-900' : 'text-slate-400'}`}>Under Review</p>
-                {currentStep === 2 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mt-1 animate-pulse">In Progress</p>}
+                <p className={`font-black text-sm ${currentStep >= 2 ? 'text-slate-900' : 'text-slate-400'}`}>Under Review</p>
+                {currentStep === 2 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1 bg-indigo-50 px-2 py-0.5 rounded-full inline-block">In Progress</p>}
               </div>
             </div>
 
             {/* Step 3: Decision */}
-            <div className="flex flex-col items-center gap-3">
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm border-4 outline outline-2 outline-white shadow-sm transition-colors duration-300 ${
+            <div className="flex flex-col items-center gap-3 w-24">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
                 currentStep >= 3 
-                  ? (isRejected ? 'bg-red-500 text-white border-red-100' : 'bg-green-500 text-white border-green-100')
-                  : 'bg-white text-slate-400 border-slate-100'
+                  ? (isRejected ? 'bg-red-500 text-white shadow-red-200' : 'bg-emerald-500 text-white shadow-emerald-200')
+                  : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
               }`}>
                 {currentStep >= 3 ? (
-                  isRejected ? <XCircle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />
+                  isRejected ? <XCircle className="h-6 w-6" /> : <CheckCircle2 className="h-6 w-6" />
                 ) : 3}
               </div>
               <div className="text-center">
-                <p className={`font-bold text-sm ${currentStep >= 3 ? 'text-slate-900' : 'text-slate-400'}`}>Decision</p>
+                <p className={`font-black text-sm ${currentStep >= 3 ? 'text-slate-900' : 'text-slate-400'}`}>Decision</p>
                 {currentStep === 3 && (
-                  <p className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${isRejected ? 'text-red-600' : 'text-green-600'}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 px-2 py-0.5 rounded-full inline-block ${isRejected ? 'text-red-700 bg-red-50' : 'text-emerald-700 bg-emerald-50'}`}>
                     {isRejected ? 'Declined' : 'Approved'}
                   </p>
                 )}

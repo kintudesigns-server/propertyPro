@@ -24,61 +24,77 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     if (lease.moveOutStatus !== "INSPECTION_COMPLETED") {
-        return NextResponse.json({ error: "Cannot review at this stage" }, { status: 400 });
+      return NextResponse.json({ error: "Cannot review at this stage. The inspection report must be ready first." }, { status: 400 });
     }
 
     if (action === "accept") {
-        if (!lease.tenant.bankName || !lease.tenant.accountNumber || !lease.tenant.accountName) {
-            return NextResponse.json({ error: "Bank details are required to accept" }, { status: 400 });
-        }
+      // Refund method is captured on the lease — no need to check tenant user profile bank fields
+      const updatedLease = await prisma.lease.update({
+        where: { id: leaseId },
+        data: {
+          moveOutStatus: "TENANT_ACCEPTED",
+          tenantReviewedAt: new Date(),
+        },
+      });
 
-        const updatedLease = await prisma.lease.update({
-            where: { id: leaseId },
-            data: { moveOutStatus: "TENANT_ACCEPTED" }
-        });
+      await notify({
+        userId: lease.unit.property.ownerId,
+        title: "Tenant Accepted — Ready to Finalize",
+        message: `The tenant has accepted the deductions and refund estimate for ${lease.unit?.property?.name}. You can now navigate to the Final Statement to process the deposit refund.`,
+        type: "LEASE",
+        priority: "HIGH",
+        relatedEntityId: lease.id,
+      });
 
-        // Notify Owner
-        await notify({
-            userId: lease.unit.property.ownerId,
-            title: "Tenant Accepted Refund Estimate",
-            message: `The tenant has accepted the deductions and refund estimate for lease ${lease.id}. You can now finalize the move-out.`,
-            type: "LEASE",
-            priority: "MEDIUM",
-            relatedEntityId: lease.id,
-        });
+      return NextResponse.json(updatedLease);
 
-        return NextResponse.json(updatedLease);
     } else if (action === "dispute") {
-        const disputeCount = lease.disputeCount + 1;
-        const newStatus = disputeCount >= 2 ? "ADMIN_MEDIATION" : "TENANT_DISPUTED";
+      if (!tenantDisputeNote || tenantDisputeNote.trim().length < 10) {
+        return NextResponse.json({ error: "Please provide a clear reason for your dispute (minimum 10 characters)." }, { status: 400 });
+      }
 
-        const updatedLease = await prisma.lease.update({
-            where: { id: leaseId },
-            data: { 
-                moveOutStatus: newStatus,
-                tenantDisputeNote,
-                disputeCount
-            }
-        });
+      const disputeCount = (lease.disputeCount || 0) + 1;
+      // 2nd dispute → DISPUTE_FINALIZED (replaces the dead ADMIN_MEDIATION)
+      const newStatus = disputeCount >= 2 ? "DISPUTE_FINALIZED" : "TENANT_DISPUTED";
 
-        // Notify Owner
+      const updatedLease = await prisma.lease.update({
+        where: { id: leaseId },
+        data: {
+          moveOutStatus: newStatus,
+          tenantDisputeNote,
+          disputeCount,
+          tenantReviewedAt: new Date(),
+        },
+      });
+
+      // Notify Owner
+      await notify({
+        userId: lease.unit.property.ownerId,
+        title: newStatus === "DISPUTE_FINALIZED" ? "⚠️ Move-Out Dispute Finalized" : "Tenant Disputed Deductions",
+        message: newStatus === "DISPUTE_FINALIZED"
+          ? `The tenant has disputed the deductions a second time for ${lease.unit?.property?.name}. The dispute has been finalized. Both parties should resolve this matter offline or through small claims court. A Dispute Record is available to download from the lease page.`
+          : `The tenant has disputed the deductions for ${lease.unit?.property?.name}. Please review their note: "${tenantDisputeNote}" — you can revise deductions or respond.`,
+        type: "LEASE",
+        priority: "HIGH",
+        relatedEntityId: lease.id,
+      });
+
+      // Notify Tenant of DISPUTE_FINALIZED
+      if (newStatus === "DISPUTE_FINALIZED") {
         await notify({
-            userId: lease.unit.property.ownerId,
-            title: newStatus === "ADMIN_MEDIATION" ? "Move-Out Dispute Escalated" : "Tenant Disputed Refund Estimate",
-            message: newStatus === "ADMIN_MEDIATION" 
-                ? `Tenant has disputed the estimate 2 times. It has been escalated to Admin Mediation.`
-                : `The tenant has disputed the deductions for lease ${lease.id}. Please review their notes.`,
-            type: "LEASE",
-            priority: "HIGH",
-            relatedEntityId: lease.id,
+          userId: lease.tenantId,
+          title: "Dispute Record Generated",
+          message: `Your move-out dispute for ${lease.unit?.property?.name} has been formally recorded. Both parties are encouraged to resolve this through mediation or small claims court. You can download a Dispute Record document from your lease page.`,
+          type: "LEASE",
+          priority: "HIGH",
+          relatedEntityId: lease.id,
         });
+      }
 
-        // If escalated, maybe notify admin (assuming SUPERADMIN or all admins, but for now we just change status)
-
-        return NextResponse.json(updatedLease);
+      return NextResponse.json(updatedLease);
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid action. Use 'accept' or 'dispute'." }, { status: 400 });
 
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to submit review" }, { status: 500 });

@@ -98,6 +98,13 @@ export default function InspectorActiveTasksPage() {
         finalLabor: actionData.labor, 
         finalMaterials: actionData.materials 
       });
+    } else if (activeModal === "QUICK_RESOLVE") {
+      handleUpdateStatus(selectedTicket.id, "RESOLVED", { 
+        action: "QUICK_RESOLVE",
+        finalLabor: actionData.labor, 
+        finalMaterials: actionData.materials,
+        inspectorNotes: actionData.notes
+      });
     }
   };
 
@@ -136,6 +143,7 @@ export default function InspectorActiveTasksPage() {
                     <TableHead className="text-slate-500 font-bold text-[11px] uppercase tracking-wider h-10">Property & Unit</TableHead>
                     <TableHead className="text-slate-500 font-bold text-[11px] uppercase tracking-wider h-10">Tenant Info</TableHead>
                     <TableHead className="text-slate-500 font-bold text-[11px] uppercase tracking-wider h-10">Priority</TableHead>
+                    <TableHead className="text-slate-500 font-bold text-[11px] uppercase tracking-wider h-10">Status</TableHead>
                     <TableHead className="text-right text-slate-500 font-bold text-[11px] uppercase tracking-wider h-10 pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -163,45 +171,62 @@ export default function InspectorActiveTasksPage() {
                           {t.priority}
                         </Badge>
                       </TableCell>
+                      <TableCell className="py-4">
+                        <Badge className={`rounded-full font-bold px-3 py-0.5 text-[10px] uppercase tracking-wider ${
+                          t.status === "ASSIGNED" ? "bg-slate-100 text-slate-600 border-slate-200" :
+                          t.status === "DIAGNOSIS_SCHEDULED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                          t.status === "PENDING_APPROVAL" ? "bg-amber-50 text-amber-600 border-amber-200" :
+                          t.status === "APPROVED" ? "bg-indigo-50 text-indigo-600 border-indigo-200" :
+                          t.status === "REPAIR_SCHEDULED" ? "bg-purple-50 text-purple-600 border-purple-200" :
+                          "bg-emerald-55 text-emerald-600 border-emerald-200"
+                        }`}>
+                          {t.status.replace(/_/g, " ")}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right pr-6 py-4">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-[#0F172A] hover:bg-slate-100 rounded-lg outline-none focus:ring-2 focus:ring-[#3B82F6]">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-[#E2E8F0] p-1">
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${t.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                              <Eye className="h-4 w-4 text-[#64748B]" /> View Details
-                            </DropdownMenuItem>
-                            
-                            <div className="h-px bg-[#E2E8F0] my-1" />
+                        <div className="flex items-center justify-end gap-2.5">
+                          <Link href={`/dashboard/maintenance/${t.id}`}>
+                            <Button size="icon" variant="outline" className="h-9 w-9 border-slate-200 bg-white rounded-xl" title="View details">
+                              <Eye className="h-4.5 w-4.5 text-slate-500" />
+                            </Button>
+                          </Link>
 
-                            {t.status === "ASSIGNED" && (
-                              <DropdownMenuItem onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SCHEDULE_DIAGNOSIS"); }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                                <Calendar className="h-4 w-4" /> Schedule Diagnosis
-                              </DropdownMenuItem>
-                            )}
-                            {t.status === "DIAGNOSIS_SCHEDULED" && (
-                              <DropdownMenuItem onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SUBMIT_ESTIMATE"); }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-orange-600 p-2 rounded-lg hover:bg-orange-50">
-                                <FileText className="h-4 w-4" /> Submit Estimate
-                              </DropdownMenuItem>
-                            )}
-                            {t.status === "PENDING_APPROVAL" && (
-                              <DropdownMenuItem disabled className="flex items-center gap-2 text-sm font-medium text-slate-500 p-2 rounded-lg italic opacity-70">
-                                Waiting on Owner
-                              </DropdownMenuItem>
-                            )}
-                            {t.status === "APPROVED" && (
-                              <DropdownMenuItem onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SCHEDULE_REPAIR"); }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                                <Calendar className="h-4 w-4" /> Schedule Repair
-                              </DropdownMenuItem>
-                            )}
-                            {t.status === "REPAIR_SCHEDULED" && (
-                              <DropdownMenuItem onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("RESOLVE"); }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-emerald-600 p-2 rounded-lg hover:bg-emerald-50">
-                                <CheckCircle2 className="h-4 w-4" /> Complete Work
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          {t.status === "ASSIGNED" && (
+                            <div className="flex gap-2">
+                              <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SCHEDULE_DIAGNOSIS"); }} className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-9 px-3.5 rounded-xl text-xs shadow-none">
+                                Schedule Visit
+                              </Button>
+                              <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("QUICK_RESOLVE"); }} variant="outline" className="h-9 px-3.5 rounded-xl text-xs font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-50">
+                                Quick Resolve
+                              </Button>
+                            </div>
+                          )}
+                          {t.status === "DIAGNOSIS_SCHEDULED" && (
+                            <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SUBMIT_ESTIMATE"); }} className="bg-orange-600 hover:bg-orange-500 text-white font-bold h-9 px-3.5 rounded-xl text-xs shadow-none">
+                              Submit Estimate
+                            </Button>
+                          )}
+                          {t.status === "PENDING_APPROVAL" && (
+                            <span className="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-xl block shrink-0">
+                              Awaiting Approval
+                            </span>
+                          )}
+                          {t.status === "APPROVED" && (
+                            <div className="flex gap-2">
+                              <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("SCHEDULE_REPAIR"); }} className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-9 px-3.5 rounded-xl text-xs shadow-none">
+                                Schedule Repair
+                              </Button>
+                              <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("QUICK_RESOLVE"); }} variant="outline" className="h-9 px-3.5 rounded-xl text-xs font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-50">
+                                Quick Resolve
+                              </Button>
+                            </div>
+                          )}
+                          {t.status === "REPAIR_SCHEDULED" && (
+                            <Button onClick={() => { setSelectedTicket(t); setActionData({}); setActiveModal("RESOLVE"); }} className="bg-emerald-600 hover:bg-emerald-500 text-white font-black h-9 px-3.5 rounded-xl text-xs shadow-none">
+                              Complete Work
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -221,6 +246,7 @@ export default function InspectorActiveTasksPage() {
               {activeModal === "SUBMIT_ESTIMATE" && "Submit Damage Estimate"}
               {activeModal === "SCHEDULE_REPAIR" && "Schedule Repair Visit"}
               {activeModal === "RESOLVE" && "Complete Work & Final Bill"}
+              {activeModal === "QUICK_RESOLVE" && "Quick Resolve Ticket"}
             </DialogTitle>
             <DialogDescription>
               {selectedTicket?.entryPermission ? (
@@ -238,7 +264,7 @@ export default function InspectorActiveTasksPage() {
                 <Input type="datetime-local" onChange={(e) => setActionData({...actionData, date: e.target.value})} />
               </div>
             )}
-            {(activeModal === "SUBMIT_ESTIMATE" || activeModal === "RESOLVE") && (
+            {(activeModal === "SUBMIT_ESTIMATE" || activeModal === "RESOLVE" || activeModal === "QUICK_RESOLVE") && (
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -250,9 +276,9 @@ export default function InspectorActiveTasksPage() {
                     <Input type="number" placeholder="0.00" onChange={(e) => setActionData({...actionData, materials: Number(e.target.value)})} />
                   </div>
                 </div>
-                {activeModal === "SUBMIT_ESTIMATE" && (
+                {(activeModal === "SUBMIT_ESTIMATE" || activeModal === "QUICK_RESOLVE") && (
                   <div className="space-y-2">
-                    <Label>Diagnosis Notes</Label>
+                    <Label>{activeModal === "QUICK_RESOLVE" ? "Resolution Notes" : "Diagnosis Notes"}</Label>
                     <Textarea placeholder="Explain the issue..." onChange={(e) => setActionData({...actionData, notes: e.target.value})} />
                   </div>
                 )}

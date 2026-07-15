@@ -31,6 +31,16 @@ export async function GET(req: NextRequest) {
         where: { tenantId: userId },
         include: { tenant: true, unit: { include: { property: true } }, invoices: true },
       });
+    } else if (role === "INSPECTOR") {
+      leases = await prisma.lease.findMany({
+        where: {
+          OR: [
+            { moveOutInspectorId: userId },
+            { preliminaryInspectorId: userId }
+          ]
+        },
+        include: { tenant: true, unit: { include: { property: true } } },
+      });
     } else {
       leases = [];
     }

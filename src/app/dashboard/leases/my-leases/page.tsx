@@ -34,6 +34,9 @@ import {
   Search,
   MapPin,
   Clock,
+  CheckCircle,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { LeaseActionsMenu } from "@/components/tenant/LeaseActionsMenu";
@@ -54,7 +57,17 @@ export default function MyLeasesPage() {
   const [activeLeaseForMoveOut, setActiveLeaseForMoveOut] = useState<any>(null);
   const [moveOutDate, setMoveOutDate] = useState("");
   const [moveOutReason, setMoveOutReason] = useState("");
-  const [forwardingAddress, setForwardingAddress] = useState("");
+  const [otherReasonNote, setOtherReasonNote] = useState("");
+  const [forwardingStreet, setForwardingStreet] = useState("");
+  const [forwardingCity, setForwardingCity] = useState("");
+  const [forwardingState, setForwardingState] = useState("");
+  const [forwardingZip, setForwardingZip] = useState("");
+  const [utilitiesChecked, setUtilitiesChecked] = useState(false);
+  const [cleaningChecked, setCleaningChecked] = useState(false);
+  const [moveOutStep, setMoveOutStep] = useState(1);
+  const [refundBankName, setRefundBankName] = useState("");
+  const [refundAccountName, setRefundAccountName] = useState("");
+  const [refundAccountNumber, setRefundAccountNumber] = useState("");
   const [moveOutSubmitting, setMoveOutSubmitting] = useState(false);
 
   useEffect(() => {
@@ -152,15 +165,36 @@ export default function MyLeasesPage() {
   const handleRequestMoveOut = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeLeaseForMoveOut) return;
+
+    if (moveOutStep < 2) {
+      setMoveOutStep(moveOutStep + 1);
+      return;
+    }
+
     setMoveOutSubmitting(true);
+    const forwardingAddress = `${forwardingStreet}, ${forwardingCity}, ${forwardingState} ${forwardingZip}`.trim();
+
+    const payload: any = {
+      moveOutDate,
+      moveOutReason,
+      otherReasonNote: moveOutReason === "Other" ? otherReasonNote : undefined,
+      forwardingAddress,
+      refundMethod: "BANK_TRANSFER",
+      refundBankName,
+      refundAccountName,
+      refundAccountNumber,
+      utilitiesAcknowledged: utilitiesChecked,
+      cleaningAcknowledged: cleaningChecked,
+    };
+
     try {
       const res = await fetch(`/api/leases/${activeLeaseForMoveOut.id}/move-out-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ moveOutDate, moveOutReason, forwardingAddress }),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
-        toast.success("Move-out request submitted");
+        toast.success("Move-out notice submitted successfully.");
         setShowMoveOutModal(false);
         fetchLeases();
       } else {
@@ -178,8 +212,19 @@ export default function MyLeasesPage() {
     const l = leases.find(l => l.id === leaseId);
     if (l) {
       setActiveLeaseForMoveOut(l);
+      setMoveOutStep(1);
       setMoveOutDate("");
       setMoveOutReason("");
+      setOtherReasonNote("");
+      setRefundBankName("");
+      setRefundAccountName("");
+      setRefundAccountNumber("");
+      setForwardingStreet("");
+      setForwardingCity("");
+      setForwardingState("");
+      setForwardingZip("");
+      setUtilitiesChecked(false);
+      setCleaningChecked(false);
       setShowMoveOutModal(true);
     }
   };
@@ -238,6 +283,7 @@ export default function MyLeasesPage() {
   };
 
   const statusBadge = (l: any) => {
+    if (l.status === "SIGNED") return hasUnpaidDeposit(l) ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-indigo-50 text-indigo-700 border border-indigo-200";
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50 text-blue-700 border border-blue-200";
     if (l.status === "ACTIVE") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
     if (l.status === "PENDING_SIGNATURE") return "bg-amber-50 text-amber-700 border border-amber-200";
@@ -246,6 +292,7 @@ export default function MyLeasesPage() {
   };
 
   const statusDot = (l: any) => {
+    if (l.status === "SIGNED") return hasUnpaidDeposit(l) ? "bg-amber-500" : "bg-indigo-500";
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-500";
     if (l.status === "ACTIVE") return "bg-emerald-500";
     if (l.status === "PENDING_SIGNATURE") return "bg-amber-500";
@@ -253,6 +300,7 @@ export default function MyLeasesPage() {
   };
 
   const formatStatus = (l: any) => {
+    if (l.status === "SIGNED") return hasUnpaidDeposit(l) ? "Deposit Pending" : "Awaiting Move-in";
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "Awaiting Deposit";
     return l.status.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   };
@@ -576,7 +624,9 @@ export default function MyLeasesPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {daysLeft > 0 ? (
+                          {l.status === "SIGNED" && new Date(l.startDate).getTime() > Date.now() ? (
+                            <span className="text-sm text-indigo-600 font-semibold">Move-in in {Math.ceil((new Date(l.startDate).getTime() - Date.now()) / 86400000)} days</span>
+                          ) : daysLeft > 0 ? (
                             <span className="text-sm text-[#64748B] font-semibold">{daysLeft} days remaining</span>
                           ) : (
                             <span className="text-sm text-red-500 font-semibold">Expired {Math.abs(daysLeft)} days ago</span>
@@ -727,104 +777,277 @@ export default function MyLeasesPage() {
         </div>
       </Card>
 
-      {/* Move-Out Request Modal */}
-      {showMoveOutModal && activeLeaseForMoveOut && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
-            <div className="p-6">
-              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Request Move-Out</h2>
-              <p className="text-sm text-[#64748B] mb-6">
-                Please provide your preferred move-out date and reason. 
-                {activeLeaseForMoveOut?.moveOutNoticeDays && (
-                  <span className="block mt-2 text-amber-600 font-semibold text-xs">
-                    * Your lease agreement requires {activeLeaseForMoveOut.moveOutNoticeDays} days notice.
-                  </span>
-                )}
-              </p>
-              
-              <form onSubmit={handleRequestMoveOut} className="space-y-4">
+      {/* Move-Out Request Modal — 2-Step Clean Form */}
+      {showMoveOutModal && activeLeaseForMoveOut && (() => {
+        const noticeDays = activeLeaseForMoveOut?.moveOutNoticeDays || 30;
+        const isShortNotice = moveOutDate
+          ? (new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < noticeDays
+          : false;
+        const forwardingFull = [forwardingStreet, forwardingCity, forwardingState, forwardingZip].filter(Boolean).join(", ");
+
+        const step1Valid = moveOutDate && moveOutReason &&
+          (moveOutReason !== "Other" || (otherReasonNote && otherReasonNote.trim().length >= 10)) &&
+          forwardingStreet && forwardingCity && forwardingState && forwardingZip;
+        const step2Valid = utilitiesChecked && cleaningChecked &&
+          refundBankName && refundAccountName && refundAccountNumber;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <Card className="w-full max-w-lg bg-white border-0 shadow-2xl rounded-[24px] flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              {/* Sticky Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div>
-                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Preferred Move-Out Date</label>
-                  <input 
-                    type="date"
-                    required
-                    value={moveOutDate}
-                    onChange={(e) => setMoveOutDate(e.target.value)}
-                    className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none"
-                  />
-                  {moveOutDate && activeLeaseForMoveOut?.moveOutNoticeDays && (
-                    <div className="mt-2 text-xs">
-                      {(new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) >= activeLeaseForMoveOut.moveOutNoticeDays && (
-                        <p className="text-emerald-600 font-semibold">Notice period met.</p>
+                  <h2 className="text-xl font-extrabold text-[#0F172A]">Request Move-Out</h2>
+                  <p className="text-xs text-[#64748B] mt-0.5">{activeLeaseForMoveOut.unit?.property?.name} — {activeLeaseForMoveOut.unit?.name}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Step dots */}
+                  <div className="flex gap-1.5">
+                    {[1, 2].map((step) => (
+                      <div key={step} className={`h-1.5 rounded-full transition-all ${moveOutStep >= step ? 'w-8 bg-[#3B82F6]' : 'w-4 bg-[#E2E8F0]'}`} />
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => setShowMoveOutModal(false)} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleRequestMoveOut} className="flex flex-col flex-1 overflow-hidden">
+                {/* Scrollable Form Fields */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  {/* ── STEP 1: Notice Details ── */}
+                  {moveOutStep === 1 && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                      <p className="text-sm font-semibold text-[#64748B]">Step 1 of 2 — Notice Details</p>
+
+                      {/* Move-Out Date */}
+                      <div>
+                        <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Planned Move-Out Date *</label>
+                        <input
+                          type="date"
+                          required
+                          value={moveOutDate}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) => setMoveOutDate(e.target.value)}
+                          className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none text-sm"
+                        />
+                        {moveOutDate && !isShortNotice && (
+                          <p className="text-emerald-600 text-xs font-semibold mt-1 flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5" /> Notice period met ({noticeDays} days required).
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Early Termination Warning */}
+                      {moveOutDate && isShortNotice && (
+                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                          <p className="text-amber-900 font-extrabold text-sm flex items-center gap-2 mb-1">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                            Early Termination Notice
+                          </p>
+                          <p className="text-amber-800 text-xs font-semibold leading-relaxed">
+                            Your lease requires {noticeDays} days notice. By submitting this date, you are breaking your lease early.
+                            {activeLeaseForMoveOut.earlyTerminationFee && Number(activeLeaseForMoveOut.earlyTerminationFee) > 0 && (
+                              <> An early termination fee of <strong>${Number(activeLeaseForMoveOut.earlyTerminationFee).toLocaleString()}</strong> will be billed.</>
+                            )}
+                          </p>
+                        </div>
                       )}
+
+                      {/* Reason */}
+                      <div>
+                        <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Reason for Moving *</label>
+                        <select
+                          required
+                          value={moveOutReason}
+                          onChange={(e) => setMoveOutReason(e.target.value)}
+                          className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm bg-white"
+                        >
+                          <option value="" disabled>Select a reason...</option>
+                          <option value="End of Lease Term">End of Lease Term</option>
+                          <option value="Job Relocation">Job Relocation</option>
+                          <option value="Buying a Home">Buying a Home</option>
+                          <option value="Need More Space">Need More Space</option>
+                          <option value="Downsizing">Downsizing</option>
+                          <option value="Personal Reasons">Personal Reasons</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        {moveOutReason === "Other" && (
+                          <div className="mt-2">
+                            <input
+                              type="text"
+                              required
+                              placeholder="Please describe your reason (min. 10 characters)..."
+                              value={otherReasonNote}
+                              onChange={(e) => setOtherReasonNote(e.target.value)}
+                              className="w-full p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                            />
+                            {otherReasonNote.length > 0 && otherReasonNote.length < 10 && (
+                              <p className="text-red-500 text-xs mt-1">{10 - otherReasonNote.length} more characters required.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Forwarding Address — always visible */}
+                      <div>
+                        <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Forwarding Address *</label>
+                        <p className="text-[10px] text-[#94A3B8] mt-0.5 mb-1.5">Your deposit disposition letter will be mailed here — required regardless of refund method.</p>
+                        <input
+                          required
+                          placeholder="Street Address"
+                          value={forwardingStreet}
+                          onChange={(e) => setForwardingStreet(e.target.value)}
+                          className="w-full p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                        />
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          <input
+                            required
+                            placeholder="City"
+                            value={forwardingCity}
+                            onChange={(e) => setForwardingCity(e.target.value)}
+                            className="col-span-1 p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                          />
+                          <input
+                            required
+                            placeholder="State"
+                            value={forwardingState}
+                            onChange={(e) => setForwardingState(e.target.value)}
+                            className="p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                          />
+                          <input
+                            required
+                            placeholder="Zip"
+                            value={forwardingZip}
+                            onChange={(e) => setForwardingZip(e.target.value)}
+                            className="p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Deposit info */}
+                      <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-3 rounded-xl flex justify-between items-center text-xs">
+                        <span className="font-bold text-[#64748B]">Security Deposit Timeline:</span>
+                        <span className="font-black text-[#3B82F6]">Within {activeLeaseForMoveOut.depositReturnDays || 21} days of move-out</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── STEP 2: Confirm & Refund Method ── */}
+                  {moveOutStep === 2 && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                      <p className="text-sm font-semibold text-[#64748B]">Step 2 of 2 — Confirm & Refund Method</p>
+
+                      {/* Deposit Refund Account */}
+                      <div>
+                        <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Deposit Refund Account *</label>
+                        <p className="text-xs text-[#64748B] mt-1 mb-3">Please provide your bank details. Your deposit refund will be securely transferred via encrypted wire. This is the fastest and safest method.</p>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                          <div>
+                            <label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1 block">Bank Name</label>
+                            <input
+                              required
+                              placeholder="e.g. Chase Bank"
+                              value={refundBankName}
+                              onChange={(e) => setRefundBankName(e.target.value)}
+                              className="w-full p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1 block">Account Holder Name</label>
+                            <input
+                              required
+                              placeholder="e.g. John Doe"
+                              value={refundAccountName}
+                              onChange={(e) => setRefundAccountName(e.target.value)}
+                              className="w-full p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1 block">Account Number</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="Account Number"
+                              value={refundAccountNumber}
+                              onChange={(e) => setRefundAccountNumber(e.target.value)}
+                              className="w-full p-2.5 rounded-lg border border-[#E2E8F0] focus:border-[#3B82F6] outline-none text-sm font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Your Responsibilities */}
+                      <div>
+                        <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Your Responsibilities</label>
+                        <div className="mt-2 space-y-3">
+                          <label className="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" required checked={utilitiesChecked} onChange={(e) => setUtilitiesChecked(e.target.checked)} className="mt-1 shrink-0 h-4 w-4 rounded border-[#E2E8F0] text-[#3B82F6]" />
+                            <span className="text-xs font-semibold text-[#64748B] group-hover:text-[#0F172A] transition-colors leading-relaxed">
+                              I will transfer or cancel all utilities by my move-out date.
+                            </span>
+                          </label>
+                          <label className="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" required checked={cleaningChecked} onChange={(e) => setCleaningChecked(e.target.checked)} className="mt-1 shrink-0 h-4 w-4 rounded border-[#E2E8F0] text-[#3B82F6]" />
+                            <span className="text-xs font-semibold text-[#64748B] group-hover:text-[#0F172A] transition-colors leading-relaxed">
+                              I have read and agree to the move-out cleaning standards to ensure a full deposit return.
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Confirmation Summary */}
+                      <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-4 space-y-2">
+                        <p className="text-xs font-extrabold text-[#0369A1] uppercase tracking-wider mb-2">Confirm Your Notice</p>
+                        <div className="grid grid-cols-2 gap-y-1.5 text-xs">
+                          <span className="text-[#64748B] font-semibold">Move-Out Date:</span>
+                          <span className="font-bold text-[#0F172A]">{moveOutDate ? new Date(moveOutDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—"}</span>
+                          <span className="text-[#64748B] font-semibold">Reason:</span>
+                          <span className="font-bold text-[#0F172A]">{moveOutReason === "Other" ? `Other: ${otherReasonNote}` : moveOutReason}</span>
+                          <span className="text-[#64748B] font-semibold">Forwarding Address:</span>
+                          <span className="font-bold text-[#0F172A]">{forwardingFull || "—"}</span>
+                          <span className="text-[#64748B] font-semibold">Refund Method:</span>
+                          <span className="font-bold text-[#0F172A]">Direct Bank Transfer</span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-                
-                <div>
-                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Reason for Moving</label>
-                  <select 
-                    required
-                    value={moveOutReason}
-                    onChange={(e) => setMoveOutReason(e.target.value)}
-                    className="w-full mt-1.5 p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none bg-white"
-                  >
-                    <option value="" disabled>Select a reason...</option>
-                    <option value="End of Lease Term">End of Lease Term</option>
-                    <option value="Job Relocation">Job Relocation</option>
-                    <option value="Buying a Home">Buying a Home</option>
-                    <option value="Need More Space">Need More Space</option>
-                    <option value="Downsizing">Downsizing</option>
-                    <option value="Personal Reasons">Personal Reasons</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
 
-                <div>
-                  <label className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Forwarding Address</label>
-                  <p className="text-[10px] text-slate-500 mb-1.5">Required for the return of your security deposit.</p>
-                  <textarea 
-                    required
-                    rows={2}
-                    value={forwardingAddress}
-                    onChange={(e) => setForwardingAddress(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-[#E2E8F0] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none resize-none"
-                    placeholder="Enter your new mailing address..."
-                  />
-                </div>
-
-                {moveOutDate && activeLeaseForMoveOut?.moveOutNoticeDays && 
-                 (new Date(moveOutDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < activeLeaseForMoveOut.moveOutNoticeDays && (
-                  <div className="bg-red-50 border border-red-100 p-3 rounded-xl mt-4">
-                    <p className="text-red-700 font-semibold text-xs flex items-start gap-2">
-                      <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" /> 
-                      <span>By submitting a notice of less than {activeLeaseForMoveOut.moveOutNoticeDays} days, you acknowledge that you may be subject to an Early Termination Fee as per your lease agreement.</span>
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowMoveOutModal(false)}
-                    className="flex-1 rounded-xl h-11 border-[#E2E8F0] text-[#64748B] font-bold"
+                {/* Sticky Footer */}
+                <div className="px-6 py-4 border-t border-[#F1F5F9] flex gap-3 shrink-0 bg-slate-50/50">
+                  {moveOutStep === 1 ? (
+                    <Button type="button" variant="outline" onClick={() => setShowMoveOutModal(false)}
+                      className="flex-1 rounded-xl h-11 border-[#E2E8F0] text-[#64748B] font-bold">Cancel</Button>
+                  ) : (
+                    <Button type="button" variant="outline" onClick={() => setMoveOutStep(1)}
+                      className="flex-1 rounded-xl h-11 border-[#E2E8F0] text-[#64748B] font-bold">← Back</Button>
+                  )}
+                  <Button
+                    type="submit"
+                    disabled={
+                      (moveOutStep === 1 && !step1Valid) ||
+                      (moveOutStep === 2 && (!step2Valid || moveOutSubmitting))
+                    }
+                    className={`flex-1 rounded-xl h-11 font-bold text-white disabled:opacity-50 ${
+                      isShortNotice ? "bg-amber-500 hover:bg-amber-600" : "bg-[#3B82F6] hover:bg-[#2563EB]"
+                    }`}
                   >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={moveOutSubmitting || !moveOutDate || !moveOutReason}
-                    className="flex-1 rounded-xl h-11 bg-red-600 hover:bg-red-700 text-white font-bold"
-                  >
-                    {moveOutSubmitting ? "Submitting..." : "Submit Notice"}
+                    {moveOutStep < 2
+                      ? "Next →"
+                      : moveOutSubmitting
+                        ? "Submitting..."
+                        : isShortNotice
+                          ? "Submit Early Notice (Fee May Apply)"
+                          : "Confirm & Submit Notice"}
                   </Button>
                 </div>
               </form>
-            </div>
-          </Card>
-        </div>
-      )}
+            </Card>
+          </div>
+        );
+      })()}
     </div>
   );
 }

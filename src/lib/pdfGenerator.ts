@@ -666,7 +666,8 @@ export const generatePDF = (htmlContent: string, filename: string) => {
 
 export const generateDispositionPDF = (lease: any) => {
   const doc = new jsPDF("p", "pt", "a4");
-  const primaryColor = "#3B82F6"; 
+  const isDispute = lease.moveOutStatus === "DISPUTE_FINALIZED";
+  const primaryColor = isDispute ? "#F59E0B" : "#3B82F6"; 
   const textColor = "#0F172A"; 
   const lightText = "#64748B"; 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -679,7 +680,7 @@ export const generateDispositionPDF = (lease: any) => {
   
   doc.setFontSize(10);
   doc.setTextColor(lightText);
-  doc.text("Security Deposit Disposition", 40, currentY + 15);
+  doc.text(isDispute ? "Official Move-Out Dispute Record" : "Security Deposit Disposition", 40, currentY + 15);
 
   const dateStr = `Generated: ${new Date().toLocaleDateString()}`;
   doc.setFontSize(12);
@@ -696,7 +697,7 @@ export const generateDispositionPDF = (lease: any) => {
   // Title
   doc.setFontSize(18);
   doc.setTextColor(textColor);
-  doc.text("Security Deposit Disposition Statement", 40, currentY);
+  doc.text(isDispute ? "Lease Move-Out Dispute Record" : "Security Deposit Disposition Statement", 40, currentY);
   currentY += 30;
 
   // Info Section
@@ -713,6 +714,9 @@ export const generateDispositionPDF = (lease: any) => {
   doc.setFontSize(10);
   doc.setTextColor(lightText);
   doc.text(lease.tenant?.email || "N/A", leftColX, currentY + 30);
+  if (lease.forwardingAddress) {
+    doc.text(`Forwarding: ${lease.forwardingAddress}`, leftColX, currentY + 45);
+  }
 
   doc.setFontSize(10);
   doc.setTextColor(lightText);
@@ -724,8 +728,14 @@ export const generateDispositionPDF = (lease: any) => {
   doc.setFontSize(10);
   doc.setTextColor(lightText);
   doc.text(`Unit: ${lease.unit?.name || "N/A"}`, rightColX, currentY + 30);
+  if (lease.actualMoveOutDate) {
+    doc.text(`Actual Move-Out: ${new Date(lease.actualMoveOutDate).toLocaleDateString()}`, rightColX, currentY + 45);
+  }
+  if (lease.depositDueBy) {
+    doc.text(`Deadline Date: ${new Date(lease.depositDueBy).toLocaleDateString()}`, rightColX, currentY + 60);
+  }
 
-  currentY += 70;
+  currentY += 90;
 
   // Table
   doc.setFontSize(14);
@@ -733,27 +743,39 @@ export const generateDispositionPDF = (lease: any) => {
   doc.text("Itemized Deductions", 40, currentY);
   currentY += 15;
 
-  const formattedDeductions = (lease.deductions || []).map((d: any) => [d.description, `-$${Number(d.amount).toFixed(2)}`]);
-  const tableBody = formattedDeductions.length > 0 ? formattedDeductions : [["No deductions recorded. Full deposit will be refunded.", "$0.00"]];
+  const CATEGORY_LABELS: Record<string, string> = {
+    DAMAGE: "Property Damage",
+    CLEANING: "Cleaning",
+    UNPAID_RENT: "Unpaid Rent",
+    UNPAID_FEE: "Unpaid Fee",
+    OTHER: "Other",
+  };
+
+  const formattedDeductions = (lease.deductions || []).map((d: any) => [
+    d.description,
+    CATEGORY_LABELS[d.category] || d.category || "Other",
+    `-$${Number(d.amount).toFixed(2)}`
+  ]);
+  const tableBody = formattedDeductions.length > 0 ? formattedDeductions : [["No deductions recorded. Full deposit will be refunded.", "-", "$0.00"]];
 
   autoTable(doc, {
     startY: currentY,
-    head: [['Description', 'Amount Deducted']],
+    head: [['Description', 'Category', 'Amount Deducted']],
     body: tableBody,
     theme: 'grid',
-    headStyles: { fillColor: [59, 130, 246] },
+    headStyles: { fillColor: isDispute ? [245, 158, 11] : [59, 130, 246] },
     styles: { fontSize: 11, cellPadding: 8 },
     columnStyles: {
-      1: { halign: 'right', fontStyle: 'bold' }
+      2: { halign: 'right', fontStyle: 'bold' }
     },
     margin: { left: 40, right: 40 }
   });
 
   currentY = (doc as any).lastAutoTable.finalY + 30;
 
-  // Summary
   const originalDeposit = Number(lease.securityDeposit || 0);
   const totalDeducted = (lease.deductions || []).reduce((sum: number, d: any) => sum + Number(d.amount), 0);
+  const excessAmount = totalDeducted - originalDeposit;
   const refundAmount = Math.max(0, originalDeposit - totalDeducted);
 
   const rightAlign = pageWidth - 40;
@@ -777,21 +799,94 @@ export const generateDispositionPDF = (lease: any) => {
   doc.setFontSize(12);
   doc.setTextColor(textColor);
   doc.setFont("helvetica", 'bold');
-  doc.text("Final Refund:", rightAlign - 120, currentY);
-  doc.setTextColor("#10B981");
-  doc.text(`$${refundAmount.toFixed(2)}`, rightAlign, currentY, { align: 'right' });
+  if (excessAmount > 0) {
+    doc.text("Final Balance Due:", rightAlign - 120, currentY);
+    doc.setTextColor("#EF4444");
+    doc.text(`$${excessAmount.toFixed(2)}`, rightAlign, currentY, { align: 'right' });
+  } else {
+    doc.text("Final Refund:", rightAlign - 120, currentY);
+    doc.setTextColor("#10B981");
+    doc.text(`$${refundAmount.toFixed(2)}`, rightAlign, currentY, { align: 'right' });
+  }
 
-  currentY += 60;
+  currentY += 35;
 
-  // Footer note
+  // Refund Method Details
+  if (lease.refundMethod && excessAmount <= 0) {
+    doc.setFontSize(10);
+    doc.setTextColor(lightText);
+    doc.setFont("helvetica", "normal");
+    const methodStr = lease.refundMethod === "ORIGINAL" ? "Original Payment Method" :
+                      lease.refundMethod === "CHECK" ? "Mailed Check" : "Offline Transfer / Wire";
+    doc.text(`Refund Method: ${methodStr}`, 40, currentY);
+    if (lease.refundRef) {
+      doc.text(`Reference / Check #: ${lease.refundRef}`, 40, currentY + 15);
+    }
+    currentY += 35;
+  }
+
+  // Tenant Acknowledgements
+  if (lease.utilitiesAcknowledgedAt || lease.cleaningAcknowledgedAt) {
+    doc.setFontSize(11);
+    doc.setTextColor(textColor);
+    doc.setFont("helvetica", "bold");
+    doc.text("Tenant Acknowledgements (Notice of Move-Out)", 40, currentY);
+    currentY += 15;
+
+    doc.setFontSize(9);
+    doc.setTextColor(lightText);
+    doc.setFont("helvetica", "normal");
+    if (lease.utilitiesAcknowledgedAt) {
+      doc.text(`✓ Confirmed utility transfer responsibility on ${new Date(lease.utilitiesAcknowledgedAt).toLocaleDateString()}`, 45, currentY);
+      currentY += 12;
+    }
+    if (lease.cleaningAcknowledgedAt) {
+      doc.text(`✓ Agreed to move-out cleaning standards on ${new Date(lease.cleaningAcknowledgedAt).toLocaleDateString()}`, 45, currentY);
+      currentY += 12;
+    }
+    currentY += 15;
+  }
+
+  // Tenant dispute details
+  if (isDispute && lease.tenantDisputeNote) {
+    doc.setFontSize(11);
+    doc.setTextColor("#EF4444");
+    doc.setFont("helvetica", "bold");
+    doc.text("Tenant Dispute Statement", 40, currentY);
+    currentY += 15;
+
+    doc.setFontSize(9);
+    doc.setTextColor(textColor);
+    doc.setFont("helvetica", "italic");
+    const splitDispute = doc.splitTextToSize(`"${lease.tenantDisputeNote}"`, pageWidth - 80);
+    for (let i = 0; i < splitDispute.length; i++) {
+      doc.text(splitDispute[i], 40, currentY);
+      currentY += 12;
+    }
+    currentY += 15;
+  }
+
+  // Footer / Dispute Disclaimer
   doc.setFontSize(9);
   doc.setFont("helvetica", 'normal');
   doc.setTextColor(lightText);
-  const footerText = "This statement is an official security deposit disposition summary generated by PropertyPro. Please send the final refund to the forwarding address provided.";
+  let footerText = "";
+  if (isDispute) {
+    footerText = "This Dispute Record is generated by PropertyPro. The tenant has disputed the deductions above. PropertyPro does not provide legal mediation or binding rulings. Both parties are encouraged to resolve this through local small claims court or professional arbitration.";
+  } else {
+    footerText = excessAmount > 0
+      ? `This statement is an official security deposit disposition summary generated by PropertyPro. The tenant owes the outstanding balance of $${excessAmount.toFixed(2)}. Please remit the remaining balance immediately.`
+      : "This statement is an official security deposit disposition summary generated by PropertyPro. Please send the final refund to the forwarding address provided.";
+  }
   const splitFooter = doc.splitTextToSize(footerText, pageWidth - 80);
-  doc.text(splitFooter, 40, currentY);
+  for (let i = 0; i < splitFooter.length; i++) {
+    doc.text(splitFooter[i], 40, currentY);
+    currentY += 12;
+  }
 
-  const filename = `Disposition_${lease.id.slice(-8)}.pdf`;
+  const filename = isDispute
+    ? `Dispute_Record_${lease.id.slice(-8)}.pdf`
+    : `Disposition_${lease.id.slice(-8)}.pdf`;
   doc.save(filename);
 };
 

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit-log";
-import { decrypt } from "@/lib/encryption";
+import { decryptSymmetric as decrypt } from "@/lib/encryption";
 
 export async function GET(
   req: NextRequest,

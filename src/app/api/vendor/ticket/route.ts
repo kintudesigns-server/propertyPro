@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sanitizeVendor } from "@/lib/sanitization";
-import { encrypt } from "@/lib/encryption";
+import { encryptSymmetric as encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;

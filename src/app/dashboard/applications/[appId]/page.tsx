@@ -250,6 +250,34 @@ export default function ApplicationDetailsPage() {
           </CardContent>
         </Card>
 
+        {/* Guarantor Info */}
+        {app.hasGuarantor && (
+          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex items-center gap-2">
+              <User className="h-5 w-5 text-[#3B82F6]" />
+              <h2 className="font-bold text-[#0F172A] text-lg">Guarantor Information</h2>
+            </div>
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
+                <div className="text-sm font-bold text-[#64748B]">Guarantor Name</div>
+                <div className="font-semibold text-[#0F172A]">{app.guarantorName || "N/A"}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
+                <div className="text-sm font-bold text-[#64748B]">Contact Info</div>
+                <div className="font-semibold text-[#0F172A]">
+                  {app.guarantorPhone} {app.guarantorEmail && `(${app.guarantorEmail})`}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-sm font-bold text-[#64748B]">Guarantor Income</div>
+                <div className="font-semibold text-[#0F172A]">
+                  {app.guarantorIncome ? `$${Number(app.guarantorIncome).toLocaleString()}/mo` : "N/A"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Previous Landlord Reference */}
         <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
           <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex items-center gap-2">
@@ -276,11 +304,33 @@ export default function ApplicationDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Pets & Vehicles */}
+        {/* Emergency Contact */}
+        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex items-center gap-2">
+            <PhoneCall className="h-5 w-5 text-[#3B82F6]" />
+            <h2 className="font-bold text-[#0F172A] text-lg">Emergency Contact</h2>
+          </div>
+          <CardContent className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
+              <div className="text-sm font-bold text-[#64748B]">Contact Name</div>
+              <div className="font-semibold text-[#0F172A]">{app.emergencyContactName || "N/A"}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
+              <div className="text-sm font-bold text-[#64748B]">Phone Number</div>
+              <div className="font-semibold text-[#0F172A]">{app.emergencyContactPhone || "N/A"}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-sm font-bold text-[#64748B]">Relationship</div>
+              <div className="font-semibold text-[#0F172A]">{app.emergencyContactRelation || "N/A"}</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pets, Vehicles & Consents */}
         <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden md:col-span-2">
           <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex items-center gap-2">
             <FileText className="h-5 w-5 text-[#3B82F6]" />
-            <h2 className="font-bold text-[#0F172A] text-lg">Compliance, Pets & Parking</h2>
+            <h2 className="font-bold text-[#0F172A] text-lg">Compliance, Consents & Parking</h2>
           </div>
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -288,15 +338,33 @@ export default function ApplicationDetailsPage() {
                 <div className="text-sm font-bold text-[#64748B]">Pets Count</div>
                 <div className="font-semibold text-[#0F172A]">{app.petsCount || 0} pets</div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
                 <div className="text-sm font-bold text-[#64748B]">Pet Details</div>
                 <div className="font-semibold text-[#0F172A]">{app.petDetails || "None"}</div>
               </div>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 pb-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="text-sm font-bold text-[#64748B]">Vehicle Info</div>
                 <div className="font-semibold text-[#0F172A]">{app.vehicleInfo || "No Vehicles"}</div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-[#EFF6FF] border border-[#BFDBFE] p-4 rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-[#1E3A8A] font-bold">
+                  {app.backgroundCheckConsent ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                  Background Check Consent
+                </div>
+                <p className="text-xs text-[#3B82F6]">
+                  {app.backgroundCheckConsent ? "Applicant has authorized a background & credit check via third-party service." : "Applicant has NOT authorized a background check."}
+                </p>
+              </div>
+              <div className="bg-[#EFF6FF] border border-[#BFDBFE] p-4 rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-[#1E3A8A] font-bold">
+                  {app.agreedToTerms ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                  Agreed to Terms
+                </div>
+                <p className="text-xs text-[#3B82F6]">
+                  {app.agreedToTerms ? "Applicant has certified that all information provided is true and correct." : "Applicant has NOT agreed to terms."}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -308,65 +376,62 @@ export default function ApplicationDetailsPage() {
             <Paperclip className="h-5 w-5 text-[#3B82F6]" />
             <h2 className="font-bold text-[#0F172A] text-lg">Supporting Documents</h2>
             <span className="ml-auto text-xs font-bold text-[#64748B] bg-slate-100 px-2.5 py-1 rounded-full">
-              {Array.isArray(app.documents) ? app.documents.length : 0} file{Array.isArray(app.documents) && app.documents.length !== 1 ? "s" : ""}
+              {(app.idDocumentUrl ? 1 : 0) + (app.incomeProofUrl ? 1 : 0)} files
             </span>
           </div>
           <CardContent className="p-6">
-            {Array.isArray(app.documents) && app.documents.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {app.documents.map((url: string, idx: number) => {
-                  const fileName = url.split("/").pop()?.split("?")[0] || `Document ${idx + 1}`;
-                  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
-                  const isPdf = /\.pdf$/i.test(url);
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-4 p-4 bg-slate-50 border border-[#E2E8F0] rounded-xl hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
-                    >
-                      {/* Icon */}
-                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        isImage ? "bg-purple-50" : isPdf ? "bg-red-50" : "bg-blue-50"
-                      }`}>
-                        <FileText className={`h-5 w-5 ${
-                          isImage ? "text-purple-500" : isPdf ? "text-red-500" : "text-blue-500"
-                        }`} />
-                      </div>
-                      {/* File info */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[#0F172A] truncate">{decodeURIComponent(fileName)}</p>
-                        <p className="text-xs text-[#64748B] mt-0.5">
-                          {isImage ? "Image" : isPdf ? "PDF Document" : "Document"} · Uploaded by applicant
-                        </p>
-                      </div>
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" /> Open
-                        </a>
-                        <a
-                          href={url}
-                          download
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                        >
-                          <Download className="h-3.5 w-3.5" /> Download
-                        </a>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
+            {!app.idDocumentUrl && !app.incomeProofUrl ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
                   <Paperclip className="h-6 w-6 text-slate-400" />
                 </div>
                 <p className="font-bold text-[#0F172A] text-sm">No documents uploaded</p>
                 <p className="text-xs text-[#64748B] mt-1">The applicant did not attach any supporting documents.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {app.idDocumentUrl && (
+                  <div className="flex flex-col gap-3 p-4 bg-slate-50 border border-[#E2E8F0] rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-purple-50">
+                        <FileText className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[#0F172A] truncate">Government ID</p>
+                        <p className="text-xs text-[#64748B] mt-0.5">Uploaded by applicant</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#E2E8F0]">
+                      <a href={app.idDocumentUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                        <ExternalLink className="h-3.5 w-3.5" /> View
+                      </a>
+                      <a href={app.idDocumentUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                        <Download className="h-3.5 w-3.5" /> Save
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {app.incomeProofUrl && (
+                  <div className="flex flex-col gap-3 p-4 bg-slate-50 border border-[#E2E8F0] rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50">
+                        <FileText className="h-5 w-5 text-emerald-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[#0F172A] truncate">Proof of Income</p>
+                        <p className="text-xs text-[#64748B] mt-0.5">Pay stubs or tax returns</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#E2E8F0]">
+                      <a href={app.incomeProofUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                        <ExternalLink className="h-3.5 w-3.5" /> View
+                      </a>
+                      <a href={app.incomeProofUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                        <Download className="h-3.5 w-3.5" /> Save
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

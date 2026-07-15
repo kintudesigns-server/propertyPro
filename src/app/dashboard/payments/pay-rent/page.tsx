@@ -25,6 +25,7 @@ import {
   X,
   Lock,
   Plus,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -321,7 +322,9 @@ export default function PayRentPage() {
     }
   };
 
-  const handlePayWithSavedCard = async (inv: any) => {
+  const [confirmInvoice, setConfirmInvoice] = useState<any>(null);
+
+  const executePayWithSavedCard = async (inv: any) => {
     if (!savedCard) return;
     setSavedCardPaying(inv.id);
     try {
@@ -396,6 +399,64 @@ export default function PayRentPage() {
         </Button>
       </div>
 
+      {/* ── AUTO-PAY BANNER ── */}
+      {activeLease && (
+        <div className="bg-gradient-to-r from-indigo-600 to-[#635BFF] rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm shrink-0">
+              <RefreshCw className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black tracking-tight">Never Miss a Rent Payment</h3>
+              <p className="text-indigo-100 text-sm mt-1 max-w-lg leading-relaxed">
+                Set up Auto-Pay to automatically deduct your rent on the 1st of every month using your default payment method. Avoid late fees and stay stress-free.
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0 w-full md:w-auto">
+            {savedCard ? (
+              <div className="flex items-center justify-between md:justify-end gap-4 bg-white/10 p-3 rounded-xl border border-white/20">
+                <span className="text-sm font-bold">Auto-Pay is {activeLease.autoPayEnabled ? "ON" : "OFF"}</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={activeLease.autoPayEnabled}
+                    onChange={async (e) => {
+                      const enabled = e.target.checked;
+                      // Optimistic UI update could go here, but we'll rely on fetchData for simplicity in this demo
+                      try {
+                        const res = await fetch(`/api/leases/${activeLease.id}/auto-pay`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ autoPayEnabled: enabled })
+                        });
+                        if (res.ok) {
+                          toast.success(`Auto-Pay successfully turned ${enabled ? 'ON' : 'OFF'}`);
+                          fetchData();
+                        } else {
+                          toast.error("Failed to update Auto-Pay settings");
+                        }
+                      } catch(err) {
+                        toast.error("Network error");
+                      }
+                    }}
+                  />
+                  <div className="w-11 h-6 bg-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-400"></div>
+                </label>
+              </div>
+            ) : (
+              <Button 
+                onClick={() => router.push("/dashboard/payments/add-card")}
+                className="bg-white text-indigo-600 hover:bg-slate-50 font-bold h-11 px-6 rounded-xl w-full md:w-auto shadow-sm transition-all hover:scale-105"
+              >
+                <CreditCard className="mr-2 h-4 w-4" /> Add Card to Enable
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── SUMMARY STATS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className={`rounded-2xl p-5 border shadow-sm ${totalOwed > 0 ? "bg-red-50 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
@@ -462,6 +523,17 @@ export default function PayRentPage() {
           </div>
         ) : (
           <div className="space-y-4">
+            {activeLease?.moveOutDate && (
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start gap-3 shadow-sm animate-in slide-in-from-top-2 duration-300">
+                <ShieldAlert className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-blue-900">Move-Out Pending</p>
+                  <p className="text-xs text-blue-800 mt-0.5 font-medium leading-relaxed">
+                    💡 <strong>Note:</strong> Any unpaid balances (including Early Termination Fees or Prorated Rent) will be automatically deducted from your final Security Deposit refund upon move-out. You do not have to pay them manually now.
+                  </p>
+                </div>
+              </div>
+            )}
             {pendingInvoices.map((inv) => {
               const daysInfo = getDaysInfo(inv.dueDate);
               const isLoadingThis = loadingCheckout === inv.id;
@@ -476,13 +548,18 @@ export default function PayRentPage() {
                 >
                   {/* Overdue / Due Today banner */}
                   {(daysInfo.isOverdue || daysInfo.isToday) && (
-                    <div className={`px-5 py-2 flex items-center gap-2 text-xs font-bold ${daysInfo.isOverdue ? "bg-red-500 text-white" : "bg-amber-400 text-amber-900"}`}>
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      {daysInfo.isOverdue ? `⚠️ OVERDUE — ${daysInfo.label}` : "⏰ Due Today"}
+                    <div className={`px-5 py-2 flex items-center justify-between text-xs font-bold ${daysInfo.isOverdue ? "bg-red-500 text-white" : "bg-amber-400 text-amber-900"}`}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        {daysInfo.isOverdue ? `⚠️ OVERDUE — ${daysInfo.label}` : "⏰ Due Today"}
+                      </div>
+                      <span className="opacity-90 font-medium">
+                        {daysInfo.isOverdue ? "A late fee has been applied." : `A $50 late fee will be applied after the ${activeLease?.gracePeriodDays || 5}-day grace period.`}
+                      </span>
                     </div>
                   )}
 
-                  <div className="p-6">
+                  <div className="p-6 border-b border-slate-100">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       {/* Info */}
                       <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -490,7 +567,11 @@ export default function PayRentPage() {
                           <Banknote className={`h-6 w-6 ${daysInfo.isOverdue ? "text-red-500" : "text-blue-500"}`} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-[#0F172A] text-base">{Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent'}</p>
+                          <p className="font-bold text-[#0F172A] text-base">
+                            {inv.invoiceType 
+                              ? inv.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
+                              : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent')}
+                          </p>
                           <p className="text-sm text-slate-500 mt-0.5">
                             {inv.lease?.unit?.property?.name || activeLease?.unit?.property?.name} · {inv.lease?.unit?.name || activeLease?.unit?.name}
                           </p>
@@ -502,6 +583,14 @@ export default function PayRentPage() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Breakdown Details (Simulated for real-world feel) */}
+                      <div className="hidden md:flex flex-col gap-1 text-right border-r border-slate-200 pr-6 mr-2 shrink-0">
+                         <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Breakdown</p>
+                         <p className="text-[11px] font-semibold text-slate-600">Base Rent: {formatCurrency(Number(inv.amount) - (daysInfo.isOverdue ? 50 : 0))}</p>
+                         {daysInfo.isOverdue && <p className="text-[11px] font-semibold text-red-500">Late Fee: $50.00</p>}
+                      </div>
+
                       {/* Amount + CTA */}
                       <div className="flex flex-row sm:flex-col items-center sm:items-end gap-4 sm:gap-2 shrink-0">
                         <div className="text-left sm:text-right">
@@ -514,7 +603,7 @@ export default function PayRentPage() {
                             {savedCard ? (
                               <>
                                 <Button
-                                  onClick={() => handlePayWithSavedCard(inv)}
+                                  onClick={() => setConfirmInvoice(inv)}
                                   disabled={savedCardPaying === inv.id || !!savedCardPaying || !!loadingCheckout}
                                   className={`h-12 px-5 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap shadow-md transition-all ${
                                     daysInfo.isOverdue ? "bg-red-500 hover:bg-red-600 text-white" : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
@@ -659,6 +748,38 @@ export default function PayRentPage() {
         </div>
       </div>
 
+      {/* ── PAYMENT METHODS ── */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-slate-400" />
+            <h2 className="text-xl font-black text-[#0F172A]">Payment Methods</h2>
+          </div>
+        </div>
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-16 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center shrink-0">
+              {savedCard ? (
+                <span className="font-black text-slate-600 tracking-wider text-sm">{savedCard.cardBrand?.toUpperCase()}</span>
+              ) : (
+                <CreditCard className="h-6 w-6 text-slate-400" />
+              )}
+            </div>
+            <div>
+              <p className="font-bold text-[#0F172A]">{savedCard ? `•••• •••• •••• ${savedCard.cardLast4}` : "No payment method saved"}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{savedCard ? "Default payment method for rent and Auto-Pay" : "Add a card for faster checkout and Auto-Pay"}</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => router.push("/dashboard/payments/add-card")}
+            variant={savedCard ? "outline" : "default"}
+            className={`h-10 px-6 rounded-xl font-bold shadow-sm transition-all ${!savedCard ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "border-slate-200 hover:bg-slate-50"}`}
+          >
+            {savedCard ? "Update Card" : "Add Card"}
+          </Button>
+        </div>
+      </div>
+
       {/* ── PAYMENT HISTORY ── */}
       {paidInvoices.length > 0 && (
         <div className="space-y-4">
@@ -685,6 +806,31 @@ export default function PayRentPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CONFIRMATION MODAL ── */}
+      {confirmInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200 border border-slate-100">
+            <h3 className="text-xl font-black text-[#0F172A] mb-2">Confirm Payment</h3>
+            <p className="text-slate-500 mb-6 text-sm">
+              You are about to securely charge <span className="font-bold text-[#0F172A]">{formatCurrency(confirmInvoice.amount)}</span> to your saved <span className="font-bold text-[#0F172A]">{savedCard?.cardBrand?.toUpperCase()}</span> ending in <span className="font-bold text-[#0F172A]">{savedCard?.cardLast4}</span>.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setConfirmInvoice(null)} className="rounded-xl font-semibold border-slate-200">Cancel</Button>
+              <Button 
+                onClick={() => {
+                  const inv = confirmInvoice;
+                  setConfirmInvoice(null);
+                  executePayWithSavedCard(inv);
+                }} 
+                className="bg-[#635BFF] hover:bg-[#4f46e5] text-white font-bold rounded-xl shadow-md"
+              >
+                Confirm Payment
+              </Button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { decrypt } from "@/lib/encryption";
+import { decryptSymmetric as decrypt } from "@/lib/encryption";
 
 export function maskBankDetails(accountNumber?: string | null, routingNumber?: string | null) {
   const result: { accountNumber?: string; routingNumber?: string } = {};

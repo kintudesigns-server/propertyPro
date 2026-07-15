@@ -1,58 +1,80 @@
-import crypto from "crypto";
+import crypto from 'crypto';
 
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12; // GCM standard IV length
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 16;
+const SALT_LENGTH = 64;
+const TAG_LENGTH = 16;
+const TAG_POSITION = SALT_LENGTH + IV_LENGTH;
+const ENCRYPTED_POSITION = TAG_POSITION + TAG_LENGTH;
 
-// Derive a 32-byte key from ENCRYPTION_KEY or a secure fallback using scrypt
-const ENCRYPTION_KEY = (() => {
-  const keyStr = process.env.ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || "default-fallback-secret-propertypro-32-chars";
-  return crypto.scryptSync(keyStr, "propertypro-salt", 32);
-})();
+// For prototype/demo, we use a static fallback if the env var isn't set, 
+// but in production this must be a securely generated 32-byte hex string in .env
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'a1b2c3d4e5f60718293a4b5c6d7e8f901234567890abcdef1234567890abcdef';
 
 /**
- * Encrypt a plain-text string using AES-256-GCM.
- * Returns a colon-separated string: ivHex:authTagHex:encryptedHex
+ * Encrypts a string (e.g., bank account number) using AES-256-GCM.
+ * The output is a single hex string containing the salt, IV, auth tag, and ciphertext.
+ * This format allows it to be safely stored in a standard database string column.
  */
-export function encrypt(text: string): string {
-  if (!text) return "";
+export function encryptSymmetric(text: string): string {
+  if (!text) return text;
+  
+  // Create a 256-bit key buffer from the hex key
+  const keyBuffer = Buffer.from(ENCRYPTION_KEY, 'hex');
+  if (keyBuffer.length !== 32) {
+    throw new Error('Invalid ENCRYPTION_KEY length. Must be 64 hex characters (32 bytes).');
+  }
+
+  // Generate random salt and IV
+  const salt = crypto.randomBytes(SALT_LENGTH);
   const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+
+  // We derive the actual working key using pbkdf2 to add brute-force resistance
+  const derivedKey = crypto.pbkdf2Sync(keyBuffer, salt, 100000, 32, 'sha512');
+
+  const cipher = crypto.createCipheriv(ALGORITHM, derivedKey, iv);
   
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
+  let encrypted = cipher.update(text, 'utf8');
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  const authTag = cipher.getAuthTag();
+
+  // Pack the payload: [salt][iv][authTag][encryptedData]
+  const payload = Buffer.concat([salt, iv, authTag, encrypted]);
   
-  const authTag = cipher.getAuthTag().toString("hex");
-  
-  return `${iv.toString("hex")}:${authTag.toString()}:${encrypted}`;
+  return payload.toString('hex');
 }
 
 /**
- * Decrypt a cipher-text string. Supports fallback to plain text if the input
- * is not encrypted or uses a legacy format.
+ * Decrypts a string previously encrypted with `encryptSymmetric`.
  */
-export function decrypt(encryptedText: string): string {
-  if (!encryptedText) return "";
+export function decryptSymmetric(hexPayload: string): string {
+  if (!hexPayload || hexPayload.length < ENCRYPTED_POSITION * 2) {
+    // If it's not a valid encrypted hex string, it might be an old unencrypted record (legacy fallback)
+    return hexPayload;
+  }
+
   try {
-    const parts = encryptedText.split(":");
-    if (parts.length !== 3) {
-      // Legacy data is not encrypted
-      return encryptedText;
-    }
+    const payload = Buffer.from(hexPayload, 'hex');
     
-    const [ivHex, authTagHex, encryptedHex] = parts;
-    const iv = Buffer.from(ivHex, "hex");
-    const authTag = Buffer.from(authTagHex, "hex");
-    const encrypted = Buffer.from(encryptedHex, "hex");
-    
-    const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+    // Extract pieces
+    const salt = payload.subarray(0, SALT_LENGTH);
+    const iv = payload.subarray(SALT_LENGTH, TAG_POSITION);
+    const authTag = payload.subarray(TAG_POSITION, ENCRYPTED_POSITION);
+    const encryptedText = payload.subarray(ENCRYPTED_POSITION);
+
+    const keyBuffer = Buffer.from(ENCRYPTION_KEY, 'hex');
+    const derivedKey = crypto.pbkdf2Sync(keyBuffer, salt, 100000, 32, 'sha512');
+
+    const decipher = crypto.createDecipheriv(ALGORITHM, derivedKey, iv);
     decipher.setAuthTag(authTag);
     
-    let decrypted = decipher.update(encrypted as any, "hex", "utf8");
-    decrypted += decipher.final("utf8");
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
     
-    return decrypted;
-  } catch (err) {
-    // Return original input if decryption fails (e.g. legacy plain text)
-    return encryptedText;
+    return decrypted.toString('utf8');
+  } catch (error) {
+    console.error("Failed to decrypt payload:", error);
+    // If decryption fails, it might be legacy plaintext data or corrupt
+    return "DECRYPTION_ERROR";
   }
 }

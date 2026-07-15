@@ -41,7 +41,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (
       role !== "SUPERADMIN" && 
       lease.unit.property.ownerId !== userId && 
-      lease.tenantId !== userId
+      lease.tenantId !== userId &&
+      lease.moveOutInspectorId !== userId
     ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

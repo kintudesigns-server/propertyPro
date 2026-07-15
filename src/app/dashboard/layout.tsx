@@ -28,6 +28,7 @@ import {
   CreditCard,
   X,
   ClipboardList,
+  TrendingUp,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MessageBadge } from "@/components/notifications/MessageBadge";
@@ -65,6 +66,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [leasesOpen, setLeasesOpen] = useState(true);
   const [toursOpen, setToursOpen] = useState(true);
+  const [inspectionsOpen, setInspectionsOpen] = useState(true);
   const [maintenanceOpen, setMaintenanceOpen] = useState(true);
   const [financialsOpen, setFinancialsOpen] = useState(true);
   const [activityOpen, setActivityOpen] = useState(true);
@@ -503,7 +505,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
-                    WORK ORDERS
+                    DIAGNOSTICS & REPAIRS
                   </span>
                 )}
 
@@ -516,7 +518,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <Wrench className="h-5 w-5" />
-                  {sidebarOpen && <span>Active Tasks</span>}
+                  {sidebarOpen && <span>Assigned Repairs</span>}
                 </Link>
 
                 <Link
@@ -528,7 +530,25 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <FileText className="h-5 w-5" />
-                  {sidebarOpen && <span>History Logs</span>}
+                  {sidebarOpen && <span>Closed Diagnostics</span>}
+                </Link>
+
+                {sidebarOpen && (
+                  <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
+                    INSPECTIONS
+                  </span>
+                )}
+
+                <Link
+                  href="/dashboard/inspector/inspections"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/inspector/inspections")
+                      ? "bg-[#EEF2FF] text-[#4F46E5]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <ClipboardList className="h-5 w-5" />
+                  {sidebarOpen && <span>Move-Out Walkthroughs</span>}
                 </Link>
 
                 {sidebarOpen && (
@@ -899,53 +919,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 {/* Team & Staff Accordion */}
                 {isOwnerOrAdmin && (
                   <div className="flex flex-col">
-                    <button
-                      onClick={() => {
-                        if (!sidebarOpen) setSidebarOpen(true);
-                        setTeamOpen(!teamOpen);
-                      }}
+                    <Link
+                      href="/dashboard/team"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
-                        isActive("/dashboard/team") && !teamOpen
+                        isActive("/dashboard/team")
                           ? "bg-[#EFF6FF] text-[#3B82F6]"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
                       <Briefcase className="h-5 w-5" />
-                      {sidebarOpen && <span className="flex-1 text-left">Team & Staff</span>}
-                      {sidebarOpen && (
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform duration-200 ${teamOpen ? "rotate-180" : ""}`}
-                        />
-                      )}
-                    </button>
-
-                    {/* Sub-menu (Tree) */}
-                    {sidebarOpen && teamOpen && (
-                      <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
-                        <Link
-                          href="/dashboard/team"
-                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
-                            pathname === "/dashboard/team"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
-                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
-                          }`}
-                        >
-                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                          All Staff
-                        </Link>
-                        <Link
-                          href="/dashboard/team/new"
-                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
-                            pathname === "/dashboard/team/new"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
-                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
-                          }`}
-                        >
-                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                          Add Staff
-                        </Link>
-                      </div>
-                    )}
+                      {sidebarOpen && <span className="flex-1 text-left">Inspectors & Vendors</span>}
+                    </Link>
                   </div>
                 )}
 
@@ -1073,6 +1057,48 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
 
+                {/* Inspections Accordion */}
+                {isOwnerOrAdmin && (
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() => {
+                        if (!sidebarOpen) setSidebarOpen(true);
+                        setInspectionsOpen(!inspectionsOpen);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
+                        isActive("/dashboard/inspections") && !inspectionsOpen
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <ShieldCheck className="h-5 w-5" />
+                      {sidebarOpen && <span className="flex-1 text-left">Inspections</span>}
+                      {sidebarOpen && (
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${inspectionsOpen ? "rotate-180" : ""}`}
+                        />
+                      )}
+                    </button>
+
+                    {/* Sub-menu */}
+                    {sidebarOpen && inspectionsOpen && (
+                      <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
+                        <Link
+                          href="/dashboard/inspections"
+                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            pathname === "/dashboard/inspections"
+                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                          Turnovers & Move-Outs
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Maintenance Accordion */}
                 {(!isTenant) && (
                   <div className="flex flex-col">
@@ -1123,38 +1149,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             Emergency
                           </div>
                         </Link>
-                        <Link
-                          href="/dashboard/vendors"
-                          className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
-                            pathname === "/dashboard/vendors"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
-                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
-                          }`}
-                        >
-                          <div className="flex items-center">
-                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                            Vendors Directory
-                          </div>
-                        </Link>
+
                       </div>
                     )}
                   </div>
                 )}
 
-                {(isOwnerOrAdmin || isInspector) && (
-                  <Link
-                    href="/dashboard/inspections"
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      isActive("/dashboard/inspections")
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
-                        : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                    }`}
-                  >
-                    <ShieldCheck className="h-5 w-5" />
-                    {sidebarOpen && <span className="flex-1">Inspections</span>}
-                    {sidebarOpen && <ChevronRight className="h-4 w-4 opacity-50" />}
-                  </Link>
-                )}
+
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
@@ -1205,17 +1206,31 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
 
                 {isOwner && (
-                  <Link
-                    href="/dashboard/accounting/wallet"
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      isActive("/dashboard/accounting/wallet")
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
-                        : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                    }`}
-                  >
-                    <DollarSign className="h-5 w-5" />
-                    {sidebarOpen && <span>Wallet & Payouts</span>}
-                  </Link>
+                  <>
+                    <Link
+                      href="/dashboard/accounting/overview"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        isActive("/dashboard/accounting/overview")
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <TrendingUp className="h-5 w-5" />
+                      {sidebarOpen && <span>Financial Overview</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/accounting/wallet"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        isActive("/dashboard/accounting/wallet")
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <DollarSign className="h-5 w-5" />
+                      {sidebarOpen && <span>Wallet & Payouts</span>}
+                    </Link>
+                  </>
                 )}
                 {isOwnerOrAdmin && (
                   <Link
