@@ -26,6 +26,7 @@ import {
   Lock,
   Plus,
   ShieldAlert,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -381,50 +382,83 @@ export default function PayRentPage() {
   return (
     <div className="w-full max-w-5xl mx-auto pt-6 pb-24 px-4 space-y-8">
 
-      {/* ── PAGE HEADER ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Pay Rent</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Secure payments powered by{" "}
-            <span className="font-bold text-[#635BFF]">Stripe</span>
-          </p>
+      {/* ── BREADCRUMB & HEADER ── */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">
+          <span>Dashboard</span>
+          <span className="text-slate-300">/</span>
+          <span>Payments</span>
+          <span className="text-slate-300">/</span>
+          <span className="text-[#635BFF]">Pay Rent</span>
         </div>
-        <Button
-          onClick={fetchData}
-          variant="outline"
-          className="h-10 px-4 rounded-xl border-[#E2E8F0] font-semibold text-sm flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" /> Refresh
-        </Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 rounded-[28px] text-white shadow-xl relative overflow-hidden">
+          {/* Subtle glowing mesh background */}
+          <div className="absolute right-0 top-0 w-80 h-80 bg-[#635BFF]/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <div className="absolute left-1/4 bottom-0 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl -mb-16 pointer-events-none" />
+          
+          <div className="relative z-10 space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                <Banknote className="h-5 w-5 text-indigo-300" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Pay Your Rent</h1>
+            </div>
+            <p className="text-indigo-200/70 text-sm max-w-md">
+              Secure, instant, and encrypted payments powered by <span className="font-bold text-white underline decoration-indigo-400 decoration-2 underline-offset-2">Stripe</span>.
+            </p>
+          </div>
+          
+          <Button
+            onClick={fetchData}
+            variant="ghost"
+            className="h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-semibold text-sm flex items-center gap-2 transition-all hover:scale-102 active:scale-98 shrink-0 relative z-10"
+          >
+            <RefreshCw className="h-4 w-4 text-indigo-300" />
+            <span>Refresh System</span>
+          </Button>
+        </div>
       </div>
 
       {/* ── AUTO-PAY BANNER ── */}
       {activeLease && (
-        <div className="bg-gradient-to-r from-indigo-600 to-[#635BFF] rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm shrink-0">
-              <RefreshCw className="h-6 w-6 text-white" />
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-955 to-slate-900 rounded-[24px] p-6 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-indigo-950/40">
+          <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex items-start gap-4 relative z-10">
+            <div className="bg-white/10 p-3.5 rounded-2xl backdrop-blur-sm shrink-0 border border-white/10 flex items-center justify-center shadow-xs">
+              <RefreshCw className="h-6 w-6 text-indigo-300" />
             </div>
-            <div>
-              <h3 className="text-lg font-black tracking-tight">Never Miss a Rent Payment</h3>
-              <p className="text-indigo-100 text-sm mt-1 max-w-lg leading-relaxed">
-                Set up Auto-Pay to automatically deduct your rent on the 1st of every month using your default payment method. Avoid late fees and stay stress-free.
+            <div className="space-y-1">
+              <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
+                <span>Never Miss a Payment</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-500/35 text-indigo-200 uppercase tracking-widest border border-indigo-400/20">
+                  Recommended
+                </span>
+              </h3>
+              <p className="text-indigo-200/70 text-sm max-w-xl leading-relaxed">
+                Enable Auto-Pay to charge your default card on the 1st of every month automatically. No late fees, no manual checkouts, completely stress-free.
               </p>
             </div>
           </div>
-          <div className="shrink-0 w-full md:w-auto">
+          
+          <div className="shrink-0 w-full md:w-auto relative z-10">
             {savedCard ? (
-              <div className="flex items-center justify-between md:justify-end gap-4 bg-white/10 p-3 rounded-xl border border-white/20">
-                <span className="text-sm font-bold">Auto-Pay is {activeLease.autoPayEnabled ? "ON" : "OFF"}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+              <div className="flex items-center justify-between md:justify-end gap-5 bg-white/5 p-4 rounded-2xl border border-white/10 shadow-inner">
+                <div className="text-left">
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Auto-Pay Settings</span>
+                  <span className="text-sm font-black text-white">
+                    Status: <span className={activeLease.autoPayEnabled ? "text-emerald-400" : "text-slate-400"}>
+                      {activeLease.autoPayEnabled ? "ENABLED" : "DISABLED"}
+                    </span>
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer select-none">
                   <input 
                     type="checkbox" 
                     className="sr-only peer" 
                     checked={activeLease.autoPayEnabled}
                     onChange={async (e) => {
                       const enabled = e.target.checked;
-                      // Optimistic UI update could go here, but we'll rely on fetchData for simplicity in this demo
                       try {
                         const res = await fetch(`/api/leases/${activeLease.id}/auto-pay`, {
                           method: 'POST',
@@ -442,15 +476,16 @@ export default function PayRentPage() {
                       }
                     }}
                   />
-                  <div className="w-11 h-6 bg-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-400"></div>
+                  <div className="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-emerald-500"></div>
                 </label>
               </div>
             ) : (
               <Button 
                 onClick={() => router.push("/dashboard/payments/add-card")}
-                className="bg-white text-indigo-600 hover:bg-slate-50 font-bold h-11 px-6 rounded-xl w-full md:w-auto shadow-sm transition-all hover:scale-105"
+                className="bg-white hover:bg-slate-50 text-slate-900 font-bold h-12 px-6 rounded-2xl w-full md:w-auto shadow-md transition-all hover:scale-102 active:scale-98 flex items-center justify-center gap-2"
               >
-                <CreditCard className="mr-2 h-4 w-4" /> Add Card to Enable
+                <CreditCard className="h-4 w-4 text-indigo-600" />
+                <span>Add Card to Enable Auto-Pay</span>
               </Button>
             )}
           </div>
@@ -458,47 +493,138 @@ export default function PayRentPage() {
       )}
 
       {/* ── SUMMARY STATS ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`rounded-2xl p-5 border shadow-sm ${totalOwed > 0 ? "bg-red-50 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Amount Owed</p>
-          <p className={`text-2xl font-black mt-1 ${totalOwed > 0 ? "text-red-600" : "text-emerald-600"}`}>{formatCurrency(totalOwed)}</p>
-          <p className="text-xs text-slate-500 mt-1">{pendingInvoices.length} unpaid invoice{pendingInvoices.length !== 1 ? "s" : ""}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Card 1: Amount Owed */}
+        <div className={`relative overflow-hidden rounded-[24px] p-6 border shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px] ${
+          totalOwed > 0 
+            ? "bg-red-50/60 border-red-100/80" 
+            : "bg-emerald-50/60 border-emerald-100/80"
+        }`}>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Owed</p>
+              <p className={`text-3xl font-black tracking-tight mt-2 ${totalOwed > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                {formatCurrency(totalOwed)}
+              </p>
+            </div>
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs border ${
+              totalOwed > 0 ? "bg-red-500/10 text-red-600 border-red-200/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-200/20"
+            }`}>
+              {totalOwed > 0 ? <AlertTriangle className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
+            </div>
+          </div>
+          <p className="text-xs font-semibold text-slate-550 mt-4">
+            {pendingInvoices.length} unpaid invoice{pendingInvoices.length !== 1 ? "s" : ""} pending
+          </p>
         </div>
-        <div className="rounded-2xl p-5 border border-[#E2E8F0] bg-white shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Monthly Rent</p>
-          <p className="text-2xl font-black mt-1 text-[#0F172A]">{activeLease ? formatCurrency(activeLease.monthlyRent) : "—"}</p>
-          <p className="text-xs text-slate-500 mt-1">per month</p>
+
+        {/* Card 2: Monthly Rent */}
+        <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Rent</p>
+              <p className="text-3xl font-black tracking-tight mt-2 text-slate-800">
+                {activeLease ? formatCurrency(activeLease.monthlyRent) : "—"}
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-xl bg-indigo-50 border border-indigo-100/50 text-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
+              <Home className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs font-semibold text-slate-550 mt-4">
+            Due on the 1st of every month
+          </p>
         </div>
-        <div className="rounded-2xl p-5 border border-[#E2E8F0] bg-white shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Paid Invoices</p>
-          <p className="text-2xl font-black mt-1 text-[#0F172A]">{paidInvoices.length}</p>
-          <p className="text-xs text-slate-500 mt-1">all time payments</p>
+
+        {/* Card 3: Paid Invoices */}
+        <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Payments Made</p>
+              <p className="text-3xl font-black tracking-tight mt-2 text-slate-800">
+                {paidInvoices.length}
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 border border-emerald-100/50 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-xs font-semibold text-slate-550 mt-4">
+            All-time completed payments
+          </p>
         </div>
-        <div className="rounded-2xl p-5 border border-[#E2E8F0] bg-white shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Next Due Date</p>
-          <p className="text-2xl font-black mt-1 text-[#0F172A]">{pendingInvoices[0] ? formatDate(pendingInvoices[0].dueDate) : "—"}</p>
-          <p className="text-xs text-slate-500 mt-1">{pendingInvoices[0] ? getDaysInfo(pendingInvoices[0].dueDate).label : "No pending invoices"}</p>
-        </div>
+
+        {/* Card 4: Next Due Date */}
+        {(() => {
+          const nextInv = pendingInvoices[0];
+          const daysInfo = nextInv ? getDaysInfo(nextInv.dueDate) : null;
+          const isUrgent = daysInfo?.isOverdue || daysInfo?.isToday;
+          
+          return (
+            <div className={`relative overflow-hidden rounded-[24px] p-6 border hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-350 flex flex-col justify-between min-h-[140px] ${
+              isUrgent 
+                ? "bg-amber-50/60 border-amber-100/85" 
+                : "border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
+            }`}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Next Payment Due</p>
+                  <p className={`text-2xl font-black tracking-tight mt-2 ${isUrgent ? "text-amber-700" : "text-slate-850"}`}>
+                    {nextInv ? formatDate(nextInv.dueDate) : "—"}
+                  </p>
+                </div>
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs border ${
+                  isUrgent ? "bg-amber-500/10 text-amber-600 border-amber-200/20" : "bg-slate-50 border-slate-205 text-slate-600"
+                }`}>
+                  <Calendar className="h-5 w-5" />
+                </div>
+              </div>
+              <p className={`text-xs font-semibold mt-4 ${isUrgent ? "text-amber-705" : "text-slate-550"}`}>
+                {nextInv ? daysInfo?.label : "All balances settled"}
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── LEASE BANNER ── */}
       {activeLease && (
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-            <Home className="h-6 w-6 text-slate-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-[#0F172A] text-base">{activeLease.unit?.property?.name || "Your Property"}</p>
-            <p className="text-sm text-slate-500 truncate">{activeLease.unit?.name} · {activeLease.unit?.property?.address}, {activeLease.unit?.property?.city}</p>
-          </div>
-          <div className="flex items-center gap-6 text-sm shrink-0">
-            <div className="text-right">
-              <p className="text-xs text-slate-500 font-medium">Lease Period</p>
-              <p className="font-bold text-[#0F172A]">{formatDate(activeLease.startDate)} – {formatDate(activeLease.endDate)}</p>
+        <div className="bg-white border border-[#F1F5F9] rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500" />
+          
+          <div className="flex items-start gap-4 pl-2">
+            <div className="h-14 w-14 rounded-2xl bg-indigo-50 flex items-center justify-center shrink-0 shadow-xs border border-indigo-100/50">
+              <Home className="h-7 w-7 text-indigo-600" />
             </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-500 font-medium">Rent</p>
-              <p className="font-black text-[#0F172A] text-lg">{formatCurrency(activeLease.monthlyRent)}<span className="text-xs text-slate-400 font-normal">/mo</span></p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <h3 className="font-bold text-[#0F172A] text-lg tracking-tight">
+                  {activeLease.unit?.property?.name || "Your Residence"}
+                </h3>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                  Active Lease
+                </span>
+              </div>
+              <p className="text-sm text-slate-550">
+                {activeLease.unit?.name} · {activeLease.unit?.property?.address}, {activeLease.unit?.property?.city}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-6 md:gap-10 shrink-0 text-sm pl-2 md:pl-0 border-t border-slate-100 md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
+            <div className="space-y-1 min-w-[120px]">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Lease Term</p>
+              <p className="font-bold text-slate-700">
+                {formatDate(activeLease.startDate)} – {formatDate(activeLease.endDate)}
+              </p>
+            </div>
+            
+            <div className="space-y-1 min-w-[100px]">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Rent</p>
+              <p className="font-black text-indigo-600 text-xl">
+                {formatCurrency(activeLease.monthlyRent)}
+                <span className="text-xs text-slate-400 font-medium"> /mo</span>
+              </p>
             </div>
           </div>
         </div>
@@ -506,25 +632,54 @@ export default function PayRentPage() {
 
       {/* ── OUTSTANDING INVOICES ── */}
       <div className="space-y-4">
-        <h2 className="text-xl font-black text-[#0F172A] flex items-center gap-2">
-          Outstanding Invoices
-          {pendingInvoices.length > 0 && (
-            <span className="text-sm font-bold bg-red-100 text-red-600 px-2.5 py-0.5 rounded-full">
-              {pendingInvoices.length}
-            </span>
-          )}
-        </h2>
+        <div className="flex items-center gap-2.5 pl-1">
+          <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
+            <Banknote className="h-5 w-5 text-slate-500" />
+          </div>
+          <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+            Outstanding Invoices
+            {pendingInvoices.length > 0 && (
+              <span className="text-xs font-black bg-red-50 text-red-650 px-2.5 py-1 rounded-full border border-red-100/50">
+                {pendingInvoices.length} Pending
+              </span>
+            )}
+          </h2>
+        </div>
 
         {pendingInvoices.length === 0 ? (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 text-center">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
-            <p className="text-lg font-bold text-emerald-800">You're all caught up! 🎉</p>
-            <p className="text-sm text-emerald-600 mt-1">No outstanding rent payments. Great job staying on top of things.</p>
+          <div className="bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/20 border border-emerald-100 rounded-[28px] p-8 sm:p-12 text-center shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative overflow-hidden flex flex-col items-center">
+            <div className="absolute -left-12 -top-12 w-48 h-48 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="h-16 w-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 mb-4 shadow-sm border border-emerald-200/50">
+              <CheckCircle2 className="h-8 w-8" />
+            </div>
+            
+            <h3 className="text-xl sm:text-2xl font-black text-slate-850 tracking-tight">
+              You're completely caught up! 🎉
+            </h3>
+            
+            <p className="text-slate-500 text-sm mt-2 max-w-md leading-relaxed">
+              Fantastic! You have no pending invoices or outstanding rent balances. Your account is in perfect standing.
+            </p>
+            
+            <button
+              onClick={() => {
+                const element = document.getElementById("payment-history-section");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-wider bg-slate-100 hover:bg-indigo-50 px-4 py-2 rounded-full border border-slate-200/60 hover:border-indigo-100/60"
+            >
+              <span>View Payment History</span>
+              <span>↓</span>
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
             {activeLease?.moveOutDate && (
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start gap-3 shadow-sm animate-in slide-in-from-top-2 duration-300">
+              <div className="bg-blue-50/60 border border-blue-200/80 p-4 rounded-[20px] flex items-start gap-3 shadow-xs animate-in slide-in-from-top-2 duration-300">
                 <ShieldAlert className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-bold text-blue-900">Move-Out Pending</p>
@@ -534,92 +689,145 @@ export default function PayRentPage() {
                 </div>
               </div>
             )}
+            
             {pendingInvoices.map((inv) => {
               const daysInfo = getDaysInfo(inv.dueDate);
               const isLoadingThis = loadingCheckout === inv.id;
               const isActiveCheckout = checkoutState?.invoiceId === inv.id;
+              
+              // Color coding settings
+              const cardBorderClass = daysInfo.isOverdue 
+                ? "border-red-200 shadow-[0_8px_30px_rgb(239,68,68,0.03)]" 
+                : daysInfo.isToday 
+                  ? "border-amber-200 shadow-[0_8px_30px_rgb(245,158,11,0.03)]" 
+                  : "border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.015)]";
+                  
+              const accentColorClass = daysInfo.isOverdue 
+                ? "bg-red-500" 
+                : daysInfo.isToday 
+                  ? "bg-amber-400" 
+                  : "bg-indigo-500";
+
+              const textType = inv.invoiceType 
+                ? inv.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
+                : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent');
 
               return (
                 <div
                   key={inv.id}
-                  className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
-                    daysInfo.isOverdue ? "border-red-200" : daysInfo.isToday ? "border-amber-200" : "border-[#E2E8F0]"
-                  }`}
+                  className={`bg-white rounded-[24px] border overflow-hidden transition-all duration-350 relative ${cardBorderClass}`}
                 >
-                  {/* Overdue / Due Today banner */}
+                  {/* Accent vertical line on the left */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentColorClass}`} />
+
+                  {/* Overdue / Due Today Banner inside the card */}
                   {(daysInfo.isOverdue || daysInfo.isToday) && (
-                    <div className={`px-5 py-2 flex items-center justify-between text-xs font-bold ${daysInfo.isOverdue ? "bg-red-500 text-white" : "bg-amber-400 text-amber-900"}`}>
+                    <div className={`px-6 py-2.5 flex items-center justify-between text-xs font-bold pl-8 border-b ${
+                      daysInfo.isOverdue 
+                        ? "bg-red-50 text-red-750 border-red-100/50" 
+                        : "bg-amber-50 text-amber-900 border-amber-100/50"
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        {daysInfo.isOverdue ? `⚠️ OVERDUE — ${daysInfo.label}` : "⏰ Due Today"}
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        <span>{daysInfo.isOverdue ? `OVERDUE — ${daysInfo.label}` : "DUE TODAY"}</span>
                       </div>
-                      <span className="opacity-90 font-medium">
-                        {daysInfo.isOverdue ? "A late fee has been applied." : `A $50 late fee will be applied after the ${activeLease?.gracePeriodDays || 5}-day grace period.`}
+                      <span className="opacity-80 font-semibold hidden md:inline">
+                        {daysInfo.isOverdue ? "Late penalty applied" : `Grace period of ${activeLease?.gracePeriodDays || 5} days remaining.`}
                       </span>
                     </div>
                   )}
 
-                  <div className="p-6 border-b border-slate-100">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      {/* Info */}
+                  <div className="p-6 md:p-8 pl-8">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                      
+                      {/* Left: Invoice Core Info */}
                       <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${daysInfo.isOverdue ? "bg-red-50" : "bg-blue-50"}`}>
-                          <Banknote className={`h-6 w-6 ${daysInfo.isOverdue ? "text-red-500" : "text-blue-500"}`} />
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border ${
+                          daysInfo.isOverdue 
+                            ? "bg-red-50 text-red-500 border-red-100" 
+                            : "bg-indigo-50 text-indigo-500 border-indigo-100"
+                        }`}>
+                          <Banknote className="h-6 w-6" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-[#0F172A] text-base">
-                            {inv.invoiceType 
-                              ? inv.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
-                              : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent')}
-                          </p>
-                          <p className="text-sm text-slate-500 mt-0.5">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-slate-800 text-lg tracking-tight">
+                              {textType}
+                            </span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                              daysInfo.isOverdue 
+                                ? "bg-red-50 text-red-650 border border-red-100/50" 
+                                : daysInfo.isToday 
+                                  ? "bg-amber-50 text-amber-700 border border-amber-100/55" 
+                                  : "bg-indigo-50 text-indigo-600 border border-indigo-100/50"
+                            }`}>
+                              {daysInfo.isOverdue ? "Overdue" : daysInfo.isToday ? "Due Today" : "Upcoming"}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-500">
                             {inv.lease?.unit?.property?.name || activeLease?.unit?.property?.name} · {inv.lease?.unit?.name || activeLease?.unit?.name}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-2 pt-1">
                             <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                            <span className={`text-xs font-semibold ${daysInfo.isOverdue ? "text-red-600" : "text-slate-500"}`}>
-                              Due: {formatDate(inv.dueDate)} · {daysInfo.label}
+                            <span className={`text-xs font-semibold ${daysInfo.isOverdue ? "text-red-500" : "text-slate-500"}`}>
+                              Due date: {formatDate(inv.dueDate)} ({daysInfo.label})
                             </span>
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Breakdown Details (Simulated for real-world feel) */}
-                      <div className="hidden md:flex flex-col gap-1 text-right border-r border-slate-200 pr-6 mr-2 shrink-0">
-                         <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Breakdown</p>
-                         <p className="text-[11px] font-semibold text-slate-600">Base Rent: {formatCurrency(Number(inv.amount) - (daysInfo.isOverdue ? 50 : 0))}</p>
-                         {daysInfo.isOverdue && <p className="text-[11px] font-semibold text-red-500">Late Fee: $50.00</p>}
+
+                      {/* Middle: Breakdown info */}
+                      <div className="hidden sm:flex flex-col gap-1.5 text-right border-l lg:border-l border-slate-100 px-6 shrink-0 w-full sm:w-auto items-end lg:items-end">
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Breakdown</p>
+                        <div className="text-xs space-y-1 text-slate-555 font-semibold">
+                          <div className="flex justify-between sm:justify-end gap-4">
+                            <span>Base Rent:</span>
+                            <span className="text-slate-700">{formatCurrency(Number(inv.amount) - (daysInfo.isOverdue ? 50 : 0))}</span>
+                          </div>
+                          {daysInfo.isOverdue && (
+                            <div className="flex justify-between sm:justify-end gap-4 text-red-500">
+                              <span>Late Fee:</span>
+                              <span>+ $50.00</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Amount + CTA */}
-                      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-4 sm:gap-2 shrink-0">
-                        <div className="text-left sm:text-right">
-                          <p className="text-xs text-slate-500 font-medium">Amount Due</p>
-                          <p className="text-3xl font-black text-[#0F172A]">{formatCurrency(inv.amount)}</p>
+                      {/* Right: Payment Amount & Action CTAs */}
+                      <div className="flex flex-row sm:flex-col lg:flex-row items-center justify-between sm:justify-start lg:items-center gap-6 w-full lg:w-auto shrink-0 border-t border-slate-50 lg:border-t-0 pt-4 lg:pt-0">
+                        <div className="text-left sm:text-right lg:text-right">
+                          <p className="text-xs text-slate-450 font-bold uppercase tracking-wider">Amount Due</p>
+                          <p className="text-3xl font-black text-slate-800 tracking-tight mt-1">
+                            {formatCurrency(inv.amount)}
+                          </p>
                         </div>
+                        
                         {!isActiveCheckout && (
-                          <div className="flex flex-col gap-2 w-full sm:w-auto">
+                          <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
                             {/* Saved card one-click pay */}
                             {savedCard ? (
                               <>
                                 <Button
                                   onClick={() => setConfirmInvoice(inv)}
                                   disabled={savedCardPaying === inv.id || !!savedCardPaying || !!loadingCheckout}
-                                  className={`h-12 px-5 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap shadow-md transition-all ${
-                                    daysInfo.isOverdue ? "bg-red-500 hover:bg-red-600 text-white" : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
+                                  className={`h-12 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 whitespace-nowrap shadow-md hover:shadow-lg transition-all hover:scale-102 active:scale-98 w-full ${
+                                    daysInfo.isOverdue 
+                                      ? "bg-red-500 hover:bg-red-600 text-white" 
+                                      : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
                                   }`}
                                 >
-                                  {savedCardPaying === inv.id
-                                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
-                                    : <><CreditCard className="h-4 w-4" /> Pay · {savedCard.cardBrand?.toUpperCase()} ••••{savedCard.cardLast4}</>
-                                  }
+                                  {savedCardPaying === inv.id ? (
+                                    <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
+                                  ) : (
+                                    <><CreditCard className="h-4 w-4" /> Quick Pay · {savedCard.cardBrand?.toUpperCase()} ••••{savedCard.cardLast4}</>
+                                  )}
                                 </Button>
                                 <button
                                   onClick={() => openCheckout(inv)}
                                   disabled={isLoadingThis || !!loadingCheckout || !!savedCardPaying}
-                                  className="text-xs text-slate-400 hover:text-[#635BFF] font-medium underline underline-offset-2 text-center transition-colors"
+                                  className="text-xs text-slate-400 hover:text-[#635BFF] font-bold underline underline-offset-2 text-center transition-colors block w-full"
                                 >
-                                  {isLoadingThis ? "Loading..." : "Use a different card"}
+                                  {isLoadingThis ? "Loading Form..." : "Use another card"}
                                 </button>
                               </>
                             ) : (
@@ -627,23 +835,30 @@ export default function PayRentPage() {
                                 <Button
                                   onClick={() => openCheckout(inv)}
                                   disabled={isLoadingThis || !!loadingCheckout}
-                                  className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap shadow-md transition-all ${
-                                    daysInfo.isOverdue ? "bg-red-500 hover:bg-red-600 text-white" : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
+                                  className={`h-12 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 whitespace-nowrap shadow-md hover:shadow-lg transition-all hover:scale-102 active:scale-98 w-full ${
+                                    daysInfo.isOverdue 
+                                      ? "bg-red-500 hover:bg-red-600 text-white" 
+                                      : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
                                   }`}
                                 >
-                                  {isLoadingThis ? <><Loader2 className="h-4 w-4 animate-spin" /> Loading...</> : <><CreditCard className="h-4 w-4" /> Pay with Card</>}
+                                  {isLoadingThis ? (
+                                    <><Loader2 className="h-4 w-4 animate-spin" /> Preparing...</>
+                                  ) : (
+                                    <><CreditCard className="h-4 w-4" /> Pay with Card</>
+                                  )}
                                 </Button>
                                 <button
                                   onClick={() => router.push("/dashboard/payments/add-card")}
-                                  className="text-xs text-[#635BFF] hover:underline font-medium flex items-center justify-center gap-1"
+                                  className="text-xs text-[#635BFF] hover:text-[#4f46e5] font-bold flex items-center justify-center gap-1 transition-colors w-full"
                                 >
-                                  <Plus className="h-3 w-3" /> Save a card for faster payments
+                                  <Plus className="h-3 w-3" /> Save card for faster checkout
                                 </button>
                               </>
                             )}
                           </div>
                         )}
                       </div>
+
                     </div>
 
                     {/* ── INLINE STRIPE CHECKOUT PANEL ── */}
@@ -735,101 +950,240 @@ export default function PayRentPage() {
         )}
       </div>
 
-      {/* ── TRUST BADGE ── */}
-      <div className="bg-slate-50 border border-[#E2E8F0] rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-        <div className="h-12 w-12 rounded-xl bg-[#635BFF]/10 flex items-center justify-center shrink-0 mx-auto sm:mx-0">
-          <ShieldCheck className="h-6 w-6 text-[#635BFF]" />
+      {/* ── TRUST FOOTER SEALS ── */}
+      <div className="bg-slate-50/50 border border-slate-100 rounded-[24px] p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.005)] relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div className="h-12 w-12 rounded-2xl bg-[#635BFF]/10 flex items-center justify-center shrink-0 border border-[#635BFF]/10 shadow-inner">
+            <ShieldCheck className="h-6 w-6 text-[#635BFF]" />
+          </div>
+          <div className="space-y-0.5">
+            <h4 className="font-extrabold text-slate-800 tracking-tight text-sm sm:text-base">Payments Secured & Certified</h4>
+            <p className="text-xs text-slate-400 font-semibold leading-relaxed max-w-md">
+              Your payment information is fully encrypted end-to-end and processed directly by Stripe. PropertyPro never stores or transmits raw credit card credentials.
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="font-bold text-[#0F172A]">Payments secured by Stripe</p>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Your payment info is encrypted end-to-end and processed directly by Stripe. PropertyPro never sees or stores your card details.
-          </p>
+        
+        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 border-t md:border-t-0 md:border-l border-slate-200/60 pt-4 md:pt-0 md:pl-6 shrink-0 w-full md:w-auto">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+            <Lock className="h-3.5 w-3.5 text-[#635BFF]" />
+            <span>256-bit SSL</span>
+          </div>
+          <div className="h-3 w-px bg-slate-300 hidden sm:block" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#635BFF]" />
+            <span>PCI-DSS Compliant</span>
+          </div>
+          <div className="h-3 w-px bg-slate-300 hidden sm:block" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+            <RefreshCw className="h-3.5 w-3.5 text-[#635BFF]" />
+            <span>Stripe Certified</span>
+          </div>
         </div>
       </div>
 
       {/* ── PAYMENT METHODS ── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-slate-400" />
-            <h2 className="text-xl font-black text-[#0F172A]">Payment Methods</h2>
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
+              <CreditCard className="h-4.5 w-4.5 text-slate-505" />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 tracking-tight">Payment Methods</h2>
           </div>
         </div>
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-16 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center shrink-0">
-              {savedCard ? (
-                <span className="font-black text-slate-600 tracking-wider text-sm">{savedCard.cardBrand?.toUpperCase()}</span>
-              ) : (
+        
+        <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="absolute right-0 top-0 w-32 h-32 bg-slate-100/50 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            {savedCard ? (
+              <div className="h-12 w-20 bg-gradient-to-br from-slate-850 to-slate-950 rounded-xl flex flex-col justify-between p-2 shrink-0 shadow-sm border border-slate-700/30 text-white select-none">
+                <div className="flex justify-between items-center">
+                  <div className="h-3.5 w-4 bg-amber-400/80 rounded-[2px]" />
+                  <span className="text-[7px] font-black tracking-widest text-slate-400">Pro</span>
+                </div>
+                <span className="font-black text-[9px] tracking-wider uppercase text-right leading-none">
+                  {savedCard.cardBrand || "Card"}
+                </span>
+              </div>
+            ) : (
+              <div className="h-12 w-20 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 border border-dashed border-slate-250">
                 <CreditCard className="h-6 w-6 text-slate-400" />
-              )}
-            </div>
-            <div>
-              <p className="font-bold text-[#0F172A]">{savedCard ? `•••• •••• •••• ${savedCard.cardLast4}` : "No payment method saved"}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{savedCard ? "Default payment method for rent and Auto-Pay" : "Add a card for faster checkout and Auto-Pay"}</p>
+              </div>
+            )}
+            
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-bold text-[#0F172A] tracking-tight">
+                  {savedCard ? `•••• •••• •••• ${savedCard.cardLast4}` : "No Card Saved"}
+                </p>
+                {savedCard && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black bg-indigo-50 text-indigo-650 border border-indigo-100 uppercase tracking-wide">
+                    Default
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-450 font-semibold leading-relaxed">
+                {savedCard 
+                  ? "Used for monthly manual rent checkouts and automated Auto-Pay deductions" 
+                  : "Add a credit or debit card for faster one-click checkout and auto-pay."}
+              </p>
             </div>
           </div>
+          
           <Button
             onClick={() => router.push("/dashboard/payments/add-card")}
             variant={savedCard ? "outline" : "default"}
-            className={`h-10 px-6 rounded-xl font-bold shadow-sm transition-all ${!savedCard ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "border-slate-200 hover:bg-slate-50"}`}
+            className={`h-11 px-6 rounded-xl font-bold shadow-md transition-all hover:scale-102 active:scale-98 w-full sm:w-auto ${
+              !savedCard 
+                ? "bg-[#635BFF] hover:bg-[#4f46e5] text-white" 
+                : "border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+            }`}
           >
-            {savedCard ? "Update Card" : "Add Card"}
+            {savedCard ? "Replace Payment Method" : "Add Card Details"}
           </Button>
         </div>
       </div>
 
       {/* ── PAYMENT HISTORY ── */}
       {paidInvoices.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-slate-400" />
-            <h2 className="text-xl font-black text-[#0F172A]">Payment History</h2>
-          </div>
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-            <div className="divide-y divide-[#F1F5F9]">
-              {paidInvoices.slice(0, 12).map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#0F172A] text-sm">{Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent'} — {inv.lease?.unit?.name || activeLease?.unit?.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Paid · Due {formatDate(inv.dueDate)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0 ml-4">
-                    <p className="font-black text-emerald-600 text-base">{formatCurrency(inv.amount)}</p>
-                    <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">PAID</span>
-                  </div>
-                </div>
-              ))}
+        <div id="payment-history-section" className="space-y-4 pt-4 scroll-mt-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
+                <History className="h-4.5 w-4.5 text-slate-500" />
+              </div>
+              <h2 className="text-xl font-black text-slate-800 tracking-tight">Payment History</h2>
             </div>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              {paidInvoices.length} Receipt{paidInvoices.length !== 1 ? "s" : ""} Available
+            </span>
+          </div>
+          
+          <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden">
+            <div className="divide-y divide-slate-100">
+              {paidInvoices.slice(0, 10).map((inv) => {
+                const textType = inv.invoiceType 
+                  ? inv.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
+                  : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent');
+                
+                return (
+                  <div key={inv.id} className="flex items-center justify-between px-6 py-5 hover:bg-slate-50/50 transition-colors">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="h-10 w-10 rounded-full bg-emerald-55 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0 space-y-0.5">
+                        <p className="font-bold text-slate-800 text-sm tracking-tight">
+                          {textType} — {inv.lease?.unit?.name || activeLease?.unit?.name}
+                        </p>
+                        <p className="text-xs text-slate-400 font-semibold">
+                          Paid secure · Due: {formatDate(inv.dueDate)}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 shrink-0 ml-4">
+                      <div className="text-right">
+                        <p className="font-black text-emerald-650 text-base">
+                          {formatCurrency(inv.amount)}
+                        </p>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wider">
+                          PAID
+                        </span>
+                      </div>
+                      
+                      {/* Decorative Download Receipt button */}
+                      <button 
+                        onClick={() => toast.info("📄 PDF Receipt download will start shortly...")}
+                        className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors border border-slate-200/20"
+                        title="Download Receipt"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {paidInvoices.length > 10 && (
+              <div className="bg-slate-50/50 border-t border-slate-100 px-6 py-3 text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  Showing latest 10 of {paidInvoices.length} historical payments
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ── CONFIRMATION MODAL ── */}
       {confirmInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200 border border-slate-100">
-            <h3 className="text-xl font-black text-[#0F172A] mb-2">Confirm Payment</h3>
-            <p className="text-slate-500 mb-6 text-sm">
-              You are about to securely charge <span className="font-bold text-[#0F172A]">{formatCurrency(confirmInvoice.amount)}</span> to your saved <span className="font-bold text-[#0F172A]">{savedCard?.cardBrand?.toUpperCase()}</span> ending in <span className="font-bold text-[#0F172A]">{savedCard?.cardLast4}</span>.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-205">
+          <div className="bg-white rounded-[28px] shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-250 border border-slate-100 flex flex-col relative overflow-hidden">
+            
+            {/* Header lock icon */}
+            <div className="flex items-center gap-3.5 mb-5">
+              <div className="h-11 w-11 rounded-2xl bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center shrink-0 border border-[#635BFF]/10">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-800 tracking-tight">Confirm Secure Payment</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Stripe Secure Checkout</p>
+              </div>
+            </div>
+            
+            {/* Summary Box */}
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 mb-6">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-450 font-semibold">Payment For:</span>
+                <span className="font-extrabold text-slate-700">
+                  {confirmInvoice.invoiceType 
+                    ? confirmInvoice.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
+                    : "Monthly Rent"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-455 font-semibold">Payment Method:</span>
+                <span className="font-extrabold text-slate-700 flex items-center gap-1.5">
+                  <span className="uppercase text-[10px] bg-slate-200 text-slate-650 px-1.5 py-0.5 rounded font-black">
+                    {savedCard?.cardBrand}
+                  </span>
+                  <span>•••• {savedCard?.cardLast4}</span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2.5 border-t border-slate-200/60">
+                <span className="text-slate-800 font-extrabold text-sm">Total Due:</span>
+                <span className="font-black text-indigo-600 text-xl tracking-tight">
+                  {formatCurrency(confirmInvoice.amount)}
+                </span>
+              </div>
+            </div>
+            
+            <p className="text-slate-500/85 text-xs leading-relaxed mb-6 font-medium text-center">
+              Your payment will be processed immediately. Once confirmed, a digital receipt will be issued and you will receive email confirmation.
             </p>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={() => setConfirmInvoice(null)} className="rounded-xl font-semibold border-slate-200">Cancel</Button>
+            
+            <div className="flex gap-3 justify-end w-full">
+              <Button 
+                variant="outline" 
+                onClick={() => setConfirmInvoice(null)} 
+                className="flex-1 h-12 rounded-xl font-bold border-slate-200 text-slate-500 hover:text-slate-800 transition-all text-sm"
+              >
+                Go Back
+              </Button>
               <Button 
                 onClick={() => {
                   const inv = confirmInvoice;
                   setConfirmInvoice(null);
                   executePayWithSavedCard(inv);
                 }} 
-                className="bg-[#635BFF] hover:bg-[#4f46e5] text-white font-bold rounded-xl shadow-md"
+                className="flex-1 h-12 bg-[#635BFF] hover:bg-[#4f46e5] text-white font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
               >
-                Confirm Payment
+                <ShieldCheck className="h-4 w-4" />
+                <span>Pay Securely</span>
               </Button>
             </div>
           </div>

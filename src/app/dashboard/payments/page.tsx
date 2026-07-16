@@ -1,3 +1,5 @@
-import TransactionsPage from "../accounting/transactions/page";
+import { redirect } from "next/navigation";
 
-export default TransactionsPage;
+export default function PaymentsPage() {
+  redirect("/dashboard/payments/pay-rent");
+}

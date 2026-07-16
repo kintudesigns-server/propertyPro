@@ -159,6 +159,7 @@ export async function GET(req: NextRequest) {
       where: { id: userId },
       select: { 
         employmentStatus: true, 
+        position: true,
         bankName: true,
         subscriptionStatus: true,
         pricingTier: {
@@ -167,7 +168,9 @@ export async function GET(req: NextRequest) {
       }
     });
     
-    const profileComplete = !!user?.employmentStatus;
+    const profileComplete = role === "OWNER"
+      ? (user?.employmentStatus === "INDIVIDUAL" || user?.employmentStatus === "BUSINESS") && !!user?.position
+      : !!user?.employmentStatus;
     const bankConnected = !!user?.bankName;
 
     return NextResponse.json({

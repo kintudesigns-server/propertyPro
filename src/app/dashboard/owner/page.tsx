@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PropertyForm } from "@/components/PropertyForm";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,6 +93,7 @@ export default function OwnerDashboard() {
 
   // Tab State connected to Sidebar
   const [activeTabState, setActiveTabState] = useState("dashboard");
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -114,6 +115,21 @@ export default function OwnerDashboard() {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  useEffect(() => {
+    const tabParam = searchParams ? searchParams.get("tab") : null;
+    if (tabParam) {
+      if (tabParam === "subscription") {
+        setActiveTabState("settings");
+        setActiveSettingsTab("subscription");
+      } else if (tabParam === "settings") {
+        setActiveTabState("settings");
+        setActiveSettingsTab("profile");
+      } else {
+        setActiveTabState(tabParam);
+      }
+    }
+  }, [searchParams]);
 
   const activeTab = activeTabState;
   const setActiveTab = (tab: string) => {

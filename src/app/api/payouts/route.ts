@@ -8,6 +8,7 @@ import { getStripe } from "@/lib/stripe";
 import { maskBankDetails } from "@/lib/sanitization";
 import { encryptSymmetric } from "@/lib/encryption";
 import { auditLog } from "@/lib/audit-log";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -285,11 +286,11 @@ export async function POST(req: NextRequest) {
       note: `Owner created payout request for $${withdrawAmount.toFixed(2)} to bank: ${bankName}`,
     });
 
-    // Notify all admins of the new payout/withdrawal request
+    // Notify all admins of the new payout/withdrawal request and send email alert
     try {
       const admins = await prisma.user.findMany({
         where: { role: "SUPERADMIN" },
-        select: { id: true }
+        select: { id: true, email: true }
       });
       const adminIds = admins.map(a => a.id);
       await notifyMany(adminIds, {
@@ -299,6 +300,66 @@ export async function POST(req: NextRequest) {
         priority: "HIGH",
         relatedEntityId: payout.id,
       });
+
+      const adminUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/admin/payouts`;
+      for (const admin of admins) {
+        if (admin.email) {
+          await sendEmail({
+            to: admin.email,
+            subject: "🔔 Alert: New Payout Request Submitted",
+            html: `
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+              <tr>
+                <td align="center">
+                  <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                      <td align="center" style="background-color: #0f172a; padding: 40px 20px;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800;">New Payout Request</h1>
+                        <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 15px;">Pending Payout Processing</p>
+                      </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                      <td style="padding: 40px 32px;">
+                        <p style="margin: 0 0 16px; font-size: 16px; color: #0f172a; font-weight: 600;">Hi Admin,</p>
+                        <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
+                          An owner has requested a bank payout of their ledger balance.
+                        </p>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+                          <tr>
+                            <td style="padding: 20px;">
+                              <h3 style="margin: 0 0 16px; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Request Details</h3>
+                              <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 120px;">Owner Name</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${owner?.name || 'Owner'}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Payout Amount</td><td style="padding: 8px 0; font-weight: 700; color: #059669; font-size: 16px;">$${withdrawAmount.toFixed(2)}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Bank Name</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${bankName}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Account Name</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${accountName}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Account Number</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">••••${accountNumber.slice(-4)}</td></tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+ 
+                        <!-- CTA -->
+                        <div style="text-align: center;">
+                          <a href="${adminUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">Manage Payout Requests →</a>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            `
+          });
+        }
+      }
     } catch (err) {
       console.error("[payouts] Failed to notify admins of new payout request:", err);
     }

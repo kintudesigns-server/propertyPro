@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ScheduleInspectionModal } from "@/components/modals/ScheduleInspectionModal";
 import { SelfInspectionModal } from "@/components/modals/SelfInspectionModal";
+import { BypassConfirmationModal } from "@/components/modals/BypassConfirmationModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function LeaseDetailsPage() {
   const params = useParams();
@@ -29,17 +31,19 @@ export default function LeaseDetailsPage() {
   const [activatingLease, setActivatingLease] = useState(false);
 
   const [inspectors, setInspectors] = useState<any[]>([]);
-  const [showInspectionModal, setShowInspectionModal] = useState(false);
-  const [schedulingInspection, setSchedulingInspection] = useState(false);
+  const [scheduleInspectionType, setScheduleInspectionType] = useState<"FINAL" | "PRELIMINARY" | null>(null);
 
   // Self-Inspection State
-  const [showSelfInspectionModal, setShowSelfInspectionModal] = useState(false);
-  const [submittingSelfInspection, setSubmittingSelfInspection] = useState(false);
+  const [selfInspectMode, setSelfInspectMode] = useState<"final" | "preliminary" | null>(null);
 
   // Preliminary Walkthrough State
-  const [showSchedulePreliminaryModal, setShowSchedulePreliminaryModal] = useState(false);
-  const [showPreliminarySelfInspectModal, setShowPreliminarySelfInspectModal] = useState(false);
   const [showPrelimResultsModal, setShowPrelimResultsModal] = useState(false);
+  const [showBypassModal, setShowBypassModal] = useState(false);
+
+  // ConfirmDialog States
+  const [showConfirmActivate, setShowConfirmActivate] = useState(false);
+  const [showConfirmTerminate, setShowConfirmTerminate] = useState(false);
+  const [showConfirmSkipPrelim, setShowConfirmSkipPrelim] = useState(false);
 
   const [showKeyReturnModal, setShowKeyReturnModal] = useState(false);
   const [actualMoveOutDate, setActualMoveOutDate] = useState("");
@@ -88,30 +92,9 @@ export default function LeaseDetailsPage() {
     }
   };
 
-  const [skippingInspection, setSkippingInspection] = useState(false);
 
-  const handleSkipInspection = async () => {
-    if (!confirm("Are you sure you want to skip the inspection? This will advance the move-out process directly to settlement with ZERO deductions. You will not be able to claim damages later. Proceed?")) return;
-    
-    setSkippingInspection(true);
-    try {
-      const res = await fetch(`/api/leases/${lease.id}/skip-inspection`, { method: "POST" });
-      if (res.ok) {
-        toast.success("Inspection skipped. No deductions recorded.");
-        fetchLease();
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Failed to skip inspection");
-      }
-    } catch {
-      toast.error("Error skipping inspection");
-    } finally {
-      setSkippingInspection(false);
-    }
-  };
 
   const handleActivateLease = async () => {
-    if (!confirm("Confirm that the tenant has physically received the keys and has moved in. This will activate the lease and mark the unit as Occupied.")) return;
     setActivatingLease(true);
     try {
       const res = await fetch(`/api/leases/${lease.id}/activate`, { method: "POST" });
@@ -309,7 +292,6 @@ export default function LeaseDetailsPage() {
   };
 
   const handleTerminateLease = async () => {
-    if (!confirm("Are you sure you want to terminate this lease? The unit will be marked as vacant, but the lease record will be preserved.")) return;
     try {
       const res = await fetch(`/api/leases/${lease.id}/terminate`, {
         method: "POST",
@@ -323,6 +305,25 @@ export default function LeaseDetailsPage() {
       }
     } catch (err) {
       toast.error("Error terminating lease");
+    }
+  };
+
+  const handleSkipPreliminaryWalkthrough = async () => {
+    try {
+      const res = await fetch(`/api/leases/${lease.id}/preliminary-inspection`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "SKIP" })
+      });
+      if (res.ok) {
+        toast.success("Preliminary Walkthrough skipped.");
+        fetchLease();
+      } else {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to skip preliminary walkthrough");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to skip preliminary walkthrough");
     }
   };
 
@@ -543,7 +544,7 @@ export default function LeaseDetailsPage() {
             </p>
           </div>
           <Button
-            onClick={handleActivateLease}
+            onClick={() => setShowConfirmActivate(true)}
             disabled={activatingLease}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
           >
@@ -598,30 +599,14 @@ export default function LeaseDetailsPage() {
             {lease.preliminaryInspectionStatus === "NONE" && (
               <>
                 <Button
-                  onClick={async () => {
-                    if (confirm("Are you sure you want to skip the preliminary walkthrough?")) {
-                      try {
-                        const res = await fetch(`/api/leases/${lease.id}/preliminary-inspection`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ action: "SKIP" })
-                        });
-                        if (res.ok) {
-                          toast.success("Preliminary Walkthrough skipped.");
-                          fetchLease();
-                        } else throw new Error();
-                      } catch {
-                        toast.error("Failed to skip.");
-                      }
-                    }
-                  }}
+                  onClick={() => setShowConfirmSkipPrelim(true)}
                   variant="outline"
                   className="bg-transparent border-purple-300 text-purple-700 hover:bg-purple-100 font-bold h-10 px-4 rounded-xl text-xs"
                 >
                   Skip
                 </Button>
                 <Button
-                  onClick={() => setShowSchedulePreliminaryModal(true)}
+                  onClick={() => setScheduleInspectionType("PRELIMINARY")}
                   className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
                 >
                   Schedule Walkthrough
@@ -632,7 +617,7 @@ export default function LeaseDetailsPage() {
               <Button
                 onClick={() => {
                   if (lease.preliminaryInspectorId === (session?.user as any)?.id || !lease.preliminaryInspectorId) {
-                    setShowPreliminarySelfInspectModal(true);
+                    setSelfInspectMode("preliminary");
                   } else {
                     toast.error("This is assigned to another inspector.");
                   }
@@ -766,7 +751,7 @@ export default function LeaseDetailsPage() {
                         </p>
                         <div className="flex flex-col gap-3 mt-4">
                           <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => setShowSelfInspectionModal(true)} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200 hover:border-indigo-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
+                            <button onClick={() => setSelfInspectMode("final")} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200 hover:border-indigo-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
                               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <CheckCircle2 className="h-12 w-12 text-indigo-600" />
                               </div>
@@ -779,7 +764,7 @@ export default function LeaseDetailsPage() {
                               <p className="text-[10px] text-slate-500 font-medium leading-relaxed max-w-[85%] z-10">Use our guided room-by-room checklist with photo uploads.</p>
                             </button>
                             
-                            <button onClick={() => setShowInspectionModal(true)} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-slate-50 to-white border border-slate-200 hover:border-slate-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
+                            <button onClick={() => setScheduleInspectionType("FINAL")} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-slate-50 to-white border border-slate-200 hover:border-slate-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
                               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <Settings className="h-12 w-12 text-slate-600" />
                               </div>
@@ -793,13 +778,13 @@ export default function LeaseDetailsPage() {
                             </button>
                           </div>
 
-                          <button onClick={handleSkipInspection} disabled={skippingInspection} className="relative overflow-hidden flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-50 to-white border border-amber-200 hover:border-amber-400 hover:shadow-sm rounded-xl text-left transition-all duration-300 group disabled:opacity-50">
+                          <button onClick={() => setShowBypassModal(true)} className="relative overflow-hidden flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-50 to-white border border-amber-200 hover:border-amber-400 hover:shadow-sm rounded-xl text-left transition-all duration-300 group">
                             <div className="flex flex-col z-10">
                               <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs mb-0.5">
-                                {skippingInspection ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />} 
+                                <CheckCircle className="h-3.5 w-3.5" /> 
                                 Skip Inspection (Refund Full Deposit)
                               </div>
-                              <p className="text-[10px] text-slate-500 font-medium">Bypass the physical inspection and advance directly to closing with zero deductions.</p>
+                              <p className="text-[10px] text-slate-500 font-medium">Bypass the physical inspection and advance directly to closing with zero deductions. Reason & acknowledgment required.</p>
                             </div>
                             <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors shrink-0 z-10">
                               <ArrowUpRight className="h-4 w-4" />
@@ -1051,14 +1036,14 @@ export default function LeaseDetailsPage() {
                   </DropdownMenuItem>
                   {lease.status === "SIGNED" && (
                     <DropdownMenuItem
-                      onClick={handleActivateLease}
+                      onClick={() => setShowConfirmActivate(true)}
                       className="cursor-pointer font-bold text-indigo-600 rounded-lg py-2.5"
                     >
                       <KeyRound className="mr-2 h-4 w-4" /> Confirm Key Handover
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem
-                    onClick={handleTerminateLease}
+                    onClick={() => setShowConfirmTerminate(true)}
                     disabled={lease.status === "TERMINATED" || lease.status === "EXPIRED" || lease.status === "DRAFT"}
                     className="cursor-pointer font-bold text-[#EF4444] rounded-lg py-2.5 focus:text-[#EF4444] focus:bg-[#FEE2E2]"
                   >
@@ -1899,7 +1884,7 @@ export default function LeaseDetailsPage() {
                 <ShieldAlert className="h-4 w-4 mr-3 text-[#F59E0B]" /> Process Move-Out & Refund
               </Button>
               <Button
-                onClick={handleTerminateLease}
+                onClick={() => setShowConfirmTerminate(true)}
                 disabled={lease.status === "TERMINATED" || lease.status === "EXPIRED" || lease.status === "DRAFT"}
                 variant="outline"
                 className="w-full justify-start h-12 rounded-xl border-[#E2E8F0] font-bold text-[#0F172A] text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -2240,18 +2225,53 @@ export default function LeaseDetailsPage() {
 
       <ScheduleInspectionModal
         leaseId={params.id as string}
-        open={showInspectionModal}
-        onOpenChange={setShowInspectionModal}
+        open={scheduleInspectionType !== null}
+        onOpenChange={(open) => { if (!open) setScheduleInspectionType(null); }}
         onSuccess={fetchLease}
         moveOutDate={lease?.moveOutDate}
+        defaultType={scheduleInspectionType ?? "FINAL"}
       />
       <SelfInspectionModal
         leaseId={params.id as string}
         unit={lease?.unit}
-        open={showSelfInspectionModal}
-        onOpenChange={setShowSelfInspectionModal}
+        open={selfInspectMode !== null}
+        onOpenChange={(open) => { if (!open) setSelfInspectMode(null); }}
         onSuccess={fetchLease}
-        preliminaryDeductions={lease?.preliminaryDeductions}
+        isPreliminary={selfInspectMode === "preliminary"}
+        preliminaryDeductions={selfInspectMode === "preliminary" ? undefined : lease?.preliminaryDeductions}
+      />
+      <BypassConfirmationModal
+        leaseId={params.id as string}
+        open={showBypassModal}
+        onOpenChange={setShowBypassModal}
+        onSuccess={fetchLease}
+      />
+      <ConfirmDialog
+        open={showConfirmActivate}
+        onOpenChange={setShowConfirmActivate}
+        title="Confirm Key Handover"
+        description="Confirm that the tenant has physically received the keys and has moved in. This will activate the lease and mark the unit as Occupied."
+        confirmLabel="Confirm Activation"
+        confirmVariant="default"
+        onConfirm={handleActivateLease}
+      />
+      <ConfirmDialog
+        open={showConfirmTerminate}
+        onOpenChange={setShowConfirmTerminate}
+        title="Terminate Lease"
+        description="Are you sure you want to terminate this lease? The unit will be marked as vacant, but the lease record will be preserved."
+        confirmLabel="Terminate Lease"
+        confirmVariant="destructive"
+        onConfirm={handleTerminateLease}
+      />
+      <ConfirmDialog
+        open={showConfirmSkipPrelim}
+        onOpenChange={setShowConfirmSkipPrelim}
+        title="Skip Preliminary Walkthrough"
+        description="Are you sure you want to skip the preliminary walkthrough?"
+        confirmLabel="Skip Walkthrough"
+        confirmVariant="destructive"
+        onConfirm={handleSkipPreliminaryWalkthrough}
       />
       <Dialog open={showKeyReturnModal} onOpenChange={setShowKeyReturnModal}>
         <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-md p-6">
@@ -2293,24 +2313,7 @@ export default function LeaseDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Preliminary Walkthrough Modals */}
-      <ScheduleInspectionModal
-        leaseId={lease?.id}
-        open={showSchedulePreliminaryModal}
-        onOpenChange={setShowSchedulePreliminaryModal}
-        onSuccess={fetchLease}
-        moveOutDate={lease?.moveOutDate}
-        defaultType="PRELIMINARY"
-      />
-
-      <SelfInspectionModal
-        leaseId={lease?.id}
-        unit={lease?.unit}
-        open={showPreliminarySelfInspectModal}
-        onOpenChange={setShowPreliminarySelfInspectModal}
-        onSuccess={fetchLease}
-        isPreliminary={true}
-      />
+      {/* Preliminary Walkthrough Modals are handled by unified consolidated modals above */}
 
       <Dialog open={showPrelimResultsModal} onOpenChange={setShowPrelimResultsModal}>
         <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-lg p-6">

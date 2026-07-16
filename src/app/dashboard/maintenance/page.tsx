@@ -35,19 +35,30 @@ export default function MaintenancePage() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedReqForAssign, setSelectedReqForAssign] = useState<any>(null);
   const [selectedInspectorId, setSelectedInspectorId] = useState("");
+  const [assignModalMode, setAssignModalMode] = useState<"select" | "create">("select");
+  const [newInspector, setNewInspector] = useState({ name: "", email: "", phone: "", password: "TempPassword@123" });
+  const [inspectorSubmitting, setInspectorSubmitting] = useState(false);
+
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [dispatchModalOpen, setDispatchModalOpen] = useState(false);
+  const [selectedReqForDispatch, setSelectedReqForDispatch] = useState<any>(null);
+  const [selectedVendorId, setSelectedVendorId] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [reqRes, usersRes] = await Promise.all([
+      const [reqRes, usersRes, vendorsRes] = await Promise.all([
         fetch("/api/maintenance"),
-        fetch("/api/users?role=INSPECTOR")
+        fetch("/api/users?role=INSPECTOR"),
+        fetch("/api/external-vendors")
       ]);
       const reqData = await reqRes.json();
       const usersData = await usersRes.json();
+      const vendorsData = await vendorsRes.json();
 
       if (Array.isArray(reqData)) setRequests(reqData);
       if (Array.isArray(usersData)) setInspectors(usersData);
+      if (Array.isArray(vendorsData)) setVendors(vendorsData);
     } catch (err) {
       toast.error("Failed to load data");
     } finally {
@@ -80,7 +91,10 @@ export default function MaintenancePage() {
       const res = await fetch("/api/maintenance", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedReqForAssign.id, inspectorId: selectedInspectorId })
+        body: JSON.stringify({ 
+          id: selectedReqForAssign.id, 
+          inspectorId: selectedInspectorId === "none" ? null : selectedInspectorId 
+        })
       });
       if (res.ok) {
         toast.success("Inspector assigned successfully");
@@ -97,7 +111,73 @@ export default function MaintenancePage() {
   const openAssignModal = (req: any) => {
     setSelectedReqForAssign(req);
     setSelectedInspectorId(req.inspectorId || "");
+    setAssignModalMode("select");
+    setNewInspector({ name: "", email: "", phone: "", password: "TempPassword@123" });
     setAssignModalOpen(true);
+  };
+
+  const handleCreateInspector = async () => {
+    if (!newInspector.name || !newInspector.email || !newInspector.password) {
+      return toast.error("Name, email and password are required");
+    }
+    setInspectorSubmitting(true);
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newInspector,
+          role: "INSPECTOR"
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Inspector created successfully!");
+        setAssignModalMode("select");
+        if (data.user) {
+          setInspectors(prev => [...prev, data.user]);
+          setSelectedInspectorId(data.user.id);
+        }
+        await fetchData();
+      } else {
+        toast.error(data.error || "Failed to create inspector");
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setInspectorSubmitting(false);
+    }
+  };
+
+  const openDispatchModal = (req: any) => {
+    setSelectedReqForDispatch(req);
+    setSelectedVendorId(req.externalVendorId || "");
+    setDispatchModalOpen(true);
+  };
+
+  const handleDispatchSubmit = async () => {
+    if (!selectedVendorId || !selectedReqForDispatch) return;
+    try {
+      const res = await fetch("/api/maintenance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedReqForDispatch.id,
+          externalVendorId: selectedVendorId,
+          status: "ASSIGNED",
+          action: "DISPATCH_VENDOR"
+        })
+      });
+      if (res.ok) {
+        toast.success("Vendor dispatched successfully! They have been notified.");
+        setDispatchModalOpen(false);
+        fetchData();
+      } else {
+        toast.error("Failed to dispatch vendor");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    }
   };
 
   const handleQuickStatusChange = async (id: string, newStatus: string) => {
@@ -489,9 +569,15 @@ export default function MaintenancePage() {
                               Edit Request
                             </DropdownMenuItem>
                             {!req.externalVendorId && (
-                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50">
-                                <UserPlus className="h-4 w-4" />
+                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-[#F1F5F9]">
+                                <UserPlus className="h-4 w-4 text-[#64748B]" />
                                 {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
+                              </DropdownMenuItem>
+                            )}
+                            {req.status === "SUBMITTED" && (
+                              <DropdownMenuItem onClick={() => openDispatchModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
+                                <Send className="h-4 w-4" />
+                                Dispatch Vendor
                               </DropdownMenuItem>
                             )}
                             <div className="h-px bg-[#E2E8F0] my-1" />
@@ -537,7 +623,7 @@ export default function MaintenancePage() {
                                 ⚡ Review &amp; Approve
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
+                            <DropdownMenuItem onClick={() => openDispatchModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
                               <Send className="h-4 w-4" /> Dispatch Vendor
                             </DropdownMenuItem>
                             {!req.externalVendorId && (
@@ -662,7 +748,7 @@ export default function MaintenancePage() {
                             Assign Inspector
                           </Button>
                           <Button 
-                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                            onClick={(e) => { e.stopPropagation(); openDispatchModal(req); }} 
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
                           >
                             Dispatch Vendor
@@ -720,31 +806,142 @@ export default function MaintenancePage() {
       {assignModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {assignModalMode === "select" ? (
+              <>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-1">
+                    <h2 className="text-xl font-bold text-[#0F172A]">Assign Inspector</h2>
+                    <button 
+                      onClick={() => setAssignModalMode("create")} 
+                      className="text-xs font-bold text-[#3B82F6] hover:underline"
+                    >
+                      + New Inspector
+                    </button>
+                  </div>
+                  <p className="text-sm font-medium text-[#64748B] mb-6">Select an inspector to handle this maintenance request.</p>
+                  
+                  <div className="space-y-2">
+                    <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
+                    <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
+                      <SelectTrigger className="w-full h-12 bg-white border-[#E2E8F0] rounded-xl focus:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm">
+                        <SelectValue placeholder="Select an inspector" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-[#E2E8F0]">
+                        <SelectItem value="none">Leave unassigned</SelectItem>
+                        {ownerId && (
+                          <SelectItem value={ownerId}>Assign to Me (Self)</SelectItem>
+                        )}
+                        {inspectors.map((ins) => (
+                          <SelectItem key={ins.id} value={ins.id}>{ins.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="p-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#64748B] hover:text-[#0F172A]">Cancel</Button>
+                  <Button onClick={handleAssignSubmit} className="rounded-xl font-semibold bg-[#3B82F6] hover:bg-[#2563EB] text-white">Confirm Assignment</Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-1">
+                    <h2 className="text-xl font-bold text-[#0F172A]">Add New Inspector</h2>
+                    <button 
+                      onClick={() => setAssignModalMode("select")} 
+                      className="text-xs font-bold text-[#3B82F6] hover:underline"
+                    >
+                      Back to Select
+                    </button>
+                  </div>
+                  <p className="text-sm font-medium text-[#64748B] mb-6">Add a new inspector to your team directory.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-[#0F172A] uppercase">Full Name *</label>
+                      <Input 
+                        value={newInspector.name} 
+                        onChange={e => setNewInspector({...newInspector, name: e.target.value})} 
+                        placeholder="e.g. Jake Inspector" 
+                        className="h-11 rounded-xl bg-slate-50 border-[#E2E8F0] text-sm focus:ring-[#3B82F6]" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-[#0F172A] uppercase">Email Address *</label>
+                      <Input 
+                        type="email" 
+                        value={newInspector.email} 
+                        onChange={e => setNewInspector({...newInspector, email: e.target.value})} 
+                        placeholder="jake@example.com" 
+                        className="h-11 rounded-xl bg-slate-50 border-[#E2E8F0] text-sm focus:ring-[#3B82F6]" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-[#0F172A] uppercase">Phone Number</label>
+                      <Input 
+                        value={newInspector.phone} 
+                        onChange={e => setNewInspector({...newInspector, phone: e.target.value})} 
+                        placeholder="+1 (555) 123-4567" 
+                        className="h-11 rounded-xl bg-slate-50 border-[#E2E8F0] text-sm focus:ring-[#3B82F6]" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-[#0F172A] uppercase">Temporary Password *</label>
+                      <Input 
+                        type="password" 
+                        value={newInspector.password} 
+                        onChange={e => setNewInspector({...newInspector, password: e.target.value})} 
+                        placeholder="Initial password" 
+                        className="h-11 rounded-xl bg-slate-50 border-[#E2E8F0] text-sm focus:ring-[#3B82F6]" 
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setAssignModalMode("select")} className="rounded-xl font-semibold text-[#64748B] hover:text-[#0F172A]">Cancel</Button>
+                  <Button onClick={handleCreateInspector} disabled={inspectorSubmitting} className="rounded-xl font-semibold bg-[#3B82F6] hover:bg-[#2563EB] text-white">Save Inspector</Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Dispatch Vendor Modal */}
+      {dispatchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Inspector</h2>
-              <p className="text-sm font-medium text-[#64748B] mb-6">Select an inspector to handle this maintenance request.</p>
+              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Dispatch External Vendor</h2>
+              <p className="text-sm font-medium text-[#64748B] mb-6">Select an external vendor to assign to this maintenance request.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
-                <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
+                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Vendor</label>
+                <Select value={selectedVendorId} onValueChange={(v) => setSelectedVendorId(v || "")}>
                   <SelectTrigger className="w-full h-12 bg-white border-[#E2E8F0] rounded-xl focus:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm">
-                    <SelectValue placeholder="Select an inspector" />
+                    <SelectValue placeholder="Select a vendor" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[#E2E8F0]">
-                    <SelectItem value="none">Leave unassigned</SelectItem>
-                    {ownerId && (
-                      <SelectItem value={ownerId}>Assign to Me (Self)</SelectItem>
+                    {vendors.length === 0 ? (
+                      <SelectItem value="none" disabled>No vendors available. Create one in Inspectors &amp; Vendors.</SelectItem>
+                    ) : (
+                      vendors.map((vendor) => (
+                        <SelectItem key={vendor.id} value={vendor.id}>
+                          {vendor.name} ({vendor.specialty})
+                        </SelectItem>
+                      ))
                     )}
-                    {inspectors.map((ins) => (
-                      <SelectItem key={ins.id} value={ins.id}>{ins.name}</SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-[#64748B] font-medium mt-2">
+                  This vendor will automatically receive an email with a secure Magic Link to manage this job.
+                </p>
               </div>
             </div>
             <div className="p-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#64748B] hover:text-[#0F172A]">Cancel</Button>
-              <Button onClick={handleAssignSubmit} className="rounded-xl font-semibold bg-[#3B82F6] hover:bg-[#2563EB] text-white">Confirm Assignment</Button>
+              <Button variant="ghost" onClick={() => setDispatchModalOpen(false)} className="rounded-xl font-semibold text-[#64748B] hover:text-[#0F172A]">Cancel</Button>
+              <Button onClick={handleDispatchSubmit} className="rounded-xl font-semibold bg-[#3B82F6] hover:bg-[#2563EB] text-white">Confirm Dispatch</Button>
             </div>
           </div>
         </div>

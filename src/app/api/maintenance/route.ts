@@ -495,6 +495,10 @@ export async function PUT(req: NextRequest) {
       updateData.repairDate = new Date(updateData.repairDate);
     }
 
+    if (updateData.inspectorId === "none" || updateData.inspectorId === "") {
+      updateData.inspectorId = null;
+    }
+
     // Auto-update status based on inspector assignment if not explicitly set
     if (updateData.inspectorId && !updateData.status) {
       updateData.status = "ASSIGNED";

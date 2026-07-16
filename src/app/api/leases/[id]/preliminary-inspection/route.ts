@@ -1,3 +1,8 @@
+// POST /api/leases/[id]/preliminary-inspection
+// Handles ONLY the SKIP action for preliminary walkthroughs.
+// Preliminary walkthrough scheduling is handled via PUT /api/leases/[id]/inspection (via ScheduleInspectionModal).
+// Preliminary walkthrough completing is handled via POST /api/leases/[id]/inspection (via SelfInspectionModal).
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";

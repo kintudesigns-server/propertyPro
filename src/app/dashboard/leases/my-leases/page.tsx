@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Shield,
   ShieldAlert,
@@ -40,6 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { LeaseActionsMenu } from "@/components/tenant/LeaseActionsMenu";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function MyLeasesPage() {
   const { data: session, status } = useSession();
@@ -58,6 +60,7 @@ export default function MyLeasesPage() {
   const [moveOutDate, setMoveOutDate] = useState("");
   const [moveOutReason, setMoveOutReason] = useState("");
   const [otherReasonNote, setOtherReasonNote] = useState("");
+  const [declineRenewalLeaseId, setDeclineRenewalLeaseId] = useState<string | null>(null);
   const [forwardingStreet, setForwardingStreet] = useState("");
   const [forwardingCity, setForwardingCity] = useState("");
   const [forwardingState, setForwardingState] = useState("");
@@ -143,7 +146,6 @@ export default function MyLeasesPage() {
   };
 
   const handleRejectRenewal = async (leaseId: string) => {
-    if (!confirm("Are you sure you want to decline the renewal? This will mark your lease for move-out.")) return;
     try {
       const res = await fetch(`/api/leases/${leaseId}/renew`, { 
         method: "POST",
@@ -305,6 +307,13 @@ export default function MyLeasesPage() {
     return l.status.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   };
 
+  const pendingLeaseUnpaidDepositInvoice = pendingLease && pendingLease.invoices?.find(
+    (inv: any) =>
+      pendingLease.securityDeposit &&
+      Number(inv.amount) === Number(pendingLease.securityDeposit) &&
+      inv.status === "UNPAID"
+  );
+
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
 
@@ -355,128 +364,163 @@ export default function MyLeasesPage() {
 
       {/* ── Pending Lease Alert ── */}
       {pendingLease && (
-        <Card className="bg-amber-50 border border-amber-200 rounded-2xl shadow-sm p-6">
-          <CardHeader className="pb-4 p-0">
-            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-amber-900">
-              <ShieldAlert className="h-5 w-5 text-amber-600" />
-              Action Required: Lease Pending Signature
-            </CardTitle>
-            <CardDescription className="text-amber-700 text-xs font-semibold">
-              Pending lease for {pendingLease.unit?.name} at{" "}
-              {pendingLease.unit?.property?.name}.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-4 p-0 space-y-3 text-sm">
-            <div className="flex justify-between pb-3 border-b border-amber-200/60">
-              <span className="text-amber-700">Monthly Rent</span>
-              <strong className="text-amber-900 font-extrabold">
-                ${Number(pendingLease.monthlyRent).toLocaleString()}
-              </strong>
+        <Card className={`rounded-3xl shadow-xs border overflow-hidden p-6 md:p-8 relative ${
+          pendingLeaseUnpaidDepositInvoice
+            ? "bg-red-50/70 border-red-100 text-red-950"
+            : "bg-amber-50/70 border-amber-100 text-amber-950"
+        }`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full ${
+                  pendingLeaseUnpaidDepositInvoice
+                    ? "bg-red-100 text-red-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}>
+                  Action Required
+                </span>
+              </div>
+              <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
+                <ShieldAlert className={`h-5 w-5 ${pendingLeaseUnpaidDepositInvoice ? 'text-red-500' : 'text-amber-500'}`} />
+                {pendingLeaseUnpaidDepositInvoice
+                  ? "Pay Security Deposit to Complete Lease"
+                  : "Review & Sign Lease Agreement"
+                }
+              </h2>
+              <p className={`text-sm font-semibold max-w-2xl ${pendingLeaseUnpaidDepositInvoice ? 'text-red-700' : 'text-amber-700'}`}>
+                {pendingLeaseUnpaidDepositInvoice
+                  ? `Your lease for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} is approved. Please pay the security deposit of $${Number(pendingLease.securityDeposit).toLocaleString()} to finalize your lease agreement.`
+                  : `You have a pending lease contract for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} awaiting your signature.`
+                }
+              </p>
             </div>
-            <Button
-              onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 rounded-xl shadow-sm"
-            >
-              View & Sign Lease Contract
-            </Button>
-          </CardContent>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
+              <Button
+                onClick={() => {
+                  if (pendingLeaseUnpaidDepositInvoice) {
+                    handleSignLease(pendingLease.id);
+                  } else {
+                    router.push(`/dashboard/leases/${pendingLease.id}`);
+                  }
+                }}
+                className={`w-full sm:w-auto font-bold h-11 px-6 rounded-xl shadow-xs transition-all ${
+                  pendingLeaseUnpaidDepositInvoice
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-amber-600 hover:bg-amber-700 text-white"
+                }`}
+              >
+                {pendingLeaseUnpaidDepositInvoice ? `Pay Deposit $${Number(pendingLease.securityDeposit).toLocaleString()}` : "View & Sign Contract"}
+              </Button>
+              <Button
+                onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
+                variant="outline"
+                className={`w-full sm:w-auto font-bold h-11 px-6 rounded-xl bg-white border shadow-xs transition-all ${
+                  pendingLeaseUnpaidDepositInvoice
+                    ? "border-red-200 text-red-900 hover:bg-red-50"
+                    : "border-amber-200 text-amber-900 hover:bg-amber-50"
+                }`}
+              >
+                Lease Details
+              </Button>
+            </div>
+          </div>
         </Card>
       )}
 
       {/* ── Pending Renewal Alert ── */}
       {pendingRenewal && (
-        <Card className="bg-purple-50 border border-purple-200 rounded-2xl shadow-sm p-6">
-          <CardHeader className="pb-4 p-0">
-            <CardTitle className="text-base font-extrabold flex items-center gap-2 text-purple-900">
-              <ShieldAlert className="h-5 w-5 text-purple-600" />
-              Action Required: Lease Renewal Offer
-            </CardTitle>
-            <CardDescription className="text-purple-700 text-xs font-semibold">
-              Your lease for {pendingRenewal.unit?.name} at{" "}
-              {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-4 p-0 space-y-3 text-sm">
-            <div className="flex justify-between pb-3 border-b border-purple-200/60">
-              <span className="text-purple-700">Proposed New Rent</span>
-              <strong className="text-purple-900 font-extrabold">
-                ${Number(pendingRenewal.monthlyRent).toLocaleString()}
-              </strong>
+        <Card className="bg-purple-50/70 border border-purple-100 rounded-3xl shadow-xs p-6 md:p-8 relative">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="bg-purple-100 text-purple-700 text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full">
+                  Renewal Available
+                </span>
+              </div>
+              <h2 className="text-xl font-black tracking-tight flex items-center gap-2 text-purple-950">
+                <ShieldAlert className="h-5 w-5 text-purple-500" />
+                Lease Renewal Offer
+              </h2>
+              <p className="text-sm font-semibold text-purple-700 max-w-2xl">
+                Your lease for Unit {pendingRenewal.unit?.name} at {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal with a proposed rent of <strong className="text-purple-900">${Number(pendingRenewal.monthlyRent).toLocaleString()}/month</strong>.
+              </p>
             </div>
-            <div className="flex gap-3">
+            
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
               <Button
                 onClick={() => handleAcceptRenewal(pendingRenewal.id)}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 rounded-xl shadow-sm"
+                className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold h-11 px-6 rounded-xl shadow-xs transition-all"
               >
-                Accept & Renew Lease
+                Accept & Renew
               </Button>
               <Button
-                onClick={() => handleRejectRenewal(pendingRenewal.id)}
+                onClick={() => setDeclineRenewalLeaseId(pendingRenewal.id)}
                 variant="outline"
-                className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-100 font-bold h-10 rounded-xl bg-white"
+                className="w-full sm:w-auto border-purple-200 text-purple-900 hover:bg-purple-50 bg-white font-bold h-11 px-6 rounded-xl shadow-xs transition-all"
               >
                 Decline (Move Out)
               </Button>
             </div>
-          </CardContent>
+          </div>
         </Card>
       )}
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Leases */}
-        <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-[#64748B]">Total Leases</p>
-              <h3 className="text-3xl font-black text-[#0F172A] mt-1 tracking-tight">{leases.length}</h3>
-              <p className="text-xs text-[#94A3B8] mt-1">{leases.length} currently active</p>
+        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Total Leases</p>
+              <h3 className="text-3xl font-black text-[#0F172A] tracking-tight">{leases.length}</h3>
+              <p className="text-[11px] font-semibold text-slate-400">Registry count</p>
             </div>
-            <div className="p-2.5 bg-[#EFF6FF] rounded-xl text-[#3B82F6]">
+            <div className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl">
               <Home className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Active Leases */}
-        <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-[#64748B]">Active Leases</p>
-              <h3 className="text-3xl font-black text-[#0F172A] mt-1 tracking-tight">{activeCount}</h3>
-              <p className="text-xs text-[#94A3B8] mt-1">Currently occupied</p>
+        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Active Leases</p>
+              <h3 className="text-3xl font-black text-[#0F172A] tracking-tight">{activeCount}</h3>
+              <p className="text-[11px] font-semibold text-emerald-500 font-extrabold">Currently active</p>
             </div>
-            <div className="p-2.5 bg-[#F0FDF4] rounded-xl text-[#16A34A]">
+            <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
               <FileText className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Expiring Soon */}
-        <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-[#64748B]">Expiring Soon</p>
-              <h3 className="text-3xl font-black text-[#0F172A] mt-1 tracking-tight">{expiringCount}</h3>
-              <p className="text-xs text-[#94A3B8] mt-1">Within 60 days</p>
+        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Expiring Soon</p>
+              <h3 className={`text-3xl font-black tracking-tight ${expiringCount > 0 ? "text-rose-600" : "text-[#0F172A]"}`}>{expiringCount}</h3>
+              <p className="text-[11px] font-semibold text-rose-500">Within 60 days</p>
             </div>
-            <div className="p-2.5 bg-[#FFFBEB] rounded-xl text-[#D97706]">
+            <div className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl">
               <Calendar className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Total Monthly Rent */}
-        <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-[#64748B]">Total Monthly Rent</p>
-              <h3 className="text-2xl font-black text-[#0F172A] mt-1 tracking-tight">
-                ${totalRent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Monthly Commitment</p>
+              <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">
+                ${totalRent.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </h3>
-              <p className="text-xs text-[#94A3B8] mt-1">Combined across all leases</p>
+              <p className="text-[11px] font-semibold text-slate-400">Total rent obligation</p>
             </div>
-            <div className="p-2.5 bg-[#F0FDF4] rounded-xl text-[#16A34A]">
+            <div className="p-3.5 bg-slate-100 text-slate-700 rounded-2xl">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
@@ -533,28 +577,38 @@ export default function MyLeasesPage() {
               className="pl-10 pr-4 py-2.5 w-full bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] shadow-sm"
             />
           </div>
-          <select
+
+          <Select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white border border-[#E2E8F0] text-sm text-[#0F172A] px-4 py-2.5 rounded-xl focus:outline-none focus:border-[#3B82F6] shadow-sm cursor-pointer font-semibold min-w-[130px]"
+            onValueChange={(v: string | null) => setStatusFilter(v || "all")}
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="pending_signature">Pending Signature</option>
-            <option value="terminated">Terminated</option>
-            <option value="expired">Expired</option>
-          </select>
-          <select
+            <SelectTrigger className="w-full sm:w-[160px] bg-white border border-[#E2E8F0] h-10 px-3.5 rounded-xl shadow-xs font-semibold text-xs text-[#0F172A] focus:ring-1 focus:ring-[#3B82F6] cursor-pointer">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="pending_signature">Pending Signature</SelectItem>
+              <SelectItem value="terminated">Terminated</SelectItem>
+              <SelectItem value="expired">Expired</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="bg-white border border-[#E2E8F0] text-sm text-[#0F172A] px-4 py-2.5 rounded-xl focus:outline-none focus:border-[#3B82F6] shadow-sm cursor-pointer font-semibold min-w-[140px]"
+            onValueChange={(v: string | null) => setSortBy(v || "newest")}
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="rent_high">Rent: High to Low</option>
-            <option value="rent_low">Rent: Low to High</option>
-          </select>
+            <SelectTrigger className="w-full sm:w-[160px] bg-white border border-[#E2E8F0] h-10 px-3.5 rounded-xl shadow-xs font-semibold text-xs text-[#0F172A] focus:ring-1 focus:ring-[#3B82F6] cursor-pointer">
+              <SelectValue placeholder="Newest First" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="rent_high">Rent: High to Low</SelectItem>
+              <SelectItem value="rent_low">Rent: Low to High</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Sub-heading */}
@@ -571,12 +625,25 @@ export default function MyLeasesPage() {
         {/* Content */}
         <div className="px-6 pb-6">
           {filtered.length === 0 ? (
-            <div className="text-center py-14 text-[#64748B] italic font-semibold border border-dashed border-[#E2E8F0] rounded-2xl bg-[#F8FAFC]">
-              No leases match your search.
+            <div className="text-center py-12 px-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 flex flex-col items-center justify-center space-y-3">
+              <div className="h-12 w-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
+                <Search className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-800">No leases found</h3>
+              <p className="text-xs text-slate-500 max-w-sm">
+                No leases match your search criteria. Try modifying your search term or clearing the status filters.
+              </p>
+              <Button 
+                onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}
+                variant="outline"
+                className="h-9 px-4 rounded-xl text-xs font-bold border-slate-200 text-slate-700 bg-white"
+              >
+                Clear Search & Filters
+              </Button>
             </div>
           ) : viewMode === "list" ? (
             /* ── LIST VIEW ── */
-            <div className="overflow-x-auto rounded-xl border border-[#F1F5F9]">
+            <div className="overflow-x-auto rounded-xl border border-[#F1F5F9] bg-white shadow-xs">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent bg-[#F8FAFC]">
@@ -584,7 +651,7 @@ export default function MyLeasesPage() {
                     <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3">Lease Period</TableHead>
                     <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3">Monthly Rent</TableHead>
                     <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3">Days Until</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3">Timeline</TableHead>
                     <TableHead className="font-bold text-xs uppercase text-[#64748B] py-3 text-right pr-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -593,29 +660,34 @@ export default function MyLeasesPage() {
                     const daysLeft = Math.ceil((new Date(l.endDate).getTime() - Date.now()) / 86400000);
                     const months = Math.round(Math.abs(daysLeft) / 30);
                     return (
-                      <TableRow key={l.id} className="hover:bg-[#F8FAFC] transition-colors border-t border-[#F1F5F9]">
+                      <TableRow key={l.id} className="hover:bg-[#F8FAFC]/55 transition-colors border-t border-[#F1F5F9]">
                         <TableCell className="py-4 pl-4">
-                          <div>
-                            <p className="font-bold text-[#0F172A] text-sm">
+                          <div className="space-y-0.5">
+                            <p className="font-extrabold text-[#0F172A] text-sm flex items-center gap-2">
                               {l.unit?.property?.name || "Unknown"}
+                              <span className="bg-[#EFF6FF] text-[#3B82F6] font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+                                Unit {l.unit?.name || "—"}
+                              </span>
                             </p>
                             {l.unit?.property?.address && (
-                              <p className="text-[11px] text-[#64748B] truncate max-w-[180px]">
-                                {l.unit.property.address}, {l.unit.property.city}, {l.unit.property.state} {l.unit.property.zip}
+                              <p className="text-[11px] text-[#64748B] truncate max-w-[220px] font-semibold">
+                                {l.unit.property.address}, {l.unit.property.city}
                               </p>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <p className="text-sm text-[#0F172A] font-semibold">
-                            {new Date(l.startDate).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})} - {new Date(l.endDate).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
+                          <p className="text-sm text-[#0F172A] font-bold">
+                            {new Date(l.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(l.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </p>
-                          <p className="text-[11px] text-[#94A3B8]">{months} month{months !== 1 ? "s" : ""}</p>
-                          <p className="text-[11px] text-[#64748B]">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
+                          <p className="text-[11px] text-[#64748B] font-semibold flex items-center gap-1.5 mt-0.5">
+                            <Clock className="h-3 w-3 text-slate-400" />
+                            {months} month{months !== 1 ? "s" : ""} duration
+                          </p>
                         </TableCell>
                         <TableCell>
-                          <p className="font-bold text-[#0F172A]">${Number(l.monthlyRent).toLocaleString()}</p>
-                          <p className="text-[11px] text-[#94A3B8]">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
+                          <p className="font-extrabold text-sm text-[#0F172A]">${Number(l.monthlyRent).toLocaleString()}<span className="text-[#64748B] text-[10px] font-normal">/mo</span></p>
+                          <p className="text-[11px] text-[#64748B] font-semibold">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
                         </TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${statusBadge(l)}`}>
@@ -625,11 +697,11 @@ export default function MyLeasesPage() {
                         </TableCell>
                         <TableCell>
                           {l.status === "SIGNED" && new Date(l.startDate).getTime() > Date.now() ? (
-                            <span className="text-sm text-indigo-600 font-semibold">Move-in in {Math.ceil((new Date(l.startDate).getTime() - Date.now()) / 86400000)} days</span>
+                            <span className="text-xs text-indigo-600 font-bold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Move-in in {Math.ceil((new Date(l.startDate).getTime() - Date.now()) / 86400000)}d</span>
                           ) : daysLeft > 0 ? (
-                            <span className="text-sm text-[#64748B] font-semibold">{daysLeft} days remaining</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${daysLeft < 30 ? 'text-amber-700 bg-amber-50 border border-amber-100' : 'text-slate-600 bg-slate-50 border border-slate-100'}`}>{daysLeft}d left</span>
                           ) : (
-                            <span className="text-sm text-red-500 font-semibold">Expired {Math.abs(daysLeft)} days ago</span>
+                            <span className="text-xs text-red-600 font-bold bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">Expired</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right pr-4">
@@ -651,7 +723,7 @@ export default function MyLeasesPage() {
             </div>
           ) : (
             /* ── GRID VIEW ── */
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {filtered.map((l) => {
                 const daysLeft = Math.ceil(
                   (new Date(l.endDate).getTime() - Date.now()) / 86400000
@@ -660,111 +732,123 @@ export default function MyLeasesPage() {
                 return (
                   <Card
                     key={l.id}
-                    className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-all duration-200 relative"
+                    onClick={() => router.push(`/dashboard/leases/${l.id}`)}
+                    className="cursor-pointer bg-white border-0 ring-1 ring-slate-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden flex flex-col group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 relative"
                   >
                     {/* Top-Right Action Menu */}
-                    <div className="absolute top-3 right-3 z-30">
+                    <div className="absolute top-3 right-3 z-30" onClick={(e) => e.stopPropagation()}>
                       <LeaseActionsMenu lease={l} onSignLease={handleSignLease} onRequestMoveOut={openMoveOutModal} variant="card" />
                     </div>
 
                     {/* Property image / placeholder */}
-                    <div className="h-40 w-full bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] relative overflow-hidden">
+                    <div className="h-44 w-full bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF] relative overflow-hidden">
                       {l.unit?.property?.coverPhoto ? (
                         <img
                           src={l.unit.property.coverPhoto}
                           alt={l.unit.property.name}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <Home className="h-12 w-12 text-[#93C5FD] opacity-60" />
+                        <div className="h-full w-full flex items-center justify-center bg-slate-50 text-slate-400">
+                          <Home className="h-10 w-10 text-slate-300 group-hover:scale-105 transition-transform duration-500" />
                         </div>
                       )}
                       {/* Status badge overlay */}
                       <div className="absolute top-3 left-3">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm ${
+                        <span className={`inline-flex items-center gap-1.5 text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-xs ${
                           l.status === "ACTIVE" && hasUnpaidDeposit(l)
-                            ? "bg-blue-500 text-white"
+                            ? "bg-blue-600 text-white"
                             : l.status === "ACTIVE"
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-emerald-600 text-white"
                             : l.status === "PENDING_SIGNATURE"
                             ? "bg-amber-500 text-white"
-                            : "bg-slate-500 text-white"
+                            : "bg-slate-600 text-white"
                         }`}>
-                          <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                          <span className="h-1 w-1 rounded-full bg-white" />
                           {formatStatus(l)}
                         </span>
                       </div>
                       {expiringSoon && (
                         <div className="absolute top-3 right-12">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500 text-white shadow-sm">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full bg-rose-600 text-white shadow-xs">
                             <Clock className="h-2.5 w-2.5" /> {daysLeft}d left
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="p-5 flex flex-col flex-1 space-y-4">
+                    <div className="p-6 flex flex-col flex-1 space-y-4">
                       {/* Property name + unit */}
-                      <div>
-                        <h3 className="font-black text-base text-[#0F172A] truncate">
-                          {l.unit?.property?.name || "Unknown Property"}
-                        </h3>
-                        <p className="text-xs font-semibold text-[#3B82F6] mt-0.5">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-extrabold text-base text-[#0F172A] truncate group-hover:text-[#3B82F6] transition-colors">
+                            {l.unit?.property?.name || "Unknown Property"}
+                          </h3>
+                        </div>
+                        <p className="text-[11px] font-extrabold text-[#3B82F6] uppercase tracking-wider bg-blue-50 w-fit px-2 py-0.5 rounded-md">
                           Unit {l.unit?.name || "—"}
                         </p>
                       </div>
 
                       {/* Address */}
                       {l.unit?.property?.address && (
-                        <div className="flex items-start gap-1.5 text-[#64748B]">
-                          <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                          <span className="text-xs leading-relaxed line-clamp-2">
+                        <div className="flex items-start gap-1.5 text-[#64748B] min-h-[32px]">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" />
+                          <span className="text-[11px] font-semibold leading-normal line-clamp-2">
                             {l.unit.property.address}, {l.unit.property.city}
-                            {l.unit.property.state ? `, ${l.unit.property.state}` : ""}
-                            {l.unit.property.zip ? ` ${l.unit.property.zip}` : ""}
                           </span>
                         </div>
                       )}
 
-                      <div className="h-px bg-[#F1F5F9]" />
+                      <div className="h-px bg-slate-100" />
 
                       {/* Rent + Deposit */}
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">Monthly Rent</p>
-                          <p className="text-sm font-black text-[#3B82F6] mt-0.5">
-                            ${Number(l.monthlyRent).toLocaleString()}
+                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Monthly Rent</p>
+                          <p className="text-sm font-extrabold text-[#0F172A] mt-1">
+                            ${Number(l.monthlyRent).toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">Deposit</p>
-                          <p className="text-sm font-bold text-[#0F172A] mt-0.5">
+                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Deposit</p>
+                          <p className="text-sm font-extrabold text-slate-500 mt-1">
                             ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}
                           </p>
                         </div>
                       </div>
 
-                      <div className="h-px bg-[#F1F5F9]" />
+                      <div className="h-px bg-slate-100" />
 
                       {/* Lease term */}
-                      <div>
-                        <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">Lease Term</p>
-                        <p className="text-xs text-[#0F172A] font-semibold mt-0.5">
-                          {new Date(l.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                          {" "}&ndash;{" "}
-                          {new Date(l.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </p>
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Lease Term</p>
+                          <p className="text-[11px] text-[#0F172A] font-semibold mt-1">
+                            {new Date(l.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(l.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                        </div>
+                        {daysLeft > 0 ? (
+                          <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                            daysLeft < 30 ? "bg-amber-50 text-amber-700" : "bg-slate-50 text-slate-600"
+                          }`}>
+                            {daysLeft}d left
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700">
+                            Expired
+                          </span>
+                        )}
                       </div>
 
                       {/* Action */}
                       {l.status === "PENDING_SIGNATURE" && (
-                        <div className="flex items-center gap-2">
+                        <div className="pt-2" onClick={(e) => e.stopPropagation()}>
                           <Button
                             onClick={() => router.push(`/dashboard/leases/${l.id}`)}
-                            className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold h-9 rounded-xl shadow-sm text-sm"
+                            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 rounded-xl shadow-xs text-xs"
                           >
-                            View & Sign
+                            View & Sign Contract
                           </Button>
                         </div>
                       )}
@@ -1048,6 +1132,15 @@ export default function MyLeasesPage() {
           </div>
         );
       })()}
+      <ConfirmDialog
+        open={declineRenewalLeaseId !== null}
+        onOpenChange={(open) => { if (!open) setDeclineRenewalLeaseId(null); }}
+        title="Decline Renewal"
+        description="Are you sure you want to decline the renewal? This will mark your lease for move-out."
+        confirmLabel="Decline Renewal"
+        confirmVariant="destructive"
+        onConfirm={() => { if (declineRenewalLeaseId) handleRejectRenewal(declineRenewalLeaseId); }}
+      />
     </div>
   );
 }

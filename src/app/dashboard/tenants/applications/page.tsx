@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, MoreVertical, Eye, RefreshCw, FileText, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ReasonModal } from "@/components/ui/ReasonModal";
 
 export default function ApplicationsPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [rejectAppId, setRejectAppId] = useState<string | null>(null);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -34,13 +36,7 @@ export default function ApplicationsPage() {
     }
   };
 
-  const handleUpdateStatus = async (appId: string, status: string) => {
-    let reason = "";
-    if (status === "REJECTED") {
-      const input = window.prompt("Please provide a reason for rejecting this application (this will be emailed to the applicant):");
-      if (input === null) return;
-      reason = input.trim();
-    }
+  const handleUpdateStatus = async (appId: string, status: string, reason = "") => {
 
     try {
       const res = await fetch(`/api/applications/${appId}`, {
@@ -223,8 +219,8 @@ export default function ApplicationsPage() {
                                   <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "APPROVED")} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
                                     <CheckCircle2 className="mr-2 h-4 w-4 text-[#94A3B8]" /> Approve (Only)
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "REJECTED")} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
-                                    <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Reject Application
+                                  <DropdownMenuItem onClick={() => setRejectAppId(app.id)} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
+                                    <XCircle className="mr-2 h-4 w-4 text-[#FDA4AF]" /> Reject Application
                                   </DropdownMenuItem>
                                 </>
                               )}
@@ -262,6 +258,14 @@ export default function ApplicationsPage() {
           </div>
         )}
       </Card>
+      <ReasonModal
+        open={rejectAppId !== null}
+        onOpenChange={(open) => { if (!open) setRejectAppId(null); }}
+        title="Reject Application"
+        description="Please provide a reason for rejecting this application. This reason will be emailed to the applicant."
+        placeholder="Reason for rejection..."
+        onConfirm={(reason) => { if (rejectAppId) handleUpdateStatus(rejectAppId, "REJECTED", reason); }}
+      />
     </div>
   );
 }

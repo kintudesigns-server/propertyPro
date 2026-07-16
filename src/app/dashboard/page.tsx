@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Building,
   Home,
@@ -55,6 +56,16 @@ export default function DashboardPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [tenantLoading, setTenantLoading] = useState(true);
   const [selectedLeaseId, setSelectedLeaseId] = useState<string | null>(null);
+
+  const getLeaseProgress = (lease: any) => {
+    if (!lease?.startDate || !lease?.endDate) return 0;
+    const start = new Date(lease.startDate).getTime();
+    const end = new Date(lease.endDate).getTime();
+    const now = Date.now();
+    if (now < start) return 0;
+    if (now > end) return 100;
+    return Math.round(((now - start) / (end - start)) * 100);
+  };
 
   const fetchLandlordStats = async () => {
     setStatsLoading(true);
@@ -261,19 +272,30 @@ export default function DashboardPage() {
 
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
               {leases.length > 0 && (
-                <div className="relative w-full sm:w-auto min-w-[260px]">
-                  <select
+                <div className="w-full sm:w-auto min-w-[260px]">
+                  <Select
                     value={selectedLeaseId || ""}
-                    onChange={(e) => setSelectedLeaseId(e.target.value)}
-                    className="appearance-none bg-white/10 hover:bg-white/15 transition-colors border border-white/20 text-white font-bold px-5 py-3.5 pr-12 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-md cursor-pointer text-sm w-full"
+                    onValueChange={(v: string | null) => setSelectedLeaseId(v)}
                   >
-                    {leases.map((l) => (
-                      <option key={l.id} value={l.id} className="text-slate-900 font-medium">
-                        {l.unit?.property?.name ? `${l.unit.property.name} - ${l.unit.name}` : `Lease ${l.id.slice(0, 8)}`}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70 pointer-events-none" />
+                    <SelectTrigger className="w-full h-[50px] rounded-2xl bg-white/10 hover:bg-white/15 border-white/20 text-white font-bold px-5 shadow-sm focus:ring-indigo-500/50 backdrop-blur-md transition-colors text-sm relative">
+                      <SelectValue placeholder="Select Lease">
+                        {(() => {
+                          const active = leases.find((l) => l.id === selectedLeaseId);
+                          if (active) {
+                            return active.unit?.property?.name ? `${active.unit.property.name} - ${active.unit.name}` : `Lease ${active.id.slice(0, 8)}`;
+                          }
+                          return "Select Lease";
+                        })()}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1 bg-white">
+                      {leases.map((l) => (
+                        <SelectItem key={l.id} value={l.id} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700 hover:bg-slate-50">
+                          {l.unit?.property?.name ? `${l.unit.property.name} - ${l.unit.name}` : `Lease ${l.id.slice(0, 8)}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
               <Button
@@ -407,7 +429,10 @@ export default function DashboardPage() {
 
         {/* Quick Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <Card 
+            onClick={() => router.push("/dashboard/leases/my-leases")}
+            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
+          >
             <div className="flex justify-between items-start">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Leases</span>
               <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-sm">
@@ -422,22 +447,30 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <Card 
+            onClick={() => router.push("/dashboard/payments/pay-rent")}
+            className={`border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer ${
+              unpaidInvoices.length > 0 ? "bg-red-50/20 hover:bg-red-50/40" : "bg-white"
+            }`}
+          >
             <div className="flex justify-between items-start">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Unpaid Balance</span>
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl shadow-sm">
+              <div className={`p-3 rounded-2xl shadow-sm ${unpaidInvoices.length > 0 ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
                 <Wallet className="h-5 w-5" />
               </div>
             </div>
             <div>
-              <h3 className="text-4xl font-black text-slate-900 tracking-tight">
+              <h3 className={`text-4xl font-black tracking-tight ${unpaidInvoices.length > 0 ? "text-red-600" : "text-slate-900"}`}>
                 ${unpaidInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0).toLocaleString()}
               </h3>
               <p className="text-sm text-slate-500 font-semibold mt-1">{unpaidInvoices.length} due invoices</p>
             </div>
           </Card>
 
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <Card 
+            onClick={() => router.push("/dashboard/maintenance/my-requests")}
+            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
+          >
             <div className="flex justify-between items-start">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Open Requests</span>
               <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shadow-sm">
@@ -450,7 +483,10 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <Card 
+            onClick={() => router.push("/dashboard/messages")}
+            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
+          >
             <div className="flex justify-between items-start">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest">New Messages</span>
               <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl shadow-sm">
@@ -458,9 +494,9 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-3xl font-black text-[#0F172A] tracking-tight">{unpaidInvoices.length}</h3>
-              <p className="text-xs text-[#64748B] font-medium mt-1">
-                {unpaidInvoices.length === 1 ? "1 unread message" : `${unpaidInvoices.length} unread messages`}
+              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{totalMessagesCount}</h3>
+              <p className="text-sm text-slate-500 font-semibold mt-1">
+                {totalMessagesCount === 1 ? "1 unread message" : `${totalMessagesCount} unread messages`}
               </p>
             </div>
           </Card>
@@ -760,54 +796,69 @@ export default function DashboardPage() {
 
       {/* Critical Status Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Overdue Invoices Alert */}
         <div 
           onClick={() => router.push('/dashboard/accounting/invoices')}
-          className="bg-gradient-to-r from-amber-50 to-amber-100/50 hover:from-amber-100 hover:to-amber-200/50 transition-all border border-amber-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-amber-200 transition-all duration-300 group relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 text-amber-800">
-            <div className="p-3 bg-amber-500/10 rounded-2xl">
-              <AlertTriangle className="h-6 w-6 text-amber-600" />
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+          <div className="flex items-center gap-4 text-slate-800">
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+              <AlertTriangle className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-black text-lg">Overdue Invoices</p>
-              <p className="text-sm mt-0.5 text-amber-700/80 font-medium">{stats?.overduePayments || 0} tenants are behind schedule</p>
+              <p className="font-black text-[#0F172A] text-lg leading-snug">Overdue Invoices</p>
+              <p className="text-xs mt-1 text-slate-500 font-semibold">{stats?.overduePayments || 0} tenants are behind schedule</p>
             </div>
           </div>
-          <span className="text-3xl font-black text-amber-700 group-hover:translate-x-1 transition-transform">{stats?.overduePayments || 0}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl font-black text-amber-600 leading-none">{stats?.overduePayments || 0}</span>
+            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
 
+        {/* Urgent Repairs Alert */}
         <div 
           onClick={() => router.push('/dashboard/maintenance')}
-          className="bg-gradient-to-r from-red-50 to-red-100/50 hover:from-red-100 hover:to-red-200/50 transition-all border border-red-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-red-200 transition-all duration-300 group relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 text-red-800">
-            <div className="p-3 bg-red-500/10 rounded-2xl">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
+          <div className="flex items-center gap-4 text-slate-800">
+            <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
+              <AlertTriangle className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-black text-lg">Urgent Repairs</p>
-              <p className="text-sm mt-0.5 text-red-700/80 font-medium">
+              <p className="font-black text-[#0F172A] text-lg leading-snug">Urgent Repairs</p>
+              <p className="text-xs mt-1 text-slate-500 font-semibold">
                 {stats?.urgentMaintenance ? `${stats.urgentMaintenance} emergency issues open` : "All systems working normally"}
               </p>
             </div>
           </div>
-          <span className="text-3xl font-black text-red-700 group-hover:translate-x-1 transition-transform">{stats?.urgentMaintenance || 0}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl font-black text-red-600 leading-none">{stats?.urgentMaintenance || 0}</span>
+            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
 
+        {/* Expiring Leases Alert */}
         <div 
           onClick={() => router.push('/dashboard/leases')}
-          className="bg-gradient-to-r from-sky-50 to-sky-100/50 hover:from-sky-100 hover:to-sky-200/50 transition-all border border-sky-200/60 rounded-3xl p-6 flex items-center justify-between shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 group"
+          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 group relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 text-sky-800">
-            <div className="p-3 bg-sky-500/10 rounded-2xl">
-              <FileText className="h-6 w-6 text-sky-600" />
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+          <div className="flex items-center gap-4 text-slate-800">
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+              <FileText className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-black text-lg">Expiring Leases</p>
-              <p className="text-sm mt-0.5 text-sky-700/80 font-medium">Renewals needed within 30 days</p>
+              <p className="font-black text-[#0F172A] text-lg leading-snug">Expiring Leases</p>
+              <p className="text-xs mt-1 text-slate-500 font-semibold">Renewals needed within 30 days</p>
             </div>
           </div>
-          <span className="text-3xl font-black text-sky-700 group-hover:translate-x-1 transition-transform">{stats?.leaseRenewals || 0}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl font-black text-blue-600 leading-none">{stats?.leaseRenewals || 0}</span>
+            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       </div>
 
@@ -827,17 +878,17 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Revenue Chart Card */}
-          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8 flex flex-col justify-between">
+          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-100">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-emerald-500" />
                     Revenue Trend
                   </h2>
-                  <span className="text-sm font-medium text-slate-500 mt-1 block">Monthly collected rent payments</span>
+                  <span className="text-xs font-semibold text-slate-400 mt-1 block">Monthly collected rent payments</span>
                 </div>
-                <span className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-black rounded-xl border border-emerald-100">
+                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-extrabold rounded-lg border border-emerald-100">
                   Last 6 Months
                 </span>
               </div>
@@ -847,13 +898,13 @@ export default function DashboardPage() {
                   <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.25}/>
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.15}/>
                         <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#94A3B8" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F8FAFC" />
+                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94A3B8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: "#0F172A", borderRadius: "16px", border: "none" }}
                       labelStyle={{ color: "#94A3B8", fontWeight: 800, fontSize: "12px" }}
@@ -881,49 +932,49 @@ export default function DashboardPage() {
         <div className="lg:col-span-4 space-y-8">
           
           {/* Quick Actions Panel */}
-          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8">
-            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
+          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8">
+            <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
               <Activity className="h-5 w-5 text-indigo-500" />
               Quick Actions
             </h2>
             
             <div className="grid grid-cols-2 gap-4">
-              <Button
+              <button
                 onClick={() => router.push("/dashboard/properties/new")}
-                className="h-24 bg-blue-50/50 hover:bg-blue-50 border border-blue-100/50 text-blue-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+                className="h-24 bg-slate-50/50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
               >
                 <Plus className="h-5 w-5 text-blue-600" />
                 <span className="text-xs">Add Property</span>
-              </Button>
-              <Button
-                onClick={() => router.push("/dashboard/owner#settings")}
-                className="h-24 bg-violet-50/50 hover:bg-violet-50 border border-violet-100/50 text-violet-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/owner?tab=settings")}
+                className="h-24 bg-slate-50/50 hover:bg-violet-50 border border-slate-100 hover:border-violet-200 text-slate-700 hover:text-violet-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
               >
                 <Users className="h-5 w-5 text-violet-600" />
                 <span className="text-xs">Invite Tenant</span>
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => router.push("/dashboard/accounting/wallet")}
-                className="h-24 bg-amber-50/50 hover:bg-amber-50 border border-amber-100/50 text-amber-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+                className="h-24 bg-slate-50/50 hover:bg-amber-50 border border-slate-100 hover:border-amber-200 text-slate-700 hover:text-amber-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
               >
                 <Wallet className="h-5 w-5 text-amber-600" />
                 <span className="text-xs">Payout Wallet</span>
-              </Button>
-              <Button
-                onClick={() => router.push("/dashboard/owner#settings-subscription")}
-                className="h-24 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100/50 text-emerald-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all"
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/owner?tab=subscription")}
+                className="h-24 bg-slate-50/50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 text-slate-700 hover:text-emerald-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
               >
                 <Settings className="h-5 w-5 text-emerald-600" />
                 <span className="text-xs">Stripe Billing</span>
-              </Button>
+              </button>
             </div>
           </Card>
 
           {/* Recent Maintenance Tickets Feed */}
-          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[32px] p-8 flex flex-col justify-between">
+          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8 flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-                <div className="p-2 bg-amber-100 rounded-lg">
+              <h2 className="text-lg font-black text-slate-900 flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+                <div className="p-2 bg-amber-50 rounded-lg">
                   <Wrench className="h-4 w-4 text-amber-600" />
                 </div>
                 Recent Tickets
@@ -939,7 +990,7 @@ export default function DashboardPage() {
                     <div 
                       key={req.id} 
                       onClick={() => router.push("/dashboard/maintenance")}
-                      className="p-4 border border-slate-100 rounded-2xl bg-slate-50/30 hover:border-indigo-100 hover:shadow-md transition-all group flex flex-col gap-2 cursor-pointer animate-fade-in"
+                      className="p-4 border border-slate-100 rounded-2xl bg-slate-50/30 hover:border-indigo-100 hover:bg-white hover:shadow-md transition-all group flex flex-col gap-2 cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="font-extrabold text-sm text-slate-900 truncate max-w-[150px]">{req.title}</span>
@@ -974,17 +1025,17 @@ export default function DashboardPage() {
 
 function MetricCard({ title, value, subtext, Icon, iconBg, iconColor }: any) {
   return (
-    <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-      <CardContent className="p-5 flex flex-col justify-between h-full">
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-sm font-extrabold text-[#0F172A] leading-tight pr-4">{title}</p>
-          <div className={`p-2 rounded-xl ${iconBg} ${iconColor} shrink-0`}>
+    <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
+      <CardContent className="p-5 flex flex-col justify-between h-full flex-1">
+        <div className="flex justify-between items-start">
+          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">{title}</p>
+          <div className={`p-2.5 rounded-xl ${iconBg} ${iconColor} shrink-0`}>
             <Icon className="h-4 w-4" />
           </div>
         </div>
-        <div>
-          <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">{value}</h3>
-          <p className="text-[11px] text-[#64748B] mt-1 font-semibold">{subtext}</p>
+        <div className="mt-4">
+          <h3 className="text-2xl font-black text-[#0F172A] tracking-tight leading-none">{value}</h3>
+          <p className="text-xs text-slate-500 mt-2 font-semibold leading-normal">{subtext}</p>
         </div>
       </CardContent>
     </Card>

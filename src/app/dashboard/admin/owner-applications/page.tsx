@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Loader2, Search, RefreshCw, CheckCircle2, XCircle, Clock, Eye, FileText,
-  Building2, Globe, Phone, Mail, Users, ChevronRight, Filter
+  Building2, Globe, Phone, Mail, Users, ChevronRight, Filter, ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   PENDING:      { label: "Pending",      color: "text-amber-700",  bg: "bg-amber-50 border-amber-200" },
@@ -30,6 +31,8 @@ export default function AdminOwnerApplicationsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
+  const [showConfirmApprove, setShowConfirmApprove] = useState(false);
+  const [showConfirmReject, setShowConfirmReject] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/login");
@@ -201,9 +204,9 @@ export default function AdminOwnerApplicationsPage() {
 
       {/* Review Modal */}
       {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl my-8">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-start">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col my-8">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-start shrink-0">
               <div>
                 <h2 className="text-xl font-black text-slate-900">{selectedApp.name}</h2>
                 <p className="text-slate-500 text-sm">{selectedApp.entityType} · Applied {new Date(selectedApp.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
@@ -211,25 +214,75 @@ export default function AdminOwnerApplicationsPage() {
               <Badge className={`${statusConfig[selectedApp.status].bg} ${statusConfig[selectedApp.status].color} border text-xs font-bold px-2.5 py-1 rounded-lg`}>{statusConfig[selectedApp.status].label}</Badge>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
               {/* KYB Details Grid */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                {[
-                  { icon: Mail, label: "Email", value: selectedApp.email },
-                  { icon: Phone, label: "Phone", value: selectedApp.phone },
-                  { icon: Users, label: "Portfolio Size", value: selectedApp.portfolioSize },
-                  { icon: FileText, label: "Current Software", value: selectedApp.currentSoftware || "N/A" },
-                  { icon: Building2, label: "Entity Type", value: selectedApp.entityType },
-                  { icon: Globe, label: "Website", value: selectedApp.website || "Not provided" },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-start gap-2.5">
-                    <Icon className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-slate-500 text-xs font-medium">{label}</p>
-                      <p className="text-slate-900 text-sm font-semibold">{value}</p>
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="flex items-start gap-2.5">
+                  <Mail className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Email</p>
+                    <a href={`mailto:${selectedApp.email}`} className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-semibold flex items-center gap-1">
+                      {selectedApp.email} <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
-                ))}
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <Phone className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Phone</p>
+                    <a href={`tel:${selectedApp.phone}`} className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-semibold flex items-center gap-1">
+                      {selectedApp.phone} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <Users className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Portfolio Size</p>
+                    <p className="text-slate-900 text-sm font-semibold">{selectedApp.portfolioSize}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <FileText className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Current Software</p>
+                    {selectedApp.currentSoftware ? (
+                      <p className="text-slate-900 text-sm font-semibold">{selectedApp.currentSoftware}</p>
+                    ) : (
+                      <p className="text-slate-400 italic text-sm font-semibold">None reported</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <Building2 className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Entity Type</p>
+                    <p className="text-slate-900 text-sm font-semibold">{selectedApp.entityType}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <Globe className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Website</p>
+                    {selectedApp.website ? (
+                      <a 
+                        href={selectedApp.website.startsWith("http") ? selectedApp.website : `https://${selectedApp.website}`}
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-semibold flex items-center gap-1"
+                      >
+                        {selectedApp.website} <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <p className="text-slate-400 italic text-sm font-semibold">Not provided</p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Admin Notes */}
@@ -246,29 +299,71 @@ export default function AdminOwnerApplicationsPage() {
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-100">
-                <Button variant="outline" className="rounded-xl font-semibold" onClick={() => { setSelectedApp(null); setRejectionReason(""); setAdminNotes(""); }}>
-                  Cancel
+              {/* Show rejection reason if application is already rejected */}
+              {selectedApp.status === "REJECTED" && selectedApp.rejectionReason && (
+                <div className="bg-red-50 border border-red-200 text-red-950 p-4 rounded-xl space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-800">Rejection Reason</p>
+                  <p className="text-sm font-semibold">{selectedApp.rejectionReason}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons in Footer */}
+            <div className="p-6 border-t border-slate-100 flex flex-wrap gap-3 shrink-0 bg-slate-50/50 rounded-b-3xl">
+              <Button variant="outline" className="rounded-xl font-semibold" onClick={() => { setSelectedApp(null); setRejectionReason(""); setAdminNotes(""); }}>
+                Cancel
+              </Button>
+              {selectedApp.status === "PENDING" && (
+                <Button variant="outline" disabled={actionLoading} onClick={() => handleAction(selectedApp.id, "UNDER_REVIEW")} className="rounded-xl font-semibold text-blue-600 border-blue-200 hover:bg-blue-50">
+                  <Clock className="h-4 w-4 mr-1.5" /> Mark Under Review
                 </Button>
-                {selectedApp.status === "PENDING" && (
-                  <Button variant="outline" disabled={actionLoading} onClick={() => handleAction(selectedApp.id, "UNDER_REVIEW")} className="rounded-xl font-semibold text-blue-600 border-blue-200 hover:bg-blue-50">
-                    <Clock className="h-4 w-4 mr-1.5" /> Mark Under Review
+              )}
+              {selectedApp.status !== "APPROVED" && selectedApp.status !== "REJECTED" && (
+                <>
+                  <Button 
+                    disabled={actionLoading} 
+                    onClick={() => {
+                      if (!rejectionReason.trim()) {
+                        toast.error("Please provide a rejection reason");
+                      } else {
+                        setShowConfirmReject(true);
+                      }
+                    }} 
+                    className="rounded-xl font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                  >
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <XCircle className="h-4 w-4 mr-1.5" />} Reject
                   </Button>
-                )}
-                {selectedApp.status !== "APPROVED" && selectedApp.status !== "REJECTED" && (
-                  <>
-                    <Button disabled={actionLoading} onClick={() => handleAction(selectedApp.id, "REJECT")} className="rounded-xl font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100">
-                      {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <XCircle className="h-4 w-4 mr-1.5" />} Reject
-                    </Button>
-                    <Button disabled={actionLoading} onClick={() => handleAction(selectedApp.id, "APPROVE")} className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white ml-auto">
-                      {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <CheckCircle2 className="h-4 w-4 mr-1.5" />} Approve & Create Account
-                    </Button>
-                  </>
-                )}
-              </div>
+                  <Button 
+                    disabled={actionLoading} 
+                    onClick={() => setShowConfirmApprove(true)} 
+                    className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white ml-auto"
+                  >
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <CheckCircle2 className="h-4 w-4 mr-1.5" />} Approve & Create Account
+                  </Button>
+                </>
+              )}
             </div>
           </div>
+
+          <ConfirmDialog
+            open={showConfirmApprove}
+            onOpenChange={setShowConfirmApprove}
+            title="Approve Owner Application"
+            description={`Are you sure you want to approve ${selectedApp.name}'s application? This will automatically create an Owner user account, associate their pricing tier, and send a welcome email.`}
+            confirmLabel="Approve & Create Account"
+            confirmVariant="default"
+            onConfirm={() => handleAction(selectedApp.id, "APPROVE")}
+          />
+
+          <ConfirmDialog
+            open={showConfirmReject}
+            onOpenChange={setShowConfirmReject}
+            title="Reject Owner Application"
+            description={`Are you sure you want to reject ${selectedApp.name}'s application? An email explaining the rejection will be sent to them.`}
+            confirmLabel="Confirm Rejection"
+            confirmVariant="destructive"
+            onConfirm={() => handleAction(selectedApp.id, "REJECT")}
+          />
         </div>
       )}
     </div>

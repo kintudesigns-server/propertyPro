@@ -98,8 +98,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Owners and admins can query freely
+    let whereClause: any = { role: role as any };
+    if (requesterRole === "OWNER" && role === "INSPECTOR") {
+      whereClause.ownerId = requesterId;
+    }
+
     const users = await prisma.user.findMany({
-      where: { role: role as any },
+      where: whereClause,
       select: { id: true, name: true, email: true, phone: true },
     });
 
@@ -157,6 +162,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const requesterId = (session.user as any).id;
+    const requesterRole = (session.user as any).role;
     const { name, email, phone, role, password } = await req.json();
 
     if (!name || !email || !role || !password) {
@@ -177,6 +184,7 @@ export async function POST(req: NextRequest) {
         phone,
         role,
         password: hashedPassword,
+        ...(role === "INSPECTOR" && requesterRole === "OWNER" ? { ownerId: requesterId } : {}),
       },
     });
 

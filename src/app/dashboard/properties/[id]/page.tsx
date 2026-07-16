@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   ArrowLeft, Edit, Trash2, Building, BedDouble, Bath, 
   Ruler, Home, MapPin, DollarSign, CheckCircle2, 
-  Wrench, Users, Eye, MoreVertical, ImageIcon, Image as ImageIcon2, FileText, Download
+  Wrench, Users, Eye, MoreVertical, ImageIcon, Image as ImageIcon2, FileText, Download,
+  Shield, Clock
 } from "lucide-react";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -181,6 +182,32 @@ export default function PropertyDetailsPage() {
       fetchProperty(); // Refresh UI
     }
   };
+ 
+  const handleRemoveMedia = async (targetType: "PROPERTY" | "UNIT", targetId: string, url: string) => {
+    if (!confirm("Are you sure you want to delete this photo?")) return;
+    try {
+      const res = await fetch(`/api/properties`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: property.id,
+          action: "REMOVE_MEDIA",
+          targetType,
+          targetId,
+          url
+        })
+      });
+      if (res.ok) {
+        toast.success("Photo deleted successfully");
+        fetchProperty();
+      } else {
+        toast.error("Failed to delete photo");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error deleting photo");
+    }
+  };
 
   // Gamification & Alerts
   const missingFacade = property.type === "Commercial" && (!property.images || property.images.length === 0);
@@ -311,78 +338,117 @@ export default function PropertyDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* Occupancy Card - Adapt for Houses vs Others */}
-              <Card className="col-span-1 lg:col-span-2 bg-white border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-[#E2E8F0] flex justify-between items-center bg-[#F8FAFC]/50">
+              <Card className="col-span-1 lg:col-span-2 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col justify-between">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
                   <div>
-                    <h2 className="font-bold text-[#0F172A] text-lg">
+                    <h2 className="font-black text-[#0F172A] text-lg">
                       {property.type === "House" ? "Lease & Unit Status" : "Occupancy Overview"}
                     </h2>
-                    <p className="text-xs font-semibold text-[#64748B]">Real-time unit status</p>
+                    <p className="text-xs font-semibold text-[#64748B] mt-0.5">Real-time unit status</p>
                   </div>
                   {property.type !== "House" && (
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-lg font-bold border-[#E2E8F0] shadow-sm">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
-                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg font-bold shadow-sm">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-lg font-bold border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-sm h-9">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
+                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg font-bold shadow-sm h-9">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
                     </div>
                   )}
                 </div>
-                <CardContent className="p-6 flex-1 flex flex-col justify-center">
+                <CardContent className="p-6 flex-1 flex flex-col justify-between min-h-[340px]">
                   {property.type === "House" ? (
-                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <div className="flex flex-col items-center justify-center py-8 text-center flex-1">
                       <div className={`h-24 w-24 rounded-full flex items-center justify-center mb-4 shadow-sm border-4 ${property.units?.[0]?.status === "OCCUPIED" ? "bg-blue-50 border-blue-100" : "bg-green-50 border-green-100"}`}>
                         {property.units?.[0]?.status === "OCCUPIED" ? <Users className="h-10 w-10 text-blue-600" /> : <CheckCircle2 className="h-10 w-10 text-green-600" />}
                       </div>
                       <h3 className="text-2xl font-black text-[#0F172A] mb-1">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
-                      <p className="text-[#64748B] font-semibold">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
+                      <p className="text-[#64748B] font-semibold text-sm">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
                       {property.units?.[0]?.status !== "OCCUPIED" && (
-                        <Button className="mt-6 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl h-11 px-8 shadow-md">Invite Tenant</Button>
+                        <Button onClick={() => router.push(`/dashboard/owner?tab=settings`)} className="mt-6 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl h-11 px-8 shadow-md">Invite Tenant</Button>
                       )}
                     </div>
                   ) : (
                     <>
-                      <div className="mb-8">
+                      <div>
                         <div className="flex justify-between items-end mb-2">
-                          <span className="font-extrabold text-3xl text-[#0F172A]">{occupancyRate}%</span>
-                          <span className="font-bold text-[#64748B] text-sm">{occupiedUnits} of {totalUnits} units occupied</span>
+                          <span className="font-black text-3xl text-[#0F172A] tracking-tight">{occupancyRate}%</span>
+                          <span className="font-semibold text-slate-400 text-xs uppercase tracking-wider">{occupiedUnits} of {totalUnits} units occupied</span>
                         </div>
                         <div className="w-full h-3 bg-[#F1F5F9] rounded-full overflow-hidden shadow-inner">
                           <div className="h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }} />
                         </div>
                       </div>
                       
+                      {/* Units Quick View Snapshot */}
+                      <div className="my-5 flex-1 border border-slate-100/80 rounded-2xl p-4 bg-slate-50/30">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Units Status Snapshot</h4>
+                          <button onClick={() => setActiveTab("units")} className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer">
+                            Manage Units ({totalUnits}) →
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {!property.units || property.units.length === 0 ? (
+                            <p className="text-xs text-slate-400 font-semibold text-center py-6">No units added to this property.</p>
+                          ) : (
+                            property.units.slice(0, 3).map((u: any) => (
+                              <div key={u.id} className="flex justify-between items-center py-2 px-3 bg-white border border-slate-100 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400 shrink-0">
+                                    <Home className="h-3.5 w-3.5" />
+                                  </div>
+                                  <span className="text-xs font-bold text-slate-800">{property.type === "Commercial" ? "" : "Unit "}{u.name}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs font-extrabold text-slate-600">${Number(u.rentAmount || 0).toLocaleString()}/mo</span>
+                                  <Badge className={`border-0 rounded-lg px-2 py-0.5 font-bold text-[10px] ${
+                                    u.status === "VACANT" 
+                                      ? "bg-emerald-50 text-emerald-700" 
+                                      : u.status === "OCCUPIED" 
+                                      ? "bg-blue-50 text-blue-700" 
+                                      : "bg-red-50 text-red-700"
+                                  }`}>
+                                    {u.status === "VACANT" ? "Available" : u.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+ 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-auto">
-                        <div className="p-4 bg-[#F0FDF4] rounded-2xl border border-[#bbf7d0]">
-                          <p className="text-xs font-extrabold text-[#16A34A] uppercase tracking-wider mb-1">Available</p>
-                          <p className="text-2xl font-black text-[#14532D]">{vacantUnits}</p>
+                        <div className="p-4 bg-[#F0FDF4] rounded-2xl border border-[#bbf7d0] hover:scale-[1.02] transition-transform duration-300">
+                          <p className="text-[10px] font-black text-[#16A34A] uppercase tracking-wider mb-1">Available</p>
+                          <p className="text-2xl font-black text-[#14532D] leading-none">{vacantUnits}</p>
                         </div>
-                        <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#bfdbfe]">
-                          <p className="text-xs font-extrabold text-[#3B82F6] uppercase tracking-wider mb-1">Occupied</p>
-                          <p className="text-2xl font-black text-[#1E3A8A]">{occupiedUnits}</p>
+                        <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#bfdbfe] hover:scale-[1.02] transition-transform duration-300">
+                          <p className="text-[10px] font-black text-[#3B82F6] uppercase tracking-wider mb-1">Occupied</p>
+                          <p className="text-2xl font-black text-[#1E3A8A] leading-none">{occupiedUnits}</p>
                         </div>
-                        <div className="p-4 bg-[#FFF7ED] rounded-2xl border border-[#fed7aa]">
-                          <p className="text-xs font-extrabold text-[#F97316] uppercase tracking-wider mb-1">Maintenance</p>
-                          <p className="text-2xl font-black text-[#7C2D12]">{maintenanceUnits}</p>
+                        <div className="p-4 bg-[#FFF7ED] rounded-2xl border border-[#fed7aa] hover:scale-[1.02] transition-transform duration-300">
+                          <p className="text-[10px] font-black text-[#F97316] uppercase tracking-wider mb-1">Maintenance</p>
+                          <p className="text-2xl font-black text-[#7C2D12] leading-none">{maintenanceUnits}</p>
                         </div>
-                        <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0]">
-                          <p className="text-xs font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Total</p>
-                          <p className="text-2xl font-black text-[#0F172A]">{totalUnits}</p>
+                        <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] hover:scale-[1.02] transition-transform duration-300">
+                          <p className="text-[10px] font-black text-[#64748B] uppercase tracking-wider mb-1">Total</p>
+                          <p className="text-2xl font-black text-[#0F172A] leading-none">{totalUnits}</p>
                         </div>
                       </div>
                     </>
                   )}
                 </CardContent>
               </Card>
-
+ 
               {/* Location & Financials Column */}
-              <div className="col-span-1 space-y-6">
-                <Card className="bg-white border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-                    <h2 className="font-bold text-[#0F172A] text-base flex items-center gap-2">
+              <div className="col-span-1 space-y-6 flex flex-col justify-between">
+                <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col flex-1">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/20">
+                    <h2 className="font-black text-[#0F172A] text-sm flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-[#3B82F6]" /> Location
                     </h2>
                   </div>
-                  <CardContent className="p-5">
-                    <div className="w-full h-40 bg-slate-100 rounded-xl mb-5 overflow-hidden border border-[#E2E8F0]">
+                  <CardContent className="p-5 flex flex-col justify-between flex-1">
+                    <div className="w-full h-36 bg-slate-100 rounded-xl mb-4 overflow-hidden border border-slate-100 shadow-inner">
                       <iframe 
                         title="Property Location Map"
                         src={`https://maps.google.com/maps?q=${encodeURIComponent(`${property.address || ''} ${property.city || ''} ${property.state || ''}`)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
@@ -397,37 +463,37 @@ export default function PropertyDetailsPage() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-xs font-bold text-[#94A3B8] uppercase">Street Address</p>
-                        <p className="font-semibold text-[#0F172A]">{property.address || "N/A"}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Street Address</p>
+                        <p className="font-extrabold text-[#0F172A] text-sm mt-0.5">{property.address || "N/A"}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-xs font-bold text-[#94A3B8] uppercase">City</p>
-                          <p className="font-semibold text-[#0F172A]">{property.city}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">City</p>
+                          <p className="font-extrabold text-[#0F172A] text-xs mt-0.5">{property.city}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[#94A3B8] uppercase">State/ZIP</p>
-                          <p className="font-semibold text-[#0F172A]">{property.state} {property.zip}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">State/ZIP</p>
+                          <p className="font-extrabold text-[#0F172A] text-xs mt-0.5">{property.state} {property.zip}</p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card className="bg-white border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-                    <h2 className="font-bold text-[#0F172A] text-base flex items-center gap-2">
+ 
+                <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col justify-between">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/20">
+                    <h2 className="font-black text-[#0F172A] text-sm flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-[#3B82F6]" /> Financial Overview
                     </h2>
                   </div>
                   <CardContent className="p-5 space-y-4">
                     <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                      <span className="text-sm font-bold text-[#64748B]">Monthly Rent Range</span>
-                      <span className="font-extrabold text-[#0F172A]">{rentRange}</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Rent Range</span>
+                      <span className="font-black text-[#0f172a] text-sm">{rentRange}</span>
                     </div>
-                    <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                      <span className="text-sm font-bold text-[#64748B]">Price per Sq. Ft.</span>
-                      <span className="font-extrabold text-[#0F172A]">${ppsqft} {property.type === "Commercial" ? "/yr" : "/mo"}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Price per Sq. Ft.</span>
+                      <span className="font-black text-emerald-600 text-sm">${ppsqft} {property.type === "Commercial" ? "/yr" : "/mo"}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -438,35 +504,65 @@ export default function PropertyDetailsPage() {
 
         {/* DETAILS TAB */}
         {activeTab === "details" && (
-          <Card className="bg-white border-[#E2E8F0] rounded-2xl shadow-sm">
-            <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-              <h2 className="font-bold text-[#0F172A] text-lg">Property Specifications</h2>
+          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
+            <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/20">
+              <h2 className="font-black text-[#0F172A] text-lg flex items-center gap-2">
+                <Shield className="h-5 w-5 text-indigo-500" />
+                Property Specifications
+              </h2>
             </div>
-            <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4 border-b border-[#F1F5F9] pb-4">
-                    <div className="col-span-1 text-sm font-bold text-[#64748B]">Property Name</div>
-                    <div className="col-span-2 font-semibold text-[#0F172A]">{property.name}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 border-b border-[#F1F5F9] pb-4">
-                    <div className="col-span-1 text-sm font-bold text-[#64748B]">Property Type</div>
-                    <div className="col-span-2 font-semibold text-[#0F172A]">{property.type || "Apartment"}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 border-b border-[#F1F5F9] pb-4">
-                    <div className="col-span-1 text-sm font-bold text-[#64748B]">Status</div>
-                    <div className="col-span-2 font-semibold text-[#0F172A]">{property.status}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 border-b border-[#F1F5F9] pb-4">
-                    <div className="col-span-1 text-sm font-bold text-[#64748B]">Year Built</div>
-                    <div className="col-span-2 font-semibold text-[#0F172A]">{property.yearBuilt || "Not specified"}</div>
-                  </div>
+            <CardContent className="p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Specs List Column (7 cols) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {[
+                    { label: "Property Name", value: property.name, Icon: Building, color: "text-blue-500 bg-blue-50" },
+                    { label: "Property Type", value: property.type || "Apartment", Icon: Home, color: "text-violet-500 bg-violet-50" },
+                    { label: "Status", value: property.status, Icon: CheckCircle2, color: "text-emerald-500 bg-emerald-50", isBadge: true },
+                    { label: "Year Built", value: property.yearBuilt || "Not specified", Icon: Clock, color: "text-amber-500 bg-amber-50" },
+                  ].map((spec, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-[#F8FAFC]/60 border border-slate-100/80 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-xl ${spec.color}`}>
+                          <spec.Icon className="h-4 w-4" />
+                        </div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{spec.label}</span>
+                      </div>
+                      {spec.isBadge ? (
+                        <Badge className={`border-0 rounded-lg px-2.5 py-1 font-bold text-xs ${
+                          spec.value === "AVAILABLE" 
+                            ? "bg-emerald-50 text-emerald-700" 
+                            : spec.value === "OCCUPIED" 
+                            ? "bg-blue-50 text-blue-700" 
+                            : "bg-red-50 text-red-700"
+                        }`}>
+                          {spec.value}
+                        </Badge>
+                      ) : (
+                        <span className="font-extrabold text-[#0F172A] text-sm">{spec.value}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="bg-[#F8FAFC] p-5 rounded-2xl border border-[#E2E8F0]">
-                  <h3 className="font-bold text-[#0F172A] mb-2">Description</h3>
-                  <p className="text-sm text-[#475569] leading-relaxed whitespace-pre-wrap">
-                    {property.description || "No description has been provided for this property yet."}
-                  </p>
+
+                {/* Description Column (5 cols) */}
+                <div className="lg:col-span-5 flex">
+                  <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 flex flex-col justify-between w-full">
+                    <div>
+                      <h3 className="font-black text-[#0F172A] text-sm flex items-center gap-2 mb-3">
+                        <FileText className="h-4 w-4 text-indigo-500" />
+                        About the Property
+                      </h3>
+                      <p className="text-xs font-medium text-slate-500 leading-relaxed whitespace-pre-wrap">
+                        {property.description || "No description has been provided for this property yet."}
+                      </p>
+                    </div>
+                    
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                      <span>Property ID</span>
+                      <span className="font-mono text-slate-500 select-all">{property.id}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -596,14 +692,20 @@ export default function PropertyDetailsPage() {
               </Button>
             </div>
             
-            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {property.images?.length > 0 ? (
                 property.images.map((img: string, i: number) => (
                   <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-[#E2E8F0] shadow-sm">
                     <img src={img} alt={`Property image ${i}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-end justify-end p-3">
-                      <Button variant="destructive" size="sm" className="rounded-xl font-bold shadow-md">Delete</Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => handleRemoveMedia("PROPERTY", property.id, img)}
+                        className="rounded-xl font-bold shadow-md cursor-pointer"
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -616,26 +718,43 @@ export default function PropertyDetailsPage() {
               )}
             </div>
 
-            {/* Display unit-specific media as well for House/Commercial to give total visibility */}
+            {/* Display unit-specific media grouped by unit name to handle high unit counts cleanly */}
             {property.units?.some((u: any) => u.images && u.images.length > 0) && (
-              <div className="pt-8 border-t border-slate-100 mt-8">
-                <h3 className="text-lg font-bold text-[#0F172A] mb-4">Interior & Unit Photos</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {property.units.filter((u: any) => u.images?.length > 0).flatMap((u: any) => 
-                    u.images.map((img: string, i: number) => (
-                      <div key={`${u.id}-${i}`} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-[#E2E8F0] shadow-sm">
-                        <img src={img} alt={`Unit image`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-                          <div className="flex justify-end">
-                            <Badge className="bg-white/20 backdrop-blur-md text-white border-0 font-bold">{u.name}</Badge>
-                          </div>
-                          <div className="flex justify-end">
-                            <Button variant="destructive" size="sm" className="rounded-xl font-bold shadow-md">Delete</Button>
-                          </div>
+              <div className="pt-8 border-t border-slate-100 mt-8 space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F172A]">Interior & Unit Photos</h3>
+                  <p className="text-xs font-semibold text-slate-400 mt-1">Photos are grouped by individual unit.</p>
+                </div>
+                
+                <div className="space-y-4">
+                  {property.units
+                    .filter((u: any) => u.images?.length > 0)
+                    .map((u: any) => (
+                      <div key={u.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="font-extrabold text-sm text-slate-800">
+                            Unit {u.name} <span className="text-xs font-semibold text-slate-400">({u.images.length} photos)</span>
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                          {u.images.map((img: string, i: number) => (
+                            <div key={i} className="aspect-square bg-white rounded-xl overflow-hidden relative group border border-slate-200/40 shadow-sm">
+                              <img src={img} alt={`Unit ${u.name} image ${i}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm" 
+                                  onClick={() => handleRemoveMedia("UNIT", u.id, img)}
+                                  className="h-7 px-2.5 rounded-lg font-bold text-[10px] shadow-md cursor-pointer"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))
-                  )}
+                    ))}
                 </div>
               </div>
             )}

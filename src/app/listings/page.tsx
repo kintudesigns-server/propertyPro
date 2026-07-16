@@ -384,6 +384,16 @@ export default function ListingsPage() {
 
   const groupedList = Object.values(groupedProperties);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [groupSearchQuery, setGroupSearchQuery] = useState("");
+  const [groupBedrooms, setGroupBedrooms] = useState("all");
+  const [groupMaxRentPrice, setGroupMaxRentPrice] = useState("");
+
+  // Clear group filters when selected group changes
+  useEffect(() => {
+    setGroupSearchQuery("");
+    setGroupBedrooms("all");
+    setGroupMaxRentPrice("");
+  }, [selectedGroup]);
 
   // Map representation data
   const mapCoordinates: Record<string, { x: number; y: number }> = {
@@ -1046,44 +1056,101 @@ export default function ListingsPage() {
       {/* Property Group Dialog */}
       <Dialog open={!!selectedGroup} onOpenChange={(o) => !o && setSelectedGroup(null)}>
         <DialogContent className="bg-[#F8FAFC] border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-2xl p-0 overflow-hidden shadow-2xl">
-          {selectedGroup && (
-            <>
-              <div className="bg-white p-6 border-b border-[#E2E8F0] flex justify-between items-start">
-                <div>
-                  <DialogTitle className="text-2xl font-black">{selectedGroup.property.name}</DialogTitle>
-                  <DialogDescription className="text-slate-500 font-semibold mt-1">
-                    Select an available unit below to view full details and apply.
-                  </DialogDescription>
-                </div>
-                <Badge className="bg-blue-100 text-blue-700 border-0 rounded-lg font-bold">
-                  {selectedGroup.units.length} Available
-                </Badge>
-              </div>
-              <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
-                {selectedGroup.units.map((u: any) => (
-                  <div key={u.id} className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center hover:border-blue-300 transition-colors shadow-sm">
-                    <div>
-                      <h4 className="font-extrabold text-slate-800 text-lg">
-                        {selectedGroup.property.type === "Commercial" ? "Suite " : "Unit "}{u.name}
-                      </h4>
-                      <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mt-1">
-                        {selectedGroup.property.type !== "Commercial" && (
-                          <span className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {u.rooms} Bed</span>
-                        )}
-                        <span className="flex items-center gap-1"><Square className="h-3 w-3" /> {u.sqFootage} sqft</span>
-                      </div>
-                    </div>
-                    <div className="text-right flex flex-col items-end gap-2">
-                      <span className="font-black text-blue-600 text-xl">${Number(u.rentAmount).toLocaleString()}</span>
-                      <Button onClick={() => window.location.href = `/listings/${u.id}`} className="bg-slate-900 hover:bg-slate-800 text-white h-8 rounded-lg text-xs font-bold px-4">
-                        View Unit
-                      </Button>
-                    </div>
+          {selectedGroup && (() => {
+            const filteredGroupUnits = selectedGroup.units.filter((u: any) => {
+              const query = groupSearchQuery.toLowerCase().trim();
+              const matchesSearch = query === "" || u.name.toLowerCase().includes(query);
+              const matchesBeds = groupBedrooms === "all" || u.rooms === Number(groupBedrooms);
+              const matchesRent = groupMaxRentPrice === "" || Number(u.rentAmount) <= Number(groupMaxRentPrice);
+              return matchesSearch && matchesBeds && matchesRent;
+            });
+
+            return (
+              <>
+                <div className="bg-white p-6 border-b border-[#E2E8F0] flex justify-between items-start">
+                  <div>
+                    <DialogTitle className="text-2xl font-black">{selectedGroup.property.name}</DialogTitle>
+                    <DialogDescription className="text-slate-500 font-semibold mt-1">
+                      Select an available unit below to view full details and apply.
+                    </DialogDescription>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
+                  <Badge className="bg-blue-100 text-blue-700 border-0 rounded-lg font-bold">
+                    {selectedGroup.units.length} Available
+                  </Badge>
+                </div>
+
+                {/* Inline Unit Filters inside Dialog */}
+                <div className="p-4 bg-slate-50 border-b border-[#E2E8F0] grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <Input 
+                      placeholder="Search unit #..." 
+                      className="pl-9 bg-white border-[#E2E8F0] text-xs font-semibold rounded-xl h-9"
+                      value={groupSearchQuery}
+                      onChange={(e) => setGroupSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  {selectedGroup.property.type !== "Commercial" ? (
+                    <select 
+                      className="bg-white border border-[#E2E8F0] text-xs font-semibold rounded-xl h-9 px-3 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={groupBedrooms}
+                      onChange={(e) => setGroupBedrooms(e.target.value)}
+                    >
+                      <option value="all">All Beds</option>
+                      <option value="1">1 Bed</option>
+                      <option value="2">2 Beds</option>
+                      <option value="3">3 Beds</option>
+                      <option value="4">4+ Beds</option>
+                    </select>
+                  ) : (
+                    <div className="text-xs font-semibold text-slate-400 flex items-center px-2 bg-slate-100/50 rounded-xl border border-dashed border-slate-200">
+                      Commercial Units
+                    </div>
+                  )}
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                    <Input 
+                      placeholder="Max Rent..." 
+                      type="number"
+                      className="pl-9 bg-white border-[#E2E8F0] text-xs font-semibold rounded-xl h-9"
+                      value={groupMaxRentPrice}
+                      onChange={(e) => setGroupMaxRentPrice(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[50vh] space-y-4">
+                  {filteredGroupUnits.length > 0 ? (
+                    filteredGroupUnits.map((u: any) => (
+                      <div key={u.id} className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center hover:border-blue-300 transition-colors shadow-sm">
+                        <div>
+                          <h4 className="font-extrabold text-slate-800 text-lg">
+                            {selectedGroup.property.type === "Commercial" ? "Suite " : "Unit "}{u.name}
+                          </h4>
+                          <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mt-1">
+                            {selectedGroup.property.type !== "Commercial" && (
+                              <span className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {u.rooms} Bed</span>
+                            )}
+                            <span className="flex items-center gap-1"><Square className="h-3 w-3" /> {u.sqFootage} sqft</span>
+                          </div>
+                        </div>
+                        <div className="text-right flex flex-col items-end gap-2">
+                          <span className="font-black text-blue-600 text-xl">${Number(u.rentAmount).toLocaleString()}</span>
+                          <Button onClick={() => window.location.href = `/listings/${u.id}`} className="bg-slate-900 hover:bg-slate-800 text-white h-8 rounded-lg text-xs font-bold px-4">
+                            View Unit
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-12 text-center text-slate-400 font-semibold text-sm">
+                      No units match your search filters.
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

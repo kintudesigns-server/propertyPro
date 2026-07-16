@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Wrench, Plus, Loader2, RefreshCw, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function MyRequestsPage() {
   const { data: session, status } = useSession();
@@ -21,6 +22,7 @@ export default function MyRequestsPage() {
 
   const [maintenance, setMaintenance] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelRequestId, setCancelRequestId] = useState<string | null>(null);
 
   // Filter States
   const [maintFilterPriority, setMaintFilterPriority] = useState("ALL");
@@ -43,6 +45,20 @@ export default function MyRequestsPage() {
       toast.error("Failed to load maintenance requests");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    try {
+      const res = await fetch(`/api/maintenance?id=${requestId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Request cancelled successfully");
+        fetchMaintenance();
+      } else {
+        toast.error("Failed to cancel request");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
     }
   };
 
@@ -228,21 +244,9 @@ export default function MyRequestsPage() {
                             size="sm"
                             variant="outline"
                             className="h-8 px-3 rounded-lg border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold text-xs flex items-center gap-1.5"
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm("Are you sure you want to cancel this request?")) {
-                                try {
-                                  const res = await fetch(`/api/maintenance?id=${m.id}`, { method: "DELETE" });
-                                  if (res.ok) {
-                                    toast.success("Request cancelled successfully");
-                                    fetchMaintenance();
-                                  } else {
-                                    toast.error("Failed to cancel request");
-                                  }
-                                } catch (err) {
-                                  toast.error("An error occurred");
-                                }
-                              }
+                              setCancelRequestId(m.id);
                             }}
                           >
                             Cancel
@@ -325,6 +329,15 @@ export default function MyRequestsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        open={cancelRequestId !== null}
+        onOpenChange={(open) => { if (!open) setCancelRequestId(null); }}
+        title="Cancel Maintenance Request"
+        description="Are you sure you want to cancel this maintenance request?"
+        confirmLabel="Cancel Request"
+        confirmVariant="destructive"
+        onConfirm={() => { if (cancelRequestId) handleCancelRequest(cancelRequestId); }}
+      />
     </div>
   );
 }

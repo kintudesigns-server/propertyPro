@@ -31,6 +31,21 @@ export async function POST(
       return NextResponse.json({ error: "Lease is already terminated" }, { status: 400 });
     }
 
+    // Block termination if the move-out deposit pipeline is mid-flight
+    const PIPELINE_IN_PROGRESS = [
+      "MOVE_OUT_REQUESTED",
+      "INSPECTION_SCHEDULED",
+      "KEYS_RETURNED",
+      "INSPECTION_COMPLETED",
+      "OWNER_REVIEWING",
+      "TENANT_DISPUTED",
+    ];
+    if (lease.status === "NOTICE_GIVEN" && lease.moveOutStatus && PIPELINE_IN_PROGRESS.includes(lease.moveOutStatus)) {
+      return NextResponse.json({
+        error: "Cannot force-terminate while the move-out pipeline is active. Complete the inspection and deposit settlement first, or use the Final Statement page to finalize.",
+      }, { status: 409 });
+    }
+
     // Update lease status to TERMINATED and unit status to VACANT
     const [updatedLease] = await prisma.$transaction([
       prisma.lease.update({

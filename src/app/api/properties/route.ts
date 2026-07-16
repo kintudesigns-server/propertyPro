@@ -173,11 +173,11 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Notify all admins
+    // Notify all admins of the new property and send email alert
     try {
       const admins = await prisma.user.findMany({
         where: { role: "SUPERADMIN" },
-        select: { id: true }
+        select: { id: true, email: true }
       });
       const adminIds = admins.map(a => a.id);
       await notifyMany(adminIds, {
@@ -187,6 +187,66 @@ export async function POST(req: NextRequest) {
         priority: "MEDIUM",
         relatedEntityId: property.id,
       });
+
+      const adminUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/admin/approve-properties`;
+      for (const admin of admins) {
+        if (admin.email) {
+          await sendEmail({
+            to: admin.email,
+            subject: "🔔 Alert: New Property Registered",
+            html: `
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+              <tr>
+                <td align="center">
+                  <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                      <td align="center" style="background-color: #0f172a; padding: 40px 20px;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800;">New Property Registered</h1>
+                        <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 15px;">Pending Admin Approval</p>
+                      </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                      <td style="padding: 40px 32px;">
+                        <p style="margin: 0 0 16px; font-size: 16px; color: #0f172a; font-weight: 600;">Hi Admin,</p>
+                        <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
+                          An owner has registered a new property that requires review and approval before going live.
+                        </p>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+                          <tr>
+                            <td style="padding: 20px;">
+                              <h3 style="margin: 0 0 16px; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Property Details</h3>
+                              <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 120px;">Property Name</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${property.name}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Registered By</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${owner?.name || 'Owner'}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Address</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${property.address}, ${property.city}, ${property.state || ''} ${property.zip || ''}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Property Type</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${property.type}</td></tr>
+                                <tr><td colspan="2" style="border-bottom: 1px solid #e2e8f0;"></td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Units Count</td><td style="padding: 8px 0; font-weight: 600; color: #0f172a; font-size: 14px;">${unitsPayload.length}</td></tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+ 
+                        <!-- CTA -->
+                        <div style="text-align: center;">
+                          <a href="${adminUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">Approve Properties →</a>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            `
+          });
+        }
+      }
     } catch (err) {
       console.error("[properties] Failed to notify admins of new property:", err);
     }
@@ -376,6 +436,27 @@ export async function PATCH(req: NextRequest) {
         await prisma.unit.update({
           where: { id: targetId },
           data: { images: [...targetUnit.images, url] }
+        });
+      }
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
+
+    // Handle Smart Media Deletion
+    if (data.action === "REMOVE_MEDIA") {
+      const { targetType, targetId, url } = data;
+      
+      if (targetType === "PROPERTY") {
+        await prisma.property.update({
+          where: { id: data.id },
+          data: { images: existingProperty.images.filter((img: string) => img !== url) }
+        });
+      } else if (targetType === "UNIT") {
+        const targetUnit = existingProperty.units.find(u => u.id === targetId);
+        if (!targetUnit) return NextResponse.json({ error: "Unit not found" }, { status: 404 });
+        
+        await prisma.unit.update({
+          where: { id: targetId },
+          data: { images: targetUnit.images.filter((img: string) => img !== url) }
         });
       }
       return NextResponse.json({ success: true }, { status: 200 });

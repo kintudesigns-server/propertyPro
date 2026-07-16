@@ -916,22 +916,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
 
-                {/* Team & Staff Accordion */}
-                {isOwnerOrAdmin && (
-                  <div className="flex flex-col">
-                    <Link
-                      href="/dashboard/team"
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
-                        isActive("/dashboard/team")
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
-                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                      }`}
-                    >
-                      <Briefcase className="h-5 w-5" />
-                      {sidebarOpen && <span className="flex-1 text-left">Inspectors & Vendors</span>}
-                    </Link>
-                  </div>
-                )}
+
 
                 {/* Leases Accordion */}
                 {isOwnerOrAdmin && (
@@ -1066,7 +1051,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         setInspectionsOpen(!inspectionsOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
-                        isActive("/dashboard/inspections") && !inspectionsOpen
+                        (isActive("/dashboard/inspections") || isActive("/dashboard/team")) && !inspectionsOpen
                           ? "bg-[#EFF6FF] text-[#3B82F6]"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
@@ -1093,6 +1078,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         >
                           <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
                           Turnovers & Move-Outs
+                        </Link>
+                        <Link
+                          href="/dashboard/team"
+                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            pathname === "/dashboard/team"
+                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                          Inspectors & Vendors
                         </Link>
                       </div>
                     )}
@@ -1163,41 +1159,66 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   </span>
                 )}
 
-                <Link
-                  href="/dashboard/messages"
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    pathname === "/dashboard/messages"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
-                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                  }`}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  {sidebarOpen && <span>Inbox Messages</span>}
-                </Link>
+                {/* Activity Accordion */}
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => {
+                      if (!sidebarOpen) setSidebarOpen(true);
+                      setActivityOpen(!activityOpen);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
+                      (pathname === "/dashboard/messages" || pathname === "/dashboard/calendar" || pathname === "/dashboard/notifications") && !activityOpen
+                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                    }`}
+                  >
+                    <Bell className="h-5 w-5" />
+                    {sidebarOpen && <span className="flex-1 text-left">Activity Logs</span>}
+                    {sidebarOpen && (
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform duration-200 ${activityOpen ? "rotate-180" : ""}`}
+                      />
+                    )}
+                  </button>
 
-                <Link
-                  href="/dashboard/notifications"
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    pathname === "/dashboard/notifications"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
-                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                  }`}
-                >
-                  <Bell className="h-5 w-5" />
-                  {sidebarOpen && <span>System Notifications</span>}
-                </Link>
-
-                <Link
-                  href="/dashboard/calendar"
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    pathname === "/dashboard/calendar"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
-                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                  }`}
-                >
-                  <Calendar className="h-5 w-5" />
-                  {sidebarOpen && <span>Calendar</span>}
-                </Link>
+                  {sidebarOpen && activityOpen && (
+                    <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
+                      <Link
+                        href="/dashboard/messages"
+                        className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          pathname === "/dashboard/messages"
+                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                        }`}
+                      >
+                        <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                        Inbox Messages
+                      </Link>
+                      <Link
+                        href="/dashboard/notifications"
+                        className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          pathname === "/dashboard/notifications"
+                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                        }`}
+                      >
+                        <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                        System Notifications
+                      </Link>
+                      <Link
+                        href="/dashboard/calendar"
+                        className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          pathname === "/dashboard/calendar"
+                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                        }`}
+                      >
+                        <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                        Calendar
+                      </Link>
+                    </div>
+                  )}
+                </div>
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
@@ -1265,9 +1286,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
                 
                 <Link
-                  href={isOwner ? "/dashboard/owner#settings" : "/dashboard/admin#settings"}
+                  href={isOwner ? "/dashboard/owner?tab=settings" : "/dashboard/admin/settings/pricing"}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    (pathname === "/dashboard/owner" || pathname === "/dashboard/admin") && typeof window !== 'undefined' && window.location.hash === "#settings"
+                    (pathname === "/dashboard/owner" && currentTab === "settings") || pathname.startsWith("/dashboard/admin/settings")
                       ? "bg-[#EFF6FF] text-[#3B82F6]"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
@@ -1278,9 +1299,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 
                 {isOwner && (
                   <Link
-                    href="/dashboard/owner#settings-subscription"
+                    href="/dashboard/owner?tab=subscription"
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      pathname === "/dashboard/owner" && typeof window !== 'undefined' && window.location.hash === "#settings-subscription"
+                      pathname === "/dashboard/owner" && currentTab === "subscription"
                         ? "bg-[#EFF6FF] text-[#3B82F6]"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
@@ -1327,12 +1348,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden md:flex relative w-80">
+            <div className="hidden md:flex relative w-80 opacity-60 cursor-not-allowed" title="Search coming soon">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
               <input
                 type="text"
-                placeholder="Search anything..."
-                className="pl-10 pr-12 py-2.5 w-full bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] shadow-sm transition-all"
+                disabled
+                placeholder="Search coming soon..."
+                className="pl-10 pr-12 py-2.5 w-full bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#94A3B8] placeholder-[#94A3B8] cursor-not-allowed shadow-sm transition-all"
               />
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 font-mono text-[9px] font-medium text-[#64748B]">
                 <span className="text-[10px]">⌘</span>K
@@ -1343,9 +1365,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <MessageBadge />
             <NotificationDropdown />
-            <button className="p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] transition-colors hidden md:block">
+            <Link
+              href={isOwner ? "/dashboard/owner?tab=settings" : isTenant ? "/dashboard/tenant?tab=settings" : "/dashboard/admin/settings/pricing"}
+              className="p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] transition-colors hidden md:block"
+              title="Profile Settings"
+            >
               <Settings className="h-5 w-5" />
-            </button>
+            </Link>
             <div className="h-8 w-px bg-[#E2E8F0] hidden md:block" />
             <button 
               onClick={() => signOut({ callbackUrl: "/auth/login" })}

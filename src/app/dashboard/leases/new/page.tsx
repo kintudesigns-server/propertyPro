@@ -324,7 +324,8 @@ export default function CreateLeasePage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
                   <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={properties.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors pl-10 relative">
+                      <Building className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                       <SelectValue placeholder={properties.length === 0 && hasLoaded ? "No properties found" : "Select a property"}>
                         {selectedProperty ? (properties.find(p => p.id === selectedProperty)?.name || selectedProperty) : undefined}
                       </SelectValue>
@@ -345,7 +346,8 @@ export default function CreateLeasePage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
                   <Select value={formData.unitId} onValueChange={(v) => handleUnitSelect(v || "")} disabled={!selectedProperty || units.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors pl-10 relative">
+                      <Home className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                       <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No units found" : "Select unit"}>
                         {formData.unitId ? (units.find(u => u.id === formData.unitId)?.name || formData.unitId) : undefined}
                       </SelectValue>
@@ -394,13 +396,16 @@ export default function CreateLeasePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Start Date <span className="text-[#EF4444]">*</span></Label>
-                  <Input
-                    type="date"
-                    required
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <Input
+                      type="date"
+                      required
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                      className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -413,13 +418,16 @@ export default function CreateLeasePage() {
                       </div>
                     )}
                   </div>
-                  <Input
-                    type="date"
-                    required
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <Input
+                      type="date"
+                      required
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                      className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>

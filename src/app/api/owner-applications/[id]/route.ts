@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export const dynamic = 'force-dynamic';
 
@@ -43,9 +44,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: "A user with this email already exists" }, { status: 409 });
       }
 
-      // Generate random password
-      const tempPassword = `PropPro${Math.random().toString(36).slice(-6).toUpperCase()}!`;
-      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+      // Create a secure placeholder password (direct credentials login will be impossible until they set their password)
+      const placeholderPassword = crypto.randomBytes(32).toString("hex");
+      const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
 
       // Determine appropriate pricing tier based on portfolio size
       const portfolioNumber = parseInt(application.portfolioSize.split("-")[0]) || 1;
@@ -63,10 +64,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           password: hashedPassword,
           role: "OWNER",
           accountStatus: "ACTIVE",
+          employmentStatus: application.entityType === "BUSINESS" ? "BUSINESS" : "INDIVIDUAL",
           notes: `Approved from application. Entity: ${application.entityType}. Portfolio: ${application.portfolioSize}. Website: ${application.website || "N/A"}`,
           currentTierId: tier?.id,
           subscriptionStatus: tier?.price === 0 ? "active" : null,
         },
+      });
+
+      // Generate secure random token for setup link (valid for 48 hours)
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
+      
+      await prisma.passwordResetToken.create({
+        data: { token, userId: newUser.id, expiresAt },
       });
 
       // Update application
@@ -81,12 +91,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         },
       });
 
-      const dashboardUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/auth/login`;
+      const origin = process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const setupUrl = `${origin}/auth/set-password?token=${token}`;
 
       // Send welcome email
       await sendEmail({
         to: application.email,
-        subject: "🎉 Welcome to PropertyPro — Your Owner Account is Ready!",
+        subject: "🎉 Welcome to PropertyPro — Securely Set Up Your Owner Account!",
         html: `
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
           <tr>
@@ -94,10 +105,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
                 <!-- Header -->
                 <tr>
-                  <td align="center" style="background-color: #059669; padding: 40px 20px;">
+                  <td align="center" style="background-color: #2563eb; padding: 40px 20px;">
                     <div style="font-size: 40px; margin-bottom: 12px;">🎉</div>
-                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">You're Approved!</h1>
-                    <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 16px;">Your PropertyPro owner account is ready</p>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome Aboard!</h1>
+                    <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 16px;">Your owner application has been approved</p>
                   </td>
                 </tr>
                 <!-- Body -->
@@ -105,38 +116,25 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                   <td style="padding: 40px 32px;">
                     <p style="margin: 0 0 16px; font-size: 16px; color: #0f172a; font-weight: 600;">Hi ${application.name},</p>
                     <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
-                      Your owner application has been reviewed and <strong style="color: #059669;">approved</strong>. Welcome to PropertyPro! Below are your login credentials.
+                      Your owner application has been reviewed and <strong style="color: #2563eb;">approved</strong>. Welcome to PropertyPro! 
+                    </p>
+                    <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
+                      Please click the button below to choose your private secure password and finish setting up your account.
                     </p>
                     
-                    <!-- Credentials Card -->
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 8px; margin-bottom: 24px; text-align: center;">
-                      <tr>
-                        <td style="padding: 24px;">
-                          <p style="color: #94a3b8; font-size: 12px; margin: 0 0 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Your Login Credentials</p>
-                          <p style="color: #64748b; font-size: 12px; margin: 0 0 4px;">Email Address</p>
-                          <p style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0 0 16px 0;">${application.email}</p>
-                          
-                          <div style="border-top: 1px solid #1e293b; margin: 0 24px 16px 24px;"></div>
-                          
-                          <p style="color: #64748b; font-size: 12px; margin: 0 0 4px;">Temporary Password</p>
-                          <p style="color: #10b981; font-size: 24px; font-weight: 800; letter-spacing: 2px; margin: 0; font-family: 'Courier New', Courier, monospace;">${tempPassword}</p>
-                        </td>
-                      </tr>
-                    </table>
+                    <!-- CTA -->
+                    <div style="text-align: center; margin-bottom: 28px;">
+                      <a href="${setupUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Set Up Your Password & Login →</a>
+                    </div>
 
-                    <!-- Warning -->
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef9c3; border: 1px solid #fde047; border-radius: 6px; margin-bottom: 32px;">
+                    <!-- Info Alert -->
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; margin-bottom: 32px;">
                       <tr>
                         <td style="padding: 12px 16px;">
-                          <p style="color: #854d0e; font-size: 13px; margin: 0; font-weight: 600;">⚠️ Please change your password immediately after your first login for security.</p>
+                          <p style="color: #1e40af; font-size: 13px; margin: 0; font-weight: 600;">🔒 Security Notice: For your safety, this setup link is one-time use only and will expire in 48 hours.</p>
                         </td>
                       </tr>
                     </table>
-
-                    <!-- CTA -->
-                    <div style="text-align: center; margin-bottom: 32px;">
-                      <a href="${dashboardUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 16px;">Access Your Dashboard →</a>
-                    </div>
 
                     <!-- Plan Details -->
                     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
@@ -153,10 +151,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                     <!-- Checklist -->
                     <h3 style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px; border-top: 1px solid #e2e8f0; padding-top: 24px;">Getting Started Checklist</h3>
                     <ul style="list-style: none; padding: 0; margin: 0; color: #475569; font-size: 14px; line-height: 2;">
-                      <li><span style="color: #10b981; font-weight: bold; margin-right: 8px;">✓</span> Account created</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Log in and change your password</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Complete your profile</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Add your first property</li>
+                      <li><span style="color: #2563eb; font-weight: bold; margin-right: 8px;">✓</span> Owner application approved</li>
+                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Set up your password</li>
+                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Complete onboarding profile</li>
+                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Add your first property list</li>
                     </ul>
                   </td>
                 </tr>

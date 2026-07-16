@@ -90,6 +90,11 @@ model User {
   acceptedInvitations  TenantInvitation[]   @relation("AcceptedByTenant")
   passwordResetTokens  PasswordResetToken[]
   ownedVendors         ExternalVendor[]     @relation("OwnerVendors")
+
+  // Inspectors linked to Owner
+  ownerId              String?
+  owner                User?                @relation("OwnerInspectors", fields: [ownerId], references: [id])
+  createdInspectors    User[]               @relation("OwnerInspectors")
 }
 
 model PasswordResetToken {

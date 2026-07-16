@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Home, Calendar, CreditCard, Wrench, Shield, LogOut, Loader2, Plus, Clock, 
   CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, Settings, 
-  AlertTriangle, FileText, Send, Phone, Video, Info, UserCheck, DollarSign, ShieldAlert
+  AlertTriangle, FileText, Send, Phone, Video, Info, UserCheck, DollarSign, ShieldAlert, Mail
 } from "lucide-react";
 import { toast } from "sonner";
 import SecuritySettings from "@/components/settings/SecuritySettings";
@@ -120,14 +120,7 @@ export default function TenantDashboard() {
   const [maintFilterPriority, setMaintFilterPriority] = useState("ALL");
   const [maintFilterStatus, setMaintFilterStatus] = useState("ALL");
 
-  // Move-Out State
-  const [showMoveOutModal, setShowMoveOutModal] = useState(false);
-  const [moveOutDate, setMoveOutDate] = useState("");
-  const [moveOutReason, setMoveOutReason] = useState("End of lease");
-  const [moveOutSubmitting, setMoveOutSubmitting] = useState(false);
-  const [showDisputeModal, setShowDisputeModal] = useState(false);
-  const [tenantDisputeNote, setTenantDisputeNote] = useState("");
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  // Move-Out State is handled by the dedicated My Leases tab and Final Statement page.
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -439,54 +432,7 @@ export default function TenantDashboard() {
     }
   };
 
-  const handleRequestMoveOut = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeLease) return;
-    setMoveOutSubmitting(true);
-    try {
-      const res = await fetch(`/api/leases/${activeLease.id}/move-out-request`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ moveOutDate, moveOutReason }),
-      });
-      if (res.ok) {
-        toast.success("Move-out request submitted");
-        setShowMoveOutModal(false);
-        fetchData();
-      } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to submit request");
-      }
-    } catch {
-      toast.error("An error occurred");
-    } finally {
-      setMoveOutSubmitting(false);
-    }
-  };
 
-  const handleReviewRefund = async (action: "accept" | "dispute") => {
-    if (!activeLease) return;
-    setReviewSubmitting(true);
-    try {
-      const res = await fetch(`/api/leases/${activeLease.id}/tenant-review`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, tenantDisputeNote }),
-      });
-      if (res.ok) {
-        toast.success(action === "accept" ? "Refund accepted" : "Dispute submitted");
-        setShowDisputeModal(false);
-        fetchData();
-      } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to submit review");
-      }
-    } catch {
-      toast.error("An error occurred");
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
 
   const handleSignLease = async (leaseId: string) => {
     try {
@@ -515,6 +461,16 @@ export default function TenantDashboard() {
   }
 
   // Derived Values
+  const getLeaseProgress = (lease: any) => {
+    if (!lease?.startDate || !lease?.endDate) return 0;
+    const start = new Date(lease.startDate).getTime();
+    const end = new Date(lease.endDate).getTime();
+    const now = Date.now();
+    if (now < start) return 0;
+    if (now > end) return 100;
+    return Math.round(((now - start) / (end - start)) * 100);
+  };
+
   const unpaidInvoices = invoices.filter((i) => i.status === "UNPAID" || i.status === "OVERDUE");
   const totalUnpaid = unpaidInvoices.reduce((acc, curr) => acc + Number(curr.amount), 0);
   const openRequestsCount = maintenance.filter((m) => m.status !== "RESOLVED" && m.status !== "CLOSED").length;
@@ -607,209 +563,351 @@ export default function TenantDashboard() {
 
             {/* Refund Estimate Review Banner */}
             {activeLease?.moveOutStatus === "INSPECTION_COMPLETED" && (
-              <Card className="rounded-[24px] shadow-sm overflow-hidden p-6 border bg-blue-50 border-blue-200 text-blue-950">
-                <CardHeader className="pb-4 p-0">
-                  <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-blue-900">
+              <Card className="rounded-[24px] shadow-sm overflow-hidden p-6 border bg-blue-50 border-blue-200 text-blue-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-extrabold flex items-center gap-2 text-blue-900">
                     <ShieldAlert className="h-5 w-5 text-blue-600" />
                     Move-Out Inspection Complete - Action Required
-                  </CardTitle>
-                  <CardDescription className="text-xs font-semibold text-blue-700">
-                    Please review the inspection deductions and finalize your bank details for the refund.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4 p-0 space-y-4 text-sm">
-                  <div className="bg-white rounded-xl p-4 border border-blue-100">
-                    <h4 className="font-bold mb-3 text-slate-800">Refund Calculation</h4>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Original Security Deposit</span>
-                        <strong className="font-bold">${Number(activeLease.securityDeposit || 0).toFixed(2)}</strong>
-                      </div>
-                      
-                      {activeLease.deductions && (activeLease.deductions as any[]).map((d: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-red-600">
-                          <span>- {d.description}</span>
-                          <strong>-${Number(d.amount).toFixed(2)}</strong>
-                        </div>
-                      ))}
-                      
-                      <div className="flex justify-between pt-2 border-t border-slate-100 font-extrabold text-sm text-emerald-700">
-                        <span>Final Refund Amount</span>
-                        <span>
-                          ${(
-                            Number(activeLease.securityDeposit || 0) - 
-                            (activeLease.deductions ? (activeLease.deductions as any[]).reduce((sum, d) => sum + Number(d.amount), 0) : 0)
-                          ).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-xl p-4 border border-blue-100">
-                    <h4 className="font-bold mb-3 text-slate-800">Confirm Bank Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <Label className="text-[10px] font-bold text-slate-500">Bank Name</Label>
-                        <Input value={bankName} onChange={e => setBankName(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] font-bold text-slate-500">Account Holder</Label>
-                        <Input value={accountName} onChange={e => setAccountName(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] font-bold text-slate-500">Account / IBAN</Label>
-                        <Input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} className="h-9 text-xs mt-1" placeholder="Required" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                    <Button 
-                      onClick={async () => {
-                        // First save profile, then accept
-                        if (!bankName || !accountName || !accountNumber) {
-                          toast.error("Please fill in all bank details first.");
-                          return;
-                        }
-                        await handleUpdateProfile({ preventDefault: () => {} } as any);
-                        handleReviewRefund("accept");
-                      }}
-                      disabled={reviewSubmitting || !bankName || !accountName || !accountNumber}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 rounded-xl shadow-sm transition-colors"
-                    >
-                      Accept Refund Estimate
-                    </Button>
-                    <Button 
-                      onClick={() => setShowDisputeModal(true)}
-                      variant="outline"
-                      disabled={reviewSubmitting}
-                      className="bg-white hover:bg-red-50 border-red-200 text-red-700 font-bold h-11 rounded-xl shadow-sm"
-                    >
-                      Dispute Deductions
-                    </Button>
-                  </div>
-                </CardContent>
+                  </h3>
+                  <p className="text-xs font-semibold text-blue-700 mt-1">
+                    Please review the inspection deductions, verify bank details, and submit your acceptance or dispute on the final statement page.
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => router.push(`/dashboard/tenant/leases/${activeLease.id}/move-out`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 px-6 rounded-xl shadow-sm transition-colors w-full md:w-auto shrink-0"
+                >
+                  Review Final Statement
+                </Button>
               </Card>
             )}
 
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-extrabold text-[#64748B] uppercase tracking-wider">Active Leases</span>
-                    <h3 className="text-2xl font-extrabold text-[#0F172A] mt-1">{leases.filter(l => l.status === "ACTIVE").length}</h3>
+            {/* Hero Residence Card */}
+            {activeLease ? (
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] text-white border-none shadow-lg rounded-3xl overflow-hidden p-6 sm:p-8 relative">
+                <div className="absolute right-0 top-0 h-full w-1/3 bg-radial-gradient from-white/5 to-transparent pointer-events-none" />
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-[#496E5C] text-emerald-100 text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full">
+                        Your Residence
+                      </span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{activeLease.unit.name}</h2>
+                    <p className="text-slate-300 text-sm font-semibold flex items-center gap-1.5">
+                      <Home className="h-4 w-4 text-[#496E5C]" />
+                      {activeLease.unit.property.name} &bull; {activeLease.unit.property.address || "Verified Location"}
+                    </p>
                   </div>
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <Shield className="h-5 w-5" />
+                  <div className="flex flex-row md:flex-col items-baseline md:items-end gap-3 shrink-0">
+                    <div>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider text-left md:text-right">Monthly Rent</p>
+                      <p className="text-2xl sm:text-3xl font-black text-emerald-400">${Number(activeLease.monthlyRent).toLocaleString()}</p>
+                    </div>
                   </div>
                 </div>
-              </Card>
 
-              <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-extrabold text-[#64748B] uppercase tracking-wider">Outstanding Rent</span>
-                    <h3 className="text-2xl font-extrabold text-red-600 mt-1">${totalUnpaid.toLocaleString()}</h3>
+                {/* Lease Period progress line */}
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
+                    <span>Lease Term: {new Date(activeLease.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(activeLease.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                    <span className="font-extrabold text-emerald-400">{getLeaseProgress(activeLease)}% Complete</span>
                   </div>
-                  <div className="p-3 bg-red-50 text-red-500 rounded-xl">
-                    <DollarSign className="h-5 w-5" />
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                      style={{ width: `${getLeaseProgress(activeLease)}%` }} 
+                    />
                   </div>
                 </div>
               </Card>
+            ) : (
+              <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
+                <div className="h-16 w-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center">
+                  <Home className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-black text-slate-950">No Active Lease Agreement</h3>
+                <p className="text-sm text-slate-500">
+                  You are not currently registered to any active property leases. If you have recently applied, check your application status.
+                </p>
+                <Button 
+                  onClick={() => router.push("/dashboard/tenant/applications")}
+                  className="bg-[#496E5C] hover:bg-[#3D5C4D] text-white font-bold h-11 px-6 rounded-xl shadow-xs transition-colors"
+                >
+                  Check Application Status
+                </Button>
+              </Card>
+            )}
 
-              <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-extrabold text-[#64748B] uppercase tracking-wider">Open Maintenance</span>
-                    <h3 className="text-2xl font-extrabold text-amber-600 mt-1">{openRequestsCount}</h3>
+            {/* Action Status Cards */}
+            {activeLease && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* 🔴 Rent Status Card */}
+                <Card className={`border rounded-2xl p-5 shadow-xs bg-white ${
+                  totalUnpaid > 0 ? "border-red-200" : "border-emerald-100"
+                }`}>
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Rent Balance</span>
+                      <h3 className={`text-2xl font-black ${totalUnpaid > 0 ? "text-red-600" : "text-emerald-700"}`}>
+                        {totalUnpaid > 0 ? `$${totalUnpaid.toLocaleString()}` : "Fully Paid"}
+                      </h3>
+                      <p className="text-xs text-[#64748B]">
+                        {totalUnpaid > 0 ? "Outstanding balance due" : "No outstanding invoices"}
+                      </p>
+                    </div>
+                    <div className={`p-2.5 rounded-xl shrink-0 ${totalUnpaid > 0 ? "bg-red-50 text-red-500" : "bg-emerald-50 text-emerald-600"}`}>
+                      <DollarSign className="h-5 w-5" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                    <Wrench className="h-5 w-5" />
-                  </div>
-                </div>
-              </Card>
+                  {totalUnpaid > 0 ? (
+                    <div className="mt-4">
+                      <Button 
+                        onClick={() => handlePayInvoice(unpaidInvoices[0]?.id)}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-10 rounded-xl text-xs transition-colors"
+                      >
+                        Pay Rent Now
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-4">
+                      <div className="w-full bg-emerald-50 text-emerald-700 text-center py-2 font-bold rounded-xl text-xs border border-emerald-100">
+                        ✓ Account Up-to-Date
+                      </div>
+                    </div>
+                  )}
+                </Card>
 
-              <Card className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-extrabold text-[#64748B] uppercase tracking-wider">Unread Messages</span>
-                    <h3 className="text-2xl font-extrabold text-blue-600 mt-1">
-                      {messages.filter(m => m.receiverId === (session?.user as any).id).length}
-                    </h3>
+                {/* 🟡 Maintenance Tickets Card */}
+                <Card className="border border-[#E2E8F0] rounded-2xl p-5 shadow-xs bg-white">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Maintenance</span>
+                      <h3 className="text-2xl font-black text-slate-800">
+                        {openRequestsCount} Open
+                      </h3>
+                      <p className="text-xs text-[#64748B]">
+                        {openRequestsCount > 0 ? "Active repair requests" : "No pending repairs"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+                      <Wrench className="h-5 w-5" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <Bell className="h-5 w-5" />
+                  <div className="mt-4 flex gap-2">
+                    <Button 
+                      onClick={() => setActiveTab("submit-request")}
+                      variant="outline"
+                      className="flex-1 border-[#E2E8F0] text-slate-700 font-bold h-10 rounded-xl text-xs"
+                    >
+                      New Request
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab("my-requests")}
+                      className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold h-10 rounded-xl text-xs"
+                    >
+                      View All
+                    </Button>
                   </div>
-                </div>
-              </Card>
-            </div>
+                </Card>
+
+                {/* 🔵 Lease Expiry Card */}
+                <Card className="border border-[#E2E8F0] rounded-2xl p-5 shadow-xs bg-white">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Contract Window</span>
+                      {(() => {
+                        const expiry = new Date(activeLease.endDate).getTime();
+                        const diff = expiry - Date.now();
+                        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        return (
+                          <>
+                            <h3 className={`text-2xl font-black ${days < 30 ? "text-amber-600" : "text-slate-800"}`}>
+                              {days > 0 ? `${days} Days` : "Expired"}
+                            </h3>
+                            <p className="text-xs text-[#64748B]">
+                              Remaining in term
+                            </p>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button 
+                      onClick={() => router.push(`/dashboard/leases/${activeLease.id}`)}
+                      variant="outline"
+                      className="w-full border-[#E2E8F0] text-slate-700 font-bold h-10 rounded-xl text-xs hover:bg-slate-50"
+                    >
+                      View Agreement Detail
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            )}
 
             {/* Split Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Lease Snapshot Card */}
-              <div className="lg:col-span-1 space-y-6">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
-                  <div className="pb-4 border-b border-[#F1F5F9]">
-                    <h2 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
-                      <Shield className="h-4.5 w-4.5 text-[#496E5C]" />
-                      Lease Snapshot
-                    </h2>
-                    <span className="text-xs text-[#64748B]">Active tenancy credentials</span>
+              {/* Activity Feed Column */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-xs p-6">
+                  <div className="pb-4 border-b border-[#F1F5F9] mb-6">
+                    <h2 className="text-base font-extrabold text-[#0F172A]">Recent Activity & Updates</h2>
+                    <span className="text-xs text-[#64748B]">Real-time tenant actions and platform updates</span>
                   </div>
-                  <CardContent className="p-0 pt-6 space-y-4 text-xs">
-                    {activeLease ? (
-                      <>
-                        <div className="flex justify-between pb-2.5 border-b border-[#F1F5F9]">
-                          <span className="text-[#64748B]">Property</span>
-                          <strong className="text-[#0F172A] font-bold">{activeLease.unit.property.name}</strong>
+
+                  <div className="space-y-6">
+                    {/* Action Required Sub-Section */}
+                    {unpaidInvoices.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                          Action Required
+                        </h3>
+                        <div className="space-y-3">
+                          {unpaidInvoices.map((inv) => (
+                            <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-red-50/40 border border-red-100 rounded-2xl">
+                              <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-red-100 text-red-600 rounded-xl shrink-0 mt-0.5">
+                                  <DollarSign className="h-4.5 w-4.5" />
+                                </div>
+                                <div className="space-y-1">
+                                  <h4 className="text-xs font-extrabold text-red-950">Pending Rent Invoice</h4>
+                                  <p className="text-xs text-red-700">Rent of <strong className="font-extrabold">${Number(inv.amount).toLocaleString()}</strong> is outstanding.</p>
+                                  <p className="text-[10px] text-red-500 font-semibold">Due Date: {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                                </div>
+                              </div>
+                              <Button
+                                onClick={() => handlePayInvoice(inv.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white font-bold h-9 px-4 rounded-xl text-xs shrink-0"
+                              >
+                                Pay Now
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                        <div className="flex justify-between pb-2.5 border-b border-[#F1F5F9]">
-                          <span className="text-[#64748B]">Unit</span>
-                          <strong className="text-[#0F172A] font-bold">{activeLease.unit.name}</strong>
+                      </div>
+                    )}
+
+                    {/* Recent Updates Sub-Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                        Recent Updates
+                      </h3>
+                      
+                      {maintenance.length === 0 && documents.length === 0 && unpaidInvoices.length === 0 ? (
+                        <div className="text-center py-10 border border-dashed border-[#E2E8F0] rounded-2xl">
+                          <p className="text-xs text-[#64748B] italic">No recent updates found.</p>
                         </div>
-                        <div className="flex justify-between pb-2.5 border-b border-[#F1F5F9]">
-                          <span className="text-[#64748B]">Monthly Rent</span>
-                          <strong className="text-[#496E5C] text-sm font-extrabold">${Number(activeLease.monthlyRent).toLocaleString()}</strong>
+                      ) : (
+                        <div className="space-y-3">
+                          {maintenance.slice(0, 3).map((m) => (
+                            <div key={m.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E2E8F0] rounded-2xl hover:border-slate-300 transition-colors">
+                              <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl shrink-0 mt-0.5">
+                                  <Wrench className="h-4.5 w-4.5" />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <h4 className="text-xs font-extrabold text-slate-900">{m.title}</h4>
+                                  <p className="text-[11px] text-[#64748B]">Category: {m.category} &bull; Priority: {m.priority}</p>
+                                  <p className="text-[10px] text-slate-400">Created: {new Date(m.createdAt || Date.now()).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                              <Badge className={
+                                m.status === "OPEN" ? "bg-blue-50 text-blue-700 border border-blue-100" :
+                                m.status === "ASSIGNED" ? "bg-purple-50 text-purple-700 border border-purple-100" :
+                                m.status === "IN_PROGRESS" ? "bg-amber-50 text-amber-700 border border-amber-100" :
+                                "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                              }>
+                                {m.status.replace(/_/g, " ")}
+                              </Badge>
+                            </div>
+                          ))}
+
+                          {documents.slice(0, 2).map((d) => (
+                            <div key={d.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E2E8F0] rounded-2xl hover:border-slate-300 transition-colors">
+                              <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0 mt-0.5">
+                                  <FileText className="h-4.5 w-4.5" />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <h4 className="text-xs font-extrabold text-slate-900">{d.name}</h4>
+                                  <p className="text-[11px] text-[#64748B]">Legal Vault &bull; Category: {d.category}</p>
+                                  <p className="text-[10px] text-slate-400">Uploaded: {new Date(d.uploadedAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(d.url, "_blank")}
+                                className="h-8 text-xs font-bold text-[#496E5C] hover:bg-[#496E5C]/5 rounded-lg"
+                              >
+                                View
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                        <div className="flex justify-between pb-2.5 border-b border-[#F1F5F9]">
-                          <span className="text-[#64748B]">Lease Period</span>
-                          <strong className="text-[#0F172A] font-semibold">
-                            {new Date(activeLease.startDate).toLocaleDateString()} - {new Date(activeLease.endDate).toLocaleDateString()}
-                          </strong>
-                        </div>
-                        
-                        {activeLease.moveOutStatus === "NONE" && (
-                          <div className="pt-2">
-                            <Button 
-                              onClick={() => setShowMoveOutModal(true)}
-                              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold rounded-xl text-xs h-10 transition-colors"
-                            >
-                              Request Move-Out
-                            </Button>
-                          </div>
-                        )}
-                        {activeLease.moveOutStatus !== "NONE" && (
-                          <div className="pt-2">
-                            <div className="w-full bg-blue-50 text-blue-700 text-center py-2.5 font-extrabold rounded-xl text-xs border border-blue-100">
-                              Move-Out Status: {activeLease.moveOutStatus.replace(/_/g, " ")}
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Support & Contacts Column */}
+              <div className="lg:col-span-1 space-y-6">
+                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-xs p-6">
+                  <div className="pb-4 border-b border-[#F1F5F9] mb-4">
+                    <h2 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
+                      <UserCheck className="h-4.5 w-4.5 text-[#496E5C]" />
+                      Support Contacts
+                    </h2>
+                    <span className="text-xs text-[#64748B]">Reach out directly via secure chat</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {contacts.length === 0 ? (
+                      <p className="text-xs text-[#64748B] italic text-center py-4">No support contacts loaded.</p>
+                    ) : (
+                      contacts.map((c) => (
+                        <div key={c.id} className="p-3.5 bg-slate-50 border border-[#E2E8F0] rounded-2xl space-y-3 hover:border-slate-300 transition-colors">
+                          <div className="flex gap-3 items-center">
+                            <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-extrabold shrink-0">
+                              {c.name ? c.name.charAt(0).toUpperCase() : "?"}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-extrabold text-[#0F172A] truncate">{c.name}</h4>
+                              <p className="text-[10px] text-[#64748B] font-bold uppercase tracking-wider">{c.role}</p>
                             </div>
                           </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-center py-6 text-[#64748B] italic">No active lease found.</div>
+                          <div className="text-[11px] text-[#64748B] space-y-1">
+                            <p className="truncate flex items-center gap-1"><Mail className="h-3 w-3 text-slate-400" /> {c.email}</p>
+                            {c.phone && <p className="truncate flex items-center gap-1"><Phone className="h-3 w-3 text-slate-400" /> {c.phone}</p>}
+                          </div>
+                          <Button
+                            onClick={() => {
+                              setSelectedContact(c);
+                              setActiveTab("messages");
+                            }}
+                            className="w-full bg-[#496E5C] hover:bg-[#3D5C4D] text-white font-bold h-9 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <Send className="h-3.5 w-3.5" /> Message {c.role === "OWNER" ? "Owner" : "Inspector"}
+                          </Button>
+                        </div>
+                      ))
                     )}
-                  </CardContent>
+                  </div>
                 </Card>
 
-                {/* Repair Panel */}
-                <Card className="bg-[#496E5C] text-white border-0 rounded-[24px] p-6 relative overflow-hidden shadow-sm">
+                {/* Quick Repair Panel */}
+                <Card className="bg-[#496E5C] text-white border-0 rounded-[24px] p-6 relative overflow-hidden shadow-xs">
                   <div className="absolute -right-8 -top-8 h-28 w-28 bg-white/10 rounded-full blur-xl" />
                   <h3 className="text-sm font-extrabold mb-2">Need Help or Repairs?</h3>
                   <p className="text-[11px] text-emerald-100 leading-relaxed mb-4">
-                    Submit a ticket with description and pictures, and we will assign a certified inspector immediately.
+                    Submit a ticket with descriptions and pictures, and we will assign a certified inspector immediately.
                   </p>
                   <Button 
                     onClick={() => setActiveTab("submit-request")}
@@ -820,104 +918,110 @@ export default function TenantDashboard() {
                 </Card>
               </div>
 
-              {/* Latest Activity Feed */}
-              <div className="lg:col-span-2">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6 h-full">
-                  <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-                    <h2 className="text-base font-extrabold text-[#0F172A]">Latest Activity Logs</h2>
-                    <span className="text-xs text-[#64748B]">Real-time tenant actions and platform updates</span>
-                  </div>
-
-                  <div className="space-y-4">
-                    {unpaidInvoices.map((inv) => (
-                      <div key={inv.id} className="flex gap-4 items-start p-3 bg-red-50/50 border border-red-100 rounded-xl">
-                        <div className="p-2 bg-red-100 text-red-500 rounded-lg">
-                          <DollarSign className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-[#0F172A]">Rent Invoice Pending Payment</h4>
-                          <p className="text-[11px] text-[#64748B] mt-0.5">Rent of ${Number(inv.amount).toLocaleString()} is outstanding. Due date: {new Date(inv.dueDate).toLocaleDateString()}.</p>
-                        </div>
-                      </div>
-                    ))}
-
-                    {maintenance.slice(0, 3).map((m) => (
-                      <div key={m.id} className="flex gap-4 items-start p-3 bg-amber-50/50 border border-amber-100 rounded-xl">
-                        <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
-                          <Wrench className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-[#0F172A]">Maintenance Status: {m.status}</h4>
-                          <p className="text-[11px] text-[#64748B] mt-0.5">{m.title} - Priority: {m.priority}.</p>
-                        </div>
-                      </div>
-                    ))}
-
-                    {documents.slice(0, 2).map((d) => (
-                      <div key={d.id} className="flex gap-4 items-start p-3 bg-slate-50 border border-[#E2E8F0] rounded-xl">
-                        <div className="p-2 bg-slate-100 text-slate-500 rounded-lg">
-                          <FileText className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-[#0F172A]">Document Uploaded</h4>
-                          <p className="text-[11px] text-[#64748B] mt-0.5">{d.name} ({d.category}) was added on {new Date(d.uploadedAt).toLocaleDateString()}.</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
             </div>
           </div>
         )}
 
-        {/* -------------------- MY LEASES TAB -------------------- */}
         {activeTab === "my-leases" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
-            <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A]">Leases Registry</h2>
-              <span className="text-xs text-[#64748B]">All active and historical contracts</span>
+          <div className="space-y-6">
+            <div className="pb-2 border-b border-[#F1F5F9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-black text-[#0F172A] tracking-tight">Leases Registry</h2>
+                <p className="text-xs text-[#64748B] font-semibold mt-0.5">All active and historical tenancy agreements</p>
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Property & Unit</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Monthly Rent</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Deposit Amount</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Start Date</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">End Date</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leases.map((l) => (
-                    <TableRow key={l.id} className="hover:bg-slate-50/50">
-                      <TableCell className="font-bold text-slate-800">
-                        {l.unit.property.name}
-                        <p className="text-[10px] text-[#64748B] font-normal">{l.unit.name}</p>
-                      </TableCell>
-                      <TableCell className="font-bold text-[#496E5C]">${Number(l.monthlyRent).toLocaleString()}</TableCell>
-                      <TableCell className="font-semibold text-slate-700">${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</TableCell>
-                      <TableCell className="text-slate-600">{new Date(l.startDate).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-slate-600">{new Date(l.endDate).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Badge className={
-                          l.status === "ACTIVE" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                          l.status === "PENDING_SIGNATURE" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                          "bg-slate-100 text-slate-700 border border-slate-200"
-                        }>
-                          {l.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
+            {leases.length === 0 ? (
+              <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
+                <div className="h-16 w-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center">
+                  <FileText className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-black text-slate-950">No Leases Found</h3>
+                <p className="text-sm text-slate-500">
+                  There are no current or historical lease contracts linked to your tenant profile.
+                </p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {leases.map((l) => {
+                  const progressVal = getLeaseProgress(l);
+                  return (
+                    <Card key={l.id} className="bg-white border border-[#E2E8F0] hover:border-slate-300 shadow-xs hover:shadow-sm rounded-[24px] overflow-hidden transition-all duration-300 flex flex-col justify-between">
+                      <div className="p-6 space-y-4">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="space-y-1">
+                            <h3 className="font-extrabold text-slate-900 text-base">{l.unit.property.name}</h3>
+                            <p className="text-xs text-[#64748B] font-semibold flex items-center gap-1">
+                              <Home className="h-3.5 w-3.5 text-[#496E5C]" />
+                              Unit: {l.unit.name}
+                            </p>
+                          </div>
+                          <Badge className={
+                            l.status === "ACTIVE" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                            l.status === "PENDING_SIGNATURE" ? "bg-amber-50 text-amber-700 border border-amber-100 animate-pulse" :
+                            "bg-slate-100 text-slate-700 border border-slate-200"
+                          }>
+                            {l.status === "ACTIVE" ? "Active Tenancy" :
+                             l.status === "PENDING_SIGNATURE" ? "Awaiting Signature" :
+                             "Expired / Inactive"}
+                          </Badge>
+                        </div>
+
+                        {/* Lease Dates */}
+                        <div className="grid grid-cols-2 gap-4 py-2 border-y border-[#F1F5F9] text-xs">
+                          <div>
+                            <span className="text-[#64748B] block mb-0.5">Start Date</span>
+                            <span className="font-bold text-slate-800">{new Date(l.startDate).toLocaleDateString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#64748B] block mb-0.5">End Date</span>
+                            <span className="font-bold text-slate-800">{new Date(l.endDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Rent and Deposit */}
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <span className="text-[#64748B] block mb-0.5">Monthly Rent</span>
+                            <span className="font-extrabold text-[#496E5C] text-sm">${Number(l.monthlyRent).toLocaleString()}/mo</span>
+                          </div>
+                          <div>
+                            <span className="text-[#64748B] block mb-0.5">Security Deposit</span>
+                            <span className="font-bold text-slate-800">${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar for active tenancy */}
+                        {l.status === "ACTIVE" && (
+                          <div className="space-y-1.5 pt-2">
+                            <div className="flex justify-between text-[10px] text-slate-400">
+                              <span>Term Progress</span>
+                              <span>{progressVal}%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-emerald-500 rounded-full" 
+                                style={{ width: `${progressVal}%` }} 
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-4 bg-slate-50 border-t border-[#F1F5F9] flex gap-2">
+                        <Button 
+                          onClick={() => router.push(`/dashboard/leases/${l.id}`)}
+                          className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold h-10 rounded-xl text-xs transition-colors"
+                        >
+                          View Agreement Contract
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {/* -------------------- DOCUMENTS TAB -------------------- */}
@@ -1926,118 +2030,7 @@ export default function TenantDashboard() {
 
     </div>
 
-      {/* Move-Out Request Modal */}
-      {showMoveOutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
-            <div className="p-6">
-              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Request Move-Out</h2>
-              <p className="text-sm text-[#64748B] mb-6">
-                Please provide your preferred move-out date and reason. 
-                {activeLease?.moveOutNoticeDays && (
-                  <span className="block mt-2 text-amber-600 font-semibold text-xs">
-                    Note: Your lease requires a {activeLease.moveOutNoticeDays}-day notice period.
-                  </span>
-                )}
-              </p>
-              
-              <form onSubmit={handleRequestMoveOut} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-[#0F172A]">Preferred Move-Out Date</Label>
-                  <Input 
-                    type="date" 
-                    required
-                    value={moveOutDate}
-                    onChange={(e) => setMoveOutDate(e.target.value)}
-                    className="h-11 rounded-xl bg-[#F8FAFC] border-[#E2E8F0]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-[#0F172A]">Reason for Leaving</Label>
-                  <select 
-                    value={moveOutReason}
-                    onChange={(e) => setMoveOutReason(e.target.value)}
-                    className="w-full h-11 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] px-3 text-sm"
-                  >
-                    <option>End of lease</option>
-                    <option>Job relocation</option>
-                    <option>Financial reasons</option>
-                    <option>Need more space</option>
-                    <option>Buying a home</option>
-                    <option>Other</option>
-                  </select>
-                </div>
 
-                <div className="flex gap-3 pt-4 border-t border-[#F1F5F9] mt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowMoveOutModal(false)}
-                    className="flex-1 h-11 rounded-xl text-slate-600 font-bold"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={moveOutSubmitting}
-                    className="flex-1 h-11 rounded-xl bg-[#496E5C] text-white font-bold hover:bg-[#3d5a4b]"
-                  >
-                    {moveOutSubmitting ? "Submitting..." : "Submit Request"}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Dispute Modal */}
-      {showDisputeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <Card className="w-full max-w-md bg-white border-0 shadow-2xl overflow-hidden rounded-[24px]">
-            <div className="p-6">
-              <h2 className="text-xl font-extrabold text-[#0F172A] mb-2">Dispute Deductions</h2>
-              <p className="text-sm text-[#64748B] mb-6">
-                Please explain why you disagree with the proposed deductions. Your owner will review this.
-                <span className="block mt-2 font-bold text-slate-700">
-                  You have {2 - (activeLease?.disputeCount || 0)} disputes remaining before Admin Mediation.
-                </span>
-              </p>
-              
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-[#0F172A]">Dispute Details</Label>
-                  <textarea 
-                    rows={4}
-                    value={tenantDisputeNote}
-                    onChange={(e) => setTenantDisputeNote(e.target.value)}
-                    className="w-full rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] p-3 text-sm focus:ring-[#3B82F6]"
-                    placeholder="e.g., The carpet stain was there when I moved in (see my move-in photos)."
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-[#F1F5F9] mt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowDisputeModal(false)}
-                    className="flex-1 h-11 rounded-xl text-slate-600 font-bold"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => handleReviewRefund("dispute")}
-                    disabled={reviewSubmitting || !tenantDisputeNote.trim()}
-                    className="flex-1 h-11 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700"
-                  >
-                    {reviewSubmitting ? "Submitting..." : "Submit Dispute"}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
     </>
   );
 }
