@@ -18,17 +18,32 @@ export async function GET(req: NextRequest) {
     if (role === "TENANT") {
       whereClause.tenantId = userId;
     } else if (role === "OWNER") {
-      whereClause.tenant = {
-        leases: {
-          some: {
-            unit: {
-              property: {
-                ownerId: userId
+      whereClause.OR = [
+        {
+          tenant: {
+            leases: {
+              some: {
+                unit: {
+                  property: {
+                    ownerId: userId
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          invoice: {
+            lease: {
+              unit: {
+                property: {
+                  ownerId: userId
+                }
               }
             }
           }
         }
-      };
+      ];
     }
 
     const transactions = await prisma.transaction.findMany({

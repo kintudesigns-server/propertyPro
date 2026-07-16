@@ -625,14 +625,14 @@ export default function TransactionsPage() {
                           <div className={`h-9 w-9 rounded-xl ${details.iconBg} flex items-center justify-center shrink-0`}>
                             {details.icon}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-black text-slate-900 text-sm">{details.title}</span>
-                              <Badge className={`${details.badgeStyle} rounded-full font-bold px-2 py-0.5 text-[9px]`}>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-black text-slate-900 text-sm truncate">{details.title}</span>
+                              <Badge className={`${details.badgeStyle} rounded-full font-bold px-2 py-0.5 text-[9px] whitespace-nowrap`}>
                                 {details.badgeLabel}
                               </Badge>
                             </div>
-                            <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{details.subtitle}</div>
+                            <div className="text-[11px] text-[#64748B] font-medium mt-0.5 truncate">{details.subtitle}</div>
                           </div>
                         </div>
                       </TableCell>

@@ -151,16 +151,16 @@ async function main() {
 
   // ── Inspectors ──
   const inspectorJake = await prisma.user.create({
-    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
+    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE" },
   });
   await prisma.user.create({
-    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
+    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE" },
   });
   await prisma.user.create({
-    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
+    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE" },
   });
   await prisma.user.create({
-    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
+    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE" },
   });
 
   // ── Tenants ──
