@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       data: {
         status: newStatus,
         preferredTimes: updatedPreferredTimes,
+        scheduledDate: null,
         ...(clearDiagnosis ? { diagnosisDate: null } : {}),
         ...(clearRepair ? { repairDate: null } : {}),
       },

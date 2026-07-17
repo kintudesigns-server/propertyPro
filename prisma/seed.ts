@@ -6,21 +6,37 @@ import crypto from "crypto";
 const prisma = new PrismaClient();
 
 // ─── Encryption Setup ─────────────────────────────────────────────────────────
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;
-const ENCRYPTION_KEY = (() => {
-  const keyStr = process.env.ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || "default-fallback-secret-propertypro-32-chars";
-  return crypto.scryptSync(keyStr, "propertypro-salt", 32);
-})();
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 16;
+const SALT_LENGTH = 64;
+const TAG_LENGTH = 16;
+const TAG_POSITION = SALT_LENGTH + IV_LENGTH;
+const ENCRYPTED_POSITION = TAG_POSITION + TAG_LENGTH;
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'a1b2c3d4e5f60718293a4b5c6d7e8f901234567890abcdef1234567890abcdef';
 
 function encrypt(text: string): string {
   if (!text) return "";
+  
+  const keyBuffer = Buffer.from(ENCRYPTION_KEY, 'hex');
+  if (keyBuffer.length !== 32) {
+    throw new Error('Invalid ENCRYPTION_KEY length. Must be 64 hex characters (32 bytes).');
+  }
+
+  const salt = crypto.randomBytes(SALT_LENGTH);
   const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  const authTag = cipher.getAuthTag().toString("hex");
-  return `${iv.toString("hex")}:${authTag}:${encrypted}`;
+
+  const derivedKey = crypto.pbkdf2Sync(keyBuffer, salt, 100000, 32, 'sha512');
+
+  const cipher = crypto.createCipheriv(ALGORITHM, derivedKey, iv);
+  
+  let encrypted = cipher.update(text, 'utf8');
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  const authTag = cipher.getAuthTag();
+
+  const payload = Buffer.concat([salt, iv, authTag, encrypted]);
+  
+  return payload.toString('hex');
 }
 
 // ─── Image URL Constants (Unsplash) ──────────────────────────────────────────
@@ -43,6 +59,13 @@ const IMG = {
     cover:  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200",
     lobby:  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200",
     office: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200",
+  },
+  maint: {
+    smokeDetector: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800",
+    leak:          "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800",
+    brokenWindow:  "https://images.unsplash.com/photo-1508962914676-134849a727f0?w=800",
+    hvac:          "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800",
+    waterHeater:   "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800",
   },
 };
 
@@ -516,6 +539,9 @@ async function main() {
   // ── SECTION 7: Maintenance Requests ───────────────────────────────────────
   console.log("🔨 Creating maintenance requests (all status states)...");
 
+  // ── SECTION 7: Maintenance Requests ───────────────────────────────────────
+  console.log("🔨 Creating maintenance requests (all status states)...");
+
   // 1. SUBMITTED — Needs assignment
   await prisma.maintenanceRequest.create({
     data: {
@@ -523,6 +549,7 @@ async function main() {
       title: "Smoke Detector Low Battery Alarm",
       description: "The smoke detector in the hallway has been beeping every 30 seconds for 2 days. Low battery.",
       category: "GENERAL", priority: "LOW", status: "SUBMITTED", entryPermission: true, hasPets: "No",
+      photos: [IMG.maint.smokeDetector],
     },
   });
 
@@ -534,111 +561,163 @@ async function main() {
       description: "Water is backing up and overflowing from the roof gutter during rainfall, staining the exterior wall.",
       category: "GENERAL", priority: "MEDIUM", status: "SUBMITTED", entryPermission: true, hasPets: "No",
       preferredTimes: "Weekday mornings between 9 AM – 12 PM",
+      photos: [IMG.maint.leak],
     },
   });
 
-  // 3. ASSIGNED — Inspector Jake assigned, tenant confirmed schedule
+  // 3. DIAGNOSIS_SCHEDULED — Inspector Jake assigned, tenant MUST be home, awaiting confirmation
   const ticketHvac = await prisma.maintenanceRequest.create({
     data: {
       unitId: u104.id, tenantId: tenantMarvin.id,
       title: "HVAC System Not Cooling",
       description: "Central AC stopped blowing cold air. Ambient temp is 88°F. We have a toddler at home — urgent.",
-      category: "APPLIANCE", priority: "HIGH", status: "ASSIGNED",
-      inspectorId: inspectorJake.id, scheduledDate: dDaysAfter(2),
-      entryPermission: true, hasPets: "Yes", tenantConfirmedSchedule: true,
+      category: "APPLIANCE", priority: "HIGH", status: "DIAGNOSIS_SCHEDULED",
+      inspectorId: inspectorJake.id, scheduledDate: dDaysAfter(2), diagnosisDate: dDaysAfter(2),
+      entryPermission: false, hasPets: "Yes", tenantConfirmedSchedule: false,
+      photos: [IMG.maint.hvac],
     },
   });
 
-  // 4. DIAGNOSIS_SCHEDULED — Diagnosis date set by inspector
+  // 4. DIAGNOSIS_COMPLETE — Inspector Jake completed diagnosis. Ready for vendor dispatch.
   await prisma.maintenanceRequest.create({
     data: {
       unitId: u104.id, tenantId: tenantMarvin.id,
-      title: "Dishwasher Leaking from Front Panel",
+      title: "Dishwasher Drainage Leak",
       description: "A pool of water forms under the front panel after each dishwasher cycle.",
-      category: "APPLIANCE", priority: "MEDIUM", status: "ASSIGNED",
-      inspectorId: inspectorJake.id, diagnosisDate: dDaysAfter(1), entryPermission: true, hasPets: "No",
+      category: "APPLIANCE", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
+      inspectorId: inspectorJake.id,
+
+      estimateSource: "INSPECTOR",
+      inspectorNotes: "Dishwasher pump seal is cracked. Needs vendor to replace the pump.",
+      entryPermission: true, hasPets: "No",
+      photos: [IMG.maint.leak],
     },
   });
 
-  // 5. AWAITING_APPROVAL — Estimate above owner approval threshold ($500)
-  await prisma.maintenanceRequest.create({
+  // 5. AWAITING_APPROVAL — Vendor Quote Awaiting Approval (With inspector comparison reference!)
+  const ticketWaterHeater = await prisma.maintenanceRequest.create({
     data: {
       unitId: u104.id, tenantId: tenantMarvin.id,
       title: "Water Heater Full Replacement Required",
       description: "Water heater has severe corrosion and is leaking from the base. Complete unit failure imminent.",
       category: "PLUMBING", priority: "HIGH", status: "AWAITING_APPROVAL",
       inspectorId: inspectorJake.id,
+
+      externalVendorId: vendorPlumbing.id,
+      vendorMagicToken: "DEMO-VENDOR-WATER-HEATER-REPLACE",
+      vendorTokenExpiresAt: dDaysAfter(14),
       estimatedLabor: 750.00, estimatedMaterials: 650.00,
-      inspectorNotes: "Tank is ~15 years old with severe base corrosion. Total replacement required. Estimated $1,400 — needs owner approval above the $500 threshold.",
+      estimateSource: "VENDOR",
+      inspectorNotes: "Tank is ~15 years old with severe base corrosion. Total replacement required. Inspector estimated $1,000, vendor quoted $1,400.",
       diagnosisDate: dDaysBefore(2),
+      photos: [IMG.maint.waterHeater],
     },
   });
 
-  // 6. PENDING_TENANT_CONFIRMATION — Vendor fault, chargeback ruling undecided
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: u104.id, tenantId: tenantMarvin.id,
-      title: "Shattered Sliding Patio Door Glass",
-      description: "The entire glass pane of the sliding patio door is shattered. Tenant denies causing it.",
-      category: "GENERAL", priority: "HIGH", status: "PENDING_TENANT_CONFIRMATION",
-      finalLabor: 280.00, finalMaterials: 420.00,
-      vendorReportedFault: true, ownerChargebackDecision: null, // Owner has not ruled yet
-      inspectorNotes: "Glass shows external impact point pattern. Tenant claims it was pre-existing.",
-    },
-  });
-
-  // 7. CLOSED — Normal wear & tear
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: u104.id, tenantId: tenantMarvin.id,
-      title: "Stiff Front Door Deadbolt",
-      description: "The front door deadbolt is increasingly difficult to operate.",
-      category: "GENERAL", priority: "LOW", status: "CLOSED",
-      finalLabor: 60.00, finalMaterials: 20.00,
-      vendorReportedFault: false, ownerChargebackDecision: "WEAR_AND_TEAR",
-      inspectorNotes: "Deadbolt mechanism worn from age and repeated use. Replaced with new set.",
-      tenantRating: 5, tenantFeedback: "Super fast response! Issue resolved perfectly.",
-    },
-  });
-
-  // 8. CLOSED — Tenant fault, deposit deduction applied
-  const ticketTile = await prisma.maintenanceRequest.create({
-    data: {
-      unitId: u104.id, tenantId: tenantMarvin.id,
-      title: "Cracked Bathroom Tile (Tenant Fault)",
-      description: "Large crack running across bathroom floor tile near the shower door.",
-      category: "GENERAL", priority: "MEDIUM", status: "CLOSED",
-      finalLabor: 80.00, finalMaterials: 45.00,
-      vendorReportedFault: true, ownerChargebackDecision: "TENANT_FAULT",
-      chargebackSource: "DEPOSIT", chargebackDepositAmount: 125.00, chargebackInvoiceAmount: 0.00,
-      inspectorNotes: "Impact crack pattern consistent with dropped heavy object. Deposit deduction recommended.",
-    },
-  });
-  await prisma.transaction.create({
-    data: { type: "EXPENSE", category: "DEPOSIT", amount: 125.00, reference: `DEPOSIT_DEDUCT_${ticketTile.id.slice(-6).toUpperCase()}`, status: "COMPLETED", tenantId: tenantMarvin.id },
-  });
-
-  // 9. EMERGENCY — External vendor dispatched (tests vendor magic link)
+  // 6. ASSIGNED — Vendor Dispatch Pending Quote (Vendor Portal Entry testing)
   await prisma.maintenanceRequest.create({
     data: {
       unitId: u104.id, tenantId: tenantMarvin.id,
       title: "🚨 EMERGENCY: Burst Pipe Under Bathroom Sink",
       description: "A pipe under the bathroom sink has burst. Water spraying out. I shut the under-sink valve but may still be water in walls.",
       category: "PLUMBING", priority: "EMERGENCY", status: "ASSIGNED",
-      inspectorId: inspectorJake.id, externalVendorId: vendorPlumbing.id,
+      inspectorId: inspectorJake.id,
+
+      externalVendorId: vendorPlumbing.id,
       vendorMagicToken: "DEMO-VENDOR-BURST-PIPE-2025-TOKEN",
       vendorTokenExpiresAt: dDaysAfter(14),
       entryPermission: true, hasPets: "No",
+      photos: [IMG.maint.leak],
     },
   });
 
-  // 10. SUBMITTED — Commercial property ticket (Coastal)
+  // 7. PENDING_TENANT_CONFIRMATION — Repair completed by vendor, awaiting tenant confirm
   await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Shattered Sliding Patio Door Glass",
+      description: "The entire glass pane of the sliding patio door is shattered.",
+      category: "GENERAL", priority: "HIGH", status: "PENDING_TENANT_CONFIRMATION",
+      finalLabor: 280.00, finalMaterials: 420.00,
+      vendorReportedFault: true, ownerChargebackDecision: null,
+      inspectorNotes: "Glass shows external impact point pattern. Tenant claims it was pre-existing.",
+      photos: [IMG.maint.brokenWindow],
+    },
+  });
+
+  // 8. CLOSED — Deadbolt Lock (Awaiting payout settlement warning banner)
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Stiff Front Door Deadbolt",
+      description: "The front door deadbolt is increasingly difficult to operate.",
+      category: "GENERAL", priority: "LOW", status: "CLOSED",
+      inspectorId: inspectorJake.id,
+      finalLabor: 60.00, finalMaterials: 20.00,
+      vendorReportedFault: false, ownerChargebackDecision: "WEAR_AND_TEAR",
+      inspectorNotes: "Deadbolt mechanism worn from age and repeated use. Replaced with new set.",
+      tenantRating: 5, tenantFeedback: "Super fast response! Issue resolved perfectly.",
+      photos: [IMG.maint.brokenWindow],
+    },
+  });
+
+  // 9. CLOSED — Tenant fault, deposit deduction applied
+  const ticketTile = await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Cracked Bathroom Tile (Tenant Fault)",
+      description: "Large crack running across bathroom floor tile near the shower door.",
+      category: "GENERAL", priority: "MEDIUM", status: "CLOSED",
+      inspectorId: inspectorJake.id,
+      finalLabor: 80.00, finalMaterials: 45.00,
+      vendorReportedFault: true, ownerChargebackDecision: "TENANT_FAULT",
+      chargebackSource: "DEPOSIT", chargebackDepositAmount: 125.00, chargebackInvoiceAmount: 0.00,
+      inspectorNotes: "Impact crack pattern consistent with dropped heavy object. Deposit deduction recommended.",
+      photos: [IMG.maint.brokenWindow],
+    },
+  });
+  await prisma.transaction.create({
+    data: { type: "EXPENSE", category: "DEPOSIT", amount: 125.00, reference: `DEPOSIT_DEDUCT_${ticketTile.id.slice(-6).toUpperCase()}`, status: "COMPLETED", tenantId: tenantMarvin.id },
+  });
+
+  // 10. SUBMITTED — Commercial property ticket (Coastal)
+  const ticketCommercial = await prisma.maintenanceRequest.create({
     data: {
       unitId: suiteA.id, tenantId: tenantCarlos.id,
       title: "Suite A HVAC Temperature Imbalance",
       description: "HVAC creating inconsistent temperatures across the office floor. East zone is 10°F warmer than west zone. Impacting employee productivity.",
       category: "APPLIANCE", priority: "MEDIUM", status: "SUBMITTED", entryPermission: true,
+      photos: [IMG.maint.hvac],
+    },
+  });
+
+  // 11. ASSIGNED (Owner self-inspection) — Owner is acting as inspector
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Loose Kitchen Cabinet Hinges",
+      description: "Several cabinet doors are sagging and not closing properly.",
+      category: "GENERAL", priority: "LOW", status: "ASSIGNED",
+      inspectorId: ownerAtlas.id, // Owner assigned to self
+      entryPermission: true, hasPets: "No",
+      photos: [IMG.maint.brokenWindow],
+    },
+  });
+
+  // 12. DIAGNOSIS_COMPLETE (Owner self-inspection) — Owner diagnosed the issue
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Leaking Faucet in Master Bath",
+      description: "Continuous drip from the master bathroom sink. Driving us crazy at night.",
+      category: "PLUMBING", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
+      inspectorId: ownerAtlas.id, // Owner self-inspected
+
+      estimateSource: "INSPECTOR",
+      inspectorNotes: "Self-diagnosed. Just needs a new O-ring and cartridge. I can fix this myself this weekend.",
+      diagnosisDate: dDaysBefore(1),
+      entryPermission: true, hasPets: "No",
+      photos: [IMG.maint.leak],
     },
   });
 
@@ -758,13 +837,13 @@ async function main() {
   await prisma.notification.createMany({
     data: [
       // Owner Atlas
-      { userId: ownerAtlas.id, title: "New Maintenance Estimate Pending", message: "Jake Thorpe submitted a $1,400 estimate for Unit 104 water heater replacement. Review & approve.", type: "MAINTENANCE", priority: "HIGH" },
+      { userId: ownerAtlas.id, title: "New Maintenance Estimate Pending", message: "Jake Thorpe submitted a $1,400 estimate for Unit 104 water heater replacement. Review & approve.", type: "MAINTENANCE", priority: "HIGH", relatedEntityId: ticketWaterHeater.id },
       { userId: ownerAtlas.id, title: "Move-Out Request Received", message: "Liam Walsh (Unit 201) has submitted a move-out request. Inspection needs to be scheduled.", type: "SYSTEM", priority: "HIGH" },
       { userId: ownerAtlas.id, title: "Payout Request Under Review", message: "Your $12,500 disbursement request is pending admin review. Estimated 1-2 business days.", type: "BILLING", priority: "MEDIUM" },
       { userId: ownerAtlas.id, title: "Tenant Dispute Raised", message: "Dan Gibbs (Unit 203) has disputed deposit deductions of $375. Resolution required.", type: "SYSTEM", priority: "HIGH" },
       { userId: ownerAtlas.id, title: "Renewal Window Open", message: "Adam Brooks' lease (Unit 102) expires in 6 months. Renewal decision needed.", type: "SYSTEM", priority: "MEDIUM" },
       // Owner Coastal
-      { userId: ownerCoastal.id, title: "Commercial Maintenance Request", message: "Carlos Ruiz (Suite A) submitted an HVAC maintenance request. Assign an inspector.", type: "MAINTENANCE", priority: "MEDIUM" },
+      { userId: ownerCoastal.id, title: "Commercial Maintenance Request", message: "Carlos Ruiz (Suite A) submitted an HVAC maintenance request. Assign an inspector.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketCommercial.id },
       { userId: ownerCoastal.id, title: "New Commercial Application", message: "Vertex Analytics Inc. applied for Suite B — 36-month NNN lease, $6,500/month.", type: "SYSTEM", priority: "HIGH" },
       // Admin
       { userId: admin.id, title: "Payout Request — Atlas Properties", message: "Marcus Reed (Atlas Properties LLC) requested a $12,500 disbursement. Admin action required.", type: "BILLING", priority: "HIGH" },
@@ -776,7 +855,7 @@ async function main() {
       // Tenant Oscar
       { userId: tenantOscar.id, title: "⚠️ Rent Overdue Notice", message: "Your rent of $2,400 is now overdue. A late fee of $120 has been applied. Please pay immediately.", type: "BILLING", priority: "HIGH" },
       // Tenant Marvin
-      { userId: tenantMarvin.id, title: "Inspection Scheduled", message: "Jake Thorpe will inspect your HVAC on Thursday at 10 AM. Ensure entry access is available.", type: "MAINTENANCE", priority: "MEDIUM" },
+      { userId: tenantMarvin.id, title: "Inspection Scheduled", message: "Jake Thorpe will inspect your HVAC on Thursday at 10 AM. Ensure entry access is available.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketHvac.id },
       // Tenant Nora
       { userId: tenantNora.id, title: "Action Required: Sign Your Lease", message: "Your lease for Unit 101 is ready for signature and deposit payment. Complete now to confirm your move-in.", type: "SYSTEM", priority: "HIGH" },
       // Tenant Liam

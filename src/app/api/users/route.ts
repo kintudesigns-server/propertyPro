@@ -38,6 +38,8 @@ export async function GET(req: NextRequest) {
         annualIncome: true,
         avatar: true,
         subscriptionStatus: true,
+        approvalThreshold: true,
+        emergencyOverrideLimit: true,
         pricingTier: {
           select: {
             id: true,
@@ -126,7 +128,8 @@ export async function PUT(req: NextRequest) {
     const { 
       name, phone, bankName, accountNumber, accountName,
       emergencyName, emergencyPhone, emergencyRelationship, dob, 
-      employmentStatus, employer, position, avatar
+      employmentStatus, employer, position, avatar,
+      approvalThreshold, emergencyOverrideLimit
     } = await req.json();
 
     const updatedUser = await prisma.user.update({
@@ -144,7 +147,9 @@ export async function PUT(req: NextRequest) {
         employmentStatus,
         employer,
         position,
-        avatar
+        avatar,
+        approvalThreshold: approvalThreshold !== undefined ? (approvalThreshold === "" || approvalThreshold === null ? 200.00 : Number(approvalThreshold)) : undefined,
+        emergencyOverrideLimit: emergencyOverrideLimit !== undefined ? (emergencyOverrideLimit === "" || emergencyOverrideLimit === null ? 1500.00 : Number(emergencyOverrideLimit)) : undefined,
       },
     });
 

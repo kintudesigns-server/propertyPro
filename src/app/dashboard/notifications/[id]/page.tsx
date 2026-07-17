@@ -111,23 +111,51 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
   // ── Maintenance ────────────────────────────
   else if (type === "MAINTENANCE" || t.includes("maintenance") || t.includes("repair")) {
     if (id) {
+      let maintenanceDesc = "Inspect the full maintenance ticket, update status, or assign an inspector.";
+      if (userRole === "TENANT") {
+        maintenanceDesc = "View the status, scheduled date, and details of your request.";
+      } else if (userRole === "INSPECTOR") {
+        maintenanceDesc = "View details of this task, submit estimates, and update status.";
+      }
+
       actions.push({
         href: `/dashboard/maintenance/${id}`,
         label: "View Maintenance Request",
-        description: "Inspect the full maintenance ticket, update status, or assign an inspector.",
+        description: maintenanceDesc,
         Icon: Wrench,
         color: "bg-orange-50",
         textColor: "text-orange-600",
       });
     }
-    actions.push({
-      href: `/dashboard/maintenance`,
-      label: "All Maintenance Requests",
-      description: "View the full maintenance ledger and dispatch team.",
-      Icon: Wrench,
-      color: "bg-slate-50",
-      textColor: "text-slate-600",
-    });
+
+    if (userRole === "TENANT") {
+      actions.push({
+        href: `/dashboard/maintenance/my-requests`,
+        label: "My Maintenance Requests",
+        description: "View all your submitted maintenance requests.",
+        Icon: Wrench,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
+    } else if (userRole === "INSPECTOR") {
+      actions.push({
+        href: `/dashboard/inspector/active`,
+        label: "My Active Tasks",
+        description: "Manage and progress all repair tickets assigned to you.",
+        Icon: Wrench,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
+    } else {
+      actions.push({
+        href: `/dashboard/maintenance`,
+        label: "All Maintenance Requests",
+        description: "View the full maintenance ledger and dispatch team.",
+        Icon: Wrench,
+        color: "bg-slate-50",
+        textColor: "text-slate-600",
+      });
+    }
   }
 
   // ── Mediation & Disputes ───────────────────

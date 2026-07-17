@@ -241,6 +241,34 @@ export default function MaintenancePage() {
             Assigned
           </span>
         );
+      case "DIAGNOSIS_SCHEDULED": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 whitespace-nowrap">
+            <Calendar className="h-3.5 w-3.5" />
+            Diagnosis Scheduled
+          </span>
+        );
+      case "DIAGNOSIS_COMPLETE": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Diagnosis Complete
+          </span>
+        );
+      case "APPROVED": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-750 border border-indigo-200 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Approved
+          </span>
+        );
+      case "REPAIR_SCHEDULED": 
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-750 border border-purple-200 whitespace-nowrap">
+            <Calendar className="h-3.5 w-3.5" />
+            Repair Scheduled
+          </span>
+        );
       case "AWAITING_APPROVAL": 
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
@@ -256,6 +284,7 @@ export default function MaintenancePage() {
           </span>
         );
       case "RESOLVED": 
+
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200 whitespace-nowrap">
             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -754,6 +783,22 @@ export default function MaintenancePage() {
                             Dispatch Vendor
                           </Button>
                         </div>
+                      ) : req.status === "DIAGNOSIS_COMPLETE" ? (
+                        <div className="flex gap-2 w-full">
+                          <Button 
+                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                            variant="outline" 
+                            className="flex-1 text-slate-500 border-slate-200 hover:bg-slate-50 font-bold rounded-xl text-xs h-10 shadow-none text-center"
+                          >
+                            View Diagnosis
+                          </Button>
+                          <Button 
+                            onClick={(e) => { e.stopPropagation(); openDispatchModal(req); }} 
+                            className="flex-1 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
+                          >
+                            Dispatch Vendor
+                          </Button>
+                        </div>
                       ) : req.status === "AWAITING_APPROVAL" ? (
                         <Button 
                           onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
@@ -768,7 +813,7 @@ export default function MaintenancePage() {
                         >
                           💳 Settle &amp; Close Ticket
                         </Button>
-                      ) : req.status === "ASSIGNED" && !req.externalVendor ? (
+                      ) : (req.status === "ASSIGNED" || req.status === "DIAGNOSIS_SCHEDULED") && !req.externalVendor ? (
                         <div className="flex gap-2 w-full">
                           <Button 
                             onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
@@ -779,7 +824,7 @@ export default function MaintenancePage() {
                           </Button>
                           <Button 
                             disabled 
-                            className="flex-1 bg-slate-105 text-slate-400 font-bold rounded-xl text-xs h-10 shadow-none cursor-not-allowed text-center"
+                            className="flex-1 bg-slate-100 text-slate-400 font-bold rounded-xl text-xs h-10 shadow-none cursor-not-allowed text-center"
                           >
                             Awaiting Diagnosis...
                           </Button>

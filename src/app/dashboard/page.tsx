@@ -170,12 +170,12 @@ export default function DashboardPage() {
       }
       return false;
     });
-    const activeLease = leases.find((l) => l.status === "ACTIVE" && (!onboardingLease || onboardingLease.id !== l.id));
 
     const activeLeasesCount = leases.filter((l) => l.status === "ACTIVE").length;
     const unpaidInvoices = invoices.filter((i) => i.status === "UNPAID" || i.status === "OVERDUE");
     const openRequestsCount = maintenance.filter((m) => m.status !== "RESOLVED" && m.status !== "CLOSED").length;
     const totalMessagesCount = messages.filter((m) => m.receiverId === (session?.user as any).id).length;
+    const pendingConfirmations = maintenance.filter((m) => m.status === "PENDING_TENANT_CONFIRMATION");
 
     const getGreeting = () => {
       const hr = new Date().getHours();
@@ -184,463 +184,589 @@ export default function DashboardPage() {
       return "Good evening";
     };
 
+    // Rent due countdown
+    const nextRentInvoice = unpaidInvoices
+      .filter(i => {
+        const lease = leases.find((l: any) => l.id === i.leaseId);
+        return !(lease && Number(i.amount) === Number(lease.securityDeposit));
+      })
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+
+    const daysUntilRent = nextRentInvoice
+      ? Math.ceil((new Date(nextRentInvoice.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
+
+    const leaseProgress = getLeaseProgress(selectedLease);
+    const daysUntilLeaseEnd = selectedLease?.endDate
+      ? Math.ceil((new Date(selectedLease.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
+
+    // Human readable maintenance status map
+    const statusLabel: Record<string, { text: string; color: string; dot: string }> = {
+      SUBMITTED:                { text: "Submitted — under review",     color: "text-slate-600",   dot: "bg-slate-400"   },
+      UNASSIGNED:               { text: "Awaiting assignment",          color: "text-orange-600",  dot: "bg-orange-400"  },
+      ASSIGNED:                 { text: "Inspector assigned",           color: "text-blue-600",    dot: "bg-blue-400"    },
+      DIAGNOSIS_SCHEDULED:      { text: "Visit scheduled",              color: "text-indigo-600",  dot: "bg-indigo-400"  },
+      DIAGNOSIS_COMPLETE:       { text: "Diagnosed — vendor coming",    color: "text-teal-600",    dot: "bg-teal-400"    },
+      AWAITING_APPROVAL:        { text: "Quote pending approval",       color: "text-amber-600",   dot: "bg-amber-400"   },
+      APPROVED:                 { text: "Work approved",                color: "text-emerald-600", dot: "bg-emerald-400" },
+      REPAIR_SCHEDULED:         { text: "Repair scheduled",             color: "text-purple-600",  dot: "bg-purple-400"  },
+      IN_PROGRESS:              { text: "Repair in progress",           color: "text-blue-600",    dot: "bg-blue-400"    },
+      PENDING_TENANT_CONFIRMATION: { text: "⚡ Needs your confirmation", color: "text-rose-600",  dot: "bg-rose-500"    },
+      RESOLVED:                 { text: "Resolved",                     color: "text-emerald-600", dot: "bg-emerald-400" },
+      CLOSED:                   { text: "Closed",                       color: "text-slate-400",   dot: "bg-slate-300"   },
+    };
+
+    // Build prioritized activity feed
     const activities: {
-      id: string;
-      title: string;
-      date: Date;
-      description: string;
-      badgeText: string;
-      badgeColor: string;
-      icon: React.ReactNode;
-      iconBg: string;
+      id: string; title: string; date: Date; description: string;
+      badgeText: string; badgeColor: string; icon: React.ReactNode;
+      iconBg: string; urgent?: boolean; action?: () => void; actionLabel?: string;
     }[] = [];
 
     unpaidInvoices.forEach((inv) => {
       const lease = leases.find((l: any) => l.id === inv.leaseId);
       const isDeposit = lease && Number(inv.amount) === Number(lease.securityDeposit);
+      const daysLeft = Math.ceil((new Date(inv.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const isOverdue = daysLeft < 0;
       activities.push({
         id: `invoice-${inv.id}`,
-        title: isDeposit ? "Deposit Reminder" : "Rent Reminder",
+        title: isDeposit ? "Security Deposit Due" : "Rent Payment Due",
         date: new Date(inv.dueDate),
         description: isDeposit
-          ? `Your security deposit of $${Number(inv.amount).toLocaleString()} is outstanding.`
-          : `Your rent payment of $${Number(inv.amount).toLocaleString()} is outstanding.`,
-        badgeText: "Notification",
-        badgeColor: "bg-slate-100 text-[#475569] border border-[#E2E8F0]",
-        icon: <DollarSign className="h-4 w-4 text-slate-600" />,
-        iconBg: "bg-slate-50 border border-slate-100",
+          ? `Your $${Number(inv.amount).toLocaleString()} security deposit is outstanding.`
+          : isOverdue
+            ? `Your $${Number(inv.amount).toLocaleString()} rent is ${Math.abs(daysLeft)} day${Math.abs(daysLeft) !== 1 ? "s" : ""} overdue.`
+            : `Your $${Number(inv.amount).toLocaleString()} rent is due in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}.`,
+        badgeText: isOverdue ? "Overdue" : "Payment Due",
+        badgeColor: isOverdue ? "bg-red-100 text-red-700 border-red-200" : "bg-amber-100 text-amber-700 border-amber-200",
+        icon: <DollarSign className="h-4 w-4 text-red-600" />,
+        iconBg: "bg-red-50 border border-red-100",
+        urgent: true,
+        action: () => router.push("/dashboard/payments/pay-rent"),
+        actionLabel: "Pay Now →",
       });
     });
 
     maintenance.forEach((m) => {
-      let badgeCol = "bg-amber-100 text-amber-800";
-      if (m.priority === "EMERGENCY" || m.priority === "HIGH") {
-        badgeCol = "bg-red-100 text-red-800";
-      }
+      const isPendingConfirm = m.status === "PENDING_TENANT_CONFIRMATION";
+      const isEmergency = m.priority === "EMERGENCY";
       activities.push({
         id: `maintenance-${m.id}`,
-        title: "Maintenance Update",
-        date: new Date(m.createdAt),
-        description: `${m.title} - Status changed to ${m.status} (Priority: ${m.priority}).`,
-        badgeText: "Maintenance",
-        badgeColor: `${badgeCol} border border-amber-200/55`,
-        icon: <Wrench className="h-4 w-4 text-amber-600" />,
-        iconBg: "bg-amber-50 border border-amber-100",
+        title: m.title,
+        date: new Date(m.updatedAt || m.createdAt),
+        description: statusLabel[m.status]?.text || m.status.replace(/_/g, " "),
+        badgeText: isPendingConfirm ? "Action Required" : isEmergency ? "Emergency" : m.priority.charAt(0) + m.priority.slice(1).toLowerCase(),
+        badgeColor: isPendingConfirm
+          ? "bg-rose-100 text-rose-700 border-rose-200"
+          : isEmergency
+            ? "bg-red-100 text-red-700 border-red-200"
+            : "bg-amber-50 text-amber-700 border-amber-200",
+        icon: <Wrench className={`h-4 w-4 ${isPendingConfirm ? "text-rose-600" : "text-amber-600"}`} />,
+        iconBg: isPendingConfirm ? "bg-rose-50 border border-rose-100" : "bg-amber-50 border border-amber-100",
+        urgent: isPendingConfirm,
+        action: isPendingConfirm ? () => router.push(`/dashboard/maintenance/${m.id}`) : undefined,
+        actionLabel: isPendingConfirm ? "Confirm Repair →" : undefined,
       });
     });
 
     documents.forEach((d) => {
       activities.push({
         id: `document-${d.id}`,
-        title: "Document Uploaded",
+        title: d.name,
         date: new Date(d.uploadedAt),
-        description: `New lease document '${d.name}' (${d.category}) has been uploaded successfully.`,
+        description: `New document added to your lease • ${d.category}`,
         badgeText: "Document",
-        badgeColor: "bg-blue-100 text-blue-800 border border-blue-200/55",
+        badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
         icon: <FileText className="h-4 w-4 text-blue-600" />,
         iconBg: "bg-blue-50 border border-blue-100",
       });
     });
 
-    activities.sort((a, b) => b.date.getTime() - a.date.getTime());
-    const latestActivities = activities.slice(0, 5);
+    activities.sort((a, b) => {
+      if (a.urgent && !b.urgent) return -1;
+      if (!a.urgent && b.urgent) return 1;
+      return b.date.getTime() - a.date.getTime();
+    });
+    const latestActivities = activities.slice(0, 6);
 
     return (
-      <div className="w-full max-w-7xl mx-auto pt-6 space-y-8 pb-20">
-        {/* Premium Header */}
-        <div className="relative overflow-hidden rounded-[32px] bg-[#0F172A] p-8 md:p-10 shadow-2xl border border-slate-800">
-          {/* Abstract Background Shapes */}
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-gradient-to-tr from-blue-500/20 to-emerald-500/20 blur-3xl pointer-events-none"></div>
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 sm:px-0">
 
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-xs font-bold text-white tracking-wide uppercase">Tenant Portal Active</span>
+        {/* ── HERO HEADER ── */}
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] shadow-2xl border border-slate-800/80">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-600/20 to-indigo-600/15 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-violet-600/15 to-emerald-600/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 p-7 md:p-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              {/* Greeting */}
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 mb-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-400 tracking-widest uppercase">Tenant Portal Active</span>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                  {getGreeting()},{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
+                    {session?.user?.name?.split(" ")[0] || "Tenant"}
+                  </span>
+                  !
+                </h1>
+                {selectedLease && (
+                  <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    {selectedLease.unit?.property?.name} • Unit {selectedLease.unit?.name}
+                  </p>
+                )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">{session?.user?.name?.split(' ')[0] || "Tenant"}</span>!
-              </h1>
-              <p className="text-slate-300 text-base md:text-lg max-w-xl font-medium">
-                Manage your lease, track maintenance, and review documents all in one unified experience.
-              </p>
-            </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-              {leases.length > 0 && (
-                <div className="w-full sm:w-auto min-w-[260px]">
-                  <Select
-                    value={selectedLeaseId || ""}
-                    onValueChange={(v: string | null) => setSelectedLeaseId(v)}
-                  >
-                    <SelectTrigger className="w-full h-[50px] rounded-2xl bg-white/10 hover:bg-white/15 border-white/20 text-white font-bold px-5 shadow-sm focus:ring-indigo-500/50 backdrop-blur-md transition-colors text-sm relative">
-                      <SelectValue placeholder="Select Lease">
-                        {(() => {
-                          const active = leases.find((l) => l.id === selectedLeaseId);
-                          if (active) {
-                            return active.unit?.property?.name ? `${active.unit.property.name} - ${active.unit.name}` : `Lease ${active.id.slice(0, 8)}`;
-                          }
-                          return "Select Lease";
-                        })()}
-                      </SelectValue>
+              {/* Right — Rent Countdown + Refresh */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                {daysUntilRent !== null && (
+                  <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl border font-bold text-sm min-w-[200px] ${
+                    daysUntilRent <= 0
+                      ? "bg-red-500/20 border-red-500/40 text-red-300"
+                      : daysUntilRent <= 5
+                        ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                        : "bg-white/8 border-white/15 text-white"
+                  }`}>
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest opacity-70">Next Rent Due</p>
+                      <p className="font-black text-base">
+                        {daysUntilRent <= 0 ? `${Math.abs(daysUntilRent)}d overdue` : `${daysUntilRent} days`}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {leases.length > 1 && (
+                  <Select value={selectedLeaseId || ""} onValueChange={(v) => setSelectedLeaseId(v)}>
+                    <SelectTrigger className="h-[50px] rounded-2xl bg-white/10 border-white/20 text-white font-bold px-4 backdrop-blur-md text-sm min-w-[200px]">
+                      <SelectValue placeholder="Select Lease" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1 bg-white">
+                    <SelectContent className="rounded-xl border-slate-200 shadow-xl bg-white">
                       {leases.map((l) => (
-                        <SelectItem key={l.id} value={l.id} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700 hover:bg-slate-50">
-                          {l.unit?.property?.name ? `${l.unit.property.name} - ${l.unit.name}` : `Lease ${l.id.slice(0, 8)}`}
+                        <SelectItem key={l.id} value={l.id} className="rounded-lg font-medium text-slate-700">
+                          {l.unit?.property?.name ? `${l.unit.property.name} — ${l.unit.name}` : `Lease ${l.id.slice(0, 8)}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              )}
-              <Button
-                onClick={fetchTenantData}
-                variant="outline"
-                className="bg-white hover:bg-slate-100 text-[#0F172A] border-0 rounded-2xl font-bold flex items-center gap-2 h-[50px] px-6 shadow-xl w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-95"
-              >
-                <RefreshCw className="h-4 w-4" /> Refresh Data
-              </Button>
+                )}
+                <Button
+                  onClick={fetchTenantData}
+                  variant="outline"
+                  className="bg-white/10 hover:bg-white/15 border-white/20 text-white font-bold rounded-2xl h-[50px] px-5 gap-2 backdrop-blur-md transition-all"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="hidden sm:inline">Refresh</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Move-In Progress Tracker for Pending Lease */}
+        {/* ── MOVE-IN CHECKLIST ── */}
         {onboardingLease && (() => {
           const step = onboardingLease.status === "PENDING_SIGNATURE" ? 1 : 2;
-
           return (
-            <Card className="bg-white border-0 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden mb-6 ring-1 ring-slate-100">
-              <div className="bg-gradient-to-r from-indigo-50 to-white p-8 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-black text-indigo-950 flex items-center gap-3">
-                    <div className="p-2.5 bg-indigo-600 rounded-xl shadow-sm">
-                      <Key className="h-5 w-5 text-white" />
-                    </div>
-                    Move-In Checklist
-                  </h2>
-                  <p className="text-base font-medium text-indigo-700/80 mt-2">Complete these final steps to secure <strong className="text-indigo-900">Unit {onboardingLease.unit?.name}</strong>.</p>
+            <div className="bg-white rounded-3xl border border-indigo-100 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-50 via-white to-purple-50/30 p-6 border-b border-indigo-100/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
+                    <Key className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-indigo-950">Move-In Checklist</h2>
+                    <p className="text-sm font-medium text-indigo-600/80">
+                      Complete these final steps to secure <strong>Unit {onboardingLease.unit?.name}</strong>.
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-indigo-100 shadow-sm">
-                  <div className="w-12 h-12 rounded-full border-4 border-indigo-100 flex items-center justify-center relative overflow-hidden">
-                    <svg className="absolute inset-0 w-full h-full text-indigo-600" viewBox="0 0 36 36">
-                      <path
-                        className="stroke-current"
-                        strokeWidth="4"
-                        strokeDasharray={`${(step - 1) * 50}, 100`}
-                        strokeLinecap="round"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
+                <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl border border-indigo-100 shadow-sm shrink-0">
+                  <div className="relative h-10 w-10">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E0E7FF" strokeWidth="4" />
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4F46E5" strokeWidth="4"
+                        strokeDasharray={`${((step - 1) / 2) * 100} 100`} strokeLinecap="round" />
                     </svg>
-                    <span className="text-xs font-black text-indigo-950 relative z-10">{Math.round(((step - 1) / 2) * 100)}%</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-indigo-900">
+                      {Math.round(((step - 1) / 2) * 100)}%
+                    </span>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Progress</span>
-                    <span className="text-sm font-black text-indigo-950">Step {step} of 3</span>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Progress</p>
+                    <p className="text-sm font-black text-indigo-950">Step {step} of 3</p>
                   </div>
                 </div>
               </div>
-
-              <div className="p-8">
-                <div className="space-y-0 relative before:absolute before:inset-0 before:ml-[23px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-indigo-100 before:via-indigo-100 before:to-transparent">
-                  
-                  {/* Step 1: Signature */}
-                  <div className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group transition-opacity duration-300 ${step === 1 ? 'opacity-100' : 'opacity-70'}`}>
-                    
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-indigo-100 text-indigo-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors">
-                      {step > 1 ? <CheckCircle2 className="h-6 w-6 text-emerald-500" /> : <PenTool className="h-5 w-5" />}
-                    </div>
-
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-3xl bg-white border border-slate-100 shadow-sm mb-6 group-hover:shadow-md transition-all group-hover:border-indigo-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className={`text-lg font-black ${step === 1 ? 'text-indigo-950' : 'text-slate-900'}`}>1. Lease Agreement</h3>
-                        {step > 1 && <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] uppercase tracking-widest font-bold rounded-full border border-emerald-100">Signed</span>}
+              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  {
+                    n: 1, label: "Sign Lease", desc: "Review terms and digitally sign your contract.",
+                    done: step > 1,
+                    active: step === 1,
+                    action: () => router.push(`/dashboard/leases/${onboardingLease.id}`),
+                    actionLabel: "Review & Sign",
+                    icon: <PenTool className="h-4 w-4" />,
+                  },
+                  {
+                    n: 2, label: "Pay Deposit", desc: `Pay your $${Number(onboardingLease.securityDeposit).toLocaleString()} security deposit.`,
+                    done: false,
+                    active: step === 2,
+                    action: () => router.push("/dashboard/payments/pay-rent"),
+                    actionLabel: "Pay Now",
+                    icon: <Banknote className="h-4 w-4" />,
+                  },
+                  {
+                    n: 3, label: "Lease Activated", desc: "You're all set — enjoy your new home!",
+                    done: false, active: false, locked: true,
+                    icon: <CheckCircle2 className="h-4 w-4" />,
+                  },
+                ].map((s) => (
+                  <div key={s.n} className={`p-5 rounded-2xl border transition-all ${
+                    s.done ? "bg-emerald-50 border-emerald-200" :
+                    s.active ? "bg-indigo-50 border-indigo-200 shadow-sm" :
+                    "bg-slate-50 border-slate-200 opacity-50"
+                  }`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black ${
+                        s.done ? "bg-emerald-500 text-white" :
+                        s.active ? "bg-indigo-600 text-white" :
+                        "bg-slate-300 text-slate-500"
+                      }`}>
+                        {s.done ? <CheckCircle2 className="h-4 w-4" /> : s.n}
                       </div>
-                      <p className="text-sm font-medium text-slate-500 mb-4 leading-relaxed">
-                        Review the financial terms, early termination policy, and digitally sign the legally binding contract.
+                      <p className={`font-black text-sm ${s.done ? "text-emerald-800" : s.active ? "text-indigo-900" : "text-slate-500"}`}>
+                        {s.label}
                       </p>
-                      {step === 1 && (
-                        <Button
-                          onClick={() => router.push(`/dashboard/leases/${onboardingLease.id}`)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 w-full sm:w-auto px-6 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5 animate-pulse"
-                        >
-                          <PenTool className="h-5 w-5 mr-2" /> Review & Sign Lease
-                        </Button>
-                      )}
+                      {s.done && <span className="ml-auto text-[9px] font-black px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full uppercase tracking-wider">Done</span>}
                     </div>
+                    <p className="text-xs font-medium text-slate-500 mb-3 leading-relaxed">{s.desc}</p>
+                    {s.active && s.action && (
+                      <Button onClick={s.action} className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm">
+                        {s.icon} {s.actionLabel}
+                      </Button>
+                    )}
                   </div>
-
-                  {/* Step 2: Deposit */}
-                  <div className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group transition-opacity duration-300 ${step === 2 ? 'opacity-100' : 'opacity-50'}`}>
-                    
-                    <div className={`flex items-center justify-center w-12 h-12 rounded-full border-4 border-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors ${step === 2 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
-                      {step === 2 ? <Banknote className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
-                    </div>
-
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-3xl bg-white border border-slate-100 shadow-sm mb-6 group-hover:shadow-md transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className={`text-lg font-black ${step === 2 ? 'text-amber-950' : 'text-slate-500'}`}>2. Security Deposit</h3>
-                        {step < 2 && <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] uppercase tracking-widest font-bold rounded-full border border-slate-200">Locked</span>}
-                      </div>
-                      <p className="text-sm font-medium text-slate-500 mb-4 leading-relaxed">
-                        Secure the unit by paying your refundable security deposit of <strong className="text-slate-700">${Number(onboardingLease.securityDeposit).toLocaleString()}</strong>.
-                      </p>
-                      {step === 2 ? (
-                        <Button
-                          onClick={() => router.push('/dashboard/payments/pay-rent')}
-                          className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-12 w-full sm:w-auto px-6 rounded-xl shadow-lg shadow-amber-200 transition-all hover:-translate-y-0.5"
-                        >
-                          <Banknote className="h-5 w-5 mr-2" /> Pay Deposit Now
-                        </Button>
-                      ) : (
-                        <p className="text-xs font-bold text-slate-400 flex items-center gap-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                          <Lock className="h-4 w-4" /> Locked until lease is signed
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Step 3: Activation */}
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group opacity-40">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-100 text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                      <Lock className="h-4 w-4" />
-                    </div>
-
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-3xl bg-slate-50/50 border border-slate-100 shadow-sm mb-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-black text-slate-500">3. Final Activation</h3>
-                      </div>
-                      <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                        Once signed, your lease will become active. You will gain access to your official signed PDF and receive move-in instructions.
-                      </p>
-                    </div>
-                  </div>
-
-                </div>
+                ))}
               </div>
-            </Card>
-          )
+            </div>
+          );
         })()}
 
-        {/* Quick Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card 
-            onClick={() => router.push("/dashboard/leases/my-leases")}
-            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Leases</span>
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-sm">
-                <Home className="h-5 w-5" />
-              </div>
+        {/* ── ATTENTION REQUIRED BANNER ── */}
+        {pendingConfirmations.length > 0 && (
+          <div className="flex items-center gap-4 p-5 bg-rose-50 border border-rose-200 rounded-2xl shadow-sm">
+            <div className="h-11 w-11 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+              <AlertTriangle className="h-5 w-5 text-rose-600" />
             </div>
-            <div>
-              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{activeLeasesCount}</h3>
-              <p className="text-sm text-slate-500 font-semibold mt-1">
-                {leases.length === 1 ? "1 total lease" : `${leases.length} total leases`}
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-rose-900 text-sm">
+                {pendingConfirmations.length} repair{pendingConfirmations.length > 1 ? "s" : ""} waiting for your confirmation!
+              </p>
+              <p className="text-rose-600 text-xs font-medium mt-0.5">
+                A technician has completed work on your unit. Please confirm the repairs were done to your satisfaction.
               </p>
             </div>
-          </Card>
+            <Button
+              onClick={() => router.push(`/dashboard/maintenance/${pendingConfirmations[0].id}`)}
+              className="shrink-0 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl h-9 px-4 text-xs shadow-sm"
+            >
+              Review Now →
+            </Button>
+          </div>
+        )}
 
-          <Card 
-            onClick={() => router.push("/dashboard/payments/pay-rent")}
-            className={`border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer ${
-              unpaidInvoices.length > 0 ? "bg-red-50/20 hover:bg-red-50/40" : "bg-white"
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Unpaid Balance</span>
-              <div className={`p-3 rounded-2xl shadow-sm ${unpaidInvoices.length > 0 ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
-                <Wallet className="h-5 w-5" />
-              </div>
-            </div>
-            <div>
-              <h3 className={`text-4xl font-black tracking-tight ${unpaidInvoices.length > 0 ? "text-red-600" : "text-slate-900"}`}>
-                ${unpaidInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0).toLocaleString()}
-              </h3>
-              <p className="text-sm text-slate-500 font-semibold mt-1">{unpaidInvoices.length} due invoices</p>
-            </div>
-          </Card>
-
-          <Card 
-            onClick={() => router.push("/dashboard/maintenance/my-requests")}
-            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Open Requests</span>
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shadow-sm">
-                <Wrench className="h-5 w-5" />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{openRequestsCount}</h3>
-              <p className="text-sm text-slate-500 font-semibold mt-1">Active maintenance</p>
-            </div>
-          </Card>
-
-          <Card 
-            onClick={() => router.push("/dashboard/messages")}
-            className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[150px] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">New Messages</span>
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl shadow-sm">
-                <Bell className="h-5 w-5" />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{totalMessagesCount}</h3>
-              <p className="text-sm text-slate-500 font-semibold mt-1">
-                {totalMessagesCount === 1 ? "1 unread message" : `${totalMessagesCount} unread messages`}
-              </p>
-            </div>
-          </Card>
-        </div>
-
-        {/* Split Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Lease Snapshot Card */}
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 flex flex-col justify-between">
-            <div>
-              <div className="pb-6 border-b border-slate-100 mb-6 flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-indigo-500" />
-                    Lease Snapshot
-                  </h2>
-                  <span className="text-sm font-medium text-slate-500 mt-1 block">Essential details about your current lease</span>
+        {/* ── STAT CARDS ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              label: "My Lease",
+              value: activeLeasesCount > 0 ? "Active" : "No Lease",
+              sub: activeLeasesCount > 0 ? `${leases.length} total lease${leases.length !== 1 ? "s" : ""}` : "Browse listings",
+              icon: <Home className="h-5 w-5" />,
+              iconClass: "bg-blue-50 text-blue-600",
+              accent: "border-l-blue-500",
+              urgent: false,
+              onClick: () => router.push("/dashboard/leases/my-leases"),
+            },
+            {
+              label: "Balance Due",
+              value: unpaidInvoices.length > 0
+                ? `$${unpaidInvoices.reduce((s, i) => s + Number(i.amount), 0).toLocaleString()}`
+                : "Paid",
+              sub: unpaidInvoices.length > 0 ? `${unpaidInvoices.length} unpaid invoice${unpaidInvoices.length !== 1 ? "s" : ""}` : "All invoices paid ✓",
+              icon: <Wallet className="h-5 w-5" />,
+              iconClass: unpaidInvoices.length > 0 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600",
+              accent: unpaidInvoices.length > 0 ? "border-l-red-500" : "border-l-emerald-400",
+              urgent: unpaidInvoices.length > 0,
+              onClick: () => router.push("/dashboard/payments/pay-rent"),
+            },
+            {
+              label: "Maintenance",
+              value: openRequestsCount,
+              sub: openRequestsCount > 0 ? `${openRequestsCount} open request${openRequestsCount !== 1 ? "s" : ""}` : "No open requests",
+              icon: <Wrench className="h-5 w-5" />,
+              iconClass: "bg-amber-50 text-amber-600",
+              accent: "border-l-amber-400",
+              urgent: false,
+              onClick: () => router.push("/dashboard/maintenance/my-requests"),
+            },
+            {
+              label: "Messages",
+              value: totalMessagesCount,
+              sub: totalMessagesCount > 0 ? `${totalMessagesCount} message${totalMessagesCount !== 1 ? "s" : ""}` : "No messages",
+              icon: <Bell className="h-5 w-5" />,
+              iconClass: "bg-violet-50 text-violet-600",
+              accent: "border-l-violet-400",
+              urgent: false,
+              onClick: () => router.push("/dashboard/messages"),
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              onClick={card.onClick}
+              className={`bg-white rounded-2xl p-5 border border-slate-200/80 border-l-4 ${card.accent} shadow-sm hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5 group ${card.urgent ? "ring-1 ring-red-200" : ""}`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{card.label}</span>
+                <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${card.iconClass} group-hover:scale-110 transition-transform`}>
+                  {card.icon}
                 </div>
               </div>
-              
-              <div className="space-y-6">
-                {selectedLease ? (
-                  <>
-                    <div className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100">
-                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
-                        Property
-                      </span>
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <strong className="text-xl font-black text-slate-900">
-                          {selectedLease.unit?.property?.name || "Unknown Property"}
-                        </strong>
-                        <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${
-                          selectedLease.status === "ACTIVE" 
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
-                            : "bg-amber-50 text-amber-700 border-amber-100"
-                        }`}>
-                          {selectedLease.status}
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-2 mt-2 text-slate-500">
-                        <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-indigo-400" />
-                        <span className="text-sm font-medium leading-relaxed">
-                          {selectedLease.unit?.property?.address ? (
-                            `${selectedLease.unit.property.address}, ${selectedLease.unit.property.city}, ${selectedLease.unit.property.state || ""} ${selectedLease.unit.property.zip || ""}`
-                          ) : (
-                            "No address provided"
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
-                          Lease Period
-                        </span>
-                        <strong className="text-sm font-bold text-slate-900 block mt-0.5">
-                          {new Date(selectedLease.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – {new Date(selectedLease.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </strong>
-                      </div>
-                      <div className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">
-                          Monthly Rent
-                        </span>
-                        <strong className="text-lg font-black text-indigo-600 block mt-0.5">
-                          ${Number(selectedLease.monthlyRent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </strong>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-slate-500 font-medium">No active lease details available.</p>
-                  </div>
-                )}
-              </div>
+              <p className={`text-2xl font-black tracking-tight mb-0.5 ${card.urgent ? "text-red-600" : "text-slate-900"}`}>
+                {card.value}
+              </p>
+              <p className="text-xs font-semibold text-slate-500">{card.sub}</p>
             </div>
+          ))}
+        </div>
 
-            {/* Repair Panel */}
-            <div className="mt-8 pt-8 border-t border-slate-100">
-              <Card className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white border-0 rounded-3xl p-6 relative overflow-hidden shadow-xl shadow-indigo-200/50">
-                <div className="absolute -right-8 -top-8 h-32 w-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute -left-8 -bottom-8 h-24 w-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
-                
-                <h3 className="text-lg font-black mb-2 text-white relative z-10">Need Help or Repairs?</h3>
-                <p className="text-sm text-indigo-100 leading-relaxed mb-6 font-medium relative z-10">
-                  Submit a request with description and pictures, and our maintenance team will address it immediately.
-                </p>
-                <Button
-                  onClick={() => router.push("/dashboard/maintenance/new")}
-                  className="w-full bg-white text-indigo-700 hover:bg-slate-50 font-black rounded-xl text-sm h-12 transition-all shadow-sm relative z-10 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  File Maintenance Ticket
-                </Button>
-              </Card>
-            </div>
-          </Card>
+        {/* ── MAIN CONTENT GRID ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-          {/* Latest Activity Card */}
-          <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 flex flex-col justify-between">
-            <div className="w-full h-full flex flex-col">
-              <div className="pb-6 border-b border-slate-100 mb-6">
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Bell className="h-4 w-4 text-amber-600" />
-                  </div>
-                  Latest Activity
-                </h2>
-                <span className="text-sm font-medium text-slate-500 mt-2 block">Recent notifications and updates on your account</span>
-              </div>
+          {/* LEFT — My Home Card (3 cols) */}
+          <div className="lg:col-span-3 space-y-5">
 
-              <div className="space-y-4 overflow-y-auto pr-2 flex-grow custom-scrollbar">
-                {latestActivities.length === 0 ? (
-                  <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex-grow flex items-center justify-center">
-                    <p className="text-slate-500 font-medium">No recent activity to show.</p>
-                  </div>
-                ) : (
-                  latestActivities.map((act) => (
-                    <div key={act.id} className="p-5 border border-slate-100 rounded-2xl bg-white hover:border-indigo-100 hover:shadow-md transition-all group flex flex-col gap-3">
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl ${act.iconBg} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                            {act.icon}
-                          </div>
-                          <span className="font-bold text-slate-900">{act.title}</span>
-                        </div>
-                        <span className="text-xs text-slate-400 font-bold bg-slate-50 px-2.5 py-1 rounded-lg">
-                          {act.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                      </div>
-                      <p className="text-sm font-medium text-slate-500 leading-relaxed ml-11">
-                        {act.description}
+            {/* Lease Details */}
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Your Home</p>
+                    <h2 className="text-xl font-black text-white">{selectedLease?.unit?.property?.name || "No Active Lease"}</h2>
+                    {selectedLease && (
+                      <p className="text-slate-400 text-xs font-medium mt-1 flex items-center gap-1.5">
+                        <MapPin className="h-3 w-3" />
+                        {selectedLease.unit?.property?.address}, {selectedLease.unit?.property?.city}, {selectedLease.unit?.property?.state}
                       </p>
-                      <div className="flex items-center mt-1 ml-11">
-                        <span className={`text-[10px] font-black px-3 py-1 rounded-md ${act.badgeColor} uppercase tracking-widest border-none ring-1 ring-black/5`}>
-                          {act.badgeText}
-                        </span>
-                      </div>
+                    )}
+                  </div>
+                  {selectedLease && (
+                    <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest ${
+                      selectedLease.status === "ACTIVE"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                    }`}>
+                      {selectedLease.status === "ACTIVE" ? "Active" : selectedLease.status.replace(/_/g, " ")}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {selectedLease ? (
+                <div className="p-6 space-y-5">
+                  {/* Key lease data */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Monthly Rent</p>
+                      <p className="text-xl font-black text-indigo-600">
+                        ${Number(selectedLease.monthlyRent).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </p>
                     </div>
-                  ))
-                )}
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Unit</p>
+                      <p className="text-xl font-black text-slate-900">{selectedLease.unit?.name || "—"}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 col-span-2 sm:col-span-1">
+                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
+                        {daysUntilLeaseEnd !== null && daysUntilLeaseEnd > 0 ? `Expires in ${daysUntilLeaseEnd}d` : "Lease Period"}
+                      </p>
+                      <p className="text-sm font-black text-slate-900 leading-tight">
+                        {new Date(selectedLease.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} —{" "}
+                        {new Date(selectedLease.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Lease progress bar */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-bold text-slate-500">Lease Progress</p>
+                      <p className="text-xs font-black text-slate-700">{leaseProgress}% complete</p>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
+                        style={{ width: `${leaseProgress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pay rent CTA if due */}
+                  {unpaidInvoices.length > 0 && (
+                    <Button
+                      onClick={() => router.push("/dashboard/payments/pay-rent")}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl h-12 text-sm shadow-md shadow-red-200/50 transition-all hover:scale-[1.01]"
+                    >
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Pay Rent — ${unpaidInvoices.reduce((s, i) => s + Number(i.amount), 0).toLocaleString()} Due
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-slate-500 font-medium text-sm">No active lease found.</p>
+                  <Button onClick={() => router.push("/listings")} className="mt-4 bg-indigo-600 text-white font-bold rounded-xl h-10 px-6 text-sm">
+                    Browse Listings
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-indigo-500" />
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  {
+                    label: "File a Repair Request",
+                    desc: "Report any maintenance issue",
+                    icon: <Wrench className="h-5 w-5" />,
+                    bg: "bg-indigo-50 hover:bg-indigo-100",
+                    text: "text-indigo-700",
+                    action: () => router.push("/dashboard/maintenance/new"),
+                    primary: true,
+                  },
+                  {
+                    label: "Pay Rent",
+                    desc: "View & pay invoices",
+                    icon: <DollarSign className="h-5 w-5" />,
+                    bg: unpaidInvoices.length > 0 ? "bg-red-50 hover:bg-red-100" : "bg-emerald-50 hover:bg-emerald-100",
+                    text: unpaidInvoices.length > 0 ? "text-red-700" : "text-emerald-700",
+                    action: () => router.push("/dashboard/payments/pay-rent"),
+                  },
+                  {
+                    label: "View Lease Docs",
+                    desc: "Access signed documents",
+                    icon: <FileText className="h-5 w-5" />,
+                    bg: "bg-blue-50 hover:bg-blue-100",
+                    text: "text-blue-700",
+                    action: () => router.push("/dashboard/leases/my-leases"),
+                  },
+                  {
+                    label: "Track Maintenance",
+                    desc: "Check request status",
+                    icon: <Settings className="h-5 w-5" />,
+                    bg: "bg-amber-50 hover:bg-amber-100",
+                    text: "text-amber-700",
+                    action: () => router.push("/dashboard/maintenance/my-requests"),
+                  },
+                ].map((qa) => (
+                  <button
+                    key={qa.label}
+                    onClick={qa.action}
+                    className={`${qa.bg} rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm group`}
+                  >
+                    <div className={`${qa.text} mb-2 group-hover:scale-110 transition-transform inline-block`}>{qa.icon}</div>
+                    <p className={`text-sm font-black ${qa.text} leading-tight`}>{qa.label}</p>
+                    <p className="text-[11px] font-medium text-slate-500 mt-0.5">{qa.desc}</p>
+                  </button>
+                ))}
               </div>
             </div>
-          </Card>
+          </div>
+
+          {/* RIGHT — Activity Feed (2 cols) */}
+          <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex flex-col">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-amber-500" />
+                  Recent Activity
+                </h2>
+                <p className="text-xs font-medium text-slate-400 mt-0.5">Updates on your account</p>
+              </div>
+              {activities.filter(a => a.urgent).length > 0 && (
+                <span className="h-5 w-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                  {activities.filter(a => a.urgent).length}
+                </span>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-50 px-2 py-1">
+              {latestActivities.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                  <div className="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
+                    <Bell className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <p className="text-sm font-bold text-slate-500">All caught up!</p>
+                  <p className="text-xs text-slate-400 mt-1">No recent activity to show.</p>
+                </div>
+              ) : (
+                latestActivities.map((act) => (
+                  <div key={act.id} className={`px-4 py-4 transition-all hover:bg-slate-50/80 group ${act.urgent ? "bg-rose-50/30 hover:bg-rose-50/50" : ""}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-xl ${act.iconBg} flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform`}>
+                        {act.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <p className="text-sm font-bold text-slate-800 truncate">{act.title}</p>
+                          <span className="text-[10px] text-slate-400 font-semibold shrink-0">
+                            {act.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-slate-500 leading-relaxed">{act.description}</p>
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${act.badgeColor} uppercase tracking-wider`}>
+                            {act.badgeText}
+                          </span>
+                          {act.action && act.actionLabel && (
+                            <button
+                              onClick={act.action}
+                              className="text-[11px] font-black text-indigo-600 hover:text-indigo-800 transition-colors"
+                            >
+                              {act.actionLabel}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {activities.length > 6 && (
+              <div className="p-4 border-t border-slate-100">
+                <button
+                  onClick={() => router.push("/dashboard/activity-logs")}
+                  className="w-full text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors text-center py-1"
+                >
+                  View all activity →
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

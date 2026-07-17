@@ -27,17 +27,20 @@ function decryptSafe(val: string | null | undefined): string | null {
   }
 }
 
-export function sanitizeVendor(vendor: any) {
+export function sanitizeVendor(vendor: any, mask: boolean = true) {
   if (!vendor) return vendor;
   const sanitized = { ...vendor };
   
   const acc = decryptSafe(sanitized.accountNumber);
   const rout = decryptSafe(sanitized.routingNumber);
 
-  if (acc) {
+  if (mask) {
     const masked = maskBankDetails(acc, rout);
-    sanitized.accountNumber = masked.accountNumber;
-    if (sanitized.routingNumber) sanitized.routingNumber = masked.routingNumber;
+    if (acc) sanitized.accountNumber = masked.accountNumber;
+    if (rout) sanitized.routingNumber = masked.routingNumber;
+  } else {
+    if (acc) sanitized.accountNumber = acc;
+    if (rout) sanitized.routingNumber = rout;
   }
   return sanitized;
 }

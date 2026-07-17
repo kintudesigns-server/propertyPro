@@ -81,7 +81,8 @@ export async function GET(req: NextRequest) {
       }
 
       if (request.externalVendor) {
-        request.externalVendor = sanitizeVendor(request.externalVendor);
+        const isOwnerOrAdmin = role === "OWNER" || role === "SUPERADMIN";
+        request.externalVendor = sanitizeVendor(request.externalVendor, !isOwnerOrAdmin);
       }
 
       return NextResponse.json({ ...request, activeLease, vendorExpenseTransaction });
@@ -106,7 +107,21 @@ export async function GET(req: NextRequest) {
       where: whereClause,
       include: {
         unit: {
-          include: { property: true }
+          include: { 
+            property: {
+              include: {
+                owner: {
+                  select: {
+                    name: true,
+                    email: true,
+                    phone: true,
+                    approvalThreshold: true,
+                    emergencyOverrideLimit: true
+                  }
+                }
+              }
+            }
+          }
         },
         tenant: {
           select: { name: true, email: true, phone: true }
@@ -126,8 +141,10 @@ export async function GET(req: NextRequest) {
       return req;
     });
 
-    return NextResponse.json(sanitizedRequests);
+    const serialized = JSON.parse(JSON.stringify(sanitizedRequests));
+    return NextResponse.json(serialized);
   } catch (error: any) {
+    console.error("API Error in /api/maintenance:", error);
     return NextResponse.json({ error: error.message || "Failed to fetch maintenance requests" }, { status: 500 });
   }
 }
@@ -290,7 +307,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const data = await req.json();
-    const { id, action, paymentMethod, referenceNote, ...updateData } = data;
+    const { id, action, paymentMethod, referenceNote, rejectionReason, ...updateData } = data;
 
     if (!id) {
       return NextResponse.json({ error: "Missing request ID" }, { status: 400 });
@@ -299,7 +316,11 @@ export async function PUT(req: NextRequest) {
     // Fetch full request details first for validations and metadata
     const fullRequest: any = await prisma.maintenanceRequest.findUnique({
       where: { id },
-      include: { unit: { include: { property: { include: { owner: true } } } }, externalVendor: true } as any,
+      include: { 
+        unit: { include: { property: { include: { owner: true } } } }, 
+        externalVendor: true,
+        inspector: true
+      } as any,
     });
 
     if (!fullRequest) {
@@ -309,7 +330,18 @@ export async function PUT(req: NextRequest) {
     const owner = fullRequest.unit.property.owner;
     const requesterRole = (session.user as any).role;
 
-    // Handle Quick Resolve (Skip Diagnosis/Estimates)
+    // ── ROLE GUARD: Inspectors cannot resolve/close tickets — diagnosis only ──
+    if (requesterRole === "INSPECTOR") {
+      const blockedStatuses = ["RESOLVED", "PENDING_TENANT_CONFIRMATION", "CLOSED"];
+      if (action === "QUICK_RESOLVE" || (updateData.status && blockedStatuses.includes(updateData.status))) {
+        return NextResponse.json(
+          { error: "Inspectors can only submit diagnosis reports. Resolving or closing tickets is not permitted." },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Handle Quick Resolve (Owner/Superadmin only — inspectors blocked above)
     if (action === "QUICK_RESOLVE") {
       updateData.status = "RESOLVED";
       updateData.finalLabor = updateData.finalLabor !== undefined ? parseFloat(updateData.finalLabor) : 0;
@@ -460,27 +492,121 @@ export async function PUT(req: NextRequest) {
         } catch (_) {}
       }
     }
+    
+    if (action === "REJECT_ESTIMATE") {
+      updateData.status = "DIAGNOSIS_SCHEDULED";
+      updateData.estimatedLabor = null;
+      updateData.estimatedMaterials = null;
+      updateData.estimatedCost = null;
+
+      const reason = rejectionReason || "No feedback provided";
+      updateData.inspectorNotes = `Estimate Rejected on ${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}: "${reason}"\n\nPrevious notes:\n${fullRequest.inspectorNotes || ""}`;
+
+      if (fullRequest.externalVendor) {
+        try {
+          const magicLink = `http://localhost:3000/vendor/ticket/${fullRequest.vendorMagicToken}`;
+          await sendEmail({
+            to: fullRequest.externalVendor.email,
+            subject: `Estimate Revision Requested: ${fullRequest.unit.property.name}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <h2 style="color: #e11d48; margin-top: 0;">Estimate Revision Requested</h2>
+                <p>Hello <strong>${fullRequest.externalVendor.name}</strong>,</p>
+                <p>The property owner has reviewed your estimate for the work order "<strong>${fullRequest.title}</strong>" at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong> and requested a revision.</p>
+                
+                <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-weight: bold; color: #9f1239;">Owner Rejection Feedback:</p>
+                  <p style="margin: 8px 0 0 0; font-style: italic; color: #4c0519;">"${reason}"</p>
+                </div>
+                
+                <p>Please click the button below to view the ticket details and submit a revised estimate:</p>
+                <p style="margin: 25px 0; text-align: center;">
+                  <a href="${magicLink}" style="background-color: #e11d48; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    Submit Revised Estimate
+                  </a>
+                </p>
+                <p style="color: #64748b; font-size: 13px;">If you have any questions, please coordinate directly with the property owner.</p>
+              </div>
+            `
+          });
+        } catch (_) {}
+      } else if (fullRequest.inspector) {
+        try {
+          const inspectorLink = `http://localhost:3000/dashboard/inspector/active`;
+          await sendEmail({
+            to: fullRequest.inspector.email,
+            subject: `Estimate Revision Requested: ${fullRequest.unit.property.name}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <h2 style="color: #e11d48; margin-top: 0;">Estimate Revision Requested</h2>
+                <p>Hello <strong>${fullRequest.inspector.name}</strong>,</p>
+                <p>The property owner has reviewed your estimate for the work order "<strong>${fullRequest.title}</strong>" at <strong>${fullRequest.unit.property.name} (Unit ${fullRequest.unit.name})</strong> and requested a revision.</p>
+                
+                <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-weight: bold; color: #9f1239;">Owner Rejection Feedback:</p>
+                  <p style="margin: 8px 0 0 0; font-style: italic; color: #4c0519;">"${reason}"</p>
+                </div>
+                
+                <p>Please click the button below to log in to your dashboard and submit a revised estimate:</p>
+                <p style="margin: 25px 0; text-align: center;">
+                  <a href="${inspectorLink}" style="background-color: #e11d48; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    Go to Active Tasks
+                  </a>
+                </p>
+                <p style="color: #64748b; font-size: 13px;">If you have any questions, please coordinate directly with the property owner.</p>
+              </div>
+            `
+          });
+        } catch (_) {}
+      }
+    }
 
     // Process dates or numbers if present
-    const estLabor = updateData.estimatedLabor !== undefined ? Number(updateData.estimatedLabor) : Number(fullRequest.estimatedLabor || 0);
-    const estMaterials = updateData.estimatedMaterials !== undefined ? Number(updateData.estimatedMaterials) : Number(fullRequest.estimatedMaterials || 0);
+    const estLabor = (updateData.estimatedLabor !== undefined && updateData.estimatedLabor !== null) ? Number(updateData.estimatedLabor) : Number(fullRequest.estimatedLabor || 0);
+    const estMaterials = (updateData.estimatedMaterials !== undefined && updateData.estimatedMaterials !== null) ? Number(updateData.estimatedMaterials) : Number(fullRequest.estimatedMaterials || 0);
     const totalEstimate = estLabor + estMaterials;
 
-    if (updateData.estimatedLabor !== undefined || updateData.estimatedMaterials !== undefined) {
-      updateData.estimatedLabor = estLabor;
-      updateData.estimatedMaterials = estMaterials;
-      
-      const isEmergency = (updateData.priority || fullRequest.priority) === "EMERGENCY";
-      const limit = isEmergency
-        ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
-        : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
+    if ((updateData.estimatedLabor !== undefined || updateData.estimatedMaterials !== undefined) && action !== "REJECT_ESTIMATE") {
 
-      // If frontend asks for approval but it's under the limit, auto-approve it
-      if ((updateData.status === "PENDING_APPROVAL" || updateData.status === "AWAITING_APPROVAL") && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
-        if (totalEstimate <= limit) {
-          updateData.status = "APPROVED";
-        } else {
-          updateData.status = "AWAITING_APPROVAL"; // Standardize on AWAITING_APPROVAL
+      // ── INSPECTOR ESTIMATE: Diagnosis report only, no approval gate ──
+      if (requesterRole === "INSPECTOR" || action === "SUBMIT_INSPECTOR_ESTIMATE") {
+        // Store in inspector-specific reference fields (separate from vendor quote fields)
+        updateData.inspectorEstimateLabor = estLabor;
+        updateData.inspectorEstimateMaterials = estMaterials;
+        updateData.estimateSource = "INSPECTOR";
+        // Do NOT set estimatedLabor/Materials — those are reserved for vendor quotes
+        delete updateData.estimatedLabor;
+        delete updateData.estimatedMaterials;
+        // Inspector's job is done: move to DIAGNOSIS_COMPLETE, no approval needed
+        updateData.status = "DIAGNOSIS_COMPLETE";
+
+        // Notify the property owner about the diagnosis report
+        try {
+          await notify({
+            userId: owner.id,
+            title: "Inspector Diagnosis Report Ready",
+            message: `${fullRequest.inspector?.name || "Inspector"} has submitted a diagnosis report for "${fullRequest.title}" at ${fullRequest.unit.property.name}. Reference estimate: $${totalEstimate.toFixed(2)}.`,
+            type: "SYSTEM",
+            priority: "HIGH",
+          });
+        } catch (_) {}
+      } else {
+        // ── VENDOR / OWNER ESTIMATE: Goes through approval flow ──
+        updateData.estimatedLabor = estLabor;
+        updateData.estimatedMaterials = estMaterials;
+
+        const isEmergency = (updateData.priority || fullRequest.priority) === "EMERGENCY";
+        const limit = isEmergency
+          ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
+          : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
+
+        // If frontend asks for approval but it's under the limit, auto-approve it
+        if ((updateData.status === "PENDING_APPROVAL" || updateData.status === "AWAITING_APPROVAL") && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
+          if (totalEstimate <= limit) {
+            updateData.status = "APPROVED";
+          } else {
+            updateData.status = "AWAITING_APPROVAL";
+          }
         }
       }
     }
@@ -490,9 +616,11 @@ export async function PUT(req: NextRequest) {
     }
     if (updateData.diagnosisDate) {
       updateData.diagnosisDate = new Date(updateData.diagnosisDate);
+      updateData.scheduledDate = updateData.diagnosisDate; // Keep scheduledDate in sync
     }
     if (updateData.repairDate) {
       updateData.repairDate = new Date(updateData.repairDate);
+      updateData.scheduledDate = updateData.repairDate; // Keep scheduledDate in sync
     }
 
     if (updateData.inspectorId === "none" || updateData.inspectorId === "") {
@@ -777,7 +905,8 @@ export async function PUT(req: NextRequest) {
       (updateData.status === "CLOSED" || data.status === "CLOSED") &&
       fullRequest.vendorReportedFault &&
       !fullRequest.ownerChargebackDecision &&
-      action !== "PAY_VENDOR"
+      action !== "PAY_VENDOR" &&
+      requesterRole !== "TENANT"
     ) {
       return NextResponse.json(
         { error: "Liability ruling required. Please rule 'Tenant Fault' or 'Normal Wear & Tear' in the Cost & Liability section before closing this ticket." },

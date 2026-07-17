@@ -62,6 +62,15 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
   const [isQuickFix, setIsQuickFix] = useState(false);
   const [workflowPath, setWorkflowPath] = useState<"ESTIMATE" | "QUICK_FIX" | null>(null);
 
+  const getLatestRejectionReason = (notes: string) => {
+    if (!notes || !notes.includes("Estimate Rejected")) return null;
+    const lines = notes.split("\n");
+    const rejectionLine = lines.find(l => l.includes("Estimate Rejected"));
+    if (!rejectionLine) return null;
+    const match = rejectionLine.match(/"([^"]+)"/);
+    return match ? match[1] : "Revision requested by property owner";
+  };
+
   const fetchTicket = async () => {
     setLoading(true);
     try {
@@ -515,6 +524,40 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <p className="text-xs text-slate-500 mt-1">Please complete the steps in order to manage and resolve this ticket.</p>
                 </div>
 
+                {/* Inspector Reference Estimate Hint */}
+                {(request.inspectorEstimateLabor != null || request.inspectorEstimateMaterials != null) && (
+                  <div className="p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🔍</span>
+                      <span className="text-xs font-bold text-teal-800 uppercase tracking-wide">Inspector Pre-Assessment on File</span>
+                    </div>
+                    <p className="text-xs font-semibold text-teal-700 leading-relaxed">
+                      A property inspector has previously assessed this job. Their estimated fair cost is{" "}
+                      <strong className="text-teal-900">
+                        ${(Number(request.inspectorEstimateLabor || 0) + Number(request.inspectorEstimateMaterials || 0)).toFixed(2)}
+                      </strong>
+                      {" "}(Labor: ${Number(request.inspectorEstimateLabor || 0).toFixed(2)} + Materials: ${Number(request.inspectorEstimateMaterials || 0).toFixed(2)}).
+                      Please ensure your quote reflects the actual scope of work.
+                    </p>
+                  </div>
+                )}
+
+                {getLatestRejectionReason(request.inspectorNotes) && request.status === "DIAGNOSIS_SCHEDULED" && (
+
+                  <div className="p-4 bg-rose-50 border-l-4 border-l-rose-500 border-rose-100 rounded-r-xl space-y-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                      <span className="text-xs font-bold text-rose-850 uppercase tracking-wide">Estimate Revision Requested</span>
+                    </div>
+                    <p className="text-xs font-semibold text-rose-700 leading-relaxed italic bg-white p-3 rounded-lg border border-rose-100/50">
+                      &ldquo;{getLatestRejectionReason(request.inspectorNotes)}&rdquo;
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-semibold leading-normal">
+                      The property owner requested revisions on your initial quote. Please update labor/material costs in Step 2 and submit a revised estimate.
+                    </p>
+                  </div>
+                )}
+
                 {/* Horizontal Step Progress Bar */}
                 <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-2">
                   <div className="flex items-center w-full md:w-auto gap-3">
@@ -651,6 +694,7 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                           <div className="flex-1">
                             <Input
                               type="date"
+                              min={new Date().toISOString().split('T')[0]}
                               value={selectedDate}
                               onChange={(e) => setSelectedDate(e.target.value)}
                               className="bg-white border-indigo-200 rounded-xl text-sm w-full h-10"
@@ -714,6 +758,10 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                           {request.rescheduleRequested ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 animate-pulse">
                               🚨 Reschedule Requested: "{request.rescheduleReason}"
+                            </span>
+                          ) : request.entryPermission ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                              ✅ Auto-Confirmed (Key Release Granted)
                             </span>
                           ) : request.tenantConfirmedSchedule ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">

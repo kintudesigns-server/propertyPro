@@ -1133,6 +1133,19 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           All Requests
                         </Link>
                         <Link
+                          href="/dashboard/maintenance/my-inspections"
+                          className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            pathname === "/dashboard/maintenance/my-inspections"
+                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            My Inspections
+                          </div>
+                        </Link>
+                        <Link
                           href="/dashboard/maintenance/emergency"
                           className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/maintenance/emergency"

@@ -68,8 +68,8 @@ function PipelineBadge({ status }: { status: string }) {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function InspectorActiveTasksPage() {
-  const { status } = useSession();
+export default function OwnerAssignedInspectionsPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [tasks,   setTasks]   = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +152,14 @@ export default function InspectorActiveTasksPage() {
   };
 
   // ── Derived ──
-  const active = useMemo(() => tasks.filter(t => !["RESOLVED", "CLOSED", "PENDING_TENANT_CONFIRMATION"].includes(t.status)), [tasks]);
+  const active = useMemo(() => {
+    const userId = (session?.user as any)?.id;
+    if (!userId) return [];
+    return tasks.filter(t => 
+      t.inspectorId === userId && 
+      !["RESOLVED", "CLOSED", "PENDING_TENANT_CONFIRMATION"].includes(t.status)
+    );
+  }, [tasks, session?.user]);
 
   const filtered = useMemo(() => {
     return active
@@ -194,28 +201,31 @@ export default function InspectorActiveTasksPage() {
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
 
       {/* ── HEADER ── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Wrench className="h-4 w-4 text-indigo-500" />
-            <span className="text-[11px] font-extrabold text-indigo-500 uppercase tracking-widest">Assigned Repairs</span>
+      <div className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl p-6 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <Wrench className="h-6 w-6 text-blue-500" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">My Assigned Inspections</h1>
+              <p className="text-[#64748B] text-sm font-medium mt-0.5">Manage, schedule, and estimate repairs you've assigned to yourself</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-slate-900">Active Work Orders</h1>
-          <p className="text-slate-400 text-sm mt-0.5">Manage and progress all repair tickets assigned to you.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Stats pills */}
-          <div className="hidden sm:flex items-center gap-2">
-            {[
-              { label: "Total", value: active.length, bg: "bg-slate-100", text: "text-slate-700" },
-              { label: "Waiting Approval", value: active.filter(t => t.status === "AWAITING_APPROVAL").length, bg: "bg-amber-50", text: "text-amber-700" },
-              { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-blue-50", text: "text-blue-700" },
-            ].map(s => (
-              <div key={s.label} className={`${s.bg} rounded-xl px-3 py-1.5 flex items-center gap-2`}>
-                <span className={`text-base font-black ${s.text}`}>{s.value}</span>
-                <span className={`text-[10px] font-bold ${s.text} opacity-80`}>{s.label}</span>
-              </div>
-            ))}
+          <div className="flex items-center gap-3">
+            {/* Stats pills */}
+            <div className="hidden sm:flex items-center gap-2">
+              {[
+                { label: "Total", value: active.length, bg: "bg-slate-100", text: "text-slate-700" },
+                { label: "Waiting Approval", value: active.filter(t => t.status === "AWAITING_APPROVAL").length, bg: "bg-amber-50", text: "text-amber-700" },
+                { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-blue-50", text: "text-blue-700" },
+              ].map(s => (
+                <div key={s.label} className={`${s.bg} rounded-xl px-3 py-1.5 flex items-center gap-2`}>
+                  <span className={`text-base font-black ${s.text}`}>{s.value}</span>
+                  <span className={`text-[10px] font-bold ${s.text} opacity-80`}>{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

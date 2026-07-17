@@ -238,6 +238,8 @@ export default function OwnerDashboard() {
   const [bankName, setBankName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [approvalThreshold, setApprovalThreshold] = useState<number | string>("");
+  const [emergencyOverrideLimit, setEmergencyOverrideLimit] = useState<number | string>("");
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [pricingTier, setPricingTier] = useState<any>(null);
@@ -315,6 +317,8 @@ export default function OwnerDashboard() {
             setBankName(userData.bankName || "");
             setAccountName(userData.accountName || "");
             setAccountNumber(userData.accountNumber || "");
+            setApprovalThreshold(userData.approvalThreshold !== null && userData.approvalThreshold !== undefined ? Number(userData.approvalThreshold) : "");
+            setEmergencyOverrideLimit(userData.emergencyOverrideLimit !== null && userData.emergencyOverrideLimit !== undefined ? Number(userData.emergencyOverrideLimit) : "");
             setPricingTier(userData.pricingTier || null);
             const currentStatus = userData.subscriptionStatus || "";
             setSubscriptionStatus(currentStatus);
@@ -1054,6 +1058,8 @@ export default function OwnerDashboard() {
           bankName,
           accountName,
           accountNumber,
+          approvalThreshold: approvalThreshold === "" ? null : Number(approvalThreshold),
+          emergencyOverrideLimit: emergencyOverrideLimit === "" ? null : Number(emergencyOverrideLimit),
         }),
       });
       if (res.ok) {
@@ -4232,6 +4238,45 @@ export default function OwnerDashboard() {
                           className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
                         />
                       </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
+                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Maintenance Cost Controls</h3>
+                  <p className="text-sm text-slate-600 mb-6">
+                    Define standard thresholds and emergency limits. Vendor quotes under these thresholds are automatically approved to expedite work.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="appThreshold" className="text-sm font-bold text-slate-700">Standard Approval Threshold ($)</Label>
+                      <Input 
+                        id="appThreshold"
+                        type="number"
+                        placeholder="200.00"
+                        min="0"
+                        step="0.01"
+                        value={approvalThreshold}
+                        onChange={(e) => setApprovalThreshold(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                      <p className="text-[11px] text-slate-500">Estimates above this require your manual approval. Default is $200.00</p>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="emergLimit" className="text-sm font-bold text-slate-700">Emergency Override Limit ($)</Label>
+                      <Input 
+                        id="emergLimit"
+                        type="number"
+                        placeholder="1500.00"
+                        min="0"
+                        step="0.01"
+                        value={emergencyOverrideLimit}
+                        onChange={(e) => setEmergencyOverrideLimit(e.target.value)}
+                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                      />
+                      <p className="text-[11px] text-slate-500">Emergency tickets under this are auto-authorized. Default is $1,500.00</p>
                     </div>
                   </div>
                 </Card>

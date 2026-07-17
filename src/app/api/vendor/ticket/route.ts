@@ -94,8 +94,10 @@ export async function PUT(req: NextRequest) {
       
       if (fullRequest.status === "SUBMITTED" || fullRequest.status === "ASSIGNED") {
         updateData.status = "DIAGNOSIS_SCHEDULED";
+        updateData.diagnosisDate = updateData.scheduledDate; // Keep in sync
       } else if (fullRequest.status === "APPROVED") {
         updateData.status = "REPAIR_SCHEDULED";
+        updateData.repairDate = updateData.scheduledDate; // Keep in sync
       }
     }
 
@@ -125,12 +127,16 @@ export async function PUT(req: NextRequest) {
         ? (owner.emergencyOverrideLimit ? Number(owner.emergencyOverrideLimit) : 1500)
         : (owner.approvalThreshold ? Number(owner.approvalThreshold) : 200);
 
+      // Tag this as a vendor estimate (used for source label on owner approval card)
+      updateData.estimateSource = "VENDOR";
+
       if (totalEstimate > limit) {
         updateData.status = "AWAITING_APPROVAL";
       } else {
         updateData.status = "APPROVED"; // Auto-approved if under limit
       }
     }
+
 
     // Explicit status updates
     if (status) {
@@ -183,6 +189,30 @@ export async function PUT(req: NextRequest) {
         priority: "MEDIUM",
         relatedEntityId: updatedRequest.id,
       });
+      
+      // Notify tenant on status updates
+      if (updatedRequest.tenantId) {
+        const statusMessages: Record<string, string> = {
+          ASSIGNED: `Your maintenance request "${fullRequest.title}" has been assigned to an inspector/vendor.`,
+          APPROVED: `The repair estimate for "${fullRequest.title}" has been approved. Repairs will be scheduled shortly.`,
+          IN_PROGRESS: `Work has started on your maintenance request "${fullRequest.title}".`,
+          RESOLVED: `Your maintenance request "${fullRequest.title}" has been resolved.`,
+          PENDING_TENANT_CONFIRMATION: `Your maintenance request "${fullRequest.title}" has been completed. Please confirm if it is fixed.`,
+          AWAITING_APPROVAL: `Your maintenance request "${fullRequest.title}" estimate is awaiting owner cost approval.`,
+          CLOSED: `Your maintenance request "${fullRequest.title}" has been closed.`,
+        };
+        const msg = statusMessages[updatedRequest.status];
+        if (msg) {
+          await notify({
+            userId: updatedRequest.tenantId,
+            title: `Maintenance Update – ${fullRequest.title}`,
+            message: msg,
+            type: "MAINTENANCE",
+            priority: updatedRequest.status === "PENDING_TENANT_CONFIRMATION" ? "HIGH" : "MEDIUM",
+            relatedEntityId: updatedRequest.id,
+          });
+        }
+      }
 
       // Notify Tenant if a scheduledDate was just locked in
       if (scheduledDate && (!fullRequest.scheduledDate || new Date(scheduledDate).getTime() !== new Date(fullRequest.scheduledDate).getTime())) {

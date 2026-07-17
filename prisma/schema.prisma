@@ -380,6 +380,13 @@ model MaintenanceRequest {
   finalLabor          Decimal?  @db.Decimal(10, 2)
   finalMaterials      Decimal?  @db.Decimal(10, 2)
   externalVendorName  String?
+
+  // Estimate tracking: who submitted the estimate
+  estimateSource            String?   // "INSPECTOR" | "VENDOR"
+  // Inspector's internal reference estimate (informational only, never goes to approval)
+  inspectorEstimateLabor    Decimal?  @db.Decimal(10, 2)
+  inspectorEstimateMaterials Decimal? @db.Decimal(10, 2)
+
   
   // Real-world safeguards and accounting
   vendorReportedFault     Boolean   @default(false)
