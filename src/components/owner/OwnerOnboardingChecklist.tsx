@@ -42,7 +42,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
   return (
     <div className="mb-6 bg-white border border-blue-200 rounded-2xl p-6 shadow-sm relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4">
-         <button onClick={handleDismiss} className="text-slate-400 hover:text-slate-600 transition-colors">
+         <button onClick={handleDismiss} className="text-[#8E8E93] hover:text-[#6E6E73] transition-colors">
             <X className="h-5 w-5" />
          </button>
       </div>
@@ -51,7 +51,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
         <div className="md:w-1/3 flex flex-col justify-center">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-slate-900 mb-1">Welcome to PropertyPro! 🎉</h2>
-            <p className="text-slate-500 text-sm">Let's get your account set up so you can start managing your portfolio.</p>
+            <p className="text-[#6E6E73] text-sm">Let's get your account set up so you can start managing your portfolio.</p>
           </div>
           
           <div className="mb-2 flex justify-between items-center text-sm font-semibold text-blue-700">
@@ -74,7 +74,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
              <div>
                 <p className={`font-bold text-sm ${true ? 'text-emerald-900' : 'text-slate-700'}`}>Account Created</p>
-                <p className={`text-xs mt-1 ${true ? 'text-emerald-700' : 'text-slate-500'}`}>You're in! Access granted.</p>
+                <p className={`text-xs mt-1 ${true ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>You're in! Access granted.</p>
              </div>
           </div>
 
@@ -82,27 +82,27 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
              {isProfileComplete ? <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" /> : <Circle className="h-5 w-5 text-slate-300 shrink-0 mt-0.5" />}
              <div>
                 <p className={`font-bold text-sm ${isProfileComplete ? 'text-emerald-900' : 'text-slate-700'}`}>Complete Profile</p>
-                <p className={`text-xs mt-1 ${isProfileComplete ? 'text-emerald-700' : 'text-slate-500'}`}>Add contact and bank details.</p>
+                <p className={`text-xs mt-1 ${isProfileComplete ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>Add contact and bank details.</p>
              </div>
-             {!isProfileComplete && <ChevronRight className="h-4 w-4 text-slate-400 ml-auto mt-0.5" />}
+             {!isProfileComplete && <ChevronRight className="h-4 w-4 text-[#8E8E93] ml-auto mt-0.5" />}
           </div>
 
           <div className={`p-4 rounded-xl border flex gap-3 transition-colors ${hasProperty ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-blue-300 cursor-pointer'}`} onClick={() => !hasProperty && router.push('#properties')}>
              {hasProperty ? <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" /> : <Circle className="h-5 w-5 text-slate-300 shrink-0 mt-0.5" />}
              <div>
                 <p className={`font-bold text-sm ${hasProperty ? 'text-emerald-900' : 'text-slate-700'}`}>Add Property</p>
-                <p className={`text-xs mt-1 ${hasProperty ? 'text-emerald-700' : 'text-slate-500'}`}>Create your first building.</p>
+                <p className={`text-xs mt-1 ${hasProperty ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>Create your first building.</p>
              </div>
-             {!hasProperty && <ChevronRight className="h-4 w-4 text-slate-400 ml-auto mt-0.5" />}
+             {!hasProperty && <ChevronRight className="h-4 w-4 text-[#8E8E93] ml-auto mt-0.5" />}
           </div>
 
           <div className={`p-4 rounded-xl border flex gap-3 transition-colors ${hasLease ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-blue-300 cursor-pointer'}`} onClick={() => !hasLease && router.push('#leases')}>
              {hasLease ? <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" /> : <Circle className="h-5 w-5 text-slate-300 shrink-0 mt-0.5" />}
              <div>
                 <p className={`font-bold text-sm ${hasLease ? 'text-emerald-900' : 'text-slate-700'}`}>Invite Tenant</p>
-                <p className={`text-xs mt-1 ${hasLease ? 'text-emerald-700' : 'text-slate-500'}`}>Add leases and start collecting.</p>
+                <p className={`text-xs mt-1 ${hasLease ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>Add leases and start collecting.</p>
              </div>
-             {!hasLease && <ChevronRight className="h-4 w-4 text-slate-400 ml-auto mt-0.5" />}
+             {!hasLease && <ChevronRight className="h-4 w-4 text-[#8E8E93] ml-auto mt-0.5" />}
           </div>
         </div>
       </div>

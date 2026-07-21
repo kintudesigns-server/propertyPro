@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   Users, UserCheck, Clock, CalendarDays, Search, LayoutGrid, List,
@@ -121,17 +122,17 @@ export default function TenantsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Tenants</h1>
-          <p className="text-[#64748B] text-sm mt-1">Manage tenant applications and profiles</p>
+          <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">Tenants</h1>
+          <p className="text-[#6E6E73] text-sm mt-1">Manage tenant applications and profiles</p>
         </div>
         {!checkingProperties && properties.some(p => p.approvalStatus === "APPROVED") ? (
           <Link href="/dashboard/tenants/new">
-            <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2">
+            <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2">
               <Plus className="h-4 w-4" /> Add Tenant
             </Button>
           </Link>
         ) : (
-          <Button disabled className="bg-slate-200 text-slate-400 border border-slate-200 shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2 cursor-not-allowed">
+          <Button disabled className="bg-slate-200 text-[#8E8E93] border border-slate-200 shadow-sm rounded-xl h-11 font-bold px-6 flex items-center gap-2 cursor-not-allowed">
             <Plus className="h-4 w-4" /> Add Tenant (Locked)
           </Button>
         )}
@@ -160,26 +161,26 @@ export default function TenantsPage() {
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Total Tenants" value={totalTenants} subtext="All tenant profiles" icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#3B82F6]" />
-        <MetricCard title="Active Tenants" value={activeTenants} subtext="Currently living in properties" icon={UserCheck} color="bg-[#DCFCE7]" iconColor="text-[#16A34A]" />
-        <MetricCard title="Pending Review" value={pendingTenants} subtext="Awaiting background check" icon={Clock} color="bg-[#FEF9C3]" iconColor="text-[#CA8A04]" />
-        <MetricCard title="This Month" value={thisMonth} subtext="New applications" icon={CalendarDays} color="bg-[#F3E8FF]" iconColor="text-[#9333EA]" />
+        <KpiCard title="Total Tenants" value={totalTenants} subtext="All tenant profiles" icon={Users} variant="blue" />
+        <KpiCard title="Active Tenants" value={activeTenants} subtext="Currently living in properties" icon={UserCheck} variant="green" />
+        <KpiCard title="Pending Review" value={pendingTenants} subtext="Awaiting background check" icon={Clock} variant="orange" />
+        <KpiCard title="This Month" value={thisMonth} subtext="New applications" icon={CalendarDays} variant="purple" />
       </div>
 
       {/* Main Content Area */}
-      <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-        <div className="p-5 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+        <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="font-bold text-[#0F172A] text-lg flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#3B82F6]" /> Tenants ({filteredTenants.length})
+            <h2 className="font-bold text-[#1D1D1F] text-lg flex items-center gap-2">
+              <Users className="h-5 w-5 text-[#007AFF]" /> Tenants ({filteredTenants.length})
             </h2>
-            <p className="text-xs text-[#64748B] mt-0.5">Showing {filteredTenants.length} of {tenants.length} tenants</p>
+            <p className="text-xs text-[#6E6E73] mt-0.5">Showing {filteredTenants.length} of {tenants.length} tenants</p>
           </div>
           <div className="flex items-center bg-[#F1F5F9] p-1 rounded-xl">
             <button
               onClick={() => setViewMode("table")}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                viewMode === "table" ? "bg-white text-[#0F172A] shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
+                viewMode === "table" ? "bg-white text-[#1D1D1F] shadow-sm" : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <List className="h-4 w-4" /> Table
@@ -187,7 +188,7 @@ export default function TenantsPage() {
             <button
               onClick={() => setViewMode("cards")}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                viewMode === "cards" ? "bg-[#3B82F6] text-white shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
+                viewMode === "cards" ? "bg-[#007AFF] text-white shadow-sm" : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <LayoutGrid className="h-4 w-4" /> Cards
@@ -195,20 +196,20 @@ export default function TenantsPage() {
           </div>
         </div>
 
-        <div className="p-5 flex flex-col md:flex-row gap-4 border-b border-[#E2E8F0]">
+        <div className="p-5 flex flex-col md:flex-row gap-4 border-b border-[#E5E5EA]">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <Input 
               placeholder="Search tenants..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 bg-[#F8FAFC] border-[#E2E8F0] rounded-xl focus-visible:ring-1 focus-visible:ring-[#3B82F6] focus-visible:border-[#3B82F6]"
+              className="pl-10 h-11 bg-[#F2F2F7] border-[#E5E5EA] rounded-xl focus-visible:ring-1 focus-visible:ring-[#007AFF] focus-visible:border-[#007AFF]"
             />
           </div>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none min-w-[180px]"
+            className="h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm font-semibold text-[#1D1D1F] outline-none min-w-[180px]"
           >
             <option>All Statuses</option>
             <option>Active</option>
@@ -220,8 +221,8 @@ export default function TenantsPage() {
         {/* Loading State */}
         {loading && (
           <div className="p-16 text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#3B82F6] border-r-transparent"></div>
-            <p className="mt-4 text-[#64748B] font-semibold">Loading tenants...</p>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#007AFF] border-r-transparent"></div>
+            <p className="mt-4 text-[#6E6E73] font-semibold">Loading tenants...</p>
           </div>
         )}
 
@@ -230,12 +231,12 @@ export default function TenantsPage() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#F8FAFC]">
-                  <TableHead className="font-extrabold text-[#64748B] uppercase tracking-wider text-xs">Tenant</TableHead>
-                  <TableHead className="font-extrabold text-[#64748B] uppercase tracking-wider text-xs">Status</TableHead>
-                  <TableHead className="font-extrabold text-[#64748B] uppercase tracking-wider text-xs">Contact</TableHead>
-                  <TableHead className="font-extrabold text-[#64748B] uppercase tracking-wider text-xs">Employment</TableHead>
-                  <TableHead className="font-extrabold text-[#64748B] uppercase tracking-wider text-xs text-right">Actions</TableHead>
+                <TableRow className="border-[#E5E5EA] bg-[#F2F2F7] hover:bg-[#F2F2F7]">
+                  <TableHead className="font-extrabold text-[#6E6E73] uppercase tracking-wider text-xs">Tenant</TableHead>
+                  <TableHead className="font-extrabold text-[#6E6E73] uppercase tracking-wider text-xs">Status</TableHead>
+                  <TableHead className="font-extrabold text-[#6E6E73] uppercase tracking-wider text-xs">Contact</TableHead>
+                  <TableHead className="font-extrabold text-[#6E6E73] uppercase tracking-wider text-xs">Employment</TableHead>
+                  <TableHead className="font-extrabold text-[#6E6E73] uppercase tracking-wider text-xs text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -244,19 +245,19 @@ export default function TenantsPage() {
                   const badgeConfig = hasActiveLease || t.tenantStatus === "Active" 
                     ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
                     : t.tenantStatus === "Approved"
-                    ? { bg: "bg-[#EFF6FF]", text: "text-[#3B82F6]", label: "Approved" }
+                    ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
                     : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
 
                   return (
-                    <TableRow key={t.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC]/50 transition-colors">
+                    <TableRow key={t.id} className="border-b border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center font-bold text-lg shrink-0">
+                          <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-bold text-lg shrink-0">
                             {t.name ? t.name.charAt(0).toUpperCase() : "U"}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-[#0F172A] truncate">{t.name}</span>
-                            <span className="text-xs text-[#64748B] truncate">{t.email}</span>
+                            <span className="font-bold text-[#1D1D1F] truncate">{t.name}</span>
+                            <span className="text-xs text-[#6E6E73] truncate">{t.email}</span>
                           </div>
                         </div>
                       </TableCell>
@@ -266,34 +267,34 @@ export default function TenantsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm font-semibold text-[#0F172A]">{t.phone || "-"}</div>
-                        <div className="text-xs text-[#64748B] mt-0.5 truncate">{t.email}</div>
+                        <div className="text-sm font-semibold text-[#1D1D1F]">{t.phone || "-"}</div>
+                        <div className="text-xs text-[#6E6E73] mt-0.5 truncate">{t.email}</div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm font-semibold text-[#0F172A] truncate max-w-[150px]" title={t.position || t.employmentStatus}>
+                        <div className="text-sm font-semibold text-[#1D1D1F] truncate max-w-[150px]" title={t.position || t.employmentStatus}>
                           {t.employmentStatus === "EMPLOYED" 
                             ? (t.position || "Employed") 
                             : t.employmentStatus 
                               ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') 
                               : "-"}
                         </div>
-                        <div className="text-xs text-[#64748B] mt-0.5 truncate max-w-[150px]" title={`${t.employer || ''} ${t.annualIncome ? `$${t.annualIncome}/yr` : ''}`}>
+                        <div className="text-xs text-[#6E6E73] mt-0.5 truncate max-w-[150px]" title={`${t.employer || ''} ${t.annualIncome ? `$${t.annualIncome}/yr` : ''}`}>
                           {t.employer ? t.employer : "-"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F8FAFC] inline-flex items-center justify-center rounded-lg">
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
                             <MoreVertical className="h-4 w-4" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1">
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                               <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                               <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Tenant
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                            <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                               <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Change Status
                             </DropdownMenuItem>
                             <DropdownMenuItem 
@@ -311,7 +312,7 @@ export default function TenantsPage() {
                 })}
                 {filteredTenants.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10 text-[#64748B]">
+                    <TableCell colSpan={5} className="text-center py-10 text-[#6E6E73]">
                       No tenants found.
                     </TableCell>
                   </TableRow>
@@ -323,30 +324,30 @@ export default function TenantsPage() {
 
         {/* CARDS VIEW */}
         {!loading && viewMode === "cards" && (
-          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-[#F8FAFC]/50">
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-[#F2F2F7]/50">
             {filteredTenants.map((t) => {
               const hasActiveLease = t.leases?.some((l:any) => l.status === "ACTIVE");
               const badgeConfig = hasActiveLease || t.tenantStatus === "Active" 
                     ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
                     : t.tenantStatus === "Approved"
-                    ? { bg: "bg-[#EFF6FF]", text: "text-[#3B82F6]", label: "Approved" }
+                    ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
                     : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
               
               return (
-                <div key={t.id} className="bg-white border border-[#E2E8F0] rounded-[20px] p-5 hover:shadow-lg transition-shadow relative group flex flex-col">
+                <div key={t.id} className="bg-white border border-[#E5E5EA] rounded-[20px] p-5 hover:shadow-lg transition-shadow relative group flex flex-col">
                   <div className="absolute top-4 right-4">
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#F8FAFC] inline-flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                           <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                           <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Tenant
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg">
+                        <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
                           <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Change Status
                         </DropdownMenuItem>
                         <DropdownMenuItem 
@@ -361,16 +362,16 @@ export default function TenantsPage() {
                   </div>
 
                   <div className="flex flex-col items-center text-center mt-2 mb-4">
-                    <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
+                    <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
                       {t.name ? t.name.charAt(0).toUpperCase() : "U"}
                     </div>
-                    <h3 className="font-extrabold text-[#0F172A] text-lg truncate w-full">{t.name}</h3>
-                    <p className="text-sm text-[#64748B] truncate w-full">{t.email}</p>
+                    <h3 className="font-extrabold text-[#1D1D1F] text-lg truncate w-full">{t.name}</h3>
+                    <p className="text-sm text-[#6E6E73] truncate w-full">{t.email}</p>
                     <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2 w-full text-center">
                       <p className="text-xs font-bold text-slate-700 truncate">
                         {t.employmentStatus === "EMPLOYED" ? t.position || "Employed" : t.employmentStatus ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') : "Employment N/A"}
                       </p>
-                      <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                      <p className="text-[10px] text-[#6E6E73] mt-0.5 truncate">
                         {t.employer ? t.employer : "No details"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
                       </p>
                     </div>
@@ -380,16 +381,16 @@ export default function TenantsPage() {
                     <Badge className={`${badgeConfig.bg} ${badgeConfig.text} border-0`}>
                       {badgeConfig.label}
                     </Badge>
-                    <span className="text-xs font-bold text-[#64748B]">{t.phone || "-"}</span>
+                    <span className="text-xs font-bold text-[#6E6E73]">{t.phone || "-"}</span>
                   </div>
                 </div>
               );
             })}
             {filteredTenants.length === 0 && (
-              <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E2E8F0] rounded-2xl bg-white">
+              <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-white">
                 <Users className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-[#0F172A]">No Tenants Found</h3>
-                <p className="text-sm text-[#64748B] mt-1">Try adjusting your search or add a new tenant.</p>
+                <h3 className="text-lg font-bold text-[#1D1D1F]">No Tenants Found</h3>
+                <p className="text-sm text-[#6E6E73] mt-1">Try adjusting your search or add a new tenant.</p>
               </div>
             )}
           </div>
@@ -400,18 +401,18 @@ export default function TenantsPage() {
       {showStatusModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <Card className="w-full max-w-md bg-white border-0 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-[#E2E8F0] flex justify-between items-center bg-[#F8FAFC]">
-              <h2 className="font-bold text-[#0F172A] text-lg">Change Tenant Status</h2>
-              <button onClick={() => setShowStatusModal(false)} className="text-[#64748B] hover:text-[#0F172A]">✕</button>
+            <div className="p-6 border-b border-[#E5E5EA] flex justify-between items-center bg-[#F2F2F7]">
+              <h2 className="font-bold text-[#1D1D1F] text-lg">Change Tenant Status</h2>
+              <button onClick={() => setShowStatusModal(false)} className="text-[#6E6E73] hover:text-[#1D1D1F]">✕</button>
             </div>
             <form onSubmit={handleStatusChange}>
               <CardContent className="p-6 space-y-4">
                 <div>
-                  <label className="text-sm font-bold text-[#0F172A] mb-2 block">New Status</label>
+                  <label className="text-sm font-bold text-[#1D1D1F] mb-2 block">New Status</label>
                   <select 
                     value={newStatus} 
                     onChange={(e) => setNewStatus(e.target.value)}
-                    className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none"
+                    className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm font-semibold text-[#1D1D1F] outline-none"
                   >
                     <option value="Active">Activate Tenant</option>
                     <option value="Pending Review">Pending Review</option>
@@ -419,19 +420,19 @@ export default function TenantsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-[#0F172A] mb-2 block">Reason / Notes (Optional)</label>
+                  <label className="text-sm font-bold text-[#1D1D1F] mb-2 block">Reason / Notes (Optional)</label>
                   <textarea 
                     rows={3}
                     placeholder="Enter reason for status change..."
-                    className="w-full bg-white border border-[#E2E8F0] rounded-xl p-3 text-sm text-[#0F172A] outline-none resize-none focus:ring-2 focus:ring-[#3B82F6]"
+                    className="w-full bg-white border border-[#E5E5EA] rounded-xl p-3 text-sm text-[#1D1D1F] outline-none resize-none focus:ring-2 focus:ring-[#007AFF]"
                   ></textarea>
                 </div>
               </CardContent>
-              <div className="p-6 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => setShowStatusModal(false)} className="h-11 px-6 rounded-xl font-bold border-[#E2E8F0]">
+              <div className="p-6 border-t border-[#E5E5EA] bg-[#F2F2F7] flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setShowStatusModal(false)} className="h-11 px-6 rounded-xl font-bold border-[#E5E5EA]">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white h-11 px-6 rounded-xl font-bold">
+                <Button type="submit" className="bg-[#007AFF] hover:bg-[#0062CC] text-white h-11 px-6 rounded-xl font-bold">
                   Save Status
                 </Button>
               </div>
@@ -446,17 +447,17 @@ export default function TenantsPage() {
 
 function MetricCard({ title, value, subtext, icon: Icon, color, iconColor }: any) {
   return (
-    <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
+    <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
       <CardContent className="p-5 flex flex-col justify-between h-full">
         <div className="flex justify-between items-start mb-4">
-          <p className="text-sm font-bold text-[#0F172A]">{title}</p>
+          <p className="text-sm font-bold text-[#1D1D1F]">{title}</p>
           <div className={`p-2 rounded-xl shrink-0 ${color} ${iconColor}`}>
             <Icon className="h-5 w-5" />
           </div>
         </div>
         <div>
-          <p className="font-extrabold text-[#0F172A] text-3xl leading-tight">{value}</p>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">{subtext}</p>
+          <p className="font-extrabold text-[#1D1D1F] text-3xl leading-tight">{value}</p>
+          <p className="text-xs text-[#6E6E73] mt-1 font-medium">{subtext}</p>
         </div>
       </CardContent>
     </Card>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -267,65 +268,34 @@ export default function AdminUsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 border-0 shadow-lg shadow-blue-500/20 rounded-2xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <CardContent className="p-6 relative z-10 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-blue-100">Total Users</p>
-              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <Users2 className="h-5 w-5 text-white" />
-              </div>
-            </div>
-            <p className="text-4xl font-black mb-1 drop-shadow-md">{totalUsers}</p>
-            <p className="text-sm font-semibold text-blue-200">All registered users</p>
-          </CardContent>
-          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 border-0 shadow-lg shadow-emerald-500/20 rounded-2xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <CardContent className="p-6 relative z-10 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-emerald-100">Active Users</p>
-              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <UserCheck className="h-5 w-5 text-white" />
-              </div>
-            </div>
-            <p className="text-4xl font-black mb-1 drop-shadow-md">{activeUsers}</p>
-            <p className="text-sm font-semibold text-emerald-200">Currently active</p>
-          </CardContent>
-          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-rose-500 to-pink-600 border-0 shadow-lg shadow-rose-500/20 rounded-2xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <CardContent className="p-6 relative z-10 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-rose-100">Inactive Users</p>
-              <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <UserMinus className="h-5 w-5 text-white" />
-              </div>
-            </div>
-            <p className="text-4xl font-black mb-1 drop-shadow-md">{inactiveUsers}</p>
-            <p className="text-sm font-semibold text-rose-200">Deactivated users</p>
-          </CardContent>
-          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-800 to-slate-950 border-0 shadow-lg shadow-slate-900/20 rounded-2xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <CardContent className="p-6 relative z-10 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-slate-300">Admins</p>
-              <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <ShieldAlert className="h-5 w-5 text-amber-400" />
-              </div>
-            </div>
-            <p className="text-4xl font-black mb-1 drop-shadow-md">{adminUsers}</p>
-            <p className="text-sm font-semibold text-slate-400">System administrators</p>
-          </CardContent>
-          <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-white opacity-5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
-        </Card>
+        <KpiCard
+          title="Total Users"
+          value={totalUsers}
+          subtext="All registered users"
+          icon={Users2}
+          variant="blue"
+        />
+        <KpiCard
+          title="Active Users"
+          value={activeUsers}
+          subtext="Currently active"
+          icon={UserCheck}
+          variant="green"
+        />
+        <KpiCard
+          title="Inactive Users"
+          value={inactiveUsers}
+          subtext="Deactivated users"
+          icon={UserMinus}
+          variant="red"
+        />
+        <KpiCard
+          title="Admins"
+          value={adminUsers}
+          subtext="System administrators"
+          icon={ShieldAlert}
+          variant="orange"
+        />
       </div>
 
       {/* Users List Card */}

@@ -32,7 +32,7 @@ const getIconForType = (type: string, priority: string) => {
     case "MAINTENANCE": return <Wrench        className="h-8 w-8 text-orange-500" />;
     case "LEASE":       return <FileText      className="h-8 w-8 text-purple-500" />;
     case "APPLICATION": return <ClipboardList className="h-8 w-8 text-blue-500" />;
-    default:            return <Bell          className="h-8 w-8 text-slate-500" />;
+    default:            return <Bell          className="h-8 w-8 text-[#6E6E73]" />;
   }
 };
 
@@ -140,7 +140,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
         label: "Go to Applications Ledger",
         description: "Browse all pending, approved, and rejected applications in one place.",
         Icon: Users,
-        color: "bg-slate-50",
+        color: "bg-[#F5F5F7]",
         textColor: "text-slate-600",
       });
     }
@@ -172,7 +172,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
         label: "My Maintenance Requests",
         description: "View all your submitted maintenance requests.",
         Icon: Wrench,
-        color: "bg-slate-50",
+        color: "bg-[#F5F5F7]",
         textColor: "text-slate-600",
       });
     } else if (userRole === "INSPECTOR") {
@@ -181,7 +181,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
         label: "My Active Tasks",
         description: "Manage and progress all repair tickets assigned to you.",
         Icon: Wrench,
-        color: "bg-slate-50",
+        color: "bg-[#F5F5F7]",
         textColor: "text-slate-600",
       });
     } else {
@@ -190,7 +190,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
         label: "All Maintenance Requests",
         description: "View the full maintenance ledger and dispatch team.",
         Icon: Wrench,
-        color: "bg-slate-50",
+        color: "bg-[#F5F5F7]",
         textColor: "text-slate-600",
       });
     }
@@ -227,7 +227,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
         label: "Go to Owner Wallet",
         description: "Check your current balance and view your payout history.",
         Icon: FileText,
-        color: "bg-slate-50",
+        color: "bg-[#F5F5F7]",
         textColor: "text-slate-600",
       });
     }
@@ -300,7 +300,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       label: "All Leases",
       description: "Browse all active, expiring, and expired leases on the platform.",
       Icon: Home,
-      color: "bg-slate-50",
+      color: "bg-[#F5F5F7]",
       textColor: "text-slate-600",
     });
   }
@@ -333,7 +333,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
           label: "Property Approvals",
           description: "Review pending property listings waiting for admin approval.",
           Icon: CheckCircle2,
-          color: "bg-slate-50",
+          color: "bg-[#F5F5F7]",
           textColor: "text-slate-600",
         });
       }
@@ -347,7 +347,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       label: isTenant ? "Browse Properties" : "Go to Dashboard",
       description: isTenant ? "Explore available rental listings." : "Return to the main dashboard to see an overview of platform activity.",
       Icon: isTenant ? Building2 : Home,
-      color: "bg-slate-50",
+      color: "bg-[#F5F5F7]",
       textColor: "text-slate-600",
     });
   }
@@ -388,13 +388,13 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/notifications"
-          className="p-2.5 bg-white border border-[#E2E8F0] rounded-xl text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 transition-colors shadow-sm"
+          className="p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-colors shadow-sm"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-xl font-extrabold text-[#0F172A] tracking-tight">Notification Details</h1>
-          <p className="text-sm text-[#64748B] font-medium mt-0.5">View alert contents, metadata, and related actions</p>
+          <h1 className="text-xl font-extrabold text-[#1D1D1F] tracking-tight">Notification Details</h1>
+          <p className="text-sm text-[#6E6E73] font-medium mt-0.5">View alert contents, metadata, and related actions</p>
         </div>
       </div>
 
@@ -402,9 +402,9 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
         {/* ── Left: main content ── */}
         <div className="flex-1 flex flex-col gap-5">
           {/* Hero card */}
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
-            <div className="p-8 flex flex-col items-center text-center border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-              <div className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-[#E2E8F0]">
+          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
+            <div className="p-8 flex flex-col items-center text-center border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
+              <div className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-[#E5E5EA]">
                 {getIconForType(notification.type, notification.priority)}
               </div>
               <div className="flex flex-wrap justify-center gap-2 mb-3">
@@ -413,36 +413,36 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
                   {notification.type} ALERT
                 </span>
               </div>
-              <h2 className="text-2xl font-extrabold text-[#0F172A] max-w-2xl">{notification.title}</h2>
+              <h2 className="text-2xl font-extrabold text-[#1D1D1F] max-w-2xl">{notification.title}</h2>
             </div>
             <div className="p-8">
               <h3 className="text-xs font-extrabold text-[#94A3B8] uppercase tracking-wider mb-4">Message Content</h3>
-              <div className="bg-slate-50 p-6 rounded-xl border border-[#E2E8F0]">
-                <p className="whitespace-pre-wrap leading-relaxed text-base text-[#0F172A]">{notification.message}</p>
+              <div className="bg-slate-50 p-6 rounded-xl border border-[#E5E5EA]">
+                <p className="whitespace-pre-wrap leading-relaxed text-base text-[#1D1D1F]">{notification.message}</p>
               </div>
             </div>
           </div>
 
           {/* ── Smart Navigation Actions ── */}
           {navActions.length > 0 && (
-            <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-                <h3 className="font-extrabold text-[#0F172A] text-sm">Related Actions</h3>
-                <p className="text-xs text-[#64748B] mt-0.5 font-medium">Jump directly to the page related to this notification</p>
+            <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#E5E5EA] bg-[#F2F2F7]">
+                <h3 className="font-extrabold text-[#1D1D1F] text-sm">Related Actions</h3>
+                <p className="text-xs text-[#6E6E73] mt-0.5 font-medium">Jump directly to the page related to this notification</p>
               </div>
               <div className="p-5 flex flex-col gap-3">
                 {navActions.map((action, i) => (
                   <Link
                     key={i}
                     href={action.href}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-[#E2E8F0] hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-[#E5E5EA] hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
                   >
                     <div className={`h-11 w-11 rounded-xl ${action.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
                       <action.Icon className={`h-5 w-5 ${action.textColor}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-bold text-sm ${action.textColor} group-hover:underline`}>{action.label}</p>
-                      <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">{action.description}</p>
+                      <p className="text-xs text-[#6E6E73] mt-0.5 leading-relaxed">{action.description}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-[#94A3B8] shrink-0 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
                   </Link>
@@ -455,9 +455,9 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
         {/* ── Right sidebar ── */}
         <div className="w-full lg:w-80 flex flex-col gap-5 shrink-0">
           {/* Overview card */}
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <h3 className="font-bold text-[#0F172A] text-sm">Overview</h3>
+          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-[#E5E5EA] bg-[#F2F2F7]">
+              <h3 className="font-bold text-[#1D1D1F] text-sm">Overview</h3>
             </div>
             <div className="p-5 space-y-5">
               {/* Status */}
@@ -470,14 +470,14 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
                 </span>
               </div>
 
-              <div className="h-px bg-[#E2E8F0]" />
+              <div className="h-px bg-[#E5E5EA]" />
 
               {/* Date */}
               <div>
                 <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                   <Calendar className="h-3.5 w-3.5" /> Date Received
                 </span>
-                <p className="text-sm font-semibold text-[#0F172A]">{formatDate(notification.createdAt)}</p>
+                <p className="text-sm font-semibold text-[#1D1D1F]">{formatDate(notification.createdAt)}</p>
               </div>
 
               {/* Time */}
@@ -485,18 +485,18 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
                 <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                   <Clock className="h-3.5 w-3.5" /> Time
                 </span>
-                <p className="text-sm font-semibold text-[#0F172A]">{formatTime(notification.createdAt)}</p>
+                <p className="text-sm font-semibold text-[#1D1D1F]">{formatTime(notification.createdAt)}</p>
               </div>
 
               {/* Raw entity ID */}
               {notification.relatedEntityId && (
                 <>
-                  <div className="h-px bg-[#E2E8F0]" />
+                  <div className="h-px bg-[#E5E5EA]" />
                   <div>
                     <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                       <FileText className="h-3.5 w-3.5" /> Entity ID
                     </span>
-                    <p className="text-[11px] font-mono text-[#64748B] bg-slate-50 border border-slate-200 p-2 rounded-lg break-all">
+                    <p className="text-[11px] font-mono text-[#6E6E73] bg-slate-50 border border-slate-200 p-2 rounded-lg break-all">
                       {notification.relatedEntityId}
                     </p>
                   </div>
@@ -506,7 +506,7 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden p-5">
+          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden p-5">
             <h3 className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-4">Quick Actions</h3>
             <NotificationActions id={notification.id} isRead={notification.isRead} />
           </div>

@@ -46,7 +46,7 @@ function CardBrandIcon({ brand }: { brand: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-xl">{icons[brand] || "💳"}</span>
-      <span className="font-bold text-[#0F172A] capitalize">{labels[brand] || brand}</span>
+      <span className="font-bold text-[#1D1D1F] capitalize">{labels[brand] || brand}</span>
     </div>
   );
 }
@@ -115,7 +115,7 @@ function SetupForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="rounded-xl overflow-hidden border border-[#E2E8F0] p-4 bg-white">
+      <div className="rounded-xl overflow-hidden border border-[#E5E5EA] p-4 bg-white">
         <PaymentElement
           options={{
             layout: "tabs",
@@ -135,7 +135,7 @@ function SetupForm({
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex items-center gap-2 text-xs text-[#8E8E93]">
         <Lock className="h-3.5 w-3.5" />
         <span>256-bit SSL encrypted · Powered by Stripe · We never store your card number</span>
       </div>
@@ -146,14 +146,14 @@ function SetupForm({
           variant="outline"
           onClick={onCancel}
           disabled={processing}
-          className="flex-1 h-12 rounded-xl border-[#E2E8F0] font-semibold text-sm"
+          className="flex-1 h-12 rounded-xl border-[#E5E5EA] font-semibold text-sm"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-[2] h-12 bg-[#635BFF] hover:bg-[#4f46e5] text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
+          className="flex-[2] h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
         >
           {processing ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Saving Card...</>
@@ -251,8 +251,8 @@ export default function AddCardPage() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#635BFF]" />
-        <p className="text-slate-500 font-semibold text-sm">Loading payment methods...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
+        <p className="text-[#6E6E73] font-semibold text-sm">Loading payment methods...</p>
       </div>
     );
   }
@@ -262,22 +262,22 @@ export default function AddCardPage() {
 
       {/* ── HEADER ── */}
       <div>
-        <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Payment Methods</h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">Payment Methods</h1>
+        <p className="text-[#6E6E73] text-sm mt-1">
           Save a card to pay rent faster — one click, no re-entry needed
         </p>
       </div>
 
       {/* ── SAVED CARD DISPLAY ── */}
       {savedCard && !showForm ? (
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 space-y-4">
+        <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#0F172A]">Saved Card</h2>
+            <h2 className="text-lg font-bold text-[#1D1D1F]">Saved Card</h2>
             <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-full">DEFAULT</span>
           </div>
 
           {/* Card visual */}
-          <div className="bg-gradient-to-br from-[#635BFF] to-[#4f46e5] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#007AFF] to-[#0062CC] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-10 -translate-x-10" />
             <div className="relative z-10">
@@ -303,7 +303,7 @@ export default function AddCardPage() {
             <Button
               onClick={() => { setShowForm(false); openSetupForm(); }}
               variant="outline"
-              className="flex-1 h-11 rounded-xl border-[#E2E8F0] font-semibold text-sm flex items-center justify-center gap-2"
+              className="flex-1 h-11 rounded-xl border-[#E5E5EA] font-semibold text-sm flex items-center justify-center gap-2"
             >
               <Plus className="h-4 w-4" /> Replace Card
             </Button>
@@ -320,18 +320,18 @@ export default function AddCardPage() {
         </div>
       ) : !showForm ? (
         /* ── NO CARD YET ── */
-        <div className="bg-white border-2 border-dashed border-[#E2E8F0] rounded-2xl p-10 text-center space-y-4">
-          <div className="h-16 w-16 rounded-2xl bg-[#635BFF]/10 flex items-center justify-center mx-auto">
-            <CreditCard className="h-8 w-8 text-[#635BFF]" />
+        <div className="bg-white border-2 border-dashed border-[#E5E5EA] rounded-2xl p-10 text-center space-y-4">
+          <div className="h-16 w-16 rounded-2xl bg-[#007AFF]/10 flex items-center justify-center mx-auto">
+            <CreditCard className="h-8 w-8 text-[#007AFF]" />
           </div>
           <div>
-            <p className="font-bold text-[#0F172A] text-lg">No saved card yet</p>
-            <p className="text-slate-500 text-sm mt-1">Save your card once and pay rent with a single click</p>
+            <p className="font-bold text-[#1D1D1F] text-lg">No saved card yet</p>
+            <p className="text-[#6E6E73] text-sm mt-1">Save your card once and pay rent with a single click</p>
           </div>
           <Button
             onClick={openSetupForm}
             disabled={loadingSetup}
-            className="bg-[#635BFF] hover:bg-[#4f46e5] text-white font-bold h-12 px-8 rounded-xl shadow-md text-sm flex items-center gap-2 mx-auto"
+            className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold h-12 px-8 rounded-xl shadow-md text-sm flex items-center gap-2 mx-auto"
           >
             {loadingSetup ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             Add a Payment Card
@@ -341,14 +341,14 @@ export default function AddCardPage() {
 
       {/* ── SETUP FORM ── */}
       {showForm && clientSecret && (
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 space-y-4">
+        <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-3 pb-4 border-b border-[#F1F5F9]">
-            <div className="h-10 w-10 rounded-xl bg-[#635BFF]/10 flex items-center justify-center">
-              <ShieldCheck className="h-5 w-5 text-[#635BFF]" />
+            <div className="h-10 w-10 rounded-xl bg-[#007AFF]/10 flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5 text-[#007AFF]" />
             </div>
             <div>
-              <h2 className="font-bold text-[#0F172A]">Add New Card</h2>
-              <p className="text-xs text-slate-500">Your card will be saved for future rent payments</p>
+              <h2 className="font-bold text-[#1D1D1F]">Add New Card</h2>
+              <p className="text-xs text-[#6E6E73]">Your card will be saved for future rent payments</p>
             </div>
           </div>
 
@@ -359,7 +359,7 @@ export default function AddCardPage() {
               appearance: {
                 theme: "stripe",
                 variables: {
-                  colorPrimary: "#635BFF",
+                  colorPrimary: "#007AFF",
                   borderRadius: "12px",
                   fontFamily: "Inter, system-ui, sans-serif",
                 },
@@ -377,8 +377,8 @@ export default function AddCardPage() {
 
       {/* ── HOW IT WORKS ── */}
       {!showForm && (
-        <div className="bg-slate-50 border border-[#E2E8F0] rounded-2xl p-6 space-y-4">
-          <h3 className="font-bold text-[#0F172A]">How saved cards work</h3>
+        <div className="bg-slate-50 border border-[#E5E5EA] rounded-2xl p-6 space-y-4">
+          <h3 className="font-bold text-[#1D1D1F]">How saved cards work</h3>
           <div className="space-y-3">
             {[
               { step: "1", text: "Add your card securely using the form above" },
@@ -386,10 +386,10 @@ export default function AddCardPage() {
               { step: "3", text: "Pay with one click — no need to re-enter card details" },
             ].map((item) => (
               <div key={item.step} className="flex items-center gap-3">
-                <div className="h-7 w-7 rounded-full bg-[#635BFF]/10 text-[#635BFF] text-xs font-black flex items-center justify-center shrink-0">
+                <div className="h-7 w-7 rounded-full bg-[#007AFF]/10 text-[#007AFF] text-xs font-black flex items-center justify-center shrink-0">
                   {item.step}
                 </div>
-                <p className="text-sm text-slate-600 font-medium">{item.text}</p>
+                <p className="text-sm text-[#6E6E73] font-medium">{item.text}</p>
               </div>
             ))}
           </div>
@@ -397,10 +397,10 @@ export default function AddCardPage() {
       )}
 
       {/* ── TRUST BADGE ── */}
-      <div className="flex items-center gap-3 p-4 bg-white border border-[#E2E8F0] rounded-xl">
-        <ShieldCheck className="h-5 w-5 text-[#635BFF] shrink-0" />
-        <p className="text-xs text-slate-500">
-          <span className="font-bold text-[#0F172A]">Secured by Stripe. </span>
+      <div className="flex items-center gap-3 p-4 bg-white border border-[#E5E5EA] rounded-xl">
+        <ShieldCheck className="h-5 w-5 text-[#007AFF] shrink-0" />
+        <p className="text-xs text-[#6E6E73]">
+          <span className="font-bold text-[#1D1D1F]">Secured by Stripe. </span>
           Your card details are encrypted and stored securely by Stripe. PropertyPro never has access to your full card number.
         </p>
       </div>

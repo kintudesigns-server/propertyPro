@@ -53,7 +53,7 @@ export function MessageBadge() {
   return (
     <Link
       href="/dashboard/messages"
-      className="relative p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#3B82F6] hover:bg-[#EFF6FF] transition-colors"
+      className="relative p-2.5 bg-white rounded-xl border border-[#E5E5EA] shadow-sm text-[#6E6E73] hover:text-[#007AFF] hover:bg-[#EFF6FF] transition-colors"
       title="Messages"
     >
       <MessageSquare className="h-5 w-5" />

@@ -157,19 +157,19 @@ export default function InspectorsAndVendorsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Inspectors &amp; Vendors</h1>
-          <p className="text-[#64748B] mt-1 text-sm font-medium">Manage both your internal inspection team and external contractors in one hub.</p>
+          <h1 className="text-3xl font-extrabold text-[#1D1D1F] tracking-tight">Inspectors &amp; Vendors</h1>
+          <p className="text-[#6E6E73] mt-1 text-sm font-medium">Manage both your internal inspection team and external contractors in one hub.</p>
         </div>
 
         {activeTab === "inspectors" ? (
           <Link href="/dashboard/team/new">
-            <Button className="w-full md:w-auto h-11 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold px-6 rounded-xl shadow-sm transition-all text-sm gap-2 border-none">
+            <Button className="w-full md:w-auto h-11 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-6 rounded-xl shadow-sm transition-all text-sm gap-2 border-none">
               <Plus className="h-5 w-5" /> Add Staff Member
             </Button>
           </Link>
         ) : (
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="inline-flex items-center justify-center bg-[#3B82F6] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
+            <DialogTrigger className="inline-flex items-center justify-center bg-[#007AFF] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
               <Plus className="h-5 w-5" /> Add New Vendor
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
@@ -178,21 +178,21 @@ export default function InspectorsAndVendorsPage() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Company / Name *</Label>
+                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
                   <Input value={newVendor.name} onChange={e => setNewVendor({...newVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="e.g. Bob's Plumbing Pro" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Email *</Label>
+                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
                   <Input value={newVendor.email} onChange={e => setNewVendor({...newVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" placeholder="dispatch@bobsplumbing.com" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Phone</Label>
+                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
                   <Input value={newVendor.phone} onChange={e => setNewVendor({...newVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="(555) 123-4567" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Specialty *</Label>
+                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
                   <Select value={newVendor.specialty} onValueChange={v => setNewVendor({...newVendor, specialty: v || "General"})}>
-                    <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E2E8F0]">
+                    <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
                       <SelectValue placeholder="Select specialty" />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-white">
@@ -209,29 +209,29 @@ export default function InspectorsAndVendorsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Base Call-Out Fee ($)</Label>
+                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
                   <Input value={newVendor.baseCallOutFee} onChange={e => setNewVendor({...newVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" placeholder="e.g. 75" />
                 </div>
                 
-                <div className="space-y-4 pt-4 border-t border-[#E2E8F0] mt-2">
+                <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label className="text-sm font-bold text-[#0F172A]">W-9 Form on File</Label>
-                      <p className="text-[11px] text-[#64748B]">Required for 1099 tax reporting.</p>
+                      <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
+                      <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
                     </div>
                     <Switch checked={newVendor.w9OnFile} onCheckedChange={c => setNewVendor({...newVendor, w9OnFile: c})} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label className="text-sm font-bold text-[#0F172A]">Liability Insurance</Label>
-                      <p className="text-[11px] text-[#64748B]">Verify active insurance coverage.</p>
+                      <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
+                      <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
                     </div>
                     <Switch checked={newVendor.insuranceOnFile} onCheckedChange={c => setNewVendor({...newVendor, insuranceOnFile: c})} />
                   </div>
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-4">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E2E8F0]">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
                   Cancel
                 </Button>
                 <Button onClick={handleVendorCreate} disabled={isSubmitting} className="bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl px-8 shadow-sm border-none">
@@ -244,13 +244,13 @@ export default function InspectorsAndVendorsPage() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-[#E2E8F0] pb-px">
+      <div className="flex border-b border-[#E5E5EA] pb-px">
         <button
           onClick={() => setActiveTab("inspectors")}
           className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all ${
             activeTab === "inspectors"
-              ? "border-[#3B82F6] text-[#3B82F6]"
-              : "border-transparent text-[#64748B] hover:text-[#0F172A]"
+              ? "border-[#007AFF] text-[#007AFF]"
+              : "border-transparent text-[#6E6E73] hover:text-[#1D1D1F]"
           }`}
         >
           🕵️ Internal Inspectors ({inspectors.length})
@@ -259,8 +259,8 @@ export default function InspectorsAndVendorsPage() {
           onClick={() => setActiveTab("vendors")}
           className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all ${
             activeTab === "vendors"
-              ? "border-[#3B82F6] text-[#3B82F6]"
-              : "border-transparent text-[#64748B] hover:text-[#0F172A]"
+              ? "border-[#007AFF] text-[#007AFF]"
+              : "border-transparent text-[#6E6E73] hover:text-[#1D1D1F]"
           }`}
         >
           🔧 External Contractors ({vendors.length})
@@ -269,45 +269,45 @@ export default function InspectorsAndVendorsPage() {
 
       {/* Tab Contents */}
       {activeTab === "inspectors" ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5EA] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                  <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Name</th>
-                  <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Contact Info</th>
-                  <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Designation</th>
-                  <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest text-right">Actions</th>
+                <tr className="bg-[#F2F2F7] border-b border-[#E5E5EA]">
+                  <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Name</th>
+                  <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Contact Info</th>
+                  <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Designation</th>
+                  <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="py-12 text-center text-sm font-semibold text-[#64748B]">Loading inspectors...</td>
+                    <td colSpan={4} className="py-12 text-center text-sm font-semibold text-[#6E6E73]">Loading inspectors...</td>
                   </tr>
                 ) : inspectors.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-12 text-center text-sm font-semibold text-[#64748B]">No inspectors registered.</td>
+                    <td colSpan={4} className="py-12 text-center text-sm font-semibold text-[#6E6E73]">No inspectors registered.</td>
                   </tr>
                 ) : (
                   inspectors.map((member) => (
-                    <tr key={member.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8FAFC]/50 transition-colors">
+                    <tr key={member.id} className="border-b border-[#E5E5EA] last:border-0 hover:bg-[#F2F2F7]/50 transition-colors">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 min-w-[40px] bg-slate-100 text-slate-600 rounded-full flex items-center justify-center font-bold text-sm">
+                          <div className="h-10 w-10 min-w-[40px] bg-slate-100 text-[#6E6E73] rounded-full flex items-center justify-center font-bold text-sm">
                             {member.name.charAt(0)}
                           </div>
-                          <span className="font-bold text-sm text-[#0F172A]">{member.name}</span>
+                          <span className="font-bold text-sm text-[#1D1D1F]">{member.name}</span>
                         </div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center gap-2 text-xs font-medium text-[#64748B]">
+                          <div className="flex items-center gap-2 text-xs font-medium text-[#6E6E73]">
                             <Mail className="h-3.5 w-3.5" />
                             {member.email}
                           </div>
                           {member.phone && (
-                            <div className="flex items-center gap-2 text-xs font-medium text-[#64748B]">
+                            <div className="flex items-center gap-2 text-xs font-medium text-[#6E6E73]">
                               <Phone className="h-3.5 w-3.5" />
                               {member.phone}
                             </div>
@@ -337,9 +337,9 @@ export default function InspectorsAndVendorsPage() {
       ) : (
         <div className="space-y-6">
           {/* Vendor Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-[#E2E8F0]">
+          <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-[#E5E5EA]">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
               <Input
                 placeholder="Search vendor name or specialty..."
                 value={search}
@@ -367,34 +367,34 @@ export default function InspectorsAndVendorsPage() {
           </div>
 
           {/* Vendors List */}
-          <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5EA] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                    <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Company / Specialist</th>
-                    <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Specialty</th>
-                    <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Call-Out Fee</th>
-                    <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest">Compliance</th>
-                    <th className="py-4 px-6 text-xs font-extrabold text-[#64748B] uppercase tracking-widest text-right">Actions</th>
+                  <tr className="bg-[#F2F2F7] border-b border-[#E5E5EA]">
+                    <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Company / Specialist</th>
+                    <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Specialty</th>
+                    <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Call-Out Fee</th>
+                    <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Compliance</th>
+                    <th className="py-4 px-6 text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#64748B]">Loading contractors...</td>
+                      <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#6E6E73]">Loading contractors...</td>
                     </tr>
                   ) : filteredVendors.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#64748B]">No contractors found.</td>
+                      <td colSpan={5} className="py-12 text-center text-sm font-semibold text-[#6E6E73]">No contractors found.</td>
                     </tr>
                   ) : (
                     filteredVendors.map((vendor) => (
-                      <tr key={vendor.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8FAFC]/50 transition-colors">
+                      <tr key={vendor.id} className="border-b border-[#E5E5EA] last:border-0 hover:bg-[#F2F2F7]/50 transition-colors">
                         <td className="py-4 px-6">
                           <div>
-                            <span className="font-bold text-sm text-[#0F172A]">{vendor.name}</span>
-                            <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-4 mt-1 text-[11px] font-medium text-[#64748B]">
+                            <span className="font-bold text-sm text-[#1D1D1F]">{vendor.name}</span>
+                            <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-4 mt-1 text-[11px] font-medium text-[#6E6E73]">
                               <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {vendor.email}</span>
                               {vendor.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {vendor.phone}</span>}
                             </div>
@@ -405,7 +405,7 @@ export default function InspectorsAndVendorsPage() {
                             <Wrench className="h-3 w-3" /> {vendor.specialty}
                           </span>
                         </td>
-                        <td className="py-4 px-6 font-bold text-sm text-[#0F172A]">
+                        <td className="py-4 px-6 font-bold text-sm text-[#1D1D1F]">
                           ${parseFloat(vendor.baseCallOutFee || "0").toFixed(2)}
                         </td>
                         <td className="py-4 px-6">
@@ -424,18 +424,18 @@ export default function InspectorsAndVendorsPage() {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] rounded-lg outline-none">
+                            <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] rounded-lg outline-none">
                               <MoreHorizontal className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40 bg-white border-[#E2E8F0] p-1 shadow-md z-50">
+                            <DropdownMenuContent align="end" className="w-40 bg-white border-[#E5E5EA] p-1 shadow-md z-50">
                               <DropdownMenuItem
                                 onClick={() => {
                                   setEditVendor(vendor);
                                   setEditOpen(true);
                                 }}
-                                className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-slate-50"
+                                className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F5F5F7]"
                               >
-                                <Edit className="h-4 w-4 text-[#64748B]" /> Edit
+                                <Edit className="h-4 w-4 text-[#6E6E73]" /> Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleVendorDelete(vendor.id)}
@@ -465,21 +465,21 @@ export default function InspectorsAndVendorsPage() {
           {editVendor && (
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Company / Name *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
                 <Input value={editVendor.name} onChange={e => setEditVendor({...editVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Email *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
                 <Input value={editVendor.email} onChange={e => setEditVendor({...editVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Phone</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
                 <Input value={editVendor.phone} onChange={e => setEditVendor({...editVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Specialty *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
                 <Select value={editVendor.specialty} onValueChange={v => setEditVendor({...editVendor, specialty: v || "General"})}>
-                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E2E8F0]">
+                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
                     <SelectValue placeholder="Select specialty" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-white">
@@ -496,22 +496,22 @@ export default function InspectorsAndVendorsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Base Call-Out Fee ($)</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
                 <Input value={editVendor.baseCallOutFee} onChange={e => setEditVendor({...editVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" />
               </div>
               
-              <div className="space-y-4 pt-4 border-t border-[#E2E8F0] mt-2">
+              <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">W-9 Form on File</Label>
-                    <p className="text-[11px] text-[#64748B]">Required for 1099 tax reporting.</p>
+                    <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
+                    <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
                   </div>
                   <Switch checked={editVendor.w9OnFile} onCheckedChange={c => setEditVendor({...editVendor, w9OnFile: c})} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">Liability Insurance</Label>
-                    <p className="text-[11px] text-[#64748B]">Verify active insurance coverage.</p>
+                    <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
+                    <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
                   </div>
                   <Switch checked={editVendor.insuranceOnFile} onCheckedChange={c => setEditVendor({...editVendor, insuranceOnFile: c})} />
                 </div>
@@ -519,10 +519,10 @@ export default function InspectorsAndVendorsPage() {
             </div>
           )}
           <div className="flex justify-end gap-3 mt-4">
-            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E2E8F0]">
+            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
               Cancel
             </Button>
-            <Button onClick={handleVendorEdit} disabled={isSubmitting} className="bg-[#3B82F6] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm border-none">
+            <Button onClick={handleVendorEdit} disabled={isSubmitting} className="bg-[#007AFF] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm border-none">
               Save Changes
             </Button>
           </div>

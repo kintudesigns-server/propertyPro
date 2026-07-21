@@ -66,7 +66,7 @@ export default function FinancialOverviewPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-        <p className="text-slate-400 font-bold text-sm">Analyzing Financial Portfolio...</p>
+        <p className="text-[#8E8E93] font-bold text-sm">Analyzing Financial Portfolio...</p>
       </div>
     );
   }
@@ -77,12 +77,12 @@ export default function FinancialOverviewPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Financial Overview</h1>
-          <p className="text-slate-500 font-medium mt-1">Real-time analysis of your cash flow, escrowed deposits, and rental payouts.</p>
+          <p className="text-[#6E6E73] font-medium mt-1">Real-time analysis of your cash flow, escrowed deposits, and rental payouts.</p>
         </div>
         <Button
           variant="outline"
           onClick={() => { fetchData(); toast.success("Refreshed stats"); }}
-          className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 border border-slate-200 rounded-xl px-3 py-2 hover:bg-slate-50 transition-all shadow-none"
+          className="flex items-center gap-2 text-xs font-bold text-[#6E6E73] hover:text-slate-800 border border-slate-200 rounded-xl px-3 py-2 hover:bg-[#F5F5F7] transition-all shadow-none"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </Button>
@@ -97,11 +97,11 @@ export default function FinancialOverviewPage() {
               <div className="h-8 w-8 bg-blue-50 rounded-xl flex items-center justify-center">
                 <Wallet className="h-4 w-4 text-blue-600" />
               </div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Available Wallet</p>
+              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Available Wallet</p>
             </div>
             <p className="text-3xl font-black text-slate-900">${fmt(balance)}</p>
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-              <span className="text-[11px] text-slate-400 font-bold">Unwithdrawn earnings</span>
+              <span className="text-[11px] text-[#8E8E93] font-bold">Unwithdrawn earnings</span>
               <Button
                 size="sm"
                 onClick={() => router.push("/dashboard/accounting/wallet")}
@@ -162,7 +162,7 @@ export default function FinancialOverviewPage() {
       <Card className="border-slate-200 shadow-sm rounded-[24px] overflow-hidden">
         <CardHeader className="bg-slate-50 border-b border-slate-100 py-5 px-6">
           <CardTitle className="text-lg font-black text-slate-900">Unified Portfolio Ledger</CardTitle>
-          <CardDescription className="text-xs font-semibold text-slate-500">
+          <CardDescription className="text-xs font-semibold text-[#6E6E73]">
             A single ledger tracking all rent incomes, fee commissions, maintenance outflows, and tenant security deposit distributions.
           </CardDescription>
         </CardHeader>
@@ -207,7 +207,7 @@ function LedgerTable({ list }: { list: any[] }) {
       <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl space-y-2 mt-2">
         <FileText className="h-8 w-8 text-slate-300 mx-auto" />
         <h4 className="font-bold text-slate-700 text-sm">No transactions found</h4>
-        <p className="text-xs text-slate-400 font-medium max-w-xs mx-auto">No records match this ledger filter in your history.</p>
+        <p className="text-xs text-[#8E8E93] font-medium max-w-xs mx-auto">No records match this ledger filter in your history.</p>
       </div>
     );
   }
@@ -215,36 +215,36 @@ function LedgerTable({ list }: { list: any[] }) {
   return (
     <div className="rounded-xl border border-slate-200 overflow-hidden mt-2">
       <Table>
-        <TableHeader className="bg-slate-50">
+        <TableHeader className="bg-[#F5F5F7]">
           <TableRow>
-            <TableHead className="font-bold text-slate-600 text-xs">Date</TableHead>
-            <TableHead className="font-bold text-slate-600 text-xs">Transaction ID</TableHead>
-            <TableHead className="font-bold text-slate-600 text-xs">Category</TableHead>
-            <TableHead className="font-bold text-slate-600 text-xs">Leaseholder</TableHead>
-            <TableHead className="font-bold text-slate-600 text-xs">Reference</TableHead>
-            <TableHead className="text-right font-bold text-slate-600 text-xs">Amount</TableHead>
+            <TableHead className="font-bold text-[#6E6E73] text-xs">Date</TableHead>
+            <TableHead className="font-bold text-[#6E6E73] text-xs">Transaction ID</TableHead>
+            <TableHead className="font-bold text-[#6E6E73] text-xs">Category</TableHead>
+            <TableHead className="font-bold text-[#6E6E73] text-xs">Leaseholder</TableHead>
+            <TableHead className="font-bold text-[#6E6E73] text-xs">Reference</TableHead>
+            <TableHead className="text-right font-bold text-[#6E6E73] text-xs">Amount</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {list.map((tx) => {
             const isExpense = tx.type === "EXPENSE";
             return (
-              <TableRow key={tx.id} className="hover:bg-slate-50/50">
-                <TableCell className="text-xs font-semibold text-slate-600">
+              <TableRow key={tx.id} className="hover:bg-[#F5F5F7]/50">
+                <TableCell className="text-xs font-semibold text-[#6E6E73]">
                   {new Date(tx.createdAt).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
                     year: "numeric"
                   })}
                 </TableCell>
-                <TableCell className="text-xs font-mono text-slate-500 uppercase">
+                <TableCell className="text-xs font-mono text-[#6E6E73] uppercase">
                   {tx.id.slice(0, 8)}
                 </TableCell>
                 <TableCell>
                   <Badge className={`text-[10px] font-black tracking-wider uppercase ${
                     tx.category === "RENT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
                     tx.category === "DEPOSIT" ? "bg-purple-50 text-purple-700 border-purple-200" :
-                    "bg-slate-50 text-slate-600 border-slate-200"
+                    "bg-slate-50 text-[#6E6E73] border-slate-200"
                   }`}>
                     {tx.category === "DEPOSIT" ? (isExpense ? "REFUND" : "ESCROW") : tx.category}
                   </Badge>
@@ -252,12 +252,12 @@ function LedgerTable({ list }: { list: any[] }) {
                 <TableCell className="text-xs font-bold text-slate-700">
                   {tx.tenant?.name || "System Expense"}
                 </TableCell>
-                <TableCell className="text-xs font-medium text-slate-500">
+                <TableCell className="text-xs font-medium text-[#6E6E73]">
                   {tx.reference ? (
                     <span className="flex items-center gap-1">
                       {tx.reference}
                       {tx.reference.startsWith("re_") && (
-                        <ExternalLink className="h-3 w-3 text-slate-400" />
+                        <ExternalLink className="h-3 w-3 text-[#8E8E93]" />
                       )}
                     </span>
                   ) : "—"}

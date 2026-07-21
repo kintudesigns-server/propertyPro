@@ -88,7 +88,7 @@ export function NotificationDropdown() {
       case "PAYMENT": return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "MAINTENANCE": return <Info className="h-4 w-4 text-blue-500" />;
       case "LEASE": return <FileText className="h-4 w-4 text-purple-500" />;
-      default: return <Bell className="h-4 w-4 text-slate-500" />;
+      default: return <Bell className="h-4 w-4 text-[#6E6E73]" />;
     }
   };
 
@@ -110,7 +110,7 @@ export function NotificationDropdown() {
           setIsOpen(!isOpen);
           if (!isOpen) fetchNotifications();
         }}
-        className={`relative p-2.5 rounded-xl border shadow-sm transition-colors ${isOpen ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"}`}
+        className={`relative p-2.5 rounded-xl border shadow-sm transition-colors ${isOpen ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-white border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F]"}`}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -119,19 +119,19 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-[#E2E8F0] z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-[#E5E5EA] z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top-right">
           {/* Header */}
-          <div className="p-4 border-b border-[#E2E8F0] bg-[#F8FAFC] flex justify-between items-center">
+          <div className="p-4 border-b border-[#E5E5EA] bg-[#F2F2F7] flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-[#0F172A] text-sm">Notifications</h3>
-              <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
+              <h3 className="font-bold text-[#1D1D1F] text-sm">Notifications</h3>
+              <p className="text-[10px] text-[#6E6E73] font-semibold mt-0.5">
                 {unreadCount} unread &middot; {highPriorityCount} high priority
               </p>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={fetchNotifications}
-                className="p-1.5 text-[#64748B] hover:text-[#3B82F6] hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-1.5 text-[#6E6E73] hover:text-[#007AFF] hover:bg-blue-50 rounded-lg transition-colors"
                 title="Refresh"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
@@ -139,7 +139,7 @@ export function NotificationDropdown() {
               <button 
                 onClick={markAllAsRead}
                 disabled={unreadCount === 0}
-                className="p-1.5 text-[#64748B] hover:text-[#10B981] hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50"
+                className="p-1.5 text-[#6E6E73] hover:text-[#10B981] hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50"
                 title="Mark all as read"
               >
                 <CheckCheck className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function NotificationDropdown() {
           {/* List */}
           <div className="max-h-[320px] overflow-y-auto flex flex-col">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-[#64748B]">
+              <div className="p-8 text-center text-[#6E6E73]">
                 <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
                 <p className="text-sm font-semibold">No notifications</p>
                 <p className="text-xs mt-1">You're all caught up!</p>
@@ -161,21 +161,21 @@ export function NotificationDropdown() {
                   href={`/dashboard/notifications/${notif.id}`}
                   key={notif.id}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-start gap-3 p-4 border-b border-slate-50 hover:bg-[#F8FAFC] transition-colors ${!notif.isRead ? "bg-slate-50/50" : ""}`}
+                  className={`flex items-start gap-3 p-4 border-b border-slate-50 hover:bg-[#F2F2F7] transition-colors ${!notif.isRead ? "bg-slate-50/50" : ""}`}
                 >
                   <div className={`mt-0.5 p-2 rounded-full shrink-0 ${!notif.isRead ? "bg-white shadow-sm border border-slate-100" : "bg-transparent"}`}>
                     {getIconForType(notif.type, notif.priority)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
-                      <h4 className={`text-sm truncate pr-2 ${!notif.isRead ? "font-bold text-[#0F172A]" : "font-semibold text-slate-700"}`}>
+                      <h4 className={`text-sm truncate pr-2 ${!notif.isRead ? "font-bold text-[#1D1D1F]" : "font-semibold text-slate-700"}`}>
                         {notif.title}
                       </h4>
                       <span className="text-[10px] text-[#94A3B8] whitespace-nowrap shrink-0 pt-0.5">
                         {getTimeAgo(notif.createdAt)}
                       </span>
                     </div>
-                    <p className={`text-xs line-clamp-2 ${!notif.isRead ? "text-slate-600 font-medium" : "text-[#64748B]"}`}>
+                    <p className={`text-xs line-clamp-2 ${!notif.isRead ? "text-[#6E6E73] font-medium" : "text-[#6E6E73]"}`}>
                       {notif.message}
                     </p>
                   </div>
@@ -188,11 +188,11 @@ export function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t border-[#E2E8F0] bg-white">
+          <div className="p-3 border-t border-[#E5E5EA] bg-white">
             <Link 
               href="/dashboard/notifications" 
               onClick={() => setIsOpen(false)}
-              className="block w-full text-center py-2 text-sm font-bold text-[#3B82F6] hover:text-[#2563EB] hover:bg-blue-50 rounded-xl transition-colors"
+              className="block w-full text-center py-2 text-sm font-bold text-[#007AFF] hover:text-[#0062CC] hover:bg-blue-50 rounded-xl transition-colors"
             >
               View all notifications
             </Link>

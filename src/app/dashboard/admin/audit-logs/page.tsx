@@ -100,11 +100,11 @@ export default function AuditLogsPage() {
             <ShieldAlert className="h-8 w-8 text-rose-600 animate-pulse" />
             System Audit Trails
           </h2>
-          <p className="text-slate-500 text-sm">
+          <p className="text-[#6E6E73] text-sm">
             Trace security compliance, financial operations, lease modifications, and authentication actions.
           </p>
         </div>
-        <Button onClick={fetchLogs} variant="outline" size="sm" className="h-10 border-slate-200 text-slate-600 rounded-xl flex items-center gap-2 font-bold bg-white">
+        <Button onClick={fetchLogs} variant="outline" size="sm" className="h-10 border-slate-200 text-[#6E6E73] rounded-xl flex items-center gap-2 font-bold bg-white">
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh Trails
         </Button>
@@ -114,8 +114,8 @@ export default function AuditLogsPage() {
       <Card className="border-0 shadow-xs bg-white rounded-2xl">
         <CardContent className="p-5 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-3 items-center">
-            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold text-slate-600">
-              <Filter className="h-4 w-4 text-slate-400" />
+            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold text-[#6E6E73]">
+              <Filter className="h-4 w-4 text-[#8E8E93]" />
               Filters
             </div>
 
@@ -152,8 +152,8 @@ export default function AuditLogsPage() {
             </select>
           </div>
 
-          <div className="text-xs font-bold text-slate-400">
-            Showing <span className="text-slate-800">{logs.length}</span> of <span className="text-slate-800">{pagination.total}</span> records
+          <div className="text-xs font-bold text-[#8E8E93]">
+            Showing <span className="text-[#1D1D1F]">{logs.length}</span> of <span className="text-[#1D1D1F]">{pagination.total}</span> records
           </div>
         </CardContent>
       </Card>
@@ -162,21 +162,21 @@ export default function AuditLogsPage() {
       <Card className="border-0 shadow-xs bg-white rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
-            <div className="py-24 text-center text-slate-400 font-medium flex flex-col items-center justify-center gap-3">
+            <div className="py-24 text-center text-[#8E8E93] font-medium flex flex-col items-center justify-center gap-3">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Fetching audit logs...</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">Fetching audit logs...</p>
             </div>
           ) : logs.length === 0 ? (
-            <div className="py-24 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+            <div className="py-24 text-center text-[#8E8E93] flex flex-col items-center justify-center gap-3">
               <Database className="h-12 w-12 text-slate-200" />
               <p className="font-semibold text-sm">No audit logs found.</p>
-              <p className="text-xs text-slate-400">Try adjusting your filters or search terms.</p>
+              <p className="text-xs text-[#8E8E93]">Try adjusting your filters or search terms.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/70 border-b border-slate-100 text-slate-400 text-[10px] font-extrabold tracking-wider uppercase">
+                  <tr className="bg-slate-50/70 border-b border-slate-100 text-[#8E8E93] text-[10px] font-extrabold tracking-wider uppercase">
                     <th className="py-3.5 px-6">Event Time</th>
                     <th className="py-3.5 px-6">Entity</th>
                     <th className="py-3.5 px-6">Action / Event</th>
@@ -199,22 +199,22 @@ export default function AuditLogsPage() {
                     });
 
                     return (
-                      <tr key={log.id} className="hover:bg-slate-50/40 transition-colors">
+                      <tr key={log.id} className="hover:bg-[#F5F5F7]/40 transition-colors">
                         <td className="py-4 px-6">
                           <div className="font-bold text-slate-700 flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                            <Calendar className="h-3.5 w-3.5 text-[#8E8E93]" />
                             {eventDate}
                           </div>
-                          <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                            <Clock className="h-3.5 w-3.5 text-slate-400" />
+                          <div className="text-xs text-[#8E8E93] flex items-center gap-1.5 mt-0.5">
+                            <Clock className="h-3.5 w-3.5 text-[#8E8E93]" />
                             {eventTime}
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <Badge variant="outline" className="rounded-lg font-bold text-[10px] uppercase py-0.5 px-2 bg-slate-50 border-slate-200 text-slate-600">
+                          <Badge variant="outline" className="rounded-lg font-bold text-[10px] uppercase py-0.5 px-2 bg-slate-50 border-slate-200 text-[#6E6E73]">
                             {log.entityType}
                           </Badge>
-                          <div className="text-[10px] text-slate-400 mt-1 font-mono">{log.entityId.slice(0, 8)}...</div>
+                          <div className="text-[10px] text-[#8E8E93] mt-1 font-mono">{log.entityId.slice(0, 8)}...</div>
                         </td>
                         <td className="py-4 px-6">
                           <Badge
@@ -231,19 +231,19 @@ export default function AuditLogsPage() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-1.5">
-                            <User className="h-3.5 w-3.5 text-slate-400" />
+                            <User className="h-3.5 w-3.5 text-[#8E8E93]" />
                             <span className="font-bold text-slate-700">
                               {log.actorRole || "SYSTEM"}
                             </span>
                           </div>
                           {log.actorId && (
-                            <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                            <div className="text-[10px] text-[#8E8E93] mt-0.5 font-mono">
                               ID: {log.actorId.slice(0, 8)}...
                             </div>
                           )}
                         </td>
                         <td className="py-4 px-6 max-w-xs">
-                          <p className="text-xs font-medium text-slate-600 line-clamp-2">
+                          <p className="text-xs font-medium text-[#6E6E73] line-clamp-2">
                             {log.note || "No comments or description recorded."}
                           </p>
                         </td>
@@ -252,7 +252,7 @@ export default function AuditLogsPage() {
                             onClick={() => setSelectedLog(log)}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-xl"
+                            className="h-8 w-8 text-[#8E8E93] hover:text-rose-600 hover:bg-[#F5F5F7] rounded-xl"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -273,15 +273,15 @@ export default function AuditLogsPage() {
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 variant="outline"
                 size="sm"
-                className="h-9 px-3 rounded-lg border-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1 bg-white disabled:opacity-50"
+                className="h-9 px-3 rounded-lg border-slate-200 text-[#6E6E73] text-xs font-bold flex items-center gap-1 bg-white disabled:opacity-50"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
 
-              <div className="text-xs font-bold text-slate-500">
-                Page <span className="text-slate-800">{page}</span> of{" "}
-                <span className="text-slate-800">{pagination.totalPages}</span>
+              <div className="text-xs font-bold text-[#6E6E73]">
+                Page <span className="text-[#1D1D1F]">{page}</span> of{" "}
+                <span className="text-[#1D1D1F]">{pagination.totalPages}</span>
               </div>
 
               <Button
@@ -289,7 +289,7 @@ export default function AuditLogsPage() {
                 onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
                 variant="outline"
                 size="sm"
-                className="h-9 px-3 rounded-lg border-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1 bg-white disabled:opacity-50"
+                className="h-9 px-3 rounded-lg border-slate-200 text-[#6E6E73] text-xs font-bold flex items-center gap-1 bg-white disabled:opacity-50"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -304,7 +304,7 @@ export default function AuditLogsPage() {
         <DialogContent className="max-w-2xl bg-white border-slate-100 text-slate-800 rounded-3xl p-6 overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold text-slate-900">Audit Trail Diffs</DialogTitle>
-            <DialogDescription className="text-slate-400 text-xs">
+            <DialogDescription className="text-[#8E8E93] text-xs">
               Detailed payload change representation captured during execution.
             </DialogDescription>
           </DialogHeader>
@@ -313,17 +313,17 @@ export default function AuditLogsPage() {
             <div className="space-y-4 pt-4 overflow-y-auto max-h-[450px] pr-2">
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-slate-400 uppercase text-[9px] mb-1">Entity Details</div>
+                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Entity Details</div>
                   <div className="text-slate-700 font-semibold">{selectedLog.entityType} ({selectedLog.entityId.slice(0, 8)})</div>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-slate-400 uppercase text-[9px] mb-1">Trigger Action</div>
+                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Trigger Action</div>
                   <div className="text-slate-700 font-semibold">{selectedLog.action}</div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600">Event Description</label>
+                <label className="text-xs font-bold text-[#6E6E73]">Event Description</label>
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs text-slate-700 font-semibold italic">
                   "{selectedLog.note || "No details provided."}"
                 </div>

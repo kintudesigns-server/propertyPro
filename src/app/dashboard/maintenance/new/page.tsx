@@ -245,56 +245,56 @@ export default function NewMaintenanceRequestPage() {
     <div className="w-full max-w-4xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4">
         <Link href={isTenant ? "/dashboard/maintenance/my-requests" : "/dashboard/maintenance"}>
-          <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]">
+          <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-[28px] font-black text-[#0F172A] tracking-tight">Submit Request</h1>
-          <p className="text-[#64748B] text-sm font-medium mt-0.5">Create a new maintenance or repair ticket.</p>
+          <h1 className="text-[28px] font-black text-[#1D1D1F] tracking-tight">Submit Request</h1>
+          <p className="text-[#6E6E73] text-sm font-medium mt-0.5">Create a new maintenance or repair ticket.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Request Details */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden">
           <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
+            <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
               <FileText className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Request Details</h2>
+            <h2 className="text-lg font-bold text-[#1D1D1F]">Request Details</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2.5">
-              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Issue Title <span className="text-[#EF4444]">*</span></Label>
+              <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Issue Title <span className="text-[#EF4444]">*</span></Label>
               <Input 
                 required
                 placeholder="e.g. Leaking faucet in master bathroom"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                className="h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm"
               />
             </div>
 
             <div className="space-y-2.5">
-              <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Description <span className="text-[#EF4444]">*</span></Label>
+              <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Description <span className="text-[#EF4444]">*</span></Label>
               <Textarea 
                 required
                 placeholder="Please describe the issue in detail. What is happening? When did it start?"
                 value={formData.description}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({...formData, description: e.target.value})}
-                className="min-h-[120px] rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-medium text-[#0F172A] shadow-sm resize-y"
+                className="min-h-[120px] rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-medium text-[#1D1D1F] shadow-sm resize-y"
               />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Category <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Category <span className="text-[#EF4444]">*</span></Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v || "GENERAL"})} required>
-                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                  <SelectContent className="rounded-xl border-[#E5E5EA]">
                     <SelectItem value="PLUMBING">Plumbing</SelectItem>
                     <SelectItem value="ELECTRICAL">Electrical</SelectItem>
                     <SelectItem value="HVAC">HVAC</SelectItem>
@@ -314,12 +314,12 @@ export default function NewMaintenanceRequestPage() {
               </div>
 
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Priority <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Priority <span className="text-[#EF4444]">*</span></Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v || "MEDIUM"})} required>
-                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                  <SelectContent className="rounded-xl border-[#E5E5EA]">
                     <SelectItem value="LOW">Low - Routine</SelectItem>
                     <SelectItem value="MEDIUM">Medium - Standard</SelectItem>
                     <SelectItem value="HIGH">High - Urgent</SelectItem>
@@ -340,19 +340,19 @@ export default function NewMaintenanceRequestPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Pets in Unit? <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Pets in Unit? <span className="text-[#EF4444]">*</span></Label>
                 <Select value={formData.hasPets} onValueChange={(v) => setFormData({...formData, hasPets: v || "No"})} required>
-                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                  <SelectContent className="rounded-xl border-[#E5E5EA]">
                     <SelectItem value="No">No pets</SelectItem>
                     <SelectItem value="Yes">Yes, pets are present</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Permission to Enter <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Permission to Enter <span className="text-[#EF4444]">*</span></Label>
                 <Select 
                   value={formData.entryPermission ? "true" : "false"} 
                   onValueChange={(v) => {
@@ -365,12 +365,12 @@ export default function NewMaintenanceRequestPage() {
                   }} 
                   required
                 >
-                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Select permission">
                       {formData.entryPermission ? "Yes, enter if I am not home" : "No, I must be home"}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                  <SelectContent className="rounded-xl border-[#E5E5EA]">
                     <SelectItem value="true">Yes, enter if I am not home</SelectItem>
                     <SelectItem value="false">No, I must be home</SelectItem>
                   </SelectContent>
@@ -378,7 +378,7 @@ export default function NewMaintenanceRequestPage() {
               </div>
 
               <div className="space-y-2.5 md:col-span-2">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Preferred Scheduling <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Preferred Scheduling <span className="text-[#EF4444]">*</span></Label>
                 <div className="flex gap-3">
                   <div className="w-1/2">
                     <Input
@@ -387,7 +387,7 @@ export default function NewMaintenanceRequestPage() {
                       value={prefDate}
                       onChange={(e) => setPrefDate(e.target.value)}
                       disabled={formData.entryPermission}
-                      className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80"
+                      className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm disabled:bg-gray-50 disabled:opacity-80"
                       required={!formData.entryPermission}
                     />
                   </div>
@@ -398,10 +398,10 @@ export default function NewMaintenanceRequestPage() {
                       disabled={formData.entryPermission}
                       required={!formData.entryPermission}
                     >
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
                         <SelectValue placeholder="Time Window" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0]">
+                      <SelectContent className="rounded-xl border-[#E5E5EA]">
                         <SelectItem value="Morning (8 AM - 12 PM)">Morning (8 AM - 12 PM)</SelectItem>
                         <SelectItem value="Afternoon (12 PM - 4 PM)">Afternoon (12 PM - 4 PM)</SelectItem>
                         <SelectItem value="Evening (4 PM - 7 PM)">Evening (4 PM - 7 PM)</SelectItem>
@@ -416,19 +416,19 @@ export default function NewMaintenanceRequestPage() {
         </Card>
 
         {/* Section 2: Property & Tenant */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden">
           <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
               <MapPin className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Location & Tenant</h2>
+            <h2 className="text-lg font-bold text-[#1D1D1F]">Location & Tenant</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             {isTenant ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
+                    <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
                     <Select 
                       value={formData.propertyId} 
                       onValueChange={(v) => {
@@ -442,14 +442,14 @@ export default function NewMaintenanceRequestPage() {
                       }}
                       required
                     >
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                         <SelectValue placeholder="Select a property">
                           {formData.propertyId
                             ? (tenantLeases.find(l => l.unit?.propertyId === formData.propertyId)?.unit?.property?.name || "Select a property")
                             : ""}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0] bg-white">
+                      <SelectContent className="rounded-xl border-[#E5E5EA] bg-white">
                         {Array.from(new Map(tenantLeases.map(l => [l.unit?.propertyId, l.unit?.property])).values())
                           .filter(Boolean)
                           .map((p: any) => (
@@ -461,21 +461,21 @@ export default function NewMaintenanceRequestPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Unit <span className="text-[#EF4444]">*</span></Label>
+                    <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Unit <span className="text-[#EF4444]">*</span></Label>
                     <Select 
                       value={formData.unitId} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, unitId: v || "" }))} 
                       required 
                       disabled={!formData.propertyId}
                     >
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
                         <SelectValue placeholder="Select a unit">
                           {formData.unitId
                             ? (tenantLeases.find(l => l.unitId === formData.unitId)?.unit?.name || "Select a unit")
                             : ""}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0] bg-white">
+                      <SelectContent className="rounded-xl border-[#E5E5EA] bg-white">
                         {tenantLeases
                           .filter(l => l.unit?.propertyId === formData.propertyId)
                           .map((l: any) => (
@@ -490,27 +490,27 @@ export default function NewMaintenanceRequestPage() {
             ) : (
               <div className="space-y-6">
                 <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Tenant <span className="text-[#EF4444]">*</span></Label>
+                  <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Tenant <span className="text-[#EF4444]">*</span></Label>
                   <Select value={formData.tenantId} onValueChange={handleTenantSelect} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                       <SelectValue placeholder="Select a tenant">
                         {formData.tenantId ? `${allTenants.find(t => t.id === formData.tenantId)?.name || ''} (${allTenants.find(t => t.id === formData.tenantId)?.email || ''})` : ""}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] max-h-60">
+                    <SelectContent className="rounded-xl border-[#E5E5EA] max-h-60">
                       {allTenants.map(t => (
                         <SelectItem key={t.id} value={t.id}>{t.name} ({t.email})</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-[#64748B] font-medium mt-1">Selecting a tenant will automatically fetch their property and unit.</p>
+                  <p className="text-xs text-[#6E6E73] font-medium mt-1">Selecting a tenant will automatically fetch their property and unit.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
+                    <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
                     <Select value={formData.propertyId} onValueChange={(v) => setFormData({...formData, propertyId: v || ""})} required disabled={!!formData.tenantId}>
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
                         <SelectValue placeholder="Property">
                           {formData.propertyId 
                             ? (properties.find(p => p.id === formData.propertyId)?.name 
@@ -518,7 +518,7 @@ export default function NewMaintenanceRequestPage() {
                             : ""}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0]">
+                      <SelectContent className="rounded-xl border-[#E5E5EA]">
                         {properties.map(p => (
                           <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                         ))}
@@ -527,14 +527,14 @@ export default function NewMaintenanceRequestPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Unit <span className="text-[#EF4444]">*</span></Label>
+                    <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Unit <span className="text-[#EF4444]">*</span></Label>
                     <Select value={formData.unitId} onValueChange={(v) => setFormData({...formData, unitId: v || ""})} disabled={!!formData.tenantId || (!formData.propertyId && units.length === 0)} required>
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm disabled:bg-gray-50 disabled:opacity-80">
                         <SelectValue placeholder="Unit">
                           {formData.unitId ? units.find(u => u.id === formData.unitId)?.name : ""}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0]">
+                      <SelectContent className="rounded-xl border-[#E5E5EA]">
                         {units.map(u => (
                           <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                         ))}
@@ -544,14 +544,14 @@ export default function NewMaintenanceRequestPage() {
                 </div>
 
                 {selectedTenant && (
-                  <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] flex items-center justify-between">
+                  <div className="p-4 bg-[#F2F2F7] rounded-xl border border-[#E5E5EA] flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-[#E2E8F0] flex items-center justify-center">
-                        <User className="h-5 w-5 text-[#64748B]" />
+                      <div className="h-10 w-10 rounded-full bg-[#E5E5EA] flex items-center justify-center">
+                        <User className="h-5 w-5 text-[#6E6E73]" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-[#0F172A]">{selectedTenant.name}</p>
-                        <p className="text-xs font-medium text-[#64748B]">{selectedTenant.email}</p>
+                        <p className="text-sm font-bold text-[#1D1D1F]">{selectedTenant.name}</p>
+                        <p className="text-xs font-medium text-[#6E6E73]">{selectedTenant.email}</p>
                       </div>
                     </div>
                     <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#10B981] text-[10px] font-bold rounded-full uppercase tracking-wide border border-green-200">
@@ -566,23 +566,23 @@ export default function NewMaintenanceRequestPage() {
 
         {/* Section 3: Assignment & Scheduling (Landlord/Admin only) */}
         {!isTenant && (
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden">
             <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#EF4444]">
                 <Calendar className="h-4 w-4" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Assignment & Scheduling</h2>
+              <h2 className="text-lg font-bold text-[#1D1D1F]">Assignment & Scheduling</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2.5">
-                <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Assign Inspector (Optional)</Label>
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Assign Inspector (Optional)</Label>
                 <Select value={formData.inspectorId} onValueChange={(v) => setFormData({...formData, inspectorId: v === "none" ? "" : (v || "")})}>
-                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Leave unassigned">
                       {formData.inspectorId && formData.inspectorId !== "none" ? `${inspectors.find(i => i.id === formData.inspectorId)?.name || ''}` : ""}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E2E8F0]">
+                  <SelectContent className="rounded-xl border-[#E5E5EA]">
                     <SelectItem value="none">Leave unassigned</SelectItem>
                     {inspectors.map(i => (
                       <SelectItem key={i.id} value={i.id}>{i.name} ({i.role})</SelectItem>
@@ -593,24 +593,24 @@ export default function NewMaintenanceRequestPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Estimated Cost ($)</Label>
+                  <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Estimated Cost ($)</Label>
                   <Input 
                     type="number"
                     step="0.01"
                     placeholder="0.00"
                     value={formData.estimatedCost}
                     onChange={(e) => setFormData({...formData, estimatedCost: e.target.value})}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                    className="h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm"
                   />
                 </div>
 
                 <div className="space-y-2.5">
-                  <Label className="text-[13px] font-bold text-[#0F172A] uppercase tracking-wide">Scheduled Date</Label>
+                  <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide">Scheduled Date</Label>
                   <Input 
                     type="datetime-local"
                     value={formData.scheduledDate}
                     onChange={(e) => setFormData({...formData, scheduledDate: e.target.value})}
-                    className="h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-sm"
+                    className="h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-sm"
                   />
                 </div>
               </div>
@@ -619,12 +619,12 @@ export default function NewMaintenanceRequestPage() {
         )}
 
         {/* Section 4: Photos */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden">
           <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#FAFAFA] flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-[#F3E8FF] flex items-center justify-center text-[#A855F7]">
               <Camera className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Photos & Documents</h2>
+            <h2 className="text-lg font-bold text-[#1D1D1F]">Photos & Documents</h2>
           </div>
           <CardContent className="p-6">
             {/* Hidden real file input */}
@@ -640,7 +640,7 @@ export default function NewMaintenanceRequestPage() {
             {/* Drop Zone */}
             <div
               className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer group ${
-                dragOver ? "border-[#3B82F6] bg-blue-50" : "border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#F1F5F9]"
+                dragOver ? "border-[#007AFF] bg-blue-50" : "border-[#E5E5EA] bg-[#F2F2F7] hover:bg-[#F1F5F9]"
               }`}
               onClick={() => !uploading && fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -649,20 +649,20 @@ export default function NewMaintenanceRequestPage() {
             >
               <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 {uploading
-                  ? <Loader2 className="h-6 w-6 text-[#3B82F6] animate-spin" />
-                  : <UploadCloud className={`h-6 w-6 ${dragOver ? "text-[#3B82F6]" : "text-[#94A3B8]"}`} />
+                  ? <Loader2 className="h-6 w-6 text-[#007AFF] animate-spin" />
+                  : <UploadCloud className={`h-6 w-6 ${dragOver ? "text-[#007AFF]" : "text-[#94A3B8]"}`} />
                 }
               </div>
-              <h3 className="text-[15px] font-bold text-[#0F172A]">
+              <h3 className="text-[15px] font-bold text-[#1D1D1F]">
                 {uploading ? "Uploading..." : dragOver ? "Drop files here" : "Upload files or drag and drop"}
               </h3>
-              <p className="text-xs font-medium text-[#64748B] mt-1">PNG, JPG, WEBP, PDF up to 10MB each</p>
+              <p className="text-xs font-medium text-[#6E6E73] mt-1">PNG, JPG, WEBP, PDF up to 10MB each</p>
 
               <Button
                 type="button"
                 variant="outline"
                 disabled={uploading}
-                className="mt-6 h-9 rounded-lg border-[#E2E8F0] text-[#0F172A] font-semibold text-xs shadow-sm"
+                className="mt-6 h-9 rounded-lg border-[#E5E5EA] text-[#1D1D1F] font-semibold text-xs shadow-sm"
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
               >
                 {uploading ? "Uploading..." : "Browse Files"}
@@ -672,10 +672,10 @@ export default function NewMaintenanceRequestPage() {
             {/* Uploaded Photo Previews */}
             {formData.photos.length > 0 && (
               <div className="mt-5">
-                <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wide mb-3">{formData.photos.length} file{formData.photos.length > 1 ? "s" : ""} attached</p>
+                <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wide mb-3">{formData.photos.length} file{formData.photos.length > 1 ? "s" : ""} attached</p>
                 <div className="flex gap-3 flex-wrap">
                   {formData.photos.map((url, i) => (
-                    <div key={i} className="relative group h-20 w-20 rounded-xl overflow-hidden border-2 border-[#E2E8F0] shadow-sm bg-[#F8FAFC]">
+                    <div key={i} className="relative group h-20 w-20 rounded-xl overflow-hidden border-2 border-[#E5E5EA] shadow-sm bg-[#F2F2F7]">
                       {url.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
                         <img src={url} alt={`upload-${i}`} className="h-full w-full object-cover" />
                       ) : (
@@ -703,11 +703,11 @@ export default function NewMaintenanceRequestPage() {
         {/* Form Actions */}
         <div className="flex justify-end gap-3 pt-4">
           <Link href={isTenant ? "/dashboard/maintenance/my-requests" : "/dashboard/maintenance"}>
-            <Button type="button" variant="outline" className="h-12 px-8 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] font-bold shadow-sm">
+            <Button type="button" variant="outline" className="h-12 px-8 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] font-bold shadow-sm">
               Cancel
             </Button>
           </Link>
-          <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-sm">
+          <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold shadow-sm">
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Request"}
           </Button>
         </div>

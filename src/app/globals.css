@@ -39,48 +39,59 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
 }
 
 :root {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  /* iOS Light Theme System Tokens */
+  --background: #F5F5F7;
+  --foreground: #1D1D1F;
+  
   --card: #FFFFFF;
-  --card-foreground: #0F172A;
+  --card-foreground: #1D1D1F;
+  
   --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #2563EB;
+  --popover-foreground: #1D1D1F;
+  
+  --primary: #007AFF;
   --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #0F172A;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #EFF6FF;
-  --accent-foreground: #2563EB;
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #2563EB;
-  --chart-1: #2563EB;
-  --chart-2: #3B82F6;
-  --chart-3: #93C5FD;
-  --chart-4: #0F172A;
-  --chart-5: #64748B;
-  --radius: 1rem;
+  
+  --secondary: rgba(60, 60, 67, 0.08);
+  --secondary-foreground: #1D1D1F;
+  
+  --muted: #F0F0F0;
+  --muted-foreground: #6E6E73;
+  
+  --accent: rgba(0, 122, 255, 0.08);
+  --accent-foreground: #007AFF;
+  
+  --destructive: #FF3B30;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #E5E5EA;
+  --input: #F0F0F0;
+  --ring: rgba(0, 122, 255, 0.4);
+  
+  --chart-1: #007AFF;
+  --chart-2: #34C759;
+  --chart-3: #FF9500;
+  --chart-4: #AF52DE;
+  --chart-5: #FF3B30;
+  
+  --radius: 0.75rem;
+  
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #0F172A;
-  --sidebar-primary: #2563EB;
+  --sidebar-foreground: #1D1D1F;
+  --sidebar-primary: #007AFF;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F5F9;
-  --sidebar-accent-foreground: #0F172A;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #2563EB;
+  --sidebar-accent: rgba(60, 60, 67, 0.06);
+  --sidebar-accent-foreground: #1D1D1F;
+  --sidebar-border: #E5E5EA;
+  --sidebar-ring: rgba(0, 122, 255, 0.4);
 }
 
 .dark {
@@ -102,11 +113,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -121,71 +127,299 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground relative min-h-screen;
-  }
-  body::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0) 70%);
-    filter: blur(60px);
-    pointer-events: none;
-    z-index: -10;
-  }
-  body::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0) 70%);
-    filter: blur(60px);
-    pointer-events: none;
-    z-index: -10;
-  }
   html {
-    @apply font-sans;
+    @apply font-sans antialiased bg-[#F5F5F7] text-[#1D1D1F];
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-[#F5F5F7] text-[#1D1D1F] min-h-screen selection:bg-[#007AFF]/20 selection:text-[#007AFF];
   }
 }
 
-.tree-container {
-  position: relative;
-  margin-left: 0.5rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--border);
+/* Custom Utilities for iOS Feel */
+.ios-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.tree-item {
-  position: relative;
+.ios-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E5EA;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.01);
+  border-radius: 16px;
 }
 
-.tree-item::before {
-  content: "";
-  position: absolute;
-  left: -0.75rem;
-  top: 50%;
-  width: 0.5rem;
-  height: 1px;
-  background-color: var(--border);
+.ios-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ios-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
-/* Custom premium scrollbars */
+.ios-container {
+  background: #FFFFFF;
+  border: 1px solid #E5E5EA;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.ios-modal {
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.ios-input {
+  background: #F0F0F0;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #1D1D1F;
+  transition: all 0.15s ease;
+}
+.ios-input:focus {
+  background: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.35);
+}
+
+.ios-btn-primary {
+  background: #007AFF;
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.ios-btn-primary:hover {
+  background: #0066CC;
+}
+
+.ios-btn-secondary {
+  background: rgba(60, 60, 67, 0.08);
+  color: #1D1D1F;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.ios-btn-secondary:hover {
+  background: rgba(60, 60, 67, 0.14);
+}
+
+/* Mobile Safe Areas */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Custom iOS Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(60, 60, 67, 0.22);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(60, 60, 67, 0.36);
+}
+
+/* 3D & Animation Utility Classes */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(-2deg);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 50s linear infinite;
+}
+
+.animate-marquee-slow:hover {
+  animation-play-state: paused;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+
+.glow-blue {
+  box-shadow: 0 0 40px -5px rgba(0, 122, 255, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 40px -5px rgba(175, 82, 222, 0.3);
+}
+
+.ios-card-3d {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0);
+}
+
+.ios-card-3d:hover {
+  transform: perspective(1000px) rotateX(-2deg) rotateY(3deg) translateZ(10px);
+  box-shadow: 0 20px 40px -15px rgba(0, 122, 255, 0.15), 0 0 0 1px rgba(0, 122, 255, 0.1);
+}
+
+/* Ken Burns - cinematic slow zoom pan for hero BG image */
+@keyframes kenBurns {
+  0%   { transform: scale(1.0) translate(0%, 0%); }
+  25%  { transform: scale(1.06) translate(-1.5%, -1%); }
+  50%  { transform: scale(1.08) translate(1%, -1.5%); }
+  75%  { transform: scale(1.04) translate(-0.5%, 1%); }
+  100% { transform: scale(1.0) translate(0%, 0%); }
+}
+
+.animate-ken-burns {
+  animation: kenBurns 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Slow upward drift for floating cards */
+@keyframes driftUp {
+  0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+  33%       { transform: translateY(-10px) translateX(3px) rotate(0.5deg); }
+  66%       { transform: translateY(-6px) translateX(-2px) rotate(-0.3deg); }
+}
+
+@keyframes driftDown {
+  0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+  33%       { transform: translateY(8px) translateX(-2px) rotate(-0.5deg); }
+  66%       { transform: translateY(4px) translateX(3px) rotate(0.4deg); }
+}
+
+.animate-drift-up   { animation: driftUp   7s ease-in-out infinite; }
+.animate-drift-down { animation: driftDown 9s ease-in-out infinite; }
+
+/* Gentle rotate for decorative rings */
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-slow-spin { animation: slowSpin 18s linear infinite; }
+
+/* Number count-up shimmer sweep */
+@keyframes sweepShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.stat-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.stat-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  animation: sweepShimmer 3.5s ease-in-out infinite;
+}
+
+/* Glow pulse for accent badge */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,122,255,0.0); }
+  50%       { box-shadow: 0 0 18px 6px rgba(0,122,255,0.18); }
+}
+.animate-glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+
+/* Glass card entrance slide */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up-1 { animation: slideUpFade 0.7s ease-out 0.1s both; }
+.animate-slide-up-2 { animation: slideUpFade 0.7s ease-out 0.3s both; }
+.animate-slide-up-3 { animation: slideUpFade 0.7s ease-out 0.5s both; }
+.animate-slide-up-4 { animation: slideUpFade 0.7s ease-out 0.7s both; }
+.animate-slide-up-5 { animation: slideUpFade 0.7s ease-out 0.9s both; }
+
+/* Background gradient mesh sweep */
+@keyframes meshMove {
+  0%   { background-position: 0% 0%; }
+  50%  { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+.animate-mesh-bg {
+  background-size: 400% 400%;
+  animation: meshMove 20s ease-in-out infinite;
 }

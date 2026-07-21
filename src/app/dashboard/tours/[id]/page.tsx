@@ -223,9 +223,9 @@ export default function TourDetailPage() {
       <div className="flex-1 p-8 text-center max-w-lg mx-auto py-24 space-y-4">
         <AlertCircle className="h-12 w-12 text-slate-300 mx-auto" />
         <h3 className="text-lg font-bold text-slate-800">Tour Request Not Found</h3>
-        <p className="text-sm text-slate-500">The showing request could not be loaded or has been deleted.</p>
+        <p className="text-sm text-[#6E6E73]">The showing request could not be loaded or has been deleted.</p>
         <Link href="/dashboard/tours">
-          <Button className="bg-slate-900 text-white rounded-xl">Go Back</Button>
+          <Button className="bg-[#007AFF] text-white rounded-xl">Go Back</Button>
         </Link>
       </div>
     );
@@ -247,7 +247,7 @@ export default function TourDetailPage() {
     <div className="flex-1 p-8 pt-6 max-w-7xl mx-auto space-y-8">
       {/* Top Navigation / Breadcrumb */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-xs text-slate-400 font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-xs text-[#8E8E93] font-bold uppercase tracking-wider">
           <Link href="/dashboard/tours" className="hover:text-slate-600 transition-colors">Showings Schedule</Link>
           <span>/</span>
           <span className="text-slate-600">Request #{tour.id.slice(-6).toUpperCase()}</span>
@@ -255,13 +255,13 @@ export default function TourDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link href="/dashboard/tours">
-              <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-500 hover:text-slate-700 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl transition-all">
+              <Button variant="ghost" size="icon" className="h-10 w-10 text-[#6E6E73] hover:text-slate-700 bg-slate-50 border border-slate-200 hover:bg-[#F2F2F7] rounded-xl transition-all">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Visit details: {tour.tenantName}</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Manage showing outcomes and review prospect details.</p>
+              <p className="text-sm text-[#6E6E73] mt-0.5">Manage showing outcomes and review prospect details.</p>
             </div>
           </div>
           <div className="flex items-center gap-2.5">
@@ -293,7 +293,7 @@ export default function TourDetailPage() {
           
           {/* Card 1: Prospect Profile */}
           <Card className="border border-slate-100 shadow-sm bg-white rounded-3xl overflow-hidden p-6">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+            <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <User className="h-4 w-4" />
               Prospect Profile Details
             </h3>
@@ -309,12 +309,12 @@ export default function TourDetailPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-600">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-700">{tour.tenantEmail}</span>
+                    <Mail className="h-4 w-4 text-[#8E8E93]" />
+                    <span className="text-[#3C3C43]">{tour.tenantEmail}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-700">{tour.tenantPhone}</span>
+                    <Phone className="h-4 w-4 text-[#8E8E93]" />
+                    <span className="text-[#3C3C43]">{tour.tenantPhone}</span>
                   </div>
                 </div>
               </div>
@@ -322,9 +322,9 @@ export default function TourDetailPage() {
 
             {tour.tenantMessage && (
               <div className="pt-6">
-                <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Message to Owner</Label>
+                <Label className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block mb-2">Message to Owner</Label>
                 <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-sm text-slate-600 italic font-semibold flex gap-2.5">
-                  <MessageSquare className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
+                  <MessageSquare className="h-5 w-5 text-[#8E8E93] shrink-0 mt-0.5" />
                   <span>"{tour.tenantMessage}"</span>
                 </div>
               </div>
@@ -333,26 +333,26 @@ export default function TourDetailPage() {
 
           {/* Card 2: Visit Appointment */}
           <Card className="border border-slate-100 shadow-sm bg-white rounded-3xl overflow-hidden p-6">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+            <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
               Visit Appointment Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-slate-100">
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Property & Unit</span>
+                <span className="text-[10px] uppercase font-bold text-[#8E8E93] block tracking-wider">Property & Unit</span>
                 <span className="text-base font-extrabold text-slate-800">{tour.property.name}</span>
                 {tour.unit && (
-                  <span className="text-xs font-bold text-slate-500 block">Unit: {tour.unit.name}</span>
+                  <span className="text-xs font-bold text-[#6E6E73] block">Unit: {tour.unit.name}</span>
                 )}
-                <span className="text-xs text-slate-400 block mt-1">{tour.property.address}</span>
+                <span className="text-xs text-[#8E8E93] block mt-1">{tour.property.address}</span>
               </div>
               <div className="space-y-2 text-sm font-semibold text-slate-700">
                 <div className="flex items-center gap-2.5">
-                  <Calendar className="h-4.5 w-4.5 text-slate-400" />
+                  <Calendar className="h-4.5 w-4.5 text-[#8E8E93]" />
                   <span>{formattedDate}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Clock className="h-4.5 w-4.5 text-slate-400" />
+                  <Clock className="h-4.5 w-4.5 text-[#8E8E93]" />
                   <span>{formattedTime}</span>
                 </div>
               </div>
@@ -360,13 +360,13 @@ export default function TourDetailPage() {
             
             <div className="pt-6 flex flex-wrap gap-6 text-xs text-slate-600 font-bold">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">Showing Method</span>
+                <span className="text-[10px] uppercase font-bold text-[#8E8E93] block tracking-wider mb-1">Showing Method</span>
                 <Badge variant="outline" className="rounded-lg bg-slate-50 border-slate-200 text-slate-600 font-bold py-1 px-2.5">
                   {tour.tourType === "IN_PERSON" ? "In-Person Visit" : "Virtual Video Call"}
                 </Badge>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">Request Verified</span>
+                <span className="text-[10px] uppercase font-bold text-[#8E8E93] block tracking-wider mb-1">Request Verified</span>
                 <Badge className="bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-lg font-bold py-1 px-2.5 uppercase">
                   SMS Verified
                 </Badge>
@@ -377,14 +377,14 @@ export default function TourDetailPage() {
           {/* Card 3: Outcomes (Instructions, Reasons, Reviews) */}
           {(tour.status !== "PENDING") && (
             <Card className="border border-slate-100 shadow-sm bg-white rounded-3xl overflow-hidden p-6">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+              <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Settings className="h-4 w-4" />
                 Visit Outcomes
               </h3>
 
               {tour.status === "CONFIRMED" && tour.ownerNotes && (
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sent Visit Instructions</Label>
+                  <Label className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Sent Visit Instructions</Label>
                   <div className="bg-blue-50/50 border border-blue-100 text-blue-900 p-4 rounded-2xl text-sm font-medium">
                     <p className="margin-0 leading-relaxed">"{tour.ownerNotes}"</p>
                   </div>
@@ -393,7 +393,7 @@ export default function TourDetailPage() {
 
               {tour.status === "CANCELLED" && (
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Cancellation Information</Label>
+                  <Label className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Cancellation Information</Label>
                   <div className="bg-rose-50 border border-rose-100 text-rose-900 p-4 rounded-2xl text-sm">
                     <span className="font-extrabold block text-rose-950 mb-1">Reason for cancellation:</span>
                     <p className="margin-0 font-medium italic leading-relaxed">"{tour.cancellationReason || "No specific reason was provided."}"</p>
@@ -405,7 +405,7 @@ export default function TourDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Feedback rating from prospect */}
                   <div className="space-y-3">
-                    <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Prospect Visit Feedback</Label>
+                    <Label className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Prospect Visit Feedback</Label>
                     {tour.feedbackRating ? (
                       <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl space-y-2.5">
                         <div className="flex items-center gap-2">
@@ -417,7 +417,7 @@ export default function TourDetailPage() {
                                 className={`h-4.5 w-4.5 ${
                                   idx < (tour.feedbackRating || 0)
                                     ? "text-amber-500 fill-amber-500"
-                                    : "text-slate-200"
+                                    : "text-[#EBEBF0]"
                                 }`}
                               />
                             ))}
@@ -428,7 +428,7 @@ export default function TourDetailPage() {
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs text-slate-400 font-semibold">
+                      <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs text-[#8E8E93] font-semibold">
                         No feedback rating or comments submitted by the prospect.
                       </div>
                     )}
@@ -436,7 +436,7 @@ export default function TourDetailPage() {
 
                   {/* Private landlord evaluation */}
                   <div className="space-y-3">
-                    <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Private Notes & Rating</Label>
+                    <Label className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Your Private Notes & Rating</Label>
                     <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl space-y-2.5">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-slate-600">Prospect Quality:</span>
@@ -447,7 +447,7 @@ export default function TourDetailPage() {
                               className={`h-4.5 w-4.5 ${
                                 idx < (tour.ownerProspectRating || 0)
                                   ? "text-blue-500 fill-blue-500"
-                                  : "text-slate-200"
+                                  : "text-[#EBEBF0]"
                               }`}
                             />
                           ))}
@@ -458,7 +458,7 @@ export default function TourDetailPage() {
                           "{tour.ownerProspectNotes}"
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-400 font-semibold">
+                        <p className="text-xs text-[#8E8E93] font-semibold">
                           No private landlord notes provided.
                         </p>
                       )}
@@ -476,7 +476,7 @@ export default function TourDetailPage() {
           
           {/* Card 1: Sidebar Actions */}
           <Card className="border border-slate-100 shadow-sm bg-white rounded-3xl p-6">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider mb-4">
               Showing Actions
             </h3>
             
@@ -517,7 +517,7 @@ export default function TourDetailPage() {
             )}
 
             {(tour.status === "COMPLETED" || tour.status === "CANCELLED") && (
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center text-xs text-slate-400 font-semibold">
+              <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center text-xs text-[#8E8E93] font-semibold">
                 No active actions available. This showing tour has already been {tour.status.toLowerCase()}.
               </div>
             )}
@@ -525,7 +525,7 @@ export default function TourDetailPage() {
 
           {/* Card 2: Timeline Info */}
           <Card className="border border-slate-100 shadow-sm bg-white rounded-3xl p-6">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider mb-4">
               Request Timeline
             </h3>
             
@@ -536,7 +536,7 @@ export default function TourDetailPage() {
                   <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
                 </span>
                 <span className="text-xs font-bold text-slate-800 block">Request Submitted</span>
-                <span className="text-[10px] text-slate-400 font-bold">
+                <span className="text-[10px] text-[#8E8E93] font-bold">
                   {new Date(tour.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}{" "}
                   {new Date(tour.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                 </span>
@@ -548,7 +548,7 @@ export default function TourDetailPage() {
                   <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                 </span>
                 <span className="text-xs font-bold text-slate-800 block">Email Verified via OTP</span>
-                <span className="text-[10px] text-slate-400 font-bold">Automatic validation complete</span>
+                <span className="text-[10px] text-[#8E8E93] font-bold">Automatic validation complete</span>
               </div>
 
               {/* Step 3: Current Status */}
@@ -560,7 +560,7 @@ export default function TourDetailPage() {
                     ? "border-blue-400"
                     : tour.status === "COMPLETED"
                     ? "border-emerald-400"
-                    : "border-slate-300"
+                    : "border-[#D1D1D6]"
                 }`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${
                     tour.status === "PENDING"
@@ -573,11 +573,11 @@ export default function TourDetailPage() {
                   }`} />
                 </span>
                 <span className="text-xs font-bold text-slate-800 block">Status: {tour.status}</span>
-                <span className="text-[10px] text-slate-400 font-bold">Updated in showing log</span>
+                <span className="text-[10px] text-[#8E8E93] font-bold">Updated in showing log</span>
               </div>
             </div>
 
-            <div className="text-[10px] text-slate-400 border-t border-slate-100 pt-4 mt-6 flex flex-col gap-1 font-bold">
+            <div className="text-[10px] text-[#8E8E93] border-t border-slate-100 pt-4 mt-6 flex flex-col gap-1 font-bold">
               <span>SYSTEM ID: {tour.id}</span>
             </div>
           </Card>
@@ -590,10 +590,10 @@ export default function TourDetailPage() {
 
       {/* Confirm Tour Modal */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-3xl max-w-sm p-6">
+        <DialogContent className="bg-white border-[#E5E5EA] text-slate-800 rounded-3xl max-w-sm p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold">Confirm Showing Tour</DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
+            <DialogDescription className="text-xs text-[#8E8E93]">
               Provide visit instructions (parking, door codes, contact person) that will be emailed to {tour.tenantName}.
             </DialogDescription>
           </DialogHeader>
@@ -618,10 +618,10 @@ export default function TourDetailPage() {
 
       {/* Cancel Tour Modal */}
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-3xl max-w-sm p-6">
+        <DialogContent className="bg-white border-[#E5E5EA] text-slate-800 rounded-3xl max-w-sm p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold text-rose-600">Decline / Cancel Showing</DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
+            <DialogDescription className="text-xs text-[#8E8E93]">
               You must provide a cancellation reason. This explanation will be automatically emailed to the prospect.
             </DialogDescription>
           </DialogHeader>
@@ -653,10 +653,10 @@ export default function TourDetailPage() {
 
       {/* Complete Showing & Rate Guest Modal */}
       <Dialog open={rateProspectOpen} onOpenChange={setRateProspectOpen}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-3xl max-w-sm p-6">
+        <DialogContent className="bg-white border-[#E5E5EA] text-slate-800 rounded-3xl max-w-sm p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold">Complete Showing Visit</DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
+            <DialogDescription className="text-xs text-[#8E8E93]">
               Rate this prospective tenant to help track applicant quality in the system.
             </DialogDescription>
           </DialogHeader>
@@ -692,7 +692,7 @@ export default function TourDetailPage() {
                 onChange={(e) => setProspectNotes(e.target.value)}
                 className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold min-h-[100px] resize-none"
               />
-              <p className="text-[10px] text-slate-400">These notes are completely private and are never visible to the prospect.</p>
+              <p className="text-[10px] text-[#8E8E93]">These notes are completely private and are never visible to the prospect.</p>
             </div>
           </div>
           <DialogFooter className="flex sm:justify-end gap-2">

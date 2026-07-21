@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -26,9 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased font-sans bg-[#F5F5F3] text-[#111111]`}>
+      <body className={`${inter.variable} ${geistMono.variable} h-full antialiased font-sans bg-[#F5F5F7] text-[#1D1D1F]`}>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+

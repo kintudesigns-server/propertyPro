@@ -1183,7 +1183,7 @@ export default function OwnerDashboard() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Button onClick={fetchOwnerData} variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
+                <Button onClick={fetchOwnerData} variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
                   <RefreshCw className="h-3.5 w-3.5" /> Refresh
                 </Button>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
@@ -1214,7 +1214,7 @@ export default function OwnerDashboard() {
                     {overdueInvoicesCount} <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
-                <p className="text-slate-500 font-medium text-xs ml-6">{overdueInvoicesCount} payments are overdue</p>
+                <p className="text-[#6E6E73] font-medium text-xs ml-6">{overdueInvoicesCount} payments are overdue</p>
               </Card>
 
               {/* Urgent Maintenance Alert */}
@@ -1228,7 +1228,7 @@ export default function OwnerDashboard() {
                     {urgentMaintenanceCount} <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
-                <p className="text-slate-500 font-medium text-xs ml-6">{urgentMaintenanceCount > 0 ? `${urgentMaintenanceCount} urgent requests` : "No urgent maintenance requests"}</p>
+                <p className="text-[#6E6E73] font-medium text-xs ml-6">{urgentMaintenanceCount > 0 ? `${urgentMaintenanceCount} urgent requests` : "No urgent maintenance requests"}</p>
               </Card>
 
               {/* Expiring Leases Alert */}
@@ -1242,7 +1242,7 @@ export default function OwnerDashboard() {
                     {expiringLeasesCount} <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
-                <p className="text-slate-500 font-medium text-xs ml-6">{expiringLeasesCount} leases expiring within the next 30 days</p>
+                <p className="text-[#6E6E73] font-medium text-xs ml-6">{expiringLeasesCount} leases expiring within the next 30 days</p>
               </Card>
             </div>
 
@@ -1272,7 +1272,7 @@ export default function OwnerDashboard() {
                       </div>
                       <p className="text-3xl font-bold text-slate-900 mt-3 leading-none">{stat.value}</p>
                     </div>
-                    <p className="text-xs text-slate-500 mt-4 leading-tight font-medium">{stat.sub}</p>
+                    <p className="text-xs text-[#6E6E73] mt-4 leading-tight font-medium">{stat.sub}</p>
                   </Card>
                 );
               })}
@@ -1286,14 +1286,14 @@ export default function OwnerDashboard() {
                   <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                     <div>
                       <h3 className="text-lg font-black text-slate-900">Recent Activity Feed</h3>
-                      <p className="text-xs text-slate-400 font-medium">Real-time log of payments, tickets, and withdrawals</p>
+                      <p className="text-xs text-[#8E8E93] font-medium">Real-time log of payments, tickets, and withdrawals</p>
                     </div>
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
                   
                   <div className="space-y-4 mt-5">
                     {recentActivities.length === 0 ? (
-                      <div className="text-center py-12 text-slate-400 font-bold">No recent activities logged.</div>
+                      <div className="text-center py-12 text-[#8E8E93] font-bold">No recent activities logged.</div>
                     ) : (
                       recentActivities.map((act, i) => (
                         <div key={i} className="flex items-start gap-4">
@@ -1302,8 +1302,8 @@ export default function OwnerDashboard() {
                           </div>
                           <div className="space-y-0.5 min-w-0 flex-1">
                             <p className="text-xs font-bold text-slate-800 truncate">{act.title}</p>
-                            <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{act.description}</p>
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase">{new Date(act.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">{act.description}</p>
+                            <span className="text-[9px] text-[#8E8E93] font-extrabold uppercase">{new Date(act.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </div>
                       ))
@@ -1318,23 +1318,23 @@ export default function OwnerDashboard() {
                   <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                     <div>
                       <h3 className="text-lg font-black text-slate-900">Financial Overview</h3>
-                      <p className="text-xs text-slate-400 font-medium">Monthly revenue vs simulated expenses (last 6 months)</p>
+                      <p className="text-xs text-[#8E8E93] font-medium">Monthly revenue vs simulated expenses (last 6 months)</p>
                     </div>
                     <div className="flex gap-4.5 text-[10px] font-extrabold tracking-widest uppercase">
                       <div className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-[#496E5C]" />
-                        <span className="text-slate-600">Revenue</span>
+                        <span className="text-[#6E6E73]">Revenue</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                        <span className="text-slate-600">Expenses</span>
+                        <span className="text-[#6E6E73]">Expenses</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="h-80 w-full mt-6 flex items-center justify-center">
                     {invoices.length === 0 ? (
-                      <div className="text-slate-400 font-bold text-xs">No transaction history available.</div>
+                      <div className="text-[#8E8E93] font-bold text-xs">No transaction history available.</div>
                     ) : (
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -1378,7 +1378,7 @@ export default function OwnerDashboard() {
                 <p className="text-[#7F817F] mt-1 text-sm">Manage your property portfolio</p>
               </div>
               <div className="flex gap-3">
-                <Button onClick={fetchOwnerData} variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
+                <Button onClick={fetchOwnerData} variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
                   <RefreshCw className="h-3.5 w-3.5" /> Refresh
                 </Button>
                 <Button onClick={handleAddPropertyClick} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-all flex items-center gap-2">
@@ -1399,14 +1399,14 @@ export default function OwnerDashboard() {
                 return (
                   <Card key={s.label} className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
-                      <p className="text-xs text-slate-500 font-semibold">{s.label}</p>
+                      <p className="text-xs text-[#6E6E73] font-semibold">{s.label}</p>
                       <div className={`p-2 rounded-full ${s.bg} ${s.color}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                     </div>
                     <div className="mt-1">
                       <p className="text-3xl font-bold text-slate-900 leading-none">{s.val}</p>
-                      <p className="text-[11px] text-slate-500 mt-3 font-medium">{s.sub}</p>
+                      <p className="text-[11px] text-[#6E6E73] mt-3 font-medium">{s.sub}</p>
                     </div>
                   </Card>
                 );
@@ -1439,17 +1439,17 @@ export default function OwnerDashboard() {
                       </div>
                       <div>
                         <h2 className="text-lg font-bold text-slate-900 leading-tight">Properties</h2>
-                        <p className="text-[11px] text-slate-500">Showing 1 to {filtered.length} of {properties.length} properties</p>
+                        <p className="text-[11px] text-[#6E6E73]">Showing 1 to {filtered.length} of {properties.length} properties</p>
                       </div>
                     </div>
                     <div className="flex bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-sm">
-                      <button onClick={()=>setPropViewMode('grid')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='grid'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-slate-400 hover:text-slate-600'}`}>
+                      <button onClick={()=>setPropViewMode('grid')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='grid'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                         <LayoutGrid className="h-4 w-4" />
                       </button>
-                      <button onClick={()=>setPropViewMode('list')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='list'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-slate-400 hover:text-slate-600'}`}>
+                      <button onClick={()=>setPropViewMode('list')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='list'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                         <List className="h-4 w-4" />
                       </button>
-                      <button onClick={()=>setPropViewMode('table')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='table'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-slate-400 hover:text-slate-600'}`}>
+                      <button onClick={()=>setPropViewMode('table')} className={`p-1.5 rounded-lg transition-colors ${propViewMode==='table'?'bg-white text-slate-900 shadow-sm border border-slate-200/50':'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                         <Table2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -1458,7 +1458,7 @@ export default function OwnerDashboard() {
                   {/* Search and Filter Bar */}
                   <div className="flex flex-wrap gap-3 items-center bg-white p-3 border border-slate-100 rounded-2xl shadow-sm">
                     <div className="relative flex-1 min-w-[200px]">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
                       <Input placeholder="Search properties..." value={propSearch} onChange={e=>setPropSearch(e.target.value)} className="pl-9 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 rounded-xl h-10 text-sm w-full transition-colors" />
                     </div>
                     <Select value={propTypeFilter} onValueChange={(v)=>setPropTypeFilter(v||'ALL')}>
@@ -1488,14 +1488,14 @@ export default function OwnerDashboard() {
                         <SelectItem value="OLDEST">Oldest First</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button variant="outline" className="h-10 rounded-xl text-sm font-medium border-slate-200 text-slate-700 hover:bg-slate-50 px-4">
+                    <Button variant="outline" className="h-10 rounded-xl text-sm font-medium border-slate-200 text-slate-700 hover:bg-[#F5F5F7] px-4">
                       All Units
                     </Button>
                   </div>
 
                   {/* Property Render Loop */}
                   {!filtered.length ? (
-                    <div className="text-center py-16 text-slate-500 bg-white rounded-2xl border border-slate-100 shadow-sm"><Building className="h-12 w-12 mx-auto mb-3 opacity-20" /><p className="font-semibold">No properties found</p><Button onClick={()=>setActiveTab('add-property')} className="mt-4 bg-blue-600 text-white rounded-xl px-5 h-10 text-xs font-bold hover:bg-blue-700"><Plus className="h-4 w-4 mr-1"/>Add Your First Property</Button></div>
+                    <div className="text-center py-16 text-[#6E6E73] bg-white rounded-2xl border border-slate-100 shadow-sm"><Building className="h-12 w-12 mx-auto mb-3 opacity-20" /><p className="font-semibold">No properties found</p><Button onClick={()=>setActiveTab('add-property')} className="mt-4 bg-blue-600 text-white rounded-xl px-5 h-10 text-xs font-bold hover:bg-blue-700"><Plus className="h-4 w-4 mr-1"/>Add Your First Property</Button></div>
                   ) : propViewMode === 'grid' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filtered.map(p=>{
@@ -1520,7 +1520,7 @@ export default function OwnerDashboard() {
                                 </div>
                                 <div className="absolute top-3 right-3">
                                   <span className="text-[11px] font-bold bg-white/95 text-slate-700 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                                    <Building className="h-3 w-3 text-slate-500" />{type}
+                                    <Building className="h-3 w-3 text-[#6E6E73]" />{type}
                                   </span>
                                 </div>
                               </div>
@@ -1528,11 +1528,11 @@ export default function OwnerDashboard() {
                             <div className="p-5 relative flex flex-col gap-3">
                               <div>
                                 <h3 className="font-bold text-slate-900 text-[17px] pr-6 truncate">{name}</h3>
-                                <p className="text-[13px] text-slate-500 mt-1 line-clamp-1">{p.description || "hello world"}</p>
+                                <p className="text-[13px] text-[#6E6E73] mt-1 line-clamp-1">{p.description || "hello world"}</p>
                               </div>
                               
-                              <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                                <MapPin className="h-4 w-4 text-slate-400 shrink-0" /> <span className="truncate">{p.city}, {p.state || p.city}, {p.country || 'London'} {p.zip || '3100'}</span>
+                              <p className="text-xs text-[#6E6E73] flex items-center gap-1.5 font-medium">
+                                <MapPin className="h-4 w-4 text-[#8E8E93] shrink-0" /> <span className="truncate">{p.city}, {p.state || p.city}, {p.country || 'London'} {p.zip || '3100'}</span>
                               </p>
                               
                               <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100 flex flex-col gap-2 mt-1">
@@ -1541,30 +1541,30 @@ export default function OwnerDashboard() {
                                   {vacantCount > 0 && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold">{vacantCount} available</span>}
                                   {occupiedCount > 0 && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">{occupiedCount} occupied</span>}
                                 </div>
-                                <div className="text-[11px] text-slate-500 font-medium">Types: {type}</div>
+                                <div className="text-[11px] text-[#6E6E73] font-medium">Types: {type}</div>
                               </div>
                               
                               <div className="mt-1 flex justify-between items-center">
                                 <div>
                                   {range ? (
-                                    <p className="text-[17px] font-black text-slate-900">${range.min.toLocaleString(undefined, {minimumFractionDigits: 2})}{range.min!==range.max?` - $${range.max.toLocaleString(undefined, {minimumFractionDigits: 2})}`:''}<span className="text-[12px] font-semibold text-slate-500"> /month</span></p>
+                                    <p className="text-[17px] font-black text-slate-900">${range.min.toLocaleString(undefined, {minimumFractionDigits: 2})}{range.min!==range.max?` - $${range.max.toLocaleString(undefined, {minimumFractionDigits: 2})}`:''}<span className="text-[12px] font-semibold text-[#6E6E73]"> /month</span></p>
                                   ) : (
-                                    <p className="text-[17px] font-black text-slate-900">$150.00 <span className="text-[12px] font-semibold text-slate-500"> /month</span></p>
+                                    <p className="text-[17px] font-black text-slate-900">$150.00 <span className="text-[12px] font-semibold text-[#6E6E73]"> /month</span></p>
                                   )}
                                   <p className="text-[11px] font-bold text-emerald-600 mt-1">{vacantCount > 0 ? `${vacantCount} available` : propUnits.length === 1 ? 'Single unit' : ''}</p>
                                 </div>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 p-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                                  <DropdownMenuTrigger className="text-[#8E8E93] hover:text-[#6E6E73] p-1.5 rounded-md hover:bg-[#F5F5F7] transition-colors">
                                     <MoreVertical className="h-5 w-5" />
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="w-48 bg-white border-slate-100 rounded-xl shadow-lg p-1">
                                     <DropdownMenuGroup>
-                                      <DropdownMenuLabel className="text-xs font-bold text-slate-400 uppercase tracking-wider py-1.5 px-2">Actions</DropdownMenuLabel>
+                                      <DropdownMenuLabel className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider py-1.5 px-2">Actions</DropdownMenuLabel>
                                       <DropdownMenuItem onClick={() => { setUnitPropFilter(p.id); setActiveTab('units'); }} className="text-sm font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-900 cursor-pointer rounded-lg py-2 px-2 flex items-center gap-2">
-                                        <Eye className="h-4 w-4 text-slate-400" /> View Details
+                                        <Eye className="h-4 w-4 text-[#8E8E93]" /> View Details
                                       </DropdownMenuItem>
                                       <DropdownMenuItem onClick={() => { setEditPropId(p.id); setActiveTab('add-property'); }} className="text-sm font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-900 cursor-pointer rounded-lg py-2 px-2 flex items-center gap-2">
-                                        <Edit2 className="h-4 w-4 text-slate-400" /> Edit Property
+                                        <Edit2 className="h-4 w-4 text-[#8E8E93]" /> Edit Property
                                       </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                     <DropdownMenuSeparator className="bg-slate-100 my-1" />
@@ -1604,21 +1604,21 @@ export default function OwnerDashboard() {
                                 <div className="flex justify-between items-start">
                                   <h3 className="font-bold text-slate-900 text-lg">{name}</h3>
                                   <div className="flex items-center gap-2">
-                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm ${status==='AVAILABLE'?'bg-emerald-50 text-emerald-600 border-emerald-200':status==='OCCUPIED'?'bg-blue-50 text-blue-600 border-blue-200':status==='MAINTENANCE'?'bg-amber-50 text-amber-600 border-amber-200':'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm ${status==='AVAILABLE'?'bg-emerald-50 text-emerald-600 border-emerald-200':status==='OCCUPIED'?'bg-blue-50 text-blue-600 border-blue-200':status==='MAINTENANCE'?'bg-amber-50 text-amber-600 border-amber-200':'bg-slate-50 text-[#6E6E73] border-slate-200'}`}>
                                       {status==='AVAILABLE'?'Available':status==='OCCUPIED'?'Occupied':status==='MAINTENANCE'?'Maintenance':'Vacant'}
                                     </span>
                                     <DropdownMenu>
-                                      <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-50 transition-colors">
+                                      <DropdownMenuTrigger className="text-[#8E8E93] hover:text-[#6E6E73] p-1 rounded-md hover:bg-[#F5F5F7] transition-colors">
                                         <MoreVertical className="h-4 w-4" />
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end" className="w-48 bg-white border-slate-100 rounded-xl shadow-lg p-1">
                                         <DropdownMenuGroup>
-                                          <DropdownMenuLabel className="text-xs font-bold text-slate-400 uppercase tracking-wider py-1.5 px-2">Actions</DropdownMenuLabel>
+                                          <DropdownMenuLabel className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider py-1.5 px-2">Actions</DropdownMenuLabel>
                                           <DropdownMenuItem onClick={() => { setUnitPropFilter(p.id); setActiveTab('units'); }} className="text-sm font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-900 cursor-pointer rounded-lg py-2 px-2 flex items-center gap-2">
-                                            <Eye className="h-4 w-4 text-slate-400" /> View Details
+                                            <Eye className="h-4 w-4 text-[#8E8E93]" /> View Details
                                           </DropdownMenuItem>
                                           <DropdownMenuItem onClick={() => { setEditPropId(p.id); setActiveTab('add-property'); }} className="text-sm font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-900 cursor-pointer rounded-lg py-2 px-2 flex items-center gap-2">
-                                            <Edit2 className="h-4 w-4 text-slate-400" /> Edit Property
+                                            <Edit2 className="h-4 w-4 text-[#8E8E93]" /> Edit Property
                                           </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator className="bg-slate-100 my-1" />
@@ -1639,20 +1639,20 @@ export default function OwnerDashboard() {
                                     </DropdownMenu>
                                   </div>
                                 </div>
-                                <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-1 font-medium"><MapPin className="h-3.5 w-3.5 text-slate-400" /> {p.address}, {p.city}</p>
+                                <p className="text-[11px] text-[#6E6E73] flex items-center gap-1.5 mt-1 font-medium"><MapPin className="h-3.5 w-3.5 text-[#8E8E93]" /> {p.address}, {p.city}</p>
                               </div>
                               <div className="flex items-center gap-6 mt-4">
                                 <div>
-                                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Type</p>
+                                  <p className="text-[10px] text-[#8E8E93] uppercase font-bold tracking-wider">Type</p>
                                   <p className="text-sm font-semibold text-slate-700">{type}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Units</p>
+                                  <p className="text-[10px] text-[#8E8E93] uppercase font-bold tracking-wider">Units</p>
                                   <p className="text-sm font-semibold text-slate-700">{propUnits.length}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Rent Range</p>
-                                  {range ? <p className="text-sm font-semibold text-slate-700">${range.min.toLocaleString()} - ${range.max.toLocaleString()}</p> : <p className="text-sm text-slate-500">-</p>}
+                                  <p className="text-[10px] text-[#8E8E93] uppercase font-bold tracking-wider">Rent Range</p>
+                                  {range ? <p className="text-sm font-semibold text-slate-700">${range.min.toLocaleString()} - ${range.max.toLocaleString()}</p> : <p className="text-sm text-[#6E6E73]">-</p>}
                                 </div>
                               </div>
                             </div>
@@ -1663,8 +1663,8 @@ export default function OwnerDashboard() {
                   ) : (
                     <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
                       <Table>
-                        <TableHeader className="bg-slate-50/50 border-b border-slate-100"><TableRow className="hover:bg-transparent"><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Property</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Location</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Type</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Units</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider text-right">Status</TableHead></TableRow></TableHeader>
-                        <TableBody>{filtered.map(p=>{ const type=getPropType(p); const name=getPropName(p); const status=getPropStatus(p); const pu=units.filter((u:any)=>u.propertyId===p.id); return (<TableRow key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"><TableCell className="font-bold text-slate-900 py-3">{name}</TableCell><TableCell className="text-slate-500 font-medium text-xs">{p.city}, {p.country}</TableCell><TableCell className="text-slate-700 font-medium text-xs">{type}</TableCell><TableCell className="text-blue-600 font-bold text-xs">{pu.length}</TableCell><TableCell className="text-right"><Badge className={`rounded-full font-bold px-2.5 py-0.5 border shadow-sm ${status==='AVAILABLE'?'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100':status==='OCCUPIED'?'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100':'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'}`}>{status==='AVAILABLE'?'Available':status==='OCCUPIED'?'Occupied':status==='MAINTENANCE'?'Maintenance':'Vacant'}</Badge></TableCell></TableRow>); })}</TableBody>
+                        <TableHeader className="bg-slate-50/50 border-b border-slate-100"><TableRow className="hover:bg-transparent"><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Property</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Location</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Type</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Units</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider text-right">Status</TableHead></TableRow></TableHeader>
+                        <TableBody>{filtered.map(p=>{ const type=getPropType(p); const name=getPropName(p); const status=getPropStatus(p); const pu=units.filter((u:any)=>u.propertyId===p.id); return (<TableRow key={p.id} className="border-b border-slate-50 hover:bg-[#F5F5F7]/50 transition-colors"><TableCell className="font-bold text-slate-900 py-3">{name}</TableCell><TableCell className="text-[#6E6E73] font-medium text-xs">{p.city}, {p.country}</TableCell><TableCell className="text-slate-700 font-medium text-xs">{type}</TableCell><TableCell className="text-blue-600 font-bold text-xs">{pu.length}</TableCell><TableCell className="text-right"><Badge className={`rounded-full font-bold px-2.5 py-0.5 border shadow-sm ${status==='AVAILABLE'?'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100':status==='OCCUPIED'?'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100':'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'}`}>{status==='AVAILABLE'?'Available':status==='OCCUPIED'?'Occupied':status==='MAINTENANCE'?'Maintenance':'Vacant'}</Badge></TableCell></TableRow>); })}</TableBody>
                       </Table>
                     </Card>
                   )}
@@ -1684,15 +1684,15 @@ export default function OwnerDashboard() {
             </div>
             <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
               <Table>
-                <TableHeader className="bg-slate-50/50 border-b border-slate-100"><TableRow><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Applicant</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Unit</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider">Status</TableHead><TableHead className="text-slate-500 font-semibold text-[11px] py-3 uppercase tracking-wider text-right">Actions</TableHead></TableRow></TableHeader>
+                <TableHeader className="bg-slate-50/50 border-b border-slate-100"><TableRow><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Applicant</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Unit</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider">Status</TableHead><TableHead className="text-[#6E6E73] font-semibold text-[11px] py-3 uppercase tracking-wider text-right">Actions</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {applications.length === 0 ? (
-                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-slate-500 font-medium">No applications found.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#6E6E73] font-medium">No applications found.</TableCell></TableRow>
                   ) : applications.map(app => (
                     <TableRow key={app.id}>
                       <TableCell>
                         <p className="font-bold text-slate-900">{app.name}</p>
-                        <p className="text-xs text-slate-500">{app.email} • {app.phone}</p>
+                        <p className="text-xs text-[#6E6E73]">{app.email} • {app.phone}</p>
                         {app.documents && app.documents.length > 0 && (
                           <a href={app.documents[0]} target="_blank" rel="noreferrer" className="text-blue-500 text-xs hover:underline mt-1 block">View Document</a>
                         )}
@@ -1745,7 +1745,7 @@ export default function OwnerDashboard() {
                 <p className="text-sm text-[#7F817F] mt-1 font-medium">Individual units currently available for rent</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
-                <Button onClick={() => fetchOwnerData()} variant="outline" className="flex-1 md:flex-none border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold h-10 rounded-xl transition-all shadow-sm">
+                <Button onClick={() => fetchOwnerData()} variant="outline" className="flex-1 md:flex-none border-slate-200 text-slate-700 bg-white hover:bg-[#F5F5F7] font-semibold h-10 rounded-xl transition-all shadow-sm">
                   <RefreshCw className="h-4 w-4 mr-2" /> Refresh
                 </Button>
                 <Button onClick={handleAddPropertyClick} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 rounded-xl transition-all shadow-sm px-6">
@@ -1758,42 +1758,42 @@ export default function OwnerDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Available Units</p>
+                  <p className="text-xs text-[#6E6E73] font-semibold uppercase tracking-wider">Available Units</p>
                   <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600"><CheckCircle2 className="h-4 w-4" /></div>
                 </div>
                 <div className="mt-4">
                   <p className="text-3xl font-black text-slate-900">{avTotalVacantUnits}</p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 font-medium">Across {avTotalPropertiesWithVacancies} properties</p>
+                  <p className="text-[11px] text-[#6E6E73] mt-1.5 font-medium">Across {avTotalPropertiesWithVacancies} properties</p>
                 </div>
               </Card>
               <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Average Rent</p>
+                  <p className="text-xs text-[#6E6E73] font-semibold uppercase tracking-wider">Average Rent</p>
                   <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600"><DollarSign className="h-4 w-4" /></div>
                 </div>
                 <div className="mt-4">
                   <p className="text-3xl font-black text-slate-900">${avAvgRent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 font-medium">${avMinRent.toLocaleString()} - ${avMaxRent.toLocaleString()}</p>
+                  <p className="text-[11px] text-[#6E6E73] mt-1.5 font-medium">${avMinRent.toLocaleString()} - ${avMaxRent.toLocaleString()}</p>
                 </div>
               </Card>
               <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Most Common Type</p>
+                  <p className="text-xs text-[#6E6E73] font-semibold uppercase tracking-wider">Most Common Type</p>
                   <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600"><Building2 className="h-4 w-4" /></div>
                 </div>
                 <div className="mt-4">
                   <p className="text-3xl font-black text-slate-900 truncate">{avMostCommonType}</p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 font-medium">{avHighestCount} units</p>
+                  <p className="text-[11px] text-[#6E6E73] mt-1.5 font-medium">{avHighestCount} units</p>
                 </div>
               </Card>
               <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Average Size</p>
+                  <p className="text-xs text-[#6E6E73] font-semibold uppercase tracking-wider">Average Size</p>
                   <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600"><Maximize2 className="h-4 w-4" /></div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-3xl font-black text-slate-900">{Math.round(avAvgSqFt).toLocaleString()} <span className="text-lg font-bold text-slate-500">ft²</span></p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 font-medium">{avMinSqFt.toLocaleString()} - {avMaxSqFt.toLocaleString()} ft²</p>
+                  <p className="text-3xl font-black text-slate-900">{Math.round(avAvgSqFt).toLocaleString()} <span className="text-lg font-bold text-[#6E6E73]">ft²</span></p>
+                  <p className="text-[11px] text-[#6E6E73] mt-1.5 font-medium">{avMinSqFt.toLocaleString()} - {avMaxSqFt.toLocaleString()} ft²</p>
                 </div>
               </Card>
             </div>
@@ -1801,19 +1801,19 @@ export default function OwnerDashboard() {
             {/* Filter Bar */}
             <div className="bg-white p-2 border border-slate-100 rounded-2xl shadow-sm flex flex-col lg:flex-row gap-3">
               <div className="flex bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0">
-                <button onClick={() => setAvUnitsViewMode('grid')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setAvUnitsViewMode('grid')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                   <LayoutGrid className="h-4 w-4" />
                 </button>
-                <button onClick={() => setAvUnitsViewMode('list')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'list' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setAvUnitsViewMode('list')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'list' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                   <List className="h-4 w-4" />
                 </button>
-                <button onClick={() => setAvUnitsViewMode('table')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'table' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setAvUnitsViewMode('table')} className={`p-2 rounded-lg transition-all ${avUnitsViewMode === 'table' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-[#8E8E93] hover:text-[#6E6E73]'}`}>
                   <Table2 className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
                 <Input 
                   placeholder="Search units or properties..." 
                   value={avUnitsSearch} 
@@ -1825,7 +1825,7 @@ export default function OwnerDashboard() {
               <div className="flex flex-wrap sm:flex-nowrap gap-3">
                 <Select value={avUnitsPropTypeFilter} onValueChange={v => setAvUnitsPropTypeFilter(v || "ALL")}>
                   <SelectTrigger className="w-[140px] sm:w-[160px] h-11 bg-slate-50 border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-blue-500">
-                    <div className="flex items-center gap-2"><Building className="h-4 w-4 text-slate-400" /><SelectValue placeholder="Property Type" /></div>
+                    <div className="flex items-center gap-2"><Building className="h-4 w-4 text-[#8E8E93]" /><SelectValue placeholder="Property Type" /></div>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl shadow-lg border-slate-100">
                     <SelectItem value="ALL">All Types</SelectItem>
@@ -1886,7 +1886,7 @@ export default function OwnerDashboard() {
                   <Search className="h-6 w-6 text-slate-300" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">No units found</h3>
-                <p className="text-sm text-slate-500 max-w-sm text-center">We couldn't find any available units matching your filters. Try adjusting your search criteria.</p>
+                <p className="text-sm text-[#6E6E73] max-w-sm text-center">We couldn't find any available units matching your filters. Try adjusting your search criteria.</p>
                 <Button onClick={() => {setAvUnitsSearch(''); setAvUnitsPropTypeFilter('ALL'); setAvUnitsBedFilter('ALL'); setAvUnitsBathFilter('ALL'); setAvUnitsUnitTypeFilter('ALL');}} variant="outline" className="mt-6 rounded-xl">Clear All Filters</Button>
               </div>
             ) : avUnitsViewMode === 'grid' ? (
@@ -1914,7 +1914,7 @@ export default function OwnerDashboard() {
                           </div>
                           <div className="absolute top-3 right-3">
                             <span className="text-[11px] font-bold bg-white/95 text-slate-700 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                              <Home className="h-3 w-3 text-slate-500" />{u.type || 'Apartment'}
+                              <Home className="h-3 w-3 text-[#6E6E73]" />{u.type || 'Apartment'}
                             </span>
                           </div>
                         </div>
@@ -1922,35 +1922,35 @@ export default function OwnerDashboard() {
                       <div className="p-5 flex-1 flex flex-col">
                         <div>
                           <h3 className="font-bold text-slate-900 text-[17px] leading-tight truncate">{p?.name ? `${p.name} - ${u.name}` : u.name}</h3>
-                          <p className="text-[13px] text-slate-500 mt-1 line-clamp-2">{p?.description || "hello world"}</p>
+                          <p className="text-[13px] text-[#6E6E73] mt-1 line-clamp-2">{p?.description || "hello world"}</p>
                         </div>
-                        <div className="mt-3 text-xs text-slate-500 font-medium flex items-center gap-1.5 truncate">
-                          <MapPin className="h-4 w-4 text-slate-400 shrink-0" /> {p?.city || 'London'}, {p?.state || p?.city}, {p?.country || 'London'} {p?.zip || '3100'}
+                        <div className="mt-3 text-xs text-[#6E6E73] font-medium flex items-center gap-1.5 truncate">
+                          <MapPin className="h-4 w-4 text-[#8E8E93] shrink-0" /> {p?.city || 'London'}, {p?.state || p?.city}, {p?.country || 'London'} {p?.zip || '3100'}
                         </div>
 
-                        <div className="mt-4 flex items-center gap-4 text-[13px] font-semibold text-slate-600">
-                          <span className="flex items-center gap-1.5"><Bed className="h-4 w-4 text-slate-400" /> {u.rooms}</span>
-                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-slate-400" /> {u.bathrooms || 1}</span>
-                          <span className="flex items-center gap-1.5"><Square className="h-4 w-4 text-slate-400" /> {u.sqFootage || '--'} ft²</span>
+                        <div className="mt-4 flex items-center gap-4 text-[13px] font-semibold text-[#6E6E73]">
+                          <span className="flex items-center gap-1.5"><Bed className="h-4 w-4 text-[#8E8E93]" /> {u.rooms}</span>
+                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-[#8E8E93]" /> {u.bathrooms || 1}</span>
+                          <span className="flex items-center gap-1.5"><Square className="h-4 w-4 text-[#8E8E93]" /> {u.sqFootage || '--'} ft²</span>
                         </div>
                         
                         <div className="mt-3">
-                          <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[11px] font-bold">Floor {u.floor || 1}</span>
+                          <span className="bg-slate-100 text-[#6E6E73] px-2 py-1 rounded text-[11px] font-bold">Floor {u.floor || 1}</span>
                         </div>
 
                         <div className="mt-auto pt-5 flex items-center justify-between">
-                          <p className="font-black text-slate-900 text-[17px] leading-none">${Number(u.rentAmount).toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-[12px] font-semibold text-slate-500">/month</span></p>
+                          <p className="font-black text-slate-900 text-[17px] leading-none">${Number(u.rentAmount).toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-[12px] font-semibold text-[#6E6E73]">/month</span></p>
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 p-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                            <DropdownMenuTrigger className="text-[#8E8E93] hover:text-[#6E6E73] p-1.5 rounded-md hover:bg-[#F5F5F7] transition-colors">
                               <MoreVertical className="h-5 w-5" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
                               <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={() => { setViewUnitId(u.id); setActiveTab('unit-details'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                  <Eye className="h-4 w-4 mr-2 text-slate-400" /> View Unit Details
+                                  <Eye className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Unit Details
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { setUnitPropFilter(p?.id); setActiveTab('units'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                  <Building className="h-4 w-4 mr-2 text-slate-400" /> View Property
+                                  <Building className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Property
                                 </DropdownMenuItem>
                               </DropdownMenuGroup>
                             </DropdownMenuContent>
@@ -1982,30 +1982,30 @@ export default function OwnerDashboard() {
                           <div className="flex justify-between items-start">
                             <div>
                               <h3 className="font-bold text-slate-900 text-xl leading-tight">{u.name}</h3>
-                              <p className="text-sm text-slate-500 font-medium mt-1">{p?.name || 'Unknown Property'}</p>
-                              <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mt-1.5">
-                                <MapPin className="h-3 w-3 text-slate-400 shrink-0" /> {p?.address}, {p?.city}
+                              <p className="text-sm text-[#6E6E73] font-medium mt-1">{p?.name || 'Unknown Property'}</p>
+                              <div className="flex items-center gap-1.5 text-[11px] text-[#6E6E73] font-medium mt-1.5">
+                                <MapPin className="h-3 w-3 text-[#8E8E93] shrink-0" /> {p?.address}, {p?.city}
                               </div>
                             </div>
                             <div className="flex items-start gap-4">
                               <div className="text-right">
                                 <p className="font-black text-blue-600 text-2xl leading-tight">${Number(u.rentAmount).toLocaleString()}</p>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">/ Month</p>
+                                <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest mt-1">/ Month</p>
                               </div>
                               <Button variant="outline" size="icon" onClick={() => { setViewUnitId(u.id); setActiveTab('unit-details'); }} className="h-8 w-8 rounded-full text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300">
                                 <Eye className="h-4 w-4" />
                               </Button>
                               <DropdownMenu>
-                                <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors border border-slate-100 ml-1">
+                                <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-slate-700 hover:bg-[#F5F5F7] transition-colors border border-slate-100 ml-1">
                                   <MoreVertical className="h-4 w-4" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
                                   <DropdownMenuGroup>
                                     <DropdownMenuItem onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Edit2 className="h-4 w-4 mr-2 text-slate-400" /> View Unit Details
+                                      <Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Unit Details
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { setUnitPropFilter(p?.id); setActiveTab('units'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Building className="h-4 w-4 mr-2 text-slate-400" /> View Property
+                                      <Building className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Property
                                     </DropdownMenuItem>
                                   </DropdownMenuGroup>
                                 </DropdownMenuContent>
@@ -2015,20 +2015,20 @@ export default function OwnerDashboard() {
                         </div>
                         <div className="flex flex-wrap gap-6 mt-6 pt-5 border-t border-slate-100">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Bed className="h-4 w-4 text-slate-400" /></div>
-                            <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Beds</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.rooms}</p></div>
+                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Bed className="h-4 w-4 text-[#8E8E93]" /></div>
+                            <div><p className="text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Beds</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.rooms}</p></div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Bath className="h-4 w-4 text-slate-400" /></div>
-                            <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Baths</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.bathrooms || 1}</p></div>
+                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Bath className="h-4 w-4 text-[#8E8E93]" /></div>
+                            <div><p className="text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Baths</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.bathrooms || 1}</p></div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Maximize2 className="h-4 w-4 text-slate-400" /></div>
-                            <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sq Ft</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.sqFootage || '--'}</p></div>
+                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Maximize2 className="h-4 w-4 text-[#8E8E93]" /></div>
+                            <div><p className="text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Sq Ft</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.sqFootage || '--'}</p></div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Building2 className="h-4 w-4 text-slate-400" /></div>
-                            <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Type</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.type || 'Apartment'}</p></div>
+                            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center"><Building2 className="h-4 w-4 text-[#8E8E93]" /></div>
+                            <div><p className="text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Type</p><p className="text-sm font-black text-slate-700 leading-none mt-0.5">{u.type || 'Apartment'}</p></div>
                           </div>
                         </div>
                       </div>
@@ -2042,10 +2042,10 @@ export default function OwnerDashboard() {
                   <Table>
                     <TableHeader className="bg-slate-50/80 border-b border-slate-100">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-slate-500 font-bold text-[11px] py-4 uppercase tracking-wider">Unit Info</TableHead>
-                        <TableHead className="text-slate-500 font-bold text-[11px] py-4 uppercase tracking-wider">Property & Location</TableHead>
-                        <TableHead className="text-slate-500 font-bold text-[11px] py-4 uppercase tracking-wider">Details</TableHead>
-                        <TableHead className="text-slate-500 font-bold text-[11px] py-4 uppercase tracking-wider text-right">Rent</TableHead>
+                        <TableHead className="text-[#6E6E73] font-bold text-[11px] py-4 uppercase tracking-wider">Unit Info</TableHead>
+                        <TableHead className="text-[#6E6E73] font-bold text-[11px] py-4 uppercase tracking-wider">Property & Location</TableHead>
+                        <TableHead className="text-[#6E6E73] font-bold text-[11px] py-4 uppercase tracking-wider">Details</TableHead>
+                        <TableHead className="text-[#6E6E73] font-bold text-[11px] py-4 uppercase tracking-wider text-right">Rent</TableHead>
                         <TableHead className="w-16"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -2053,7 +2053,7 @@ export default function OwnerDashboard() {
                       {avFilteredUnits.map((u: any) => {
                         const p = properties.find((prop: any) => prop.id === u.propertyId);
                         return (
-                          <TableRow key={u.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                          <TableRow key={u.id} className="border-b border-slate-50 hover:bg-[#F5F5F7]/50 transition-colors">
                             <TableCell className="py-4">
                               <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 hidden sm:block">
@@ -2067,19 +2067,19 @@ export default function OwnerDashboard() {
                                 </div>
                                 <div>
                                   <p className="font-bold text-slate-900">{u.name}</p>
-                                  <p className="text-xs text-slate-500 font-medium">{u.type || 'Apartment'}</p>
+                                  <p className="text-xs text-[#6E6E73] font-medium">{u.type || 'Apartment'}</p>
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell>
                               <p className="font-bold text-slate-700 text-sm">{p?.name || 'Unknown Property'}</p>
-                              <p className="text-[11px] text-slate-500 font-medium mt-0.5">{p?.city}</p>
+                              <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5">{p?.city}</p>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <span title="Beds" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bed className="h-3 w-3 text-slate-400" /> {u.rooms}</span>
-                                <span title="Baths" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bath className="h-3 w-3 text-slate-400" /> {u.bathrooms || 1}</span>
-                                <span title="Sq Ft" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Maximize2 className="h-3 w-3 text-slate-400" /> {u.sqFootage || '--'}</span>
+                              <div className="flex items-center gap-3 text-xs font-semibold text-[#6E6E73]">
+                                <span title="Beds" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bed className="h-3 w-3 text-[#8E8E93]" /> {u.rooms}</span>
+                                <span title="Baths" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bath className="h-3 w-3 text-[#8E8E93]" /> {u.bathrooms || 1}</span>
+                                <span title="Sq Ft" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Maximize2 className="h-3 w-3 text-[#8E8E93]" /> {u.sqFootage || '--'}</span>
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
@@ -2092,16 +2092,16 @@ export default function OwnerDashboard() {
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                                  <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-slate-700 hover:bg-[#F2F2F7] transition-colors">
                                   <MoreVertical className="h-4 w-4" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
                                   <DropdownMenuGroup>
                                     <DropdownMenuItem onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Edit2 className="h-4 w-4 mr-2 text-slate-400" /> View Unit Details
+                                      <Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Unit Details
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { setUnitPropFilter(p?.id); setActiveTab('units'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Building className="h-4 w-4 mr-2 text-slate-400" /> View Property
+                                      <Building className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Property
                                     </DropdownMenuItem>
                                   </DropdownMenuGroup>
                                 </DropdownMenuContent>
@@ -2122,11 +2122,11 @@ export default function OwnerDashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">All Units</h2>
-                <p className="text-sm text-slate-500 font-medium mt-1">Browse every unit across all properties</p>
+                <p className="text-sm text-[#6E6E73] font-medium mt-1">Browse every unit across all properties</p>
               </div>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold shadow-sm transition-all">
-                  <RefreshCw className="h-4 w-4 mr-2 text-slate-400" /> Refresh
+                <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-[#F5F5F7] text-[#6E6E73] font-semibold shadow-sm transition-all">
+                  <RefreshCw className="h-4 w-4 mr-2 text-[#8E8E93]" /> Refresh
                 </Button>
                 <Dialog open={unitOpen} onOpenChange={setUnitOpen}>
                   <DialogTrigger render={<Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-xl h-10 px-5 font-bold transition-all" />}>
@@ -2243,7 +2243,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">{auTotalUnits}</h3>
-                    <p className="text-sm font-medium text-slate-500 mt-1">Across {auTotalProperties} properties</p>
+                    <p className="text-sm font-medium text-[#6E6E73] mt-1">Across {auTotalProperties} properties</p>
                   </div>
                 </div>
               </Card>
@@ -2256,7 +2256,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">${auAvgRent.toLocaleString(undefined, {maximumFractionDigits:0})}</h3>
-                    <p className="text-sm font-medium text-slate-500 mt-1">Range: ${auMinRent.toLocaleString()} - ${auMaxRent.toLocaleString()}</p>
+                    <p className="text-sm font-medium text-[#6E6E73] mt-1">Range: ${auMinRent.toLocaleString()} - ${auMaxRent.toLocaleString()}</p>
                   </div>
                 </div>
               </Card>
@@ -2269,7 +2269,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <h3 className="text-3xl font-black text-slate-900 tracking-tight capitalize truncate" title={auMostCommonType}>{auMostCommonType}</h3>
-                    <p className="text-sm font-medium text-slate-500 mt-1">{auHighestCount} total units</p>
+                    <p className="text-sm font-medium text-[#6E6E73] mt-1">{auHighestCount} total units</p>
                   </div>
                 </div>
               </Card>
@@ -2282,7 +2282,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">{auOccupancyRate}%</h3>
-                    <p className="text-sm font-medium text-slate-500 mt-1">{auOccupiedCount} occupied</p>
+                    <p className="text-sm font-medium text-[#6E6E73] mt-1">{auOccupiedCount} occupied</p>
                   </div>
                 </div>
               </Card>
@@ -2290,20 +2290,20 @@ export default function OwnerDashboard() {
 
             <div className="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm flex flex-col xl:flex-row gap-3">
               <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl shrink-0 self-start xl:self-auto">
-                <button onClick={() => setUnitViewMode('grid')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>
+                <button onClick={() => setUnitViewMode('grid')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-[#6E6E73] hover:text-slate-700 hover:bg-[#E5E5EA]/50'}`}>
                   <LayoutGrid className="h-4 w-4" /><span className="hidden sm:inline">Grid</span>
                 </button>
-                <button onClick={() => setUnitViewMode('list')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>
+                <button onClick={() => setUnitViewMode('list')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-[#6E6E73] hover:text-slate-700 hover:bg-[#E5E5EA]/50'}`}>
                   <List className="h-4 w-4" /><span className="hidden sm:inline">List</span>
                 </button>
-                <button onClick={() => setUnitViewMode('table')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>
+                <button onClick={() => setUnitViewMode('table')} className={`h-9 px-3 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${unitViewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-[#6E6E73] hover:text-slate-700 hover:bg-[#E5E5EA]/50'}`}>
                   <Table2 className="h-4 w-4" /><span className="hidden sm:inline">Table</span>
                 </button>
               </div>
               <div className="h-px xl:h-auto xl:w-px bg-slate-200 mx-1"></div>
               
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
                 <Input 
                   placeholder="Search all units..." 
                   value={unitSearch} 
@@ -2327,7 +2327,7 @@ export default function OwnerDashboard() {
 
                 <Select value={unitPropFilter} onValueChange={v => setUnitPropFilter(v || "ALL")}>
                   <SelectTrigger className="w-[140px] sm:w-[160px] h-11 bg-slate-50 border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-blue-500">
-                    <div className="flex items-center gap-2"><Building className="h-4 w-4 text-slate-400" /><SelectValue placeholder="Property" /></div>
+                    <div className="flex items-center gap-2"><Building className="h-4 w-4 text-[#8E8E93]" /><SelectValue placeholder="Property" /></div>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl shadow-lg border-slate-100">
                     <SelectItem value="ALL">All Properties</SelectItem>
@@ -2383,7 +2383,7 @@ export default function OwnerDashboard() {
                   <Search className="h-6 w-6 text-slate-300" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">No units found</h3>
-                <p className="text-sm text-slate-500 max-w-sm text-center">We couldn't find any units matching your filters. Try adjusting your search criteria.</p>
+                <p className="text-sm text-[#6E6E73] max-w-sm text-center">We couldn't find any units matching your filters. Try adjusting your search criteria.</p>
                 <Button onClick={() => {setUnitSearch(''); setUnitPropFilter('ALL'); setUnitStatusFilter('ALL'); setUnitBedFilter('ALL'); setUnitBathFilter('ALL'); setUnitTypeFilter('ALL');}} variant="outline" className="mt-6 rounded-xl">Clear All Filters</Button>
               </div>
             ) : unitViewMode === 'grid' ? (
@@ -2414,7 +2414,7 @@ export default function OwnerDashboard() {
                           </div>
                           <div className="absolute top-3 right-3">
                             <span className="text-[11px] font-bold bg-white/95 text-slate-700 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                              <Home className="h-3 w-3 text-slate-500" />{u.type || 'Apartment'}
+                              <Home className="h-3 w-3 text-[#6E6E73]" />{u.type || 'Apartment'}
                             </span>
                           </div>
                         </div>
@@ -2422,38 +2422,38 @@ export default function OwnerDashboard() {
                       <div className="p-5 flex-1 flex flex-col">
                         <div>
                           <h3 className="font-bold text-slate-900 text-[17px] leading-tight truncate">{p?.name ? `${p.name} - ${u.name}` : u.name}</h3>
-                          <p className="text-[13px] text-slate-500 mt-1 line-clamp-2">{p?.description || "hello world"}</p>
+                          <p className="text-[13px] text-[#6E6E73] mt-1 line-clamp-2">{p?.description || "hello world"}</p>
                         </div>
-                        <div className="mt-3 text-xs text-slate-500 font-medium flex items-center gap-1.5 truncate">
-                          <MapPin className="h-4 w-4 text-slate-400 shrink-0" /> {p?.city || 'London'}, {p?.state || p?.city}, {p?.country || 'London'} {p?.zip || '3100'}
+                        <div className="mt-3 text-xs text-[#6E6E73] font-medium flex items-center gap-1.5 truncate">
+                          <MapPin className="h-4 w-4 text-[#8E8E93] shrink-0" /> {p?.city || 'London'}, {p?.state || p?.city}, {p?.country || 'London'} {p?.zip || '3100'}
                         </div>
 
-                        <div className="mt-4 flex items-center gap-4 text-[13px] font-semibold text-slate-600">
-                          <span className="flex items-center gap-1.5"><Bed className="h-4 w-4 text-slate-400" /> {u.rooms}</span>
-                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-slate-400" /> {u.bathrooms || 1}</span>
-                          <span className="flex items-center gap-1.5"><Square className="h-4 w-4 text-slate-400" /> {u.sqFootage || '--'} ft²</span>
+                        <div className="mt-4 flex items-center gap-4 text-[13px] font-semibold text-[#6E6E73]">
+                          <span className="flex items-center gap-1.5"><Bed className="h-4 w-4 text-[#8E8E93]" /> {u.rooms}</span>
+                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-[#8E8E93]" /> {u.bathrooms || 1}</span>
+                          <span className="flex items-center gap-1.5"><Square className="h-4 w-4 text-[#8E8E93]" /> {u.sqFootage || '--'} ft²</span>
                         </div>
                         
                         <div className="mt-3">
-                          <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[11px] font-bold">Floor {u.floor || 1}</span>
+                          <span className="bg-slate-100 text-[#6E6E73] px-2 py-1 rounded text-[11px] font-bold">Floor {u.floor || 1}</span>
                         </div>
 
                         <div className="mt-auto pt-5 flex items-center justify-between">
-                          <p className="font-black text-slate-900 text-[17px] leading-none">${Number(u.rentAmount).toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-[12px] font-semibold text-slate-500">/month</span></p>
+                          <p className="font-black text-slate-900 text-[17px] leading-none">${Number(u.rentAmount).toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-[12px] font-semibold text-[#6E6E73]">/month</span></p>
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 p-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                            <DropdownMenuTrigger className="text-[#8E8E93] hover:text-[#6E6E73] p-1.5 rounded-md hover:bg-[#F5F5F7] transition-colors">
                               <MoreVertical className="h-5 w-5" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
                               <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                  <Edit2 className="h-4 w-4 mr-2 text-slate-400" /> Edit Unit
+                                  <Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Unit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { setViewUnitId(u.id); setActiveTab('unit-details'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                  <Eye className="h-4 w-4 mr-2 text-slate-400" /> View Unit Details
+                                  <Eye className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Unit Details
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { setUnitPropFilter(p?.id); setActiveTab('units'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                  <Building className="h-4 w-4 mr-2 text-slate-400" /> View Property
+                                  <Building className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Property
                                 </DropdownMenuItem>
                               </DropdownMenuGroup>
                             </DropdownMenuContent>
@@ -2493,28 +2493,28 @@ export default function OwnerDashboard() {
                                 <h3 className="font-bold text-slate-900 text-lg sm:text-xl tracking-tight">{u.name}</h3>
                                 <Badge className={`hidden sm:inline-flex ${badgeClass} shadow-sm font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase`}>{u.status}</Badge>
                               </div>
-                              <div className="flex items-center text-sm font-medium text-slate-500 mt-1">
+                              <div className="flex items-center text-sm font-medium text-[#6E6E73] mt-1">
                                 <Building className="h-4 w-4 mr-1.5 opacity-70" /> {p?.name || 'Unknown Property'}
                               </div>
                             </div>
                             <div className="text-right">
                               <p className="font-black text-slate-900 text-xl sm:text-2xl">${Number(u.rentAmount).toLocaleString()}</p>
-                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Per Month</p>
+                              <p className="text-[10px] text-[#6E6E73] font-bold uppercase tracking-wider mt-0.5">Per Month</p>
                             </div>
                           </div>
                           
                           <div className="flex flex-wrap items-center justify-between gap-4 mt-4 pt-4 border-t border-slate-100">
-                            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-semibold text-slate-600">
-                              <span title="Beds" className="flex items-center gap-2"><Bed className="h-4 w-4 text-slate-400" /> {u.rooms} Beds</span>
-                              <span title="Baths" className="flex items-center gap-2"><Bath className="h-4 w-4 text-slate-400" /> {u.bathrooms || 1} Baths</span>
-                              <span title="Sq Ft" className="flex items-center gap-2"><Maximize2 className="h-4 w-4 text-slate-400" /> {u.sqFootage || '--'} Sq Ft</span>
-                              <span title="Type" className="flex items-center gap-2 capitalize"><LayoutGrid className="h-4 w-4 text-slate-400" /> {u.type || 'Apartment'}</span>
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-semibold text-[#6E6E73]">
+                              <span title="Beds" className="flex items-center gap-2"><Bed className="h-4 w-4 text-[#8E8E93]" /> {u.rooms} Beds</span>
+                              <span title="Baths" className="flex items-center gap-2"><Bath className="h-4 w-4 text-[#8E8E93]" /> {u.bathrooms || 1} Baths</span>
+                              <span title="Sq Ft" className="flex items-center gap-2"><Maximize2 className="h-4 w-4 text-[#8E8E93]" /> {u.sqFootage || '--'} Sq Ft</span>
+                              <span title="Type" className="flex items-center gap-2 capitalize"><LayoutGrid className="h-4 w-4 text-[#8E8E93]" /> {u.type || 'Apartment'}</span>
                             </div>
                             <div className="flex items-center gap-2 ml-auto w-full sm:w-auto">
                               <Button variant="outline" size="icon" onClick={() => { setViewUnitId(u.id); setActiveTab('unit-details'); }} className="h-10 w-10 shrink-0 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 rounded-xl">
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-xl font-semibold h-10 px-4 transition-colors">
+                              <Button onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-[#F5F5F7] hover:text-blue-600 rounded-xl font-semibold h-10 px-4 transition-colors">
                                 <Edit2 className="h-4 w-4 mr-2" /> Edit
                               </Button>
                             </div>
@@ -2545,7 +2545,7 @@ export default function OwnerDashboard() {
                         const isOcc = u.status === "OCCUPIED";
                         const badgeColor = isAvail ? "text-emerald-600" : isOcc ? "text-blue-600" : "text-amber-600";
                         return (
-                          <TableRow key={u.id} className="hover:bg-slate-50/50 transition-colors border-b-slate-100 group">
+                          <TableRow key={u.id} className="hover:bg-[#F5F5F7]/50 transition-colors border-b-slate-100 group">
                             <TableCell className="py-4">
                               <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 hidden sm:block">
@@ -2559,19 +2559,19 @@ export default function OwnerDashboard() {
                                 </div>
                                 <div>
                                   <p className="font-bold text-slate-900">{u.name}</p>
-                                  <p className="text-xs text-slate-500 font-medium">{u.type || 'Apartment'}</p>
+                                  <p className="text-xs text-[#6E6E73] font-medium">{u.type || 'Apartment'}</p>
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell>
                               <p className="font-bold text-slate-700 text-sm">{p?.name || 'Unknown Property'}</p>
-                              <p className="text-[11px] text-slate-500 font-medium mt-0.5">{p?.city}</p>
+                              <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5">{p?.city}</p>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <span title="Beds" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bed className="h-3 w-3 text-slate-400" /> {u.rooms}</span>
-                                <span title="Baths" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bath className="h-3 w-3 text-slate-400" /> {u.bathrooms || 1}</span>
-                                <span title="Sq Ft" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Maximize2 className="h-3 w-3 text-slate-400" /> {u.sqFootage || '--'}</span>
+                              <div className="flex items-center gap-3 text-xs font-semibold text-[#6E6E73]">
+                                <span title="Beds" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bed className="h-3 w-3 text-[#8E8E93]" /> {u.rooms}</span>
+                                <span title="Baths" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Bath className="h-3 w-3 text-[#8E8E93]" /> {u.bathrooms || 1}</span>
+                                <span title="Sq Ft" className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-md"><Maximize2 className="h-3 w-3 text-[#8E8E93]" /> {u.sqFootage || '--'}</span>
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
@@ -2584,16 +2584,16 @@ export default function OwnerDashboard() {
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                                  <DropdownMenuTrigger className="h-8 w-8 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-slate-700 hover:bg-[#F2F2F7] transition-colors">
                                   <MoreVertical className="h-4 w-4" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
                                   <DropdownMenuGroup>
                                     <DropdownMenuItem onClick={() => { setEditUnitId(u.id); setUName(u.name); setURent(u.rentAmount); setUDeposit(u.depositAmt); setURooms(u.rooms); setUSqFt(u.sqFootage); setUPropId(u.propertyId); setUAmenities(u.amenities?.join(', ') || ''); setActiveTab('add-unit'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Edit2 className="h-4 w-4 mr-2 text-slate-400" /> View Unit Details
+                                      <Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Unit Details
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { setUnitPropFilter(p?.id); setActiveTab('units'); }} className="text-sm font-medium rounded-lg px-2 py-2 cursor-pointer focus:bg-slate-50">
-                                      <Building className="h-4 w-4 mr-2 text-slate-400" /> View Property
+                                      <Building className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Property
                                     </DropdownMenuItem>
                                   </DropdownMenuGroup>
                                 </DropdownMenuContent>
@@ -2614,7 +2614,7 @@ export default function OwnerDashboard() {
           <TabsContent value="unit-details" className="outline-none">
             {(() => {
               const u = units.find(u => u.id === viewUnitId);
-              if (!u) return <div className="py-20 flex flex-col items-center justify-center text-slate-500"><Building className="h-10 w-10 mb-4 text-slate-300" /><p className="font-bold">Unit not found or loading...</p></div>;
+              if (!u) return <div className="py-20 flex flex-col items-center justify-center text-[#6E6E73]"><Building className="h-10 w-10 mb-4 text-slate-300" /><p className="font-bold">Unit not found or loading...</p></div>;
               const p = properties.find((prop: any) => prop.id === u.propertyId);
               const isAvail = u.status === "VACANT";
               const isOcc = u.status === "OCCUPIED";
@@ -2625,7 +2625,7 @@ export default function OwnerDashboard() {
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-4">
-                      <Button variant="ghost" size="icon" onClick={() => setActiveTab('units')} className="h-10 w-10 rounded-xl bg-slate-50 text-slate-500 hover:text-slate-900 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => setActiveTab('units')} className="h-10 w-10 rounded-xl bg-slate-50 text-[#6E6E73] hover:text-[#1D1D1F] shrink-0">
                         <ArrowLeft className="h-5 w-5" />
                       </Button>
                       <div>
@@ -2633,7 +2633,7 @@ export default function OwnerDashboard() {
                           <h2 className="text-2xl font-black text-slate-900 tracking-tight">{u.name}</h2>
                           <Badge className={`${badgeClass} shadow-sm font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase`}>{u.status}</Badge>
                         </div>
-                        <div className="flex items-center text-sm font-medium text-slate-500">
+                        <div className="flex items-center text-sm font-medium text-[#6E6E73]">
                           <Building className="h-4 w-4 mr-1.5 opacity-70" /> {p?.name || 'Unknown Property'} 
                           <span className="mx-2">•</span> 
                           <MapPin className="h-4 w-4 mr-1.5 opacity-70" /> {p?.city || 'Unknown City'}
@@ -2645,7 +2645,7 @@ export default function OwnerDashboard() {
                         <Edit2 className="h-4 w-4 mr-2" /> Edit Unit
                       </Button>
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-slate-200 text-slate-500" />}>
+                        <DropdownMenuTrigger render={<Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-slate-200 text-[#6E6E73]" />}>
                           <MoreVertical className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
@@ -2669,7 +2669,7 @@ export default function OwnerDashboard() {
                       <button
                         key={tab.id}
                         onClick={() => setUnitDetailsSubTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 ${unitDetailsSubTab === tab.id ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 ${unitDetailsSubTab === tab.id ? 'bg-blue-50 text-blue-700' : 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7]'}`}
                       >
                         <tab.icon className="h-4 w-4" />
                         {tab.label}
@@ -2687,7 +2687,7 @@ export default function OwnerDashboard() {
                             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                               <DollarSign className="h-5 w-5" />
                             </div>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Monthly Rent</p>
+                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Monthly Rent</p>
                           </div>
                           <p className="text-2xl font-black text-slate-900">${Number(u.rentAmount).toLocaleString()}</p>
                         </Card>
@@ -2696,7 +2696,7 @@ export default function OwnerDashboard() {
                             <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                               <Shield className="h-5 w-5" />
                             </div>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Security Deposit</p>
+                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Security Deposit</p>
                           </div>
                           <p className="text-2xl font-black text-slate-900">${Number(u.depositAmt).toLocaleString()}</p>
                         </Card>
@@ -2705,16 +2705,16 @@ export default function OwnerDashboard() {
                             <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                               <Maximize2 className="h-5 w-5" />
                             </div>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Area</p>
+                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Total Area</p>
                           </div>
-                          <p className="text-2xl font-black text-slate-900">{u.sqFootage || '--'} <span className="text-sm font-bold text-slate-500">Sq Ft</span></p>
+                          <p className="text-2xl font-black text-slate-900">{u.sqFootage || '--'} <span className="text-sm font-bold text-[#6E6E73]">Sq Ft</span></p>
                         </Card>
                         <Card className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
                               <LayoutGrid className="h-5 w-5" />
                             </div>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Unit Type</p>
+                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Unit Type</p>
                           </div>
                           <p className="text-2xl font-black text-slate-900 capitalize">{u.type || 'Apartment'}</p>
                         </Card>
@@ -2723,21 +2723,21 @@ export default function OwnerDashboard() {
                       {/* Detailed Breakdown */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                          <h3 className="text-lg font-bold text-slate-900 mb-4 pb-4 border-b border-slate-100 flex items-center"><Home className="h-5 w-5 mr-2 text-slate-400" /> Unit Details</h3>
+                          <h3 className="text-lg font-bold text-slate-900 mb-4 pb-4 border-b border-slate-100 flex items-center"><Home className="h-5 w-5 mr-2 text-[#8E8E93]" /> Unit Details</h3>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Unit ID</span><span className="text-sm font-bold text-slate-900 uppercase">{u.id.substring(u.id.length - 8)}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Bedrooms</span><span className="text-sm font-bold text-slate-900">{u.rooms}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Bathrooms</span><span className="text-sm font-bold text-slate-900">{u.bathrooms || 1}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Status</span><Badge className={`${badgeClass} shadow-sm font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase`}>{u.status}</Badge></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Unit ID</span><span className="text-sm font-bold text-slate-900 uppercase">{u.id.substring(u.id.length - 8)}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Bedrooms</span><span className="text-sm font-bold text-slate-900">{u.rooms}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Bathrooms</span><span className="text-sm font-bold text-slate-900">{u.bathrooms || 1}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Status</span><Badge className={`${badgeClass} shadow-sm font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase`}>{u.status}</Badge></div>
                           </div>
                         </Card>
                         <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                          <h3 className="text-lg font-bold text-slate-900 mb-4 pb-4 border-b border-slate-100 flex items-center"><Building className="h-5 w-5 mr-2 text-slate-400" /> Property Information</h3>
+                          <h3 className="text-lg font-bold text-slate-900 mb-4 pb-4 border-b border-slate-100 flex items-center"><Building className="h-5 w-5 mr-2 text-[#8E8E93]" /> Property Information</h3>
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Property Name</span><span className="text-sm font-bold text-slate-900">{p?.name || '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Address</span><span className="text-sm font-bold text-slate-900">{p?.address || '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">City & State</span><span className="text-sm font-bold text-slate-900">{p?.city || '--'}, {p?.state || '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-slate-500">Zip Code</span><span className="text-sm font-bold text-slate-900">{p?.zip || '--'}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Property Name</span><span className="text-sm font-bold text-slate-900">{p?.name || '--'}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Address</span><span className="text-sm font-bold text-slate-900">{p?.address || '--'}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">City & State</span><span className="text-sm font-bold text-slate-900">{p?.city || '--'}, {p?.state || '--'}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-sm font-medium text-[#6E6E73]">Zip Code</span><span className="text-sm font-bold text-slate-900">{p?.zip || '--'}</span></div>
                           </div>
                         </Card>
                       </div>
@@ -2747,7 +2747,7 @@ export default function OwnerDashboard() {
                   {unitDetailsSubTab === 'features' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><Star className="h-5 w-5 mr-2 text-slate-400" /> Unit Amenities</h3>
+                        <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><Star className="h-5 w-5 mr-2 text-[#8E8E93]" /> Unit Amenities</h3>
                         {u.amenities && u.amenities.length > 0 ? (
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {u.amenities.map((amenity: string, idx: number) => (
@@ -2761,7 +2761,7 @@ export default function OwnerDashboard() {
                           <div className="py-12 flex flex-col items-center justify-center text-center">
                             <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4"><Star className="h-6 w-6 text-slate-300" /></div>
                             <p className="text-lg font-bold text-slate-900">No amenities listed</p>
-                            <p className="text-sm text-slate-500 mt-1 max-w-sm">This unit currently doesn't have any specific amenities listed. You can add them by editing the unit.</p>
+                            <p className="text-sm text-[#6E6E73] mt-1 max-w-sm">This unit currently doesn't have any specific amenities listed. You can add them by editing the unit.</p>
                           </div>
                         )}
                       </Card>
@@ -2772,7 +2772,7 @@ export default function OwnerDashboard() {
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
-                          <h3 className="text-lg font-bold text-slate-900 flex items-center"><Image className="h-5 w-5 mr-2 text-slate-400" /> Photo Gallery</h3>
+                          <h3 className="text-lg font-bold text-slate-900 flex items-center"><Image className="h-5 w-5 mr-2 text-[#8E8E93]" /> Photo Gallery</h3>
                           <Button variant="outline" size="sm" className="h-9 rounded-lg font-bold text-blue-600 border-blue-200 hover:bg-blue-50"><Plus className="h-4 w-4 mr-1.5" /> Add Photos</Button>
                         </div>
                         {u.images && u.images.length > 0 ? (
@@ -2781,7 +2781,7 @@ export default function OwnerDashboard() {
                               <div key={idx} className="aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative">
                                 <img src={img} alt={`${u.name} photo ${idx + 1}`} className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-slate-100"><Eye className="h-4 w-4" /></Button>
+                                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-[#F2F2F7]"><Eye className="h-4 w-4" /></Button>
                                   <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full"><Trash2 className="h-4 w-4" /></Button>
                                 </div>
                               </div>
@@ -2793,7 +2793,7 @@ export default function OwnerDashboard() {
                               <img src={p.coverPhoto} alt={`${p.name} cover`} className="w-full h-full object-cover" />
                               <div className="absolute top-2 left-2"><Badge className="bg-white/95 text-slate-700 shadow-sm border-none font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase">Property Photo</Badge></div>
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-slate-100"><Eye className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-[#F2F2F7]"><Eye className="h-4 w-4" /></Button>
                               </div>
                             </div>
                             {p.images && p.images.map((img: string, idx: number) => (
@@ -2801,16 +2801,16 @@ export default function OwnerDashboard() {
                                 <img src={img} alt={`${p.name} photo ${idx + 1}`} className="w-full h-full object-cover" />
                                 <div className="absolute top-2 left-2"><Badge className="bg-white/95 text-slate-700 shadow-sm border-none font-bold px-2 py-0.5 text-[10px] tracking-wide uppercase">Property Photo</Badge></div>
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-slate-100"><Eye className="h-4 w-4" /></Button>
+                                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-900 hover:bg-[#F2F2F7]"><Eye className="h-4 w-4" /></Button>
                                 </div>
                               </div>
                             ))}
                           </div>
                         ) : (
                           <div className="py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                            <div className="h-16 w-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4"><Image className="h-6 w-6 text-slate-400" /></div>
+                            <div className="h-16 w-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4"><Image className="h-6 w-6 text-[#8E8E93]" /></div>
                             <p className="text-lg font-bold text-slate-900">No photos yet</p>
-                            <p className="text-sm text-slate-500 mt-1 max-w-sm mb-6">Upload photos of this unit to showcase it to potential tenants.</p>
+                            <p className="text-sm text-[#6E6E73] mt-1 max-w-sm mb-6">Upload photos of this unit to showcase it to potential tenants.</p>
                             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-600/20 font-bold"><Plus className="h-4 w-4 mr-2" /> Upload Photos</Button>
                           </div>
                         )}
@@ -2823,50 +2823,50 @@ export default function OwnerDashboard() {
                       {isOcc ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col">
-                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><User className="h-5 w-5 mr-2 text-slate-400" /> Current Tenant</h3>
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><User className="h-5 w-5 mr-2 text-[#8E8E93]" /> Current Tenant</h3>
                             <div className="flex-1 flex flex-col">
                               <div className="flex items-center gap-4 mb-8">
-                                <div className="h-12 w-12 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                                <div className="h-12 w-12 rounded-full border-2 border-slate-200 flex items-center justify-center text-[#8E8E93] shrink-0">
                                   <User className="h-6 w-6" />
                                 </div>
                                 <div>
                                   <h4 className="text-xl font-bold text-slate-900 leading-tight">{u.tenantName || 'Tenant Name'}</h4>
-                                  <p className="text-xs text-slate-500 font-medium mt-1">Tenant ID: {u.tenantId || u.id}</p>
+                                  <p className="text-xs text-[#6E6E73] font-medium mt-1">Tenant ID: {u.tenantId || u.id}</p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4 mt-auto">
                                 <div>
                                   <p className="text-xs font-bold text-slate-900 mb-1">Email</p>
-                                  <p className="text-sm text-slate-500">{u.tenantEmail || 'tenant@example.com'}</p>
+                                  <p className="text-sm text-[#6E6E73]">{u.tenantEmail || 'tenant@example.com'}</p>
                                 </div>
                                 <div>
                                   <p className="text-xs font-bold text-slate-900 mb-1">Phone</p>
-                                  <p className="text-sm text-slate-500">{u.tenantPhone || '0170000000'}</p>
+                                  <p className="text-sm text-[#6E6E73]">{u.tenantPhone || '0170000000'}</p>
                                 </div>
                               </div>
                             </div>
                           </Card>
                           <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col">
-                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><FileText className="h-5 w-5 mr-2 text-slate-400" /> Lease Information</h3>
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center"><FileText className="h-5 w-5 mr-2 text-[#8E8E93]" /> Lease Information</h3>
                             <div className="space-y-4 flex-1">
                               <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                                <span className="text-sm font-semibold text-slate-600">Status</span>
+                                <span className="text-sm font-semibold text-[#6E6E73]">Status</span>
                                 <span className="text-sm font-bold text-slate-900">Active</span>
                               </div>
                               <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                                <span className="text-sm font-semibold text-slate-600">Start Date</span>
+                                <span className="text-sm font-semibold text-[#6E6E73]">Start Date</span>
                                 <span className="text-sm font-bold text-slate-900">10/6/2026</span>
                               </div>
                               <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                                <span className="text-sm font-semibold text-slate-600">End Date</span>
+                                <span className="text-sm font-semibold text-[#6E6E73]">End Date</span>
                                 <span className="text-sm font-bold text-slate-900">31/7/2026</span>
                               </div>
                               <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                                <span className="text-sm font-semibold text-slate-600">Monthly Rent</span>
+                                <span className="text-sm font-semibold text-[#6E6E73]">Monthly Rent</span>
                                 <span className="text-sm font-bold text-slate-900">${Number(u.rentAmount).toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-sm font-semibold text-slate-600">Security Deposit</span>
+                                <span className="text-sm font-semibold text-[#6E6E73]">Security Deposit</span>
                                 <span className="text-sm font-bold text-slate-900">${Number(u.depositAmt).toLocaleString()}</span>
                               </div>
                             </div>
@@ -2876,7 +2876,7 @@ export default function OwnerDashboard() {
                         <Card className="bg-white border border-slate-100 rounded-2xl p-10 shadow-sm flex flex-col items-center justify-center text-center">
                           <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-5"><User className="h-8 w-8 text-slate-300" /></div>
                           <h3 className="text-xl font-black text-slate-900 mb-2">No Current Tenant</h3>
-                          <p className="text-sm text-slate-500 max-w-md mb-8">This unit is currently marked as vacant. You can create a new lease to assign a tenant and update its status.</p>
+                          <p className="text-sm text-[#6E6E73] max-w-md mb-8">This unit is currently marked as vacant. You can create a new lease to assign a tenant and update its status.</p>
                           <div className="flex gap-3">
                             <Button onClick={() => { setLUnitId(u.id); setActiveTab('leases'); setLeaseSubTab("new"); }} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-600/20 font-bold h-11 px-6"><Plus className="h-4 w-4 mr-2" /> Create Lease</Button>
                             <InviteTenantModal unitId={u.id} unitName={u.name} propertyName={p?.name || 'Unknown Property'} rentAmount={Number(u.rentAmount)} />
@@ -2890,14 +2890,14 @@ export default function OwnerDashboard() {
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <Card className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
-                          <h3 className="text-lg font-bold text-slate-900 flex items-center"><FileText className="h-5 w-5 mr-2 text-slate-400" /> Documents & Files</h3>
+                          <h3 className="text-lg font-bold text-slate-900 flex items-center"><FileText className="h-5 w-5 mr-2 text-[#8E8E93]" /> Documents & Files</h3>
                           <Button variant="outline" size="sm" className="h-9 rounded-lg font-bold text-blue-600 border-blue-200 hover:bg-blue-50"><Plus className="h-4 w-4 mr-1.5" /> Upload File</Button>
                         </div>
                         <div className="py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                          <div className="h-16 w-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4"><FileText className="h-6 w-6 text-slate-400" /></div>
+                          <div className="h-16 w-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4"><FileText className="h-6 w-6 text-[#8E8E93]" /></div>
                           <p className="text-lg font-bold text-slate-900">No documents uploaded</p>
-                          <p className="text-sm text-slate-500 mt-1 max-w-sm mb-6">Upload lease agreements, inspection reports, or any other unit-specific documents here.</p>
-                          <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md font-bold"><Plus className="h-4 w-4 mr-2" /> Select Files</Button>
+                          <p className="text-sm text-[#6E6E73] mt-1 max-w-sm mb-6">Upload lease agreements, inspection reports, or any other unit-specific documents here.</p>
+                          <Button className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl shadow-md font-bold"><Plus className="h-4 w-4 mr-2" /> Select Files</Button>
                         </div>
                       </Card>
                     </div>
@@ -2911,7 +2911,7 @@ export default function OwnerDashboard() {
           <TabsContent value="add-unit" className="outline-none">
             <div className="max-w-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <Button type="button" variant="ghost" size="icon" onClick={() => setActiveTab('units')} className="h-10 w-10 rounded-xl bg-slate-50 text-slate-500 hover:text-slate-900 shrink-0">
+                <Button type="button" variant="ghost" size="icon" onClick={() => setActiveTab('units')} className="h-10 w-10 rounded-xl bg-slate-50 text-[#6E6E73] hover:text-[#1D1D1F] shrink-0">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
@@ -2970,23 +2970,23 @@ export default function OwnerDashboard() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm mb-8">
                   <div className="flex items-center gap-4">
-                    <Button type="button" variant="ghost" size="icon" onClick={() => setLeaseSubTab("all")} className="h-10 w-10 rounded-xl bg-slate-50 text-slate-500 hover:text-slate-900 shrink-0">
+                    <Button type="button" variant="ghost" size="icon" onClick={() => setLeaseSubTab("all")} className="h-10 w-10 rounded-xl bg-slate-50 text-[#6E6E73] hover:text-[#1D1D1F] shrink-0">
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <div>
                       <h2 className="text-2xl font-black text-slate-900">Create New Lease</h2>
-                      <p className="text-sm text-slate-500 mt-1">Set up a new lease with tenant, dates, and financial terms</p>
+                      <p className="text-sm text-[#6E6E73] mt-1">Set up a new lease with tenant, dates, and financial terms</p>
                     </div>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
-                    <Button type="button" variant="outline" onClick={() => setLeaseSubTab("all")} className="w-full sm:w-auto rounded-full px-5 h-10 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm">Cancel</Button>
+                    <Button type="button" variant="outline" onClick={() => setLeaseSubTab("all")} className="w-full sm:w-auto rounded-full px-5 h-10 border-slate-200 text-slate-700 hover:bg-[#F5F5F7] font-bold text-sm">Cancel</Button>
                   </div>
                 </div>
 
                 <form onSubmit={handleAddLease} className="space-y-6">
                   {/* Property & Tenant Section */}
                   <div className="bg-white p-8 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Building2 className="h-5 w-5 text-slate-400" /> Property & Tenant</h3>
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Building2 className="h-5 w-5 text-[#8E8E93]" /> Property & Tenant</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Select Property *</Label>
@@ -3015,7 +3015,7 @@ export default function OwnerDashboard() {
                       <div className="space-y-2 md:col-span-2">
                         <Label className="text-sm font-bold text-slate-700">Tenant Email *</Label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E93]" />
                           <Input type="email" placeholder="tenant@example.com" value={lEmail} onChange={e => setLEmail(e.target.value)} required className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12 font-medium" />
                         </div>
                       </div>
@@ -3024,7 +3024,7 @@ export default function OwnerDashboard() {
 
                   {/* Lease Dates */}
                   <div className="bg-white p-8 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Calendar className="h-5 w-5 text-slate-400" /> Lease Dates</h3>
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Calendar className="h-5 w-5 text-[#8E8E93]" /> Lease Dates</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Start Date *</Label>
@@ -3039,19 +3039,19 @@ export default function OwnerDashboard() {
 
                   {/* Financial Terms */}
                   <div className="bg-white p-8 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><DollarSign className="h-5 w-5 text-slate-400" /> Financial Terms</h3>
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><DollarSign className="h-5 w-5 text-[#8E8E93]" /> Financial Terms</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Monthly Rent *</Label>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E93]" />
                           <Input type="number" placeholder="1500" value={lRent} onChange={e => setLRent(e.target.value)} required className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12 font-medium text-slate-900" />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Security Deposit</Label>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E93]" />
                           <Input type="number" placeholder="1500" className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12 font-medium text-slate-900" />
                         </div>
                       </div>
@@ -3073,12 +3073,12 @@ export default function OwnerDashboard() {
 
                   {/* Late Fee Rules */}
                   <div className="bg-white p-8 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-slate-400" /> Late Fee Rules</h3>
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-[#8E8E93]" /> Late Fee Rules</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Late Fee Amount</Label>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E93]" />
                           <Input type="number" defaultValue="50" className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-12 font-medium text-slate-900" />
                         </div>
                       </div>
@@ -3101,7 +3101,7 @@ export default function OwnerDashboard() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 p-6 rounded-[28px] flex items-center gap-4 text-slate-600 border border-slate-100">
+                  <div className="bg-slate-50 p-6 rounded-[28px] flex items-center gap-4 text-[#6E6E73] border border-slate-100">
                     <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                       <FileText className="h-5 w-5" />
                     </div>
@@ -3109,7 +3109,7 @@ export default function OwnerDashboard() {
                   </div>
 
                   <div className="flex justify-end gap-3 pt-6">
-                    <Button type="button" variant="outline" className="rounded-full px-8 h-12 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold">Reset Form</Button>
+                    <Button type="button" variant="outline" className="rounded-full px-8 h-12 border-slate-200 text-slate-700 hover:bg-[#F5F5F7] font-bold">Reset Form</Button>
                     <Button type="submit" className="rounded-full px-8 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all">Create Lease</Button>
                   </div>
                 </form>
@@ -3120,11 +3120,11 @@ export default function OwnerDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900">Leases</h2>
-                    <p className="text-sm text-slate-500 mt-0.5">Manage tenant lease agreements across your portfolio</p>
+                    <p className="text-sm text-[#6E6E73] mt-0.5">Manage tenant lease agreements across your portfolio</p>
                   </div>
                   <div className="flex gap-3">
-                    <Button onClick={fetchOwnerData} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 rounded-full px-4 h-10 text-xs font-bold">↻ Refresh</Button>
-                    <Button onClick={() => setLeaseSubTab("new")} className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <Button onClick={fetchOwnerData} variant="outline" className="border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-full px-4 h-10 text-xs font-bold">↻ Refresh</Button>
+                    <Button onClick={() => setLeaseSubTab("new")} className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5 shadow-sm">
                       <Plus className="h-4 w-4" /> Create Lease
                     </Button>
                   </div>
@@ -3153,7 +3153,7 @@ export default function OwnerDashboard() {
                         { label: "Expiring Leases", value: expiringSoonCount },
                       ].map((s) => (
                         <Card key={s.label} className={`border border-slate-100 rounded-2xl shadow-sm p-4 bg-white`}>
-                          <p className="text-[11px] text-slate-500 font-bold uppercase">{s.label}</p>
+                          <p className="text-[11px] text-[#6E6E73] font-bold uppercase">{s.label}</p>
                           <p className={`text-2xl font-black mt-1 text-slate-900`}>{s.value}</p>
                         </Card>
                       ))}
@@ -3197,12 +3197,12 @@ export default function OwnerDashboard() {
                               onClick={() => setLeaseSubTab(tab.key)}
                               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border transition-all ${
                                 leaseSubTab === tab.key
-                                  ? "bg-slate-900 text-white border-slate-900"
-                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
+                                  ? "bg-[#007AFF] text-white border-slate-900"
+                                  : "bg-white text-[#6E6E73] border-slate-200 hover:border-slate-300 hover:bg-[#F5F5F7] shadow-sm"
                               }`}
                             >
                               {tab.label}
-                              <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${leaseSubTab === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                              <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${leaseSubTab === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-[#6E6E73]"}`}>
                                 {tab.count}
                               </span>
                             </button>
@@ -3210,10 +3210,10 @@ export default function OwnerDashboard() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant={leaseViewLayout === "list" ? "default" : "outline"} size="icon" onClick={() => setLeaseViewLayout("list")} className={`h-9 w-9 rounded-lg ${leaseViewLayout === "list" ? "bg-slate-900 text-white" : "text-slate-500 border-slate-200 bg-white shadow-sm"}`}>
+                          <Button variant={leaseViewLayout === "list" ? "default" : "outline"} size="icon" onClick={() => setLeaseViewLayout("list")} className={`h-9 w-9 rounded-lg ${leaseViewLayout === "list" ? "bg-[#007AFF] text-white" : "text-[#6E6E73] border-slate-200 bg-white shadow-sm"}`}>
                             <List className="h-4 w-4" />
                           </Button>
-                          <Button variant={leaseViewLayout === "grid" ? "default" : "outline"} size="icon" onClick={() => setLeaseViewLayout("grid")} className={`h-9 w-9 rounded-lg ${leaseViewLayout === "grid" ? "bg-slate-900 text-white" : "text-slate-500 border-slate-200 bg-white shadow-sm"}`}>
+                          <Button variant={leaseViewLayout === "grid" ? "default" : "outline"} size="icon" onClick={() => setLeaseViewLayout("grid")} className={`h-9 w-9 rounded-lg ${leaseViewLayout === "grid" ? "bg-[#007AFF] text-white" : "text-[#6E6E73] border-slate-200 bg-white shadow-sm"}`}>
                             <LayoutGrid className="h-4 w-4" />
                           </Button>
                         </div>
@@ -3222,7 +3222,7 @@ export default function OwnerDashboard() {
                       {/* Filter Bar */}
                       <div className="bg-white px-4 py-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-4">
                         <div className="relative w-full sm:w-80">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
                           <Input placeholder="Search leases..." value={leaseSearch} onChange={(e) => setLeaseSearch(e.target.value)} className="pl-9 bg-slate-50 border-slate-200 rounded-xl h-10 text-sm text-slate-700 placeholder-slate-400" />
                         </div>
                         <div className="flex gap-3 w-full sm:w-auto ml-auto">
@@ -3253,10 +3253,10 @@ export default function OwnerDashboard() {
                       {/* Content Render */}
                       {displayLeases.length === 0 ? (
                         <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm mt-4">
-                          <Calendar className="h-12 w-12 mx-auto mb-4 opacity-20 text-slate-400" />
+                          <Calendar className="h-12 w-12 mx-auto mb-4 opacity-20 text-[#8E8E93]" />
                           <p className="font-bold text-sm text-slate-900">No leases found</p>
-                          <p className="text-xs mt-1 font-medium text-slate-500">Create a lease to link a tenant to one of your units</p>
-                          <Button onClick={() => setLeaseSubTab("new")} className="mt-5 bg-slate-900 hover:bg-slate-800 text-white rounded-full px-5 h-10 text-xs font-bold shadow-sm">
+                          <p className="text-xs mt-1 font-medium text-[#6E6E73]">Create a lease to link a tenant to one of your units</p>
+                          <Button onClick={() => setLeaseSubTab("new")} className="mt-5 bg-slate-900 hover:bg-[#007AFF] text-white rounded-full px-5 h-10 text-xs font-bold shadow-sm">
                             <Plus className="h-3.5 w-3.5 mr-1.5" /> Create First Lease
                           </Button>
                         </div>
@@ -3268,14 +3268,14 @@ export default function OwnerDashboard() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow className="hover:bg-transparent border-slate-100">
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider pl-6">Property & Unit</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">Tenant</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">Status</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">Rent Amount</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">Start Date</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">End Date</TableHead>
-                                      <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider">Days Remaining</TableHead>
-                                      <TableHead className="text-right text-slate-400 font-extrabold text-[10px] uppercase tracking-wider pr-6">Actions</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pl-6">Property & Unit</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">Tenant</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">Status</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">Rent Amount</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">Start Date</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">End Date</TableHead>
+                                      <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider">Days Remaining</TableHead>
+                                      <TableHead className="text-right text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pr-6">Actions</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
@@ -3293,21 +3293,21 @@ export default function OwnerDashboard() {
                                         ? "text-emerald-700 border-emerald-200"
                                         : isExpired
                                         ? "text-red-600 border-red-200"
-                                        : "text-slate-600 border-slate-200";
+                                        : "text-[#6E6E73] border-slate-200";
 
                                       return (
-                                        <TableRow key={l.id} className="border-slate-100 hover:bg-slate-50 transition-colors group h-16">
+                                        <TableRow key={l.id} className="border-slate-100 hover:bg-[#F5F5F7] transition-colors group h-16">
                                           <TableCell className="pl-6">
                                             <div className="flex items-center gap-3">
                                               <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                                <Home className="h-4 w-4 text-slate-500" />
+                                                <Home className="h-4 w-4 text-[#6E6E73]" />
                                               </div>
                                               <div className="flex flex-col">
                                                 <div className="flex items-center gap-2">
                                                   <span className="font-bold text-slate-900 text-sm">{getPropName(l.unit?.property)}</span>
                                                   <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-0 rounded-md px-1.5 py-0 text-[10px] uppercase">{l.unit?.name}</Badge>
                                                 </div>
-                                                <span className="text-xs text-slate-500">{l.unit?.property?.address}</span>
+                                                <span className="text-xs text-[#6E6E73]">{l.unit?.property?.address}</span>
                                               </div>
                                             </div>
                                           </TableCell>
@@ -3318,7 +3318,7 @@ export default function OwnerDashboard() {
                                               </div>
                                               <div className="flex flex-col">
                                                 <span className="font-semibold text-slate-900 text-xs">{l.tenant?.name || "—"}</span>
-                                                <span className="text-[10px] text-slate-500">{l.tenant?.email}</span>
+                                                <span className="text-[10px] text-[#6E6E73]">{l.tenant?.email}</span>
                                               </div>
                                             </div>
                                           </TableCell>
@@ -3330,14 +3330,14 @@ export default function OwnerDashboard() {
                                           <TableCell>
                                             <div className="flex flex-col">
                                               <span className="font-bold text-slate-900 text-sm">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                                              <span className="text-[10px] text-slate-500">per month</span>
+                                              <span className="text-[10px] text-[#6E6E73]">per month</span>
                                             </div>
                                           </TableCell>
                                           <TableCell>
-                                            <span className="text-xs text-slate-600 font-medium">{startDate.toLocaleDateString()}</span>
+                                            <span className="text-xs text-[#6E6E73] font-medium">{startDate.toLocaleDateString()}</span>
                                           </TableCell>
                                           <TableCell>
-                                            <span className="text-xs text-slate-600 font-medium">{endDate.toLocaleDateString()}</span>
+                                            <span className="text-xs text-[#6E6E73] font-medium">{endDate.toLocaleDateString()}</span>
                                           </TableCell>
                                           <TableCell>
                                             {isExpired ? (
@@ -3348,15 +3348,15 @@ export default function OwnerDashboard() {
                                           </TableCell>
                                           <TableCell className="pr-6 text-right">
                                             <DropdownMenu>
-                                              <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:bg-slate-100 hover:text-slate-900" />}>
+                                              <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]" />}>
                                                 <MoreVertical className="h-4 w-4" />
                                               </DropdownMenuTrigger>
                                               <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
-                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Eye className="h-4 w-4 mr-2 text-slate-400" /> View Details</DropdownMenuItem>
-                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Edit2 className="h-4 w-4 mr-2 text-slate-400" /> Edit Lease</DropdownMenuItem>
-                                                <DropdownMenuSeparator className="bg-slate-100" />
-                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><FileText className="h-4 w-4 mr-2 text-slate-400" /> View Invoice</DropdownMenuItem>
-                                                <DropdownMenuSeparator className="bg-slate-100" />
+                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Eye className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Details</DropdownMenuItem>
+                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Lease</DropdownMenuItem>
+                                                <DropdownMenuSeparator className="bg-[#F2F2F7]" />
+                                                <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><FileText className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Invoice</DropdownMenuItem>
+                                                <DropdownMenuSeparator className="bg-[#F2F2F7]" />
                                                 <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-red-50 text-red-600 py-2"><Trash2 className="h-4 w-4 mr-2 text-red-500" /> Delete</DropdownMenuItem>
                                               </DropdownMenuContent>
                                             </DropdownMenu>
@@ -3392,14 +3392,14 @@ export default function OwnerDashboard() {
                                       <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
                                           <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                            <Home className="h-5 w-5 text-slate-500" />
+                                            <Home className="h-5 w-5 text-[#6E6E73]" />
                                           </div>
                                           <div>
                                             <div className="flex items-center gap-2">
                                               <h3 className="font-bold text-slate-900 text-sm truncate max-w-[120px]">{getPropName(l.unit?.property)}</h3>
-                                              <Badge className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 rounded-md px-1.5 py-0 text-[10px] uppercase font-bold">{l.unit?.name}</Badge>
+                                              <Badge className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 rounded-md px-1.5 py-0 text-[10px] uppercase font-bold">{l.unit?.name}</Badge>
                                             </div>
-                                            <p className="text-xs text-slate-500 truncate mt-0.5">{l.unit?.property?.address || "No address provided"}</p>
+                                            <p className="text-xs text-[#6E6E73] truncate mt-0.5">{l.unit?.property?.address || "No address provided"}</p>
                                           </div>
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -3407,12 +3407,12 @@ export default function OwnerDashboard() {
                                             {isExpired ? "Expired" : l.status.toLowerCase().replace("_", " ")}
                                           </Badge>
                                           <DropdownMenu>
-                                            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-900" />}>
+                                            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-[#8E8E93] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]" />}>
                                               <MoreVertical className="h-4 w-4" />
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-slate-100 p-1">
-                                              <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Eye className="h-4 w-4 mr-2 text-slate-400" /> View Details</DropdownMenuItem>
-                                              <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Edit2 className="h-4 w-4 mr-2 text-slate-400" /> Edit Lease</DropdownMenuItem>
+                                              <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Eye className="h-4 w-4 mr-2 text-[#8E8E93]" /> View Details</DropdownMenuItem>
+                                              <DropdownMenuItem className="cursor-pointer rounded-lg text-xs font-medium focus:bg-slate-50 py-2"><Edit2 className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Lease</DropdownMenuItem>
                                             </DropdownMenuContent>
                                           </DropdownMenu>
                                         </div>
@@ -3425,7 +3425,7 @@ export default function OwnerDashboard() {
                                           </div>
                                           <div className="flex flex-col">
                                             <span className="font-semibold text-slate-900 text-xs">{l.tenant?.name || "—"}</span>
-                                            <span className="text-[10px] text-slate-500">{l.tenant?.email}</span>
+                                            <span className="text-[10px] text-[#6E6E73]">{l.tenant?.email}</span>
                                           </div>
                                         </div>
                                       </div>
@@ -3434,7 +3434,7 @@ export default function OwnerDashboard() {
                                     <div className="p-5">
                                       <div className="flex items-center justify-between mb-5">
                                         <div className="flex items-center gap-2">
-                                          <Calendar className="h-4 w-4 text-slate-400" />
+                                          <Calendar className="h-4 w-4 text-[#8E8E93]" />
                                           <span className="text-xs font-semibold text-slate-700">{startDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})} - {endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</span>
                                         </div>
                                         {!isExpired && (
@@ -3446,16 +3446,16 @@ export default function OwnerDashboard() {
 
                                       <div className="grid grid-cols-2 gap-3 mb-5">
                                         <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                          <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Monthly Rent</p>
+                                          <p className="text-[10px] text-[#6E6E73] font-bold uppercase mb-1">Monthly Rent</p>
                                           <p className="text-sm font-black text-slate-900">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
                                         </div>
                                         <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                          <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Security</p>
+                                          <p className="text-[10px] text-[#6E6E73] font-bold uppercase mb-1">Security</p>
                                           <p className="text-sm font-black text-slate-900">${Number(l.unit?.depositAmt || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
                                         </div>
                                       </div>
 
-                                      <div className="flex items-center gap-3 text-slate-500 pb-5 border-b border-slate-100">
+                                      <div className="flex items-center gap-3 text-[#6E6E73] pb-5 border-b border-slate-100">
                                         <div className="flex items-center gap-1.5"><Bed className="h-3.5 w-3.5" /><span className="text-xs font-semibold">{l.unit?.rooms || 0}</span></div>
                                         <div className="h-1 w-1 rounded-full bg-slate-300"></div>
                                         <div className="flex items-center gap-1.5"><Bath className="h-3.5 w-3.5" /><span className="text-xs font-semibold">{l.unit?.bathrooms || 1}</span></div>
@@ -3467,7 +3467,7 @@ export default function OwnerDashboard() {
 
                                       <div className="pt-4 flex justify-between items-center">
                                         <button className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">View Details</button>
-                                        <button className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">Invoice</button>
+                                        <button className="text-xs font-bold text-[#6E6E73] hover:text-[#1D1D1F] transition-colors">Invoice</button>
                                       </div>
                                     </div>
                                   </Card>
@@ -3611,7 +3611,7 @@ export default function OwnerDashboard() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Total Tenants", val: tenants.length, color: "text-slate-900" },
+                { label: "Total Tenants", val: tenants.length, color: "text-[#1D1D1F]" },
                 { label: "Active Leases", val: leases.filter((l:any) => l.status === "ACTIVE").length, color: "text-emerald-600" },
                 { label: "Expiring Soon", val: leases.filter((l:any) => { const d = new Date(l.endDate); return l.status==="ACTIVE" && d > new Date() && d <= new Date(Date.now()+30*86400000); }).length, color: "text-amber-600" },
                 { label: "Vacant Units", val: units.filter((u:any) => u.status==="VACANT").length, color: "text-blue-600" },
@@ -3626,29 +3626,29 @@ export default function OwnerDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-slate-100">
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pl-6">Tenant</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Email</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Unit</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Lease Status</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pr-6">Monthly Rent</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pl-6">Tenant</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Email</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Unit</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Lease Status</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pr-6">Monthly Rent</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {tenants.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-16 text-slate-400"><Users className="h-10 w-10 mx-auto mb-3 opacity-20"/><p className="font-bold">No tenants yet</p></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-16 text-[#8E8E93]"><Users className="h-10 w-10 mx-auto mb-3 opacity-20"/><p className="font-bold">No tenants yet</p></TableCell></TableRow>
                   ) : tenants.map((t:any) => {
                     const tLease = leases.find((l:any) => l.tenantId === t.id && l.status === "ACTIVE");
                     return (
-                      <TableRow key={t.id} className="border-slate-100 hover:bg-slate-50/50">
+                      <TableRow key={t.id} className="border-slate-100 hover:bg-[#F5F5F7]/50">
                         <TableCell className="py-4 pl-6">
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-xs font-black text-slate-700">{t.name?.charAt(0) || "T"}</div>
                             <p className="font-extrabold text-slate-900 text-sm">{t.name}</p>
                           </div>
                         </TableCell>
-                        <TableCell className="text-slate-500 text-sm">{t.email}</TableCell>
+                        <TableCell className="text-[#6E6E73] text-sm">{t.email}</TableCell>
                         <TableCell className="font-semibold text-slate-700">{tLease?.unit?.name || "—"}</TableCell>
-                        <TableCell><Badge className={`rounded-full font-bold px-3 py-1 text-xs ${tLease ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"}`}>{tLease ? "ACTIVE" : "NO LEASE"}</Badge></TableCell>
+                        <TableCell><Badge className={`rounded-full font-bold px-3 py-1 text-xs ${tLease ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-[#6E6E73] border border-slate-200"}`}>{tLease ? "ACTIVE" : "NO LEASE"}</Badge></TableCell>
                         <TableCell className="font-extrabold text-slate-900 pr-6">{tLease ? `$${Number(tLease.monthlyRent).toLocaleString()}` : "—"}</TableCell>
                       </TableRow>
                     );
@@ -3665,7 +3665,7 @@ export default function OwnerDashboard() {
                 <h2 className="text-2xl font-black text-[#111111]">Inspections</h2>
                 <p className="text-sm text-[#7F817F] mt-0.5">Schedule and track property inspections</p>
               </div>
-              <Button onClick={() => setInspOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5">
+              <Button onClick={() => setInspOpen(true)} className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5">
                 <Plus className="h-4 w-4" /> Schedule Inspection
               </Button>
             </div>
@@ -3673,21 +3673,21 @@ export default function OwnerDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-slate-100">
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pl-6">Property / Unit</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Inspector</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Date</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Status</TableHead>
-                    <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pr-6">Notes</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pl-6">Property / Unit</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Inspector</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Date</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Status</TableHead>
+                    <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pr-6">Notes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {inspections.map((ins:any) => (
-                    <TableRow key={ins.id} className="border-slate-100 hover:bg-slate-50/50">
-                      <TableCell className="py-4 pl-6"><p className="font-extrabold text-slate-900">{ins.unit}</p><p className="text-xs text-slate-400">{ins.property}</p></TableCell>
+                    <TableRow key={ins.id} className="border-slate-100 hover:bg-[#F5F5F7]/50">
+                      <TableCell className="py-4 pl-6"><p className="font-extrabold text-slate-900">{ins.unit}</p><p className="text-xs text-[#8E8E93]">{ins.property}</p></TableCell>
                       <TableCell className="font-semibold text-slate-700">{ins.inspector}</TableCell>
-                      <TableCell className="text-slate-600 font-semibold">{new Date(ins.date).toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"})}</TableCell>
+                      <TableCell className="text-[#6E6E73] font-semibold">{new Date(ins.date).toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"})}</TableCell>
                       <TableCell><Badge className={`rounded-full font-bold px-3 py-1 text-xs border ${ins.status === "COMPLETED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>{ins.status}</Badge></TableCell>
-                      <TableCell className="text-slate-500 text-xs pr-6">{ins.notes}</TableCell>
+                      <TableCell className="text-[#6E6E73] text-xs pr-6">{ins.notes}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -3717,7 +3717,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div className="space-y-1.5"><Label className="text-xs font-bold">Date</Label><Input type="date" value={newInspDate} onChange={e => setNewInspDate(e.target.value)} className="bg-slate-50 border-slate-200 rounded-xl h-11" required/></div>
                   <div className="space-y-1.5"><Label className="text-xs font-bold">Notes (optional)</Label><Input value={newInspNotes} onChange={e => setNewInspNotes(e.target.value)} placeholder="Routine safety check..." className="bg-slate-50 border-slate-200 rounded-xl h-11"/></div>
-                  <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl">Schedule Inspection</Button>
+                  <Button type="submit" className="w-full bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 rounded-xl">Schedule Inspection</Button>
                 </form>
               </DialogContent>
             </Dialog>
@@ -3733,27 +3733,27 @@ export default function OwnerDashboard() {
                 { label: "Total Paid", val: `$${invoices.filter((i:any)=>i.status==="PAID").reduce((s:number,i:any)=>s+Number(i.amount),0).toLocaleString()}`, color: "text-emerald-600" },
                 { label: "Unpaid", val: invoices.filter((i:any)=>i.status==="UNPAID").length, color: "text-amber-600" },
                 { label: "Overdue", val: invoices.filter((i:any)=>i.status==="OVERDUE").length, color: "text-red-600" },
-                { label: "Ledger Balance", val: `$${balance.toLocaleString()}`, color: "text-slate-900" },
+                { label: "Ledger Balance", val: `$${balance.toLocaleString()}`, color: "text-[#1D1D1F]" },
               ].map(s => <Card key={s.label} className="bg-white border-0 rounded-2xl shadow-sm p-5"><p className="text-xs text-[#7F817F] font-bold">{s.label}</p><p className={`text-2xl font-black mt-1 ${s.color}`}>{s.val}</p></Card>)}
             </div>
             <Card className="bg-white border-0 rounded-3xl shadow-sm overflow-hidden">
               <Table>
                 <TableHeader><TableRow className="hover:bg-transparent border-slate-100">
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pl-6">Invoice / Tenant</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Unit</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Amount</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Due Date</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pr-6">Status</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pl-6">Invoice / Tenant</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Unit</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Amount</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Due Date</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pr-6">Status</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {invoices.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-16 text-slate-400 font-bold">No transactions yet</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-16 text-[#8E8E93] font-bold">No transactions yet</TableCell></TableRow>
                   ) : invoices.map((inv:any) => (
-                    <TableRow key={inv.id} className="border-slate-100 hover:bg-slate-50/50">
-                      <TableCell className="py-4 pl-6"><p className="font-extrabold text-slate-900 text-sm">{inv.lease?.tenant?.name || "Tenant"}</p><p className="text-xs text-slate-400">{inv.lease?.tenant?.email}</p></TableCell>
+                    <TableRow key={inv.id} className="border-slate-100 hover:bg-[#F5F5F7]/50">
+                      <TableCell className="py-4 pl-6"><p className="font-extrabold text-slate-900 text-sm">{inv.lease?.tenant?.name || "Tenant"}</p><p className="text-xs text-[#8E8E93]">{inv.lease?.tenant?.email}</p></TableCell>
                       <TableCell className="font-semibold text-slate-700">{inv.lease?.unit?.name || "—"}</TableCell>
                       <TableCell className="font-extrabold text-slate-900">${Number(inv.amount).toLocaleString()}</TableCell>
-                      <TableCell className="text-slate-500 text-sm">{new Date(inv.dueDate).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</TableCell>
+                      <TableCell className="text-[#6E6E73] text-sm">{new Date(inv.dueDate).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</TableCell>
                       <TableCell className="pr-6"><Badge className={`rounded-full font-bold px-3 py-1 text-xs border ${inv.status==="PAID"?"bg-emerald-50 text-emerald-700 border-emerald-200":inv.status==="OVERDUE"?"bg-red-50 text-red-700 border-red-200":"bg-amber-50 text-amber-700 border-amber-200"}`}>{inv.status}</Badge></TableCell>
                     </TableRow>
                   ))}
@@ -3766,20 +3766,20 @@ export default function OwnerDashboard() {
           <TabsContent value="invoices" className="space-y-6 outline-none">
             <div className="flex justify-between items-center">
               <div><h2 className="text-2xl font-black text-[#111111]">Invoices</h2><p className="text-sm text-[#7F817F] mt-0.5">Manage and create rent invoices</p></div>
-              <Button onClick={() => setInvoiceOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5"><Plus className="h-4 w-4"/> New Invoice</Button>
+              <Button onClick={() => setInvoiceOpen(true)} className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-full px-5 h-10 text-xs font-bold flex items-center gap-1.5"><Plus className="h-4 w-4"/> New Invoice</Button>
             </div>
             <div className="flex gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[180px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><Input placeholder="Search invoices..." value={invoiceSearch} onChange={e=>setInvoiceSearch(e.target.value)} className="pl-9 bg-white border-slate-200 rounded-full h-10 text-sm"/></div>
+              <div className="relative flex-1 min-w-[180px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]"/><Input placeholder="Search invoices..." value={invoiceSearch} onChange={e=>setInvoiceSearch(e.target.value)} className="pl-9 bg-white border-slate-200 rounded-full h-10 text-sm"/></div>
               <Select value={invoiceStatusFilter} onValueChange={v=>setInvoiceStatusFilter(v||"ALL")}><SelectTrigger className="w-36 rounded-full h-10 bg-white border-slate-200 text-sm font-semibold"><SelectValue/></SelectTrigger><SelectContent className="bg-white rounded-xl"><SelectItem value="ALL">All Status</SelectItem><SelectItem value="PAID">Paid</SelectItem><SelectItem value="UNPAID">Unpaid</SelectItem><SelectItem value="OVERDUE">Overdue</SelectItem></SelectContent></Select>
             </div>
             <Card className="bg-white border-0 rounded-3xl shadow-sm overflow-hidden">
               <Table>
                 <TableHeader><TableRow className="hover:bg-transparent border-slate-100">
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pl-6">Tenant</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Unit</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Amount</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase">Due Date</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase pr-6">Status</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pl-6">Tenant</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Unit</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Amount</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase">Due Date</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase pr-6">Status</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {invoices.filter((i:any)=>{
@@ -3787,11 +3787,11 @@ export default function OwnerDashboard() {
                     if(invoiceSearch&&!i.lease?.tenant?.name?.toLowerCase().includes(invoiceSearch.toLowerCase())&&!i.lease?.unit?.name?.toLowerCase().includes(invoiceSearch.toLowerCase())) return false;
                     return true;
                   }).map((inv:any) => (
-                    <TableRow key={inv.id} className="border-slate-100 hover:bg-slate-50/50">
+                    <TableRow key={inv.id} className="border-slate-100 hover:bg-[#F5F5F7]/50">
                       <TableCell className="py-4 pl-6 font-extrabold text-slate-900">{inv.lease?.tenant?.name || "Tenant"}</TableCell>
                       <TableCell className="font-semibold text-slate-700">{inv.lease?.unit?.name || "—"}</TableCell>
                       <TableCell className="font-extrabold text-slate-900">${Number(inv.amount).toLocaleString()}</TableCell>
-                      <TableCell className="text-slate-500">{new Date(inv.dueDate).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</TableCell>
+                      <TableCell className="text-[#6E6E73]">{new Date(inv.dueDate).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</TableCell>
                       <TableCell className="pr-6"><Badge className={`rounded-full font-bold px-3 py-1 text-xs border ${inv.status==="PAID"?"bg-emerald-50 text-emerald-700 border-emerald-200":inv.status==="OVERDUE"?"bg-red-50 text-red-700 border-red-200":"bg-amber-50 text-amber-700 border-amber-200"}`}>{inv.status}</Badge></TableCell>
                     </TableRow>
                   ))}
@@ -3810,7 +3810,7 @@ export default function OwnerDashboard() {
                   <div className="space-y-1.5"><Label className="text-xs font-bold">Status</Label>
                     <Select value={newInvStatus} onValueChange={v=>setNewInvStatus(v||"UNPAID")}><SelectTrigger className="bg-slate-50 border-slate-200 rounded-xl h-11"><SelectValue/></SelectTrigger><SelectContent className="bg-white rounded-xl"><SelectItem value="UNPAID">Unpaid</SelectItem><SelectItem value="PAID">Paid</SelectItem><SelectItem value="OVERDUE">Overdue</SelectItem></SelectContent></Select>
                   </div>
-                  <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl">Create Invoice</Button>
+                  <Button type="submit" className="w-full bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 rounded-xl">Create Invoice</Button>
                 </form>
               </DialogContent>
             </Dialog>
@@ -3881,14 +3881,14 @@ export default function OwnerDashboard() {
               <div><h2 className="text-2xl font-black text-[#111111]">Account Settings</h2><p className="text-sm text-[#7F817F] mt-0.5">Manage your preferences and profile</p></div>
             </div>
 
-            <div className="flex items-center space-x-6 border-b border-[#E2E8F0] mb-6">
+            <div className="flex items-center space-x-6 border-b border-[#E5E5EA] mb-6">
               <button
                 type="button"
                 onClick={() => setActiveSettingsTab("profile")}
                 className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
                   activeSettingsTab === "profile" 
                     ? "border-blue-600 text-blue-600" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Profile Settings
@@ -3899,7 +3899,7 @@ export default function OwnerDashboard() {
                 className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
                   activeSettingsTab === "security" 
                     ? "border-blue-600 text-blue-600" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Security & Password
@@ -3910,7 +3910,7 @@ export default function OwnerDashboard() {
                 className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
                   activeSettingsTab === "subscription" 
                     ? "border-blue-600 text-blue-600" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Subscription Plan
@@ -3922,7 +3922,7 @@ export default function OwnerDashboard() {
                 {pricingTier ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left Column: Plan Details */}
-                    <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-0 rounded-3xl shadow-xl p-8 col-span-2 text-white relative overflow-hidden">
+                    <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-0 rounded-3xl shadow-xl p-8 col-span-2 text-white relative overflow-hidden">
                       <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
                       <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
                       
@@ -3936,17 +3936,17 @@ export default function OwnerDashboard() {
                           </div>
                           <div className="text-right">
                             <span className="text-3xl font-black text-white">${pricingTier.price}</span>
-                            <span className="text-slate-400 font-medium text-sm">/mo</span>
+                            <span className="text-[#8E8E93] font-medium text-sm">/mo</span>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-8 mb-8">
                           <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Cycle</p>
+                            <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-2">Billing Cycle</p>
                             <p className="font-semibold text-white flex items-center gap-2"><Calendar className="h-4 w-4 text-blue-400"/> Monthly</p>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Status</p>
+                            <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-2">Status</p>
                             <div className="flex items-center gap-2">
                               <span className="relative flex h-3 w-3">
                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${subscriptionStatus.toLowerCase() === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
@@ -3961,7 +3961,7 @@ export default function OwnerDashboard() {
                           <div className="flex justify-between items-end mb-3">
                             <div>
                               <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Unit Usage</p>
-                              <p className="text-2xl font-black text-white">{units.length} <span className="text-sm font-medium text-slate-400">/ {pricingTier.maxUnits} Units</span></p>
+                              <p className="text-2xl font-black text-white">{units.length} <span className="text-sm font-medium text-[#8E8E93]">/ {pricingTier.maxUnits} Units</span></p>
                             </div>
                             <span className="text-sm font-bold text-blue-400">
                               {Math.round((units.length / pricingTier.maxUnits) * 100)}% Used
@@ -3986,7 +3986,7 @@ export default function OwnerDashboard() {
                     </Card>
 
                     {/* Right Column: Features & Upgrade */}
-                    <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm flex flex-col">
+                    <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm flex flex-col">
                       <div className="p-6 pb-4 border-b border-slate-100">
                         <h4 className="text-lg font-bold text-[#111111]">Plan Features</h4>
                       </div>
@@ -3997,7 +3997,7 @@ export default function OwnerDashboard() {
                               <div className="mt-0.5 bg-emerald-50 text-emerald-500 rounded-full p-0.5 shrink-0">
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                               </div>
-                              <span className="text-sm font-medium text-slate-600 leading-snug">{feature}</span>
+                              <span className="text-sm font-medium text-[#6E6E73] leading-snug">{feature}</span>
                             </li>
                           ))}
                         </ul>
@@ -4005,21 +4005,21 @@ export default function OwnerDashboard() {
                           <Button onClick={() => setShowPricingModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-md shadow-blue-600/20 transition-all">
                             View & Purchase Plans
                           </Button>
-                          <Button onClick={handlePortal} variant="outline" className="w-full bg-white hover:bg-slate-50 border-slate-200 text-slate-700 font-bold h-12 rounded-xl transition-all">
+                          <Button onClick={handlePortal} variant="outline" className="w-full bg-white hover:bg-[#F5F5F7] border-slate-200 text-slate-700 font-bold h-12 rounded-xl transition-all">
                             Stripe Customer Portal
                           </Button>
-                          <p className="text-center text-[11px] font-medium text-slate-400 mt-1">Stripe Portal is used for changing cards & billing details.</p>
+                          <p className="text-center text-[11px] font-medium text-[#8E8E93] mt-1">Stripe Portal is used for changing cards & billing details.</p>
                         </div>
                       </div>
                     </Card>
                   </div>
                 ) : (
-                  <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm p-12 text-center flex flex-col items-center justify-center">
+                  <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm p-12 text-center flex flex-col items-center justify-center">
                     <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
                       <Activity className="h-10 w-10 text-slate-300" />
                     </div>
                     <h3 className="text-2xl font-black text-[#111111] mb-2">No Active Subscription</h3>
-                    <p className="text-slate-500 max-w-md mx-auto mb-8">You are currently not on an active plan. Upgrade your account to list properties, manage units, and start collecting rent.</p>
+                    <p className="text-[#6E6E73] max-w-md mx-auto mb-8">You are currently not on an active plan. Upgrade your account to list properties, manage units, and start collecting rent.</p>
                     <div className="flex gap-4 justify-center">
                       <Button onClick={() => handleCheckout("starter")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 px-8 rounded-xl shadow-md shadow-blue-600/20">
                         View Pricing Plans
@@ -4036,20 +4036,20 @@ export default function OwnerDashboard() {
                       Download All
                     </Button>
                   </div>
-                  <Card className="bg-white border border-[#E2E8F0] rounded-3xl shadow-sm overflow-hidden">
+                  <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm overflow-hidden">
                     <Table>
                       <TableHeader className="bg-slate-50/50">
                         <TableRow className="border-slate-100 hover:bg-transparent">
-                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3 pl-6">Date</TableHead>
-                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Description</TableHead>
-                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Amount</TableHead>
-                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3">Status</TableHead>
-                          <TableHead className="text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3 text-right pr-6">Receipt</TableHead>
+                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3 pl-6">Date</TableHead>
+                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Description</TableHead>
+                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Amount</TableHead>
+                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Status</TableHead>
+                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3 text-right pr-6">Receipt</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {pricingTier ? (
-                          <TableRow className="border-slate-100 hover:bg-slate-50/50">
+                          <TableRow className="border-slate-100 hover:bg-[#F5F5F7]/50">
                             <TableCell className="py-4 pl-6 text-sm font-semibold text-slate-700">Oct 01, 2026</TableCell>
                             <TableCell className="text-sm font-bold text-slate-900">{pricingTier.name} Subscription</TableCell>
                             <TableCell className="text-sm font-black text-slate-900">${pricingTier.price}</TableCell>
@@ -4057,14 +4057,14 @@ export default function OwnerDashboard() {
                               <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-50 rounded-full font-bold px-2.5 py-0.5 shadow-sm">Paid</Badge>
                             </TableCell>
                             <TableCell className="text-right pr-6">
-                              <Button variant="ghost" className="h-8 w-8 p-0 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                              <Button variant="ghost" className="h-8 w-8 p-0 rounded-full text-[#8E8E93] hover:text-blue-600 hover:bg-blue-50">
                                 <Download className="h-4 w-4" />
                               </Button>
                             </TableCell>
                           </TableRow>
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={5} className="py-8 text-center text-sm font-medium text-slate-500">
+                            <TableCell colSpan={5} className="py-8 text-center text-sm font-medium text-[#6E6E73]">
                               No billing history available.
                             </TableCell>
                           </TableRow>
@@ -4087,7 +4087,7 @@ export default function OwnerDashboard() {
                       {profileAvatar ? (
                         <img src={profileAvatar} alt="Avatar" className="h-full w-full object-cover" />
                       ) : (
-                        <User className="h-10 w-10 text-slate-400" />
+                        <User className="h-10 w-10 text-[#8E8E93]" />
                       )}
                       {avatarUploading && (
                         <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
@@ -4112,7 +4112,7 @@ export default function OwnerDashboard() {
                           Remove
                         </Button>
                       </div>
-                      <p className="text-xs text-slate-500">JPG, PNG or GIF. Max size 5MB.</p>
+                      <p className="text-xs text-[#6E6E73]">JPG, PNG or GIF. Max size 5MB.</p>
                     </div>
                   </div>
 
@@ -4146,9 +4146,9 @@ export default function OwnerDashboard() {
                         <Input 
                           disabled
                           value={session?.user?.email || ""}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-slate-500 pl-10 cursor-not-allowed"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-[#6E6E73] pl-10 cursor-not-allowed"
                         />
-                        <Shield className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+                        <Shield className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
                       </div>
                     </div>
                   </div>
@@ -4165,14 +4165,14 @@ export default function OwnerDashboard() {
                           <input type="radio" name="entityType" value="INDIVIDUAL" checked={entityType === "INDIVIDUAL"} onChange={() => setEntityType("INDIVIDUAL")} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300" />
                           <div className="flex flex-col">
                             <span className="font-bold text-slate-900 text-sm">Individual</span>
-                            <span className="text-xs text-slate-500">Sole proprietor or personal ownership</span>
+                            <span className="text-xs text-[#6E6E73]">Sole proprietor or personal ownership</span>
                           </div>
                         </label>
                         <label className={`flex-1 flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${entityType === "BUSINESS" ? "border-blue-500 bg-blue-50/50" : "border-slate-200 hover:border-slate-300 bg-white"}`}>
                           <input type="radio" name="entityType" value="BUSINESS" checked={entityType === "BUSINESS"} onChange={() => setEntityType("BUSINESS")} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300" />
                           <div className="flex flex-col">
                             <span className="font-bold text-slate-900 text-sm">Business</span>
-                            <span className="text-xs text-slate-500">LLC, Corporation, or Partnership</span>
+                            <span className="text-xs text-[#6E6E73]">LLC, Corporation, or Partnership</span>
                           </div>
                         </label>
                       </div>
@@ -4198,14 +4198,14 @@ export default function OwnerDashboard() {
                         onChange={(e) => setProfilePosition(e.target.value)}
                         className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
                       />
-                      <p className="text-xs text-slate-500">Required for verification and year-end 1099 tax document generation.</p>
+                      <p className="text-xs text-[#6E6E73]">Required for verification and year-end 1099 tax document generation.</p>
                     </div>
                   </div>
                 </Card>
 
                 <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
                   <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Bank Payout Details</h3>
-                  <p className="text-sm text-slate-600 mb-6">
+                  <p className="text-sm text-[#6E6E73] mb-6">
                     Connect your bank account to receive automatic rental payouts from Stripe. Note: This data will be securely synced with Stripe Connect.
                   </p>
                   
@@ -4244,7 +4244,7 @@ export default function OwnerDashboard() {
 
                 <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
                   <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Maintenance Cost Controls</h3>
-                  <p className="text-sm text-slate-600 mb-6">
+                  <p className="text-sm text-[#6E6E73] mb-6">
                     Define standard thresholds and emergency limits. Vendor quotes under these thresholds are automatically approved to expedite work.
                   </p>
                   
@@ -4261,7 +4261,7 @@ export default function OwnerDashboard() {
                         onChange={(e) => setApprovalThreshold(e.target.value)}
                         className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
                       />
-                      <p className="text-[11px] text-slate-500">Estimates above this require your manual approval. Default is $200.00</p>
+                      <p className="text-[11px] text-[#6E6E73]">Estimates above this require your manual approval. Default is $200.00</p>
                     </div>
                     
                     <div className="space-y-1.5">
@@ -4276,7 +4276,7 @@ export default function OwnerDashboard() {
                         onChange={(e) => setEmergencyOverrideLimit(e.target.value)}
                         className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
                       />
-                      <p className="text-[11px] text-slate-500">Emergency tickets under this are auto-authorized. Default is $1,500.00</p>
+                      <p className="text-[11px] text-[#6E6E73]">Emergency tickets under this are auto-authorized. Default is $1,500.00</p>
                     </div>
                   </div>
                 </Card>
@@ -4285,7 +4285,7 @@ export default function OwnerDashboard() {
                   <Button 
                     type="submit" 
                     disabled={profileSubmitting}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
+                    className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
                   >
                     {profileSubmitting ? (
                       <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>
@@ -4345,63 +4345,63 @@ export default function OwnerDashboard() {
         <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-2xl overflow-hidden rounded-[24px]">
           <div className="bg-white rounded-[24px] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-[500px]">
             <div className="flex items-center px-4 border-b border-slate-100">
-              <Search className="h-5 w-5 text-slate-400 shrink-0" />
+              <Search className="h-5 w-5 text-[#8E8E93] shrink-0" />
               <input
-                className="flex h-14 w-full bg-transparent py-3 text-sm outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-50 border-0 focus:ring-0 ml-3 font-medium text-slate-900"
+                className="flex h-14 w-full bg-transparent py-3 text-sm outline-none placeholder:text-[#8E8E93] disabled:cursor-not-allowed disabled:opacity-50 border-0 focus:ring-0 ml-3 font-medium text-slate-900"
                 placeholder="Search..."
                 autoFocus
               />
-              <button onClick={() => setSearchOpen(false)} className="text-slate-400 hover:text-slate-600 p-2">
+              <button onClick={() => setSearchOpen(false)} className="text-[#8E8E93] hover:text-[#6E6E73] p-2">
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-2 text-slate-700">
               <div className="px-2 py-3">
-                <p className="px-2 pb-2 text-[11px] font-bold text-slate-400 tracking-wider">Overview</p>
-                <button onClick={() => { setActiveTab("dashboard"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group">
+                <p className="px-2 pb-2 text-[11px] font-bold text-[#8E8E93] tracking-wider">Overview</p>
+                <button onClick={() => { setActiveTab("dashboard"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Dashboard</span>
-                    <span className="text-xs text-slate-400">/dashboard</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Dashboard</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
                 </button>
-                <button onClick={() => { setActiveTab("calendar"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group mt-1">
+                <button onClick={() => { setActiveTab("calendar"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group mt-1">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Calendar</span>
-                    <span className="text-xs text-slate-400">/dashboard/calendar</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Calendar</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard/calendar</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
                 </button>
               </div>
               <div className="px-2 py-3">
-                <p className="px-2 pb-2 text-[11px] font-bold text-slate-400 tracking-wider">Management</p>
-                <button onClick={() => { setActiveTab("properties"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group">
+                <p className="px-2 pb-2 text-[11px] font-bold text-[#8E8E93] tracking-wider">Management</p>
+                <button onClick={() => { setActiveTab("properties"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Properties</span>
-                    <span className="text-xs text-slate-400">/dashboard/properties</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Properties</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard/properties</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
                 </button>
-                <button onClick={() => { setActiveTab("units"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group mt-1">
+                <button onClick={() => { setActiveTab("units"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group mt-1">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Units</span>
-                    <span className="text-xs text-slate-400">/dashboard/properties/units</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Units</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard/properties/units</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">List</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">List</Badge>
                 </button>
-                <button onClick={() => { setActiveTab("tenants"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group mt-1">
+                <button onClick={() => { setActiveTab("tenants"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group mt-1">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Tenants</span>
-                    <span className="text-xs text-slate-400">/dashboard/tenants</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Tenants</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard/tenants</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">Overview</Badge>
                 </button>
-                <button onClick={() => { setActiveTab("leases"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors group mt-1">
+                <button onClick={() => { setActiveTab("leases"); setSearchOpen(false); }} className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] cursor-pointer transition-colors group mt-1">
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-slate-700 group-hover:text-slate-900">Applications</span>
-                    <span className="text-xs text-slate-400">/dashboard/tenants/applications</span>
+                    <span className="font-bold text-slate-700 group-hover:text-[#1D1D1F]">Applications</span>
+                    <span className="text-xs text-[#8E8E93]">/dashboard/tenants/applications</span>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">List</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-[#6E6E73] hover:bg-[#F2F2F7] border-0 text-[10px] rounded-full px-2.5 font-bold shadow-sm">List</Badge>
                 </button>
               </div>
             </div>
@@ -4417,7 +4417,7 @@ export default function OwnerDashboard() {
               <Lock className="h-8 w-8" />
             </div>
             <DialogTitle className="text-2xl font-black text-slate-900 mb-2">Upgrade Required</DialogTitle>
-            <DialogDescription className="text-slate-500 font-medium mb-8">
+            <DialogDescription className="text-[#6E6E73] font-medium mb-8">
               {upgradeReason}
             </DialogDescription>
             <div className="w-full space-y-3">
@@ -4428,7 +4428,7 @@ export default function OwnerDashboard() {
               }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl">
                 View Subscription Settings
               </Button>
-              <Button onClick={() => setShowUpgradeModal(false)} variant="ghost" className="w-full text-slate-500 hover:text-slate-700 font-bold h-12 rounded-xl">
+              <Button onClick={() => setShowUpgradeModal(false)} variant="ghost" className="w-full text-[#6E6E73] hover:text-slate-700 font-bold h-12 rounded-xl">
                 Cancel
               </Button>
             </div>
@@ -4438,7 +4438,7 @@ export default function OwnerDashboard() {
 
       {/* Pending Draft Banner */}
       {pendingPropertyDraft && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold animate-pulse">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#007AFF] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold animate-pulse">
           <Loader2 className="h-4 w-4 animate-spin shrink-0" />
           Creating your property "{pendingPropertyDraft.name}"...
         </div>

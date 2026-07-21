@@ -198,28 +198,28 @@ export default function InvoicesPage() {
       case "DEPOSIT": return <Badge className="bg-purple-50 text-purple-700 border border-purple-100/50 hover:bg-purple-50">Deposit</Badge>;
       case "LATE_FEE": return <Badge className="bg-amber-50 text-amber-700 border border-amber-100/50 hover:bg-amber-50">Late Fee</Badge>;
       case "MAINTENANCE": return <Badge className="bg-rose-50 text-rose-700 border border-rose-100/50 hover:bg-rose-50">Maintenance</Badge>;
-      default: return <Badge className="bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-100">{safeType}</Badge>;
+      default: return <Badge className="bg-slate-100 text-slate-700 border border-slate-200 hover:bg-[#F2F2F7]">{safeType}</Badge>;
     }
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
         <div>
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Invoices</h1>
-          <p className="text-[#64748B] text-sm mt-1">
+          <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">Invoices</h1>
+          <p className="text-[#6E6E73] text-sm mt-1">
             {isTenant ? "View your rent statements and transaction invoices." : "Manage billing, track payments, and generate invoices."}
           </p>
         </div>
         {!isTenant && (
-          <Button onClick={() => setIsModalOpen(true)} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 px-6 font-bold flex items-center gap-2">
+          <Button onClick={() => setIsModalOpen(true)} className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 px-6 font-bold flex items-center gap-2">
             <Plus className="h-5 w-5" /> Create Invoice
           </Button>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <TrendingUp className="h-24 w-24 text-[#10B981]" />
           </div>
@@ -228,14 +228,14 @@ export default function InvoicesPage() {
               <div className="h-10 w-10 rounded-xl bg-[#DCFCE7] flex items-center justify-center text-[#10B981]">
                 <CheckCircle className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-[#64748B]">{isTenant ? "Total Paid" : "Total Collected"}</h3>
+              <h3 className="font-bold text-[#6E6E73]">{isTenant ? "Total Paid" : "Total Collected"}</h3>
             </div>
-            <div className="text-3xl font-black text-[#0F172A]">${totalCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-3xl font-black text-[#1D1D1F]">${totalCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             <p className="text-sm font-semibold text-[#10B981] mt-2">Payments marked as PAID</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Clock className="h-24 w-24 text-[#F59E0B]" />
           </div>
@@ -244,14 +244,14 @@ export default function InvoicesPage() {
               <div className="h-10 w-10 rounded-xl bg-[#FEF3C7] flex items-center justify-center text-[#F59E0B]">
                 <Receipt className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-[#64748B]">Outstanding Balance</h3>
+              <h3 className="font-bold text-[#6E6E73]">Outstanding Balance</h3>
             </div>
-            <div className="text-3xl font-black text-[#0F172A]">${totalOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-3xl font-black text-[#1D1D1F]">${totalOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             <p className="text-sm font-semibold text-[#F59E0B] mt-2">Awaiting payment</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <AlertCircle className="h-24 w-24 text-[#EF4444]" />
           </div>
@@ -260,16 +260,16 @@ export default function InvoicesPage() {
               <div className="h-10 w-10 rounded-xl bg-[#FEE2E2] flex items-center justify-center text-[#EF4444]">
                 <XCircle className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-[#64748B]">Total Overdue</h3>
+              <h3 className="font-bold text-[#6E6E73]">Total Overdue</h3>
             </div>
-            <div className="text-3xl font-black text-[#0F172A]">${totalOverdue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-3xl font-black text-[#1D1D1F]">${totalOverdue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             <p className="text-sm font-semibold text-[#EF4444] mt-2">Requires immediate action</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-        <div className="p-6 border-b border-[#E2E8F0] flex flex-col md:flex-row justify-between items-center gap-4 bg-[#F8FAFC]/50">
+      <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+        <div className="p-6 border-b border-[#E5E5EA] flex flex-col md:flex-row justify-between items-center gap-4 bg-[#F2F2F7]/50">
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
@@ -277,7 +277,7 @@ export default function InvoicesPage() {
                 placeholder="Search by invoice ID, tenant, or property..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6]"
+                className="pl-10 h-11 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF]"
               />
             </div>
             
@@ -285,7 +285,7 @@ export default function InvoicesPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#3B82F6] transition-all appearance-none cursor-pointer"
+                className="w-full h-11 pl-3 pr-8 border border-[#E5E5EA] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#007AFF] transition-all appearance-none cursor-pointer"
               >
                 <option value="all">Status: All</option>
                 <option value="PAID">Paid</option>
@@ -293,14 +293,14 @@ export default function InvoicesPage() {
                 <option value="OVERDUE">Overdue</option>
                 <option value="VOID">Void</option>
               </select>
-              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8E8E93] pointer-events-none" />
             </div>
 
             <div className="relative w-full sm:w-44">
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 border border-[#E2E8F0] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#3B82F6] transition-all appearance-none cursor-pointer"
+                className="w-full h-11 pl-3 pr-8 border border-[#E5E5EA] bg-white rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-[#007AFF] transition-all appearance-none cursor-pointer"
               >
                 <option value="all">Type: All</option>
                 <option value="RENT">Rent</option>
@@ -308,54 +308,54 @@ export default function InvoicesPage() {
                 <option value="LATE_FEE">Late Fee</option>
                 <option value="MAINTENANCE">Maintenance</option>
               </select>
-              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8E8E93] pointer-events-none" />
             </div>
           </div>
         </div>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#F8FAFC]">
-                <TableHead className="font-bold text-[#64748B]">Invoice ID</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Property & Tenant</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Type</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Issue Date</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Due Date</TableHead>
-                <TableHead className="font-bold text-[#64748B]">Gross Amount</TableHead>
-                {!isTenant && <TableHead className="font-bold text-[#64748B]">Net Earnings</TableHead>}
-                <TableHead className="font-bold text-[#64748B]">Status</TableHead>
-                <TableHead className="text-right font-bold text-[#64748B]">Actions</TableHead>
+              <TableRow className="border-[#E5E5EA] bg-[#F2F2F7] hover:bg-[#F2F2F7]">
+                <TableHead className="font-bold text-[#6E6E73]">Invoice ID</TableHead>
+                <TableHead className="font-bold text-[#6E6E73]">Property & Tenant</TableHead>
+                <TableHead className="font-bold text-[#6E6E73]">Type</TableHead>
+                <TableHead className="font-bold text-[#6E6E73]">Issue Date</TableHead>
+                <TableHead className="font-bold text-[#6E6E73]">Due Date</TableHead>
+                <TableHead className="font-bold text-[#6E6E73]">Gross Amount</TableHead>
+                {!isTenant && <TableHead className="font-bold text-[#6E6E73]">Net Earnings</TableHead>}
+                <TableHead className="font-bold text-[#6E6E73]">Status</TableHead>
+                <TableHead className="text-right font-bold text-[#6E6E73]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#64748B] font-bold">Loading invoices...</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#6E6E73] font-bold">Loading invoices...</TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#64748B] font-bold">No invoices found.</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#6E6E73] font-bold">No invoices found.</TableCell>
                 </TableRow>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <TableRow key={inv.id} className="border-[#E2E8F0] hover:bg-[#F8FAFC]/50 transition-colors">
-                    <TableCell className="font-semibold text-[#0F172A]">
+                  <TableRow key={inv.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
+                    <TableCell className="font-semibold text-[#1D1D1F]">
                       INV-{inv.id.substring(0, 6).toUpperCase()}
                     </TableCell>
                     <TableCell>
-                      <div className="font-bold text-[#0F172A]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
-                      <div className="text-sm font-semibold text-[#64748B]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
+                      <div className="font-bold text-[#1D1D1F]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
+                      <div className="text-sm font-semibold text-[#6E6E73]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
                     </TableCell>
                     <TableCell>
                       {getTypeBadge(inv.invoiceType)}
                     </TableCell>
-                    <TableCell className="font-semibold text-[#64748B]">
+                    <TableCell className="font-semibold text-[#6E6E73]">
                       {new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </TableCell>
-                    <TableCell className="font-semibold text-[#64748B]">
+                    <TableCell className="font-semibold text-[#6E6E73]">
                       {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </TableCell>
-                    <TableCell className="font-black text-[#0F172A]">
+                    <TableCell className="font-black text-[#1D1D1F]">
                       ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     {!isTenant && (
@@ -370,16 +370,16 @@ export default function InvoicesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#E2E8F0] inline-flex items-center justify-center rounded-lg transition-colors">
+                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] inline-flex items-center justify-center rounded-lg transition-colors">
                           <MoreVertical className="h-4 w-4" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg">
+                        <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
                           <DropdownMenuItem 
                             onClick={() => {
                               setSelectedInvoice(inv);
                               setIsDetailModalOpen(true);
                             }} 
-                            className="cursor-pointer font-semibold text-[#0F172A] rounded-lg"
+                            className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
                           >
                             <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                           </DropdownMenuItem>
@@ -389,14 +389,14 @@ export default function InvoicesPage() {
                               generateSingleInvoicePDF(inv);
                               toast.success("Invoice PDF download initiated");
                             }} 
-                            className="cursor-pointer font-semibold text-[#0F172A] rounded-lg"
+                            className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
                           >
                             <Download className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download PDF
                           </DropdownMenuItem>
                           
                           {isTenant ? (
                             (inv.status === "UNPAID" || inv.status === "OVERDUE") && (
-                              <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-semibold text-[#3B82F6] rounded-lg">
+                              <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-semibold text-[#007AFF] rounded-lg">
                                 <Receipt className="mr-2 h-4 w-4 text-[#94A3B8]" /> Pay Invoice
                               </DropdownMenuItem>
                             )
@@ -437,16 +437,16 @@ export default function InvoicesPage() {
       {!isTenant && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="sm:max-w-md bg-white rounded-2xl p-0 border-0 shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <DialogTitle className="text-xl font-bold text-[#0F172A]">Create New Invoice</DialogTitle>
+            <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]">
+              <DialogTitle className="text-xl font-bold text-[#1D1D1F]">Create New Invoice</DialogTitle>
             </div>
             
             <form onSubmit={handleCreateInvoice} className="p-6 space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Select Lease <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold text-[#1D1D1F]">Select Lease <span className="text-red-500">*</span></label>
                 <select 
                   required
-                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm font-semibold text-[#1D1D1F] outline-none focus:ring-2 focus:ring-[#007AFF]"
                   value={formData.leaseId}
                   onChange={(e) => setFormData({...formData, leaseId: e.target.value})}
                 >
@@ -460,7 +460,7 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Invoice Amount ($) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold text-[#1D1D1F]">Invoice Amount ($) <span className="text-red-500">*</span></label>
                 <Input 
                   required
                   type="number"
@@ -468,25 +468,25 @@ export default function InvoicesPage() {
                   placeholder="e.g. 1500.00" 
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                  className="h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold"
+                  className="h-11 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Due Date <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold text-[#1D1D1F]">Due Date <span className="text-red-500">*</span></label>
                 <Input 
                   required
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
-                  className="h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold"
+                  className="h-11 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Invoice Type</label>
+                <label className="text-sm font-bold text-[#1D1D1F]">Invoice Type</label>
                 <select 
-                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm font-semibold text-[#1D1D1F] outline-none focus:ring-2 focus:ring-[#007AFF]"
                   value={formData.invoiceType}
                   onChange={(e) => setFormData({...formData, invoiceType: e.target.value})}
                 >
@@ -498,9 +498,9 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Initial Status</label>
+                <label className="text-sm font-bold text-[#1D1D1F]">Initial Status</label>
                 <select 
-                  className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm font-semibold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                  className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm font-semibold text-[#1D1D1F] outline-none focus:ring-2 focus:ring-[#007AFF]"
                   value={formData.status}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
                 >
@@ -511,10 +511,10 @@ export default function InvoicesPage() {
               </div>
 
               <DialogFooter className="pt-4 border-t border-[#F1F5F9] mt-6">
-                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-11 font-bold px-6 border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC]">
+                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-11 font-bold px-6 border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7]">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 font-bold px-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white">
+                <Button type="submit" disabled={isSubmitting} className="rounded-xl h-11 font-bold px-6 bg-[#007AFF] hover:bg-[#0062CC] text-white">
                   {isSubmitting ? "Creating..." : "Create Invoice"}
                 </Button>
               </DialogFooter>
@@ -528,12 +528,12 @@ export default function InvoicesPage() {
         <DialogContent className="sm:max-w-xl bg-white rounded-2xl p-0 border-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
           {selectedInvoice && (
             <>
-              <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC] flex justify-between items-center">
+              <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7] flex justify-between items-center">
                 <div>
-                  <DialogTitle className="text-xl font-bold text-[#0F172A]">
+                  <DialogTitle className="text-xl font-bold text-[#1D1D1F]">
                     Invoice Detail
                   </DialogTitle>
-                  <p className="text-[#64748B] text-xs font-semibold mt-1">
+                  <p className="text-[#6E6E73] text-xs font-semibold mt-1">
                     INV-{selectedInvoice.id.substring(0, 6).toUpperCase()}
                   </p>
                 </div>
@@ -541,7 +541,7 @@ export default function InvoicesPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 rounded-lg font-bold border-[#E2E8F0] text-[#0F172A] hover:bg-slate-50 flex items-center gap-1"
+                    className="h-8 rounded-lg font-bold border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F5F5F7] flex items-center gap-1"
                     onClick={() => {
                       generateSingleInvoicePDF(selectedInvoice);
                       toast.success("Invoice PDF download initiated");
@@ -552,7 +552,7 @@ export default function InvoicesPage() {
                   {isTenant && (selectedInvoice.status === "UNPAID" || selectedInvoice.status === "OVERDUE") && (
                     <Button
                       size="sm"
-                      className="h-8 rounded-lg font-bold bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center gap-1"
+                      className="h-8 rounded-lg font-bold bg-[#007AFF] hover:bg-[#0062CC] text-white flex items-center gap-1"
                       onClick={() => {
                         setIsDetailModalOpen(false);
                         router.push("/dashboard/payments/pay-rent");
@@ -566,14 +566,14 @@ export default function InvoicesPage() {
 
               <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                 {/* Status & Amount */}
-                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E2E8F0]">
+                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-[#E5E5EA]">
                   <div>
-                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Status</p>
+                    <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Status</p>
                     <div className="mt-1">{getStatusBadge(selectedInvoice.status)}</div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Gross Rent Billed</p>
-                    <p className="text-xl font-black text-[#0F172A] mt-0.5">
+                    <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Gross Rent Billed</p>
+                    <p className="text-xl font-black text-[#1D1D1F] mt-0.5">
                       ${Number(selectedInvoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </div>
@@ -599,27 +599,27 @@ export default function InvoicesPage() {
                 {/* Key Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Issue Date</p>
-                    <p className="text-sm font-semibold text-[#0F172A] mt-1">
+                    <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Issue Date</p>
+                    <p className="text-sm font-semibold text-[#1D1D1F] mt-1">
                       {new Date(selectedInvoice.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Due Date</p>
-                    <p className="text-sm font-semibold text-[#0F172A] mt-1">
+                    <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Due Date</p>
+                    <p className="text-sm font-semibold text-[#1D1D1F] mt-1">
                       {new Date(selectedInvoice.dueDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
 
-                <hr className="border-[#E2E8F0]" />
+                <hr className="border-[#E5E5EA]" />
 
                 {/* Property & Tenant Information */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Property Details</p>
-                    <p className="text-sm font-bold text-[#0F172A]">{selectedInvoice.lease?.unit?.property?.name || "N/A"}</p>
-                    <p className="text-xs font-semibold text-[#64748B] mt-0.5">
+                    <p className="text-sm font-bold text-[#1D1D1F]">{selectedInvoice.lease?.unit?.property?.name || "N/A"}</p>
+                    <p className="text-xs font-semibold text-[#6E6E73] mt-0.5">
                       {selectedInvoice.lease?.unit?.name?.toLowerCase().includes("unit") 
                         ? selectedInvoice.lease?.unit?.name 
                         : `Unit ${selectedInvoice.lease?.unit?.name || "N/A"}`}
@@ -629,34 +629,34 @@ export default function InvoicesPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Billed To</p>
-                    <p className="text-sm font-bold text-[#0F172A]">{selectedInvoice.lease?.tenant?.name || "N/A"}</p>
-                    <p className="text-xs font-semibold text-[#64748B] mt-0.5">{selectedInvoice.lease?.tenant?.email || "N/A"}</p>
-                    <p className="text-xs font-semibold text-[#64748B]">{selectedInvoice.lease?.tenant?.phone || ""}</p>
+                    <p className="text-sm font-bold text-[#1D1D1F]">{selectedInvoice.lease?.tenant?.name || "N/A"}</p>
+                    <p className="text-xs font-semibold text-[#6E6E73] mt-0.5">{selectedInvoice.lease?.tenant?.email || "N/A"}</p>
+                    <p className="text-xs font-semibold text-[#6E6E73]">{selectedInvoice.lease?.tenant?.phone || ""}</p>
                   </div>
                 </div>
 
-                <hr className="border-[#E2E8F0]" />
+                <hr className="border-[#E5E5EA]" />
 
                 {/* Invoice Items */}
                 <div>
                   <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-3">Line Items</p>
-                  <div className="border border-[#E2E8F0] rounded-xl overflow-hidden">
+                  <div className="border border-[#E5E5EA] rounded-xl overflow-hidden">
                     <table className="w-full text-left border-collapse text-sm">
                       <thead>
-                        <tr className="bg-slate-50 border-b border-[#E2E8F0]">
-                          <th className="p-3 font-bold text-[#64748B]">Description</th>
-                          <th className="p-3 font-bold text-[#64748B] text-center">Qty</th>
-                          <th className="p-3 font-bold text-[#64748B] text-right">Amount</th>
+                        <tr className="bg-slate-50 border-b border-[#E5E5EA]">
+                          <th className="p-3 font-bold text-[#6E6E73]">Description</th>
+                          <th className="p-3 font-bold text-[#6E6E73] text-center">Qty</th>
+                          <th className="p-3 font-bold text-[#6E6E73] text-right">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
                           <td className="p-3">
-                            <p className="font-bold text-[#0F172A]">Residential Rental Invoice</p>
-                            <p className="text-xs text-[#64748B] mt-0.5">Charges related to lease tenancy and billing schedule</p>
+                            <p className="font-bold text-[#1D1D1F]">Residential Rental Invoice</p>
+                            <p className="text-xs text-[#6E6E73] mt-0.5">Charges related to lease tenancy and billing schedule</p>
                           </td>
-                          <td className="p-3 text-center font-semibold text-[#64748B]">1</td>
-                          <td className="p-3 text-right font-bold text-[#0F172A]">
+                          <td className="p-3 text-center font-semibold text-[#6E6E73]">1</td>
+                          <td className="p-3 text-right font-bold text-[#1D1D1F]">
                             ${Number(selectedInvoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                         </tr>
@@ -666,11 +666,11 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-[#E2E8F0] bg-slate-50 flex justify-end">
+              <div className="p-6 border-t border-[#E5E5EA] bg-slate-50 flex justify-end">
                 <Button
                   variant="outline"
                   onClick={() => setIsDetailModalOpen(false)}
-                  className="rounded-xl h-11 font-bold px-6 border-[#E2E8F0] text-[#0F172A] hover:bg-slate-100"
+                  className="rounded-xl h-11 font-bold px-6 border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7]"
                 >
                   Close
                 </Button>

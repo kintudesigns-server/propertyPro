@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -464,51 +465,47 @@ export default function TransactionsPage() {
         ))}
       </div>
 
-      {/* ── STRIPE METRICS CARDS ROW (FILTERABLE - FIXED CUTOFF WITH DIVS) ── */}
+      {/* ── STRIPE METRICS CARDS ROW (FILTERABLE) ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {
             id: "ALL",
-            label: "All",
+            label: "All Transactions",
             value: metrics.all,
-            color: "border-[#635BFF] bg-[#F8FAFC]",
-            textColor: "text-[#635BFF]"
+            variant: "blue" as const,
+            icon: CreditCard,
           },
           {
             id: "SUCCESS",
             label: "Succeeded",
             value: metrics.succeeded,
-            color: "border-emerald-500 hover:bg-emerald-50/20",
-            textColor: "text-emerald-600"
+            variant: "green" as const,
+            icon: CheckCircle2,
           },
           {
             id: "REFUNDED",
             label: "Refunded",
             value: metrics.refunded,
-            color: "border-amber-400 hover:bg-amber-50/20",
-            textColor: "text-amber-600"
+            variant: "amber" as const,
+            icon: ArrowDownLeft,
           },
           {
             id: "FAILED",
             label: "Failed",
             value: metrics.failed,
-            color: "border-rose-500 hover:bg-rose-50/20",
-            textColor: "text-rose-600"
+            variant: "red" as const,
+            icon: AlertCircle,
           }
         ].map((card) => (
-          <div
+          <KpiCard
             key={card.id}
-            role="button"
+            title={card.label}
+            value={card.value}
+            icon={card.icon}
+            variant={card.variant}
+            active={activeStatusFilter === card.id}
             onClick={() => setActiveStatusFilter(card.id as any)}
-            className={`border text-left rounded-2xl p-5 shadow-xs transition-all cursor-pointer h-auto min-h-[105px] flex flex-col justify-between ${
-              activeStatusFilter === card.id
-                ? `${card.color} border-2 scale-[1.02] shadow-sm`
-                : "border-[#E2E8F0] bg-white hover:border-slate-300 hover:scale-[1.01]"
-            }`}
-          >
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{card.label}</div>
-            <div className={`text-3xl font-black ${card.textColor} mt-2`}>{card.value}</div>
-          </div>
+          />
         ))}
       </div>
 

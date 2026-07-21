@@ -41,8 +41,8 @@ export default async function AdminSubscriptionsPage() {
     <div className="max-w-6xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Owner Subscriptions</h1>
-          <p className="text-[#64748B] text-base mt-0.5">Overview of property owners and their active subscription tiers.</p>
+          <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Owner Subscriptions</h1>
+          <p className="text-[#6E6E73] text-base mt-0.5">Overview of property owners and their active subscription tiers.</p>
         </div>
       </div>
 

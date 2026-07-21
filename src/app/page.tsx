@@ -1,1070 +1,1145 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { 
-  Building2, 
-  ArrowRight, 
-  CheckCircle2, 
-  Home, 
-  Users, 
-  Wrench, 
-  CreditCard, 
-  ChevronRight, 
-  Menu, 
-  X, 
-  Shield, 
-  BarChart3, 
-  Clock, 
-  Loader2, 
+import {
+  Building2,
+  ArrowRight,
+  CheckCircle2,
+  Home,
+  Users,
+  Wrench,
+  CreditCard,
+  ChevronRight,
+  ChevronDown,
+  Menu,
+  X,
+  Shield,
+  BarChart3,
+  Loader2,
   ShieldCheck,
-  Sparkles,
-  LayoutDashboard,
-  Smartphone,
+
   Zap,
   MapPin,
-  Heart,
-  Send,
-  MessageSquare,
-  Search
+  TrendingUp,
+  DollarSign,
+  FileText,
+  Bell,
+  Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
+/* ─────────────────────────────────────────────────────
+   Types
+───────────────────────────────────────────────────── */
+type TurnstileStatus = 0 | 1 | 2;
+
+/* ─────────────────────────────────────────────────────
+   Hero background image set – curated Unsplash
+───────────────────────────────────────────────────── */
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=90",
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=2400&q=90",
+  "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=2400&q=90",
+];
+
+/* ─────────────────────────────────────────────────────
+   Component
+───────────────────────────────────────────────────── */
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // Owner Registration States
+  const [heroImg, setHeroImg] = useState(0);
+
+  // Owner registration
   const [ownerModalOpen, setOwnerModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [trackingId, setTrackingId] = useState<string | null>(null);
-  const [turnstileStatus, setTurnstileStatus] = useState<0 | 1 | 2>(0);
+  const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>(0);
 
-  // Portal Switcher state
+  // Portal tab (kept for potential future use)
   const [activePortalTab, setActivePortalTab] = useState<"owner" | "tenant">("owner");
 
-  // Dynamic public listings state
+  // Listings
   const [listings, setListings] = useState<any[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
 
+  // FAQ accordion
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Hero ref
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  /* ── Owner apply handler ───────────────────────── */
   const handleOwnerApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (turnstileStatus !== 2) {
       toast.error("Please complete the security check.");
       return;
     }
-    
     setIsSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-    
+    const data = Object.fromEntries(new FormData(e.currentTarget));
     try {
       const res = await fetch("/api/owner-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       const json = await res.json();
       if (res.ok) {
         setTrackingId(json.trackingId);
         setSubmitSuccess(true);
       } else {
-        toast.error(json.error || "Something went wrong. Please try again.");
+        toast.error(json.error || "Something went wrong.");
       }
-    } catch (err) {
-      toast.error("Error submitting application. Our servers might be busy.");
+    } catch {
+      toast.error("Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /* ── Bootstrap ─────────────────────────────────── */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll);
 
-    // Fetch pricing tiers
     fetch("/api/pricing-tiers")
-      .then(res => res.json())
-      .then(data => setPricingTiers(data))
+      .then((r) => r.json())
+      .then(setPricingTiers)
       .catch(console.error);
 
-    // Fetch public listings
     fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
-        setListings(data.slice(0, 3)); // show top 3 listings
-        setListingsLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to load listings", err);
-        setListingsLoading(false);
-      });
+      .then((r) => r.json())
+      .then((d) => { setListings(d.slice(0, 3)); setListingsLoading(false); })
+      .catch(() => setListingsLoading(false));
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Cycle hero background every 7 s
+    const bgTimer = setInterval(() => {
+      setHeroImg((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 7000);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearInterval(bgTimer);
+    };
   }, []);
 
+  /* ── Feature cards ─────────────────────────────── */
   const features = [
-    {
-      icon: <Home className="h-6 w-6 text-blue-500" />,
-      title: "Property Portfolios",
-      desc: "Manage multiple properties and units from a single, unified dashboard with full visibility."
-    },
-    {
-      icon: <Users className="h-6 w-6 text-indigo-500" />,
-      title: "Tenant Management",
-      desc: "Screen applicants, manage active leases, and communicate directly through the portal."
-    },
-    {
-      icon: <Wrench className="h-6 w-6 text-rose-500" />,
-      title: "Maintenance Ticketing",
-      desc: "Streamline repairs with a dedicated ticketing system, inspector assignment, and photo uploads."
-    },
-    {
-      icon: <CreditCard className="h-6 w-6 text-emerald-500" />,
-      title: "Automated Accounting",
-      desc: "Generate invoices, collect rent automatically via Stripe, and track your cash flow seamlessly."
-    },
-    {
-      icon: <BarChart3 className="h-6 w-6 text-purple-500" />,
-      title: "Financial Reporting",
-      desc: "Generate beautiful, comprehensive PDF reports for payouts, taxes, and performance tracking."
-    },
-    {
-      icon: <Shield className="h-6 w-6 text-amber-500" />,
-      title: "Secure Data",
-      desc: "Bank-level encryption ensures your lease documents, financial data, and tenant records are safe."
-    }
+    { icon: <Home className="h-5 w-5" />, color: "#007AFF", title: "Portfolio Dashboard", desc: "Manage unlimited properties and units from one intelligent hub — from studio apartments to office complexes." },
+    { icon: <Users className="h-5 w-5" />, color: "#34C759", title: "Tenant Onboarding", desc: "Invite tenants, sign leases digitally, and automate the entire onboarding workflow in minutes." },
+    { icon: <Wrench className="h-5 w-5" />, color: "#FF9500", title: "Maintenance Tickets", desc: "Tenants submit photo-backed tickets, you dispatch vendors, track status — fully automated triage." },
+    { icon: <CreditCard className="h-5 w-5" />, color: "#34C759", title: "Stripe Rent Collection", desc: "Auto-invoicing, ACH & card payments, and direct bank payouts. Zero manual follow-up." },
+    { icon: <BarChart3 className="h-5 w-5" />, color: "#007AFF", title: "Financial Reporting", desc: "Generate professional P&L PDFs, occupancy heat-maps, and ledger exports in one tap." },
+    { icon: <Shield className="h-5 w-5" />, color: "#6E6E73", title: "256-bit Encryption", desc: "Lease documents, bank details, and identity records secured with bank-grade AES-256 encryption." },
   ];
 
+  /* ─────────────────────────────────────────────────
+     JSX
+  ───────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans selection:bg-blue-500 selection:text-white">
-      
-      {/* Sticky Header Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3 border-slate-200/50" : "bg-transparent py-5 border-transparent"}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Building2 className="h-5.5 w-5.5 text-white" />
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#007AFF]/20">
+
+      {/* ── NAV ─────────────────────────────────────── */}
+      <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
+        <div
+          className={`w-full max-w-6xl transition-all duration-400 rounded-2xl ${
+            scrolled
+              ? "bg-white/80 backdrop-blur-2xl border border-white/60 shadow-xl shadow-black/5 py-2.5 px-5"
+              : "bg-white/10 backdrop-blur-md border border-white/20 py-3 px-5"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            {/* Brand */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="h-9 w-9 rounded-xl bg-[#007AFF] flex items-center justify-center shadow-lg shadow-[#007AFF]/30 group-hover:scale-105 transition-transform">
+                <Building2 className="h-5 w-5 text-white" />
               </div>
-              <span className="text-2xl font-black tracking-tight text-[#0F172A]">PropertyPro</span>
-            </div>
+              <span className={`text-xl font-semibold tracking-tight transition-colors ${scrolled ? "text-[#1D1D1F]" : "text-white"}`}>
+                Property<span className={scrolled ? "text-[#007AFF]" : "text-white/80"}>Pro</span>
+              </span>
+            </Link>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-sm font-bold text-[#64748B] hover:text-[#0F172A] transition-colors">Features</a>
-              <a href="#portals" className="text-sm font-bold text-[#64748B] hover:text-[#0F172A] transition-colors">Workspaces</a>
-              <a href="#listings" className="text-sm font-bold text-[#64748B] hover:text-[#0F172A] transition-colors">Rentals</a>
-              <a href="#pricing" className="text-sm font-bold text-[#64748B] hover:text-[#0F172A] transition-colors">Pricing</a>
-            </div>
+            {/* Desktop nav pill */}
+            <nav className={`hidden md:flex items-center gap-0.5 p-1 rounded-full border transition-all ${scrolled ? "bg-[#F5F5F7] border-[#E5E5EA]" : "bg-white/10 border-white/20"}`}>
+              {["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"].map((item) => {
+                const [label, href] = item.split("|");
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${
+                      scrolled
+                        ? "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white"
+                        : "text-white/70 hover:text-white hover:bg-white/15"
+                    }`}
+                  >
+                    {label}
+                  </a>
+                );
+              })}
+            </nav>
 
-            {/* CTA Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
+            {/* CTAs */}
+            <div className="hidden md:flex items-center gap-2.5">
               <Link href="/auth/login">
-                <Button variant="ghost" className="text-[#0F172A] font-extrabold hover:bg-blue-50/50 rounded-xl">Sign In</Button>
+                <Button
+                  variant="ghost"
+                  className={`h-9 px-4 text-xs font-medium rounded-xl transition-all ${scrolled ? "text-[#1D1D1F] hover:bg-black/5" : "text-white hover:bg-white/15"}`}
+                >
+                  Sign In
+                </Button>
               </Link>
               <Link href="/dashboard">
-                <Button className="bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold px-6 py-2.5 rounded-xl shadow-md transition-all">
+                <Button className="h-9 px-4 text-xs font-semibold rounded-xl bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/25 transition-all hover:scale-[1.02]">
                   Dashboard
                 </Button>
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center">
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-                className="p-2 text-[#0F172A] hover:bg-slate-100 rounded-xl transition-all"
-              >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
+            {/* Mobile toggle */}
+            <button
+              className={`md:hidden p-2 rounded-xl transition-all ${scrolled ? "text-[#1D1D1F] hover:bg-black/5" : "text-white hover:bg-white/15"}`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden flex flex-col space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col space-y-4">
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-xl font-extrabold text-[#0F172A] py-3 border-b border-[#E2E8F0]">Features</a>
-            <a href="#portals" onClick={() => setMobileMenuOpen(false)} className="text-xl font-extrabold text-[#0F172A] py-3 border-b border-[#E2E8F0]">Workspaces</a>
-            <a href="#listings" onClick={() => setMobileMenuOpen(false)} className="text-xl font-extrabold text-[#0F172A] py-3 border-b border-[#E2E8F0]">Rentals</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-xl font-extrabold text-[#0F172A] py-3 border-b border-[#E2E8F0]">Pricing</a>
-          </div>
-          <div className="flex flex-col space-y-3 pt-6">
-            <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full h-12 font-bold text-lg rounded-xl">Sign In</Button>
-            </Link>
-            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg">Go to Dashboard</Button>
-            </Link>
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-lg pt-24 px-5 md:hidden flex flex-col pb-10 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-1">
+            {["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"].map((item) => {
+              const [label, href] = item.split("|");
+              return (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between text-sm font-semibold text-[#1D1D1F] py-3 px-3 rounded-xl hover:bg-[#F5F5F7]"
+                >
+                  {label} <ChevronRight className="h-4 w-4 text-slate-400" />
+                </a>
+              );
+            })}
+            <div className="pt-3 space-y-2 border-t border-slate-100">
+              <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full h-11 rounded-xl font-semibold">Sign In</Button>
+              </Link>
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full h-11 rounded-xl font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/20">Dashboard</Button>
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden bg-slate-50/50">
-        
-        {/* Animated Background Blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full -z-10 pointer-events-none">
-          <div className="absolute top-10 left-12 w-80 h-80 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse"></div>
-          <div className="absolute top-28 right-16 w-80 h-80 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '2.5s' }}></div>
-          <div className="absolute -bottom-16 left-1/3 w-96 h-96 bg-purple-400/15 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '5s' }}></div>
+      {/* ── HERO ─────────────────────────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Background image with crossfade */}
+        <div className="absolute inset-0 overflow-hidden">
+          {HERO_IMAGES.map((src, idx) => (
+            <div
+              key={idx}
+              className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
+              style={{ opacity: idx === heroImg ? 1 : 0 }}
+            >
+              <img
+                src={src}
+                alt="Property"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-xs font-extrabold mb-8 hover:bg-blue-100/80 transition-colors cursor-pointer shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-blue-600 animate-spin" style={{ animationDuration: '3s' }} />
-            PropertyPro v2.0 is now live! <ArrowRight className="h-3.5 w-3.5 ml-1" />
+        {/* Deep cinematic overlay – two layers */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent z-10" />
+
+        {/* Subtle animated blue tint vignette */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,122,255,0.12) 0%, transparent 70%)",
+          }}
+        />
+
+        {/* Hero content - Centered & Clean Apple Style */}
+        <div className="relative z-20 max-w-4xl mx-auto px-5 sm:px-8 w-full pt-32 pb-24 text-center flex flex-col items-center justify-center space-y-8">
+          
+          {/* Live badge */}
+          <div className="animate-slide-up-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-xs font-medium text-white/90">
+            <span className="flex h-2 w-2 rounded-full bg-[#34C759] animate-pulse" />
+            <span>PropertyPro v2.0 — Premium Real Estate OS</span>
           </div>
-          
-          <h1 className="text-5xl md:text-6xl lg:text-7.5xl font-black text-[#0F172A] tracking-tighter leading-[1.05] max-w-5xl mx-auto">
-            Manage Properties with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Perfect Precision.</span>
-          </h1>
-          
-          <p className="mt-8 text-lg md:text-xl text-[#64748B] font-semibold max-w-3xl mx-auto leading-relaxed">
-            The ultimate operating system for modern landlords, owners, and renters. Auto-collect rent via Stripe, assign maintenance tasks, sign leases digitally, and review robust financial reports.
+
+          {/* Main headline */}
+          <div className="animate-slide-up-2 space-y-3 max-w-3xl">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.08]">
+              The Smarter Way to Manage Real Estate.
+            </h1>
+            <p className="text-xl sm:text-2xl font-light text-white/75 tracking-normal">
+              Automate rent collection, digital leases, and maintenance.
+            </p>
+          </div>
+
+          {/* Subtext */}
+          <p className="animate-slide-up-3 text-base sm:text-lg text-white/65 font-normal max-w-2xl leading-relaxed">
+            Replace fragmented property tools with one cohesive operating system built for modern landlords, property managers, and tenants.
           </p>
-          
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 max-w-md mx-auto sm:max-w-none">
-            <Button 
+
+          {/* CTA row */}
+          <div className="animate-slide-up-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto pt-2">
+            <Button
               onClick={() => setOwnerModalOpen(true)}
-              className="h-14 px-8 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-lg rounded-xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              className="h-13 px-8 w-full sm:w-auto bg-[#007AFF] hover:bg-[#0066CC] text-white text-base font-semibold rounded-2xl shadow-2xl shadow-[#007AFF]/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
               Request Owner Access
+              <ArrowRight className="h-4 w-4" />
             </Button>
             <Link href="/listings" className="w-full sm:w-auto">
-              <Button variant="outline" className="h-14 px-8 w-full bg-white hover:bg-slate-50 text-[#0F172A] border-slate-200 font-extrabold text-lg rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0">
-                View Public Rentals
+              <Button
+                variant="ghost"
+                className="h-13 px-8 w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white text-base font-semibold rounded-2xl border border-white/25 backdrop-blur-md transition-all flex items-center justify-center"
+              >
+                Explore Rentals
               </Button>
             </Link>
           </div>
 
-          <div className="mt-12 flex items-center justify-center gap-8 text-[#64748B] text-xs font-extrabold tracking-wide uppercase">
-            <div className="flex items-center gap-2"><CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" /> Identity Verified Setup</div>
-            <div className="flex items-center gap-2"><CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" /> Free Setup Migration</div>
+          {/* Trust badges row */}
+          <div className="animate-slide-up-5 flex flex-wrap items-center justify-center gap-6 text-xs text-white/60 font-medium pt-4 border-t border-white/10 w-full max-w-2xl">
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Stripe Rent Collection</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Digital Lease Signing</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Automated Maintenance</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />256-bit AES Encryption</span>
           </div>
+
         </div>
 
-        {/* Real Dashboard Screenshot Display */}
-        <div className="mt-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 to-transparent z-10 h-28 bottom-0"></div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-2xl shadow-slate-900/10 transform hover:scale-[1.01] transition-transform duration-700">
-            <div className="rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner aspect-[16/10] relative flex flex-col">
-              
-              {/* Browser Header Bar */}
-              <div className="h-10 bg-slate-900 border-b border-slate-800 flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-[#EF4444]"></div>
-                  <div className="h-3 w-3 rounded-full bg-[#F59E0B]"></div>
-                  <div className="h-3 w-3 rounded-full bg-[#10B981]"></div>
+        {/* Bottom scroll cue */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 animate-bounce">
+          <span className="text-white/40 text-[10px] font-medium uppercase tracking-widest">Scroll</span>
+          <ChevronDown className="h-4 w-4 text-white/40" />
+        </div>
+      </section>
+
+      {/* ── MARQUEE ─────────────────────────────────── */}
+      <section className="py-10 bg-white border-b border-[#E5E5EA] overflow-hidden">
+        <ScrollReveal>
+          <p className="text-center text-[10px] font-semibold text-[#6E6E73] uppercase tracking-widest mb-5">
+            Trusted by property groups worldwide
+          </p>
+          <div className="flex overflow-hidden">
+            <div className="animate-marquee flex items-center gap-14 text-[#1D1D1F]/25 font-bold text-sm uppercase tracking-widest select-none whitespace-nowrap">
+              {["Apex Realty", "Horizon Capital", "Oakwood Group", "Metro Housing", "Vertex Management", "Pacific Estates", "Skyline Props", "Apex Realty", "Horizon Capital", "Oakwood Group", "Metro Housing", "Vertex Management", "Pacific Estates", "Skyline Props"].map((name, i) => (
+                <span key={i} className="shrink-0">• {name}</span>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* ── FEATURES ────────────────────────────────── */}
+      <section id="features" className="py-28 max-w-7xl mx-auto px-5 sm:px-8">
+        <ScrollReveal>
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#007AFF]">Platform Capabilities</span>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#1D1D1F] tracking-tight">Everything your portfolio needs.</h2>
+            <p className="text-base text-[#6E6E73] font-normal">Replace fragmented tools with one cohesive, beautifully designed operating system.</p>
+          </div>
+        </ScrollReveal>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map((f, i) => (
+            <ScrollReveal key={i} delay={i * 80} distance={30} className="h-full">
+              <div
+                className="group bg-white rounded-3xl border border-[#E5E5EA] p-7 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col gap-5 h-full"
+              >
+                <div
+                  className="h-12 w-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: `${f.color}12`, color: f.color }}
+                >
+                  {f.icon}
                 </div>
-                <div className="mx-auto bg-slate-855 h-6 w-2/5 rounded-md border border-slate-800 flex items-center justify-center text-[10px] text-slate-500 font-bold select-none">
-                  propertypro.app/dashboard
+                <div>
+                  <h3 className="text-base font-semibold text-[#1D1D1F] mb-1.5">{f.title}</h3>
+                  <p className="text-sm text-[#6E6E73] font-normal leading-relaxed">{f.desc}</p>
+                </div>
+                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center gap-1 text-xs font-medium text-[#007AFF] opacity-0 group-hover:opacity-100 transition-opacity">
+                  Learn more <ChevronRight className="h-3.5 w-3.5" />
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── ALL PORTALS SHOWCASE ─────────────────────── */}
+      <section id="portals" className="py-32 bg-[#F5F5F7] border-y border-[#E5E5EA] relative overflow-hidden">
+        {/* Background Mesh Overlay */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl h-full -z-10 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#007AFF]/5 rounded-full blur-[140px] animate-float"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#34C759]/5 rounded-full blur-[140px] animate-float-reverse"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          {/* Header */}
+          <ScrollReveal>
+            <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+              <span className="px-3.5 py-1.5 rounded-full bg-[#007AFF]/10 text-[#007AFF] text-xs font-bold uppercase tracking-wider animate-glow-pulse">
+                Integrated Ecosystem
+              </span>
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-[#1D1D1F] tracking-tight leading-tight">
+                One platform. Four tailored workspaces.
+              </h2>
+              <p className="text-base sm:text-lg text-[#6E6E73] font-medium max-w-2xl mx-auto">
+                PropertyPro delivers highly optimized, native-feeling workspaces designed specifically for every stakeholder in the property cycle.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* ── CARD 1: Admin Portal ── */}
+            <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
+              {/* Full-bleed Background Image with Ken Burns */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
+                  alt="Admin Control"
+                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
+              </div>
+
+              {/* Top info and status */}
+              <div className="relative z-10 p-8 flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-lg bg-black text-white flex items-center justify-center">
+                      <Shield className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-widest">Admin Control</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#1D1D1F] pt-2">System Administrator</h3>
+                  <p className="text-xs text-[#6E6E73] font-medium">Platform orchestration & operations</p>
+                </div>
+                <div className="bg-[#34C759]/10 border border-[#34C759]/30 rounded-full px-3 py-1 flex items-center gap-1.5 animate-glow-pulse">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#34C759] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#34C759] uppercase tracking-wider">Operational</span>
                 </div>
               </div>
 
-              {/* Live Mock Dashboard UI */}
-              <div className="flex-1 flex bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans text-left text-[11px] select-none">
-                {/* Left Sidebar */}
-                <div className="w-1/4 bg-[#0F172A] text-slate-400 p-4 flex flex-col justify-between border-r border-slate-800 shrink-0">
-                  <div className="space-y-4">
-                    {/* Brand Logo */}
-                    <div className="flex items-center gap-2 text-white">
-                      <div className="h-6 w-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-md flex items-center justify-center">
-                        <Building2 className="h-3.5 w-3.5 text-white" />
-                      </div>
-                      <span className="font-extrabold text-[12px]">PropertyPro</span>
-                    </div>
-                    
-                    {/* Menu Links */}
-                    <div className="space-y-1.5 pt-4">
-                      {[
-                        { label: "Dashboard", icon: <LayoutDashboard className="h-3.5 w-3.5" />, active: true },
-                        { label: "Properties", icon: <Home className="h-3.5 w-3.5" /> },
-                        { label: "Tenants", icon: <Users className="h-3.5 w-3.5" /> },
-                        { label: "Maintenance", icon: <Wrench className="h-3.5 w-3.5" />, badge: "1" },
-                        { label: "Invoices", icon: <CreditCard className="h-3.5 w-3.5" /> }
-                      ].map((item, idx) => (
-                        <div key={idx} className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg font-bold transition-colors ${
-                          item.active ? "bg-blue-600 text-white shadow-sm" : "hover:bg-slate-800 hover:text-white"
-                        }`}>
-                          <div className="flex items-center gap-2">
-                            {item.icon}
-                            <span>{item.label}</span>
-                          </div>
-                          {item.badge && (
-                            <span className="bg-rose-500 text-white font-black px-1.5 py-0.5 rounded text-[8px]">{item.badge}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+              {/* Center Floating UI - Simulated Live Log Console */}
+              <div className="relative z-10 px-8 flex justify-center py-4 preserve-3d">
+                <div className="w-full max-w-sm bg-[#1C1C1E] rounded-2xl border border-slate-800 shadow-2xl p-4 transform group-hover:translate-z-10 group-hover:rotate-x-2 transition-transform duration-500 text-left font-mono text-[10px] text-slate-400 space-y-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-[9px] uppercase font-sans font-bold text-slate-500">
+                    <span>Active Services Monitor</span>
+                    <span className="text-[#34C759]">System Live</span>
                   </div>
+                  <div className="space-y-1.5 h-20 overflow-hidden relative">
+                    <p className="text-[#34C759]">✔ [auth] connection established (JWT v2.0)</p>
+                    <p className="text-[#007AFF]">ℹ [cron] active subscriptions audit completed</p>
+                    <p className="text-[#FF9500]">⚠ [database] query optimization triggered</p>
+                    <p className="text-white animate-pulse">● [stripe] webhook listening on port 3000...</p>
+                    <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#1C1C1E] to-transparent pointer-events-none" />
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-800 text-[9px]">
+                    <span>CPU: 4.8% · RAM: 240MB</span>
+                    <span className="text-[#007AFF]">v2.0.4 stable</span>
+                  </div>
+                </div>
+              </div>
 
-                  {/* User Profile */}
-                  <div className="flex items-center gap-2 border-t border-slate-800 pt-3 text-white">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-650 to-indigo-650 flex items-center justify-center font-bold text-[9px] uppercase">
-                      PP
+              {/* Bottom Glass Tray */}
+              <div className="relative z-10 p-6 bg-white/60 border-t border-[#E5E5EA] backdrop-blur-md flex items-center justify-between">
+                <div className="flex gap-2">
+                  {["System Config", "Cron Manager", "Access Audits"].map((ft) => (
+                    <span key={ft} className="text-[9px] font-bold text-slate-700 bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-md">{ft}</span>
+                  ))}
+                </div>
+                <Link href="/dashboard">
+                  <Button className="h-9 px-4 bg-black text-white hover:bg-black/90 font-semibold rounded-xl text-xs flex items-center gap-1">
+                    Enter Workspace <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* ── CARD 2: Owner Workspace (Stripe Blue) ── */}
+            <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
+              {/* Full-bleed Background Image with Ken Burns */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"
+                  alt="Landlord Workspace"
+                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                  style={{ animationDelay: "-4s" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
+              </div>
+
+              {/* Top info and status */}
+              <div className="relative z-10 p-8 flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-lg bg-[#007AFF] text-white flex items-center justify-center">
+                      <Home className="h-4 w-4" />
                     </div>
-                    <div className="leading-none truncate">
-                      <p className="font-extrabold text-[10px]">Premium Props</p>
-                      <p className="text-[8px] text-slate-500 font-semibold mt-0.5">owner@example.com</p>
+                    <span className="text-xs font-bold text-[#007AFF] uppercase tracking-widest">Landlord Hub</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#1D1D1F] pt-2">Owner Workspace</h3>
+                  <p className="text-xs text-[#6E6E73] font-medium">Asset orchestration & yield tracking</p>
+                </div>
+                <div className="bg-[#007AFF]/10 border border-[#007AFF]/30 rounded-full px-3 py-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#007AFF] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#007AFF] uppercase tracking-wider">Stripe Ready</span>
+                </div>
+              </div>
+
+              {/* Center Floating UI - Dynamic Animated SVG Chart */}
+              <div className="relative z-10 px-8 flex justify-center py-4 preserve-3d">
+                <div className="w-full max-w-sm bg-white rounded-2xl border border-[#E5E5EA] shadow-2xl p-4 transform group-hover:translate-z-10 group-hover:-rotate-x-2 transition-transform duration-500 space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">Stripe Payouts (MTD)</p>
+                      <p className="text-lg font-extrabold text-[#1D1D1F]">$32,450.00</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#34C759] bg-[#34C759]/10 px-2.5 py-0.5 rounded-md">▲ +14.2%</span>
+                  </div>
+                  {/* SVG Chart with Line Animation */}
+                  <div className="h-16 w-full overflow-hidden">
+                    <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="chartGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#007AFF" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#007AFF" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,25 Q15,10 30,18 T60,5 T90,12 T100,8 L100,30 L0,30 Z"
+                        fill="url(#chartGlow)"
+                      />
+                      <path
+                        d="M0,25 Q15,10 30,18 T60,5 T90,12 T100,8"
+                        fill="none"
+                        stroke="#007AFF"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeDasharray="200"
+                        strokeDashoffset="200"
+                        className="animate-shimmer"
+                        style={{
+                          animation: "shimmer 4s ease-in-out infinite",
+                          strokeDashoffset: 0,
+                        }}
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Glass Tray */}
+              <div className="relative z-10 p-6 bg-white/60 border-t border-[#E5E5EA] backdrop-blur-md flex items-center justify-between">
+                <div className="flex gap-2">
+                  {["Lease Builder", "PDF Ledger", "Stripe Connect"].map((ft) => (
+                    <span key={ft} className="text-[9px] font-bold text-slate-700 bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-md">{ft}</span>
+                  ))}
+                </div>
+                <Button onClick={() => setOwnerModalOpen(true)} className="h-9 px-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-xl text-xs flex items-center gap-1 shadow-md shadow-[#007AFF]/20">
+                  Request Access <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* ── CARD 3: Tenant Workspace (Green) ── */}
+            <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
+              {/* Full-bleed Background Image with Ken Burns */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80"
+                  alt="Tenant Portal"
+                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                  style={{ animationDelay: "-8s" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
+              </div>
+
+              {/* Top info and status */}
+              <div className="relative z-10 p-8 flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-lg bg-[#34C759] text-white flex items-center justify-center">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-[#34C759] uppercase tracking-widest">Tenant Portal</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#1D1D1F] pt-2">Renter Portal</h3>
+                  <p className="text-xs text-[#6E6E73] font-medium">One-tap payments & active tickets</p>
+                </div>
+                <div className="bg-[#34C759]/10 border border-[#34C759]/30 rounded-full px-3 py-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#34C759] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#34C759] uppercase tracking-wider">Mobile Hub</span>
+                </div>
+              </div>
+
+              {/* Center Floating UI - Interactive Mobile Card */}
+              <div className="relative z-10 px-8 flex justify-center py-4 preserve-3d">
+                <div className="w-full max-w-sm bg-white rounded-2xl border border-[#E5E5EA] shadow-2xl p-4 transform group-hover:translate-z-10 group-hover:rotate-y-2 transition-transform duration-500 space-y-3">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Bill</span>
+                    <span className="text-[9px] text-[#FF9500] font-bold bg-[#FF9500]/10 px-2 py-0.5 rounded-full">Rent Due</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-lg font-extrabold text-[#1D1D1F]">$1,850.00</p>
+                      <p className="text-[9px] text-slate-400">Due Date: July 25, 2026</p>
+                    </div>
+                    {/* Simulated Apple Pay button */}
+                    <button className="h-9 px-4 bg-black text-white font-semibold rounded-xl text-[10px] flex items-center gap-1 hover:scale-105 active:scale-95 transition-transform shadow-md">
+                      <span>Pay with</span>
+                      <span className="font-bold text-xs"> Pay</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Glass Tray */}
+              <div className="relative z-10 p-6 bg-white/60 border-t border-[#E5E5EA] backdrop-blur-md flex items-center justify-between">
+                <div className="flex gap-2">
+                  {["Autopay Setup", "Ticket Triage", "Document Hub"].map((ft) => (
+                    <span key={ft} className="text-[9px] font-bold text-slate-700 bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-md">{ft}</span>
+                  ))}
+                </div>
+                <Link href="/auth/login">
+                  <Button className="h-9 px-4 bg-[#34C759] hover:bg-[#2FB34F] text-white font-semibold rounded-xl text-xs flex items-center gap-1 shadow-md shadow-[#34C759]/20">
+                    Tenant Login <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* ── PORTAL 4: Inspector Portal (Orange) ── */}
+            <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
+              {/* Full-bleed Background Image with Ken Burns */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80"
+                  alt="Inspector Workspace"
+                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                  style={{ animationDelay: "-12s" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
+              </div>
+
+              {/* Top info and status */}
+              <div className="relative z-10 p-8 flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-lg bg-[#FF9500] text-white flex items-center justify-center">
+                      <Wrench className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-[#FF9500] uppercase tracking-widest">Inspections</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#1D1D1F] pt-2">Inspector Portal</h3>
+                  <p className="text-xs text-[#6E6E73] font-medium">Job dispatch & condition checklists</p>
+                </div>
+                <div className="bg-[#FF9500]/10 border border-[#FF9500]/30 rounded-full px-3 py-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FF9500] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#FF9500] uppercase tracking-wider">Jobs Active</span>
+                </div>
+              </div>
+
+              {/* Center Floating UI - Condition Checklist and Live Progress */}
+              <div className="relative z-10 px-8 flex justify-center py-4 preserve-3d">
+                <div className="w-full max-w-sm bg-white rounded-2xl border border-[#E5E5EA] shadow-2xl p-4 transform group-hover:translate-z-10 group-hover:-rotate-y-2 transition-transform duration-500 space-y-3 text-left">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    <span>Inspection Progress</span>
+                    <span className="text-[#FF9500]">In Progress</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-4 w-4 rounded-full bg-[#34C759]/10 text-[#34C759] flex items-center justify-center font-bold text-[9px]">✔</div>
+                      <span className="text-slate-600 font-medium">HVAC Condition Checked</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-4 w-4 rounded-full bg-[#34C759]/10 text-[#34C759] flex items-center justify-center font-bold text-[9px]">✔</div>
+                      <span className="text-slate-600 font-medium">Smoke Detectors Audited</span>
+                    </div>
+                    {/* Live animated progress bar */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                        <span>Overall Checklist</span>
+                        <span>75%</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#FF9500] rounded-full w-3/4 animate-pulse" />
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Main Dashboard Workspace */}
-                <div className="flex-1 flex flex-col bg-[#F8FAFC]">
-                  
-                  {/* Workspace Topbar */}
-                  <div className="h-10 bg-white border-b border-slate-200 px-4 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <Search className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-semibold text-slate-400">Search everything...</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <span className="absolute -top-1 -right-1 h-1.5 w-1.5 bg-rose-500 rounded-full animate-ping" />
-                        <span className="absolute -top-1 -right-1 h-1.5 w-1.5 bg-rose-500 rounded-full" />
-                        <div className="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-550 text-[10px]">
-                          🔔
+              {/* Bottom Glass Tray */}
+              <div className="relative z-10 p-6 bg-white/60 border-t border-[#E5E5EA] backdrop-blur-md flex items-center justify-between">
+                <div className="flex gap-2">
+                  {["Condition Logs", "Triage Calendar", "Vendor Portal"].map((ft) => (
+                    <span key={ft} className="text-[9px] font-bold text-slate-700 bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-md">{ft}</span>
+                  ))}
+                </div>
+                <Link href="/auth/login">
+                  <Button className="h-9 px-4 bg-[#FF9500] hover:bg-[#E08800] text-white font-semibold rounded-xl text-xs flex items-center gap-1 shadow-md shadow-[#FF9500]/20">
+                    Inspector Login <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+          </div>{/* end grid */}
+        </div>
+      </section>
+
+      {/* ── LISTINGS ────────────────────────────────── */}
+      <section id="listings" className="py-28 max-w-7xl mx-auto px-5 sm:px-8">
+        <ScrollReveal>
+          <div className="flex flex-col items-center text-center mb-14 gap-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-semibold text-[#34C759] uppercase tracking-widest">Live Vacancies</span>
+              <h2 className="text-4xl font-bold text-[#1D1D1F]">Available Properties</h2>
+              <p className="text-sm text-[#6E6E73]">Real-time vacancies listed on our platform.</p>
+            </div>
+            <Link href="/listings">
+              <Button variant="outline" className="h-10 px-5 rounded-xl border-[#E5E5EA] text-xs font-medium flex items-center gap-2 shrink-0 mt-2">
+                Browse All <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </ScrollReveal>
+
+        {listingsLoading ? (
+          <div className="flex gap-6 overflow-hidden py-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-[320px] sm:w-[360px] flex-shrink-0 bg-white rounded-3xl border border-[#E5E5EA] overflow-hidden animate-pulse">
+                <div className="aspect-[16/10] bg-slate-200" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-slate-200 rounded w-1/2" />
+                  <div className="h-5 bg-slate-200 rounded w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : listings.length > 0 ? (
+          <ScrollReveal delay={100}>
+            <div className="relative w-full overflow-hidden py-6">
+              {/* Apple style frosted fade overlays */}
+              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F5F5F7] to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F5F5F7] to-transparent z-10 pointer-events-none" />
+              
+              <div className="animate-marquee-slow flex gap-6">
+                {/* Duplicate array to ensure endless smooth loop */}
+                {[...listings, ...listings, ...listings, ...listings].map((unit, index) => {
+                  const img = unit.images?.[0] || unit.property?.coverPhoto ||
+                    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                  return (
+                    <div key={`${unit.id}-${index}`} className="w-[320px] sm:w-[360px] flex-shrink-0 bg-white rounded-3xl border border-[#E5E5EA] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative">
+                      {/* Image section with premium badges */}
+                      <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
+                        <img
+                          src={img}
+                          alt={unit.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80"; }}
+                        />
+                        {/* Frosted role badge */}
+                        <div className="absolute top-3.5 left-3.5 bg-black/45 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10">
+                          {unit.type || "Apartment"}
+                        </div>
+                        {/* Floating Apple-style price bubble */}
+                        <div className="absolute bottom-3.5 right-3.5 bg-white/90 backdrop-blur-lg border border-white/60 text-[#1D1D1F] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                          ${Number(unit.rentAmount).toLocaleString()}/mo
                         </div>
                       </div>
-                      <div className="h-6 w-6 rounded-full bg-slate-200 border border-slate-350" />
+
+                      {/* Content details section */}
+                      <div className="p-6 flex flex-col gap-4 flex-1 justify-between">
+                        <div className="space-y-1">
+                          <p className="text-[9px] font-bold text-[#007AFF] uppercase tracking-widest">
+                            Unit {unit.name} · {unit.property?.city || "Los Angeles"}
+                          </p>
+                          <h4 className="text-base font-bold text-[#1D1D1F] tracking-tight line-clamp-1">
+                            {unit.property?.name || "Premium Residence"}
+                          </h4>
+                          <p className="text-[11px] text-[#6E6E73] font-normal flex items-center gap-1 leading-none pt-0.5">
+                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{unit.property?.address || "Address unavailable"}</span>
+                          </p>
+                        </div>
+
+                        {/* Specs badges in place of vertical grid lines */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-[#6E6E73] bg-[#F5F5F7] border border-[#E5E5EA] px-2.5 py-1 rounded-lg">
+                            🛏️ {unit.rooms} Beds
+                          </span>
+                          <span className="text-[10px] font-semibold text-[#6E6E73] bg-[#F5F5F7] border border-[#E5E5EA] px-2.5 py-1 rounded-lg">
+                            🛁 {unit.bathrooms || 1} Baths
+                          </span>
+                          <span className="text-[10px] font-semibold text-[#6E6E73] bg-[#F5F5F7] border border-[#E5E5EA] px-2.5 py-1 rounded-lg">
+                            📐 {unit.sqFootage} Sq Ft
+                          </span>
+                        </div>
+
+                        <Link href={`/listings?id=${unit.id}`} className="mt-2">
+                          <Button className="w-full h-10 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-2xl text-xs shadow-sm shadow-[#007AFF]/15 transition-all active:scale-[0.98]">
+                            Apply / Schedule Tour
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          </ScrollReveal>
+        ) : (
+          <ScrollReveal>
+            <div className="bg-white border border-[#E5E5EA] rounded-3xl p-14 text-center max-w-sm mx-auto shadow-sm space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center mx-auto">
+                <Home className="h-6 w-6" />
+              </div>
+              <h4 className="text-base font-semibold text-[#1D1D1F]">No Active Vacancies</h4>
+              <p className="text-xs text-[#6E6E73] leading-relaxed">All properties are currently occupied. Request owner access to list yours.</p>
+            </div>
+          </ScrollReveal>
+        )}
+      </section>
+
+      {/* ── HOW IT WORKS ────────────────────────────── */}
+      <section className="py-28 bg-white border-t border-[#E5E5EA]">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <ScrollReveal>
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+              <span className="text-[10px] font-semibold text-[#007AFF] uppercase tracking-widest">Getting Started</span>
+              <h2 className="text-4xl font-bold text-[#1D1D1F]">Up and running in three steps.</h2>
+            </div>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div className="hidden md:block absolute top-8 left-[20%] right-[20%] h-px bg-[#E5E5EA]" />
+            {[
+              { n: "01", icon: <Key className="h-5 w-5" />, title: "Get Owner Access", desc: "Apply in under 2 minutes. Our team verifies your identity and activates your account with white-glove onboarding." },
+              { n: "02", icon: <FileText className="h-5 w-5" />, title: "Add Properties & Leases", desc: "Create your property portfolio, define units, invite tenants, and generate digital leases with one click." },
+              { n: "03", icon: <DollarSign className="h-5 w-5" />, title: "Automate Everything", desc: "Connect Stripe for automatic rent collection, instant payouts, and maintenance ticket dispatching." },
+            ].map((step, i) => (
+              <ScrollReveal key={i} delay={i * 120} distance={30}>
+                <div className="relative flex flex-col items-center text-center gap-4">
+                  <div className="relative z-10 h-16 w-16 rounded-2xl bg-[#007AFF] flex items-center justify-center text-white shadow-lg shadow-[#007AFF]/25">
+                    {step.icon}
+                    <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#1D1D1F] text-white text-[9px] font-bold flex items-center justify-center">{step.n}</span>
                   </div>
+                  <h3 className="text-base font-semibold text-[#1D1D1F]">{step.title}</h3>
+                  <p className="text-sm text-[#6E6E73] leading-relaxed">{step.desc}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                  {/* Workspace Content */}
-                  <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-                    
-                    {/* Welcome Banner */}
-                    <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-xl text-white flex justify-between items-center relative overflow-hidden">
-                      <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-y-4 translate-x-4">
-                        <Building2 className="h-28 w-28 text-white" />
-                      </div>
-                      <div className="space-y-1 z-10">
-                        <h4 className="text-[13px] font-black">Good evening, Premium Properties LLC!</h4>
-                        <p className="text-slate-400 text-[9px] font-semibold">Here is a quick overview of your portfolio activity today.</p>
-                      </div>
-                      <span className="bg-blue-600 text-white font-extrabold text-[8px] uppercase tracking-wider py-0.5 px-2 rounded-md">
-                        Pro Tier
-                      </span>
-                    </div>
+      {/* ── PRICING ─────────────────────────────────── */}
+      <section id="pricing" className="py-28 bg-[#F5F5F7] border-t border-[#E5E5EA]">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+          <ScrollReveal>
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+              <span className="text-[10px] font-semibold text-[#007AFF] uppercase tracking-widest">Pricing</span>
+              <h2 className="text-4xl font-bold text-[#1D1D1F]">Simple, transparent pricing.</h2>
+              <p className="text-sm text-[#6E6E73]">Scale your plan as your portfolio grows — no platform take-rate on rent.</p>
+            </div>
+          </ScrollReveal>
 
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { label: "Overdue Invoices", value: "0", sub: "0 tenants behind schedule", border: "border-emerald-100", bg: "bg-emerald-50/50", text: "text-emerald-700" },
-                        { label: "Urgent Repairs", value: "1", sub: "1 emergency issue open", border: "border-rose-100", bg: "bg-rose-50/50", text: "text-rose-700" },
-                        { label: "Active Leases", value: "5", sub: "98% occupancy rate", border: "border-blue-100", bg: "bg-blue-50/50", text: "text-blue-700" }
-                      ].map((stat, idx) => (
-                        <div key={idx} className={`p-3 rounded-xl border ${stat.border} ${stat.bg} space-y-1`}>
-                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">{stat.label}</p>
-                          <div className="flex items-baseline gap-1.5">
-                            <span className={`text-[16px] font-black ${stat.text}`}>{stat.value}</span>
-                          </div>
-                          <p className="text-[8px] text-slate-400 font-semibold">{stat.sub}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Recent Activity Table */}
-                    <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black text-[#0F172A] uppercase tracking-wide">Recent Lease Transactions</span>
-                        <span className="text-[8px] text-blue-600 font-bold hover:underline cursor-pointer">View Accounts Ledger</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pricingTiers.length > 0 ? pricingTiers.map((tier, idx) => {
+              const isPop = tier.name.toLowerCase() === "professional";
+              return (
+                <ScrollReveal key={tier.id} delay={idx * 100} distance={30} className="h-full">
+                  <div
+                    className={`rounded-3xl p-7 flex flex-col justify-between border transition-all duration-300 h-full ${
+                      isPop
+                        ? "bg-[#1D1D1F] text-white border-slate-700 shadow-2xl shadow-black/15 md:-translate-y-3"
+                        : "bg-white text-[#1D1D1F] border-[#E5E5EA] shadow-sm"
+                    }`}
+                  >
+                    {isPop && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                        <span className="bg-[#007AFF] text-white text-[10px] font-semibold uppercase px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                          <Zap className="h-3 w-3 fill-white" /> Most Popular
+                        </span>
                       </div>
-                      <div className="space-y-1.5">
-                        {[
-                          { suite: "Downtown Tech Plaza - Suite 100", type: "Stripe Payment", amount: "$8,500.00", date: "Today", status: "Success", statusBg: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-                          { suite: "Grand Horizon Towers - Unit 101", type: "Stripe Payment", amount: "$2,000.00", date: "Yesterday", status: "Success", statusBg: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-                          { suite: "Sunset Villa - Main House", type: "Manual Invoice", amount: "$5,500.00", date: "3 days ago", status: "Pending", statusBg: "bg-amber-50 text-amber-700 border-amber-100" }
-                        ].map((row, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg border border-slate-100 transition-colors">
-                            <div className="space-y-0.5 text-left">
-                              <p className="font-extrabold text-[9px] text-[#0F172A]">{row.suite}</p>
-                              <p className="text-[8px] text-slate-400 font-semibold">{row.type} • {row.date}</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-black text-[#0F172A]">{row.amount}</span>
-                              <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold border ${row.statusBg}`}>{row.status}</span>
-                            </div>
+                    )}
+                    <div className="relative">
+                      <h3 className="text-lg font-semibold mb-0.5">{tier.name}</h3>
+                      <p className={`text-xs mb-5 ${isPop ? "text-slate-400" : "text-[#6E6E73]"}`}>{tier.description}</p>
+                      <div className="mb-6">
+                        {tier.isCustom ? (
+                          <span className="text-3xl font-bold">Custom</span>
+                        ) : (
+                          <>
+                            <span className="text-3xl font-bold">${tier.price}</span>
+                            <span className={`text-xs ${isPop ? "text-slate-400" : "text-[#6E6E73]"}`}>/mo</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="space-y-2.5 border-t border-slate-200/20 pt-5 mb-7">
+                        {tier.features.map((ft: string, i: number) => (
+                          <div key={i} className="flex items-center gap-2 text-xs font-medium">
+                            <CheckCircle2 className={`h-3.5 w-3.5 shrink-0 ${isPop ? "text-[#007AFF]" : "text-[#34C759]"}`} /> {ft}
                           </div>
                         ))}
                       </div>
                     </div>
-                    
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="py-12 border-y border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-black text-[#94A3B8] uppercase tracking-widest mb-6">Trusted by real estate portfolios worldwide</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            <div className="text-xl font-black text-[#0F172A] tracking-wider">ACME ESTATES</div>
-            <div className="text-xl font-black text-[#0F172A] italic">LUMINA HOMES</div>
-            <div className="text-xl font-black text-[#0F172A] tracking-tighter">HORIZON GROUPS</div>
-            <div className="text-xl font-black text-[#0F172A] font-serif">VERTEX CAPITAL</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section id="features" className="py-28 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] tracking-tight">Everything to run your rentals on autopilot.</h2>
-            <p className="mt-4 text-lg text-[#64748B] font-semibold leading-relaxed">Ditch messy spreadsheets, paper leases, and cash payments. PropertyPro gathers all utilities into one beautiful dashboard.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, idx) => (
-              <div key={idx} className="bg-white rounded-2.5xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-6">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-extrabold text-[#0F172A] mb-3">{feature.title}</h3>
-                <p className="text-[#64748B] font-semibold text-sm leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Workspaces Switcher Portal Showcase */}
-      <section id="portals" className="py-28 bg-white border-y border-slate-200/85">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Two Tailored Workspaces. One Platform.</h2>
-            <p className="mt-4 text-lg text-[#64748B] font-semibold">Switch tabs to see how PropertyPro streamlines operations for landlords and comfort for renters.</p>
-            
-            {/* Tab controls */}
-            <div className="inline-flex p-1 bg-slate-100 rounded-xl mt-8 shadow-inner border border-slate-200/60">
-              <button 
-                onClick={() => setActivePortalTab("owner")}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${activePortalTab === "owner" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Landlord Workspace
-              </button>
-              <button 
-                onClick={() => setActivePortalTab("tenant")}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${activePortalTab === "tenant" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}
-              >
-                <Smartphone className="h-4 w-4" />
-                Tenant Portal
-              </button>
-            </div>
-          </div>
-
-          {activePortalTab === "owner" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center animate-in fade-in duration-300">
-              {/* Owner text */}
-              <div className="lg:col-span-5 space-y-6">
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">For Landlords & Owners</span>
-                <h3 className="text-3xl font-black text-[#0F172A] leading-tight">Oversee your assets with automated workflows.</h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed">
-                  PropertyPro is designed to save property managers hours of administration. Streamline portfolio statistics, payments, maintenance schedules, and documents.
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    "Invite tenants and setup digital lease agreements instantly",
-                    "Collect rent directly into your bank account with Stripe payouts",
-                    "Track maintenance requests, assign priorities, and log logs",
-                    "Run real-time statistics including occupancy and collections"
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm font-bold text-slate-700">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Owner mockup box */}
-              <div className="lg:col-span-7 bg-slate-900 rounded-3xl p-6 shadow-2xl relative border border-slate-800 overflow-hidden min-h-[400px] flex flex-col justify-between">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full mix-blend-screen filter blur-[80px]"></div>
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-black">L</div>
-                    <span className="text-xs font-bold text-slate-200">Owner Ledger Dashboard</span>
-                  </div>
-                  <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Live Wallet</span>
-                </div>
-                
-                <div className="space-y-6 flex-1">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gross Collection</span>
-                      <div className="text-2xl font-black text-white mt-1">$24,400.00</div>
-                      <span className="text-[9px] text-emerald-400 font-bold mt-1 block">▲ +12% from last month</span>
-                    </div>
-                    <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Occupancy Rate</span>
-                      <div className="text-2xl font-black text-white mt-1">87.5%</div>
-                      <span className="text-[9px] text-slate-400 font-bold mt-1 block">7 of 8 units occupied</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 space-y-3">
-                    <span className="text-[11px] text-slate-300 font-bold block">Quick Action Shortcuts</span>
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 cursor-pointer hover:bg-slate-700 transition-colors">
-                        <Home className="h-4 w-4 text-blue-400 mx-auto mb-1" />
-                        <span className="text-[9px] text-slate-200 font-bold block">New Unit</span>
-                      </div>
-                      <div className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 cursor-pointer hover:bg-slate-700 transition-colors">
-                        <Users className="h-4 w-4 text-indigo-400 mx-auto mb-1" />
-                        <span className="text-[9px] text-slate-200 font-bold block">Invite Tenant</span>
-                      </div>
-                      <div className="bg-slate-800 border border-slate-700 rounded-xl p-2.5 cursor-pointer hover:bg-slate-700 transition-colors">
-                        <CreditCard className="h-4 w-4 text-emerald-400 mx-auto mb-1" />
-                        <span className="text-[9px] text-slate-200 font-bold block">Stripe Portal</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-800 pt-4 mt-6 flex justify-between items-center text-[10px] text-slate-500">
-                  <span>Last updated: just now</span>
-                  <Link href="/dashboard" className="text-blue-400 hover:underline font-bold">Open Full Workspace →</Link>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center animate-in fade-in duration-300">
-              {/* Tenant text */}
-              <div className="lg:col-span-5 space-y-6">
-                <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">For Renters & Tenants</span>
-                <h3 className="text-3xl font-black text-[#0F172A] leading-tight">Pay rent, view leases, and report problems.</h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed">
-                  Renters enjoy a clean, user-friendly portal to manage payments and communicate with their landlord directly. Pay instantly with your preferred payment card.
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    "View active invoices, billing terms, and payment receipts",
-                    "Add credit/debit cards or set up Stripe autopay",
-                    "Submit maintenance requests and upload photo evidence",
-                    "Directly message your landlord about leaks, keys, or inspections"
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm font-bold text-slate-700">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Tenant mockup box */}
-              <div className="lg:col-span-7 bg-[#0b0f19] rounded-3xl p-6 shadow-2xl relative border border-slate-800 overflow-hidden min-h-[400px] flex flex-col justify-between">
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full mix-blend-screen filter blur-[80px]"></div>
-                
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-black">T</div>
-                    <span className="text-xs font-bold text-slate-200">Tenant Rent Portal</span>
-                  </div>
-                  <span className="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Autopay Off</span>
-                </div>
-
-                <div className="space-y-5 flex-1">
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Next Rent Due</span>
-                      <div className="text-xl font-black text-white mt-1">$1,700.00</div>
-                      <span className="text-[9px] text-slate-500 block mt-1">Due on July 10, 2026</span>
-                    </div>
-                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl">
-                      Pay Rent Now
+                    <Button
+                      onClick={() => setOwnerModalOpen(true)}
+                      className={`w-full h-10 rounded-xl font-semibold text-xs transition-all ${
+                        isPop
+                          ? "bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/25"
+                          : "bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA]"
+                      }`}
+                    >
+                      {tier.isCustom ? "Contact Sales" : "Apply for Access"}
                     </Button>
                   </div>
-
-                  <div className="border border-slate-800/80 bg-slate-900/40 rounded-2xl p-4 space-y-3">
-                    <span className="text-[11px] text-slate-300 font-bold block">Support & Maintenance Tickets</span>
-                    <div className="flex items-center justify-between bg-slate-900/80 border border-slate-800/60 rounded-xl p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400">
-                          <Wrench className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <span className="text-[11px] text-slate-200 font-bold block">Kitchen Sink Leak</span>
-                          <span className="text-[9px] text-slate-500 block">Status: Submitted</span>
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-bold text-rose-400 uppercase bg-rose-500/10 px-2 py-0.5 rounded-full">High</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-800 pt-4 mt-6 flex justify-between items-center text-[10px] text-slate-500">
-                  <span>Secure bank details encrypted</span>
-                  <Link href="/dashboard" className="text-indigo-400 hover:underline font-bold">Open Tenant Portal →</Link>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Featured Rental Listings */}
-      <section id="listings" className="py-28 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
-            <div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Active Units</span>
-              <h2 className="text-4xl font-black text-[#0F172A] tracking-tight mt-3">Explore Available Rentals</h2>
-              <p className="mt-2 text-slate-500 font-semibold text-sm">Review real-time vacancies currently listed on our platform.</p>
-            </div>
-            <Link href="/listings" className="mt-4 md:mt-0">
-              <Button className="bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold px-6 rounded-xl flex items-center gap-2 shadow-sm">
-                Browse All Vacancies <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          {listingsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-2.5xl border border-slate-200/80 overflow-hidden shadow-sm animate-pulse">
-                  <div className="aspect-[16/10] bg-slate-200"></div>
-                  <div className="p-6 space-y-4">
-                    <div className="h-4 bg-slate-200 rounded w-1/3"></div>
-                    <div className="h-6 bg-slate-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : listings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in duration-300">
-              {listings.map((unit) => {
-                const imageUrl = unit.images?.[0] || unit.property?.coverPhoto || "/placeholder-house.png";
-                return (
-                  <div key={unit.id} className="bg-white rounded-2.5xl border border-slate-200/70 overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
-                    <div className="aspect-[16/10] bg-slate-100 relative overflow-hidden">
-                      <img 
-                        src={imageUrl} 
-                        alt={unit.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
-                        }}
-                      />
-                      <div className="absolute top-4 left-4 bg-blue-600 text-white text-[11px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider">
-                        {unit.type || "Apartment"}
-                      </div>
-                      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-[#0F172A] text-sm font-black px-3 py-1 rounded-xl shadow-sm">
-                        ${Number(unit.rentAmount).toLocaleString()}/mo
-                      </div>
-                    </div>
-
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-slate-400" />
-                          {unit.property?.city || "Unknown City"}, {unit.property?.country || "USA"}
-                        </span>
-                        <h4 className="text-lg font-black text-[#0F172A] mt-1 line-clamp-1">{unit.name}</h4>
-                        <p className="text-slate-500 text-xs font-semibold mt-1 truncate">{unit.property?.address}</p>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 border-y border-slate-100 py-3 text-center text-xs font-bold text-slate-500">
-                        <div>
-                          <span className="block text-[#0F172A] font-extrabold text-sm">{unit.rooms}</span>
-                          Beds
-                        </div>
-                        <div className="border-x border-slate-100">
-                          <span className="block text-[#0F172A] font-extrabold text-sm">{unit.bathrooms || 1}</span>
-                          Baths
-                        </div>
-                        <div>
-                          <span className="block text-[#0F172A] font-extrabold text-sm">{unit.sqFootage}</span>
-                          Sq Ft
-                        </div>
-                      </div>
-
-                      <Link href={`/listings?id=${unit.id}`} className="block">
-                        <Button className="w-full bg-slate-50 hover:bg-blue-50 text-[#0F172A] hover:text-blue-600 border border-slate-200 hover:border-blue-200/50 font-extrabold rounded-xl py-2.5 transition-colors">
-                          Apply / Schedule Tour
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center max-w-xl mx-auto shadow-sm">
-              <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-4">
-                <Home className="h-6 w-6" />
-              </div>
-              <h4 className="text-lg font-bold text-[#0F172A] mb-1">No Active Vacancies</h4>
-              <p className="text-slate-500 font-semibold text-sm leading-relaxed">
-                All units are currently occupied. Check back soon or request owner access to list your own properties!
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* How it Works Section */}
-      <section id="how-it-works" className="py-28 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="lg:w-1/2 space-y-8">
-              <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Streamline your portfolio in three simple steps.</h2>
-              
-              <div className="space-y-8">
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-black text-lg shrink-0 shadow-sm">1</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-[#0F172A] mb-1">Setup your Portfolio</h3>
-                    <p className="text-[#64748B] font-semibold text-sm leading-relaxed">Apply for Owner access, add properties, specify layouts, and configure units in less than 10 minutes.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-black text-lg shrink-0 shadow-sm">2</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-[#0F172A] mb-1">Onboard Tenants</h3>
-                    <p className="text-[#64748B] font-semibold text-sm leading-relaxed">Create active leases, set auto-invoice parameters, and send invitation links to tenants for self-onboarding.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-black text-lg shrink-0 shadow-sm">3</div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-[#0F172A] mb-1">Automate Accounting</h3>
-                    <p className="text-[#64748B] font-semibold text-sm leading-relaxed">Enjoy automated rent collection via Stripe, instant payouts, automated ledger balances, and maintenance dispatching.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="lg:w-1/2 w-full">
-              <div className="bg-[#0F172A] rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-slate-800">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30"></div>
-                
-                {/* Tech illustration */}
-                <div className="space-y-4 relative z-10">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                    <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                    <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="h-4 w-3/4 bg-slate-800 rounded"></div>
-                  <div className="h-4 w-1/2 bg-slate-800 rounded"></div>
-                  <div className="h-4 w-5/6 bg-[#3B82F6]/20 rounded border border-[#3B82F6]/30 flex items-center px-3 text-[10px] text-blue-400 font-bold">
-                    GET /api/payouts/owner-ledger ... 200 OK
-                  </div>
-                  <div className="h-4 w-2/3 bg-slate-800 rounded"></div>
-                  <div className="h-4 w-1/3 bg-slate-800 rounded"></div>
-                  <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                    <span className="text-emerald-100 font-bold text-xs uppercase tracking-wider">System Status: Fully Operational</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-28 bg-slate-50/50 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Loved by modern managers.</h2>
-            <p className="mt-4 text-lg text-[#64748B] font-semibold">Join landlords and operators saving hours of tedious admin tasks every single week.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                quote: "PropertyPro saved me over 15 hours a week on rent collection and maintenance tracking. It is an absolute game-changer.",
-                name: "Sarah Jenkins",
-                role: "Independent Landlord (12 Units)"
-              },
-              {
-                quote: "The automated lease generation and digital signatures completely eliminated our paperwork. Our tenants love the sleek portal too.",
-                name: "Michael Chen",
-                role: "Acme Properties (45 Units)"
-              },
-              {
-                quote: "Switching from Spreadsheets to PropertyPro was the best decision we made this year. Financial reporting is finally a breeze.",
-                name: "Elena Rodriguez",
-                role: "Vertex Group (120 Units)"
-              }
-            ].map((t, idx) => (
-              <div key={idx} className="bg-white rounded-2.5xl p-8 border border-slate-200/80 shadow-sm relative flex flex-col justify-between">
-                <div>
-                  <div className="text-blue-600 mb-6 opacity-30">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M14.017 21L16.41 14.904C16.593 14.53 16.7 14.125 16.7 13.7V9C16.7 8.44772 16.2523 8 15.7 8H11C10.4477 8 10 8.44772 10 9V14C10 14.5523 10.4477 15 11 15H13.785L11.782 19.34L14.017 21ZM5.01697 21L7.41097 14.904C7.59397 14.53 7.69997 14.125 7.69997 13.7V9C7.69997 8.44772 7.25225 8 6.69997 8H1.99997C1.44769 8 0.999969 8.44772 0.999969 9V14C0.999969 14.5523 1.44769 15 1.99997 15H4.78497L2.78197 19.34L5.01697 21Z"/></svg>
-                  </div>
-                  <p className="text-[#0F172A] font-semibold text-base leading-relaxed mb-6">"{t.quote}"</p>
-                </div>
-                <div className="border-t border-slate-100 pt-4 mt-4">
-                  <div className="font-extrabold text-sm text-[#0F172A]">{t.name}</div>
-                  <div className="text-xs font-bold text-[#64748B] mt-0.5">{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Simple, Transparent Pricing</h2>
-            <p className="mt-4 text-lg text-[#64748B] font-semibold">No hidden fees, no complicated tiers. Start free and scale as your portfolio grows.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingTiers.length > 0 ? pricingTiers.map((tier, idx) => {
-              const isPopular = tier.name.toLowerCase() === "professional";
-              return (
-                <div 
-                  key={tier.id} 
-                  className={`rounded-3xl p-8 flex flex-col relative transition-all duration-300 ${
-                    isPopular 
-                      ? 'bg-slate-950 text-white border border-slate-800 shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)] transform md:-translate-y-4' 
-                      : 'bg-white border border-slate-200 text-[#0F172A] shadow-sm'
-                  }`}
-                >
-                  {isPopular && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 transform -translate-y-1/2">
-                      <span className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full flex items-center gap-1 shadow-md">
-                        <Zap className="h-3 w-3 fill-current" /> Most Popular
-                      </span>
-                    </div>
-                  )}
-                  
-                  <h3 className={`text-xl font-extrabold mb-1 ${isPopular ? 'text-white' : 'text-[#0F172A]'}`}>{tier.name}</h3>
-                  <p className={`font-semibold text-xs mb-6 ${isPopular ? 'text-slate-400' : 'text-[#64748B]'}`}>{tier.description}</p>
-                  
-                  <div className="mb-6">
-                    {tier.isCustom ? (
-                      <span className="text-4xl font-black">Custom</span>
-                    ) : (
-                      <>
-                        <span className="text-4xl font-black">${tier.price}</span>
-                        <span className={`text-xs font-semibold ${isPopular ? 'text-slate-400' : 'text-[#64748B]'}`}> / month</span>
-                      </>
-                    )}
-                  </div>
-                  
-                  <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100/10 pt-6">
-                    {tier.features.map((ft: string, i: number) => (
-                      <li key={i} className={`flex items-center gap-3 text-xs font-bold ${isPopular ? 'text-slate-300' : 'text-[#334155]'}`}>
-                        <CheckCircle2 className={`h-4.5 w-4.5 shrink-0 ${isPopular ? 'text-blue-400' : 'text-blue-500'}`} /> {ft}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button 
-                    variant={isPopular ? "default" : "outline"} 
-                    onClick={() => setOwnerModalOpen(true)} 
-                    className={`w-full h-11 rounded-xl font-extrabold text-sm transition-all ${
-                      isPopular 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-md shadow-blue-600/25' 
-                        : 'border-slate-200 text-[#0F172A] hover:bg-slate-50'
-                    }`}
-                  >
-                    {tier.isCustom ? "Contact Sales" : "Apply for Access"}
-                  </Button>
-                </div>
+                </ScrollReveal>
               );
             }) : (
-              <div className="col-span-3 text-center text-slate-500 font-semibold py-10 animate-pulse">Loading pricing options...</div>
+              <div className="col-span-3 text-center text-[#6E6E73] py-14 text-sm animate-pulse">Loading pricing…</div>
             )}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-28 bg-[#F8FAFC]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Frequently Asked Questions</h2>
+      {/* ── FAQ ─────────────────────────────────────── */}
+      <section className="py-28 max-w-3xl mx-auto px-5 sm:px-8">
+        <ScrollReveal>
+          <div className="text-center mb-14 space-y-3">
+            <span className="text-[10px] font-semibold text-[#007AFF] uppercase tracking-widest">FAQ</span>
+            <h2 className="text-4xl font-bold text-[#1D1D1F]">Common questions.</h2>
           </div>
-          <div className="space-y-6">
+        </ScrollReveal>
+        <div className="space-y-3">
+          {[
+            { q: "How are rent payments processed?", a: "Rent is processed through Stripe. Tenant cards are charged automatically on the due date and funds arrive in your connected bank account within 2–3 business days." },
+            { q: "Can I manage multiple properties?", a: "Yes. The Owner dashboard supports unlimited properties and units, each with independent occupancy tracking, lease management, and financial reporting." },
+            { q: "How do tenants submit maintenance requests?", a: "Tenants log into their portal, tap 'New Ticket', describe the issue, and attach photos from their phone. You see the ticket instantly and can assign a vendor." },
+            { q: "Is tenant screening included?", a: "Yes. Applicants fill out a detailed profile including employment details, previous landlord references, and consent to background checks before you approve their lease." },
+          ].map((faq, i) => (
+            <ScrollReveal key={i} delay={i * 60} distance={20}>
+              <div className="bg-white rounded-2xl border border-[#E5E5EA] overflow-hidden shadow-sm">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full p-5 text-left flex justify-between items-center hover:bg-slate-50 transition-colors"
+                >
+                  <span className="text-sm font-semibold text-[#1D1D1F]">{faq.q}</span>
+                  <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${openFaq === i ? "rotate-180" : ""}`} />
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5 text-xs text-[#6E6E73] leading-relaxed border-t border-slate-100 pt-3">{faq.a}</div>
+                )}
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ──────────────────────────────── */}
+      <section className="relative overflow-hidden py-28 bg-[#1D1D1F]">
+        {/* Cinematic property backdrop */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=2400&q=80"
+            alt="Property"
+            className="w-full h-full object-cover opacity-20 animate-ken-burns"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1D1D1F]/80 via-[#1D1D1F]/60 to-[#1D1D1F]/90" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[300px] bg-[#007AFF]/15 rounded-full blur-[120px] pointer-events-none" />
+
+        <ScrollReveal>
+          <div className="relative z-10 max-w-3xl mx-auto px-5 text-center space-y-6">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+              Ready to modernise your property business?
+            </h2>
+            <p className="text-base text-white/60 font-normal max-w-xl mx-auto">
+              Join landlords and tenants already saving hours of admin with PropertyPro's fully automated platform.
+            </p>
+            <div className="pt-2 flex flex-col sm:flex-row justify-center gap-3">
+              <Button
+                onClick={() => setOwnerModalOpen(true)}
+                className="h-12 px-8 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-2xl shadow-2xl shadow-[#007AFF]/30 text-sm transition-all hover:scale-[1.02]"
+              >
+                Apply for Owner Access
+              </Button>
+              <Link href="/auth/login">
+                <Button className="h-12 px-8 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-2xl text-sm backdrop-blur-md">
+                  Sign In to Dashboard
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* ── FOOTER ──────────────────────────────────── */}
+      <footer className="bg-[#1D1D1F] py-14">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            <div className="col-span-2 md:col-span-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-[#007AFF] rounded-xl flex items-center justify-center text-white">
+                  <Building2 className="h-4 w-4" />
+                </div>
+                <span className="font-semibold text-white">PropertyPro</span>
+              </div>
+              <p className="text-xs text-[#8E8E93] leading-relaxed max-w-xs">
+                The premium property management operating system for modern landlords and renters.
+              </p>
+            </div>
+
             {[
-              { q: "How do rent payouts work?", a: "PropertyPro integrates directly with Stripe. When a tenant pays rent, it is routed immediately to your designated bank account. Payouts typically take 2-3 business days to clear." },
-              { q: "Is tenant screening included?", a: "Yes, our integrated application portal allows you to collect employment details, previous landlord references, and optionally run background checks seamlessly." },
-              { q: "How difficult is it to migrate my data?", a: "Not difficult at all! Our administration team offers white-glove migration services for users on Professional and Enterprise plans. We will import your units, leases, and tenant data from your old software for you." },
-              { q: "Can my tenants submit maintenance photos?", a: "Absolutely. The Tenant Portal includes a dedicated maintenance ticketing system where tenants can upload photos and videos of the issue directly from their smartphones." }
-            ].map((faq, i) => (
-              <div key={i} className="bg-white rounded-2.5xl p-6 border border-slate-200/80 shadow-sm">
-                <h4 className="text-base font-extrabold text-[#0F172A] mb-2">{faq.q}</h4>
-                <p className="text-slate-500 font-semibold text-sm leading-relaxed">{faq.a}</p>
+              { title: "Product", links: ["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"] },
+              { title: "Portals", links: ["Sign In|/auth/login", "Owner Dashboard|/dashboard", "Tenant Portal|/dashboard"] },
+              { title: "Trust", links: ["Stripe Certified|#", "256-bit Encryption|#", "Cloudflare Protected|#", "SOC2 Ready|#"] },
+            ].map((col) => (
+              <div key={col.title} className="space-y-2">
+                <p className="text-[10px] font-semibold text-white uppercase tracking-widest">{col.title}</p>
+                {col.links.map((l) => {
+                  const [text, href] = l.split("|");
+                  return (
+                    <a key={text} href={href} className="block text-xs text-[#8E8E93] hover:text-white transition-colors">{text}</a>
+                  );
+                })}
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Dynamic CTA Banner */}
-      <section className="py-28 relative overflow-hidden bg-slate-900 border-t border-slate-800">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.15),transparent_60%)]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">Ready to scale your property business?</h2>
-          <p className="text-lg text-slate-300 font-semibold max-w-2xl mx-auto">Join operators and renters saving hours of administration tasks every week with PropertyPro.</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard" className="w-full sm:w-auto">
-              <Button className="h-14 px-10 w-full bg-white hover:bg-slate-100 text-[#0F172A] font-extrabold text-lg rounded-xl shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                Open Dashboard Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-white py-14 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Building2 className="h-4.5 w-4.5 text-white" />
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-[#8E8E93]">
+            <p>© {new Date().getFullYear()} PropertyPro Inc. All rights reserved.</p>
+            <div className="flex gap-5">
+              <a href="#" className="hover:text-white">Privacy</a>
+              <a href="#" className="hover:text-white">Terms</a>
+              <a href="#" className="hover:text-white">Support</a>
             </div>
-            <span className="text-xl font-black tracking-tight text-[#0F172A]">PropertyPro</span>
-          </div>
-          <p className="text-slate-500 font-semibold text-sm">© {new Date().getFullYear()} PropertyPro Inc. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="text-slate-500 hover:text-[#0F172A] font-bold text-sm transition-colors">Privacy Policy</a>
-            <a href="#" className="text-slate-500 hover:text-[#0F172A] font-bold text-sm transition-colors">Terms of Service</a>
-            <a href="#" className="text-slate-500 hover:text-[#0F172A] font-bold text-sm transition-colors">Contact Support</a>
           </div>
         </div>
       </footer>
 
-      {/* Owner Access Form Modal */}
+      {/* ── OWNER MODAL ─────────────────────────────── */}
       {ownerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-black text-[#0F172A]">Owner Access Application</h2>
-                <button onClick={() => setOwnerModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-650 hover:bg-slate-100 rounded-full transition-all">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-lg p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-[#E5E5EA] max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
+            <div className="p-7">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-xl font-bold text-[#1D1D1F]">Owner Access Application</h2>
+                <button onClick={() => setOwnerModalOpen(false)} className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-[#1D1D1F] transition-all">
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              
+
               {submitSuccess ? (
-                <div className="text-center py-8">
-                  <div className="mx-auto h-16 w-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                    <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                <div className="text-center py-10 space-y-4">
+                  <div className="h-14 w-14 bg-[#34C759]/10 rounded-2xl flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="h-7 w-7 text-[#34C759]" />
                   </div>
-                  <h3 className="text-xl font-extrabold text-[#0F172A] mb-2">Application Submitted!</h3>
-                  <p className="text-slate-500 font-semibold text-sm mb-6">Check your email for a confirmation and tracking link. Our administration team will verify details in 1-2 business days.</p>
+                  <h3 className="text-lg font-bold text-[#1D1D1F]">Application Submitted!</h3>
+                  <p className="text-xs text-[#6E6E73] leading-relaxed max-w-xs mx-auto">Check your email for a confirmation. Our team will verify and activate your account in 1–2 business days.</p>
                   {trackingId && (
-                    <div className="bg-blue-50 border border-blue-200/50 rounded-2xl p-4 mb-6 text-left shadow-inner">
-                      <p className="text-blue-700 text-xs font-black mb-2 flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5" /> Track Application Progress
-                      </p>
-                      <Link href={`/track/owner/${trackingId}`} className="text-blue-600 text-xs font-bold underline break-all hover:text-blue-800">
-                        {typeof window !== 'undefined' ? window.location.origin : ''}/track/owner/{trackingId}
+                    <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-2xl p-4 text-left">
+                      <p className="text-[#007AFF] text-xs font-semibold mb-1 flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Track your application</p>
+                      <Link href={`/track/owner/${trackingId}`} className="text-[#007AFF] text-xs underline break-all">
+                        {typeof window !== "undefined" ? window.location.origin : ""}/track/owner/{trackingId}
                       </Link>
                     </div>
                   )}
-                  <Button onClick={() => { setOwnerModalOpen(false); setSubmitSuccess(false); setTrackingId(null); }} className="w-full h-12 bg-slate-900 text-white rounded-xl font-extrabold hover:bg-slate-800 shadow-sm transition-all">
-                    Close Application
+                  <Button onClick={() => { setOwnerModalOpen(false); setSubmitSuccess(false); setTrackingId(null); }} className="w-full h-11 bg-[#1D1D1F] text-white rounded-xl font-semibold">
+                    Done
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleOwnerApply} className="space-y-4">
-                  <p className="text-xs text-slate-500 font-bold mb-6 uppercase tracking-wider">To preserve database security, owner applicants are manually validated.</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-700 uppercase tracking-wide">Company / Full Name</label>
-                      <input required name="name" type="text" className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm" placeholder="Acme Estates" />
+                  <p className="text-[11px] text-[#6E6E73] mb-4">Owner accounts are manually verified to maintain platform security and quality.</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Company / Name</label>
+                      <input required name="name" type="text" placeholder="Acme Estates" className="w-full h-11 px-4 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:bg-white transition-all" />
                     </div>
-                    
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-700 uppercase tracking-wide">Website / LinkedIn</label>
-                      <input name="website" type="url" className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm" placeholder="https://linkedin.com/in/..." />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Website / LinkedIn</label>
+                      <input name="website" type="url" placeholder="https://..." className="w-full h-11 px-4 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:bg-white transition-all" />
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-700 uppercase tracking-wide">Email Address</label>
-                      <input required name="email" type="email" className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm" placeholder="you@company.com" />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Email Address</label>
+                      <input required name="email" type="email" placeholder="you@company.com" className="w-full h-11 px-4 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:bg-white transition-all" />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-700 uppercase tracking-wide">Phone Number</label>
-                      <input required name="phone" type="tel" className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm" placeholder="(555) 012-3456" />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Phone Number</label>
+                      <input required name="phone" type="tel" placeholder="(555) 012-3456" className="w-full h-11 px-4 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:bg-white transition-all" />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wide">Entity Structure</label>
-                    <select required name="entityType" className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-sm">
-                      <option value="">Select entity category</option>
-                      <option value="Independent Landlord">Independent Landlord (Own Units)</option>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Entity Type</label>
+                    <select required name="entityType" className="w-full h-11 px-4 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:bg-white transition-all">
+                      <option value="">Select category</option>
+                      <option value="Independent Landlord">Independent Landlord</option>
                       <option value="Property Management">Property Management Agency</option>
-                      <option value="Real Estate Investor">Investor / Portfolio syndicate</option>
+                      <option value="Real Estate Investor">Real Estate Investor / Portfolio</option>
                     </select>
                   </div>
 
-                  <div className="pt-2 pb-2">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-350 text-blue-600 focus:ring-blue-600" />
-                      <span className="text-[11px] text-slate-500 font-bold leading-normal">
-                        I confirm that all details are accurate, and I agree to the Terms of Service and Privacy Policy.
-                      </span>
-                    </label>
-                  </div>
+                  <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+                    <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#007AFF] focus:ring-[#007AFF]" />
+                    <span className="text-[11px] text-[#6E6E73] leading-normal">I confirm all details are accurate and I agree to the Terms of Service and Privacy Policy.</span>
+                  </label>
 
-                  {/* Cloudflare Turnstile / reCAPTCHA Verification */}
-                  <div className="bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-3.5 flex items-center justify-between mt-2">
+                  {/* Turnstile mock */}
+                  <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div 
-                        onClick={() => {
-                          if (turnstileStatus === 0) {
-                            setTurnstileStatus(1);
-                            setTimeout(() => setTurnstileStatus(2), 1200);
-                          }
-                        }}
-                        className={`w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer transition-colors shadow-inner ${turnstileStatus === 2 ? "bg-emerald-500 border-emerald-500" : "bg-white border-slate-300 hover:border-slate-400"}`}
+                      <div
+                        onClick={() => { if (turnstileStatus === 0) { setTurnstileStatus(1); setTimeout(() => setTurnstileStatus(2), 1200); } }}
+                        className={`w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer transition-colors ${turnstileStatus === 2 ? "bg-[#34C759] border-[#34C759]" : "bg-white border-slate-300 hover:border-slate-400"}`}
                       >
                         {turnstileStatus === 1 && <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />}
                         {turnstileStatus === 2 && <CheckCircle2 className="h-5 w-5 text-white" />}
                       </div>
-                      <span className="text-xs font-bold text-slate-700">Verify you are human</span>
+                      <span className="text-xs font-medium text-[#1D1D1F]">Verify you are human</span>
                     </div>
-                    <div className="flex flex-col items-end leading-none">
-                      <ShieldCheck className="h-5 w-5 text-slate-400 mb-0.5" />
-                      <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider">Cloudflare</span>
-                      <span className="text-[7.5px] text-slate-400 hover:underline cursor-pointer mt-0.5">Privacy &bull; Terms</span>
+                    <div className="text-right">
+                      <ShieldCheck className="h-4 w-4 text-slate-400 ml-auto" />
+                      <span className="text-[8px] text-slate-400 font-semibold uppercase tracking-wide">Cloudflare</span>
                     </div>
                   </div>
 
-                  <div className="pt-3">
-                    <Button disabled={isSubmitting || turnstileStatus !== 2} type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-extrabold shadow-md shadow-blue-600/20 disabled:opacity-75 disabled:cursor-not-allowed transition-all">
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                          Submitting application...
-                        </>
-                      ) : (
-                        "Submit Application"
-                      )}
-                    </Button>
-                  </div>
+                  <Button
+                    disabled={isSubmitting || turnstileStatus !== 2}
+                    type="submit"
+                    className="w-full h-11 bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl font-semibold shadow-md shadow-[#007AFF]/20 disabled:opacity-60 text-sm"
+                  >
+                    {isSubmitting ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting…</>
+                    ) : "Submit Application"}
+                  </Button>
                 </form>
               )}
             </div>

@@ -122,7 +122,7 @@ export default function OwnerAvailabilitySettingsPage() {
   };
 
   if (loading) {
-    return <div className="py-12 text-center text-slate-400 font-medium">Loading availability settings...</div>;
+    return <div className="py-12 text-center text-[#8E8E93] font-medium">Loading availability settings...</div>;
   }
 
   return (
@@ -130,7 +130,7 @@ export default function OwnerAvailabilitySettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900">Showing Availability Settings</h2>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-[#6E6E73] text-sm mt-1">
             Configure your showing working hours and blackout dates for prospect tour requests.
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function OwnerAvailabilitySettingsPage() {
             <CardTitle className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
               <Clock className="h-5 w-5 text-blue-600" /> Weekly Showing Schedule
             </CardTitle>
-            <CardDescription className="text-xs text-slate-400 font-semibold">
+            <CardDescription className="text-xs text-[#8E8E93] font-semibold">
               Set the time windows when you are available to conduct showings. Unchecked days are hidden from prospects.
             </CardDescription>
           </CardHeader>
@@ -176,7 +176,7 @@ export default function OwnerAvailabilitySettingsPage() {
                   </label>
 
                   {schedule.enabled ? (
-                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#6E6E73]">
                       <Input
                         type="time"
                         value={schedule.start}
@@ -192,7 +192,7 @@ export default function OwnerAvailabilitySettingsPage() {
                       />
                     </div>
                   ) : (
-                    <span className="text-xs font-bold text-slate-400 italic">Unavailable</span>
+                    <span className="text-xs font-bold text-[#8E8E93] italic">Unavailable</span>
                   )}
                 </div>
               );
@@ -233,7 +233,7 @@ export default function OwnerAvailabilitySettingsPage() {
               <CardTitle className="text-base font-extrabold text-slate-800 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-rose-600" /> Blackout Dates
               </CardTitle>
-              <CardDescription className="text-xs text-slate-400 font-semibold">
+              <CardDescription className="text-xs text-[#8E8E93] font-semibold">
                 Block specific holidays or vacation days from being booked.
               </CardDescription>
             </CardHeader>
@@ -249,14 +249,14 @@ export default function OwnerAvailabilitySettingsPage() {
                 <Button
                   onClick={handleAddBlackoutDate}
                   disabled={!newBlackoutDate}
-                  className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-10 px-3 font-bold text-xs shrink-0 flex items-center gap-1"
+                  className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl h-10 px-3 font-bold text-xs shrink-0 flex items-center gap-1"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </Button>
               </div>
 
               {blackoutDates.length === 0 ? (
-                <p className="text-xs text-slate-400 italic text-center py-2">No blackout dates added.</p>
+                <p className="text-xs text-[#8E8E93] italic text-center py-2">No blackout dates added.</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {blackoutDates.map((dateStr) => (
@@ -267,7 +267,7 @@ export default function OwnerAvailabilitySettingsPage() {
                       <span>{new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                       <button
                         onClick={() => handleRemoveBlackoutDate(dateStr)}
-                        className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                        className="text-[#8E8E93] hover:text-rose-600 transition-colors p-1"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

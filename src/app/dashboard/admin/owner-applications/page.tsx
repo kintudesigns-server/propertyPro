@@ -104,9 +104,9 @@ export default function AdminOwnerApplicationsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Owner Applications</h1>
-          <p className="text-slate-500 mt-0.5">Review and manage owner account requests</p>
+          <p className="text-[#6E6E73] mt-0.5">Review and manage owner account requests</p>
         </div>
-        <Button variant="ghost" size="icon" onClick={fetchApplications} className="text-slate-500">
+        <Button variant="ghost" size="icon" onClick={fetchApplications} className="text-[#6E6E73]">
           <RefreshCw className="h-5 w-5" />
         </Button>
       </div>
@@ -135,13 +135,13 @@ export default function AdminOwnerApplicationsPage() {
       {/* Filters & Search Toolbar */}
       <div className="bg-white border border-slate-200 p-2 rounded-[1.25rem] shadow-sm flex flex-col md:flex-row gap-3 items-center">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applications by name or email..." className="pl-10 h-12 w-full rounded-xl border-none bg-slate-50 focus-visible:ring-0 shadow-inner font-medium text-slate-800" />
         </div>
         <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
         <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide px-1">
           {["ALL", "PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED"].map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${statusFilter === s ? 'bg-slate-900 text-white shadow-md' : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
+            <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${statusFilter === s ? 'bg-slate-900 text-white shadow-md' : 'bg-transparent text-[#6E6E73] hover:bg-slate-100 hover:text-slate-900'}`}>
               {s === "ALL" ? "All Applications" : s === "UNDER_REVIEW" ? "Under Review" : s.charAt(0) + s.slice(1).toLowerCase()}
             </button>
           ))}
@@ -153,7 +153,7 @@ export default function AdminOwnerApplicationsPage() {
         {filtered.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
             <FileText className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No applications found</p>
+            <p className="text-[#6E6E73] font-medium">No applications found</p>
           </div>
         ) : (
           filtered.map(app => {
@@ -168,21 +168,21 @@ export default function AdminOwnerApplicationsPage() {
                   </div>
                   <div>
                     <p className="font-bold text-slate-900 text-base">{app.name}</p>
-                    <p className="text-slate-500 text-sm font-medium">{app.email}</p>
+                    <p className="text-[#6E6E73] text-sm font-medium">{app.email}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-8 text-sm text-slate-600 flex-1 justify-between md:justify-center">
+                <div className="flex items-center gap-8 text-sm text-[#6E6E73] flex-1 justify-between md:justify-center">
                   <div>
-                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">Entity</p>
+                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Entity</p>
                     <p className="font-bold text-slate-800">{app.entityType}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">Portfolio</p>
+                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Portfolio</p>
                     <p className="font-bold text-slate-800">{app.portfolioSize}</p>
                   </div>
                   <div className="hidden lg:block">
-                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">Applied</p>
+                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Applied</p>
                     <p className="font-bold text-slate-800">{new Date(app.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -209,7 +209,7 @@ export default function AdminOwnerApplicationsPage() {
             <div className="p-6 border-b border-slate-100 flex justify-between items-start shrink-0">
               <div>
                 <h2 className="text-xl font-black text-slate-900">{selectedApp.name}</h2>
-                <p className="text-slate-500 text-sm">{selectedApp.entityType} · Applied {new Date(selectedApp.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+                <p className="text-[#6E6E73] text-sm">{selectedApp.entityType} · Applied {new Date(selectedApp.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
               </div>
               <Badge className={`${statusConfig[selectedApp.status].bg} ${statusConfig[selectedApp.status].color} border text-xs font-bold px-2.5 py-1 rounded-lg`}>{statusConfig[selectedApp.status].label}</Badge>
             </div>
@@ -218,9 +218,9 @@ export default function AdminOwnerApplicationsPage() {
               {/* KYB Details Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div className="flex items-start gap-2.5">
-                  <Mail className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <Mail className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Email</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Email</p>
                     <a href={`mailto:${selectedApp.email}`} className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-semibold flex items-center gap-1">
                       {selectedApp.email} <ExternalLink className="h-3 w-3" />
                     </a>
@@ -228,9 +228,9 @@ export default function AdminOwnerApplicationsPage() {
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Phone className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <Phone className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Phone</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Phone</p>
                     <a href={`tel:${selectedApp.phone}`} className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-semibold flex items-center gap-1">
                       {selectedApp.phone} <ExternalLink className="h-3 w-3" />
                     </a>
@@ -238,37 +238,37 @@ export default function AdminOwnerApplicationsPage() {
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Users className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <Users className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Portfolio Size</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Portfolio Size</p>
                     <p className="text-slate-900 text-sm font-semibold">{selectedApp.portfolioSize}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <FileText className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <FileText className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Current Software</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Current Software</p>
                     {selectedApp.currentSoftware ? (
                       <p className="text-slate-900 text-sm font-semibold">{selectedApp.currentSoftware}</p>
                     ) : (
-                      <p className="text-slate-400 italic text-sm font-semibold">None reported</p>
+                      <p className="text-[#8E8E93] italic text-sm font-semibold">None reported</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Building2 className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <Building2 className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Entity Type</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Entity Type</p>
                     <p className="text-slate-900 text-sm font-semibold">{selectedApp.entityType}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Globe className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <Globe className="h-4 w-4 text-[#8E8E93] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Website</p>
+                    <p className="text-[#6E6E73] text-xs font-medium">Website</p>
                     {selectedApp.website ? (
                       <a 
                         href={selectedApp.website.startsWith("http") ? selectedApp.website : `https://${selectedApp.website}`}
@@ -279,7 +279,7 @@ export default function AdminOwnerApplicationsPage() {
                         {selectedApp.website} <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : (
-                      <p className="text-slate-400 italic text-sm font-semibold">Not provided</p>
+                      <p className="text-[#8E8E93] italic text-sm font-semibold">Not provided</p>
                     )}
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export default function AdminOwnerApplicationsPage() {
               {/* Rejection reason (shown only when rejecting) */}
               {selectedApp.status !== "REJECTED" && selectedApp.status !== "APPROVED" && (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-slate-700">Rejection Reason <span className="text-slate-400 font-normal">(Required if rejecting)</span></label>
+                  <label className="text-sm font-bold text-slate-700">Rejection Reason <span className="text-[#8E8E93] font-normal">(Required if rejecting)</span></label>
                   <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} rows={2} className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none" placeholder="Explain why the application was rejected..." />
                 </div>
               )}

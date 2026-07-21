@@ -60,7 +60,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const isOwner = role === "OWNER";
   const isTenant = role === "TENANT";
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(true);
+
+  React.useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [pathname]);
   const [propertiesOpen, setPropertiesOpen] = useState(true);
   const [tenantsOpen, setTenantsOpen] = useState(true);
   const [teamOpen, setTeamOpen] = useState(false);
@@ -152,31 +157,48 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#F0F4F8] flex flex-col items-center justify-center text-[#111111] gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3B82F6]"></div>
-        <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Loading...</p>
+      <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center text-[#1D1D1F] gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007AFF]"></div>
+        <p className="text-[#6E6E73] font-semibold text-xs tracking-wider uppercase">Loading PropertyPro...</p>
       </div>
     );
   }
 
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] font-sans flex text-[#111111]">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-[#F5F5F7] font-sans flex text-[#1D1D1F]">
+      {/* Mobile Backdrop Overlay */}
+      {mobileDrawerOpen && (
+        <div 
+          onClick={() => setMobileDrawerOpen(false)}
+          className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40 md:hidden transition-opacity"
+        />
+      )}
+
+      {/* Sidebar (Desktop + Mobile Drawer) */}
       <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-0 hidden md:flex md:w-20"
-        } flex-col justify-between bg-white border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 z-30 fixed md:relative h-screen`}
+        className={`fixed md:relative top-0 bottom-0 left-0 z-50 flex flex-col justify-between bg-white border-r border-[#E5E5EA] transition-all duration-300 h-screen ${
+          mobileDrawerOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full md:translate-x-0"
+        } ${
+          sidebarOpen ? "md:w-64" : "md:w-20"
+        }`}
       >
         <div className="flex flex-col gap-6 w-full h-full overflow-y-auto">
           {/* Logo Section */}
-          <div className="flex items-center gap-3 px-6 py-6 sticky top-0 bg-white z-10">
-            <div className="bg-[#3B82F6] text-white p-2 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+          <div className="flex items-center gap-3 px-6 py-5 sticky top-0 bg-white z-10 border-b border-[#F0F0F0]">
+            <div className="bg-[#007AFF] text-white p-2 rounded-lg flex items-center justify-center shadow-xs">
               <Building className="h-5 w-5" />
             </div>
             {sidebarOpen && (
-              <span className="font-extrabold text-lg tracking-tight whitespace-nowrap">PropertyPro</span>
+              <span className="font-semibold text-base tracking-tight text-[#1D1D1F] whitespace-nowrap">PropertyPro</span>
             )}
+            {/* Mobile close button in sidebar */}
+            <button
+              onClick={() => setMobileDrawerOpen(false)}
+              className="ml-auto p-1.5 text-[#6E6E73] hover:text-[#1D1D1F] rounded-lg md:hidden"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Navigation Links */}
@@ -1364,55 +1386,219 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Topbar */}
-        <header className="h-20 bg-[#F0F4F8] flex items-center justify-between px-6 md:px-10 shrink-0">
-          <div className="flex items-center gap-4">
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA] flex items-center justify-between px-4 md:px-8 shrink-0 z-20 sticky top-0">
+          <div className="flex items-center gap-3">
+            {/* Mobile Hamburger Drawer Trigger */}
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 bg-white rounded-xl text-[#64748B] hover:text-[#0F172A] shadow-sm border border-[#E2E8F0] transition-colors"
+              onClick={() => setMobileDrawerOpen(true)}
+              className="p-2 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F0F0F0] rounded-lg transition-colors md:hidden"
+              title="Open Navigation"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden md:flex relative w-80 opacity-60 cursor-not-allowed" title="Search coming soon">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            {/* Desktop Sidebar Toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="hidden md:flex p-2 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F0F0F0] rounded-lg transition-colors"
+              title="Toggle Sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            
+            {/* Mobile Brand Label */}
+            <div className="md:hidden flex items-center gap-2">
+              <div className="bg-[#007AFF] text-white p-1.5 rounded-lg shadow-xs">
+                <Building className="h-4 w-4" />
+              </div>
+              <span className="font-semibold text-base text-[#1D1D1F] tracking-tight">PropertyPro</span>
+            </div>
+
+            {/* Desktop Search bar */}
+            <div className="hidden md:flex relative w-80 opacity-75" title="Search platform">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AEAEB2]" />
               <input
                 type="text"
                 disabled
-                placeholder="Search coming soon..."
-                className="pl-10 pr-12 py-2.5 w-full bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#94A3B8] placeholder-[#94A3B8] cursor-not-allowed shadow-sm transition-all"
+                placeholder="Search platform..."
+                className="pl-9 pr-10 py-1.5 w-full bg-[#F0F0F0] border-0 rounded-lg text-xs text-[#1D1D1F] placeholder-[#C7C7CC] cursor-not-allowed shadow-none focus:bg-white transition-all"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 font-mono text-[9px] font-medium text-[#64748B]">
-                <span className="text-[10px]">⌘</span>K
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-4 select-none items-center gap-0.5 rounded border border-[#E5E5EA] bg-white px-1.5 font-mono text-[9px] font-medium text-[#6E6E73]">
+                ⌘K
               </kbd>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-3">
             <MessageBadge />
             <NotificationDropdown />
             <Link
               href={isOwner ? "/dashboard/owner?tab=settings" : isTenant ? "/dashboard/tenant?tab=settings" : "/dashboard/admin/settings/profile"}
-              className="p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] transition-colors hidden md:block"
+              className="p-2 rounded-full text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F0F0F0] transition-colors hidden md:flex"
               title="Profile Settings"
             >
               <Settings className="h-5 w-5" />
             </Link>
-            <div className="h-8 w-px bg-[#E2E8F0] hidden md:block" />
+            <div className="h-6 w-px bg-[#E5E5EA] hidden md:block" />
             <button 
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-red-500 hover:bg-red-50 transition-colors"
+              className="flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-full md:rounded-lg text-red-600 hover:bg-red-50 transition-colors text-xs font-semibold"
               title="Sign Out"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
+              <span className="hidden md:inline">Sign Out</span>
             </button>
           </div>
         </header>
 
         {/* Dynamic Page Content */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-10">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-24 md:pb-10 bg-[#F5F5F7]">
           {children}
         </div>
+
+        {/* Mobile iOS Bottom Tab Bar */}
+        <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-xl border-t border-[#E5E5EA] z-40 flex items-center justify-around px-2 pb-safe md:hidden shadow-lg">
+          {isTenant ? (
+            <>
+              <Link
+                href="/dashboard"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isTenantTabActive("overview") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Home</span>
+              </Link>
+              <Link
+                href="/dashboard/leases/my-leases"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isTenantTabActive("my-leases") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <ShieldCheck className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Lease</span>
+              </Link>
+              <Link
+                href="/dashboard/payments/pay-rent"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isTenantTabActive("pay-rent") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Wallet className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Pay Rent</span>
+              </Link>
+              <Link
+                href="/dashboard/maintenance/my-requests"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isTenantTabActive("my-requests") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Wrench className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Requests</span>
+              </Link>
+              <button
+                onClick={() => setMobileDrawerOpen(true)}
+                className="flex flex-col items-center justify-center gap-0.5 py-1 px-3 text-[#AEAEB2]"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="text-[10px] font-medium">More</span>
+              </button>
+            </>
+          ) : isInspector ? (
+            <>
+              <Link
+                href="/dashboard/inspector"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  pathname === "/dashboard/inspector" ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Home</span>
+              </Link>
+              <Link
+                href="/dashboard/inspector/active"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/inspector/active") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Wrench className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Assigned</span>
+              </Link>
+              <Link
+                href="/dashboard/inspector/inspections"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/inspector/inspections") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <ClipboardList className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Walkthroughs</span>
+              </Link>
+              <Link
+                href="/dashboard/calendar"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/calendar") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Calendar className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Calendar</span>
+              </Link>
+              <button
+                onClick={() => setMobileDrawerOpen(true)}
+                className="flex flex-col items-center justify-center gap-0.5 py-1 px-3 text-[#AEAEB2]"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="text-[10px] font-medium">More</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  pathname === "/dashboard" ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Home</span>
+              </Link>
+              <Link
+                href="/dashboard/properties"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/properties") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Building className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Properties</span>
+              </Link>
+              <Link
+                href="/dashboard/leases"
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/leases") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <FileText className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Leases</span>
+              </Link>
+              <Link
+                href={isOwner ? "/dashboard/accounting/wallet" : "/dashboard/admin/payouts"}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 ${
+                  isActive("/dashboard/accounting/wallet") || isActive("/dashboard/admin/payouts") ? "text-[#007AFF]" : "text-[#AEAEB2]"
+                }`}
+              >
+                <Wallet className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{isOwner ? "Wallet" : "Payouts"}</span>
+              </Link>
+              <button
+                onClick={() => setMobileDrawerOpen(true)}
+                className="flex flex-col items-center justify-center gap-0.5 py-1 px-3 text-[#AEAEB2]"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="text-[10px] font-medium">More</span>
+              </button>
+            </>
+          )}
+        </nav>
       </main>
     </div>
   );

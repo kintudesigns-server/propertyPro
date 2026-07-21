@@ -97,7 +97,7 @@ const STATUS_THEMES = {
   },
   CANCELLED: {
     label: "Cancelled",
-    badge: "bg-slate-100 text-slate-600 border-slate-200",
+    badge: "bg-slate-100 text-[#6E6E73] border-slate-200",
     dot: "bg-slate-400",
   },
 };
@@ -109,7 +109,7 @@ function StarRow({ rating }: { rating: number }) {
         <Star
           key={i}
           className={`h-3.5 w-3.5 ${
-            i <= rating ? "text-amber-400 fill-amber-400" : "text-slate-200"
+            i <= rating ? "text-amber-400 fill-amber-400" : "text-[#EBEBF0]"
           }`}
         />
       ))}
@@ -312,7 +312,7 @@ export default function TenantToursPage() {
             <h1 className="text-2xl font-black tracking-tight text-slate-900">
               My Showings & Tours
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm mt-0.5">
+            <p className="text-[#6E6E73] text-xs md:text-sm mt-0.5">
               Manage your upcoming property viewings, access virtual meeting links, and leave feedback.
             </p>
           </div>
@@ -358,7 +358,7 @@ export default function TenantToursPage() {
               color: "slate",
               sub: "Inactive requests",
               border: "border-slate-200/60 bg-slate-100/50",
-              text: "text-slate-600",
+              text: "text-[#6E6E73]",
             },
           ].map((m) => (
             <Card
@@ -372,7 +372,7 @@ export default function TenantToursPage() {
                 <p className="text-2xl font-black text-slate-900 mt-1">
                   {m.count}
                 </p>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5">
                   {m.sub}
                 </p>
               </CardContent>
@@ -401,7 +401,7 @@ export default function TenantToursPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                     active
                       ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-800"
+                      : "text-[#6E6E73] hover:text-slate-800"
                   }`}
                 >
                   {tab.label}
@@ -410,7 +410,7 @@ export default function TenantToursPage() {
                       className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
                         active
                           ? "bg-slate-100 text-slate-700"
-                          : "bg-slate-200/70 text-slate-600"
+                          : "bg-slate-200/70 text-[#6E6E73]"
                       }`}
                     >
                       {count}
@@ -422,7 +422,7 @@ export default function TenantToursPage() {
           </div>
 
           <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#8E8E93]" />
             <Input
               placeholder="Search property or address..."
               value={searchQuery}
@@ -434,14 +434,14 @@ export default function TenantToursPage() {
 
         {/* ── Main Tour Cards List ── */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-xs font-semibold">
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-[#8E8E93] text-xs font-semibold">
             Loading tour schedules...
           </div>
         ) : filteredTours.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
             <CalendarIcon className="h-10 w-10 text-slate-300 mx-auto" />
             <p className="text-sm font-bold text-slate-700">No showings match your filter</p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            <p className="text-xs text-[#8E8E93] max-w-sm mx-auto">
               Schedule your next property walkthrough directly from any property listing!
             </p>
             <Link href="/listings" className="inline-block pt-2">
@@ -490,13 +490,13 @@ export default function TenantToursPage() {
                         
                         {/* Date Badge Box */}
                         <div className="w-16 shrink-0 bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center">
-                          <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase">
+                          <span className="text-[9px] font-black tracking-wider text-[#8E8E93] uppercase">
                             {dayName}
                           </span>
                           <span className="text-lg font-black text-slate-900 leading-tight">
                             {dayNum}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-500 uppercase">
+                          <span className="text-[9px] font-bold text-[#6E6E73] uppercase">
                             {monthName}
                           </span>
                         </div>
@@ -520,15 +520,15 @@ export default function TenantToursPage() {
                             )}
                           </div>
 
-                          <p className="text-xs text-slate-500 flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <p className="text-xs text-[#6E6E73] flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5 text-[#8E8E93] shrink-0" />
                             <span>{tour.property.address}</span>
                           </p>
 
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#6E6E73] pt-0.5">
                             <span className="flex items-center gap-1 font-semibold text-slate-700">
-                              <Clock className="h-3.5 w-3.5 text-slate-400" />
-                              {dateStr} at {timeStr} <span className="text-[10px] text-slate-400 font-bold">{tzAbbrev}</span>
+                              <Clock className="h-3.5 w-3.5 text-[#8E8E93]" />
+                              {dateStr} at {timeStr} <span className="text-[10px] text-[#8E8E93] font-bold">{tzAbbrev}</span>
                             </span>
 
                             <span>
@@ -537,8 +537,8 @@ export default function TenantToursPage() {
                                   <Video className="h-3 w-3" /> Virtual Video Tour
                                 </span>
                               ) : (
-                                <span className="flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md text-[11px] font-semibold">
-                                  <MapPin className="h-3 w-3 text-slate-400" /> In-Person Showing
+                                <span className="flex items-center gap-1 text-[#6E6E73] bg-slate-100 px-2 py-0.5 rounded-md text-[11px] font-semibold">
+                                  <MapPin className="h-3 w-3 text-[#8E8E93]" /> In-Person Showing
                                 </span>
                               )}
                             </span>
@@ -552,7 +552,7 @@ export default function TenantToursPage() {
                           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${theme.dot}`} />
                           {theme.label}
                         </Badge>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-[#8E8E93]">
                           Requested {new Date(tour.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -629,7 +629,7 @@ export default function TenantToursPage() {
                           </span>
                         )}
                         {tour.status === "CONFIRMED" && (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-[#6E6E73]">
                             Need to adjust date? You can reschedule up to 24h prior.
                           </span>
                         )}
@@ -679,9 +679,9 @@ export default function TenantToursPage() {
                               setRescheduleDate(tour.scheduledAt.split("T")[0]);
                               setRescheduleOpen(true);
                             }}
-                            className="h-8 px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl"
+                            className="h-8 px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl"
                           >
-                            <RotateCcw className="h-3 w-3 mr-1 text-slate-500" /> Reschedule
+                            <RotateCcw className="h-3 w-3 mr-1 text-[#6E6E73]" /> Reschedule
                           </Button>
                         )}
 
@@ -740,7 +740,7 @@ export default function TenantToursPage() {
                   <div className="bg-slate-950 text-white p-6 shrink-0 relative">
                     <button
                       onClick={() => setDetailTour(null)}
-                      className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+                      className="absolute top-5 right-5 text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -757,8 +757,8 @@ export default function TenantToursPage() {
 
                       <div>
                         <h2 className="text-xl font-black text-white">{detailTour.property.name}</h2>
-                        <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <p className="text-xs text-[#8E8E93] mt-1 flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5 text-[#8E8E93] shrink-0" />
                           {detailTour.property.address}
                           {detailTour.unit && <span className="font-semibold text-white"> · Unit {detailTour.unit.name}</span>}
                         </p>
@@ -772,23 +772,23 @@ export default function TenantToursPage() {
                     {/* Date & Format */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Scheduled Time</p>
+                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Scheduled Time</p>
                         <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5">
-                          <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
+                          <CalendarIcon className="h-3.5 w-3.5 text-[#6E6E73]" />
                           {dateStr}
                         </p>
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-slate-500" />
-                          {timeStr} <span className="text-slate-400 text-[10px]">{tzAbbrev}</span>
+                          <Clock className="h-3.5 w-3.5 text-[#6E6E73]" />
+                          {timeStr} <span className="text-[#8E8E93] text-[10px]">{tzAbbrev}</span>
                         </p>
                       </div>
 
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Showing Format</p>
+                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Showing Format</p>
                         <p className="text-xs font-bold text-slate-900 pt-0.5">
                           {detailTour.tourType === "VIDEO_CALL" ? "Virtual Video Tour" : "In-Person Property Visit"}
                         </p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-[#6E6E73]">
                           {detailTour.tourType === "VIDEO_CALL" ? "Join online via video link" : "Meet landlord on-site"}
                         </p>
                       </div>
@@ -797,7 +797,7 @@ export default function TenantToursPage() {
                     {/* Virtual Meeting Link */}
                     {detailTour.meetingLink && (
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           Virtual Video Call Link
                         </Label>
                         <div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-2xl p-3">
@@ -828,7 +828,7 @@ export default function TenantToursPage() {
                     {/* Landlord Visit Instructions */}
                     {detailTour.ownerNotes && (
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           {detailTour.tourType === "VIDEO_CALL"
                             ? "Virtual Tour Instructions / Agenda"
                             : "Entry & Parking Instructions"}
@@ -842,7 +842,7 @@ export default function TenantToursPage() {
                     {/* Submitted Feedback */}
                     {detailTour.feedbackRating && (
                       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           Your Submitted Feedback
                         </p>
                         <div className="flex items-center gap-2">
@@ -875,7 +875,7 @@ export default function TenantToursPage() {
                     <Button
                       variant="ghost"
                       onClick={() => setDetailTour(null)}
-                      className="h-9 text-xs font-bold rounded-xl text-slate-600"
+                      className="h-9 text-xs font-bold rounded-xl text-[#6E6E73]"
                     >
                       Close
                     </Button>
@@ -904,7 +904,7 @@ export default function TenantToursPage() {
               <DialogTitle className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-blue-600" /> Reschedule Tour
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-[#6E6E73]">
                 Select a new date and time slot for your tour of {actionTour?.property.name}.
               </DialogDescription>
             </DialogHeader>
@@ -961,7 +961,7 @@ export default function TenantToursPage() {
           <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-sm p-6">
             <DialogHeader>
               <DialogTitle className="text-lg font-extrabold text-rose-600">Cancel Showing Request</DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
+              <DialogDescription className="text-xs text-[#8E8E93]">
                 Please let the landlord know why you are cancelling this appointment.
               </DialogDescription>
             </DialogHeader>
@@ -996,7 +996,7 @@ export default function TenantToursPage() {
           <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-md p-6">
             <DialogHeader>
               <DialogTitle className="text-lg font-extrabold">Rate Your Showing Visit</DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
+              <DialogDescription className="text-xs text-[#8E8E93]">
                 How was your overall experience touring {actionTour?.property.name}?
               </DialogDescription>
             </DialogHeader>
@@ -1016,13 +1016,13 @@ export default function TenantToursPage() {
                     >
                       <Star
                         className={`h-8 w-8 ${
-                          star <= userRating ? "text-amber-500 fill-amber-500" : "text-slate-200"
+                          star <= userRating ? "text-amber-500 fill-amber-500" : "text-[#EBEBF0]"
                         }`}
                       />
                     </button>
                   ))}
                 </div>
-                <p className="text-xs font-bold text-slate-600">
+                <p className="text-xs font-bold text-[#6E6E73]">
                   {userRating === 5 && "⭐ Excellent - Loved the property!"}
                   {userRating === 4 && "👍 Good Experience"}
                   {userRating === 3 && "😐 Average Tour"}

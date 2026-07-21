@@ -61,7 +61,7 @@ export function UnmaskAccountNumber({ apiUrl, maskedNumber }: { apiUrl: string; 
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-slate-400 hover:text-red-600 rounded-md"
+          className="h-6 w-6 p-0 text-[#8E8E93] hover:text-red-600 rounded-md"
           onClick={handleReveal}
           disabled={loading}
           title={unmasked ? "Hide account number" : "Reveal full account number"}
@@ -72,7 +72,7 @@ export function UnmaskAccountNumber({ apiUrl, maskedNumber }: { apiUrl: string; 
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 w-6 p-0 text-slate-400 hover:text-slate-600 rounded-md"
+        className="h-6 w-6 p-0 text-[#8E8E93] hover:text-[#6E6E73] rounded-md"
         onClick={handleCopy}
         title="Copy"
       >

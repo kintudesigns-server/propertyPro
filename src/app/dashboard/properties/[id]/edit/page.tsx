@@ -352,39 +352,39 @@ export default function EditPropertyPage() {
   };
 
   if (loadingData) {
-    return <div className="p-10 text-center font-bold text-[#64748B]">Loading Property Form...</div>;
+    return <div className="p-10 text-center font-bold text-[#6E6E73]">Loading Property Form...</div>;
   }
 
   return (
     <div className="w-full max-w-5xl mx-auto pt-6 space-y-6 pb-24 px-2 sm:px-0">
       <div className="flex items-center gap-4 mb-6">
         <Link href={`/dashboard/properties/${id}`}>
-          <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl bg-white border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]">
+          <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl bg-white border border-[#E5E5EA] shadow-sm text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-[#0F172A] tracking-tight">Edit Property</h1>
-          <p className="text-[#64748B] text-sm font-medium mt-1">Update your property details and unit information.</p>
+          <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Edit Property</h1>
+          <p className="text-[#6E6E73] text-sm font-medium mt-1">Update your property details and unit information.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* General Info */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-            <h2 className="font-bold text-[#0F172A] text-lg">General Information</h2>
-            <p className="text-sm text-[#64748B]">Basic details about this property.</p>
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
+            <h2 className="font-bold text-[#1D1D1F] text-lg">General Information</h2>
+            <p className="text-sm text-[#6E6E73]">Basic details about this property.</p>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Property Name <span className="text-red-500">*</span></label>
-                <Input required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Sunset Apartments" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">Property Name <span className="text-red-500">*</span></label>
+                <Input required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Sunset Apartments" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Property Type</label>
-                <select name="type" value={formData.type} onChange={handleChange} className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm text-[#0F172A] outline-none">
+                <label className="text-sm font-bold text-[#1D1D1F]">Property Type</label>
+                <select name="type" value={formData.type} onChange={handleChange} className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none">
                   <option value="Apartment">Apartment Complex</option>
                   <option value="House">Single Family House</option>
                   <option value="Commercial">Commercial Building</option>
@@ -394,12 +394,12 @@ export default function EditPropertyPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Year Built</label>
-                <Input name="yearBuilt" type="number" value={formData.yearBuilt} onChange={handleChange} placeholder="e.g. 2015" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">Year Built</label>
+                <Input name="yearBuilt" type="number" value={formData.yearBuilt} onChange={handleChange} placeholder="e.g. 2015" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Status</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full h-11 bg-white border border-[#E2E8F0] rounded-xl px-4 text-sm text-[#0F172A] outline-none">
+                <label className="text-sm font-bold text-[#1D1D1F]">Status</label>
+                <select name="status" value={formData.status} onChange={handleChange} className="w-full h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none">
                   <option value="AVAILABLE">Available</option>
                   <option value="OCCUPIED">Occupied</option>
                   <option value="MAINTENANCE">Under Maintenance</option>
@@ -408,28 +408,28 @@ export default function EditPropertyPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0F172A]">Description</label>
+              <label className="text-sm font-bold text-[#1D1D1F]">Description</label>
               <textarea 
                 name="description" 
                 value={formData.description} 
                 onChange={handleChange} 
                 rows={4}
                 placeholder="Write a detailed description of the property..." 
-                className="w-full bg-white border border-[#E2E8F0] rounded-xl p-4 text-sm text-[#0F172A] outline-none focus:ring-2 focus:ring-[#3B82F6] resize-y" 
+                className="w-full bg-white border border-[#E5E5EA] rounded-xl p-4 text-sm text-[#1D1D1F] outline-none focus:ring-2 focus:ring-[#007AFF] resize-y" 
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Address */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-            <h2 className="font-bold text-[#0F172A] text-lg">Address Information</h2>
-            <p className="text-sm text-[#64748B]">Where is this property located?</p>
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
+            <h2 className="font-bold text-[#1D1D1F] text-lg">Address Information</h2>
+            <p className="text-sm text-[#6E6E73]">Where is this property located?</p>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2 relative" onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
-              <label className="text-sm font-bold text-[#0F172A]">Street Address <span className="text-red-500">*</span></label>
+              <label className="text-sm font-bold text-[#1D1D1F]">Street Address <span className="text-red-500">*</span></label>
               <div className="relative">
                 <Input 
                   required 
@@ -440,7 +440,7 @@ export default function EditPropertyPage() {
                     if (suggestions.length > 0) setShowSuggestions(true);
                   }}
                   placeholder="123 Main St" 
-                  className="h-11 rounded-xl bg-white border-[#E2E8F0] pr-10" 
+                  className="h-11 rounded-xl bg-white border-[#E5E5EA] pr-10" 
                 />
                 {searchingAddress && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -450,18 +450,18 @@ export default function EditPropertyPage() {
               </div>
               
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#E2E8F0] rounded-xl shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#E5E5EA] rounded-xl shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
                   {suggestions.map((s, index) => (
                     <button
                       key={`${s.place_id}-${index}`}
                       type="button"
                       onMouseDown={() => selectSuggestion(s)}
                       onClick={() => selectSuggestion(s)}
-                      className="w-full text-left px-4 py-3 hover:bg-[#F8FAFC] transition-colors border-b border-[#F1F5F9] last:border-b-0 flex flex-col gap-0.5"
+                      className="w-full text-left px-4 py-3 hover:bg-[#F2F2F7] transition-colors border-b border-[#F1F5F9] last:border-b-0 flex flex-col gap-0.5"
                     >
-                      <span className="font-semibold text-sm text-[#0F172A]">{s.display_name}</span>
+                      <span className="font-semibold text-sm text-[#1D1D1F]">{s.display_name}</span>
                       {s.address && (
-                        <span className="text-xs text-[#64748B]">
+                        <span className="text-xs text-[#6E6E73]">
                           {[
                             s.address.city || s.address.town || s.address.village || s.address.suburb,
                             s.address.state,
@@ -477,33 +477,33 @@ export default function EditPropertyPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">City <span className="text-red-500">*</span></label>
-                <Input required name="city" value={formData.city} onChange={handleChange} placeholder="e.g. London" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">City <span className="text-red-500">*</span></label>
+                <Input required name="city" value={formData.city} onChange={handleChange} placeholder="e.g. London" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">State / Province</label>
-                <Input name="state" value={formData.state} onChange={handleChange} placeholder="e.g. NY" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">State / Province</label>
+                <Input name="state" value={formData.state} onChange={handleChange} placeholder="e.g. NY" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">ZIP / Postal Code</label>
-                <Input name="zip" value={formData.zip} onChange={handleChange} placeholder="e.g. 10001" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">ZIP / Postal Code</label>
+                <Input name="zip" value={formData.zip} onChange={handleChange} placeholder="e.g. 10001" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0F172A]">Country <span className="text-red-500">*</span></label>
-                <Input required name="country" value={formData.country} onChange={handleChange} placeholder="e.g. UK" className="h-11 rounded-xl bg-white border-[#E2E8F0]" />
+                <label className="text-sm font-bold text-[#1D1D1F]">Country <span className="text-red-500">*</span></label>
+                <Input required name="country" value={formData.country} onChange={handleChange} placeholder="e.g. UK" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Property Images Upload Area */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-            <h2 className="font-bold text-[#0F172A] text-lg">Property Images</h2>
-            <p className="text-sm text-[#64748B]">Upload high-quality images to showcase your property.</p>
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
+            <h2 className="font-bold text-[#1D1D1F] text-lg">Property Images</h2>
+            <p className="text-sm text-[#6E6E73]">Upload high-quality images to showcase your property.</p>
           </div>
           <CardContent className="p-6 space-y-6">
             <input 
@@ -517,19 +517,19 @@ export default function EditPropertyPage() {
 
             <div 
               onClick={() => document.getElementById("property-images-input")?.click()}
-              className="border-2 border-dashed border-[#CBD5E1] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F8FAFC] transition-colors cursor-pointer bg-white"
+              className="border-2 border-dashed border-[#CBD5E1] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F2F2F7] transition-colors cursor-pointer bg-white"
             >
-              <div className="h-16 w-16 bg-[#EFF6FF] text-[#3B82F6] rounded-full flex items-center justify-center mb-4">
+              <div className="h-16 w-16 bg-[#EFF6FF] text-[#007AFF] rounded-full flex items-center justify-center mb-4">
                 {uploadingPropertyImages ? (
                   <Loader2 className="h-8 w-8 animate-spin" />
                 ) : (
                   <UploadCloud className="h-8 w-8" />
                 )}
               </div>
-              <h3 className="text-lg font-bold text-[#0F172A]">
+              <h3 className="text-lg font-bold text-[#1D1D1F]">
                 {uploadingPropertyImages ? "Uploading images..." : "Upload property images"}
               </h3>
-              <p className="text-sm text-[#64748B] mt-1 mb-4">Drag and drop your images here, or click to browse files</p>
+              <p className="text-sm text-[#6E6E73] mt-1 mb-4">Drag and drop your images here, or click to browse files</p>
               <div className="flex items-center gap-4 text-xs font-semibold text-[#22C55E] mb-6">
                 <span>✓ PNG, JPG, WEBP</span>
                 <span>✓ Up to 10MB each</span>
@@ -537,7 +537,7 @@ export default function EditPropertyPage() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="h-10 px-6 rounded-full border-[#3B82F6] text-[#3B82F6] font-bold hover:bg-[#EFF6FF]"
+                className="h-10 px-6 rounded-full border-[#007AFF] text-[#007AFF] font-bold hover:bg-[#EFF6FF]"
               >
                 Choose Files
               </Button>
@@ -549,7 +549,7 @@ export default function EditPropertyPage() {
                 {formData.images.map((url) => {
                   const isCover = formData.coverPhoto === url;
                   return (
-                    <div key={url} className="group relative aspect-video rounded-xl overflow-hidden border border-[#E2E8F0] shadow-sm bg-slate-100">
+                    <div key={url} className="group relative aspect-video rounded-xl overflow-hidden border border-[#E5E5EA] shadow-sm bg-slate-100">
                       <img src={url} alt="Property" className="w-full h-full object-cover" />
                       
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -559,7 +559,7 @@ export default function EditPropertyPage() {
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
                             isCover 
                               ? "bg-[#22C55E] text-white" 
-                              : "bg-white text-[#0F172A] hover:bg-slate-50"
+                              : "bg-white text-[#1D1D1F] hover:bg-[#F5F5F7]"
                           }`}
                         >
                           {isCover ? "Cover" : "Set Cover"}
@@ -587,15 +587,15 @@ export default function EditPropertyPage() {
         </Card>
 
         {/* Amenities & Features */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50">
-            <h2 className="font-bold text-[#0F172A] text-lg flex items-center gap-2">
-              <div className="bg-[#EFF6FF] text-[#3B82F6] p-1.5 rounded-full">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
+            <h2 className="font-bold text-[#1D1D1F] text-lg flex items-center gap-2">
+              <div className="bg-[#EFF6FF] text-[#007AFF] p-1.5 rounded-full">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
               </div>
               Amenities & Features
             </h2>
-            <p className="text-sm text-[#64748B] mt-1">Select the core amenities and features that best describe this property.</p>
+            <p className="text-sm text-[#6E6E73] mt-1">Select the core amenities and features that best describe this property.</p>
           </div>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -608,12 +608,12 @@ export default function EditPropertyPage() {
                     onClick={() => toggleAmenity(amenity)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
                       isSelected 
-                        ? "border-[#3B82F6] bg-[#EFF6FF] text-[#0F172A]" 
-                        : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#CBD5E1]"
+                        ? "border-[#007AFF] bg-[#EFF6FF] text-[#1D1D1F]" 
+                        : "border-[#E5E5EA] bg-white text-[#6E6E73] hover:border-[#CBD5E1]"
                     }`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? "border-[#3B82F6]" : "border-[#CBD5E1]"}`}>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />}
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? "border-[#007AFF]" : "border-[#CBD5E1]"}`}>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-[#007AFF]" />}
                     </div>
                     {amenity}
                   </button>
@@ -621,20 +621,20 @@ export default function EditPropertyPage() {
               })}
             </div>
 
-            <div className="mt-8 p-5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-              <label className="text-sm font-bold text-[#0F172A] mb-2 block">Add custom amenity or feature</label>
+            <div className="mt-8 p-5 bg-[#F2F2F7] rounded-xl border border-[#E5E5EA]">
+              <label className="text-sm font-bold text-[#1D1D1F] mb-2 block">Add custom amenity or feature</label>
               <div className="flex gap-3">
                 <Input 
                   value={customAmenity}
                   onChange={(e) => setCustomAmenity(e.target.value)}
                   onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomAmenity(); } }}
                   placeholder="e.g. Rooftop terrace, Smart Home..." 
-                  className="h-11 rounded-xl bg-white border-[#E2E8F0] flex-1 max-w-sm" 
+                  className="h-11 rounded-xl bg-white border-[#E5E5EA] flex-1 max-w-sm" 
                 />
                 <Button 
                   type="button" 
                   onClick={addCustomAmenity}
-                  className="h-11 w-11 p-0 rounded-xl bg-white border border-[#E2E8F0] text-[#3B82F6] shadow-sm hover:bg-[#F8FAFC]"
+                  className="h-11 w-11 p-0 rounded-xl bg-white border border-[#E5E5EA] text-[#007AFF] shadow-sm hover:bg-[#F2F2F7]"
                 >
                   <Plus className="h-5 w-5" />
                 </Button>
@@ -642,9 +642,9 @@ export default function EditPropertyPage() {
               {formData.amenities.filter(a => !predefinedAmenities.includes(a)).length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
                   {formData.amenities.filter(a => !predefinedAmenities.includes(a)).map(amenity => (
-                    <div key={amenity} className="flex items-center gap-2 px-3 py-1.5 bg-[#EFF6FF] text-[#3B82F6] text-sm font-semibold rounded-lg">
+                    <div key={amenity} className="flex items-center gap-2 px-3 py-1.5 bg-[#EFF6FF] text-[#007AFF] text-sm font-semibold rounded-lg">
                       {amenity}
-                      <button type="button" onClick={() => toggleAmenity(amenity)} className="text-[#3B82F6] hover:text-[#1D4ED8]">
+                      <button type="button" onClick={() => toggleAmenity(amenity)} className="text-[#007AFF] hover:text-[#1D4ED8]">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
@@ -656,22 +656,22 @@ export default function EditPropertyPage() {
         </Card>
 
         {/* Smart Unit Management */}
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]/50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h2 className="font-bold text-[#0F172A] text-lg">Smart Unit Management</h2>
-              <p className="text-sm text-[#64748B]">Manage all units belonging to this property.</p>
+              <h2 className="font-bold text-[#1D1D1F] text-lg">Smart Unit Management</h2>
+              <p className="text-sm text-[#6E6E73]">Manage all units belonging to this property.</p>
             </div>
-            <Button type="button" onClick={addUnit} className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2 shrink-0">
+            <Button type="button" onClick={addUnit} className="bg-[#EFF6FF] text-[#007AFF] hover:bg-[#DBEAFE] h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2 shrink-0">
               <Plus className="h-4 w-4" /> Add Unit
             </Button>
           </div>
           <CardContent className="p-0">
             {units.map((unit, index) => (
-              <div key={index} className="p-6 border-b border-[#E2E8F0] last:border-b-0 bg-white hover:bg-[#F8FAFC]/30 transition-colors">
+              <div key={index} className="p-6 border-b border-[#E5E5EA] last:border-b-0 bg-white hover:bg-[#F2F2F7]/30 transition-colors">
                 <div className="flex justify-between items-center mb-5 pb-4 border-b border-[#F1F5F9]">
-                  <h3 className="font-bold text-[#0F172A] flex items-center gap-2 text-lg">
-                    <Building className="h-5 w-5 text-[#3B82F6]" /> {unit.name || `Unit ${index + 1}`}
+                  <h3 className="font-bold text-[#1D1D1F] flex items-center gap-2 text-lg">
+                    <Building className="h-5 w-5 text-[#007AFF]" /> {unit.name || `Unit ${index + 1}`}
                   </h3>
                   {units.length > 1 && (
                     <button type="button" onClick={() => removeUnit(index)} className="text-[#EF4444] bg-[#FEE2E2] hover:bg-red-200 p-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-colors">
@@ -682,20 +682,20 @@ export default function EditPropertyPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-[#0F172A]">Unit Name / Number <span className="text-red-500">*</span></label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Unit Name / Number <span className="text-red-500">*</span></label>
                     <Input required value={unit.name} onChange={(e) => handleUnitChange(index, "name", e.target.value)} placeholder="e.g. Apt 101" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Unit Type</label>
-                    <select value={unit.type || "Apartment"} onChange={(e) => handleUnitChange(index, "type", e.target.value)} className="w-full h-10 bg-white border border-[#E2E8F0] rounded-xl px-3 text-sm outline-none">
+                    <label className="text-xs font-bold text-[#1D1D1F]">Unit Type</label>
+                    <select value={unit.type || "Apartment"} onChange={(e) => handleUnitChange(index, "type", e.target.value)} className="w-full h-10 bg-white border border-[#E5E5EA] rounded-xl px-3 text-sm outline-none">
                       <option value="Apartment">Apartment</option>
                       <option value="Studio">Studio</option>
                       <option value="Commercial">Commercial</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Status</label>
-                    <select value={unit.status || "VACANT"} onChange={(e) => handleUnitChange(index, "status", e.target.value)} className="w-full h-10 bg-white border border-[#E2E8F0] rounded-xl px-3 text-sm outline-none">
+                    <label className="text-xs font-bold text-[#1D1D1F]">Status</label>
+                    <select value={unit.status || "VACANT"} onChange={(e) => handleUnitChange(index, "status", e.target.value)} className="w-full h-10 bg-white border border-[#E5E5EA] rounded-xl px-3 text-sm outline-none">
                       <option value="VACANT">Vacant</option>
                       <option value="OCCUPIED">Occupied</option>
                       <option value="MAINTENANCE">Maintenance</option>
@@ -703,38 +703,38 @@ export default function EditPropertyPage() {
                   </div>
                   
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Floor Number</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Floor Number</label>
                     <Input type="number" value={unit.floor || ""} onChange={(e) => handleUnitChange(index, "floor", e.target.value)} placeholder="e.g. 1" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Bedrooms</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Bedrooms</label>
                     <Input type="number" value={unit.rooms || ""} onChange={(e) => handleUnitChange(index, "rooms", e.target.value)} placeholder="2" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Bathrooms</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Bathrooms</label>
                     <Input type="number" value={unit.bathrooms || ""} onChange={(e) => handleUnitChange(index, "bathrooms", e.target.value)} placeholder="1" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Max Occupants</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Max Occupants</label>
                     <Input type="number" value={unit.maxOccupants || ""} onChange={(e) => handleUnitChange(index, "maxOccupants", e.target.value)} placeholder="2" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#0F172A]">Square Footage</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Square Footage</label>
                     <Input type="number" value={unit.sqFootage || ""} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} placeholder="800" className="h-10 rounded-xl" />
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-[#0F172A]">Monthly Rent ($) <span className="text-red-500">*</span></label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Monthly Rent ($) <span className="text-red-500">*</span></label>
                     <Input required type="number" value={unit.rentAmount || ""} onChange={(e) => handleUnitChange(index, "rentAmount", e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-bold text-[#0F172A]">Security Deposit ($)</label>
+                    <label className="text-xs font-bold text-[#1D1D1F]">Security Deposit ($)</label>
                     <Input type="number" value={unit.depositAmt || ""} onChange={(e) => handleUnitChange(index, "depositAmt", e.target.value)} placeholder="1500" className="h-10 rounded-xl" />
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <label className="text-xs font-bold text-[#0F172A] mb-2 block">Unit Images</label>
+                  <label className="text-xs font-bold text-[#1D1D1F] mb-2 block">Unit Images</label>
                   
                   <input 
                     type="file" 
@@ -747,20 +747,20 @@ export default function EditPropertyPage() {
                   
                   <div 
                     onClick={() => document.getElementById(`unit-images-input-${index}`)?.click()}
-                    className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#F8FAFC] hover:bg-white transition-colors cursor-pointer"
+                    className="border-2 border-dashed border-[#E5E5EA] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#F2F2F7] hover:bg-white transition-colors cursor-pointer"
                   >
-                    <div className="h-10 w-10 bg-white shadow-sm border border-[#E2E8F0] text-[#94A3B8] rounded-full flex items-center justify-center mb-3">
+                    <div className="h-10 w-10 bg-white shadow-sm border border-[#E5E5EA] text-[#94A3B8] rounded-full flex items-center justify-center mb-3">
                       <ImageIcon className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold text-[#0F172A]">Upload photos for {unit.name || `Unit ${index + 1}`}</p>
-                    <p className="text-xs text-[#64748B] mt-1">PNG, JPG up to 5MB</p>
+                    <p className="text-sm font-bold text-[#1D1D1F]">Upload photos for {unit.name || `Unit ${index + 1}`}</p>
+                    <p className="text-xs text-[#6E6E73] mt-1">PNG, JPG up to 5MB</p>
                   </div>
 
                   {/* Unit Image Previews */}
                   {unit.images && unit.images.length > 0 && (
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-4">
                       {unit.images.map((url: string) => (
-                        <div key={url} className="group relative aspect-video rounded-lg overflow-hidden border border-[#E2E8F0] bg-slate-50">
+                        <div key={url} className="group relative aspect-video rounded-lg overflow-hidden border border-[#E5E5EA] bg-slate-50">
                           <img src={url} alt="Unit" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
@@ -782,11 +782,11 @@ export default function EditPropertyPage() {
         </Card>
 
         {/* Floating Action Bar */}
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/80 backdrop-blur-md border-t border-[#E2E8F0] p-4 flex justify-end gap-3 z-20 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/80 backdrop-blur-md border-t border-[#E5E5EA] p-4 flex justify-end gap-3 z-20 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
           <Link href={`/dashboard/properties/${id}`}>
-            <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#0F172A] border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC]">Cancel</Button>
+            <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#1D1D1F] border-[#E5E5EA] shadow-sm hover:bg-[#F2F2F7]">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={loading} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
+          <Button type="submit" disabled={loading} className="bg-[#007AFF] hover:bg-[#0062CC] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
             {loading ? "Saving..." : <><Save className="h-4 w-4" /> Save Changes</>}
           </Button>
         </div>

@@ -270,19 +270,19 @@ export default function CreateLeasePage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/leases">
-            <Button variant="outline" className="h-11 w-11 p-0 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]">
+            <Button variant="outline" className="h-11 w-11 p-0 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
+            <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight flex items-center gap-2">
               Create Lease Agreement
             </h1>
-            <p className="text-[#64748B] text-base mt-0.5">Configure billing rules, dates, and tenant onboarding.</p>
+            <p className="text-[#6E6E73] text-base mt-0.5">Configure billing rules, dates, and tenant onboarding.</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5 px-4 py-2 bg-[#EFF6FF] rounded-xl border border-[#BFDBFE] text-[#1E3A8A] font-bold text-sm shadow-xs">
-          <ShieldCheck className="h-4.5 w-4.5 text-[#3B82F6]" />
+          <ShieldCheck className="h-4.5 w-4.5 text-[#007AFF]" />
           <span>Draft Mode</span>
         </div>
       </div>
@@ -312,25 +312,25 @@ export default function CreateLeasePage() {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Property & Tenant */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
                 <Building className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Property & Tenant Allocation</h2>
+              <h2 className="text-lg font-bold text-[#1D1D1F]">Property & Tenant Allocation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
                   <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={properties.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors pl-10 relative">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs transition-colors pl-10 relative">
                       <Building className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                       <SelectValue placeholder={properties.length === 0 && hasLoaded ? "No properties found" : "Select a property"}>
                         {selectedProperty ? (properties.find(p => p.id === selectedProperty)?.name || selectedProperty) : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1">
+                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-xl p-1">
                       {properties.map((p) => {
                         const isApproved = p.approvalStatus === "APPROVED";
                         return (
@@ -346,18 +346,18 @@ export default function CreateLeasePage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
                   <Select value={formData.unitId} onValueChange={(v) => handleUnitSelect(v || "")} disabled={!selectedProperty || units.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs transition-colors pl-10 relative">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs transition-colors pl-10 relative">
                       <Home className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                       <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No units found" : "Select unit"}>
                         {formData.unitId ? (units.find(u => u.id === formData.unitId)?.name || formData.unitId) : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-xl p-1">
+                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-xl p-1">
                       {units.map((u) => {
                         const isAvailable = u.status === "VACANT" || u.status === "AVAILABLE" || u.id === paramUnitId || u.id === formData.unitId;
                         return (
                           <SelectItem key={u.id} value={u.id} disabled={!isAvailable} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700">
-                            {u.name} <span className="text-slate-400 ml-1">(${u.rentAmount || 0}/mo)</span> {!isAvailable ? <span className="text-rose-500 font-semibold ml-1 text-xs">- Occupied</span> : ""}
+                            {u.name} <span className="text-[#8E8E93] ml-1">(${u.rentAmount || 0}/mo)</span> {!isAvailable ? <span className="text-rose-500 font-semibold ml-1 text-xs">- Occupied</span> : ""}
                           </SelectItem>
                         );
                       })}
@@ -376,21 +376,21 @@ export default function CreateLeasePage() {
                     placeholder="tenant@example.com"
                     value={formData.tenantEmail}
                     onChange={(e) => setFormData({ ...formData, tenantEmail: e.target.value })}
-                    className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                    className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
                   />
                 </div>
-                <p className="text-xs text-[#64748B] font-medium">An invite will be automatically dispatched to this email to sign the digital agreement.</p>
+                <p className="text-xs text-[#6E6E73] font-medium">An invite will be automatically dispatched to this email to sign the digital agreement.</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Lease Dates */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
                 <Calendar className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Lease Duration Rules</h2>
+              <h2 className="text-lg font-bold text-[#1D1D1F]">Lease Duration Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -403,7 +403,7 @@ export default function CreateLeasePage() {
                       required
                       value={formData.startDate}
                       onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                      className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                      className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
                     />
                   </div>
                 </div>
@@ -412,9 +412,9 @@ export default function CreateLeasePage() {
                     <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">End Date <span className="text-[#EF4444]">*</span></Label>
                     {formData.startDate && (
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => handleQuickDuration(6)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">6m</button>
-                        <button type="button" onClick={() => handleQuickDuration(12)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">1yr</button>
-                        <button type="button" onClick={() => handleQuickDuration(24)} className="text-[10px] font-extrabold text-[#3B82F6] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">2yr</button>
+                        <button type="button" onClick={() => handleQuickDuration(6)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">6m</button>
+                        <button type="button" onClick={() => handleQuickDuration(12)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">1yr</button>
+                        <button type="button" onClick={() => handleQuickDuration(24)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">2yr</button>
                       </div>
                     )}
                   </div>
@@ -425,7 +425,7 @@ export default function CreateLeasePage() {
                       required
                       value={formData.endDate}
                       onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                      className="pl-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                      className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
                     />
                   </div>
                 </div>
@@ -434,12 +434,12 @@ export default function CreateLeasePage() {
           </Card>
 
           {/* Financial Terms */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
                 <DollarSign className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Financial Billing Rules</h2>
+              <h2 className="text-lg font-bold text-[#1D1D1F]">Financial Billing Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -454,7 +454,7 @@ export default function CreateLeasePage() {
                       placeholder="0.00"
                       value={formData.monthlyRent}
                       onChange={(e) => setFormData({ ...formData, monthlyRent: e.target.value })}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-black text-[#0F172A] shadow-xs"
+                      className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-black text-[#1D1D1F] shadow-xs"
                     />
                   </div>
                 </div>
@@ -477,7 +477,7 @@ export default function CreateLeasePage() {
                       placeholder="0.00"
                       value={formData.securityDeposit}
                       onChange={(e) => setFormData({ ...formData, securityDeposit: e.target.value })}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-bold text-[#0F172A] shadow-xs"
+                      className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-bold text-[#1D1D1F] shadow-xs"
                     />
                   </div>
                 </div>
@@ -485,10 +485,10 @@ export default function CreateLeasePage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Rent Due Day</Label>
                   <Select value={formData.rentDueDay} onValueChange={(v) => setFormData({ ...formData, rentDueDay: v || "1" })}>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
+                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs">
                       <SelectValue placeholder="Select day" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg max-h-[200px]">
+                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg max-h-[200px]">
                       {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                         <SelectItem key={day} value={day.toString()}>
                           {day}
@@ -502,7 +502,7 @@ export default function CreateLeasePage() {
 
               {/* Late Fees */}
               <div className="pt-6 border-t border-[#F1F5F9] space-y-5">
-                <h3 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
+                <h3 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
                   <Clock className="h-4.5 w-4.5 text-amber-500" /> Late Fee Configuration
                 </h3>
 
@@ -516,7 +516,7 @@ export default function CreateLeasePage() {
                         placeholder="5"
                         value={formData.gracePeriodDays}
                         onChange={(e) => setFormData({ ...formData, gracePeriodDays: e.target.value })}
-                        className="pr-12 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs"
+                        className="pr-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">Days</div>
                     </div>
@@ -532,7 +532,7 @@ export default function CreateLeasePage() {
                         placeholder="0.00"
                         value={formData.lateFeeAmount}
                         onChange={(e) => setFormData({ ...formData, lateFeeAmount: e.target.value })}
-                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs`}
+                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs`}
                       />
                       {formData.lateFeeType === "PERCENTAGE" && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">%</div>}
                     </div>
@@ -541,10 +541,10 @@ export default function CreateLeasePage() {
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Late Fee Type</Label>
                     <Select value={formData.lateFeeType} onValueChange={(v) => setFormData({ ...formData, lateFeeType: v || "FIXED" })}>
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E2E8F0] focus:ring-[#3B82F6] font-semibold text-[#0F172A] shadow-xs">
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
+                      <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
                         <SelectItem value="FIXED">Fixed Amount</SelectItem>
                         <SelectItem value="PERCENTAGE">% of Monthly Rent</SelectItem>
                       </SelectContent>
@@ -556,14 +556,14 @@ export default function CreateLeasePage() {
           </Card>
 
           {/* Early Termination Policy Section */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:border-[#CBD5E1] transition-colors">
-            <div className="bg-[#F8FAFC] px-6 py-4 border-b border-[#E2E8F0] flex items-center gap-3">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:border-[#CBD5E1] transition-colors">
+            <div className="bg-[#F2F2F7] px-6 py-4 border-b border-[#E5E5EA] flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 shrink-0">
                 <AlertCircle className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-[#0F172A] tracking-tight">Termination & Notice Policy</h2>
-                <p className="text-xs text-[#64748B] font-medium mt-0.5">Define notice periods, penalties and prorated refund rules if tenant breaks lease</p>
+                <h2 className="text-lg font-black text-[#1D1D1F] tracking-tight">Termination & Notice Policy</h2>
+                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Define notice periods, penalties and prorated refund rules if tenant breaks lease</p>
               </div>
             </div>
             
@@ -580,10 +580,10 @@ export default function CreateLeasePage() {
                         placeholder="0.00"
                         value={formData.earlyTerminationFee}
                         onChange={(e) => setFormData({ ...formData, earlyTerminationFee: e.target.value })}
-                        className="pl-8 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-red-500 font-semibold text-[#0F172A] shadow-xs"
+                        className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-red-500 font-semibold text-[#1D1D1F] shadow-xs"
                       />
                     </div>
-                    <p className="text-[10px] text-slate-500 font-medium">Penalty tenant pays to break lease early.</p>
+                    <p className="text-[10px] text-[#6E6E73] font-medium">Penalty tenant pays to break lease early.</p>
                   </div>
 
                   <div className="space-y-2">
@@ -595,11 +595,11 @@ export default function CreateLeasePage() {
                         placeholder="30"
                         value={formData.moveOutNoticeDays}
                         onChange={(e) => setFormData({ ...formData, moveOutNoticeDays: e.target.value })}
-                        className="pr-16 pl-4 h-12 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-red-500 font-semibold text-[#0F172A] shadow-xs"
+                        className="pr-16 pl-4 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-red-500 font-semibold text-[#1D1D1F] shadow-xs"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">Days</div>
                     </div>
-                    <p className="text-[10px] text-slate-500 font-medium">Required notice before moving out.</p>
+                    <p className="text-[10px] text-[#6E6E73] font-medium">Required notice before moving out.</p>
                   </div>
 
                   <div className="space-y-3 flex flex-col justify-center pt-2 md:col-span-2">
@@ -610,7 +610,7 @@ export default function CreateLeasePage() {
                         onCheckedChange={(checked) => setFormData({ ...formData, isProratedRefundAllowed: checked })}
                       />
                     </div>
-                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                    <p className="text-[10px] text-[#6E6E73] font-medium leading-relaxed">
                       If turned on, tenant receives a refund for unused days if they move out mid-month. If turned off, prepaid rent is forfeited.
                     </p>
                   </div>
@@ -623,7 +623,7 @@ export default function CreateLeasePage() {
         {/* Sidebar Summary & Preview Column */}
         <div className="space-y-8">
           {/* Summary Panel */}
-          <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-none shadow-xl rounded-2xl overflow-hidden text-white transition-all duration-300">
+          <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-none shadow-xl rounded-2xl overflow-hidden text-white transition-all duration-300">
             <CardContent className="p-6">
               {formData.unitId ? (
                 <div className="space-y-6">
@@ -660,7 +660,7 @@ export default function CreateLeasePage() {
                           <p className="font-semibold text-white">{new Date(formData.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
                           <p className="text-[9px] text-[#94A3B8] uppercase">Move-In</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-slate-500" />
+                        <ChevronRight className="h-4 w-4 text-[#6E6E73]" />
                         <div className="text-right">
                           <p className="font-semibold text-white">{new Date(formData.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
                           <p className="text-[9px] text-[#94A3B8] uppercase">Move-Out</p>
@@ -668,7 +668,7 @@ export default function CreateLeasePage() {
                       </div>
                       {durationInfo && (
                         <div className="text-center pt-2 border-t border-white/5">
-                          <p className="text-xs font-extrabold text-[#3B82F6]">{durationInfo.months} Months ({durationInfo.days} days)</p>
+                          <p className="text-xs font-extrabold text-[#007AFF]">{durationInfo.months} Months ({durationInfo.days} days)</p>
                         </div>
                       )}
                     </div>
@@ -715,20 +715,20 @@ export default function CreateLeasePage() {
           </Card>
 
           {/* Automation settings */}
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#F8FAFC] flex items-center justify-center text-slate-500">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#F2F2F7] flex items-center justify-center text-[#6E6E73]">
                 <Settings className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#0F172A]">Invoice Automation</h2>
+              <h2 className="text-lg font-bold text-[#1D1D1F]">Invoice Automation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#3B82F6]" /> Auto-Generate Invoices
+                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-[#007AFF]" /> Auto-Generate Invoices
                   </h4>
-                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Generate monthly invoices automatically.</p>
+                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Generate monthly invoices automatically.</p>
                 </div>
                 <Switch
                   checked={formData.autoGenerateInvoices}
@@ -738,10 +738,10 @@ export default function CreateLeasePage() {
 
               <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
                 <div>
-                  <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
+                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
                     <Mail className="h-4 w-4 text-[#10B981]" /> Auto-Email Invoices
                   </h4>
-                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Send invoices directly to tenant's email address.</p>
+                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Send invoices directly to tenant's email address.</p>
                 </div>
                 <Switch
                   checked={formData.autoEmailInvoices}
@@ -751,17 +751,17 @@ export default function CreateLeasePage() {
 
               <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
                 <div>
-                  <h4 className="font-bold text-[#0F172A] text-sm flex items-center gap-2">
+                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
                     <Calendar className="h-4.5 w-4.5 text-orange-500" /> Renewal Notice Window
                   </h4>
-                  <p className="text-xs text-[#64748B] font-medium mt-0.5">Days prior to end date to alert renewal.</p>
+                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Days prior to end date to alert renewal.</p>
                 </div>
                 <div className="w-36">
                   <Select value={formData.renewalNoticeDays} onValueChange={(v) => setFormData({ ...formData, renewalNoticeDays: v || "7" })}>
-                    <SelectTrigger className="w-full h-10 rounded-xl bg-slate-50 border-[#E2E8F0] focus:bg-white focus:ring-[#3B82F6] font-bold text-[#0F172A] shadow-xs">
+                    <SelectTrigger className="w-full h-10 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-bold text-[#1D1D1F] shadow-xs">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
+                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
                       <SelectItem value="7" disabled={durationInfo ? durationInfo.days <= 7 : false}>1 Week Before</SelectItem>
                       <SelectItem value="15" disabled={durationInfo ? durationInfo.days <= 15 : false}>15 Days Before</SelectItem>
                       <SelectItem value="30" disabled={durationInfo ? durationInfo.days <= 30 : false}>1 Month Before</SelectItem>
@@ -774,12 +774,12 @@ export default function CreateLeasePage() {
 
           {/* Submit Actions */}
           <div className="flex flex-col gap-3 pt-2">
-            <Button type="submit" disabled={loading || approvedProperties.length === 0} className="w-full h-14 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-base shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed">
+            <Button type="submit" disabled={loading || approvedProperties.length === 0} className="w-full h-14 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold text-base shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed">
               {loading && <Loader2 className="h-5 w-5 animate-spin" />}
               {loading ? "Registering Lease..." : "Create Lease Agreement"}
             </Button>
             <Link href="/dashboard/leases">
-              <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] font-bold hover:bg-[#F8FAFC]">
+              <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] font-bold hover:bg-[#F2F2F7]">
                 Cancel
               </Button>
             </Link>

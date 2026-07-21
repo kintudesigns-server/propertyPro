@@ -46,7 +46,7 @@ export function LeaseActionsMenu({ lease, onSignLease, onRequestMoveOut, variant
     {
       label: "View Details",
       icon: Eye,
-      color: "text-[#3B82F6]",
+      color: "text-[#007AFF]",
       onClick: () => router.push(`/dashboard/leases/${lease.id}`),
     },
     {
@@ -76,7 +76,7 @@ export function LeaseActionsMenu({ lease, onSignLease, onRequestMoveOut, variant
     actions.push({
       label: "Request Move-Out",
       icon: LogOut,
-      color: "text-slate-600",
+      color: "text-[#6E6E73]",
       onClick: () => onRequestMoveOut(lease.id),
     });
   }
@@ -87,18 +87,18 @@ export function LeaseActionsMenu({ lease, onSignLease, onRequestMoveOut, variant
         className={`flex items-center justify-center rounded-full transition-all focus:outline-none ${
           variant === "card"
             ? "h-8 w-8 bg-transparent text-white hover:bg-white/20 border-0 shadow-none"
-            : "h-8 w-8 border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 shadow-sm"
+            : "h-8 w-8 border border-[#E5E5EA] bg-white text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] shadow-sm"
         }`}
         title="More actions"
       >
         <MoreHorizontal className={`h-4 w-4 ${variant === "card" ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]" : ""}`} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-xl border-[#E2E8F0] shadow-xl p-1.5 bg-white z-[100]">
+      <DropdownMenuContent align="end" className="w-56 rounded-xl border-[#E5E5EA] shadow-xl p-1.5 bg-white z-[100]">
         {actions.map((a) => (
           <DropdownMenuItem
             key={a.label}
             onClick={a.onClick}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#0F172A] font-semibold rounded-lg cursor-pointer hover:bg-slate-50 focus:bg-slate-50 transition-colors border-0 outline-none"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#1D1D1F] font-semibold rounded-lg cursor-pointer hover:bg-[#F5F5F7] focus:bg-slate-50 transition-colors border-0 outline-none"
           >
             <a.icon className={`h-4 w-4 shrink-0 ${a.color}`} />
             {a.label}

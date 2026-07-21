@@ -57,7 +57,7 @@ export default function PropertyDetailsPage() {
   }, [id, router]);
 
   if (loading) {
-    return <div className="p-10 text-center font-bold text-[#64748B]">Loading Property Details...</div>;
+    return <div className="p-10 text-center font-bold text-[#6E6E73]">Loading Property Details...</div>;
   }
   if (!property) return null;
 
@@ -217,27 +217,27 @@ export default function PropertyDetailsPage() {
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
         <div className="flex flex-col gap-2">
-          <Link href="/dashboard/properties" className="text-sm font-bold text-[#64748B] hover:text-[#3B82F6] flex items-center gap-2 mb-2 transition-colors w-fit">
+          <Link href="/dashboard/properties" className="text-sm font-bold text-[#6E6E73] hover:text-[#007AFF] flex items-center gap-2 mb-2 transition-colors w-fit">
             <ArrowLeft className="h-4 w-4" /> Back to Properties
           </Link>
           <div className="flex items-center gap-4 flex-wrap">
-            <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">{property.name}</h1>
+            <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{property.name}</h1>
             <div className="flex items-center gap-2">
               {property.status === "AVAILABLE" ? (
                 <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">{property.status}</Badge>
               ) : property.status === "OCCUPIED" ? (
-                <Badge className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">{property.status}</Badge>
+                <Badge className="bg-[#EFF6FF] text-[#007AFF] hover:bg-[#EFF6FF] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">{property.status}</Badge>
               ) : (
                 <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">{property.status}</Badge>
               )}
-              <Badge className="bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0] rounded-lg px-3 py-1 font-bold shadow-sm flex items-center gap-1.5">
+              <Badge className="bg-[#F2F2F7] text-[#475569] border border-[#E5E5EA] rounded-lg px-3 py-1 font-bold shadow-sm flex items-center gap-1.5">
                 <Building className="h-3.5 w-3.5" /> {property.type || "Apartment"}
               </Badge>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-[#64748B] mt-2">
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-[#6E6E73] mt-2">
             <MapPin className="h-4 w-4" /> {property.city}, {property.country}
           </div>
           
@@ -283,7 +283,7 @@ export default function PropertyDetailsPage() {
                    <Download className="h-4 w-4 mr-2" /> Generate Rent Roll
                  </Button>
                )}
-               <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-[#0F172A] border border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm rounded-xl h-11 font-bold px-6">
+               <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm rounded-xl h-11 font-bold px-6">
                  <Edit className="h-4 w-4 mr-2" /> Edit Property
                </Button>
                <Button onClick={handleDelete} className="flex-1 md:flex-none bg-white text-red-500 border border-red-200 hover:bg-red-50 shadow-sm rounded-xl h-11 font-bold px-6">
@@ -295,15 +295,15 @@ export default function PropertyDetailsPage() {
       </div>
 
       {/* Custom Horizontal Tabs */}
-      <div className="flex items-center gap-2 bg-[#F8FAFC] p-1.5 rounded-[16px] border border-[#E2E8F0] overflow-x-auto no-scrollbar shadow-sm">
+      <div className="flex items-center gap-2 bg-[#F2F2F7] p-1.5 rounded-[16px] border border-[#E5E5EA] overflow-x-auto no-scrollbar shadow-sm">
         {["overview", "details", ...(property.type === "House" ? [] : ["units"]), "media", "amenities"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap capitalize flex items-center gap-2 ${
               activeTab === tab 
-                ? "bg-gradient-to-b from-[#3B82F6] to-[#2563EB] text-white shadow-md shadow-blue-500/20" 
-                : "text-[#64748B] hover:text-[#0F172A] hover:bg-white"
+                ? "bg-gradient-to-b from-[#007AFF] to-[#0062CC] text-white shadow-md shadow-blue-500/20" 
+                : "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white"
             }`}
           >
             {tab === "units" && property.type === "Commercial" ? "Suites" : tab === "media" ? <><ImageIcon2 className="h-4 w-4" /> Media</> : tab}
@@ -341,15 +341,15 @@ export default function PropertyDetailsPage() {
               <Card className="col-span-1 lg:col-span-2 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col justify-between">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
                   <div>
-                    <h2 className="font-black text-[#0F172A] text-lg">
+                    <h2 className="font-black text-[#1D1D1F] text-lg">
                       {property.type === "House" ? "Lease & Unit Status" : "Occupancy Overview"}
                     </h2>
-                    <p className="text-xs font-semibold text-[#64748B] mt-0.5">Real-time unit status</p>
+                    <p className="text-xs font-semibold text-[#6E6E73] mt-0.5">Real-time unit status</p>
                   </div>
                   {property.type !== "House" && (
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-lg font-bold border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-sm h-9">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
-                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-lg font-bold shadow-sm h-9">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-lg font-bold border-slate-200 text-slate-700 bg-white hover:bg-[#F5F5F7] shadow-sm h-9">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
+                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-lg font-bold shadow-sm h-9">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
                     </div>
                   )}
                 </div>
@@ -359,8 +359,8 @@ export default function PropertyDetailsPage() {
                       <div className={`h-24 w-24 rounded-full flex items-center justify-center mb-4 shadow-sm border-4 ${property.units?.[0]?.status === "OCCUPIED" ? "bg-blue-50 border-blue-100" : "bg-green-50 border-green-100"}`}>
                         {property.units?.[0]?.status === "OCCUPIED" ? <Users className="h-10 w-10 text-blue-600" /> : <CheckCircle2 className="h-10 w-10 text-green-600" />}
                       </div>
-                      <h3 className="text-2xl font-black text-[#0F172A] mb-1">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
-                      <p className="text-[#64748B] font-semibold text-sm">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
+                      <h3 className="text-2xl font-black text-[#1D1D1F] mb-1">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
+                      <p className="text-[#6E6E73] font-semibold text-sm">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
                       {property.units?.[0]?.status !== "OCCUPIED" && (
                         <Button onClick={() => router.push(`/dashboard/owner?tab=settings`)} className="mt-6 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl h-11 px-8 shadow-md">Invite Tenant</Button>
                       )}
@@ -369,18 +369,18 @@ export default function PropertyDetailsPage() {
                     <>
                       <div>
                         <div className="flex justify-between items-end mb-2">
-                          <span className="font-black text-3xl text-[#0F172A] tracking-tight">{occupancyRate}%</span>
-                          <span className="font-semibold text-slate-400 text-xs uppercase tracking-wider">{occupiedUnits} of {totalUnits} units occupied</span>
+                          <span className="font-black text-3xl text-[#1D1D1F] tracking-tight">{occupancyRate}%</span>
+                          <span className="font-semibold text-[#8E8E93] text-xs uppercase tracking-wider">{occupiedUnits} of {totalUnits} units occupied</span>
                         </div>
                         <div className="w-full h-3 bg-[#F1F5F9] rounded-full overflow-hidden shadow-inner">
-                          <div className="h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }} />
+                          <div className="h-full bg-gradient-to-r from-[#007AFF] to-[#0062CC] rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }} />
                         </div>
                       </div>
                       
                       {/* Units Quick View Snapshot */}
                       <div className="my-5 flex-1 border border-slate-100/80 rounded-2xl p-4 bg-slate-50/30">
                         <div className="flex justify-between items-center mb-3">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Units Status Snapshot</h4>
+                          <h4 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Units Status Snapshot</h4>
                           <button onClick={() => setActiveTab("units")} className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer">
                             Manage Units ({totalUnits}) →
                           </button>
@@ -388,12 +388,12 @@ export default function PropertyDetailsPage() {
                         
                         <div className="space-y-2">
                           {!property.units || property.units.length === 0 ? (
-                            <p className="text-xs text-slate-400 font-semibold text-center py-6">No units added to this property.</p>
+                            <p className="text-xs text-[#8E8E93] font-semibold text-center py-6">No units added to this property.</p>
                           ) : (
                             property.units.slice(0, 3).map((u: any) => (
                               <div key={u.id} className="flex justify-between items-center py-2 px-3 bg-white border border-slate-100 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400 shrink-0">
+                                  <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 text-[#8E8E93] shrink-0">
                                     <Home className="h-3.5 w-3.5" />
                                   </div>
                                   <span className="text-xs font-bold text-slate-800">{property.type === "Commercial" ? "" : "Unit "}{u.name}</span>
@@ -422,16 +422,16 @@ export default function PropertyDetailsPage() {
                           <p className="text-2xl font-black text-[#14532D] leading-none">{vacantUnits}</p>
                         </div>
                         <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#bfdbfe] hover:scale-[1.02] transition-transform duration-300">
-                          <p className="text-[10px] font-black text-[#3B82F6] uppercase tracking-wider mb-1">Occupied</p>
+                          <p className="text-[10px] font-black text-[#007AFF] uppercase tracking-wider mb-1">Occupied</p>
                           <p className="text-2xl font-black text-[#1E3A8A] leading-none">{occupiedUnits}</p>
                         </div>
                         <div className="p-4 bg-[#FFF7ED] rounded-2xl border border-[#fed7aa] hover:scale-[1.02] transition-transform duration-300">
                           <p className="text-[10px] font-black text-[#F97316] uppercase tracking-wider mb-1">Maintenance</p>
                           <p className="text-2xl font-black text-[#7C2D12] leading-none">{maintenanceUnits}</p>
                         </div>
-                        <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] hover:scale-[1.02] transition-transform duration-300">
-                          <p className="text-[10px] font-black text-[#64748B] uppercase tracking-wider mb-1">Total</p>
-                          <p className="text-2xl font-black text-[#0F172A] leading-none">{totalUnits}</p>
+                        <div className="p-4 bg-[#F2F2F7] rounded-2xl border border-[#E5E5EA] hover:scale-[1.02] transition-transform duration-300">
+                          <p className="text-[10px] font-black text-[#6E6E73] uppercase tracking-wider mb-1">Total</p>
+                          <p className="text-2xl font-black text-[#1D1D1F] leading-none">{totalUnits}</p>
                         </div>
                       </div>
                     </>
@@ -443,8 +443,8 @@ export default function PropertyDetailsPage() {
               <div className="col-span-1 space-y-6 flex flex-col justify-between">
                 <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col flex-1">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/20">
-                    <h2 className="font-black text-[#0F172A] text-sm flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-[#3B82F6]" /> Location
+                    <h2 className="font-black text-[#1D1D1F] text-sm flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-[#007AFF]" /> Location
                     </h2>
                   </div>
                   <CardContent className="p-5 flex flex-col justify-between flex-1">
@@ -463,17 +463,17 @@ export default function PropertyDetailsPage() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Street Address</p>
-                        <p className="font-extrabold text-[#0F172A] text-sm mt-0.5">{property.address || "N/A"}</p>
+                        <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Street Address</p>
+                        <p className="font-extrabold text-[#1D1D1F] text-sm mt-0.5">{property.address || "N/A"}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">City</p>
-                          <p className="font-extrabold text-[#0F172A] text-xs mt-0.5">{property.city}</p>
+                          <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">City</p>
+                          <p className="font-extrabold text-[#1D1D1F] text-xs mt-0.5">{property.city}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">State/ZIP</p>
-                          <p className="font-extrabold text-[#0F172A] text-xs mt-0.5">{property.state} {property.zip}</p>
+                          <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">State/ZIP</p>
+                          <p className="font-extrabold text-[#1D1D1F] text-xs mt-0.5">{property.state} {property.zip}</p>
                         </div>
                       </div>
                     </div>
@@ -482,17 +482,17 @@ export default function PropertyDetailsPage() {
  
                 <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden flex flex-col justify-between">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/20">
-                    <h2 className="font-black text-[#0F172A] text-sm flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-[#3B82F6]" /> Financial Overview
+                    <h2 className="font-black text-[#1D1D1F] text-sm flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-[#007AFF]" /> Financial Overview
                     </h2>
                   </div>
                   <CardContent className="p-5 space-y-4">
                     <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Rent Range</span>
-                      <span className="font-black text-[#0f172a] text-sm">{rentRange}</span>
+                      <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Monthly Rent Range</span>
+                      <span className="font-black text-[#1D1D1F] text-sm">{rentRange}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Price per Sq. Ft.</span>
+                      <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Price per Sq. Ft.</span>
                       <span className="font-black text-emerald-600 text-sm">${ppsqft} {property.type === "Commercial" ? "/yr" : "/mo"}</span>
                     </div>
                   </CardContent>
@@ -506,7 +506,7 @@ export default function PropertyDetailsPage() {
         {activeTab === "details" && (
           <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
             <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/20">
-              <h2 className="font-black text-[#0F172A] text-lg flex items-center gap-2">
+              <h2 className="font-black text-[#1D1D1F] text-lg flex items-center gap-2">
                 <Shield className="h-5 w-5 text-indigo-500" />
                 Property Specifications
               </h2>
@@ -521,12 +521,12 @@ export default function PropertyDetailsPage() {
                     { label: "Status", value: property.status, Icon: CheckCircle2, color: "text-emerald-500 bg-emerald-50", isBadge: true },
                     { label: "Year Built", value: property.yearBuilt || "Not specified", Icon: Clock, color: "text-amber-500 bg-amber-50" },
                   ].map((spec, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-[#F8FAFC]/60 border border-slate-100/80 rounded-2xl">
+                    <div key={i} className="flex items-center justify-between p-4 bg-[#F2F2F7]/60 border border-slate-100/80 rounded-2xl">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-xl ${spec.color}`}>
                           <spec.Icon className="h-4 w-4" />
                         </div>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{spec.label}</span>
+                        <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{spec.label}</span>
                       </div>
                       {spec.isBadge ? (
                         <Badge className={`border-0 rounded-lg px-2.5 py-1 font-bold text-xs ${
@@ -539,7 +539,7 @@ export default function PropertyDetailsPage() {
                           {spec.value}
                         </Badge>
                       ) : (
-                        <span className="font-extrabold text-[#0F172A] text-sm">{spec.value}</span>
+                        <span className="font-extrabold text-[#1D1D1F] text-sm">{spec.value}</span>
                       )}
                     </div>
                   ))}
@@ -549,18 +549,18 @@ export default function PropertyDetailsPage() {
                 <div className="lg:col-span-5 flex">
                   <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 flex flex-col justify-between w-full">
                     <div>
-                      <h3 className="font-black text-[#0F172A] text-sm flex items-center gap-2 mb-3">
+                      <h3 className="font-black text-[#1D1D1F] text-sm flex items-center gap-2 mb-3">
                         <FileText className="h-4 w-4 text-indigo-500" />
                         About the Property
                       </h3>
-                      <p className="text-xs font-medium text-slate-500 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs font-medium text-[#6E6E73] leading-relaxed whitespace-pre-wrap">
                         {property.description || "No description has been provided for this property yet."}
                       </p>
                     </div>
                     
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#8E8E93] font-semibold">
                       <span>Property ID</span>
-                      <span className="font-mono text-slate-500 select-all">{property.id}</span>
+                      <span className="font-mono text-[#6E6E73] select-all">{property.id}</span>
                     </div>
                   </div>
                 </div>
@@ -574,18 +574,18 @@ export default function PropertyDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-[#0F172A]">{property.type === "Commercial" ? "Suites List" : "Units List"}</h2>
-                <p className="text-sm font-medium text-[#64748B]">Showing {totalUnits} {property.type === "Commercial" ? "suites" : "units"} for {property.name}</p>
+                <h2 className="text-xl font-bold text-[#1D1D1F]">{property.type === "Commercial" ? "Suites List" : "Units List"}</h2>
+                <p className="text-sm font-medium text-[#6E6E73]">Showing {totalUnits} {property.type === "Commercial" ? "suites" : "units"} for {property.name}</p>
               </div>
-              <Button disabled={property.approvalStatus !== "APPROVED"} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6">
+              <Button disabled={property.approvalStatus !== "APPROVED"} className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 font-bold px-6">
                 Add {property.type === "Commercial" ? "Suite" : "Unit"}
               </Button>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {property.units?.map((u: any) => (
-                <div key={u.id} className="border border-[#E2E8F0] bg-white rounded-[20px] overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
-                  <div className="relative h-40 bg-[#F8FAFC] overflow-hidden group-hover:after:absolute group-hover:after:inset-0 group-hover:after:bg-black/10 group-hover:after:transition-all">
+                <div key={u.id} className="border border-[#E5E5EA] bg-white rounded-[20px] overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
+                  <div className="relative h-40 bg-[#F2F2F7] overflow-hidden group-hover:after:absolute group-hover:after:inset-0 group-hover:after:bg-black/10 group-hover:after:transition-all">
                     {u.images && u.images.length > 0 ? (
                       <div className="w-full h-full relative">
                         <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -600,26 +600,26 @@ export default function PropertyDetailsPage() {
                       {u.status === "VACANT" ? (
                         <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Available</Badge>
                       ) : u.status === "OCCUPIED" ? (
-                        <Badge className="bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Occupied</Badge>
+                        <Badge className="bg-[#EFF6FF] text-[#007AFF] hover:bg-[#EFF6FF] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Occupied</Badge>
                       ) : (
                         <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">{u.status}</Badge>
                       )}
                     </div>
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-10">
-                      <button onClick={() => router.push(`/dashboard/properties/${id}/units/${u.id}`)} className="w-10 h-10 bg-white text-[#0F172A] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                      <button onClick={() => router.push(`/dashboard/properties/${id}/units/${u.id}`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
                         <Eye className="h-5 w-5" />
                       </button>
-                      <button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="w-10 h-10 bg-white text-[#0F172A] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                      <button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
                         <Edit className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="font-extrabold text-[#0F172A] text-lg">{property.type === "Commercial" ? "" : "Unit "}{u.name}</h3>
-                    <p className="text-xs text-[#64748B] font-bold uppercase tracking-wider mt-1">{u.type || (property.type === "Commercial" ? "Space" : "Apartment")}</p>
+                    <h3 className="font-extrabold text-[#1D1D1F] text-lg">{property.type === "Commercial" ? "" : "Unit "}{u.name}</h3>
+                    <p className="text-xs text-[#6E6E73] font-bold uppercase tracking-wider mt-1">{u.type || (property.type === "Commercial" ? "Space" : "Apartment")}</p>
                     
-                    <div className="mt-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[14px] p-3 flex flex-col gap-2">
-                      <div className="flex items-center gap-4 text-[#0F172A] font-bold text-sm flex-wrap">
+                    <div className="mt-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-[14px] p-3 flex flex-col gap-2">
+                      <div className="flex items-center gap-4 text-[#1D1D1F] font-bold text-sm flex-wrap">
                         {property.type !== "Commercial" && (
                           <>
                             <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-[#94A3B8]" /> {u.rooms} Beds</span>
@@ -631,27 +631,27 @@ export default function PropertyDetailsPage() {
                             {u.leaseStructure} Lease
                           </Badge>
                         )}
-                        <span className="text-xs text-[#64748B] font-medium ml-auto">{u.sqFootage} sq ft</span>
+                        <span className="text-xs text-[#6E6E73] font-medium ml-auto">{u.sqFootage} sq ft</span>
                       </div>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex justify-between items-center">
+                    <div className="mt-4 pt-4 border-t border-[#E5E5EA] flex justify-between items-center">
                       <div>
-                        <p className="font-extrabold text-[#0F172A] text-base">${Number(u.rentAmount).toLocaleString()} <span className="text-xs text-[#64748B] font-medium">/mo</span></p>
+                        <p className="font-extrabold text-[#1D1D1F] text-base">${Number(u.rentAmount).toLocaleString()} <span className="text-xs text-[#6E6E73] font-medium">/mo</span></p>
                         {property.type === "Commercial" && u.sqFootage > 0 && (
-                          <p className="text-xs font-bold text-slate-400">${((Number(u.rentAmount) * 12) / u.sqFootage).toFixed(2)}/sqft/yr</p>
+                          <p className="text-xs font-bold text-[#8E8E93]">${((Number(u.rentAmount) * 12) / u.sqFootage).toFixed(2)}/sqft/yr</p>
                         )}
                       </div>
-                      <Button variant="ghost" className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A]"><MoreVertical className="h-4 w-4" /></Button>
+                      <Button variant="ghost" className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F]"><MoreVertical className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 </div>
               ))}
               {totalUnits === 0 && (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E2E8F0] rounded-2xl bg-[#F8FAFC]">
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
                   <Home className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-[#0F172A]">No Units Added</h3>
-                  <p className="text-sm text-[#64748B] mt-1">Get started by creating units for this property.</p>
+                  <h3 className="text-lg font-bold text-[#1D1D1F]">No Units Added</h3>
+                  <p className="text-sm text-[#6E6E73] mt-1">Get started by creating units for this property.</p>
                 </div>
               )}
             </div>
@@ -684,10 +684,10 @@ export default function PropertyDetailsPage() {
 
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-[#0F172A]">Property Images</h2>
-                <p className="text-sm font-medium text-[#64748B]">Showing {property.images?.length || 0} images</p>
+                <h2 className="text-xl font-bold text-[#1D1D1F]">Property Images</h2>
+                <p className="text-sm font-medium text-[#6E6E73]">Showing {property.images?.length || 0} images</p>
               </div>
-              <Button onClick={() => setIsUploaderOpen(true)} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6">
+              <Button onClick={() => setIsUploaderOpen(true)} className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 font-bold px-6">
                 Add Image
               </Button>
             </div>
@@ -695,7 +695,7 @@ export default function PropertyDetailsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {property.images?.length > 0 ? (
                 property.images.map((img: string, i: number) => (
-                  <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-[#E2E8F0] shadow-sm">
+                  <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-[#E5E5EA] shadow-sm">
                     <img src={img} alt={`Property image ${i}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-end justify-end p-3">
                       <Button 
@@ -710,10 +710,10 @@ export default function PropertyDetailsPage() {
                   </div>
                 ))
               ) : (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E2E8F0] rounded-2xl bg-[#F8FAFC]">
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
                   <ImageIcon2 className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-[#0F172A]">No Images</h3>
-                  <p className="text-sm text-[#64748B] mt-1">Upload photos to showcase this property.</p>
+                  <h3 className="text-lg font-bold text-[#1D1D1F]">No Images</h3>
+                  <p className="text-sm text-[#6E6E73] mt-1">Upload photos to showcase this property.</p>
                 </div>
               )}
             </div>
@@ -722,8 +722,8 @@ export default function PropertyDetailsPage() {
             {property.units?.some((u: any) => u.images && u.images.length > 0) && (
               <div className="pt-8 border-t border-slate-100 mt-8 space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-[#0F172A]">Interior & Unit Photos</h3>
-                  <p className="text-xs font-semibold text-slate-400 mt-1">Photos are grouped by individual unit.</p>
+                  <h3 className="text-lg font-bold text-[#1D1D1F]">Interior & Unit Photos</h3>
+                  <p className="text-xs font-semibold text-[#8E8E93] mt-1">Photos are grouped by individual unit.</p>
                 </div>
                 
                 <div className="space-y-4">
@@ -733,7 +733,7 @@ export default function PropertyDetailsPage() {
                       <div key={u.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5">
                         <div className="flex justify-between items-center mb-3">
                           <span className="font-extrabold text-sm text-slate-800">
-                            Unit {u.name} <span className="text-xs font-semibold text-slate-400">({u.images.length} photos)</span>
+                            Unit {u.name} <span className="text-xs font-semibold text-[#8E8E93]">({u.images.length} photos)</span>
                           </span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
@@ -766,30 +766,30 @@ export default function PropertyDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-[#0F172A]">Property Amenities</h2>
-                <p className="text-sm font-medium text-[#64748B]">Features available at this location</p>
+                <h2 className="text-xl font-bold text-[#1D1D1F]">Property Amenities</h2>
+                <p className="text-sm font-medium text-[#6E6E73]">Features available at this location</p>
               </div>
-              <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-11 font-bold px-6">
+              <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 font-bold px-6">
                 Edit Amenities
               </Button>
             </div>
             
             {property.amenities && property.amenities.length > 0 ? (
-              <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-sm flex flex-wrap gap-3">
+              <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm flex flex-wrap gap-3">
                 {property.amenities.map((amenity: string, i: number) => (
-                  <div key={i} className="flex items-center gap-2 px-4 py-2 bg-[#F8FAFC] text-[#0F172A] text-sm font-extrabold rounded-xl border border-[#E2E8F0]">
-                    <CheckCircle2 className="h-4 w-4 text-[#3B82F6]" />
+                  <div key={i} className="flex items-center gap-2 px-4 py-2 bg-[#F2F2F7] text-[#1D1D1F] text-sm font-extrabold rounded-xl border border-[#E5E5EA]">
+                    <CheckCircle2 className="h-4 w-4 text-[#007AFF]" />
                     {amenity}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-20 text-center border-2 border-dashed border-[#E2E8F0] rounded-2xl bg-[#F8FAFC]">
+              <div className="py-20 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
                 <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm mb-4">
                   <CheckCircle2 className="h-10 w-10 text-[#CBD5E1]" />
                 </div>
-                <h3 className="text-xl font-black text-[#0F172A]">No Amenities Listed</h3>
-                <p className="text-[#64748B] mt-2 max-w-sm mx-auto font-medium">No amenities have been added to this property yet. Edit property to add them.</p>
+                <h3 className="text-xl font-black text-[#1D1D1F]">No Amenities Listed</h3>
+                <p className="text-[#6E6E73] mt-2 max-w-sm mx-auto font-medium">No amenities have been added to this property yet. Edit property to add them.</p>
               </div>
             )}
           </div>
@@ -798,19 +798,19 @@ export default function PropertyDetailsPage() {
 
       {/* SMART MEDIA UPLOADER MODAL */}
       <Dialog open={isUploaderOpen} onOpenChange={setIsUploaderOpen}>
-        <DialogContent className="sm:max-w-md bg-white border-[#E2E8F0] rounded-2xl p-0 overflow-hidden shadow-xl">
-          <div className="p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-            <DialogTitle className="text-xl font-black text-[#0F172A]">Upload Media</DialogTitle>
-            <DialogDescription className="font-semibold text-[#64748B]">
+        <DialogContent className="sm:max-w-md bg-white border-[#E5E5EA] rounded-2xl p-0 overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]">
+            <DialogTitle className="text-xl font-black text-[#1D1D1F]">Upload Media</DialogTitle>
+            <DialogDescription className="font-semibold text-[#6E6E73]">
               Photos will be automatically compressed to optimize load times.
             </DialogDescription>
           </div>
           
           <div className="p-6 space-y-6">
             <div className="space-y-3">
-              <label className="text-sm font-bold text-[#0F172A] block uppercase tracking-wider">What are you uploading?</label>
+              <label className="text-sm font-bold text-[#1D1D1F] block uppercase tracking-wider">What are you uploading?</label>
               <select 
-                className="w-full bg-white border border-[#E2E8F0] rounded-xl h-12 px-4 font-semibold text-[#0F172A] focus:ring-2 focus:ring-[#3B82F6]"
+                className="w-full bg-white border border-[#E5E5EA] rounded-xl h-12 px-4 font-semibold text-[#1D1D1F] focus:ring-2 focus:ring-[#007AFF]"
                 value={uploadCategory}
                 onChange={(e) => setUploadCategory(e.target.value)}
               >
@@ -839,9 +839,9 @@ export default function PropertyDetailsPage() {
 
             {uploadCategory === "UNIT_INTERIOR" && property.units?.length > 0 && (
               <div className="space-y-3">
-                <label className="text-sm font-bold text-[#0F172A] block uppercase tracking-wider">Which {property.type === "Commercial" ? "Suite" : "Unit"}?</label>
+                <label className="text-sm font-bold text-[#1D1D1F] block uppercase tracking-wider">Which {property.type === "Commercial" ? "Suite" : "Unit"}?</label>
                 <select 
-                  className="w-full bg-white border border-[#E2E8F0] rounded-xl h-12 px-4 font-semibold text-[#0F172A] focus:ring-2 focus:ring-[#3B82F6]"
+                  className="w-full bg-white border border-[#E5E5EA] rounded-xl h-12 px-4 font-semibold text-[#1D1D1F] focus:ring-2 focus:ring-[#007AFF]"
                   value={uploadTargetUnit}
                   onChange={(e) => setUploadTargetUnit(e.target.value)}
                 >
@@ -857,7 +857,7 @@ export default function PropertyDetailsPage() {
               <Button 
                 onClick={() => document.getElementById("smart-upload-input")?.click()}
                 disabled={isUploading || (uploadCategory === "UNIT_INTERIOR" && !uploadTargetUnit)}
-                className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md rounded-xl h-12 font-bold text-base"
+                className="w-full bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-md rounded-xl h-12 font-bold text-base"
               >
                 {isUploading ? "Compressing & Uploading..." : "Select Photos"}
               </Button>
@@ -879,14 +879,14 @@ export default function PropertyDetailsPage() {
 
 function SpecCard({ title, value, Icon }: any) {
   return (
-    <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
+    <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
       <CardContent className="p-5 flex items-center gap-4">
-        <div className="p-3 bg-[#F8FAFC] text-[#3B82F6] rounded-xl shrink-0">
+        <div className="p-3 bg-[#F2F2F7] text-[#007AFF] rounded-xl shrink-0">
           <Icon className="h-6 w-6" />
         </div>
         <div>
-          <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-1">{title}</p>
-          <p className="font-extrabold text-[#0F172A] text-lg leading-tight truncate">{value}</p>
+          <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider mb-1">{title}</p>
+          <p className="font-extrabold text-[#1D1D1F] text-lg leading-tight truncate">{value}</p>
         </div>
       </CardContent>
     </Card>

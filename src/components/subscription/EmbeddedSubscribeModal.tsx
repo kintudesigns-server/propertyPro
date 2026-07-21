@@ -94,16 +94,16 @@ function CheckoutForm({
       {/* Plan Summary */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 flex items-center justify-between">
         <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Subscribing to</p>
+          <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-widest mb-1">Subscribing to</p>
           <p className="text-xl font-black text-white">{tierName}</p>
           <div className="flex items-center gap-2 mt-2">
             <Shield className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="text-xs text-slate-400 font-medium">Cancel anytime · Secure payment</span>
+            <span className="text-xs text-[#8E8E93] font-medium">Cancel anytime · Secure payment</span>
           </div>
         </div>
         <div className="text-right">
           <p className="text-3xl font-black text-white">${tierPrice}</p>
-          <p className="text-xs text-slate-400 font-medium">/month</p>
+          <p className="text-xs text-[#8E8E93] font-medium">/month</p>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ function CheckoutForm({
 
       {!ready && (
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#8E8E93]" />
         </div>
       )}
 
@@ -139,7 +139,7 @@ function CheckoutForm({
           type="button"
           variant="outline"
           onClick={onBack}
-          className="h-12 px-5 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+          className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
           disabled={isProcessing}
         >
           <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -164,7 +164,7 @@ function CheckoutForm({
         </Button>
       </div>
 
-      <p className="text-center text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1.5">
+      <p className="text-center text-[11px] text-[#8E8E93] font-medium flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3" />
         Secured by Stripe · 256-bit SSL encryption
       </p>
@@ -278,9 +278,9 @@ export default function EmbeddedSubscribeModal({
         appearance: {
           theme: "stripe",
           variables: {
-            colorPrimary: "#2563EB",
+            colorPrimary: "#0062CC",
             colorBackground: "#ffffff",
-            colorText: "#0F172A",
+            colorText: "#1D1D1F",
             colorDanger: "#EF4444",
             fontFamily: "Inter, system-ui, sans-serif",
             borderRadius: "12px",
@@ -306,7 +306,7 @@ export default function EmbeddedSubscribeModal({
                   {step === "payment" && selectedTier ? `Subscribe to ${selectedTier.name}` : title}
                 </DialogTitle>
                 {contextMessage && step === "plans" && (
-                  <DialogDescription className="text-slate-500 text-sm font-medium mt-0.5">
+                  <DialogDescription className="text-[#6E6E73] text-sm font-medium mt-0.5">
                     {contextMessage}
                   </DialogDescription>
                 )}
@@ -359,18 +359,18 @@ export default function EmbeddedSubscribeModal({
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-black text-slate-900 text-lg">{tier.name}</h3>
                             {isCurrent && (
-                              <Badge className="bg-slate-200 text-slate-600 hover:bg-slate-200 border-0 rounded-lg text-[10px] font-bold px-2">
+                              <Badge className="bg-slate-200 text-[#6E6E73] hover:bg-slate-200 border-0 rounded-lg text-[10px] font-bold px-2">
                                 Current
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-slate-500 mb-3">
+                          <p className="text-sm text-[#6E6E73] mb-3">
                             {tier.description || `Up to ${tier.maxUnits} units`}
                           </p>
                           {tier.features && tier.features.length > 0 && (
                             <div className="flex flex-wrap gap-x-4 gap-y-1">
                               {tier.features.slice(0, 3).map((f, i) => (
-                                <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73]">
                                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                                   {f}
                                 </span>
@@ -382,14 +382,14 @@ export default function EmbeddedSubscribeModal({
                         <div className="ml-6 flex flex-col items-end gap-3 shrink-0">
                           <div className="text-right">
                             <span className="text-2xl font-black text-slate-900">${tier.price}</span>
-                            <span className="text-slate-500 text-xs font-medium">/mo</span>
+                            <span className="text-[#6E6E73] text-xs font-medium">/mo</span>
                           </div>
                           <Button
                             onClick={() => !isDowngradeBlocked && handleSelectPlan(tier)}
                             disabled={isCurrent || !!loadingTierId || isDowngradeBlocked}
                             className={`h-9 px-5 rounded-xl font-bold text-sm transition-all ${
                               isCurrent
-                                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                ? "bg-slate-200 text-[#8E8E93] cursor-not-allowed"
                                 : isDowngradeBlocked
                                 ? "bg-red-50 text-red-500 cursor-not-allowed hover:bg-red-50"
                                 : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
@@ -412,7 +412,7 @@ export default function EmbeddedSubscribeModal({
                 })
               )}
 
-              <p className="text-center text-[11px] text-slate-400 font-medium pt-2 flex items-center justify-center gap-1.5">
+              <p className="text-center text-[11px] text-[#8E8E93] font-medium pt-2 flex items-center justify-center gap-1.5">
                 <Lock className="h-3 w-3" />
                 All plans are billed monthly · Cancel anytime
               </p>
@@ -440,7 +440,7 @@ export default function EmbeddedSubscribeModal({
                   type="button"
                   variant="outline"
                   onClick={() => setStep("plans")}
-                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
                   disabled={!!loadingTierId}
                 >
                   <ArrowLeft className="h-4 w-4 mr-1.5" />

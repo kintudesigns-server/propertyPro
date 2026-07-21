@@ -328,7 +328,7 @@ export default function AddNewUserPage() {
   if (status === "loading") {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-[#3B82F6]" />
+        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
       </div>
     );
   }
@@ -344,7 +344,7 @@ export default function AddNewUserPage() {
           <div className="flex items-center gap-2 mb-2">
             <Link 
               href="/dashboard/admin/users" 
-              className="text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
+              className="text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Users Directory
             </Link>
@@ -352,7 +352,7 @@ export default function AddNewUserPage() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             Add New User Account
           </h1>
-          <p className="text-slate-500 text-sm mt-0.5 font-medium">
+          <p className="text-[#6E6E73] text-sm mt-0.5 font-medium">
             Register a new platform member and assign their role & access permissions
           </p>
         </div>
@@ -366,7 +366,7 @@ export default function AddNewUserPage() {
             Cancel
           </Button>
           <Button 
-            className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 h-11 px-7 shadow-sm transition-all flex-1 sm:flex-initial"
+            className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 h-11 px-7 shadow-sm transition-all flex-1 sm:flex-initial"
             onClick={handleSubmit}
             disabled={loading || uploadingAvatar || emailStatus === "TAKEN"}
           >
@@ -394,7 +394,7 @@ export default function AddNewUserPage() {
               
               <div 
                 onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-                className="h-32 w-32 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center mb-4 cursor-pointer hover:bg-slate-100 hover:border-slate-400 transition-all relative group overflow-hidden shadow-inner"
+                className="h-32 w-32 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center mb-4 cursor-pointer hover:bg-[#F2F2F7] hover:border-slate-400 transition-all relative group overflow-hidden shadow-inner"
               >
                 {uploadingAvatar ? (
                   <div className="flex flex-col items-center justify-center space-y-1">
@@ -411,14 +411,14 @@ export default function AddNewUserPage() {
                   </>
                 ) : (
                   <>
-                    <Upload className="h-7 w-7 text-slate-400 group-hover:text-slate-600 mb-1 transition-colors" />
-                    <span className="text-xs font-bold text-slate-600">Upload Photo</span>
+                    <Upload className="h-7 w-7 text-[#8E8E93] group-hover:text-[#6E6E73] mb-1 transition-colors" />
+                    <span className="text-xs font-bold text-[#6E6E73]">Upload Photo</span>
                   </>
                 )}
               </div>
 
               <h3 className="font-bold text-slate-900 text-sm">Profile Avatar</h3>
-              <p className="text-xs text-slate-400 mt-0.5 mb-4 font-medium">Supports JPG, PNG, or WEBP up to 10MB</p>
+              <p className="text-xs text-[#8E8E93] mt-0.5 mb-4 font-medium">Supports JPG, PNG, or WEBP up to 10MB</p>
               
               {avatarUrl ? (
                 <Button 
@@ -458,7 +458,7 @@ export default function AddNewUserPage() {
                       {formData.isActive ? "ACTIVE" : "SUSPENDED"}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-[#6E6E73] font-medium">
                     {formData.isActive ? "User can immediately log in & access features." : "User account will be created in deactivated status."}
                   </p>
                 </div>
@@ -476,7 +476,7 @@ export default function AddNewUserPage() {
                   <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-blue-600" /> Send Welcome Email
                   </h4>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-[#6E6E73] font-medium">
                     Dispatches setup email with one-time login link.
                   </p>
                 </div>
@@ -490,21 +490,21 @@ export default function AddNewUserPage() {
           </Card>
 
           {/* Quick Summary Preview Box */}
-          <div className="bg-slate-900 text-white rounded-3xl p-5 space-y-3 shadow-md">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Creation Summary</p>
+          <div className="bg-[#007AFF] text-white rounded-3xl p-5 space-y-3 shadow-md">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#8E8E93]">Creation Summary</p>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Target Role:</span>
+                <span className="text-[#8E8E93]">Target Role:</span>
                 <span className="font-bold text-white">{selectedRoleObj?.title}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Status:</span>
+                <span className="text-[#8E8E93]">Status:</span>
                 <span className={`font-bold ${formData.isActive ? "text-emerald-400" : "text-rose-400"}`}>
                   {formData.isActive ? "Active" : "Suspended"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Password Mode:</span>
+                <span className="text-[#8E8E93]">Password Mode:</span>
                 <span className="font-bold text-blue-300">
                   {passwordMode === "EMAIL_LINK" ? "Email Setup Link" : "Manual Password"}
                 </span>
@@ -523,7 +523,7 @@ export default function AddNewUserPage() {
               <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-blue-600" /> Select Account Role *
               </h3>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <p className="text-xs text-[#6E6E73] font-medium mt-0.5">
                 Role controls what navigation menus, property data, and actions the user can access.
               </p>
             </div>
@@ -549,7 +549,7 @@ export default function AddNewUserPage() {
                           <h4 className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
                             {r.title}
                           </h4>
-                          <p className="text-[11px] text-slate-400 font-semibold">{r.subtitle}</p>
+                          <p className="text-[11px] text-[#8E8E93] font-semibold">{r.subtitle}</p>
                         </div>
                       </div>
                       
@@ -562,7 +562,7 @@ export default function AddNewUserPage() {
 
                     <ul className="space-y-1 pt-1 border-t border-slate-100">
                       {r.features.map((feat, idx) => (
-                        <li key={idx} className="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                        <li key={idx} className="text-xs text-[#6E6E73] flex items-center gap-1.5 font-medium">
                           <span className="h-1.5 w-1.5 rounded-full bg-slate-300 shrink-0" />
                           {feat}
                         </li>
@@ -697,7 +697,7 @@ export default function AddNewUserPage() {
                     className={`px-3 py-1.5 rounded-lg transition-all ${
                       passwordMode === "EMAIL_LINK" 
                         ? "bg-white text-blue-600 shadow-xs font-extrabold" 
-                        : "text-slate-600 hover:text-slate-900"
+                        : "text-[#6E6E73] hover:text-[#1D1D1F]"
                     }`}
                   >
                     Email Setup Link (Recommended)
@@ -708,7 +708,7 @@ export default function AddNewUserPage() {
                     className={`px-3 py-1.5 rounded-lg transition-all ${
                       passwordMode === "MANUAL" 
                         ? "bg-white text-blue-600 shadow-xs font-extrabold" 
-                        : "text-slate-600 hover:text-slate-900"
+                        : "text-[#6E6E73] hover:text-[#1D1D1F]"
                     }`}
                   >
                     Set Password Manually
@@ -731,7 +731,7 @@ export default function AddNewUserPage() {
               ) : (
                 <div className="space-y-5 animate-in fade-in duration-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-600">Manual Password Configuration</span>
+                    <span className="text-xs font-bold text-[#6E6E73]">Manual Password Configuration</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -760,7 +760,7 @@ export default function AddNewUserPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                          className="absolute right-3 top-3 text-[#8E8E93] hover:text-[#6E6E73]"
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -782,7 +782,7 @@ export default function AddNewUserPage() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                          className="absolute right-3 top-3 text-[#8E8E93] hover:text-[#6E6E73]"
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -795,7 +795,7 @@ export default function AddNewUserPage() {
                   {formData.password && (
                     <div className="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-bold text-slate-600">Password Strength:</span>
+                        <span className="font-bold text-[#6E6E73]">Password Strength:</span>
                         <span className={`font-black ${passwordStrength.color}`}>
                           {passwordStrength.label}
                         </span>
@@ -827,7 +827,7 @@ export default function AddNewUserPage() {
                 onChange={handleInputChange}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
               />
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-[11px] text-[#8E8E93] font-medium">
                 These notes are visible only to platform administrators in audit logs.
               </p>
             </CardContent>
@@ -843,7 +843,7 @@ export default function AddNewUserPage() {
               Cancel
             </Button>
             <Button 
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl flex items-center gap-2 h-11 px-8 shadow-sm transition-all"
+              className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center gap-2 h-11 px-8 shadow-sm transition-all"
               onClick={handleSubmit}
               disabled={loading || uploadingAvatar || emailStatus === "TAKEN"}
             >

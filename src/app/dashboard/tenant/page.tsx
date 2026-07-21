@@ -459,7 +459,7 @@ export default function TenantDashboard() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-[#496E5C]" />
-        <p className="text-slate-400 font-extrabold text-sm uppercase tracking-wider">Syncing Secure Database...</p>
+        <p className="text-[#8E8E93] font-extrabold text-sm uppercase tracking-wider">Syncing Secure Database...</p>
       </div>
     );
   }
@@ -588,7 +588,7 @@ export default function TenantDashboard() {
 
             {/* Hero Residence Card */}
             {activeLease ? (
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] text-white border-none shadow-lg rounded-3xl overflow-hidden p-6 sm:p-8 relative">
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#1D1D1F] text-white border-none shadow-lg rounded-3xl overflow-hidden p-6 sm:p-8 relative">
                 <div className="absolute right-0 top-0 h-full w-1/3 bg-radial-gradient from-white/5 to-transparent pointer-events-none" />
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                   <div className="space-y-2">
@@ -605,7 +605,7 @@ export default function TenantDashboard() {
                   </div>
                   <div className="flex flex-row md:flex-col items-baseline md:items-end gap-3 shrink-0">
                     <div>
-                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider text-left md:text-right">Monthly Rent</p>
+                      <p className="text-[#8E8E93] text-[10px] font-bold uppercase tracking-wider text-left md:text-right">Monthly Rent</p>
                       <p className="text-2xl sm:text-3xl font-black text-emerald-400">${Number(activeLease.monthlyRent).toLocaleString()}</p>
                     </div>
                   </div>
@@ -613,7 +613,7 @@ export default function TenantDashboard() {
 
                 {/* Lease Period progress line */}
                 <div className="mt-8 pt-6 border-t border-white/10">
-                  <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
+                  <div className="flex justify-between items-center text-xs text-[#8E8E93] mb-2">
                     <span>Lease Term: {new Date(activeLease.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(activeLease.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                     <span className="font-extrabold text-emerald-400">{getLeaseProgress(activeLease)}% Complete</span>
                   </div>
@@ -626,12 +626,12 @@ export default function TenantDashboard() {
                 </div>
               </Card>
             ) : (
-              <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
-                <div className="h-16 w-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center">
+              <Card className="bg-white border border-[#E5E5EA] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
+                <div className="h-16 w-16 bg-slate-50 text-[#8E8E93] rounded-full flex items-center justify-center">
                   <Home className="h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-black text-slate-950">No Active Lease Agreement</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#6E6E73]">
                   You are not currently registered to any active property leases. If you have recently applied, check your application status.
                 </p>
                 <Button 
@@ -652,11 +652,11 @@ export default function TenantDashboard() {
                 }`}>
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Rent Balance</span>
+                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Rent Balance</span>
                       <h3 className={`text-2xl font-black ${totalUnpaid > 0 ? "text-red-600" : "text-emerald-700"}`}>
                         {totalUnpaid > 0 ? `$${totalUnpaid.toLocaleString()}` : "Fully Paid"}
                       </h3>
-                      <p className="text-xs text-[#64748B]">
+                      <p className="text-xs text-[#6E6E73]">
                         {totalUnpaid > 0 ? "Outstanding balance due" : "No outstanding invoices"}
                       </p>
                     </div>
@@ -683,14 +683,14 @@ export default function TenantDashboard() {
                 </Card>
 
                 {/* 🟡 Maintenance Tickets Card */}
-                <Card className="border border-[#E2E8F0] rounded-2xl p-5 shadow-xs bg-white">
+                <Card className="border border-[#E5E5EA] rounded-2xl p-5 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Maintenance</span>
+                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Maintenance</span>
                       <h3 className="text-2xl font-black text-slate-800">
                         {openRequestsCount} Open
                       </h3>
-                      <p className="text-xs text-[#64748B]">
+                      <p className="text-xs text-[#6E6E73]">
                         {openRequestsCount > 0 ? "Active repair requests" : "No pending repairs"}
                       </p>
                     </div>
@@ -702,13 +702,13 @@ export default function TenantDashboard() {
                     <Button 
                       onClick={() => setActiveTab("submit-request")}
                       variant="outline"
-                      className="flex-1 border-[#E2E8F0] text-slate-700 font-bold h-10 rounded-xl text-xs"
+                      className="flex-1 border-[#E5E5EA] text-slate-700 font-bold h-10 rounded-xl text-xs"
                     >
                       New Request
                     </Button>
                     <Button 
                       onClick={() => setActiveTab("my-requests")}
-                      className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold h-10 rounded-xl text-xs"
+                      className="flex-1 bg-slate-800 hover:bg-[#007AFF] text-white font-bold h-10 rounded-xl text-xs"
                     >
                       View All
                     </Button>
@@ -716,20 +716,20 @@ export default function TenantDashboard() {
                 </Card>
 
                 {/* 🔵 Lease Expiry Card */}
-                <Card className="border border-[#E2E8F0] rounded-2xl p-5 shadow-xs bg-white">
+                <Card className="border border-[#E5E5EA] rounded-2xl p-5 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Contract Window</span>
+                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Contract Window</span>
                       {(() => {
                         const expiry = new Date(activeLease.endDate).getTime();
                         const diff = expiry - Date.now();
                         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
                         return (
                           <>
-                            <h3 className={`text-2xl font-black ${days < 30 ? "text-amber-600" : "text-slate-800"}`}>
+                            <h3 className={`text-2xl font-black ${days < 30 ? "text-amber-600" : "text-[#1D1D1F]"}`}>
                               {days > 0 ? `${days} Days` : "Expired"}
                             </h3>
-                            <p className="text-xs text-[#64748B]">
+                            <p className="text-xs text-[#6E6E73]">
                               Remaining in term
                             </p>
                           </>
@@ -744,7 +744,7 @@ export default function TenantDashboard() {
                     <Button 
                       onClick={() => router.push(`/dashboard/leases/${activeLease.id}`)}
                       variant="outline"
-                      className="w-full border-[#E2E8F0] text-slate-700 font-bold h-10 rounded-xl text-xs hover:bg-slate-50"
+                      className="w-full border-[#E5E5EA] text-slate-700 font-bold h-10 rounded-xl text-xs hover:bg-[#F5F5F7]"
                     >
                       View Agreement Detail
                     </Button>
@@ -758,10 +758,10 @@ export default function TenantDashboard() {
               
               {/* Activity Feed Column */}
               <div className="lg:col-span-2 space-y-6">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-xs p-6">
+                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-xs p-6">
                   <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-                    <h2 className="text-base font-extrabold text-[#0F172A]">Recent Activity & Updates</h2>
-                    <span className="text-xs text-[#64748B]">Real-time tenant actions and platform updates</span>
+                    <h2 className="text-base font-extrabold text-[#1D1D1F]">Recent Activity & Updates</h2>
+                    <span className="text-xs text-[#6E6E73]">Real-time tenant actions and platform updates</span>
                   </div>
 
                   <div className="space-y-6">
@@ -799,26 +799,26 @@ export default function TenantDashboard() {
 
                     {/* Recent Updates Sub-Section */}
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                      <h3 className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">
                         Recent Updates
                       </h3>
                       
                       {maintenance.length === 0 && documents.length === 0 && unpaidInvoices.length === 0 ? (
-                        <div className="text-center py-10 border border-dashed border-[#E2E8F0] rounded-2xl">
-                          <p className="text-xs text-[#64748B] italic">No recent updates found.</p>
+                        <div className="text-center py-10 border border-dashed border-[#E5E5EA] rounded-2xl">
+                          <p className="text-xs text-[#6E6E73] italic">No recent updates found.</p>
                         </div>
                       ) : (
                         <div className="space-y-3">
                           {maintenance.slice(0, 3).map((m) => (
-                            <div key={m.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E2E8F0] rounded-2xl hover:border-slate-300 transition-colors">
+                            <div key={m.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E5E5EA] rounded-2xl hover:border-slate-300 transition-colors">
                               <div className="flex gap-3 items-start">
                                 <div className="p-2 bg-amber-50 text-amber-600 rounded-xl shrink-0 mt-0.5">
                                   <Wrench className="h-4.5 w-4.5" />
                                 </div>
                                 <div className="space-y-0.5">
                                   <h4 className="text-xs font-extrabold text-slate-900">{m.title}</h4>
-                                  <p className="text-[11px] text-[#64748B]">Category: {m.category} &bull; Priority: {m.priority}</p>
-                                  <p className="text-[10px] text-slate-400">Created: {new Date(m.createdAt || Date.now()).toLocaleDateString()}</p>
+                                  <p className="text-[11px] text-[#6E6E73]">Category: {m.category} &bull; Priority: {m.priority}</p>
+                                  <p className="text-[10px] text-[#8E8E93]">Created: {new Date(m.createdAt || Date.now()).toLocaleDateString()}</p>
                                 </div>
                               </div>
                               <Badge className={
@@ -833,15 +833,15 @@ export default function TenantDashboard() {
                           ))}
 
                           {documents.slice(0, 2).map((d) => (
-                            <div key={d.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E2E8F0] rounded-2xl hover:border-slate-300 transition-colors">
+                            <div key={d.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E5E5EA] rounded-2xl hover:border-slate-300 transition-colors">
                               <div className="flex gap-3 items-start">
                                 <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0 mt-0.5">
                                   <FileText className="h-4.5 w-4.5" />
                                 </div>
                                 <div className="space-y-0.5">
                                   <h4 className="text-xs font-extrabold text-slate-900">{d.name}</h4>
-                                  <p className="text-[11px] text-[#64748B]">Legal Vault &bull; Category: {d.category}</p>
-                                  <p className="text-[10px] text-slate-400">Uploaded: {new Date(d.uploadedAt).toLocaleDateString()}</p>
+                                  <p className="text-[11px] text-[#6E6E73]">Legal Vault &bull; Category: {d.category}</p>
+                                  <p className="text-[10px] text-[#8E8E93]">Uploaded: {new Date(d.uploadedAt).toLocaleDateString()}</p>
                                 </div>
                               </div>
                               <Button
@@ -863,33 +863,33 @@ export default function TenantDashboard() {
 
               {/* Support & Contacts Column */}
               <div className="lg:col-span-1 space-y-6">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-xs p-6">
+                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-xs p-6">
                   <div className="pb-4 border-b border-[#F1F5F9] mb-4">
-                    <h2 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <h2 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
                       <UserCheck className="h-4.5 w-4.5 text-[#496E5C]" />
                       Support Contacts
                     </h2>
-                    <span className="text-xs text-[#64748B]">Reach out directly via secure chat</span>
+                    <span className="text-xs text-[#6E6E73]">Reach out directly via secure chat</span>
                   </div>
 
                   <div className="space-y-4">
                     {contacts.length === 0 ? (
-                      <p className="text-xs text-[#64748B] italic text-center py-4">No support contacts loaded.</p>
+                      <p className="text-xs text-[#6E6E73] italic text-center py-4">No support contacts loaded.</p>
                     ) : (
                       contacts.map((c) => (
-                        <div key={c.id} className="p-3.5 bg-slate-50 border border-[#E2E8F0] rounded-2xl space-y-3 hover:border-slate-300 transition-colors">
+                        <div key={c.id} className="p-3.5 bg-slate-50 border border-[#E5E5EA] rounded-2xl space-y-3 hover:border-slate-300 transition-colors">
                           <div className="flex gap-3 items-center">
                             <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-extrabold shrink-0">
                               {c.name ? c.name.charAt(0).toUpperCase() : "?"}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="text-xs font-extrabold text-[#0F172A] truncate">{c.name}</h4>
-                              <p className="text-[10px] text-[#64748B] font-bold uppercase tracking-wider">{c.role}</p>
+                              <h4 className="text-xs font-extrabold text-[#1D1D1F] truncate">{c.name}</h4>
+                              <p className="text-[10px] text-[#6E6E73] font-bold uppercase tracking-wider">{c.role}</p>
                             </div>
                           </div>
-                          <div className="text-[11px] text-[#64748B] space-y-1">
-                            <p className="truncate flex items-center gap-1"><Mail className="h-3 w-3 text-slate-400" /> {c.email}</p>
-                            {c.phone && <p className="truncate flex items-center gap-1"><Phone className="h-3 w-3 text-slate-400" /> {c.phone}</p>}
+                          <div className="text-[11px] text-[#6E6E73] space-y-1">
+                            <p className="truncate flex items-center gap-1"><Mail className="h-3 w-3 text-[#8E8E93]" /> {c.email}</p>
+                            {c.phone && <p className="truncate flex items-center gap-1"><Phone className="h-3 w-3 text-[#8E8E93]" /> {c.phone}</p>}
                           </div>
                           <Button
                             onClick={() => {
@@ -908,7 +908,7 @@ export default function TenantDashboard() {
 
                 {/* Showing Tours Widget */}
                 {tours.length > 0 && (
-                  <Card className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-xs space-y-4">
+                  <Card className="bg-white border border-[#E5E5EA] rounded-[24px] p-6 shadow-xs space-y-4">
                     <div className="flex justify-between items-center pb-2 border-b border-[#F1F5F9]">
                       <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                         <Calendar className="h-4 w-4 text-[#496E5C]" />
@@ -932,12 +932,12 @@ export default function TenantDashboard() {
                             <Badge className={`text-[9px] px-1.5 py-0.2 border-0 font-bold ${
                               tour.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-700" :
                               tour.status === "PENDING" ? "bg-amber-50 text-amber-700" :
-                              "bg-slate-100 text-slate-600"
+                              "bg-slate-100 text-[#6E6E73]"
                             }`}>
                               {tour.status}
                             </Badge>
                           </div>
-                          <p className="text-[10px] text-slate-400 font-semibold">
+                          <p className="text-[10px] text-[#8E8E93] font-semibold">
                             {new Date(tour.scheduledAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} at {new Date(tour.scheduledAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                           </p>
                         </div>
@@ -955,7 +955,7 @@ export default function TenantDashboard() {
                   </p>
                   <Button 
                     onClick={() => setActiveTab("submit-request")}
-                    className="w-full bg-white text-[#496E5C] hover:bg-slate-100 font-extrabold rounded-xl text-xs h-10 transition-colors"
+                    className="w-full bg-white text-[#496E5C] hover:bg-[#F2F2F7] font-extrabold rounded-xl text-xs h-10 transition-colors"
                   >
                     File Maintenance Ticket
                   </Button>
@@ -970,18 +970,18 @@ export default function TenantDashboard() {
           <div className="space-y-6">
             <div className="pb-2 border-b border-[#F1F5F9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-black text-[#0F172A] tracking-tight">Leases Registry</h2>
-                <p className="text-xs text-[#64748B] font-semibold mt-0.5">All active and historical tenancy agreements</p>
+                <h2 className="text-xl font-black text-[#1D1D1F] tracking-tight">Leases Registry</h2>
+                <p className="text-xs text-[#6E6E73] font-semibold mt-0.5">All active and historical tenancy agreements</p>
               </div>
             </div>
 
             {leases.length === 0 ? (
-              <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
-                <div className="h-16 w-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center">
+              <Card className="bg-white border border-[#E5E5EA] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
+                <div className="h-16 w-16 bg-slate-50 text-[#8E8E93] rounded-full flex items-center justify-center">
                   <FileText className="h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-black text-slate-950">No Leases Found</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#6E6E73]">
                   There are no current or historical lease contracts linked to your tenant profile.
                 </p>
               </Card>
@@ -990,12 +990,12 @@ export default function TenantDashboard() {
                 {leases.map((l) => {
                   const progressVal = getLeaseProgress(l);
                   return (
-                    <Card key={l.id} className="bg-white border border-[#E2E8F0] hover:border-slate-300 shadow-xs hover:shadow-sm rounded-[24px] overflow-hidden transition-all duration-300 flex flex-col justify-between">
+                    <Card key={l.id} className="bg-white border border-[#E5E5EA] hover:border-slate-300 shadow-xs hover:shadow-sm rounded-[24px] overflow-hidden transition-all duration-300 flex flex-col justify-between">
                       <div className="p-6 space-y-4">
                         <div className="flex justify-between items-start gap-4">
                           <div className="space-y-1">
                             <h3 className="font-extrabold text-slate-900 text-base">{l.unit.property.name}</h3>
-                            <p className="text-xs text-[#64748B] font-semibold flex items-center gap-1">
+                            <p className="text-xs text-[#6E6E73] font-semibold flex items-center gap-1">
                               <Home className="h-3.5 w-3.5 text-[#496E5C]" />
                               Unit: {l.unit.name}
                             </p>
@@ -1014,11 +1014,11 @@ export default function TenantDashboard() {
                         {/* Lease Dates */}
                         <div className="grid grid-cols-2 gap-4 py-2 border-y border-[#F1F5F9] text-xs">
                           <div>
-                            <span className="text-[#64748B] block mb-0.5">Start Date</span>
+                            <span className="text-[#6E6E73] block mb-0.5">Start Date</span>
                             <span className="font-bold text-slate-800">{new Date(l.startDate).toLocaleDateString()}</span>
                           </div>
                           <div>
-                            <span className="text-[#64748B] block mb-0.5">End Date</span>
+                            <span className="text-[#6E6E73] block mb-0.5">End Date</span>
                             <span className="font-bold text-slate-800">{new Date(l.endDate).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -1026,11 +1026,11 @@ export default function TenantDashboard() {
                         {/* Rent and Deposit */}
                         <div className="grid grid-cols-2 gap-4 text-xs">
                           <div>
-                            <span className="text-[#64748B] block mb-0.5">Monthly Rent</span>
+                            <span className="text-[#6E6E73] block mb-0.5">Monthly Rent</span>
                             <span className="font-extrabold text-[#496E5C] text-sm">${Number(l.monthlyRent).toLocaleString()}/mo</span>
                           </div>
                           <div>
-                            <span className="text-[#64748B] block mb-0.5">Security Deposit</span>
+                            <span className="text-[#6E6E73] block mb-0.5">Security Deposit</span>
                             <span className="font-bold text-slate-800">${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</span>
                           </div>
                         </div>
@@ -1038,7 +1038,7 @@ export default function TenantDashboard() {
                         {/* Progress Bar for active tenancy */}
                         {l.status === "ACTIVE" && (
                           <div className="space-y-1.5 pt-2">
-                            <div className="flex justify-between text-[10px] text-slate-400">
+                            <div className="flex justify-between text-[10px] text-[#8E8E93]">
                               <span>Term Progress</span>
                               <span>{progressVal}%</span>
                             </div>
@@ -1055,7 +1055,7 @@ export default function TenantDashboard() {
                       <div className="p-4 bg-slate-50 border-t border-[#F1F5F9] flex gap-2">
                         <Button 
                           onClick={() => router.push(`/dashboard/leases/${l.id}`)}
-                          className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold h-10 rounded-xl text-xs transition-colors"
+                          className="w-full bg-slate-800 hover:bg-[#007AFF] text-white font-bold h-10 rounded-xl text-xs transition-colors"
                         >
                           View Agreement Contract
                         </Button>
@@ -1075,13 +1075,13 @@ export default function TenantDashboard() {
               
               {/* Document List */}
               <div className="lg:col-span-2">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
                   
                   {/* Filters */}
                   <div className="flex flex-col sm:flex-row gap-4 justify-between items-center pb-4 border-b border-[#F1F5F9] mb-6">
                     <div>
-                      <h2 className="text-base font-extrabold text-[#0F172A]">Tenant Documents</h2>
-                      <span className="text-xs text-[#64748B]">Legal papers, policy documents, and receipts</span>
+                      <h2 className="text-base font-extrabold text-[#1D1D1F]">Tenant Documents</h2>
+                      <span className="text-xs text-[#6E6E73]">Legal papers, policy documents, and receipts</span>
                     </div>
 
                     <div className="flex gap-2 w-full sm:w-auto">
@@ -1089,10 +1089,10 @@ export default function TenantDashboard() {
                         placeholder="Search document name..."
                         value={docSearch}
                         onChange={(e) => setDocSearch(e.target.value)}
-                        className="h-9 text-xs rounded-xl bg-slate-50 border-[#E2E8F0]"
+                        className="h-9 text-xs rounded-xl bg-slate-50 border-[#E5E5EA]"
                       />
                       <Select value={docFilterCat} onValueChange={(val) => setDocFilterCat(val || "ALL")}>
-                        <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E2E8F0] rounded-xl">
+                        <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E5E5EA] rounded-xl">
                           <SelectValue placeholder="Category" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -1110,11 +1110,11 @@ export default function TenantDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="font-bold text-xs uppercase text-[#64748B]">Document Name</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#64748B]">Category</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#64748B]">Size</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#64748B]">Date Uploaded</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#64748B] text-right">Action</TableHead>
+                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Document Name</TableHead>
+                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
+                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Size</TableHead>
+                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Uploaded</TableHead>
+                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73] text-right">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1122,8 +1122,8 @@ export default function TenantDashboard() {
                           .filter(d => docFilterCat === "ALL" || d.category === docFilterCat)
                           .filter(d => d.name.toLowerCase().includes(docSearch.toLowerCase()))
                           .map((d) => (
-                            <TableRow key={d.id} className="hover:bg-slate-50/50">
-                              <TableCell className="font-bold text-[#0F172A] flex items-center gap-2">
+                            <TableRow key={d.id} className="hover:bg-[#F5F5F7]/50">
+                              <TableCell className="font-bold text-[#1D1D1F] flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-[#496E5C]" />
                                 {d.name}
                               </TableCell>
@@ -1132,8 +1132,8 @@ export default function TenantDashboard() {
                                   {d.category}
                                 </Badge>
                               </TableCell>
-                              <TableCell className="text-[#64748B] text-xs">{d.fileSize || "1.0 MB"}</TableCell>
-                              <TableCell className="text-[#64748B] text-xs">{new Date(d.uploadedAt).toLocaleDateString()}</TableCell>
+                              <TableCell className="text-[#6E6E73] text-xs">{d.fileSize || "1.0 MB"}</TableCell>
+                              <TableCell className="text-[#6E6E73] text-xs">{new Date(d.uploadedAt).toLocaleDateString()}</TableCell>
                               <TableCell className="text-right">
                                 <Button 
                                   variant="ghost" 
@@ -1154,10 +1154,10 @@ export default function TenantDashboard() {
 
               {/* Upload Document Form */}
               <div className="lg:col-span-1">
-                <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
                   <div className="pb-4 border-b border-[#F1F5F9] mb-4">
-                    <h2 className="text-base font-extrabold text-[#0F172A]">Upload New Document</h2>
-                    <span className="text-xs text-[#64748B]">Add a contract, proof of utility, or insurance copy</span>
+                    <h2 className="text-base font-extrabold text-[#1D1D1F]">Upload New Document</h2>
+                    <span className="text-xs text-[#6E6E73]">Add a contract, proof of utility, or insurance copy</span>
                   </div>
 
                   <form onSubmit={handleUploadDocument} className="space-y-4">
@@ -1168,14 +1168,14 @@ export default function TenantDashboard() {
                         placeholder="e.g. Renters Insurance May 2026"
                         value={docName}
                         onChange={(e) => setDocName(e.target.value)}
-                        className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs"
+                        className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs"
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <Label htmlFor="docCategory" className="text-xs font-bold">Category</Label>
                       <Select value={docCategory} onValueChange={(val) => setDocCategory(val || "LEASE")}>
-                        <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-10">
+                        <SelectTrigger className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-10">
                           <SelectValue placeholder="Select Category" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -1195,7 +1195,7 @@ export default function TenantDashboard() {
                         placeholder="https://cloudinary.com/..."
                         value={docUrl}
                         onChange={(e) => setDocUrl(e.target.value)}
-                        className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs"
+                        className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs"
                       />
                     </div>
 
@@ -1216,13 +1216,13 @@ export default function TenantDashboard() {
 
         {/* -------------------- SUBMIT REQUEST TAB -------------------- */}
         {activeTab === "submit-request" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6 max-w-2xl mx-auto">
+          <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6 max-w-2xl mx-auto">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A] flex items-center gap-2">
+              <h2 className="text-lg font-extrabold text-[#1D1D1F] flex items-center gap-2">
                 <Wrench className="h-5 w-5 text-[#496E5C]" />
                 Log a Maintenance Request
               </h2>
-              <span className="text-xs text-[#64748B]">Describe the issue in detail, and certified inspectors or vendors will check the problem.</span>
+              <span className="text-xs text-[#6E6E73]">Describe the issue in detail, and certified inspectors or vendors will check the problem.</span>
             </div>
 
             <form onSubmit={handleCreateMaintenance} className="space-y-4">
@@ -1230,7 +1230,7 @@ export default function TenantDashboard() {
                 <div className="space-y-1.5">
                   <Label htmlFor="maintCategory" className="text-xs font-bold">Issue Category</Label>
                   <Select value={mCategory} onValueChange={(val) => setMCategory(val || "GENERAL")}>
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11">
+                    <SelectTrigger className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -1254,7 +1254,7 @@ export default function TenantDashboard() {
                 <div className="space-y-1.5">
                   <Label htmlFor="maintPriority" className="text-xs font-bold">Priority Level</Label>
                   <Select value={mPriority} onValueChange={(val) => setMPriority(val || "MEDIUM")}>
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11">
+                    <SelectTrigger className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11">
                       <SelectValue placeholder="Priority" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -1280,7 +1280,7 @@ export default function TenantDashboard() {
                       setMUnitId(firstMatch?.unitId || "");
                     }}
                   >
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11">
+                    <SelectTrigger className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11">
                       <SelectValue placeholder="Select property">
                         {mPropertyId
                           ? (activeLeases.find(l => l.unit?.propertyId === mPropertyId)?.unit?.property?.name || "Select property")
@@ -1305,7 +1305,7 @@ export default function TenantDashboard() {
                     onValueChange={(val) => setMUnitId(val || "")}
                     disabled={!mPropertyId}
                   >
-                    <SelectTrigger className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11 disabled:opacity-70">
+                    <SelectTrigger className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11 disabled:opacity-70">
                       <SelectValue placeholder="Select unit">
                         {mUnitId
                           ? (activeLeases.find(l => l.unitId === mUnitId)?.unit?.name || "Select unit")
@@ -1331,7 +1331,7 @@ export default function TenantDashboard() {
                   placeholder="e.g. Toilet leaking at base"
                   value={mTitle}
                   onChange={(e) => setMTitle(e.target.value)}
-                  className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                  className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                 />
               </div>
 
@@ -1343,13 +1343,13 @@ export default function TenantDashboard() {
                   placeholder="Describe when the issue started, and exactly where it is located..."
                   value={mDesc}
                   onChange={(e) => setMDesc(e.target.value)}
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs focus:ring-[#496E5C] outline-none"
+                  className="w-full p-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-xs focus:ring-[#496E5C] outline-none"
                 />
               </div>
 
-              <div className="p-6 border-2 border-dashed border-[#E2E8F0] rounded-xl text-center hover:bg-slate-50/50 transition-colors cursor-pointer">
-                <span className="text-xs font-semibold text-[#64748B] block">Drag & Drop Photos Here</span>
-                <span className="text-[10px] text-slate-400 mt-1 block">PNG, JPG formats accepted (Max 5MB)</span>
+              <div className="p-6 border-2 border-dashed border-[#E5E5EA] rounded-xl text-center hover:bg-[#F5F5F7]/50 transition-colors cursor-pointer">
+                <span className="text-xs font-semibold text-[#6E6E73] block">Drag & Drop Photos Here</span>
+                <span className="text-[10px] text-[#8E8E93] mt-1 block">PNG, JPG formats accepted (Max 5MB)</span>
               </div>
 
               <Button 
@@ -1365,17 +1365,17 @@ export default function TenantDashboard() {
 
         {/* -------------------- MY REQUESTS TAB -------------------- */}
         {activeTab === "my-requests" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+          <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             
             <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[#F1F5F9] mb-6">
               <div>
-                <h2 className="text-lg font-extrabold text-[#0F172A]">Maintenance Log</h2>
-                <span className="text-xs text-[#64748B]">All logged repairs and their current statuses</span>
+                <h2 className="text-lg font-extrabold text-[#1D1D1F]">Maintenance Log</h2>
+                <span className="text-xs text-[#6E6E73]">All logged repairs and their current statuses</span>
               </div>
 
               <div className="flex gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
                 <Select value={maintFilterPriority} onValueChange={(val) => setMaintFilterPriority(val || "ALL")}>
-                  <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E2E8F0] rounded-xl">
+                  <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E5E5EA] rounded-xl">
                     <SelectValue placeholder="Priority" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
@@ -1388,7 +1388,7 @@ export default function TenantDashboard() {
                 </Select>
 
                 <Select value={maintFilterStatus} onValueChange={(val) => setMaintFilterStatus(val || "ALL")}>
-                  <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E2E8F0] rounded-xl">
+                  <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E5E5EA] rounded-xl">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
@@ -1406,12 +1406,12 @@ export default function TenantDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Ticket Title</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Category</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Priority</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Assigned Inspector</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Date Filed</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Ticket Title</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Priority</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Assigned Inspector</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Filed</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1419,12 +1419,12 @@ export default function TenantDashboard() {
                     .filter(m => maintFilterPriority === "ALL" || m.priority === maintFilterPriority)
                     .filter(m => maintFilterStatus === "ALL" || m.status === maintFilterStatus)
                     .map((m) => (
-                      <TableRow key={m.id} className="hover:bg-slate-50/50">
+                      <TableRow key={m.id} className="hover:bg-[#F5F5F7]/50">
                         <TableCell className="font-bold text-slate-800 py-4">
                           {m.title}
-                          <p className="text-[10px] text-[#64748B] font-normal mt-0.5">{m.description}</p>
+                          <p className="text-[10px] text-[#6E6E73] font-normal mt-0.5">{m.description}</p>
                         </TableCell>
-                        <TableCell className="text-slate-600 text-xs font-semibold">{m.category}</TableCell>
+                        <TableCell className="text-[#6E6E73] text-xs font-semibold">{m.category}</TableCell>
                         <TableCell>
                           <Badge className={
                             m.priority === "EMERGENCY" ? "bg-red-50 text-red-700 border border-red-200" :
@@ -1441,9 +1441,9 @@ export default function TenantDashboard() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-xs font-bold text-slate-700">
-                          {m.inspector ? m.inspector.name : <span className="text-[#64748B] italic">Awaiting assignment</span>}
+                          {m.inspector ? m.inspector.name : <span className="text-[#6E6E73] italic">Awaiting assignment</span>}
                         </TableCell>
-                        <TableCell className="text-[#64748B] text-xs">{new Date(m.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-[#6E6E73] text-xs">{new Date(m.createdAt).toLocaleDateString()}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
@@ -1455,13 +1455,13 @@ export default function TenantDashboard() {
         {/* -------------------- PAY RENT TAB -------------------- */}
         {activeTab === "pay-rent" && (
           <div className="space-y-6 max-w-xl mx-auto">
-            <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+            <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
               <div className="pb-4 border-b border-[#F1F5F9] mb-6 text-center">
-                <h2 className="text-lg font-extrabold text-[#0F172A]">Outstanding Balance</h2>
+                <h2 className="text-lg font-extrabold text-[#1D1D1F]">Outstanding Balance</h2>
                 <h3 className={`text-3xl font-extrabold mt-2 ${totalUnpaid > 0 ? "text-red-600" : "text-[#496E5C]"}`}>
                   ${totalUnpaid.toLocaleString()}
                 </h3>
-                <span className="text-xs text-[#64748B] mt-1 block">Secure transaction portal powered by Stripe</span>
+                <span className="text-xs text-[#6E6E73] mt-1 block">Secure transaction portal powered by Stripe</span>
               </div>
 
               <form onSubmit={handlePayBalance} className="space-y-4">
@@ -1472,7 +1472,7 @@ export default function TenantDashboard() {
                     placeholder="John Doe"
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value)}
-                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                    className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                   />
                 </div>
 
@@ -1483,7 +1483,7 @@ export default function TenantDashboard() {
                     placeholder="4111 2222 3333 4444"
                     value={cardNumber}
                     onChange={(e) => setCardNumber(e.target.value)}
-                    className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                    className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                   />
                 </div>
 
@@ -1495,7 +1495,7 @@ export default function TenantDashboard() {
                       placeholder="MM/YY"
                       value={cardExpiry}
                       onChange={(e) => setCardExpiry(e.target.value)}
-                      className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                      className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1505,7 +1505,7 @@ export default function TenantDashboard() {
                       placeholder="123"
                       value={cardCvv}
                       onChange={(e) => setCardCvv(e.target.value)}
-                      className="bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                      className="bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                     />
                   </div>
                 </div>
@@ -1524,34 +1524,34 @@ export default function TenantDashboard() {
 
         {/* -------------------- TRANSACTIONS TAB -------------------- */}
         {activeTab === "transactions" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+          <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A]">Transactions Ledger</h2>
-              <span className="text-xs text-[#64748B]">All rent receipts and financial records registered in database</span>
+              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Transactions Ledger</h2>
+              <span className="text-xs text-[#6E6E73]">All rent receipts and financial records registered in database</span>
             </div>
 
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Transaction Reference</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Category</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Payment Type</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Amount</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Date Paid</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Transaction Reference</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Payment Type</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Amount</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Paid</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {transactions.map((tx) => (
-                    <TableRow key={tx.id} className="hover:bg-slate-50/50">
-                      <TableCell className="font-bold text-[#0F172A]">{tx.reference || "Direct Transfer"}</TableCell>
+                    <TableRow key={tx.id} className="hover:bg-[#F5F5F7]/50">
+                      <TableCell className="font-bold text-[#1D1D1F]">{tx.reference || "Direct Transfer"}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="rounded-full font-bold px-2 py-0.5 text-[10px]">
                           {tx.category}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-[#64748B]">
+                      <TableCell className="text-xs text-[#6E6E73]">
                         {tx.type === "INCOME" ? (
                           <span className="text-emerald-600 font-bold">Credit</span>
                         ) : (
@@ -1564,7 +1564,7 @@ export default function TenantDashboard() {
                           {tx.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-[#64748B] text-xs">{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-[#6E6E73] text-xs">{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1575,27 +1575,27 @@ export default function TenantDashboard() {
 
         {/* -------------------- INVOICES TAB -------------------- */}
         {activeTab === "invoices" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+          <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A]">Rent Invoices</h2>
-              <span className="text-xs text-[#64748B]">Pay rent directly online using Stripe checkout flow</span>
+              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Rent Invoices</h2>
+              <span className="text-xs text-[#6E6E73]">Pay rent directly online using Stripe checkout flow</span>
             </div>
 
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Due Date</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Rent Amount</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#64748B] text-right">Actions</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Due Date</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Rent Amount</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {invoices.map((inv) => (
-                    <TableRow key={inv.id} className="hover:bg-slate-50/50">
+                    <TableRow key={inv.id} className="hover:bg-[#F5F5F7]/50">
                       <TableCell className="font-semibold text-slate-800">{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
-                      <TableCell className="font-extrabold text-[#0F172A]">${Number(inv.amount).toLocaleString()}</TableCell>
+                      <TableCell className="font-extrabold text-[#1D1D1F]">${Number(inv.amount).toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge className={
                           inv.status === "PAID" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
@@ -1633,11 +1633,11 @@ export default function TenantDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[600px] items-stretch">
             
             {/* Contacts list */}
-            <Card className="lg:col-span-1 bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-4 flex flex-col justify-between">
+            <Card className="lg:col-span-1 bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-4 flex flex-col justify-between">
               <div>
                 <div className="pb-3 border-b border-[#F1F5F9] mb-4">
-                  <h2 className="text-sm font-extrabold text-[#0F172A]">Inbox Messages</h2>
-                  <span className="text-[10px] text-[#64748B]">Choose a landlord or inspector to chat</span>
+                  <h2 className="text-sm font-extrabold text-[#1D1D1F]">Inbox Messages</h2>
+                  <span className="text-[10px] text-[#6E6E73]">Choose a landlord or inspector to chat</span>
                 </div>
 
                 <div className="space-y-2 overflow-y-auto max-h-[480px]">
@@ -1648,7 +1648,7 @@ export default function TenantDashboard() {
                       className={`w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 border ${
                         selectedContact?.id === c.id 
                           ? "bg-[#496E5C]/10 border-[#496E5C] text-[#496E5C]" 
-                          : "border-transparent hover:bg-slate-50 text-[#0F172A]"
+                          : "border-transparent hover:bg-[#F5F5F7] text-[#1D1D1F]"
                       }`}
                     >
                       <div className="h-8 w-8 rounded-full bg-[#496E5C]/10 text-[#496E5C] flex items-center justify-center font-bold text-xs uppercase">
@@ -1656,7 +1656,7 @@ export default function TenantDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="text-xs font-bold block truncate">{c.name}</span>
-                        <span className="text-[9px] text-[#64748B] font-extrabold uppercase">{c.role}</span>
+                        <span className="text-[9px] text-[#6E6E73] font-extrabold uppercase">{c.role}</span>
                       </div>
                     </button>
                   ))}
@@ -1665,7 +1665,7 @@ export default function TenantDashboard() {
             </Card>
 
             {/* Conversation view */}
-            <Card className="lg:col-span-3 bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6 flex flex-col justify-between h-full">
+            <Card className="lg:col-span-3 bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6 flex flex-col justify-between h-full">
               {selectedContact ? (
                 <>
                   {/* Active Header */}
@@ -1675,18 +1675,18 @@ export default function TenantDashboard() {
                         {selectedContact.name.charAt(0)}
                       </div>
                       <div>
-                        <h3 className="text-xs font-bold text-[#0F172A]">{selectedContact.name}</h3>
-                        <span className="text-[9px] text-[#64748B] font-extrabold uppercase tracking-wide">
+                        <h3 className="text-xs font-bold text-[#1D1D1F]">{selectedContact.name}</h3>
+                        <span className="text-[9px] text-[#6E6E73] font-extrabold uppercase tracking-wide">
                           {selectedContact.role} &bull; {selectedContact.email}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button className="p-2 rounded-full hover:bg-slate-50 text-[#64748B] hover:text-[#0F172A] transition-colors">
+                      <button className="p-2 rounded-full hover:bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-colors">
                         <Phone className="h-4 w-4" />
                       </button>
-                      <button className="p-2 rounded-full hover:bg-slate-50 text-[#64748B] hover:text-[#0F172A] transition-colors">
+                      <button className="p-2 rounded-full hover:bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-colors">
                         <Video className="h-4 w-4" />
                       </button>
                     </div>
@@ -1706,10 +1706,10 @@ export default function TenantDashboard() {
                             <div className={`max-w-[70%] p-3.5 rounded-2xl text-xs shadow-sm leading-relaxed ${
                               isSelf 
                                 ? "bg-[#496E5C] text-white rounded-br-none" 
-                                : "bg-[#F1F5F9] text-[#0F172A] rounded-bl-none"
+                                : "bg-[#F1F5F9] text-[#1D1D1F] rounded-bl-none"
                             }`}>
                               <p>{m.content}</p>
-                              <span className={`text-[8px] mt-1 block text-right ${isSelf ? "text-emerald-100" : "text-[#64748B]"}`}>
+                              <span className={`text-[8px] mt-1 block text-right ${isSelf ? "text-emerald-100" : "text-[#6E6E73]"}`}>
                                 {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             </div>
@@ -1724,7 +1724,7 @@ export default function TenantDashboard() {
                       placeholder={`Type a message to ${selectedContact.name}...`}
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
-                      className="flex-1 bg-[#F8FAFC] border-[#E2E8F0] rounded-xl text-xs h-11"
+                      className="flex-1 bg-[#F2F2F7] border-[#E5E5EA] rounded-xl text-xs h-11"
                     />
                     <Button 
                       type="submit" 
@@ -1736,7 +1736,7 @@ export default function TenantDashboard() {
                   </form>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-[#64748B]">
+                <div className="flex flex-col items-center justify-center h-full text-[#6E6E73]">
                   <Bell className="h-10 w-10 text-slate-300 mb-2 animate-bounce" />
                   <p className="font-semibold text-xs">No conversation selected</p>
                 </div>
@@ -1748,10 +1748,10 @@ export default function TenantDashboard() {
 
         {/* -------------------- CALENDAR TAB -------------------- */}
         {activeTab === "calendar" && (
-          <Card className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm p-6">
+          <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#0F172A]">Calendar Schedule</h2>
-              <span className="text-xs text-[#64748B]">Scheduled inspect visits, lease deadlines, and rent payments</span>
+              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Calendar Schedule</h2>
+              <span className="text-xs text-[#6E6E73]">Scheduled inspect visits, lease deadlines, and rent payments</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1760,8 +1760,8 @@ export default function TenantDashboard() {
               <div className="md:col-span-1 space-y-4">
                 <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-1">Upcoming Payment</span>
-                  <h4 className="text-xs font-bold text-[#0F172A]">Monthly Rent Payment Due</h4>
-                  <p className="text-[11px] text-[#64748B] mt-1 flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-[#1D1D1F]">Monthly Rent Payment Due</h4>
+                  <p className="text-[11px] text-[#6E6E73] mt-1 flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5" /> Due date: 5th of every month
                   </p>
                 </div>
@@ -1769,8 +1769,8 @@ export default function TenantDashboard() {
                 {maintenance.filter(m => m.scheduledDate).map((m) => (
                   <div key={m.id} className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">Inspector/Vendor Appointment</span>
-                    <h4 className="text-xs font-bold text-[#0F172A]">{m.title}</h4>
-                    <p className="text-[11px] text-[#64748B] mt-1 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-[#1D1D1F]">{m.title}</h4>
+                    <p className="text-[11px] text-[#6E6E73] mt-1 flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" /> Date: {new Date(m.scheduledDate).toLocaleString()}
                     </p>
                   </div>
@@ -1779,8 +1779,8 @@ export default function TenantDashboard() {
                 {activeLease && (
                   <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-700 block mb-1">Contract End Date</span>
-                    <h4 className="text-xs font-bold text-[#0F172A]">Lease Agreement Concludes</h4>
-                    <p className="text-[11px] text-[#64748B] mt-1 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-[#1D1D1F]">Lease Agreement Concludes</h4>
+                    <p className="text-[11px] text-[#6E6E73] mt-1 flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" /> Expiration: {new Date(activeLease.endDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -1788,10 +1788,10 @@ export default function TenantDashboard() {
               </div>
 
               {/* Grid Calendar Mockup */}
-              <div className="md:col-span-2 p-6 bg-slate-50 border border-[#E2E8F0] rounded-2xl flex flex-col justify-between">
+              <div className="md:col-span-2 p-6 bg-slate-50 border border-[#E5E5EA] rounded-2xl flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#64748B] mb-4">Monthly Calendar Grid</h3>
-                  <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-2">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#6E6E73] mb-4">Monthly Calendar Grid</h3>
+                  <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-extrabold text-[#6E6E73] uppercase tracking-wider mb-2">
                     <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                   </div>
                   <div className="grid grid-cols-7 gap-2">
@@ -1804,7 +1804,7 @@ export default function TenantDashboard() {
                           className={`p-3 rounded-lg border text-xs font-bold flex flex-col items-center justify-center transition-all ${
                             isRentDay 
                               ? "bg-red-500 text-white border-red-600 shadow-md shadow-red-500/10" 
-                              : "bg-white border-[#E2E8F0] text-slate-700 hover:border-slate-400"
+                              : "bg-white border-[#E5E5EA] text-slate-700 hover:border-slate-400"
                           }`}
                         >
                           {day}
@@ -1830,14 +1830,14 @@ export default function TenantDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-6 border-b border-[#E2E8F0] mb-6">
+            <div className="flex items-center space-x-6 border-b border-[#E5E5EA] mb-6">
               <button
                 type="button"
                 onClick={() => setActiveSettingsTab("profile")}
                 className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
                   activeSettingsTab === "profile" 
                     ? "border-slate-900 text-slate-900" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Profile Settings
@@ -1848,7 +1848,7 @@ export default function TenantDashboard() {
                 className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
                   activeSettingsTab === "security" 
                     ? "border-slate-900 text-slate-900" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Security & Password
@@ -1866,7 +1866,7 @@ export default function TenantDashboard() {
                       {profileAvatar ? (
                         <img src={profileAvatar} alt="Avatar" className="h-full w-full object-cover" />
                       ) : (
-                        <User className="h-10 w-10 text-slate-400" />
+                        <User className="h-10 w-10 text-[#8E8E93]" />
                       )}
                       {avatarUploading && (
                         <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
@@ -1891,7 +1891,7 @@ export default function TenantDashboard() {
                           Remove
                         </Button>
                       </div>
-                      <p className="text-xs text-slate-500">JPG, PNG or GIF. Max size 5MB.</p>
+                      <p className="text-xs text-[#6E6E73]">JPG, PNG or GIF. Max size 5MB.</p>
                     </div>
                   </div>
 
@@ -1925,9 +1925,9 @@ export default function TenantDashboard() {
                         <Input 
                           disabled
                           value={session?.user?.email || ""}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-slate-500 pl-10 cursor-not-allowed"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-[#6E6E73] pl-10 cursor-not-allowed"
                         />
-                        <Shield className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+                        <Shield className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
                       </div>
                     </div>
                   </div>
@@ -2052,7 +2052,7 @@ export default function TenantDashboard() {
                   <Button 
                     type="submit" 
                     disabled={profileSubmitting}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
+                    className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
                   >
                     {profileSubmitting ? (
                       <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>

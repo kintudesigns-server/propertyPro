@@ -90,7 +90,7 @@ const STATUS_THEMES = {
   },
   CANCELLED: {
     label: "Cancelled",
-    badge: "bg-slate-100 text-slate-600 border-slate-200",
+    badge: "bg-slate-100 text-[#6E6E73] border-slate-200",
     dot: "bg-slate-400",
   },
 };
@@ -102,7 +102,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={i}
           className={`h-3.5 w-3.5 ${
-            i <= rating ? "text-amber-400 fill-amber-400" : "text-slate-200"
+            i <= rating ? "text-amber-400 fill-amber-400" : "text-[#EBEBF0]"
           }`}
         />
       ))}
@@ -308,7 +308,7 @@ export default function ToursDashboard() {
             <h1 className="text-2xl font-black tracking-tight text-slate-900">
               Showings & Tours
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm mt-0.5">
+            <p className="text-[#6E6E73] text-xs md:text-sm mt-0.5">
               Review prospect tour requests, send meeting details, and manage your property showing schedule.
             </p>
           </div>
@@ -316,15 +316,15 @@ export default function ToursDashboard() {
             <Button
               variant="outline"
               onClick={() => setAvailabilityOpen(true)}
-              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#F5F5F7]"
             >
-              <Settings className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
+              <Settings className="h-3.5 w-3.5 mr-1.5 text-[#6E6E73]" />
               Availability Hours
             </Button>
             <Button
               onClick={fetchTours}
               variant="outline"
-              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#F5F5F7]"
             >
               Refresh
             </Button>
@@ -364,7 +364,7 @@ export default function ToursDashboard() {
               color: "slate",
               text: "Inactive requests",
               border: "border-slate-200/60 bg-slate-100/50",
-              badgeColor: "text-slate-600",
+              badgeColor: "text-[#6E6E73]",
             },
           ].map((m) => (
             <Card
@@ -380,7 +380,7 @@ export default function ToursDashboard() {
                 <p className="text-2xl font-black text-slate-900 mt-1">
                   {m.count}
                 </p>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5">
                   {m.text}
                 </p>
               </CardContent>
@@ -410,7 +410,7 @@ export default function ToursDashboard() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                     active
                       ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-800"
+                      : "text-[#6E6E73] hover:text-slate-800"
                   }`}
                 >
                   {tab.label}
@@ -419,7 +419,7 @@ export default function ToursDashboard() {
                       className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
                         active
                           ? "bg-slate-100 text-slate-700"
-                          : "bg-slate-200/70 text-slate-600"
+                          : "bg-slate-200/70 text-[#6E6E73]"
                       }`}
                     >
                       {count}
@@ -432,7 +432,7 @@ export default function ToursDashboard() {
 
           {/* Search Input */}
           <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#8E8E93]" />
             <Input
               placeholder="Search prospect or property..."
               value={searchQuery}
@@ -444,14 +444,14 @@ export default function ToursDashboard() {
 
         {/* ── Main Tour Cards List ── */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-xs font-semibold">
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-[#8E8E93] text-xs font-semibold">
             Loading tour requests...
           </div>
         ) : filteredTours.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
             <CalendarIcon className="h-10 w-10 text-slate-300 mx-auto" />
             <p className="text-sm font-bold text-slate-700">No tours match your current filter</p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            <p className="text-xs text-[#8E8E93] max-w-sm mx-auto">
               When prospective renters request to view your properties, their booking slots will appear right here.
             </p>
           </div>
@@ -489,13 +489,13 @@ export default function ToursDashboard() {
                     
                     {/* Date Badge Box */}
                     <div className="w-16 shrink-0 bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase">
+                      <span className="text-[9px] font-black tracking-wider text-[#8E8E93] uppercase">
                         {dayName}
                       </span>
                       <span className="text-lg font-black text-slate-900 leading-tight">
                         {dayNum}
                       </span>
-                      <span className="text-[9px] font-bold text-slate-500 uppercase">
+                      <span className="text-[9px] font-bold text-[#6E6E73] uppercase">
                         {monthName}
                       </span>
                     </div>
@@ -532,30 +532,30 @@ export default function ToursDashboard() {
                       </div>
 
                       {/* Property & Time Details */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#6E6E73]">
                         <span className="flex items-center gap-1 font-semibold text-slate-800">
-                          <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                          <Building2 className="h-3.5 w-3.5 text-[#8E8E93]" />
                           {tour.property.name}
                           {tour.unit && (
-                            <span className="text-slate-500 font-normal">
+                            <span className="text-[#6E6E73] font-normal">
                               · Unit {tour.unit.name}
                             </span>
                           )}
                         </span>
 
-                        <span className="flex items-center gap-1 text-slate-500">
-                          <Clock className="h-3.5 w-3.5 text-slate-400" />
-                          {timeStr} <span className="text-[10px] font-bold text-slate-400">{tzAbbrev}</span>
+                        <span className="flex items-center gap-1 text-[#6E6E73]">
+                          <Clock className="h-3.5 w-3.5 text-[#8E8E93]" />
+                          {timeStr} <span className="text-[10px] font-bold text-[#8E8E93]">{tzAbbrev}</span>
                         </span>
 
-                        <span className="flex items-center gap-1 font-semibold text-slate-600">
+                        <span className="flex items-center gap-1 font-semibold text-[#6E6E73]">
                           {tour.tourType === "VIDEO_CALL" ? (
                             <span className="flex items-center gap-1 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md text-[11px]">
                               <Video className="h-3 w-3" /> Virtual Video Call
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md text-[11px]">
-                              <MapPin className="h-3 w-3 text-slate-400" /> In-Person Visit
+                            <span className="flex items-center gap-1 text-[#6E6E73] bg-slate-100 px-2 py-0.5 rounded-md text-[11px]">
+                              <MapPin className="h-3 w-3 text-[#8E8E93]" /> In-Person Visit
                             </span>
                           )}
                         </span>
@@ -563,7 +563,7 @@ export default function ToursDashboard() {
 
                       {/* Tenant Message */}
                       {tour.tenantMessage && (
-                        <p className="text-xs text-slate-500 italic truncate max-w-xl bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-1">
+                        <p className="text-xs text-[#6E6E73] italic truncate max-w-xl bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-1">
                           "{tour.tenantMessage}"
                         </p>
                       )}
@@ -622,7 +622,7 @@ export default function ToursDashboard() {
                               e.stopPropagation();
                               setDetailTour(tour);
                             }}
-                            className="h-8 px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl"
+                            className="h-8 px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl"
                           >
                             Manage
                           </Button>
@@ -637,7 +637,7 @@ export default function ToursDashboard() {
                             e.stopPropagation();
                             setDetailTour(tour);
                           }}
-                          className="h-8 px-3 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl"
+                          className="h-8 px-3 text-xs font-semibold text-[#6E6E73] hover:text-[#1D1D1F] rounded-xl"
                         >
                           Details & Rating
                         </Button>
@@ -651,14 +651,14 @@ export default function ToursDashboard() {
                             e.stopPropagation();
                             setDetailTour(tour);
                           }}
-                          className="h-8 px-2 text-xs font-semibold text-slate-400 hover:text-slate-600 rounded-xl"
+                          className="h-8 px-2 text-xs font-semibold text-[#8E8E93] hover:text-[#6E6E73] rounded-xl"
                         >
                           View Details
                         </Button>
                       )}
                     </div>
 
-                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors hidden md:block" />
+                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#6E6E73] transition-colors hidden md:block" />
                   </div>
                 </div>
               );
@@ -690,7 +690,7 @@ export default function ToursDashboard() {
                   <div className="bg-slate-950 text-white p-6 shrink-0 relative">
                     <button
                       onClick={() => setDetailTour(null)}
-                      className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+                      className="absolute top-5 right-5 text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -707,7 +707,7 @@ export default function ToursDashboard() {
 
                       <div>
                         <h2 className="text-xl font-black text-white">{detailTour.tenantName}</h2>
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                        <div className="flex items-center gap-3 text-xs text-[#8E8E93] mt-1">
                           <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{detailTour.tenantEmail}</span>
                           <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{detailTour.tenantPhone}</span>
                         </div>
@@ -723,25 +723,25 @@ export default function ToursDashboard() {
                       
                       {/* Schedule Box */}
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Schedule</p>
+                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Schedule</p>
                         <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5">
-                          <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
+                          <CalendarIcon className="h-3.5 w-3.5 text-[#6E6E73]" />
                           {dateStr}
                         </p>
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-slate-500" />
-                          {timeStr} <span className="text-slate-400 text-[10px]">{tzAbbrev}</span>
+                          <Clock className="h-3.5 w-3.5 text-[#6E6E73]" />
+                          {timeStr} <span className="text-[#8E8E93] text-[10px]">{tzAbbrev}</span>
                         </p>
                       </div>
 
                       {/* Property Box */}
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Property</p>
+                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Property</p>
                         <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5 truncate">
-                          <Building2 className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                          <Building2 className="h-3.5 w-3.5 text-[#6E6E73] shrink-0" />
                           <span className="truncate">{detailTour.property.name}</span>
                         </p>
-                        <p className="text-xs text-slate-500 truncate pl-5">
+                        <p className="text-xs text-[#6E6E73] truncate pl-5">
                           {detailTour.unit ? `Unit ${detailTour.unit.name}` : detailTour.property.address}
                         </p>
                       </div>
@@ -750,13 +750,13 @@ export default function ToursDashboard() {
                     {/* Format Type */}
                     <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Showing Format</p>
+                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Showing Format</p>
                         <p className="text-xs font-bold text-slate-900">
                           {detailTour.tourType === "VIDEO_CALL" ? "Virtual Video Walkthrough" : "In-Person Property Visit"}
                         </p>
                       </div>
                       <Badge className="bg-white border-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1">
-                        {detailTour.tourType === "VIDEO_CALL" ? <Video className="h-3.5 w-3.5 mr-1 text-purple-600" /> : <MapPin className="h-3.5 w-3.5 mr-1 text-slate-500" />}
+                        {detailTour.tourType === "VIDEO_CALL" ? <Video className="h-3.5 w-3.5 mr-1 text-purple-600" /> : <MapPin className="h-3.5 w-3.5 mr-1 text-[#6E6E73]" />}
                         {detailTour.tourType === "VIDEO_CALL" ? "Video Call" : "In-Person"}
                       </Badge>
                     </div>
@@ -764,7 +764,7 @@ export default function ToursDashboard() {
                     {/* Tenant Request Message */}
                     {detailTour.tenantMessage && (
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           Prospect Request Note
                         </Label>
                         <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 text-xs text-slate-800 italic leading-relaxed">
@@ -776,7 +776,7 @@ export default function ToursDashboard() {
                     {/* Virtual Meeting Link */}
                     {detailTour.meetingLink && (
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           Virtual Tour Meeting Link
                         </Label>
                         <div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-2xl p-3">
@@ -807,7 +807,7 @@ export default function ToursDashboard() {
                     {/* Completed Tour Ratings & Feedback */}
                     {detailTour.status === "COMPLETED" && (
                       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
                           Prospect Tour Feedback
                         </p>
                         
@@ -818,7 +818,7 @@ export default function ToursDashboard() {
                             <span className="text-xs font-bold text-slate-900">({detailTour.feedbackRating}/5)</span>
                           </div>
                         ) : (
-                          <p className="text-xs text-slate-500 font-medium italic">
+                          <p className="text-xs text-[#6E6E73] font-medium italic">
                             ⏳ Awaiting prospect feedback rating...
                           </p>
                         )}
@@ -830,7 +830,7 @@ export default function ToursDashboard() {
                         )}
 
                         {detailTour.ownerProspectNotes && (
-                          <p className="text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200">
+                          <p className="text-xs text-[#6E6E73] bg-white p-3 rounded-xl border border-slate-200">
                             <span className="font-bold text-slate-800">Private Owner Notes:</span> {detailTour.ownerProspectNotes}
                           </p>
                         )}
@@ -948,7 +948,7 @@ export default function ToursDashboard() {
                     <Button
                       variant="ghost"
                       onClick={() => setDetailTour(null)}
-                      className="h-9 text-xs font-bold rounded-xl text-slate-600"
+                      className="h-9 text-xs font-bold rounded-xl text-[#6E6E73]"
                     >
                       Close
                     </Button>
@@ -1009,7 +1009,7 @@ export default function ToursDashboard() {
               <DialogTitle className="text-lg font-extrabold text-slate-900">
                 Owner Showing Availability
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-[#6E6E73]">
                 Your available tour slots are automatically enforced when prospective tenants request showings on your property listings.
               </DialogDescription>
             </DialogHeader>
@@ -1024,7 +1024,7 @@ export default function ToursDashboard() {
                   <span>Weekend Hours</span>
                   <span className="text-blue-600">Saturday: 10:00 AM - 2:00 PM</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-500 font-semibold">
+                <div className="flex items-center justify-between text-[#6E6E73] font-semibold">
                   <span>Timezone</span>
                   <span className="font-mono text-[11px]">America/Los_Angeles (PDT)</span>
                 </div>
@@ -1034,7 +1034,7 @@ export default function ToursDashboard() {
             <DialogFooter>
               <Button
                 onClick={() => setAvailabilityOpen(false)}
-                className="w-full h-9 rounded-xl font-bold bg-slate-900 text-white text-xs"
+                className="w-full h-9 rounded-xl font-bold bg-[#007AFF] text-white text-xs"
               >
                 Got It
               </Button>

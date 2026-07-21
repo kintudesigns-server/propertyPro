@@ -80,13 +80,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#64748B] font-semibold">Loading ticket details...</div>;
+    return <div className="p-8 text-center text-[#6E6E73] font-semibold">Loading ticket details...</div>;
   }
 
   if (!request) {
     return (
       <div className="p-8 text-center space-y-4">
-        <h2 className="text-xl font-bold text-[#0F172A]">Ticket Not Found</h2>
+        <h2 className="text-xl font-bold text-[#1D1D1F]">Ticket Not Found</h2>
         <Link href="/dashboard/maintenance">
           <Button variant="outline">Back to Requests</Button>
         </Link>
@@ -272,13 +272,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="h-10 w-10 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition-all"
+            className="h-10 w-10 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] shadow-xs transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">Request Details</h1>
-            <p className="text-xs font-bold text-slate-400 mt-0.5">Ticket ID: <span className="font-mono text-slate-500">{request.id.split("-")[0].toUpperCase()}</span></p>
+            <p className="text-xs font-bold text-[#8E8E93] mt-0.5">Ticket ID: <span className="font-mono text-[#6E6E73]">{request.id.split("-")[0].toUpperCase()}</span></p>
           </div>
         </div>
         
@@ -306,7 +306,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
       {/* Dynamic Progress Stepper */}
       <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-6">
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
           <Clock className="h-3.5 w-3.5 text-indigo-500" /> Ticket Guided Progress
         </h3>
         
@@ -330,7 +330,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                       ? "bg-indigo-600"
                       : completed
                         ? "bg-indigo-200"
-                        : "bg-slate-100"
+                        : "bg-[#F2F2F7]"
                   }`} />
                 )}
                 
@@ -348,11 +348,11 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 {/* Labels */}
                 <div className="mt-3.5 space-y-0.5">
                   <p className={`text-[11px] font-black transition-colors ${
-                    completed || active ? "text-slate-800" : "text-slate-400"
+                    completed || active ? "text-[#1D1D1F]" : "text-[#8E8E93]"
                   }`}>
                     {step.label}
                   </p>
-                  <p className="text-[10px] font-medium text-slate-400 block md:inline max-w-[90px] mx-auto leading-tight">
+                  <p className="text-[10px] font-medium text-[#8E8E93] block md:inline max-w-[90px] mx-auto leading-tight">
                     {step.desc}
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-200 overflow-hidden">
             {/* Premium Header Banner */}
-            <div className="bg-[#0F172A] p-8 text-white border-b border-slate-800 relative overflow-hidden">
+            <div className="bg-[#1D1D1F] p-8 text-white border-b border-slate-800 relative overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)]" />
               <div className="flex justify-between items-start gap-4 relative z-10">
                 <div>
@@ -601,7 +601,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
               )}
 
               <div className="">
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <FileText className="h-4 w-4" /> Issue Description
                 </h3>
                 <p className="text-[15px] font-medium text-slate-700 leading-relaxed bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm whitespace-pre-wrap">
@@ -630,7 +630,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
               
               {request.photos && request.photos.length > 0 && (
                 <div className="pt-4">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Camera className="h-4 w-4" /> Attached Evidence
                   </h3>
                   <div className="flex flex-wrap gap-4">
@@ -646,7 +646,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.diagnosisPhotos && request.diagnosisPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Camera className="h-4 w-4 text-blue-500" /> Diagnosis Photos (Before Repair)
                   </h3>
                   <div className="flex flex-wrap gap-4">
@@ -662,7 +662,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.repairPhotos && request.repairPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Camera className="h-4 w-4 text-emerald-500" /> Repair Completion Photos (After Repair)
                   </h3>
                   <div className="flex flex-wrap gap-4">
@@ -678,8 +678,8 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.receiptPhotos && request.receiptPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-slate-500" /> Material & Parts Receipts
+                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-[#6E6E73]" /> Material & Parts Receipts
                   </h3>
                   <div className="flex flex-wrap gap-4">
                     {request.receiptPhotos.map((photo: string, i: number) => (
@@ -767,7 +767,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   <p className="text-xs font-semibold text-slate-450 mt-1 leading-normal">
                     <strong>{request.externalVendor?.name || "The external vendor"}</strong> has submitted a cost quote for your review.
                     {request.inspectorEstimateLabor != null && (
-                      <span className="text-slate-500"> Compare against your inspector's reference estimate below before approving.</span>
+                      <span className="text-[#6E6E73]"> Compare against your inspector's reference estimate below before approving.</span>
                     )}
                   </p>
                 </div>
@@ -775,7 +775,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 {/* Comparison: Inspector Reference vs Vendor Quote */}
                 {(request.inspectorEstimateLabor != null || request.inspectorEstimateMaterials != null) && (
                   <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cost Comparison</p>
+                    <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Cost Comparison</p>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-teal-50 border border-teal-100 rounded-lg p-3 space-y-1">
                         <p className="text-[9px] font-black text-teal-600 uppercase tracking-wider">🔍 Inspector Reference</p>
@@ -810,11 +810,11 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Labor (Vendor)</p>
+                    <p className="text-[10px] text-[#8E8E93] font-extrabold uppercase tracking-wider">Labor (Vendor)</p>
                     <p className="font-black text-base text-slate-800">${Number(request.estimatedLabor || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-1">
-                    <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Materials (Vendor)</p>
+                    <p className="text-[10px] text-[#8E8E93] font-extrabold uppercase tracking-wider">Materials (Vendor)</p>
                     <p className="font-black text-base text-slate-800">${Number(request.estimatedMaterials || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-indigo-50/30 p-4 rounded-xl border border-indigo-100 space-y-1">
@@ -850,7 +850,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 <p className="text-sm text-blue-800 mb-4">The inspector/vendor has marked the issue as fixed. Please confirm if everything is resolved to your satisfaction.</p>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Rate your experience (1 to 5 stars)</label>
+                    <label className="text-xs font-bold text-[#6E6E73] uppercase block mb-1">Rate your experience (1 to 5 stars)</label>
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -866,7 +866,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Feedback (Optional)</label>
+                    <label className="text-xs font-bold text-[#6E6E73] uppercase block mb-1">Feedback (Optional)</label>
                     <textarea
                       className="w-full text-sm border border-slate-200 rounded-lg p-2 bg-white"
                       placeholder="e.g. Service was polite and clean..."
@@ -937,7 +937,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             {/* Tenant Review & Feedback */}
             {request.tenantRating !== null && request.tenantRating !== undefined && (
               <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4 mt-6">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
                   <Star className="h-4 w-4 text-amber-500 fill-amber-500" /> Tenant Feedback &amp; Rating
                 </h3>
                 
@@ -949,7 +949,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                         className={`h-4 w-4 ${
                           star <= (request.tenantRating || 0)
                             ? "text-amber-550 fill-amber-500"
-                            : "text-slate-200"
+                            : "text-[#EBEBF0]"
                         }`}
                       />
                     ))}
@@ -962,7 +962,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     &ldquo;{request.tenantFeedback}&rdquo;
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">No written feedback was provided by the tenant.</p>
+                  <p className="text-xs text-[#8E8E93] italic">No written feedback was provided by the tenant.</p>
                 )}
               </div>
             )}
@@ -975,11 +975,11 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-3 rounded-lg border border-slate-200">
-                    <p className="text-xs text-slate-500 uppercase font-bold">Labor Cost</p>
+                    <p className="text-xs text-[#6E6E73] uppercase font-bold">Labor Cost</p>
                     <p className="font-black text-lg text-slate-900">${request.finalLabor || request.estimatedLabor || "0.00"}</p>
                   </div>
                   <div className="bg-white p-3 rounded-lg border border-slate-200">
-                    <p className="text-xs text-slate-500 uppercase font-bold">Materials Cost</p>
+                    <p className="text-xs text-[#6E6E73] uppercase font-bold">Materials Cost</p>
                     <p className="font-black text-lg text-slate-900">${request.finalMaterials || request.estimatedMaterials || "0.00"}</p>
                   </div>
                 </div>
@@ -1035,13 +1035,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     {/* Cost & Deposit Summary */}
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div className="bg-white rounded-lg p-3 border border-amber-100">
-                        <p className="text-slate-500 font-bold uppercase">Repair Cost</p>
+                        <p className="text-[#6E6E73] font-bold uppercase">Repair Cost</p>
                         <p className="text-lg font-black text-slate-900 mt-0.5">
                           ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}
                         </p>
                       </div>
                       <div className="bg-white rounded-lg p-3 border border-amber-100">
-                        <p className="text-slate-500 font-bold uppercase">Deposit Balance</p>
+                        <p className="text-[#6E6E73] font-bold uppercase">Deposit Balance</p>
                         <p className={`text-lg font-black mt-0.5 ${Number(request.activeLease?.depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
                           ${Number(request.activeLease?.depositBalance || 0).toFixed(2)}
                         </p>
@@ -1149,7 +1149,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
                 {/* Vendor Payout Settlement Block */}
                 <div className="pt-4 border-t border-slate-200 space-y-3">
-                  <p className="text-xs font-bold text-slate-500 uppercase">Vendor Payout Settlement</p>
+                  <p className="text-xs font-bold text-[#6E6E73] uppercase">Vendor Payout Settlement</p>
                   {request.vendorExpenseTransactionId ? (() => {
                     const txRef = request.vendorExpenseTransaction?.reference || "";
                     const parts = txRef.split("_");
@@ -1169,7 +1169,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                         <div className="bg-white p-3 rounded-lg border border-emerald-100/50 space-y-1.5 font-semibold text-slate-700 text-[11px]">
                           <div className="flex justify-between">
                             <span className="text-slate-450">Settlement Method:</span>
-                            <span className="text-slate-800">{methodLabel}</span>
+                            <span className="text-[#1D1D1F]">{methodLabel}</span>
                           </div>
                           {memoNote && (
                             <div className="flex flex-col gap-0.5 pt-1.5 border-t border-slate-100 mt-1.5">
@@ -1203,7 +1203,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
-                      <p className="text-xs text-slate-500">No payment has been recorded for this repair yet. Click below to disburse funds electronically or record offline cash/check settlement.</p>
+                      <p className="text-xs text-[#6E6E73]">No payment has been recorded for this repair yet. Click below to disburse funds electronically or record offline cash/check settlement.</p>
                       <Button
                         size="sm"
                         onClick={() => setShowPayoutModal(true)}
@@ -1219,7 +1219,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
             {/* Elegant Activity Timeline Card */}
             <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5 mt-6">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
                 <FileText className="h-3.5 w-3.5 text-indigo-500" /> Ticket Activity History
               </h3>
               
@@ -1294,25 +1294,25 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           {/* Right Column - Meta Data */}
           <div className="space-y-6">
           <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3.5">Location &amp; Tenant</h3>
+            <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5">Location &amp; Tenant</h3>
             
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-slate-500">
+                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#6E6E73]">
                   <Building className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Property</p>
+                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Property</p>
                   <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">{request.unit.property.name}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-slate-500">
+                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#6E6E73]">
                   <Home className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Unit</p>
+                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Unit</p>
                   <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">Unit {request.unit.name}</p>
                 </div>
               </div>
@@ -1331,13 +1331,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
 
           <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3.5">Assignment Details</h3>
+            <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5">Assignment Details</h3>
             
             <div className="space-y-4 text-xs font-semibold text-slate-700">
               <div className="flex gap-3">
-                <Wrench className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                <Wrench className="h-4 w-4 text-[#8E8E93] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">{request.externalVendor ? "Assigned Vendor" : "Assigned Inspector"}</p>
+                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider mb-1">{request.externalVendor ? "Assigned Vendor" : "Assigned Inspector"}</p>
                   {request.inspector ? (
                     <>
                       <p className="font-bold text-slate-800 text-xs leading-snug">{request.inspector.name}</p>
@@ -1349,14 +1349,14 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                       <p className="text-[11px] font-medium text-slate-450 mt-0.5">{request.externalVendor.phone || "No phone provided"}</p>
                     </>
                   ) : (
-                    <p className="font-bold text-slate-400 italic">Unassigned</p>
+                    <p className="font-bold text-[#8E8E93] italic">Unassigned</p>
                   )}
                 </div>
               </div>
               <div className="flex gap-3">
-                <Calendar className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                <Calendar className="h-4 w-4 text-[#8E8E93] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Created At</p>
+                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider mb-1">Created At</p>
                   <p className="font-bold text-slate-800 text-xs">{format(new Date(request.createdAt), "PPp")}</p>
                 </div>
               </div>
@@ -1375,7 +1375,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           {/* Vendor Dispatch Section for Owner/Inspector */}
           {isOwnerOrAdmin && (
             <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3.5 flex items-center gap-2">
+              <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5 flex items-center gap-2">
                 <Wrench className="h-3.5 w-3.5 text-indigo-500" /> External Vendor Dispatch
               </h3>
 
@@ -1383,7 +1383,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 request.externalVendor ? (
                   <div className="p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl flex justify-between items-center shadow-inner">
                     <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Assigned Vendor</p>
+                      <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Assigned Vendor</p>
                       <p className="text-xs font-bold text-slate-800 mt-0.5">{request.externalVendor.name}</p>
                       <p className="text-[11px] font-medium text-slate-450">{request.externalVendor.email}</p>
                     </div>
@@ -1392,7 +1392,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     </span>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">No external vendor was assigned to this request.</p>
+                  <p className="text-xs text-[#8E8E93] italic">No external vendor was assigned to this request.</p>
                 )
               ) : (
                 <>
@@ -1403,7 +1403,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 text-[11px] font-bold border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all flex-1 min-w-[140px]"
+                      className="h-9 text-[11px] font-bold border-slate-200 text-slate-600 rounded-xl hover:bg-[#F5F5F7] transition-all flex-1 min-w-[140px]"
                       onClick={() => {
                         navigator.clipboard.writeText(typeof window !== "undefined" ? `${window.location.origin}/vendor/ticket/${request.vendorMagicToken || ""}` : "");
                         toast.success("Magic link copied to clipboard!");
@@ -1461,15 +1461,15 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-100">
             <div className="flex justify-between items-center border-b border-slate-100 pb-2">
               <h3 className="font-bold text-slate-900 text-base">Request Reschedule</h3>
-              <button onClick={() => setShowRescheduleModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowRescheduleModal(false)} className="text-[#8E8E93] hover:text-slate-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#6E6E73]">
               Please provide your reason and list some alternative times/days you will be available for the visit.
             </p>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-slate-500 block">Reason & Availability</label>
+              <label className="text-[10px] font-bold uppercase text-[#6E6E73] block">Reason & Availability</label>
               <textarea
                 className="w-full text-sm border border-slate-200 rounded-xl p-3 bg-white min-h-[100px] focus:outline-none focus:ring-2 focus:ring-amber-500"
                 placeholder="e.g. I am not available on Wednesday. Please schedule for Friday afternoon instead..."
@@ -1528,7 +1528,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-100">
             <div className="flex justify-between items-center border-b border-slate-100 pb-2">
               <h3 className="font-bold text-slate-900 text-base">Disburse Vendor Payout</h3>
-              <button onClick={() => setShowPayoutModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowPayoutModal(false)} className="text-[#8E8E93] hover:text-slate-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1577,7 +1577,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase text-slate-500 block">Select Payout Method</label>
+              <label className="text-[10px] font-bold uppercase text-[#6E6E73] block">Select Payout Method</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -1592,7 +1592,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   }`}
                 >
                   <span className="text-xs font-bold block">Direct Deposit</span>
-                  <span className="text-[9px] text-slate-400">Electronic ACH</span>
+                  <span className="text-[9px] text-[#8E8E93]">Electronic ACH</span>
                 </button>
                 
                 <button
@@ -1605,7 +1605,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   }`}
                 >
                   <span className="text-xs font-bold block">Physical Cash</span>
-                  <span className="text-[9px] text-slate-400">Handled Offline</span>
+                  <span className="text-[9px] text-[#8E8E93]">Handled Offline</span>
                 </button>
 
                 <button
@@ -1618,7 +1618,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   }`}
                 >
                   <span className="text-xs font-bold block">Written Check</span>
-                  <span className="text-[9px] text-slate-400">Handled Offline</span>
+                  <span className="text-[9px] text-[#8E8E93]">Handled Offline</span>
                 </button>
               </div>
             </div>
@@ -1644,7 +1644,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
             {/* Reference Memo / Note Input */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-slate-500 block">
+              <label className="text-[10px] font-bold uppercase text-[#6E6E73] block">
                 Reference / Memo (Optional)
               </label>
               <Input
@@ -1664,7 +1664,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Amount to Disburse</span>
+                <span className="text-[10px] uppercase font-bold text-[#8E8E93] block">Amount to Disburse</span>
                 <span className="text-lg font-black text-slate-900">
                   ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}
                 </span>
@@ -1727,18 +1727,18 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                   setShowRejectionModal(false);
                   setRejectionReason("");
                 }} 
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[#8E8E93] hover:text-slate-600"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#6E6E73]">
               Please provide feedback or a reason for rejecting this estimate. This feedback will be sent directly to the vendor/inspector to help them submit a revised quote.
             </p>
             
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-slate-500 block">Rejection Reason / Feedback</label>
+              <label className="text-[10px] font-bold uppercase text-[#6E6E73] block">Rejection Reason / Feedback</label>
               <textarea
                 className="w-full text-sm border border-slate-200 rounded-xl p-3 bg-white min-h-[100px] focus:outline-none focus:ring-2 focus:ring-rose-500"
                 placeholder="e.g., The labor rate is too high. Please check if you can revise the estimated hours..."

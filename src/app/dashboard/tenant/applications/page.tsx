@@ -45,7 +45,7 @@ export default function TenantApplicationsPage() {
           </div>
           My Applications
         </h1>
-        <p className="text-slate-500 mt-2 text-sm font-medium">Track the status of your rental applications in real-time.</p>
+        <p className="text-[#6E6E73] mt-2 text-sm font-medium">Track the status of your rental applications in real-time.</p>
       </div>
 
       {applications.length === 0 ? (
@@ -54,7 +54,7 @@ export default function TenantApplicationsPage() {
             <ClipboardList className="h-8 w-8 text-slate-300" />
           </div>
           <h3 className="text-lg font-black text-slate-900 mb-2">No Applications Found</h3>
-          <p className="text-slate-500 max-w-md mx-auto text-sm leading-relaxed mb-8">
+          <p className="text-[#6E6E73] max-w-md mx-auto text-sm leading-relaxed mb-8">
             You haven't submitted any rental applications yet. When you find a property you like, apply to see its status here!
           </p>
           <Link href="/listings" className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors shadow-sm gap-2">
@@ -113,8 +113,8 @@ function ApplicationCard({ application }: { application: any }) {
           </div>
           <div>
             <h3 className="font-black text-slate-900 text-lg truncate max-w-[200px]">{property?.name || "Property Name"}</h3>
-            <p className="text-slate-500 font-medium text-xs mt-1">Unit {unit?.name || "N/A"}</p>
-            <p className="text-slate-400 text-xs mt-3 flex items-center gap-1.5">
+            <p className="text-[#6E6E73] font-medium text-xs mt-1">Unit {unit?.name || "N/A"}</p>
+            <p className="text-[#8E8E93] text-xs mt-3 flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
               Applied {format(new Date(createdAt), "MMM d, yyyy")}
             </p>
@@ -208,12 +208,12 @@ function ApplicationCard({ application }: { application: any }) {
             {/* Step 1: Submitted */}
             <div className="flex flex-col items-center gap-3 w-24">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
-                currentStep >= 1 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
+                currentStep >= 1 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-[#8E8E93] border-2 border-slate-200'
               }`}>
                 {currentStep > 1 ? <CheckCircle2 className="h-6 w-6" /> : 1}
               </div>
               <div className="text-center">
-                <p className={`font-black text-sm ${currentStep >= 1 ? 'text-slate-900' : 'text-slate-400'}`}>Submitted</p>
+                <p className={`font-black text-sm ${currentStep >= 1 ? 'text-slate-900' : 'text-[#8E8E93]'}`}>Submitted</p>
                 {currentStep === 1 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1 bg-indigo-50 px-2 py-0.5 rounded-full inline-block">Current</p>}
               </div>
             </div>
@@ -221,12 +221,12 @@ function ApplicationCard({ application }: { application: any }) {
             {/* Step 2: Under Review */}
             <div className="flex flex-col items-center gap-3 w-24">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
-                currentStep >= 2 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
+                currentStep >= 2 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-[#8E8E93] border-2 border-slate-200'
               }`}>
                 {currentStep > 2 ? <CheckCircle2 className="h-6 w-6" /> : 2}
               </div>
               <div className="text-center">
-                <p className={`font-black text-sm ${currentStep >= 2 ? 'text-slate-900' : 'text-slate-400'}`}>Under Review</p>
+                <p className={`font-black text-sm ${currentStep >= 2 ? 'text-slate-900' : 'text-[#8E8E93]'}`}>Under Review</p>
                 {currentStep === 2 && <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1 bg-indigo-50 px-2 py-0.5 rounded-full inline-block">In Progress</p>}
               </div>
             </div>
@@ -236,14 +236,14 @@ function ApplicationCard({ application }: { application: any }) {
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base outline outline-4 outline-white shadow-md transition-all duration-500 ${
                 currentStep >= 3 
                   ? (isRejected ? 'bg-red-500 text-white shadow-red-200' : 'bg-emerald-500 text-white shadow-emerald-200')
-                  : 'bg-slate-50 text-slate-400 border-2 border-slate-200'
+                  : 'bg-slate-50 text-[#8E8E93] border-2 border-slate-200'
               }`}>
                 {currentStep >= 3 ? (
                   isRejected ? <XCircle className="h-6 w-6" /> : <CheckCircle2 className="h-6 w-6" />
                 ) : 3}
               </div>
               <div className="text-center">
-                <p className={`font-black text-sm ${currentStep >= 3 ? 'text-slate-900' : 'text-slate-400'}`}>Decision</p>
+                <p className={`font-black text-sm ${currentStep >= 3 ? 'text-slate-900' : 'text-[#8E8E93]'}`}>Decision</p>
                 {currentStep === 3 && (
                   <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 px-2 py-0.5 rounded-full inline-block ${isRejected ? 'text-red-700 bg-red-50' : 'text-emerald-700 bg-emerald-50'}`}>
                     {isRejected ? 'Declined' : 'Approved'}

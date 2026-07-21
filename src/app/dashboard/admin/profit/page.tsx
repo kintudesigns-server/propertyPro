@@ -46,7 +46,7 @@ export default function AdminProfitDashboard() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-[#16A34A]" />
-        <p className="text-[#64748B] font-bold text-sm uppercase tracking-wider">Compiling Profit Reports...</p>
+        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Compiling Profit Reports...</p>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function AdminProfitDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/admin">
-            <Button variant="ghost" size="icon" className="text-[#64748B] hover:bg-slate-200">
+            <Button variant="ghost" size="icon" className="text-[#6E6E73] hover:bg-[#E5E5EA]">
               <ChevronLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -68,12 +68,12 @@ export default function AdminProfitDashboard() {
             <TrendingUp className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Platform Profit</h1>
-            <p className="text-[#64748B] text-base mt-0.5">Detailed breakdown of commission revenues</p>
+            <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Platform Profit</h1>
+            <p className="text-[#6E6E73] text-base mt-0.5">Detailed breakdown of commission revenues</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="border-[#E2E8F0] text-[#0F172A] font-semibold h-11 px-5 rounded-xl flex items-center gap-2 hover:bg-slate-50">
+          <Button variant="outline" className="border-[#E5E5EA] text-[#1D1D1F] font-semibold h-11 px-5 rounded-xl flex items-center gap-2 hover:bg-[#F5F5F7]">
             <Download className="h-4 w-4" /> Export CSV
           </Button>
           <Link href="/dashboard/admin/settings/pricing">
@@ -101,31 +101,31 @@ export default function AdminProfitDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-[#64748B] uppercase tracking-widest">Subscription MRR</p>
+              <p className="text-sm font-bold text-[#6E6E73] uppercase tracking-widest">Subscription MRR</p>
               <PieChart className="h-6 w-6 text-[#94A3B8]" />
             </div>
-            <p className="text-4xl font-black text-[#0F172A] mb-1">
+            <p className="text-4xl font-black text-[#1D1D1F] mb-1">
               ${(profitData?.subscriptionMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-[#64748B] flex items-center gap-1">
+            <p className="text-xs text-[#6E6E73] flex items-center gap-1">
               <Activity className="h-3 w-3" /> Monthly Owner Subscriptions
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl">
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-sm font-bold text-[#64748B] uppercase tracking-widest">Rent Commissions</p>
+              <p className="text-sm font-bold text-[#6E6E73] uppercase tracking-widest">Rent Commissions</p>
               <DollarSign className="h-6 w-6 text-[#94A3B8]" />
             </div>
-            <p className="text-4xl font-black text-[#0F172A] mb-1">
+            <p className="text-4xl font-black text-[#1D1D1F] mb-1">
               ${(profitData?.totalCommissionProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-[#64748B] flex items-center gap-1">
+            <p className="text-xs text-[#6E6E73] flex items-center gap-1">
               <Activity className="h-3 w-3" /> Percentage cuts on volume
             </p>
           </CardContent>
@@ -140,8 +140,8 @@ export default function AdminProfitDashboard() {
             onClick={() => setActiveTab("commissions")}
             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
               activeTab === "commissions"
-                ? "bg-white text-[#0F172A] shadow-sm"
-                : "text-[#64748B] hover:text-[#0F172A]"
+                ? "bg-white text-[#1D1D1F] shadow-sm"
+                : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
             Rent Commissions
@@ -150,8 +150,8 @@ export default function AdminProfitDashboard() {
             onClick={() => setActiveTab("subscriptions")}
             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
               activeTab === "subscriptions"
-                ? "bg-white text-[#0F172A] shadow-sm"
-                : "text-[#64748B] hover:text-[#0F172A]"
+                ? "bg-white text-[#1D1D1F] shadow-sm"
+                : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
             Active Subscriptions
@@ -160,12 +160,12 @@ export default function AdminProfitDashboard() {
 
         {/* Tables */}
         {activeTab === "commissions" ? (
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <CardHeader className="bg-[#F8FAFC] border-b border-[#E2E8F0] px-6 py-5">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <CardHeader className="bg-[#F2F2F7] border-b border-[#E5E5EA] px-6 py-5">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-xl font-bold text-[#0F172A]">Detailed Commission Ledger</CardTitle>
-                  <CardDescription className="text-[#64748B] text-sm mt-1">Line-by-line breakdown of where your percentage profit comes from.</CardDescription>
+                  <CardTitle className="text-xl font-bold text-[#1D1D1F]">Detailed Commission Ledger</CardTitle>
+                  <CardDescription className="text-[#6E6E73] text-sm mt-1">Line-by-line breakdown of where your percentage profit comes from.</CardDescription>
                 </div>
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-3 py-1 font-bold text-xs uppercase tracking-wider">
                   {detailedProfits.length} Transactions
@@ -176,7 +176,7 @@ export default function AdminProfitDashboard() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-[#F1F5F9]">
-                    <TableRow className="hover:bg-transparent border-b border-[#E2E8F0]">
+                    <TableRow className="hover:bg-transparent border-b border-[#E5E5EA]">
                       <TableHead className="font-bold text-[#475569] h-12">Date</TableHead>
                       <TableHead className="font-bold text-[#475569] h-12">Property & Unit</TableHead>
                       <TableHead className="font-bold text-[#475569] h-12">Landlord</TableHead>
@@ -187,27 +187,27 @@ export default function AdminProfitDashboard() {
                   </TableHeader>
                   <TableBody>
                     {detailedProfits.map((item: any) => (
-                      <TableRow key={item.id} className="hover:bg-[#F8FAFC] border-b border-[#E2E8F0] transition-colors">
-                        <TableCell className="font-medium text-[#64748B] py-4">
+                      <TableRow key={item.id} className="hover:bg-[#F2F2F7] border-b border-[#E5E5EA] transition-colors">
+                        <TableCell className="font-medium text-[#6E6E73] py-4">
                           {new Date(item.date).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="py-4">
-                          <p className="font-bold text-[#0F172A]">{item.property}</p>
-                          <p className="text-xs font-semibold text-[#64748B] mt-0.5">Unit {item.unit}</p>
+                          <p className="font-bold text-[#1D1D1F]">{item.property}</p>
+                          <p className="text-xs font-semibold text-[#6E6E73] mt-0.5">Unit {item.unit}</p>
                         </TableCell>
                         <TableCell className="py-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-[#475569] font-bold text-xs">
+                            <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs">
                               {item.owner.charAt(0).toUpperCase()}
                             </div>
                             <span className="font-semibold text-[#334155]">{item.owner}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-4 font-black text-[#0F172A]">
+                        <TableCell className="py-4 font-black text-[#1D1D1F]">
                           ${item.grossAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="py-4 text-right">
-                          <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-200 font-bold">
+                          <Badge variant="outline" className="bg-slate-100 text-[#6E6E73] border-slate-200 font-bold">
                             {item.percentageCut}%
                           </Badge>
                         </TableCell>
@@ -225,7 +225,7 @@ export default function AdminProfitDashboard() {
                     {detailedProfits.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={6} className="h-32 text-center">
-                          <div className="flex flex-col items-center justify-center text-[#64748B]">
+                          <div className="flex flex-col items-center justify-center text-[#6E6E73]">
                             <ShieldCheck className="h-8 w-8 mb-2 opacity-50" />
                             <p className="font-semibold">No profit recorded yet.</p>
                             <p className="text-sm">When tenants pay rent, your commission cut will appear here.</p>
@@ -239,12 +239,12 @@ export default function AdminProfitDashboard() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <CardHeader className="bg-[#F8FAFC] border-b border-[#E2E8F0] px-6 py-5">
+          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <CardHeader className="bg-[#F2F2F7] border-b border-[#E5E5EA] px-6 py-5">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-xl font-bold text-[#0F172A]">Active Subscription Roster</CardTitle>
-                  <CardDescription className="text-[#64748B] text-sm mt-1">Directory of landlords currently paying a monthly flat fee.</CardDescription>
+                  <CardTitle className="text-xl font-bold text-[#1D1D1F]">Active Subscription Roster</CardTitle>
+                  <CardDescription className="text-[#6E6E73] text-sm mt-1">Directory of landlords currently paying a monthly flat fee.</CardDescription>
                 </div>
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-3 py-1 font-bold text-xs uppercase tracking-wider">
                   {detailedSubscriptions.length} Active
@@ -255,7 +255,7 @@ export default function AdminProfitDashboard() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-[#F1F5F9]">
-                    <TableRow className="hover:bg-transparent border-b border-[#E2E8F0]">
+                    <TableRow className="hover:bg-transparent border-b border-[#E5E5EA]">
                       <TableHead className="font-bold text-[#475569] h-12">Landlord</TableHead>
                       <TableHead className="font-bold text-[#475569] h-12">Joined</TableHead>
                       <TableHead className="font-bold text-[#475569] h-12">Pricing Tier</TableHead>
@@ -265,16 +265,16 @@ export default function AdminProfitDashboard() {
                   </TableHeader>
                   <TableBody>
                     {detailedSubscriptions.map((item: any) => (
-                      <TableRow key={item.id} className="hover:bg-[#F8FAFC] border-b border-[#E2E8F0] transition-colors">
+                      <TableRow key={item.id} className="hover:bg-[#F2F2F7] border-b border-[#E5E5EA] transition-colors">
                         <TableCell className="py-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-[#475569] font-bold text-xs">
+                            <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs">
                               {item.owner.charAt(0).toUpperCase()}
                             </div>
                             <span className="font-semibold text-[#334155]">{item.owner}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium text-[#64748B] py-4">
+                        <TableCell className="font-medium text-[#6E6E73] py-4">
                           {new Date(item.joinedAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="py-4">
@@ -301,7 +301,7 @@ export default function AdminProfitDashboard() {
                     {detailedSubscriptions.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={5} className="h-32 text-center">
-                          <div className="flex flex-col items-center justify-center text-[#64748B]">
+                          <div className="flex flex-col items-center justify-center text-[#6E6E73]">
                             <PieChart className="h-8 w-8 mb-2 opacity-50" />
                             <p className="font-semibold">No active subscriptions.</p>
                             <p className="text-sm">Landlords on paid tiers will appear here.</p>

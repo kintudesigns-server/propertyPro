@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -127,11 +128,11 @@ export default function PropertiesPage() {
       </div>
 
       {/* 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Properties" value={properties.length} subtext="All property listings" Icon={Building} iconBg="bg-[#EFF6FF]" iconColor="text-[#3B82F6]" />
-        <StatCard title="Available Properties" value={availableProperties} subtext="Ready for rent" Icon={CheckCircle2} iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" />
-        <StatCard title="Occupied Properties" value={occupiedUnits} subtext="Currently rented units" Icon={Users} iconBg="bg-[#E0F2FE]" iconColor="text-[#0EA5E9]" />
-        <StatCard title="Under Maintenance" value={underMaintenance} subtext="Needs attention" Icon={Wrench} iconBg="bg-[#FEF9C3]" iconColor="text-[#EAB308]" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <KpiCard title="Total Properties" value={properties.length} subtext="All property listings" icon={Building} variant="blue" />
+        <KpiCard title="Available Properties" value={availableProperties} subtext="Ready for rent" icon={CheckCircle2} variant="green" />
+        <KpiCard title="Occupied Properties" value={occupiedUnits} subtext="Currently rented units" icon={Users} variant="purple" />
+        <KpiCard title="Under Maintenance" value={underMaintenance} subtext="Needs attention" icon={Wrench} variant="orange" />
       </div>
 
       {/* Main Content Area */}

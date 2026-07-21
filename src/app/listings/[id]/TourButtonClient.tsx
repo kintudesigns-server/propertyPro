@@ -17,19 +17,21 @@ interface TourButtonClientProps {
       state?: string;
     };
   };
+  className?: string;
+  variant?: "outline" | "default" | "secondary";
 }
 
-export function TourButtonClient({ unit }: TourButtonClientProps) {
+export function TourButtonClient({ unit, className, variant = "outline" }: TourButtonClientProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <Button
-        variant="outline"
+        variant={variant}
         onClick={() => setOpen(true)}
-        className="w-full h-12 rounded-xl font-bold text-slate-700 border-[#E2E8F0] hover:bg-slate-50 flex justify-center items-center gap-2"
+        className={className || "w-full h-12 rounded-full font-semibold text-xs text-[#007AFF] border border-[#007AFF] bg-[#007AFF]/5 hover:bg-[#007AFF]/10 flex justify-center items-center gap-2 transition-all active:scale-98"}
       >
-        <Calendar className="h-4 w-4" /> Schedule a Tour
+        <Calendar className="h-4 w-4 text-[#007AFF]" /> Schedule a Tour
       </Button>
 
       <ScheduleTourModal

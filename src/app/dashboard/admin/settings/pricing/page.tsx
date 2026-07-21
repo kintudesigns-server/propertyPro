@@ -146,7 +146,7 @@ export default function PricingSettingsPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-[#EF4444]" />
-        <p className="text-[#64748B] font-bold text-sm uppercase tracking-wider">Loading settings...</p>
+        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Loading settings...</p>
       </div>
     );
   }
@@ -159,8 +159,8 @@ export default function PricingSettingsPage() {
             <Settings className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Pricing Tiers</h1>
-            <p className="text-[#64748B] text-base mt-0.5">Manage subscription plans and features</p>
+            <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Pricing Tiers</h1>
+            <p className="text-[#6E6E73] text-base mt-0.5">Manage subscription plans and features</p>
           </div>
         </div>
         <Button onClick={() => setEditingTier({ name: "", description: "", price: 0, minUnits: 0, maxUnits: 0, features: [], isCustom: false, isActive: true })} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 shadow-sm">
@@ -169,14 +169,14 @@ export default function PricingSettingsPage() {
       </div>
 
       {/* Global Platform Settings */}
-      <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-none shadow-lg rounded-2xl text-white mb-8">
+      <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-none shadow-lg rounded-2xl text-white mb-8">
         <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-400" />
               Global Rent Commission Rate
             </h2>
-            <p className="text-slate-400 text-sm max-w-xl">
+            <p className="text-[#8E8E93] text-sm max-w-xl">
               This is the flat percentage cut PropertyPro takes from every single rent and security deposit payment processed across the entire platform. This affects your "Rent Commissions" profit.
             </p>
           </div>
@@ -211,7 +211,7 @@ export default function PricingSettingsPage() {
             <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
               🗓️ Tour Booking & Rate Limiting Controls
             </h2>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-[#6E6E73] text-sm mt-1">
               Configure spam-prevention rules and email OTP settings for showing tour requests.
             </p>
           </div>
@@ -227,9 +227,9 @@ export default function PricingSettingsPage() {
                   onChange={(e) => setPlatformSettings({ ...platformSettings, tourMaxRequestsPerEmail: e.target.value })}
                   className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">tours</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">tours</span>
               </div>
-              <p className="text-[11px] text-slate-400">Maximum active/pending requests allowed per email address.</p>
+              <p className="text-[11px] text-[#8E8E93]">Maximum active/pending requests allowed per email address.</p>
             </div>
 
             <div className="space-y-2">
@@ -242,9 +242,9 @@ export default function PricingSettingsPage() {
                   onChange={(e) => setPlatformSettings({ ...platformSettings, tourRateLimitWindowHours: e.target.value })}
                   className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">hours</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">hours</span>
               </div>
-              <p className="text-[11px] text-slate-400">The rolling window time frame enforced for the request limits.</p>
+              <p className="text-[11px] text-[#8E8E93]">The rolling window time frame enforced for the request limits.</p>
             </div>
 
             <div className="space-y-2">
@@ -257,9 +257,9 @@ export default function PricingSettingsPage() {
                   onChange={(e) => setPlatformSettings({ ...platformSettings, tourOtpExpiryMinutes: e.target.value })}
                   className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">minutes</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">minutes</span>
               </div>
-              <p className="text-[11px] text-slate-400">How long the 6-digit email verification OTP remains valid.</p>
+              <p className="text-[11px] text-[#8E8E93]">How long the 6-digit email verification OTP remains valid.</p>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ export default function PricingSettingsPage() {
             <Button 
               onClick={handleSaveSettings}
               disabled={savingSettings}
-              className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-11 px-6 font-bold"
+              className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl h-11 px-6 font-bold"
             >
               {savingSettings && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Save Tour Settings
@@ -283,17 +283,17 @@ export default function PricingSettingsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-xl font-bold text-slate-900">{tier.name}</CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">{tier.description}</p>
+                  <p className="text-sm text-[#6E6E73] mt-1">{tier.description}</p>
                 </div>
                 {!tier.isActive && (
-                  <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">Inactive</span>
+                  <span className="bg-slate-100 text-[#6E6E73] text-xs font-bold px-2 py-1 rounded">Inactive</span>
                 )}
               </div>
             </CardHeader>
             <CardContent>
               <div className="mb-6">
                 <span className="text-3xl font-black text-slate-900">{tier.isCustom ? 'Custom' : `$${tier.price}`}</span>
-                {!tier.isCustom && <span className="text-slate-500 font-medium"> / mo</span>}
+                {!tier.isCustom && <span className="text-[#6E6E73] font-medium"> / mo</span>}
               </div>
               <div className="space-y-2 mb-6 text-sm text-slate-700">
                 <div className="flex justify-between border-b border-slate-100 pb-2">
@@ -302,7 +302,7 @@ export default function PricingSettingsPage() {
                 </div>
                 <div className="pt-2">
                   <span className="font-semibold block mb-2">Features ({tier.features.length})</span>
-                  <ul className="list-disc pl-4 space-y-1 text-slate-600">
+                  <ul className="list-disc pl-4 space-y-1 text-[#6E6E73]">
                     {tier.features.slice(0, 3).map((f: string, i: number) => (
                       <li key={i}>{f}</li>
                     ))}
@@ -372,7 +372,7 @@ export default function PricingSettingsPage() {
                 
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
                   {editingTier.features.length === 0 && (
-                    <p className="text-sm text-slate-500 text-center py-4">No features added yet.</p>
+                    <p className="text-sm text-[#6E6E73] text-center py-4">No features added yet.</p>
                   )}
                   {editingTier.features.map((feature: string, index: number) => (
                     <div key={index} className="flex items-center gap-2">
@@ -394,13 +394,13 @@ export default function PricingSettingsPage() {
 
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                 <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-slate-500" /> Advanced Settings
+                  <Settings className="h-4 w-4 text-[#6E6E73]" /> Advanced Settings
                 </h4>
                 <div className="flex flex-col gap-4">
                   <label className="flex items-center justify-between cursor-pointer p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
                     <div>
                       <span className="text-sm font-bold text-slate-900 block">Custom / Enterprise Tier</span>
-                      <span className="text-xs text-slate-500">Requires manual billing, disables fixed monthly price.</span>
+                      <span className="text-xs text-[#6E6E73]">Requires manual billing, disables fixed monthly price.</span>
                     </div>
                     <Switch checked={editingTier.isCustom} onCheckedChange={(checked) => setEditingTier({...editingTier, isCustom: checked, price: checked ? 0 : editingTier.price})} />
                   </label>
@@ -408,7 +408,7 @@ export default function PricingSettingsPage() {
                   <label className="flex items-center justify-between cursor-pointer p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
                     <div>
                       <span className="text-sm font-bold text-slate-900 block">Visibility Status</span>
-                      <span className="text-xs text-slate-500">Enable this to allow new owners to select this tier.</span>
+                      <span className="text-xs text-[#6E6E73]">Enable this to allow new owners to select this tier.</span>
                     </div>
                     <Switch checked={editingTier.isActive} onCheckedChange={(checked) => setEditingTier({...editingTier, isActive: checked})} />
                   </label>

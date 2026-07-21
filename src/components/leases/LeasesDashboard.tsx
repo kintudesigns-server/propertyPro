@@ -140,7 +140,7 @@ export default function LeasesDashboard({
     switch (l.status) {
       case "ACTIVE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#10B981]"><CheckCircle className="h-3 w-3" /> Active</span>;
       case "PENDING_SIGNATURE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#F59E0B]"><Clock className="h-3 w-3" /> Pending</span>;
-      case "DRAFT": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#64748B]"><FileText className="h-3 w-3" /> Draft</span>;
+      case "DRAFT": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#6E6E73]"><FileText className="h-3 w-3" /> Draft</span>;
       case "TERMINATED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Terminated</span>;
       case "EXPIRED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Expired</span>;
       default: return <span className="flex items-center gap-1 text-[11px] font-bold text-gray-500">{l.status}</span>;
@@ -222,11 +222,11 @@ export default function LeasesDashboard({
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-2 sm:px-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-[28px] font-black text-[#0F172A] tracking-tight">Leases</h1>
-          <p className="text-[#64748B] text-sm font-medium mt-0.5">Manage your property leases and agreements</p>
+          <h1 className="text-[28px] font-black text-[#1D1D1F] tracking-tight">Leases</h1>
+          <p className="text-[#6E6E73] text-sm font-medium mt-0.5">Manage your property leases and agreements</p>
         </div>
         <Link href="/dashboard/leases/new">
-          <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm rounded-xl h-10 px-5 text-sm font-bold flex items-center gap-2">
+          <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-10 px-5 text-sm font-bold flex items-center gap-2">
             <Plus className="h-4 w-4" /> Create Lease
           </Button>
         </Link>
@@ -235,83 +235,83 @@ export default function LeasesDashboard({
       {/* 6 KPI Cards matching screenshot exactly */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* Total */}
-        <Card onClick={() => setStatusFilter("ALL")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#3B82F6] ${statusFilter === "ALL" ? "ring-2 ring-[#3B82F6]" : ""}`}>
+        <Card onClick={() => setStatusFilter("ALL")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#007AFF] ${statusFilter === "ALL" ? "ring-2 ring-[#007AFF]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Total</h3>
-            <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Total</h3>
+            <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
               <FileText className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{totalCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{totalCount}</div>
         </Card>
 
         {/* Action Needed */}
-        <Card onClick={() => setStatusFilter("ACTION_NEEDED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-red-500 ${statusFilter === "ACTION_NEEDED" ? "ring-2 ring-red-500 bg-red-50" : ""}`}>
+        <Card onClick={() => setStatusFilter("ACTION_NEEDED")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-red-500 ${statusFilter === "ACTION_NEEDED" ? "ring-2 ring-red-500 bg-red-50" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Action Needed</h3>
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Action Needed</h3>
             <div className="h-7 w-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
               <ShieldAlert className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{actionNeededCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{actionNeededCount}</div>
         </Card>
 
         {/* Renewals Needed */}
-        <Card onClick={() => setStatusFilter("EXPIRING")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#F59E0B] ${statusFilter === "EXPIRING" ? "ring-2 ring-[#F59E0B] bg-amber-50" : ""}`}>
+        <Card onClick={() => setStatusFilter("EXPIRING")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#F59E0B] ${statusFilter === "EXPIRING" ? "ring-2 ring-[#F59E0B] bg-amber-50" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Renewals Needed</h3>
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Renewals Needed</h3>
             <div className="h-7 w-7 rounded-lg bg-[#FEF3C7] flex items-center justify-center text-[#F59E0B]">
               <AlertTriangle className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{expiringCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{expiringCount}</div>
         </Card>
 
         {/* Active */}
-        <Card onClick={() => setStatusFilter("ACTIVE")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#10B981] ${statusFilter === "ACTIVE" ? "ring-2 ring-[#10B981]" : ""}`}>
+        <Card onClick={() => setStatusFilter("ACTIVE")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#10B981] ${statusFilter === "ACTIVE" ? "ring-2 ring-[#10B981]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Active</h3>
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Active</h3>
             <div className="h-7 w-7 rounded-lg bg-[#DCFCE7] flex items-center justify-center text-[#10B981]">
               <CheckCircle className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{activeCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{activeCount}</div>
         </Card>
 
         {/* Expired */}
-        <Card onClick={() => setStatusFilter("EXPIRED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "EXPIRED" ? "ring-2 ring-[#EF4444]" : ""}`}>
+        <Card onClick={() => setStatusFilter("EXPIRED")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "EXPIRED" ? "ring-2 ring-[#EF4444]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Expired</h3>
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Expired</h3>
             <div className="h-7 w-7 rounded-lg bg-[#FEE2E2] flex items-center justify-center text-[#EF4444]">
               <XCircle className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{expiredCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{expiredCount}</div>
         </Card>
 
         {/* Terminated */}
-        <Card onClick={() => setStatusFilter("TERMINATED")} className={`bg-white border-[#E2E8F0] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "TERMINATED" ? "ring-2 ring-[#EF4444]" : ""}`}>
+        <Card onClick={() => setStatusFilter("TERMINATED")} className={`bg-white border-[#E5E5EA] shadow-sm rounded-[16px] p-5 relative overflow-hidden group cursor-pointer transition-all hover:border-[#EF4444] ${statusFilter === "TERMINATED" ? "ring-2 ring-[#EF4444]" : ""}`}>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-[13px] font-bold text-[#0F172A]">Terminated</h3>
+            <h3 className="text-[13px] font-bold text-[#1D1D1F]">Terminated</h3>
             <div className="h-7 w-7 rounded-lg bg-[#FEE2E2] flex items-center justify-center text-[#EF4444]">
               <XCircle className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="text-[28px] font-black text-[#0F172A] leading-none mt-4">{terminatedCount}</div>
+          <div className="text-[28px] font-black text-[#1D1D1F] leading-none mt-4">{terminatedCount}</div>
         </Card>
       </div>
 
       {/* Main Container */}
-      <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-[24px] overflow-hidden p-6">
+      <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 bg-[#EFF6FF] text-[#3B82F6] rounded-xl flex items-center justify-center shrink-0">
+          <div className="h-10 w-10 bg-[#EFF6FF] text-[#007AFF] rounded-xl flex items-center justify-center shrink-0">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A] leading-tight">
+            <h2 className="text-lg font-bold text-[#1D1D1F] leading-tight">
               {title || (initialFilter === "ACTIVE" ? "Active Leases" : initialFilter === "EXPIRING" ? "Expiring Leases" : "All Leases")}
             </h2>
-            <p className="text-xs text-[#64748B] font-medium">
+            <p className="text-xs text-[#6E6E73] font-medium">
               {subtitle || (initialFilter === "ACTIVE" ? "Manage your currently active leases and track revenue" : initialFilter === "EXPIRING" ? "Leases expiring within the next 30 days" : "Manage and view all your property leases")}
             </p>
           </div>
@@ -325,16 +325,16 @@ export default function LeasesDashboard({
               placeholder="Search leases..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-xl bg-white border-[#E2E8F0] focus-visible:ring-[#3B82F6] w-full text-sm font-medium shadow-sm"
+              className="pl-10 h-11 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] w-full text-sm font-medium shadow-sm"
             />
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-              <SelectTrigger className="w-full md:w-[140px] h-11 rounded-xl bg-white border-[#E2E8F0] text-sm font-semibold shadow-sm focus:ring-[#3B82F6]">
+              <SelectTrigger className="w-full md:w-[140px] h-11 rounded-xl bg-white border-[#E5E5EA] text-sm font-semibold shadow-sm focus:ring-[#007AFF]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
+              <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
                 <SelectItem value="ALL">All Status</SelectItem>
                 <SelectItem value="DRAFT">Draft</SelectItem>
                 <SelectItem value="PENDING_SIGNATURE">Pending</SelectItem>
@@ -345,10 +345,10 @@ export default function LeasesDashboard({
             </Select>
 
             <Select value={sortOrder} onValueChange={(v) => setSortOrder(v || "NEWEST")}>
-              <SelectTrigger className="w-full md:w-[170px] h-11 rounded-xl bg-white border-[#E2E8F0] text-sm font-semibold shadow-sm focus:ring-[#3B82F6]">
+              <SelectTrigger className="w-full md:w-[170px] h-11 rounded-xl bg-white border-[#E5E5EA] text-sm font-semibold shadow-sm focus:ring-[#007AFF]">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-[#E2E8F0] shadow-lg">
+              <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
                 <SelectItem value="NEWEST">Newest First</SelectItem>
                 <SelectItem value="OLDEST">Oldest First</SelectItem>
                 <SelectItem value="START_DESC">Start Date (Latest)</SelectItem>
@@ -358,16 +358,16 @@ export default function LeasesDashboard({
               </SelectContent>
             </Select>
 
-            <div className="flex bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-1 shrink-0 h-11 items-center">
+            <div className="flex bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl p-1 shrink-0 h-11 items-center">
               <button 
                 onClick={() => setViewMode('grid')} 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#3B82F6] text-white shadow-sm' : 'text-[#64748B] hover:text-[#0F172A]'}`}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#007AFF] text-white shadow-sm' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}`}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
               <button 
                 onClick={() => setViewMode('list')} 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#3B82F6] text-white shadow-sm' : 'text-[#64748B] hover:text-[#0F172A]'}`}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#007AFF] text-white shadow-sm' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}`}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -377,14 +377,14 @@ export default function LeasesDashboard({
 
         {/* Content */}
         {loading ? (
-          <div className="py-20 text-center text-[#64748B] font-bold text-sm">Loading leases...</div>
+          <div className="py-20 text-center text-[#6E6E73] font-bold text-sm">Loading leases...</div>
         ) : filteredLeases.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center">
-            <div className="h-16 w-16 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-4 border border-[#E2E8F0]">
+            <div className="h-16 w-16 bg-[#F2F2F7] rounded-full flex items-center justify-center mb-4 border border-[#E5E5EA]">
               <FileText className="h-6 w-6 text-[#94A3B8]" />
             </div>
-            <h3 className="text-lg font-bold text-[#0F172A]">No leases found</h3>
-            <p className="text-sm text-[#64748B] mt-1 max-w-sm">There are no leases matching your current search or filter criteria.</p>
+            <h3 className="text-lg font-bold text-[#1D1D1F]">No leases found</h3>
+            <p className="text-sm text-[#6E6E73] mt-1 max-w-sm">There are no leases matching your current search or filter criteria.</p>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -407,18 +407,18 @@ export default function LeasesDashboard({
               }
               
               return (
-              <Card key={l.id} className="bg-white border-[#E2E8F0] rounded-[20px] shadow-sm hover:shadow-md transition-shadow relative p-5 flex flex-col group">
+              <Card key={l.id} className="bg-white border-[#E5E5EA] rounded-[20px] shadow-sm hover:shadow-md transition-shadow relative p-5 flex flex-col group">
                 {/* Header: Property & Status */}
                 <div className="flex justify-between items-start w-full">
                   <div className="flex gap-3 items-start max-w-[70%]">
-                    <div className="h-10 w-10 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center justify-center text-[#3B82F6] shrink-0 mt-0.5">
+                    <div className="h-10 w-10 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl flex items-center justify-center text-[#007AFF] shrink-0 mt-0.5">
                       <Home className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-[#0F172A] text-base truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
+                      <h3 className="font-bold text-[#1D1D1F] text-base truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] font-bold text-[#3B82F6] bg-[#EFF6FF] px-2 py-0.5 rounded-md truncate">Unit {l.unit?.name || ""}</span>
-                        <span className="text-[12px] text-[#64748B] font-medium truncate">{l.unit?.property?.city || ""}</span>
+                        <span className="text-[11px] font-bold text-[#007AFF] bg-[#EFF6FF] px-2 py-0.5 rounded-md truncate">Unit {l.unit?.name || ""}</span>
+                        <span className="text-[12px] text-[#6E6E73] font-medium truncate">{l.unit?.property?.city || ""}</span>
                       </div>
                     </div>
                   </div>
@@ -428,20 +428,20 @@ export default function LeasesDashboard({
                       {getStatusBadge(l)}
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="h-7 w-7 rounded-lg hover:bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] transition-colors focus:outline-none opacity-0 group-hover:opacity-100 border border-transparent hover:border-[#E2E8F0]">
+                      <DropdownMenuTrigger className="h-7 w-7 rounded-lg hover:bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] transition-colors focus:outline-none opacity-0 group-hover:opacity-100 border border-transparent hover:border-[#E5E5EA]">
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                           <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                           <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                        <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                           <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                           <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
                         </DropdownMenuItem>
                         {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
@@ -463,15 +463,15 @@ export default function LeasesDashboard({
                   <div>
                     <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Tenant</p>
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-[#E2E8F0] flex items-center justify-center text-[9px] font-black text-[#64748B] shrink-0 border border-white shadow-sm">
+                      <div className="h-6 w-6 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[9px] font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
                         {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
                       </div>
-                      <p className="text-[13px] font-bold text-[#0F172A] truncate">{l.tenant?.name || l.tenant?.email}</p>
+                      <p className="text-[13px] font-bold text-[#1D1D1F] truncate">{l.tenant?.name || l.tenant?.email}</p>
                     </div>
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5 text-right">Rent / Month</p>
-                    <p className="text-[16px] font-black text-[#0F172A] text-right leading-none">
+                    <p className="text-[16px] font-black text-[#1D1D1F] text-right leading-none">
                       ${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}
                     </p>
                   </div>
@@ -481,7 +481,7 @@ export default function LeasesDashboard({
                 <div className="mt-4 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-[#94A3B8]" />
-                    <span className="text-[12px] font-semibold text-[#64748B]">
+                    <span className="text-[12px] font-semibold text-[#6E6E73]">
                       {l.startDate ? new Date(l.startDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : "N/A"} - {l.endDate ? new Date(l.endDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : "N/A"}
                     </span>
                   </div>
@@ -490,13 +490,13 @@ export default function LeasesDashboard({
 
                 {/* Specs */}
                 <div className="flex gap-2 mt-4 pt-4 border-t border-[#F1F5F9]">
-                  <span className="px-2 py-1 bg-[#F8FAFC] text-[#64748B] text-[11px] font-bold rounded-md border border-[#E2E8F0]">
+                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
                     {l.unit?.rooms || 0} Bed
                   </span>
-                  <span className="px-2 py-1 bg-[#F8FAFC] text-[#64748B] text-[11px] font-bold rounded-md border border-[#E2E8F0]">
+                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
                     {l.unit?.bathrooms || 0} Bath
                   </span>
-                  <span className="px-2 py-1 bg-[#F8FAFC] text-[#64748B] text-[11px] font-bold rounded-md border border-[#E2E8F0]">
+                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
                     {l.unit?.sqFootage || 0} Sq Ft
                   </span>
                 </div>
@@ -505,10 +505,10 @@ export default function LeasesDashboard({
                 <div className="mt-4 pt-4 border-t border-[#F1F5F9] flex flex-col gap-2">
                   {getQuickAction(l)}
                   <div className="flex gap-2 w-full">
-                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm">
                       <Eye className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Details
                     </Button>
-                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#0F172A] border-[#E2E8F0] hover:bg-[#F8FAFC] shadow-sm">
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm">
                       <FileText className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Invoice
                     </Button>
                   </div>
@@ -517,19 +517,19 @@ export default function LeasesDashboard({
             )})}
           </div>
         ) : (
-          <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-[#E5E5EA] rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-[#E2E8F0] bg-white hover:bg-white">
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4 pl-6">Property & Unit</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">Tenant</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">Status</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">Rent Amount</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">Start Date</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">End Date</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4">Days Remaining</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#64748B] tracking-wider uppercase whitespace-nowrap py-4 text-right pr-6">Actions</TableHead>
+                  <TableRow className="border-b border-[#E5E5EA] bg-white hover:bg-white">
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4 pl-6">Property & Unit</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Tenant</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Status</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Rent Amount</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Start Date</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">End Date</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Days Remaining</TableHead>
+                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4 text-right pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -553,7 +553,7 @@ export default function LeasesDashboard({
                     }
 
                     return (
-                    <TableRow key={l.id} className="border-b border-[#E2E8F0]/50 hover:bg-[#F8FAFC]/50 transition-colors">
+                    <TableRow key={l.id} className="border-b border-[#E5E5EA]/50 hover:bg-[#F2F2F7]/50 transition-colors">
                       <TableCell className="py-4 pl-6">
                         <div className="flex items-start gap-3">
                           <div className="mt-0.5">
@@ -561,14 +561,14 @@ export default function LeasesDashboard({
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-medium text-[#0F172A]">{l.unit?.property?.name || "Property Not Available"}</span>
+                              <span className="font-medium text-[#1D1D1F]">{l.unit?.property?.name || "Property Not Available"}</span>
                               {l.unit?.name && (
-                                <span className="bg-[#EFF6FF] text-[#3B82F6] text-xs font-bold px-2 py-0.5 rounded-md">
+                                <span className="bg-[#EFF6FF] text-[#007AFF] text-xs font-bold px-2 py-0.5 rounded-md">
                                   Unit {l.unit.name}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-[#64748B]">
+                            <div className="text-xs text-[#6E6E73]">
                               {l.unit?.property?.address ? `${l.unit.property.address}, ${l.unit.property.city || ''}` : "Address Not Available"}
                             </div>
                           </div>
@@ -576,12 +576,12 @@ export default function LeasesDashboard({
                       </TableCell>
                       <TableCell className="py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-xs font-black text-[#64748B] shrink-0 border border-white shadow-sm">
+                          <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-xs font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
                             {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
                           </div>
                           <div>
-                            <div className="font-medium text-[#0F172A] text-sm">{l.tenant?.name || "Unknown Tenant"}</div>
-                            <div className="text-xs text-[#64748B]">{l.tenant?.email || "No email"}</div>
+                            <div className="font-medium text-[#1D1D1F] text-sm">{l.tenant?.name || "Unknown Tenant"}</div>
+                            <div className="text-xs text-[#6E6E73]">{l.tenant?.email || "No email"}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -591,13 +591,13 @@ export default function LeasesDashboard({
                         </div>
                       </TableCell>
                       <TableCell className="py-4">
-                        <div className="font-bold text-[#0F172A]">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-                        <div className="text-xs text-[#64748B]">per month</div>
+                        <div className="font-bold text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                        <div className="text-xs text-[#6E6E73]">per month</div>
                       </TableCell>
-                      <TableCell className="py-4 font-medium text-[#0F172A]">
+                      <TableCell className="py-4 font-medium text-[#1D1D1F]">
                         {l.startDate ? new Date(l.startDate).toLocaleDateString() : "N/A"}
                       </TableCell>
-                      <TableCell className="py-4 font-medium text-[#0F172A]">
+                      <TableCell className="py-4 font-medium text-[#1D1D1F]">
                         {l.endDate ? new Date(l.endDate).toLocaleDateString() : "N/A"}
                       </TableCell>
                       <TableCell className="py-4">
@@ -607,20 +607,20 @@ export default function LeasesDashboard({
                         <div className="flex justify-end items-center gap-2">
                           {getQuickAction(l)}
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#64748B] transition-colors focus:outline-none border border-transparent hover:border-[#E2E8F0]">
+                            <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#6E6E73] transition-colors focus:outline-none border border-transparent hover:border-[#E5E5EA]">
                               <MoreVertical className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg">
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                            <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                                 <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                                 <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                              <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                                 <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#0F172A] rounded-lg py-2">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
                                 <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
                               </DropdownMenuItem>
                               {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (

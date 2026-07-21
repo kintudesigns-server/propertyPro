@@ -88,14 +88,14 @@ export default function TenantFinalStatementPage() {
   if (loading || status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3B82F6]"></div>
-        <p className="text-slate-400 font-bold text-sm">Loading statement...</p>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#007AFF]"></div>
+        <p className="text-[#8E8E93] font-bold text-sm">Loading statement...</p>
       </div>
     );
   }
 
   if (!lease) {
-    return <div className="p-8 text-center text-slate-500">No move-out statement found for this lease.</div>;
+    return <div className="p-8 text-center text-[#6E6E73]">No move-out statement found for this lease.</div>;
   }
 
   const isCompleted = lease.status === "TERMINATED";
@@ -121,7 +121,7 @@ export default function TenantFinalStatementPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">Move-Out Final Statement</h1>
-          <p className="text-slate-500 font-semibold mt-1">
+          <p className="text-[#6E6E73] font-semibold mt-1">
             Unit {lease.unit?.name} • {lease.unit?.property?.name}
           </p>
         </div>
@@ -180,7 +180,7 @@ export default function TenantFinalStatementPage() {
 
       {/* Inspection Report — shown when ready */}
       {(canReview || isAccepted || isDisputed || isDisputeFinalized || isCompleted) && (
-        <Card className="rounded-[24px] shadow-sm border-[#E2E8F0]">
+        <Card className="rounded-[24px] shadow-sm border-[#E5E5EA]">
           <CardHeader className="border-b border-[#F1F5F9] pb-4">
             <CardTitle className="flex items-center justify-between">
               <span>Itemized Deductions</span>
@@ -193,7 +193,7 @@ export default function TenantFinalStatementPage() {
             {deductions.length > 0 ? (
               <div className="rounded-xl border border-slate-200 overflow-hidden">
                 <Table>
-                  <TableHeader className="bg-slate-50">
+                  <TableHeader className="bg-[#F5F5F7]">
                     <TableRow>
                       <TableHead className="font-bold text-slate-600">Description</TableHead>
                       <TableHead className="font-bold text-slate-600">Category</TableHead>
@@ -223,14 +223,14 @@ export default function TenantFinalStatementPage() {
                 </Table>
               </div>
             ) : (
-              <div className="p-8 text-center text-slate-500 font-bold border border-dashed border-slate-200 rounded-xl">
+              <div className="p-8 text-center text-[#6E6E73] font-bold border border-dashed border-slate-200 rounded-xl">
                 No deductions were claimed. Full deposit will be refunded.
               </div>
             )}
 
             {/* Summary */}
             <div className="mt-6 border-t border-slate-200 pt-5 space-y-3">
-              <div className="flex justify-between items-center text-sm font-bold text-slate-500">
+              <div className="flex justify-between items-center text-sm font-bold text-[#6E6E73]">
                 <span>Original Security Deposit</span>
                 <span>${originalDeposit.toFixed(2)}</span>
               </div>
@@ -256,18 +256,18 @@ export default function TenantFinalStatementPage() {
               <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {lease.forwardingAddress && (
                   <div className="flex items-start gap-2 text-xs text-slate-600">
-                    <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" />
+                    <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#8E8E93]" />
                     <div>
-                      <p className="font-bold text-slate-500 uppercase tracking-wide text-[10px]">Forwarding Address</p>
+                      <p className="font-bold text-[#6E6E73] uppercase tracking-wide text-[10px]">Forwarding Address</p>
                       <p className="font-semibold text-slate-800 mt-0.5">{lease.forwardingAddress}</p>
                     </div>
                   </div>
                 )}
                 {lease.refundMethod && (
                   <div className="flex items-start gap-2 text-xs text-slate-600">
-                    <CreditCard className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" />
+                    <CreditCard className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#8E8E93]" />
                     <div>
-                      <p className="font-bold text-slate-500 uppercase tracking-wide text-[10px]">Refund Method</p>
+                      <p className="font-bold text-[#6E6E73] uppercase tracking-wide text-[10px]">Refund Method</p>
                       <p className="font-semibold text-slate-800 mt-0.5">
                         {lease.refundMethod === "ORIGINAL" ? "Original Payment Method" :
                          lease.refundMethod === "CHECK" ? "Mailed Check" : "Offline / Direct Transfer"}
@@ -283,7 +283,7 @@ export default function TenantFinalStatementPage() {
 
       {/* Accept / Dispute Actions — only when INSPECTION_COMPLETED */}
       {canReview && (
-        <Card className="rounded-[24px] shadow-sm border-[#E2E8F0]">
+        <Card className="rounded-[24px] shadow-sm border-[#E5E5EA]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-amber-500" />

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -791,47 +792,49 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-8 pb-20">
+    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       {/* Premium Header Banner */}
-      <div className="relative overflow-hidden rounded-[32px] bg-[#0F172A] p-8 md:p-10 shadow-2xl border border-slate-800">
+      <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-6 md:p-8 shadow-xl border border-slate-800">
         {/* Glowing Gradient Background Blobs */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-2">
-              <span className="relative flex h-2 w-2">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-1">
+              <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-black text-white tracking-wide uppercase">
+              <span className="text-[10px] font-semibold text-white tracking-wide uppercase">
                 {stats?.subscriptionTier || "Hobbyist"} Plan • {stats?.subscriptionStatus === "active" ? "Active" : "Trial"}
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-              {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">{session?.user?.name ? session.user.name.split(' ')[0] : "Admin"}</span>!
+            <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
+              {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 font-bold">{session?.user?.name ? session.user.name.split(' ')[0] : "Admin"}</span>!
             </h1>
-            <p className="text-slate-300 text-base md:text-lg max-w-xl font-medium">
-              Here's what's happening with your property portfolio today.
-            </p>
+            {stats && (
+              <p className="text-slate-300 text-sm font-medium">
+                Portfolio Revenue: <span className="text-emerald-400 font-semibold">${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> this month
+              </p>
+            )}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
             <Button
               variant="outline"
               onClick={fetchLandlordStats}
               disabled={statsLoading}
-              className="bg-white/10 hover:bg-white/15 transition-colors border border-white/20 text-white font-bold rounded-2xl shadow-sm backdrop-blur-md cursor-pointer text-sm w-full sm:w-auto h-[50px] px-6"
+              className="bg-white/10 hover:bg-white/15 transition-colors border border-white/20 text-white font-semibold rounded-xl shadow-sm backdrop-blur-md cursor-pointer text-xs w-full sm:w-auto h-[42px] px-4"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${statsLoading ? "animate-spin" : ""}`} /> Refresh
+              <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${statsLoading ? "animate-spin" : ""}`} /> Refresh
             </Button>
             <Button 
               onClick={() => router.push("/dashboard/accounting/invoices")}
-              className="bg-white hover:bg-slate-100 text-[#0F172A] border-0 rounded-2xl font-bold flex items-center gap-2 h-[50px] px-6 shadow-xl w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-95"
+              className="bg-white hover:bg-slate-100 text-[#0F172A] border-0 rounded-xl font-semibold flex items-center gap-1.5 h-[42px] px-4 shadow-md w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-95 text-xs"
             >
-              <BarChart3 className="h-4 w-4" /> Financials
+              <BarChart3 className="h-3.5 w-3.5" /> Financials
             </Button>
           </div>
         </div>
@@ -839,82 +842,82 @@ export default function DashboardPage() {
 
       {/* Setup Checklist if no properties */}
       {stats?.totalProperties === 0 && (
-        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-[32px] shadow-2xl overflow-hidden mb-6">
-          <div className="relative z-10 p-8 md:p-10 border-b border-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-3xl shadow-xl overflow-hidden mb-6">
+          <div className="relative z-10 p-6 md:p-8 border-b border-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-4">
-                <span className="relative flex h-2 w-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-3">
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
                 </span>
-                <span className="text-xs font-bold text-white tracking-wide uppercase">Onboarding Active</span>
+                <span className="text-[10px] font-semibold text-white tracking-wide uppercase">Onboarding Active</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-3 tracking-tight">
                 Welcome to PropertyPro!
               </h2>
-              <p className="text-slate-400 mt-3 font-medium max-w-2xl text-lg leading-relaxed">
+              <p className="text-slate-400 mt-2 font-medium max-w-2xl text-base leading-relaxed">
                 Let's get your portfolio set up so you can start managing properties and collecting rent online. Complete these steps to unlock your dashboard.
               </p>
             </div>
             
-            <div className="flex flex-col items-start md:items-end w-full md:w-auto bg-slate-900/50 p-5 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
-              <span className="text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-widest">Setup Progress</span>
-              <div className="flex items-center gap-4">
-                <div className="w-32 h-3 bg-slate-800 rounded-full overflow-hidden shadow-inner">
+            <div className="flex flex-col items-start md:items-end w-full md:w-auto bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 backdrop-blur-sm">
+              <span className="text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Setup Progress</span>
+              <div className="flex items-center gap-3">
+                <div className="w-28 h-2 bg-slate-800 rounded-full overflow-hidden shadow-inner">
                   <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out" style={{ width: `${(( (stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0) ) / 3) * 100}%` }}></div>
                 </div>
-                <span className="font-black text-white text-xl">{(stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0)}<span className="text-slate-500">/3</span></span>
+                <span className="font-semibold text-white text-lg">{(stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0)}<span className="text-slate-500">/3</span></span>
               </div>
             </div>
           </div>
           
-          <div className="p-8 md:p-10 space-y-4 bg-slate-900/30">
+          <div className="p-6 md:p-8 space-y-3.5 bg-slate-900/30">
             <div 
-              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
+              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
               onClick={() => router.push('/dashboard/owner#settings')}
             >
-              <div className="flex items-center gap-5">
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.profileComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'}`}>
-                  {stats?.profileComplete ? <CheckCircle2 className="h-7 w-7" /> : <Users className="h-7 w-7" />}
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.profileComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'}`}>
+                  {stats?.profileComplete ? <CheckCircle2 className="h-6 w-6" /> : <Users className="h-6 w-6" />}
                 </div>
                 <div>
-                  <h4 className={`font-black text-xl ${stats?.profileComplete ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-blue-400 transition-colors'}`}>Complete Landlord Profile</h4>
-                  <p className={`text-sm mt-1 font-medium ${stats?.profileComplete ? 'text-emerald-500/60' : 'text-slate-400'}`}>Set your entity type (Individual or Business) and support contact info.</p>
+                  <h4 className={`font-semibold text-lg ${stats?.profileComplete ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-blue-400 transition-colors'}`}>Complete Landlord Profile</h4>
+                  <p className={`text-xs mt-0.5 font-medium ${stats?.profileComplete ? 'text-emerald-500/60' : 'text-slate-400'}`}>Set your entity type (Individual or Business) and support contact info.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
+              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
             </div>
 
             <div 
-              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.totalProperties > 0 ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-emerald-500/50 hover:bg-emerald-500/10'}`}
+              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.totalProperties > 0 ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-emerald-500/50 hover:bg-emerald-500/10'}`}
               onClick={() => router.push('/dashboard/properties/new')}
             >
-              <div className="flex items-center gap-5">
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.totalProperties > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-400'}`}>
-                  {stats?.totalProperties > 0 ? <CheckCircle2 className="h-7 w-7" /> : <Home className="h-7 w-7" />}
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.totalProperties > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-400'}`}>
+                  {stats?.totalProperties > 0 ? <CheckCircle2 className="h-6 w-6" /> : <Home className="h-6 w-6" />}
                 </div>
                 <div>
-                  <h4 className={`font-black text-xl ${stats?.totalProperties > 0 ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-emerald-400 transition-colors'}`}>Add Your First Property</h4>
-                  <p className={`text-sm mt-1 font-medium ${stats?.totalProperties > 0 ? 'text-emerald-500/60' : 'text-slate-400'}`}>Create a property, set up rentable units, and track occupancy.</p>
+                  <h4 className={`font-semibold text-lg ${stats?.totalProperties > 0 ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-emerald-400 transition-colors'}`}>Add Your First Property</h4>
+                  <p className={`text-xs mt-0.5 font-medium ${stats?.totalProperties > 0 ? 'text-emerald-500/60' : 'text-slate-400'}`}>Create a property, set up rentable units, and track occupancy.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
+              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
             </div>
 
             <div 
-              className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group ${stats?.bankConnected ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-purple-500/50 hover:bg-purple-500/10'}`}
+              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.bankConnected ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-purple-500/50 hover:bg-purple-500/10'}`}
               onClick={() => router.push('/dashboard/accounting/wallet')}
             >
-              <div className="flex items-center gap-5">
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${stats?.bankConnected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-purple-500/20 group-hover:text-purple-400'}`}>
-                  {stats?.bankConnected ? <CheckCircle2 className="h-7 w-7" /> : <Wallet className="h-7 w-7" />}
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.bankConnected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-purple-500/20 group-hover:text-purple-400'}`}>
+                  {stats?.bankConnected ? <CheckCircle2 className="h-6 w-6" /> : <Wallet className="h-6 w-6" />}
                 </div>
                 <div>
-                  <h4 className={`font-black text-xl ${stats?.bankConnected ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-purple-400 transition-colors'}`}>Connect Bank Account</h4>
-                  <p className={`text-sm mt-1 font-medium ${stats?.bankConnected ? 'text-emerald-500/60' : 'text-slate-400'}`}>Link your account to securely receive online rent payments via Stripe.</p>
+                  <h4 className={`font-semibold text-lg ${stats?.bankConnected ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-purple-400 transition-colors'}`}>Connect Bank Account</h4>
+                  <p className={`text-xs mt-0.5 font-medium ${stats?.bankConnected ? 'text-emerald-500/60' : 'text-slate-400'}`}>Link your account to securely receive online rent payments via Stripe.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-6 w-6 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
+              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
             </div>
           </div>
         </Card>
@@ -925,119 +928,110 @@ export default function DashboardPage() {
         {/* Overdue Invoices Alert */}
         <div 
           onClick={() => router.push('/dashboard/accounting/invoices')}
-          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-amber-200 transition-all duration-300 group relative overflow-hidden"
+          className="bg-amber-50/40 border border-amber-200/50 rounded-2xl p-4 flex items-center justify-between shadow-xs cursor-pointer hover:bg-amber-50/70 hover:-translate-y-0.5 hover:border-amber-300 transition-all duration-200 group"
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
-          <div className="flex items-center gap-4 text-slate-800">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
-              <AlertTriangle className="h-6 w-6" />
+          <div className="flex items-center gap-3 text-slate-800">
+            <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-xl">
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-black text-[#0F172A] text-lg leading-snug">Overdue Invoices</p>
-              <p className="text-xs mt-1 text-slate-500 font-semibold">{stats?.overduePayments || 0} tenants are behind schedule</p>
+              <p className="font-semibold text-slate-900 text-sm leading-snug">Overdue Invoices</p>
+              <p className="text-xs mt-0.5 text-slate-500 font-medium">{stats?.overduePayments || 0} behind schedule</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-amber-600 leading-none">{stats?.overduePayments || 0}</span>
-            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          <div className="flex items-center justify-center h-7 px-2.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-bold">
+            {stats?.overduePayments || 0}
           </div>
         </div>
 
         {/* Urgent Repairs Alert */}
         <div 
           onClick={() => router.push('/dashboard/maintenance')}
-          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-red-200 transition-all duration-300 group relative overflow-hidden"
+          className="bg-rose-50/40 border border-rose-200/50 rounded-2xl p-4 flex items-center justify-between shadow-xs cursor-pointer hover:bg-rose-50/70 hover:-translate-y-0.5 hover:border-rose-300 transition-all duration-200 group"
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
-          <div className="flex items-center gap-4 text-slate-800">
-            <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
-              <AlertTriangle className="h-6 w-6" />
+          <div className="flex items-center gap-3 text-slate-800">
+            <div className="p-2.5 bg-rose-500/10 text-rose-600 rounded-xl">
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-black text-[#0F172A] text-lg leading-snug">Urgent Repairs</p>
-              <p className="text-xs mt-1 text-slate-500 font-semibold">
-                {stats?.urgentMaintenance ? `${stats.urgentMaintenance} emergency issues open` : "All systems working normally"}
+              <p className="font-semibold text-slate-900 text-sm leading-snug">Urgent Repairs</p>
+              <p className="text-xs mt-0.5 text-slate-500 font-medium">
+                {stats?.urgentMaintenance ? `${stats.urgentMaintenance} emergency open` : "All systems normal"}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-red-600 leading-none">{stats?.urgentMaintenance || 0}</span>
-            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          <div className="flex items-center justify-center h-7 px-2.5 rounded-full bg-rose-500/10 text-rose-700 text-xs font-bold">
+            {stats?.urgentMaintenance || 0}
           </div>
         </div>
 
         {/* Expiring Leases Alert */}
         <div 
           onClick={() => router.push('/dashboard/leases')}
-          className="bg-white border border-slate-100 rounded-[20px] p-6 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)] cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 group relative overflow-hidden"
+          className="bg-blue-50/40 border border-blue-200/50 rounded-2xl p-4 flex items-center justify-between shadow-xs cursor-pointer hover:bg-blue-50/70 hover:-translate-y-0.5 hover:border-blue-300 transition-all duration-200 group"
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
-          <div className="flex items-center gap-4 text-slate-800">
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-              <FileText className="h-6 w-6" />
+          <div className="flex items-center gap-3 text-slate-800">
+            <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-xl">
+              <FileText className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-black text-[#0F172A] text-lg leading-snug">Expiring Leases</p>
-              <p className="text-xs mt-1 text-slate-500 font-semibold">Renewals needed within 30 days</p>
+              <p className="font-semibold text-slate-900 text-sm leading-snug">Expiring Leases</p>
+              <p className="text-xs mt-0.5 text-slate-500 font-medium">Renewals needed within 30 days</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-blue-600 leading-none">{stats?.leaseRenewals || 0}</span>
-            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+          <div className="flex items-center justify-center h-7 px-2.5 rounded-full bg-blue-500/10 text-blue-700 text-xs font-bold">
+            {stats?.leaseRenewals || 0}
           </div>
         </div>
       </div>
 
       {/* Top 5 Core Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        <MetricCard title="Properties Managed" value={stats?.totalProperties ?? "-"} subtext="Active properties in portfolio" Icon={Building} iconBg="bg-blue-50" iconColor="text-blue-600" />
-        <MetricCard title="Occupancy Rate" value={stats ? `${stats.occupancyRate}%` : "-"} subtext={`${stats?.occupiedUnits ?? 0} of ${stats?.totalUnits ?? 0} units occupied`} Icon={Home} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-        <MetricCard title="Monthly Revenue" value={stats ? `$${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Current month collected" Icon={DollarSign} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-        <MetricCard title="Collection Rate" value={stats ? `${stats.collectionRate}%` : "-"} subtext="Payment collection efficiency" Icon={Wallet} iconBg="bg-sky-50" iconColor="text-sky-600" />
-        <MetricCard title="Active Tenants" value={stats?.activeTenantsCount ?? "-"} subtext="Occupants under contract" Icon={Users} iconBg="bg-violet-50" iconColor="text-violet-600" />
+        <KpiCard title="Properties Managed" value={stats?.totalProperties ?? "-"} subtext="Active properties in portfolio" icon={Building} variant="blue" />
+        <KpiCard title="Occupancy Rate" value={stats ? `${stats.occupancyRate}%` : "-"} subtext={`${stats?.occupiedUnits ?? 0} of ${stats?.totalUnits ?? 0} units occupied`} icon={Home} variant="green" />
+        <KpiCard title="Monthly Revenue" value={stats ? `$${Math.round(stats.monthlyRevenue || 0).toLocaleString()}` : "-"} subtext="Current month collected" icon={DollarSign} variant="emerald" />
+        <KpiCard title="Collection Rate" value={stats ? `${stats.collectionRate}%` : "-"} subtext="Payment collection efficiency" icon={Wallet} variant="indigo" />
+        <KpiCard title="Active Tenants" value={stats?.activeTenantsCount ?? "-"} subtext="Occupants under contract" icon={Users} variant="purple" />
       </div>
 
       {/* Split Analytics and Operations Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Revenue trend chart & secondary metrics (8 cols) */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-6">
           
           {/* Revenue Chart Card */}
-          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8 flex flex-col justify-between">
+          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl p-6 flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-100">
+              <div className="flex justify-between items-start mb-4 pb-4 border-b border-[#F2F2F7]">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                  <h2 className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2">
+                    <TrendingUp className="h-4.5 w-4.5 text-[#34C759]" />
                     Revenue Trend
                   </h2>
-                  <span className="text-xs font-semibold text-slate-400 mt-1 block">Monthly collected rent payments</span>
+                  <span className="text-xs font-medium text-[#8E8E93] mt-0.5 block">Monthly collected rent payments • Last 6 Months</span>
                 </div>
-                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-extrabold rounded-lg border border-emerald-100">
-                  Last 6 Months
-                </span>
               </div>
 
-              <div className="h-[300px] w-full mt-4">
+              <div className="h-[260px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#34C759" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#34C759" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F8FAFC" />
-                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#94A3B8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E5EA" opacity={0.6} />
+                    <XAxis dataKey="name" stroke="#8E8E93" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#8E8E93" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: "#0F172A", borderRadius: "16px", border: "none" }}
-                      labelStyle={{ color: "#94A3B8", fontWeight: 800, fontSize: "12px" }}
-                      itemStyle={{ color: "#FFFFFF", fontWeight: 700, fontSize: "14px" }}
+                      contentStyle={{ backgroundColor: "#1D1D1F", borderRadius: "12px", border: "none" }}
+                      labelStyle={{ color: "#8E8E93", fontWeight: 700, fontSize: "12px" }}
+                      itemStyle={{ color: "#FFFFFF", fontWeight: 600, fontSize: "13px" }}
                       formatter={(value: any) => [`$${Number(value).toLocaleString()}`, "Revenue"]}
                     />
-                    <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                    <Area type="monotone" dataKey="revenue" stroke="#34C759" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -1046,97 +1040,103 @@ export default function DashboardPage() {
 
           {/* Secondary Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard title="Vacant Units" value={stats?.vacantUnits ?? "-"} subtext={stats ? `${stats.vacancyRate}% vacancy` : "-"} Icon={Home} iconBg="bg-red-50" iconColor="text-red-600" />
-            <MetricCard title="Average Rent" value={stats ? `$${stats.averageRent?.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "-"} subtext="Per unit average" Icon={DollarSign} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-            <MetricCard title="Total Maintenance" value={stats?.totalMaintenance ?? "-"} subtext={`${stats?.urgentMaintenance ?? 0} urgent requests`} Icon={Wrench} iconBg="bg-amber-50" iconColor="text-amber-600" />
-            <MetricCard title="Events & Logs" value={stats?.recentEvents ?? "-"} subtext="Recent activities logged" Icon={Calendar} iconBg="bg-sky-50" iconColor="text-sky-600" />
+            <KpiCard title="Vacant Units" value={stats?.vacantUnits ?? "-"} subtext={stats ? `${stats.vacancyRate}% vacancy` : "-"} icon={Home} variant="red" />
+            <KpiCard title="Average Rent" value={stats ? `$${Math.round(stats.averageRent || 0).toLocaleString()}` : "-"} subtext="Per unit average" icon={DollarSign} variant="emerald" />
+            <KpiCard title="Total Maintenance" value={stats?.totalMaintenance ?? "-"} subtext={`${stats?.urgentMaintenance ?? 0} urgent requests`} icon={Wrench} variant="amber" />
+            <KpiCard title="Events & Logs" value={stats?.recentEvents ?? "-"} subtext="Recent activities logged" icon={Calendar} variant="slate" />
           </div>
 
         </div>
 
         {/* Right Column: Quick Operations & Recent Tickets (4 cols) */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
           
           {/* Quick Actions Panel */}
-          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8">
-            <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
-              <Activity className="h-5 w-5 text-indigo-500" />
+          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2 mb-4 pb-4 border-b border-[#F2F2F7]">
+              <Activity className="h-4.5 w-4.5 text-[#007AFF]" />
               Quick Actions
             </h2>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3.5">
               <button
                 onClick={() => router.push("/dashboard/properties/new")}
-                className="h-24 bg-slate-50/50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
+                className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
-                <Plus className="h-5 w-5 text-blue-600" />
-                <span className="text-xs">Add Property</span>
+                <div className="p-2 bg-[#007AFF] text-white rounded-lg shadow-sm">
+                  <Building className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Add Property</span>
               </button>
               <button
                 onClick={() => router.push("/dashboard/owner?tab=settings")}
-                className="h-24 bg-slate-50/50 hover:bg-violet-50 border border-slate-100 hover:border-violet-200 text-slate-700 hover:text-violet-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
+                className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
-                <Users className="h-5 w-5 text-violet-600" />
-                <span className="text-xs">Invite Tenant</span>
+                <div className="p-2 bg-[#AF52DE] text-white rounded-lg shadow-sm">
+                  <Users className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Invite Tenant</span>
               </button>
               <button
                 onClick={() => router.push("/dashboard/accounting/wallet")}
-                className="h-24 bg-slate-50/50 hover:bg-amber-50 border border-slate-100 hover:border-amber-200 text-slate-700 hover:text-amber-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
+                className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
-                <Wallet className="h-5 w-5 text-amber-600" />
-                <span className="text-xs">Payout Wallet</span>
+                <div className="p-2 bg-[#FF9500] text-white rounded-lg shadow-sm">
+                  <Wallet className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Payout Wallet</span>
               </button>
               <button
                 onClick={() => router.push("/dashboard/owner?tab=subscription")}
-                className="h-24 bg-slate-50/50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 text-slate-700 hover:text-emerald-900 font-extrabold flex flex-col items-center justify-center gap-2 rounded-2xl shadow-sm hover:scale-[1.03] transition-all cursor-pointer"
+                className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
-                <Settings className="h-5 w-5 text-emerald-600" />
-                <span className="text-xs">Stripe Billing</span>
+                <div className="p-2 bg-[#34C759] text-white rounded-lg shadow-sm">
+                  <Settings className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Stripe Billing</span>
               </button>
             </div>
           </Card>
 
           {/* Recent Maintenance Tickets Feed */}
-          <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] p-8 flex flex-col justify-between">
+          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl p-6 flex flex-col justify-between">
             <div>
-              <h2 className="text-lg font-black text-slate-900 flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-                <div className="p-2 bg-amber-50 rounded-lg">
-                  <Wrench className="h-4 w-4 text-amber-600" />
+              <h2 className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2 mb-4 pb-4 border-b border-[#F2F2F7]">
+                <div className="p-1.5 bg-[#FF9500]/10 rounded-lg text-[#FF9500]">
+                  <Wrench className="h-4 w-4" />
                 </div>
                 Recent Tickets
               </h2>
 
-              <div className="space-y-4">
+              <div className="divide-y divide-[#F2F2F7]">
                 {!stats?.recentMaintenanceRequests?.length ? (
-                  <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-slate-500 font-semibold text-sm">No maintenance requests open.</p>
+                  <div className="text-center py-8 bg-[#F2F2F7]/50 rounded-xl border border-dashed border-[#E5E5EA]">
+                    <p className="text-[#8E8E93] font-medium text-xs">No maintenance requests open.</p>
                   </div>
                 ) : (
-                  stats.recentMaintenanceRequests.map((req: any) => (
-                    <div 
-                      key={req.id} 
-                      onClick={() => router.push("/dashboard/maintenance")}
-                      className="p-4 border border-slate-100 rounded-2xl bg-slate-50/30 hover:border-indigo-100 hover:bg-white hover:shadow-md transition-all group flex flex-col gap-2 cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-extrabold text-sm text-slate-900 truncate max-w-[150px]">{req.title}</span>
-                        <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest border ${
-                          req.priority === "HIGH" || req.priority === "EMERGENCY"
-                            ? "bg-red-50 text-red-700 border-red-100"
-                            : req.priority === "MEDIUM"
-                            ? "bg-amber-50 text-amber-700 border-amber-100"
-                            : "bg-blue-50 text-blue-700 border-blue-100"
-                        }`}>
+                  stats.recentMaintenanceRequests.map((req: any) => {
+                    const isHigh = req.priority === "HIGH" || req.priority === "EMERGENCY";
+                    const isMedium = req.priority === "MEDIUM";
+                    const tint = isHigh ? { bg: "bg-[#FF3B30]/10", text: "text-[#FF3B30]" } : isMedium ? { bg: "bg-[#FF9500]/10", text: "text-[#FF9500]" } : { bg: "bg-[#007AFF]/10", text: "text-[#007AFF]" };
+                    return (
+                      <div 
+                        key={req.id} 
+                        onClick={() => router.push("/dashboard/maintenance")}
+                        className="py-3 flex items-center justify-between hover:bg-[#F2F2F7]/30 transition-all cursor-pointer group px-1 rounded-lg"
+                      >
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <div className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${isHigh ? 'bg-[#FF3B30]' : isMedium ? 'bg-[#FF9500]' : 'bg-[#007AFF]'}`} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[#1D1D1F] truncate group-hover:text-[#007AFF] transition-colors">{req.title}</p>
+                            <p className="text-xs text-[#8E8E93] font-medium mt-0.5">Unit {req.unit?.name || "N/A"} • {new Date(req.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tint.bg} ${tint.text}`}>
                           {req.priority}
                         </span>
                       </div>
-                      
-                      <div className="flex justify-between items-center text-xs text-slate-400 font-semibold mt-1">
-                        <span>Unit {req.unit?.name || "N/A"}</span>
-                        <span>{new Date(req.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -1146,25 +1146,6 @@ export default function DashboardPage() {
 
       </div>
     </div>
-  );
-}
-
-function MetricCard({ title, value, subtext, Icon, iconBg, iconColor }: any) {
-  return (
-    <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
-      <CardContent className="p-5 flex flex-col justify-between h-full flex-1">
-        <div className="flex justify-between items-start">
-          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">{title}</p>
-          <div className={`p-2.5 rounded-xl ${iconBg} ${iconColor} shrink-0`}>
-            <Icon className="h-4 w-4" />
-          </div>
-        </div>
-        <div className="mt-4">
-          <h3 className="text-2xl font-black text-[#0F172A] tracking-tight leading-none">{value}</h3>
-          <p className="text-xs text-slate-500 mt-2 font-semibold leading-normal">{subtext}</p>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

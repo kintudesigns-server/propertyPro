@@ -124,7 +124,7 @@ export default function InspectionsPage() {
           <ShieldAlert className="h-6 w-6 text-indigo-500" />
           Turnovers & Inspections
         </h1>
-        <p className="text-sm font-semibold text-slate-500 mt-1">
+        <p className="text-sm font-semibold text-[#6E6E73] mt-1">
           Manage all upcoming move-outs and schedule walkthrough inspections across your portfolio.
         </p>
       </div>
@@ -133,28 +133,28 @@ export default function InspectionsPage() {
         <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
           <button
             onClick={() => setActiveTab("AWAITING_INSPECTION")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "AWAITING_INSPECTION" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "AWAITING_INSPECTION" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
           >
             Awaiting Inspection
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-600 font-extrabold">{getTabCount("AWAITING_INSPECTION")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("AWAITING_INSPECTION")}</span>
           </button>
           <button
             onClick={() => setActiveTab("READY_FOR_SETTLEMENT")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "READY_FOR_SETTLEMENT" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "READY_FOR_SETTLEMENT" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
           >
             Ready for Settlement
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-600 font-extrabold">{getTabCount("READY_FOR_SETTLEMENT")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("READY_FOR_SETTLEMENT")}</span>
           </button>
           <button
             onClick={() => setActiveTab("COMPLETED")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "COMPLETED" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "COMPLETED" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
           >
             Completed
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-600 font-extrabold">{getTabCount("COMPLETED")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("COMPLETED")}</span>
           </button>
         </div>
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
           <Input 
             placeholder="Search by property, unit, or tenant..." 
             value={search}
@@ -176,7 +176,7 @@ export default function InspectionsPage() {
             <ShieldAlert className="h-8 w-8 text-slate-300" />
           </div>
           <h3 className="text-lg font-bold text-slate-900">No active inspections</h3>
-          <p className="text-sm text-slate-500 mt-1 font-medium">There are currently no leases pending a walkthrough inspection.</p>
+          <p className="text-sm text-[#6E6E73] mt-1 font-medium">There are currently no leases pending a walkthrough inspection.</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -189,8 +189,8 @@ export default function InspectionsPage() {
                     {lease.unit?.property?.name} • {lease.unit?.name}
                   </h3>
                   <div className="flex items-center gap-2 mt-2">
-                    <User className="h-4 w-4 text-slate-400" />
-                    <p className="text-sm font-semibold text-slate-600">{lease.tenant?.name || "Unknown Tenant"}</p>
+                    <User className="h-4 w-4 text-[#8E8E93]" />
+                    <p className="text-sm font-semibold text-[#6E6E73]">{lease.tenant?.name || "Unknown Tenant"}</p>
                   </div>
                 </div>
                 <span className={`px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider ${
@@ -219,7 +219,7 @@ export default function InspectionsPage() {
                       return (
                         <>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-slate-500 flex items-center gap-2">
+                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
                               <Calendar className="h-4 w-4" /> Prelim Date
                             </span>
                             <span className="font-bold text-slate-900">
@@ -227,7 +227,7 @@ export default function InspectionsPage() {
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-slate-500 flex items-center gap-2">
+                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
                               <User className="h-4 w-4" /> Inspector
                             </span>
                             <span className="font-bold text-indigo-600">
@@ -240,7 +240,7 @@ export default function InspectionsPage() {
                       return (
                         <>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-slate-500 flex items-center gap-2">
+                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
                               <Calendar className="h-4 w-4" /> Final Date
                             </span>
                             <span className="font-bold text-slate-900">
@@ -248,7 +248,7 @@ export default function InspectionsPage() {
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-slate-500 flex items-center gap-2">
+                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
                               <User className="h-4 w-4" /> Inspector
                             </span>
                             <span className="font-bold text-indigo-600">
@@ -260,7 +260,7 @@ export default function InspectionsPage() {
                     } else {
                       return (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-semibold text-slate-500 flex items-center gap-2">
+                          <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
                             <Calendar className="h-4 w-4" /> Move-Out Date
                           </span>
                           <span className="font-bold text-slate-900">
@@ -293,7 +293,7 @@ export default function InspectionsPage() {
                 <div className="mt-auto pt-4">
                   <Button 
                     onClick={() => router.push(`/dashboard/leases/${lease.id}`)}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl shadow-none flex items-center justify-center gap-2"
+                    className="w-full bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 rounded-xl shadow-none flex items-center justify-center gap-2"
                   >
                     Manage Turnover Pipeline <ArrowRight className="h-4 w-4" />
                   </Button>

@@ -10,13 +10,14 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { KpiCard } from "@/components/ui/KpiCard";
 
 // ─── Priority color helpers ────────────────────────────────────────────────
 const PRIORITY_CONFIG: Record<string, { label: string; bg: string; text: string; border: string }> = {
   EMERGENCY: { label: "Emergency", bg: "bg-red-50",    text: "text-red-700",   border: "border-red-300"   },
   HIGH:      { label: "High",      bg: "bg-orange-50", text: "text-orange-700",border: "border-orange-300" },
   MEDIUM:    { label: "Medium",    bg: "bg-amber-50",  text: "text-amber-700", border: "border-amber-200"  },
-  LOW:       { label: "Low",       bg: "bg-slate-50",  text: "text-slate-600", border: "border-slate-200"  },
+  LOW:       { label: "Low",       bg: "bg-[#F5F5F7]",  text: "text-[#6E6E73]", border: "border-[#E5E5EA]"  },
 };
 
 const STATUS_STEP: Record<string, { label: string; next: string; color: string }> = {
@@ -74,7 +75,7 @@ export default function InspectorOverviewPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-        <p className="text-slate-400 font-semibold text-sm">Loading your dashboard...</p>
+        <p className="text-[#8E8E93] font-semibold text-sm">Loading your dashboard...</p>
       </div>
     );
   }
@@ -150,13 +151,13 @@ export default function InspectorOverviewPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Good {now.getHours() < 12 ? "morning" : now.getHours() < 18 ? "afternoon" : "evening"}, {userName} 👋
           </h1>
-          <p className="text-slate-400 text-sm font-medium mt-0.5">
+          <p className="text-[#8E8E93] text-sm font-medium mt-0.5">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
             {todayItems.length > 0 && <span className="text-indigo-600 font-bold ml-2">· {todayItems.length} job{todayItems.length > 1 ? "s" : ""} today</span>}
           </p>
         </div>
         <Link href="/dashboard/inspector/active">
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl h-10 px-5 flex items-center gap-2">
+          <Button className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold text-sm rounded-xl h-10 px-5 flex items-center gap-2">
             <Wrench className="h-4 w-4" /> View All Work Orders
           </Button>
         </Link>
@@ -185,57 +186,38 @@ export default function InspectorOverviewPage() {
 
       {/* ── KPI CARDS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {
-            label: "Active Repairs",
-            value: activeTasks.length,
-            sub: "Assigned & in-progress",
-            Icon: Wrench,
-            ibg: "bg-blue-100", icolor: "text-blue-600",
-            vcolor: "text-slate-900",
-            href: "/dashboard/inspector/active",
-          },
-          {
-            label: "Walkthroughs",
-            value: walkthroughItems.length,
-            sub: "Inspections scheduled",
-            Icon: ClipboardCheck,
-            ibg: "bg-indigo-100", icolor: "text-indigo-600",
-            vcolor: "text-slate-900",
-            href: "/dashboard/inspector/inspections",
-          },
-          {
-            label: "Completed",
-            value: resolvedTasks.length,
-            sub: "Resolved this period",
-            Icon: CheckCircle2,
-            ibg: "bg-emerald-100", icolor: "text-emerald-600",
-            vcolor: "text-emerald-600",
-            href: "/dashboard/inspector/active",
-          },
-          {
-            label: "Archived",
-            value: closedTasks.length,
-            sub: "Closed tickets",
-            Icon: Archive,
-            ibg: "bg-slate-100", icolor: "text-slate-500",
-            vcolor: "text-slate-600",
-            href: "/dashboard/inspector/history",
-          },
-        ].map((c) => (
-          <Link key={c.label} href={c.href}>
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-sm hover:border-slate-300 transition-all cursor-pointer group">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className={`h-9 w-9 ${c.ibg} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                  <c.Icon className={`h-4.5 w-4.5 ${c.icolor}`} />
-                </div>
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{c.label}</span>
-              </div>
-              <p className={`text-3xl font-black ${c.vcolor}`}>{c.value}</p>
-              <p className="text-[11px] text-slate-400 mt-1 font-medium">{c.sub}</p>
-            </div>
-          </Link>
-        ))}
+        <KpiCard
+          href="/dashboard/inspector/active"
+          title="Active Repairs"
+          value={activeTasks.length}
+          subtext="Assigned & in-progress"
+          icon={Wrench}
+          variant="blue"
+        />
+        <KpiCard
+          href="/dashboard/inspector/inspections"
+          title="Walkthroughs"
+          value={walkthroughItems.length}
+          subtext="Inspections scheduled"
+          icon={ClipboardCheck}
+          variant="indigo"
+        />
+        <KpiCard
+          href="/dashboard/inspector/active"
+          title="Completed"
+          value={resolvedTasks.length}
+          subtext="Resolved this period"
+          icon={CheckCircle2}
+          variant="green"
+        />
+        <KpiCard
+          href="/dashboard/inspector/history"
+          title="Archived"
+          value={closedTasks.length}
+          subtext="Closed tickets"
+          icon={Archive}
+          variant="slate"
+        />
       </div>
 
       {/* ── MAIN CONTENT: Today + Upcoming + Unscheduled ── */}
@@ -253,10 +235,10 @@ export default function InspectorOverviewPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-black text-slate-900">Today's Schedule</h2>
-                  <p className="text-[10px] text-slate-400 font-medium">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
+                  <p className="text-[10px] text-[#8E8E93] font-medium">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
                 </div>
               </div>
-              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${todayItems.length > 0 ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-slate-100 text-slate-500 border-slate-200"}`}>
+              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${todayItems.length > 0 ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-slate-100 text-[#6E6E73] border-slate-200"}`}>
                 {todayItems.length === 0 ? "Clear" : `${todayItems.length} Job${todayItems.length > 1 ? "s" : ""}`}
               </span>
             </div>
@@ -267,7 +249,7 @@ export default function InspectorOverviewPage() {
                   <CheckCircle2 className="h-6 w-6 text-emerald-500" />
                 </div>
                 <p className="text-sm font-bold text-slate-700">No jobs scheduled for today</p>
-                <p className="text-xs text-slate-400 mt-1">Check upcoming tasks below or action unscheduled items.</p>
+                <p className="text-xs text-[#8E8E93] mt-1">Check upcoming tasks below or action unscheduled items.</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-50">
@@ -281,20 +263,20 @@ export default function InspectorOverviewPage() {
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 bg-slate-100 rounded-xl flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-slate-500" />
+                  <Clock className="h-4 w-4 text-[#6E6E73]" />
                 </div>
                 <div>
                   <h2 className="text-sm font-black text-slate-900">Upcoming Jobs</h2>
-                  <p className="text-[10px] text-slate-400 font-medium">All scheduled work after today</p>
+                  <p className="text-[10px] text-[#8E8E93] font-medium">All scheduled work after today</p>
                 </div>
               </div>
-              <span className="text-[10px] font-black px-2.5 py-1 rounded-full border bg-slate-100 text-slate-500 border-slate-200">
+              <span className="text-[10px] font-black px-2.5 py-1 rounded-full border bg-slate-100 text-[#6E6E73] border-slate-200">
                 {upcomingItems.length} scheduled
               </span>
             </div>
 
             {upcomingItems.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-xs font-semibold italic">
+              <div className="text-center py-10 text-[#8E8E93] text-xs font-semibold italic">
                 No upcoming scheduled jobs.
               </div>
             ) : (
@@ -326,8 +308,8 @@ export default function InspectorOverviewPage() {
                   <div className="h-12 w-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
                     <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                   </div>
-                  <p className="text-xs font-bold text-slate-600">All clear!</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Every task has a scheduled date.</p>
+                  <p className="text-xs font-bold text-[#6E6E73]">All clear!</p>
+                  <p className="text-[11px] text-[#8E8E93] mt-0.5">Every task has a scheduled date.</p>
                 </div>
               ) : (
                 unscheduled.map((item) => {
@@ -350,11 +332,11 @@ export default function InspectorOverviewPage() {
                       {/* Title + location */}
                       <div>
                         <p className="text-sm font-black text-slate-900 leading-snug">{item.title}</p>
-                        <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                        <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />{item.property} · Unit {item.unit}
                         </p>
                         {item.tenant && (
-                          <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                          <p className="text-[11px] text-[#8E8E93] font-medium flex items-center gap-1 mt-0.5">
                             <User className="h-3 w-3" /> {item.tenant}
                           </p>
                         )}
@@ -368,7 +350,7 @@ export default function InspectorOverviewPage() {
                       )}
 
                       <Link href={item.link} className="block">
-                        <button className="w-full h-8 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-black rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                        <button className="w-full h-8 bg-slate-900 hover:bg-[#007AFF] text-white text-[11px] font-black rounded-lg flex items-center justify-center gap-1.5 transition-colors">
                           {sCfg?.next || "View Details"} <ArrowRight className="h-3 w-3" />
                         </button>
                       </Link>
@@ -381,19 +363,19 @@ export default function InspectorOverviewPage() {
 
           {/* Quick links */}
           <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4 space-y-2">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Quick Links</p>
+            <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest mb-3">Quick Links</p>
             {[
               { label: "All Repairs & Work Orders", href: "/dashboard/inspector/active", Icon: Wrench, color: "text-blue-600", bg: "bg-blue-50" },
               { label: "Move-Out Walkthroughs", href: "/dashboard/inspector/inspections", Icon: ClipboardCheck, color: "text-indigo-600", bg: "bg-indigo-50" },
               { label: "Completed History", href: "/dashboard/inspector/history", Icon: ListChecks, color: "text-emerald-600", bg: "bg-emerald-50" },
             ].map(link => (
               <Link key={link.href} href={link.href}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F5F7] border border-transparent hover:border-slate-200 transition-all group">
                 <div className={`h-8 w-8 ${link.bg} rounded-lg flex items-center justify-center shrink-0`}>
                   <link.Icon className={`h-3.5 w-3.5 ${link.color}`} />
                 </div>
-                <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900 flex-1 transition-colors">{link.label}</span>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-[#1D1D1F] flex-1 transition-colors">{link.label}</span>
+                <ChevronRight className="h-4 w-4 text-[#8E8E93] group-hover:text-[#6E6E73] transition-colors" />
               </Link>
             ))}
           </div>
@@ -409,7 +391,7 @@ function JobRow({ item, showTime, showDate }: { item: any; showTime?: boolean; s
   const sCfg = STATUS_STEP[item.status] || null;
 
   return (
-    <div className="px-5 py-4 flex items-start justify-between gap-4 hover:bg-slate-50/70 transition-colors">
+    <div className="px-5 py-4 flex items-start justify-between gap-4 hover:bg-[#F5F5F7]/70 transition-colors">
       <div className="flex items-start gap-3 min-w-0">
         {/* Type icon */}
         <div className={`mt-0.5 h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${item.type === "WALKTHROUGH" ? "bg-indigo-50" : "bg-blue-50"}`}>
@@ -440,11 +422,11 @@ function JobRow({ item, showTime, showDate }: { item: any; showTime?: boolean; s
           )}
 
           <p className="text-sm font-bold text-slate-900 truncate">{item.title}</p>
-          <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+          <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5 flex items-center gap-1">
             <MapPin className="h-3 w-3 shrink-0" />{item.property} · Unit {item.unit}
           </p>
           {item.tenant && (
-            <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+            <p className="text-[11px] text-[#8E8E93] font-medium flex items-center gap-1 mt-0.5">
               <User className="h-3 w-3 shrink-0" />{item.tenant}
             </p>
           )}
@@ -455,7 +437,7 @@ function JobRow({ item, showTime, showDate }: { item: any; showTime?: boolean; s
       </div>
 
       <Link href={item.link} className="shrink-0">
-        <button className="h-9 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-black rounded-xl px-3.5 flex items-center gap-1.5 transition-colors whitespace-nowrap">
+        <button className="h-9 bg-slate-900 hover:bg-[#007AFF] text-white text-[11px] font-black rounded-xl px-3.5 flex items-center gap-1.5 transition-colors whitespace-nowrap">
           {sCfg?.next || (item.type === "WALKTHROUGH" ? "Conduct" : "View")}
           <ArrowRight className="h-3 w-3" />
         </button>

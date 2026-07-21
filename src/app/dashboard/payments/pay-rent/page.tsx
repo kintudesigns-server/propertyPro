@@ -126,31 +126,31 @@ function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Invoice summary */}
-      <div className="bg-slate-50 border border-[#E2E8F0] rounded-xl p-4 space-y-1">
+      <div className="bg-slate-50 border border-[#E5E5EA] rounded-xl p-4 space-y-1">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500 font-medium">Property</span>
-          <span className="font-bold text-[#0F172A]">{propertyName}</span>
+          <span className="text-[#6E6E73] font-medium">Property</span>
+          <span className="font-bold text-[#1D1D1F]">{propertyName}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500 font-medium">Unit</span>
-          <span className="font-bold text-[#0F172A]">{unitName}</span>
+          <span className="text-[#6E6E73] font-medium">Unit</span>
+          <span className="font-bold text-[#1D1D1F]">{unitName}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500 font-medium">Base Rent</span>
-          <span className="font-semibold text-[#0F172A]">{formatCurrency(baseAmount * 100)}</span>
+          <span className="text-[#6E6E73] font-medium">Base Rent</span>
+          <span className="font-semibold text-[#1D1D1F]">{formatCurrency(baseAmount * 100)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500 font-medium">Card Processing Fee (2.9%)</span>
-          <span className="font-semibold text-slate-500">{formatCurrency(processingFee * 100)}</span>
+          <span className="text-[#6E6E73] font-medium">Card Processing Fee (2.9%)</span>
+          <span className="font-semibold text-[#6E6E73]">{formatCurrency(processingFee * 100)}</span>
         </div>
-        <div className="flex justify-between text-sm border-t border-[#E2E8F0] pt-2 mt-2">
-          <span className="text-[#0F172A] font-bold">Total Due</span>
-          <span className="font-black text-[#0F172A] text-base">{formatCurrency(amount)}</span>
+        <div className="flex justify-between text-sm border-t border-[#E5E5EA] pt-2 mt-2">
+          <span className="text-[#1D1D1F] font-bold">Total Due</span>
+          <span className="font-black text-[#1D1D1F] text-base">{formatCurrency(amount)}</span>
         </div>
       </div>
 
       {/* Stripe Payment Element */}
-      <div className="rounded-xl overflow-hidden border border-[#E2E8F0] p-4 bg-white relative min-h-[280px]">
+      <div className="rounded-xl overflow-hidden border border-[#E5E5EA] p-4 bg-white relative min-h-[280px]">
         {!stripeReady && (
           <div className="absolute inset-0 p-4 bg-white z-10 flex flex-col gap-4">
             <div className="h-11 bg-slate-100 rounded-xl animate-pulse w-full"></div>
@@ -184,7 +184,7 @@ function CheckoutForm({
       )}
 
       {/* Trust line */}
-      <div className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex items-center gap-2 text-xs text-[#8E8E93]">
         <Lock className="h-3.5 w-3.5" />
         <span>256-bit SSL encrypted · Powered by Stripe · PropertyPro never stores your card</span>
       </div>
@@ -196,14 +196,14 @@ function CheckoutForm({
           variant="outline"
           onClick={onCancel}
           disabled={processing}
-          className="flex-1 h-12 rounded-xl border-[#E2E8F0] font-semibold text-sm"
+          className="flex-1 h-12 rounded-xl border-[#E5E5EA] font-semibold text-sm"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-[2] h-12 bg-[#635BFF] hover:bg-[#4f46e5] text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2 transition-all"
+          className="flex-[2] h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2 transition-all"
         >
           {processing ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
@@ -373,8 +373,8 @@ export default function PayRentPage() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#635BFF]" />
-        <p className="text-slate-500 font-semibold text-sm">Loading your billing details...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
+        <p className="text-[#6E6E73] font-semibold text-sm">Loading your billing details...</p>
       </div>
     );
   }
@@ -384,16 +384,16 @@ export default function PayRentPage() {
 
       {/* ── BREADCRUMB & HEADER ── */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">
+        <div className="flex items-center gap-2 text-[10px] font-black text-[#8E8E93] uppercase tracking-widest pl-1">
           <span>Dashboard</span>
-          <span className="text-slate-300">/</span>
+          <span className="text-[#C7C7CC]">/</span>
           <span>Payments</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-[#635BFF]">Pay Rent</span>
+          <span className="text-[#C7C7CC]">/</span>
+          <span className="text-[#007AFF]">Pay Rent</span>
         </div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 rounded-[28px] text-white shadow-xl relative overflow-hidden">
           {/* Subtle glowing mesh background */}
-          <div className="absolute right-0 top-0 w-80 h-80 bg-[#635BFF]/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <div className="absolute right-0 top-0 w-80 h-80 bg-[#007AFF]/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
           <div className="absolute left-1/4 bottom-0 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl -mb-16 pointer-events-none" />
           
           <div className="relative z-10 space-y-1">
@@ -445,9 +445,9 @@ export default function PayRentPage() {
             {savedCard ? (
               <div className="flex items-center justify-between md:justify-end gap-5 bg-white/5 p-4 rounded-2xl border border-white/10 shadow-inner">
                 <div className="text-left">
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Auto-Pay Settings</span>
+                  <span className="text-[10px] text-[#8E8E93] font-bold block uppercase tracking-wider">Auto-Pay Settings</span>
                   <span className="text-sm font-black text-white">
-                    Status: <span className={activeLease.autoPayEnabled ? "text-emerald-400" : "text-slate-400"}>
+                    Status: <span className={activeLease.autoPayEnabled ? "text-emerald-400" : "text-[#8E8E93]"}>
                       {activeLease.autoPayEnabled ? "ENABLED" : "DISABLED"}
                     </span>
                   </span>
@@ -482,7 +482,7 @@ export default function PayRentPage() {
             ) : (
               <Button 
                 onClick={() => router.push("/dashboard/payments/add-card")}
-                className="bg-white hover:bg-slate-50 text-slate-900 font-bold h-12 px-6 rounded-2xl w-full md:w-auto shadow-md transition-all hover:scale-102 active:scale-98 flex items-center justify-center gap-2"
+                className="bg-white hover:bg-[#F5F5F7] text-slate-900 font-bold h-12 px-6 rounded-2xl w-full md:w-auto shadow-md transition-all hover:scale-102 active:scale-98 flex items-center justify-center gap-2"
               >
                 <CreditCard className="h-4 w-4 text-indigo-600" />
                 <span>Add Card to Enable Auto-Pay</span>
@@ -502,7 +502,7 @@ export default function PayRentPage() {
         }`}>
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Owed</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">Total Owed</p>
               <p className={`text-3xl font-black tracking-tight mt-2 ${totalOwed > 0 ? "text-red-600" : "text-emerald-600"}`}>
                 {formatCurrency(totalOwed)}
               </p>
@@ -522,7 +522,7 @@ export default function PayRentPage() {
         <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Rent</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">Monthly Rent</p>
               <p className="text-3xl font-black tracking-tight mt-2 text-slate-800">
                 {activeLease ? formatCurrency(activeLease.monthlyRent) : "—"}
               </p>
@@ -540,7 +540,7 @@ export default function PayRentPage() {
         <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Payments Made</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">Payments Made</p>
               <p className="text-3xl font-black tracking-tight mt-2 text-slate-800">
                 {paidInvoices.length}
               </p>
@@ -568,13 +568,13 @@ export default function PayRentPage() {
             }`}>
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Next Payment Due</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">Next Payment Due</p>
                   <p className={`text-2xl font-black tracking-tight mt-2 ${isUrgent ? "text-amber-700" : "text-slate-850"}`}>
                     {nextInv ? formatDate(nextInv.dueDate) : "—"}
                   </p>
                 </div>
                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs border ${
-                  isUrgent ? "bg-amber-500/10 text-amber-600 border-amber-200/20" : "bg-slate-50 border-slate-205 text-slate-600"
+                  isUrgent ? "bg-amber-500/10 text-amber-600 border-amber-200/20" : "bg-slate-50 border-slate-205 text-[#6E6E73]"
                 }`}>
                   <Calendar className="h-5 w-5" />
                 </div>
@@ -598,7 +598,7 @@ export default function PayRentPage() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h3 className="font-bold text-[#0F172A] text-lg tracking-tight">
+                <h3 className="font-bold text-[#1D1D1F] text-lg tracking-tight">
                   {activeLease.unit?.property?.name || "Your Residence"}
                 </h3>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
@@ -613,17 +613,17 @@ export default function PayRentPage() {
           
           <div className="flex flex-wrap items-center gap-6 md:gap-10 shrink-0 text-sm pl-2 md:pl-0 border-t border-slate-100 md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
             <div className="space-y-1 min-w-[120px]">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Lease Term</p>
+              <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">Lease Term</p>
               <p className="font-bold text-slate-700">
                 {formatDate(activeLease.startDate)} – {formatDate(activeLease.endDate)}
               </p>
             </div>
             
             <div className="space-y-1 min-w-[100px]">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Rent</p>
+              <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">Monthly Rent</p>
               <p className="font-black text-indigo-600 text-xl">
                 {formatCurrency(activeLease.monthlyRent)}
-                <span className="text-xs text-slate-400 font-medium"> /mo</span>
+                <span className="text-xs text-[#8E8E93] font-medium"> /mo</span>
               </p>
             </div>
           </div>
@@ -634,7 +634,7 @@ export default function PayRentPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2.5 pl-1">
           <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
-            <Banknote className="h-5 w-5 text-slate-500" />
+            <Banknote className="h-5 w-5 text-[#6E6E73]" />
           </div>
           <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
             Outstanding Invoices
@@ -659,7 +659,7 @@ export default function PayRentPage() {
               You're completely caught up! 🎉
             </h3>
             
-            <p className="text-slate-500 text-sm mt-2 max-w-md leading-relaxed">
+            <p className="text-[#6E6E73] text-sm mt-2 max-w-md leading-relaxed">
               Fantastic! You have no pending invoices or outstanding rent balances. Your account is in perfect standing.
             </p>
             
@@ -670,7 +670,7 @@ export default function PayRentPage() {
                   element.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-wider bg-slate-100 hover:bg-indigo-50 px-4 py-2 rounded-full border border-slate-200/60 hover:border-indigo-100/60"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-[#6E6E73] hover:text-indigo-600 transition-colors uppercase tracking-wider bg-slate-100 hover:bg-indigo-50 px-4 py-2 rounded-full border border-slate-200/60 hover:border-indigo-100/60"
             >
               <span>View Payment History</span>
               <span>↓</span>
@@ -764,12 +764,12 @@ export default function PayRentPage() {
                               {daysInfo.isOverdue ? "Overdue" : daysInfo.isToday ? "Due Today" : "Upcoming"}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-500">
+                          <p className="text-sm text-[#6E6E73]">
                             {inv.lease?.unit?.property?.name || activeLease?.unit?.property?.name} · {inv.lease?.unit?.name || activeLease?.unit?.name}
                           </p>
                           <div className="flex items-center gap-2 pt-1">
-                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                            <span className={`text-xs font-semibold ${daysInfo.isOverdue ? "text-red-500" : "text-slate-500"}`}>
+                            <Calendar className="h-3.5 w-3.5 text-[#8E8E93]" />
+                            <span className={`text-xs font-semibold ${daysInfo.isOverdue ? "text-red-500" : "text-[#6E6E73]"}`}>
                               Due date: {formatDate(inv.dueDate)} ({daysInfo.label})
                             </span>
                           </div>
@@ -778,11 +778,11 @@ export default function PayRentPage() {
 
                       {/* Middle: Breakdown info */}
                       <div className="hidden sm:flex flex-col gap-1.5 text-right border-l lg:border-l border-slate-100 px-6 shrink-0 w-full sm:w-auto items-end lg:items-end">
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Breakdown</p>
+                        <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">Breakdown</p>
                         <div className="text-xs space-y-1 text-slate-555 font-semibold">
                           <div className="flex justify-between sm:justify-end gap-4">
                             <span>Base Rent:</span>
-                            <span className="text-slate-700">{formatCurrency(Number(inv.amount) - (daysInfo.isOverdue ? 50 : 0))}</span>
+                            <span className="text-[#3C3C43]">{formatCurrency(Number(inv.amount) - (daysInfo.isOverdue ? 50 : 0))}</span>
                           </div>
                           {daysInfo.isOverdue && (
                             <div className="flex justify-between sm:justify-end gap-4 text-red-500">
@@ -813,7 +813,7 @@ export default function PayRentPage() {
                                   className={`h-12 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 whitespace-nowrap shadow-md hover:shadow-lg transition-all hover:scale-102 active:scale-98 w-full ${
                                     daysInfo.isOverdue 
                                       ? "bg-red-500 hover:bg-red-600 text-white" 
-                                      : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
+                                      : "bg-[#007AFF] hover:bg-[#0062CC] text-white"
                                   }`}
                                 >
                                   {savedCardPaying === inv.id ? (
@@ -825,7 +825,7 @@ export default function PayRentPage() {
                                 <button
                                   onClick={() => openCheckout(inv)}
                                   disabled={isLoadingThis || !!loadingCheckout || !!savedCardPaying}
-                                  className="text-xs text-slate-400 hover:text-[#635BFF] font-bold underline underline-offset-2 text-center transition-colors block w-full"
+                                  className="text-xs text-[#8E8E93] hover:text-[#007AFF] font-bold underline underline-offset-2 text-center transition-colors block w-full"
                                 >
                                   {isLoadingThis ? "Loading Form..." : "Use another card"}
                                 </button>
@@ -838,7 +838,7 @@ export default function PayRentPage() {
                                   className={`h-12 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 whitespace-nowrap shadow-md hover:shadow-lg transition-all hover:scale-102 active:scale-98 w-full ${
                                     daysInfo.isOverdue 
                                       ? "bg-red-500 hover:bg-red-600 text-white" 
-                                      : "bg-[#635BFF] hover:bg-[#4f46e5] text-white"
+                                      : "bg-[#007AFF] hover:bg-[#0062CC] text-white"
                                   }`}
                                 >
                                   {isLoadingThis ? (
@@ -849,7 +849,7 @@ export default function PayRentPage() {
                                 </Button>
                                 <button
                                   onClick={() => router.push("/dashboard/payments/add-card")}
-                                  className="text-xs text-[#635BFF] hover:text-[#4f46e5] font-bold flex items-center justify-center gap-1 transition-colors w-full"
+                                  className="text-xs text-[#007AFF] hover:text-[#0062CC] font-bold flex items-center justify-center gap-1 transition-colors w-full"
                                 >
                                   <Plus className="h-3 w-3" /> Save card for faster checkout
                                 </button>
@@ -866,14 +866,14 @@ export default function PayRentPage() {
                       <div className="mt-6 border-t border-[#F1F5F9] pt-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-[#635BFF]/10 flex items-center justify-center">
-                              <ShieldCheck className="h-4 w-4 text-[#635BFF]" />
+                            <div className="h-8 w-8 rounded-lg bg-[#007AFF]/10 flex items-center justify-center">
+                              <ShieldCheck className="h-4 w-4 text-[#007AFF]" />
                             </div>
-                            <h3 className="font-bold text-[#0F172A]">Secure Card Payment</h3>
+                            <h3 className="font-bold text-[#1D1D1F]">Secure Card Payment</h3>
                           </div>
                           <button
                             onClick={closeCheckout}
-                            className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                            className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-[#E5E5EA] flex items-center justify-center text-[#6E6E73] transition-colors"
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -886,9 +886,9 @@ export default function PayRentPage() {
                             appearance: {
                               theme: "stripe",
                               variables: {
-                                colorPrimary: "#3B82F6",
+                                colorPrimary: "#007AFF",
                                 colorBackground: "#ffffff",
-                                colorText: "#0F172A",
+                                colorText: "#1D1D1F",
                                 colorDanger: "#EF4444",
                                 fontFamily: "Inter, system-ui, sans-serif",
                                 spacingUnit: "4px",
@@ -896,32 +896,32 @@ export default function PayRentPage() {
                               },
                               rules: {
                                 '.Input': {
-                                  border: '1px solid #E2E8F0',
+                                  border: '1px solid #E5E5EA',
                                   boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                                   padding: '12px 16px',
                                 },
                                 '.Input:focus': {
-                                  border: '1px solid #3B82F6',
-                                  boxShadow: '0 0 0 1px #3B82F6',
+                                  border: '1px solid #007AFF',
+                                  boxShadow: '0 0 0 1px #007AFF',
                                 },
                                 '.Label': {
                                   fontWeight: '700',
-                                  color: '#64748B',
+                                  color: '#6E6E73',
                                   fontSize: '11px',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.5px',
                                   marginBottom: '8px',
                                 },
                                 '.Tab': {
-                                  border: '1px solid #E2E8F0',
+                                  border: '1px solid #E5E5EA',
                                   boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                                 },
                                 '.Tab--selected': {
-                                  borderColor: '#3B82F6',
-                                  boxShadow: '0 0 0 1px #3B82F6',
+                                  borderColor: '#007AFF',
+                                  boxShadow: '0 0 0 1px #007AFF',
                                 },
                                 '.Block': {
-                                  border: '1px solid #E2E8F0',
+                                  border: '1px solid #E5E5EA',
                                   boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                                 }
                               }
@@ -953,30 +953,30 @@ export default function PayRentPage() {
       {/* ── TRUST FOOTER SEALS ── */}
       <div className="bg-slate-50/50 border border-slate-100 rounded-[24px] p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.005)] relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-          <div className="h-12 w-12 rounded-2xl bg-[#635BFF]/10 flex items-center justify-center shrink-0 border border-[#635BFF]/10 shadow-inner">
-            <ShieldCheck className="h-6 w-6 text-[#635BFF]" />
+          <div className="h-12 w-12 rounded-2xl bg-[#007AFF]/10 flex items-center justify-center shrink-0 border border-[#007AFF]/10 shadow-inner">
+            <ShieldCheck className="h-6 w-6 text-[#007AFF]" />
           </div>
           <div className="space-y-0.5">
             <h4 className="font-extrabold text-slate-800 tracking-tight text-sm sm:text-base">Payments Secured & Certified</h4>
-            <p className="text-xs text-slate-400 font-semibold leading-relaxed max-w-md">
+            <p className="text-xs text-[#8E8E93] font-semibold leading-relaxed max-w-md">
               Your payment information is fully encrypted end-to-end and processed directly by Stripe. PropertyPro never stores or transmits raw credit card credentials.
             </p>
           </div>
         </div>
         
         <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 border-t md:border-t-0 md:border-l border-slate-200/60 pt-4 md:pt-0 md:pl-6 shrink-0 w-full md:w-auto">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-            <Lock className="h-3.5 w-3.5 text-[#635BFF]" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#6E6E73]">
+            <Lock className="h-3.5 w-3.5 text-[#007AFF]" />
             <span>256-bit SSL</span>
           </div>
           <div className="h-3 w-px bg-slate-300 hidden sm:block" />
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#635BFF]" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#6E6E73]">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#007AFF]" />
             <span>PCI-DSS Compliant</span>
           </div>
           <div className="h-3 w-px bg-slate-300 hidden sm:block" />
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-            <RefreshCw className="h-3.5 w-3.5 text-[#635BFF]" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#6E6E73]">
+            <RefreshCw className="h-3.5 w-3.5 text-[#007AFF]" />
             <span>Stripe Certified</span>
           </div>
         </div>
@@ -1001,7 +1001,7 @@ export default function PayRentPage() {
               <div className="h-12 w-20 bg-gradient-to-br from-slate-850 to-slate-950 rounded-xl flex flex-col justify-between p-2 shrink-0 shadow-sm border border-slate-700/30 text-white select-none">
                 <div className="flex justify-between items-center">
                   <div className="h-3.5 w-4 bg-amber-400/80 rounded-[2px]" />
-                  <span className="text-[7px] font-black tracking-widest text-slate-400">Pro</span>
+                  <span className="text-[7px] font-black tracking-widest text-[#8E8E93]">Pro</span>
                 </div>
                 <span className="font-black text-[9px] tracking-wider uppercase text-right leading-none">
                   {savedCard.cardBrand || "Card"}
@@ -1009,13 +1009,13 @@ export default function PayRentPage() {
               </div>
             ) : (
               <div className="h-12 w-20 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 border border-dashed border-slate-250">
-                <CreditCard className="h-6 w-6 text-slate-400" />
+                <CreditCard className="h-6 w-6 text-[#8E8E93]" />
               </div>
             )}
             
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-bold text-[#0F172A] tracking-tight">
+                <p className="font-bold text-[#1D1D1F] tracking-tight">
                   {savedCard ? `•••• •••• •••• ${savedCard.cardLast4}` : "No Card Saved"}
                 </p>
                 {savedCard && (
@@ -1037,8 +1037,8 @@ export default function PayRentPage() {
             variant={savedCard ? "outline" : "default"}
             className={`h-11 px-6 rounded-xl font-bold shadow-md transition-all hover:scale-102 active:scale-98 w-full sm:w-auto ${
               !savedCard 
-                ? "bg-[#635BFF] hover:bg-[#4f46e5] text-white" 
-                : "border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+                ? "bg-[#007AFF] hover:bg-[#0062CC] text-white" 
+                : "border-slate-200 text-slate-700 bg-white hover:bg-[#F5F5F7]"
             }`}
           >
             {savedCard ? "Replace Payment Method" : "Add Card Details"}
@@ -1052,11 +1052,11 @@ export default function PayRentPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
-                <History className="h-4.5 w-4.5 text-slate-500" />
+                <History className="h-4.5 w-4.5 text-[#6E6E73]" />
               </div>
               <h2 className="text-xl font-black text-slate-800 tracking-tight">Payment History</h2>
             </div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">
               {paidInvoices.length} Receipt{paidInvoices.length !== 1 ? "s" : ""} Available
             </span>
           </div>
@@ -1069,7 +1069,7 @@ export default function PayRentPage() {
                   : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent');
                 
                 return (
-                  <div key={inv.id} className="flex items-center justify-between px-6 py-5 hover:bg-slate-50/50 transition-colors">
+                  <div key={inv.id} className="flex items-center justify-between px-6 py-5 hover:bg-[#F5F5F7]/50 transition-colors">
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-10 w-10 rounded-full bg-emerald-55 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs">
                         <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -1078,7 +1078,7 @@ export default function PayRentPage() {
                         <p className="font-bold text-slate-800 text-sm tracking-tight">
                           {textType} — {inv.lease?.unit?.name || activeLease?.unit?.name}
                         </p>
-                        <p className="text-xs text-slate-400 font-semibold">
+                        <p className="text-xs text-[#8E8E93] font-semibold">
                           Paid secure · Due: {formatDate(inv.dueDate)}
                         </p>
                       </div>
@@ -1097,7 +1097,7 @@ export default function PayRentPage() {
                       {/* Decorative Download Receipt button */}
                       <button 
                         onClick={() => toast.info("📄 PDF Receipt download will start shortly...")}
-                        className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors border border-slate-200/20"
+                        className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-[#E5E5EA] flex items-center justify-center text-[#6E6E73] hover:text-slate-800 transition-colors border border-slate-200/20"
                         title="Download Receipt"
                       >
                         <Download className="h-3.5 w-3.5" />
@@ -1110,7 +1110,7 @@ export default function PayRentPage() {
             
             {paidInvoices.length > 10 && (
               <div className="bg-slate-50/50 border-t border-slate-100 px-6 py-3 text-center">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-widest">
                   Showing latest 10 of {paidInvoices.length} historical payments
                 </p>
               </div>
@@ -1126,12 +1126,12 @@ export default function PayRentPage() {
             
             {/* Header lock icon */}
             <div className="flex items-center gap-3.5 mb-5">
-              <div className="h-11 w-11 rounded-2xl bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center shrink-0 border border-[#635BFF]/10">
+              <div className="h-11 w-11 rounded-2xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0 border border-[#007AFF]/10">
                 <Lock className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="text-lg font-black text-slate-800 tracking-tight">Confirm Secure Payment</h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Stripe Secure Checkout</p>
+                <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider mt-0.5">Stripe Secure Checkout</p>
               </div>
             </div>
             
@@ -1162,7 +1162,7 @@ export default function PayRentPage() {
               </div>
             </div>
             
-            <p className="text-slate-500/85 text-xs leading-relaxed mb-6 font-medium text-center">
+            <p className="text-[#6E6E73]/85 text-xs leading-relaxed mb-6 font-medium text-center">
               Your payment will be processed immediately. Once confirmed, a digital receipt will be issued and you will receive email confirmation.
             </p>
             
@@ -1170,7 +1170,7 @@ export default function PayRentPage() {
               <Button 
                 variant="outline" 
                 onClick={() => setConfirmInvoice(null)} 
-                className="flex-1 h-12 rounded-xl font-bold border-slate-200 text-slate-500 hover:text-slate-800 transition-all text-sm"
+                className="flex-1 h-12 rounded-xl font-bold border-slate-200 text-[#6E6E73] hover:text-slate-800 transition-all text-sm"
               >
                 Go Back
               </Button>
@@ -1180,7 +1180,7 @@ export default function PayRentPage() {
                   setConfirmInvoice(null);
                   executePayWithSavedCard(inv);
                 }} 
-                className="flex-1 h-12 bg-[#635BFF] hover:bg-[#4f46e5] text-white font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+                className="flex-1 h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
               >
                 <ShieldCheck className="h-4 w-4" />
                 <span>Pay Securely</span>

@@ -223,8 +223,8 @@ export default function TenantDocumentsPage() {
   if (status === "loading" || (loading && documents.length === 0)) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#3B82F6]" />
-        <p className="text-slate-400 font-extrabold text-sm uppercase tracking-wider">Syncing document vault...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
+        <p className="text-[#8E8E93] font-extrabold text-sm uppercase tracking-wider">Syncing document vault...</p>
       </div>
     );
   }
@@ -291,13 +291,13 @@ export default function TenantDocumentsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Documents</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Access and manage your lease-related documents</p>
+            <p className="text-[#6E6E73] text-sm mt-0.5">Access and manage your lease-related documents</p>
           </div>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={fetchData}
-            className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors shadow-sm w-full sm:w-auto"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -317,9 +317,9 @@ export default function TenantDocumentsPage() {
         {/* Total Documents */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
           <div className="space-y-1.5">
-            <p className="text-slate-500 text-sm font-medium">Total Documents</p>
+            <p className="text-[#6E6E73] text-sm font-medium">Total Documents</p>
             <h3 className="text-3xl font-bold text-slate-900">{totalDocsCount}</h3>
-            <p className="text-slate-400 text-xs">{totalSizeMB} MB total size</p>
+            <p className="text-[#8E8E93] text-xs">{totalSizeMB} MB total size</p>
           </div>
           <div className="p-2 bg-blue-50 text-blue-500 rounded-xl">
             <FileText className="h-5 w-5" />
@@ -329,9 +329,9 @@ export default function TenantDocumentsPage() {
         {/* Filtered Results */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
           <div className="space-y-1.5">
-            <p className="text-slate-500 text-sm font-medium">Filtered Results</p>
+            <p className="text-[#6E6E73] text-sm font-medium">Filtered Results</p>
             <h3 className="text-3xl font-bold text-slate-900">{filteredDocsCount}</h3>
-            <p className="text-slate-400 text-xs">Matching your current filters</p>
+            <p className="text-[#8E8E93] text-xs">Matching your current filters</p>
           </div>
           <div className="p-2 bg-cyan-50 text-cyan-500 rounded-xl">
             <Search className="h-5 w-5" />
@@ -341,9 +341,9 @@ export default function TenantDocumentsPage() {
         {/* Categories */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
           <div className="space-y-1.5">
-            <p className="text-slate-500 text-sm font-medium">Categories</p>
+            <p className="text-[#6E6E73] text-sm font-medium">Categories</p>
             <h3 className="text-3xl font-bold text-slate-900">{uniqueCategoriesCount}</h3>
-            <p className="text-slate-400 text-xs">Available document categories</p>
+            <p className="text-[#8E8E93] text-xs">Available document categories</p>
           </div>
           <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
             <Folder className="h-5 w-5" />
@@ -353,9 +353,9 @@ export default function TenantDocumentsPage() {
         {/* Recent Uploads */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
           <div className="space-y-1.5">
-            <p className="text-slate-500 text-sm font-medium">Recent Uploads</p>
+            <p className="text-[#6E6E73] text-sm font-medium">Recent Uploads</p>
             <h3 className="text-3xl font-bold text-slate-900">{recentUploadsCount}</h3>
-            <p className="text-slate-400 text-xs">Last 30 days</p>
+            <p className="text-[#8E8E93] text-xs">Last 30 days</p>
           </div>
           <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
             <Upload className="h-5 w-5" />
@@ -368,13 +368,13 @@ export default function TenantDocumentsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
             <h2 className="text-lg font-bold text-slate-950">Documents</h2>
-            <p className="text-slate-400 text-xs mt-0.5">Access and manage all your lease-related documents</p>
+            <p className="text-[#8E8E93] text-xs mt-0.5">Access and manage all your lease-related documents</p>
           </div>
           {/* Filters Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 w-full md:w-auto">
             {/* Search Input */}
             <div className="relative w-full md:w-64">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#8E8E93] pointer-events-none">
                 <Search className="h-4 w-4" />
               </span>
               <input
@@ -449,13 +449,13 @@ export default function TenantDocumentsPage() {
         {/* Documents count and subtext */}
         <div className="space-y-1">
           <h4 className="text-sm font-bold text-slate-800">Documents ({filteredDocsCount})</h4>
-          <p className="text-slate-400 text-xs">Access and manage all your lease-related documents</p>
+          <p className="text-[#8E8E93] text-xs">Access and manage all your lease-related documents</p>
         </div>
 
         {/* Table Container */}
         <div className="overflow-hidden border border-slate-100 rounded-2xl">
-          <table className="w-full border-collapse text-left text-sm text-slate-500">
-            <thead className="bg-slate-50/75 border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+          <table className="w-full border-collapse text-left text-sm text-[#6E6E73]">
+            <thead className="bg-slate-50/75 border-b border-slate-100 text-[#8E8E93] font-bold uppercase text-[10px] tracking-wider">
               <tr>
                 <th scope="col" className="px-6 py-4">Document</th>
                 <th scope="col" className="px-6 py-4">Type</th>
@@ -468,7 +468,7 @@ export default function TenantDocumentsPage() {
             <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
               {paginatedDocs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-slate-400 italic">
+                  <td colSpan={6} className="text-center py-16 text-[#8E8E93] italic">
                     No documents found matching the current criteria.
                   </td>
                 </tr>
@@ -482,7 +482,7 @@ export default function TenantDocumentsPage() {
                   });
 
                   return (
-                    <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={doc.id} className="hover:bg-[#F5F5F7]/50 transition-colors">
                       <td className="px-6 py-4 font-semibold text-slate-900 flex items-start gap-3">
                         <div className="p-2 bg-blue-50 text-blue-500 rounded-lg mt-0.5 shrink-0">
                           <FileText className="h-4 w-4" />
@@ -490,14 +490,14 @@ export default function TenantDocumentsPage() {
                         <div className="flex flex-col min-w-0">
                           <span className="truncate">{doc.name}</span>
                           {doc.description && (
-                            <span className="text-[11px] text-slate-400 font-normal mt-0.5 truncate max-w-xs md:max-w-md">
+                            <span className="text-[11px] text-[#8E8E93] font-normal mt-0.5 truncate max-w-xs md:max-w-md">
                               {doc.description}
                             </span>
                           )}
                           {doc.tags && doc.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1.5">
                               {doc.tags.map((t: string, idx: number) => (
-                                <span key={idx} className="inline-flex items-center text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-medium">
+                                <span key={idx} className="inline-flex items-center text-[9px] bg-slate-100 text-[#6E6E73] px-1.5 py-0.5 rounded-full font-medium">
                                   <Tag className="h-2 w-2 mr-0.5" />
                                   {t}
                                 </span>
@@ -512,25 +512,25 @@ export default function TenantDocumentsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-slate-600">
-                          <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-[#6E6E73]">
+                          <Building2 className="h-3.5 w-3.5 text-[#8E8E93]" />
                           <span>{doc.property?.name || "—"}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-slate-600">
-                          <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-[#6E6E73]">
+                          <Calendar className="h-3.5 w-3.5 text-[#8E8E93]" />
                           <span>{formattedDate}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-500 font-medium">
+                      <td className="px-6 py-4 text-[#6E6E73] font-medium">
                         {doc.fileSize || "1.0 MB"}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="relative inline-block text-left" ref={activeMenuId === doc.id ? actionMenuRef : null}>
                           <button
                             onClick={() => setActiveMenuId(activeMenuId === doc.id ? null : doc.id)}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors border-0 bg-transparent"
+                            className="p-1 text-[#8E8E93] hover:text-slate-700 hover:bg-[#F5F5F7] rounded-lg transition-colors border-0 bg-transparent"
                           >
                             <MoreHorizontal className="h-5 w-5" />
                           </button>
@@ -542,7 +542,7 @@ export default function TenantDocumentsPage() {
                                   setActiveMenuId(null);
                                   setPreviewDoc(doc);
                                 }}
-                                className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 border-0 bg-transparent text-left"
+                                className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#F5F5F7] flex items-center gap-2 border-0 bg-transparent text-left"
                               >
                                 <Eye className="h-3.5 w-3.5 text-blue-500" />
                                 Preview
@@ -552,7 +552,7 @@ export default function TenantDocumentsPage() {
                                   setActiveMenuId(null);
                                   handleDownload(doc);
                                 }}
-                                className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 border-0 bg-transparent text-left"
+                                className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#F5F5F7] flex items-center gap-2 border-0 bg-transparent text-left"
                               >
                                 <Download className="h-3.5 w-3.5 text-emerald-500" />
                                 Download
@@ -573,7 +573,7 @@ export default function TenantDocumentsPage() {
         {filteredDocsCount > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-[#6E6E73]">
                 Showing {Math.min(filteredDocsCount, (currentPage - 1) * pageSize + 1)}-{Math.min(filteredDocsCount, currentPage * pageSize)} of {filteredDocsCount}
               </span>
               <div className="flex items-center gap-1.5">
@@ -583,14 +583,14 @@ export default function TenantDocumentsPage() {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="h-8 px-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none text-slate-600"
+                  className="h-8 px-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none text-[#6E6E73]"
                 >
                   <option value="12">12</option>
                   <option value="24">24</option>
                   <option value="36">36</option>
                   <option value="48">48</option>
                 </select>
-                <span className="text-xs text-slate-400">per page</span>
+                <span className="text-xs text-[#8E8E93]">per page</span>
               </div>
             </div>
 
@@ -598,7 +598,7 @@ export default function TenantDocumentsPage() {
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
-                className="px-3 h-9 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors border-0"
+                className="px-3 h-9 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-[#F5F5F7] disabled:opacity-50 disabled:pointer-events-none transition-colors border-0"
               >
                 &lt; Previous
               </button>
@@ -609,7 +609,7 @@ export default function TenantDocumentsPage() {
                   className={`px-3 h-9 text-xs font-semibold rounded-lg transition-colors border-0 ${
                     currentPage === pg 
                       ? "bg-blue-600 text-white" 
-                      : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                      : "bg-white text-slate-700 border border-slate-200 hover:bg-[#F5F5F7]"
                   }`}
                 >
                   {pg}
@@ -618,7 +618,7 @@ export default function TenantDocumentsPage() {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
-                className="px-3 h-9 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors border-0"
+                className="px-3 h-9 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-[#F5F5F7] disabled:opacity-50 disabled:pointer-events-none transition-colors border-0"
               >
                 Next &gt;
               </button>
@@ -635,7 +635,7 @@ export default function TenantDocumentsPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Upload Documents</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-[#8E8E93] mt-0.5">
                   Select up to 5 files. Supported types: PDF, DOC, DOCX, JPG, PNG, TXT.
                 </p>
               </div>
@@ -644,7 +644,7 @@ export default function TenantDocumentsPage() {
                   setUploadOpen(false);
                   setSelectedFile(null);
                 }}
-                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors border-0 bg-transparent"
+                className="p-1.5 hover:bg-[#F2F2F7] rounded-lg text-[#8E8E93] hover:text-[#6E6E73] transition-colors border-0 bg-transparent"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -739,7 +739,7 @@ export default function TenantDocumentsPage() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50/50 hover:border-blue-500 transition-colors flex flex-col items-center justify-center gap-2 group"
+                    className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:bg-[#F5F5F7]/50 hover:border-blue-500 transition-colors flex flex-col items-center justify-center gap-2 group"
                   >
                     <input
                       type="file"
@@ -758,7 +758,7 @@ export default function TenantDocumentsPage() {
                             <p className="text-xs font-semibold text-slate-800 truncate max-w-[200px]">
                               {selectedFile.name}
                             </p>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="text-[10px] text-[#8E8E93]">
                               {(selectedFile.size / 1024).toFixed(0)} KB
                             </p>
                           </div>
@@ -769,17 +769,17 @@ export default function TenantDocumentsPage() {
                             e.stopPropagation();
                             setSelectedFile(null);
                           }}
-                          className="p-1 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg border border-slate-200 transition-colors"
+                          className="p-1 bg-white hover:bg-red-50 text-[#8E8E93] hover:text-red-500 rounded-lg border border-slate-200 transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <div className="p-3 bg-slate-50 text-slate-400 group-hover:text-blue-500 group-hover:bg-blue-50 rounded-2xl transition-colors">
+                        <div className="p-3 bg-slate-50 text-[#8E8E93] group-hover:text-blue-500 group-hover:bg-blue-50 rounded-2xl transition-colors">
                           <Upload className="h-6 w-6" />
                         </div>
-                        <p className="text-xs text-slate-500 font-semibold mt-1">
+                        <p className="text-xs text-[#6E6E73] font-semibold mt-1">
                           Drag and drop files here, or <span className="text-blue-600">browse files</span>
                         </p>
                       </>
@@ -796,7 +796,7 @@ export default function TenantDocumentsPage() {
                     setUploadOpen(false);
                     setSelectedFile(null);
                   }}
-                  className="h-10 px-4 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors border-0"
+                  className="h-10 px-4 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors border-0"
                 >
                   Cancel
                 </button>
@@ -820,13 +820,13 @@ export default function TenantDocumentsPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Document Preview</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-[#8E8E93] mt-0.5">
                   {previewDoc.description || "lease document"}
                 </p>
               </div>
               <button
                 onClick={() => setPreviewDoc(null)}
-                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors border-0 bg-transparent"
+                className="p-1.5 hover:bg-[#F2F2F7] rounded-lg text-[#8E8E93] hover:text-[#6E6E73] transition-colors border-0 bg-transparent"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -847,12 +847,12 @@ export default function TenantDocumentsPage() {
 
                 {/* Details list */}
                 <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Building2 className="h-4 w-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-[#6E6E73]">
+                    <Building2 className="h-4 w-4 text-[#8E8E93] shrink-0" />
                     <span className="truncate">{previewDoc.property?.name || "—"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-[#6E6E73]">
+                    <Calendar className="h-4 w-4 text-[#8E8E93] shrink-0" />
                     <span>
                       {new Date(previewDoc.uploadedAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -861,12 +861,12 @@ export default function TenantDocumentsPage() {
                       })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-[#6E6E73]">
+                    <FileText className="h-4 w-4 text-[#8E8E93] shrink-0" />
                     <span>{previewDoc.fileSize || "1.0 MB"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Check className="h-4 w-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-[#6E6E73]">
+                    <Check className="h-4 w-4 text-[#8E8E93] shrink-0" />
                     <span>Status: Active</span>
                   </div>
                 </div>
@@ -875,11 +875,11 @@ export default function TenantDocumentsPage() {
               {/* Tags panel if exists */}
               {previewDoc.tags && previewDoc.tags.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tags</p>
+                  <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Tags</p>
                   <div className="flex flex-wrap gap-1.5">
                     {previewDoc.tags.map((t: string, idx: number) => (
-                      <span key={idx} className="inline-flex items-center text-[10px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">
-                        <Tag className="h-2.5 w-2.5 mr-1 text-slate-400" />
+                      <span key={idx} className="inline-flex items-center text-[10px] bg-slate-100 text-[#6E6E73] px-2.5 py-0.5 rounded-full font-medium">
+                        <Tag className="h-2.5 w-2.5 mr-1 text-[#8E8E93]" />
                         {t}
                       </span>
                     ))}
@@ -894,7 +894,7 @@ export default function TenantDocumentsPage() {
                 onClick={() => {
                   window.open(previewDoc.url, "_blank");
                 }}
-                className="h-10 px-4 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors border-0 flex items-center gap-1.5"
+                className="h-10 px-4 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors border-0 flex items-center gap-1.5"
               >
                 <Eye className="h-3.5 w-3.5" />
                 Open Document
@@ -910,7 +910,7 @@ export default function TenantDocumentsPage() {
               </button>
               <button
                 onClick={() => setPreviewDoc(null)}
-                className="h-10 px-4 text-xs font-bold text-slate-500 bg-transparent rounded-xl hover:bg-slate-50 transition-colors border-0"
+                className="h-10 px-4 text-xs font-bold text-[#6E6E73] bg-transparent rounded-xl hover:bg-[#F5F5F7] transition-colors border-0"
               >
                 Close
               </button>
