@@ -9,17 +9,20 @@ import {
   ImageIcon, ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
+import { TourButtonClient } from "./TourButtonClient";
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const unit = await prisma.unit.findUnique({
+  const rawUnit = await prisma.unit.findUnique({
     where: { id: id },
     include: { property: true }
   });
 
-  if (!unit || unit.status === "MAINTENANCE") {
+  if (!rawUnit || rawUnit.status === "MAINTENANCE") {
     notFound();
   }
+
+  const unit = JSON.parse(JSON.stringify(rawUnit));
 
   const isCommercial = unit.property.type === "Commercial";
   const isHouse = unit.property.type === "House";
@@ -208,11 +211,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       Apply Now <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href={`/listings?tourUnitId=${unit.id}`} className="block">
-                    <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-slate-700 border-[#E2E8F0] hover:bg-slate-50 flex justify-center items-center gap-2">
-                      <Calendar className="h-4 w-4" /> Schedule a Tour
-                    </Button>
-                  </Link>
+                  <TourButtonClient unit={unit} />
                 </div>
                 
                 <p className="text-[11px] text-center text-slate-400 font-semibold mt-4">

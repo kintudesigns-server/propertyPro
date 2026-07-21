@@ -13,6 +13,12 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      const existing = await prisma.user.findUnique({ where: { email: emailParam } });
+      return NextResponse.json({ exists: !!existing });
+    }
+
     const pageVal = searchParams.get("page");
     const limitVal = searchParams.get("limit");
 
@@ -31,6 +37,8 @@ export async function GET(req: NextRequest) {
             role: true,
             createdAt: true,
             tenantStatus: true,
+            accountStatus: true,
+            avatar: true,
             pricingTier: {
               select: {
                 name: true,
@@ -65,6 +73,8 @@ export async function GET(req: NextRequest) {
         role: true,
         createdAt: true,
         tenantStatus: true,
+        accountStatus: true,
+        avatar: true,
         pricingTier: {
           select: {
             name: true,
@@ -89,10 +99,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { firstName, lastName, email, phone, password, role } = await req.json();
+    const { firstName, lastName, email, phone, password, role, sendWelcomeEmail, isActive, avatar, notes } = await req.json();
 
-    if (!email || !firstName || !password || !role) {
-      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+    if (!email || !firstName || !role) {
+      return NextResponse.json({ error: "Missing required fields (email, first name, role)." }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -100,21 +110,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email already in use." }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { randomBytes } = await import("crypto");
+
+    // If password provided, use it; otherwise generate random secure password
+    const rawPassword = password && password.trim().length > 0
+      ? password
+      : randomBytes(16).toString("hex") + "A1!";
+
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
     const fullName = `${firstName} ${lastName || ""}`.trim();
 
     const newUser = await prisma.user.create({
       data: {
         email,
         name: fullName,
-        phone,
+        phone: phone || null,
         password: hashedPassword,
         role: role, // Expecting SUPERADMIN, OWNER, TENANT, INSPECTOR
+        accountStatus: isActive === false ? "SUSPENDED" : "ACTIVE",
+        avatar: avatar || null,
+        notes: notes || null,
       },
     });
 
     // 🔒 Generate one-time setup token for password setup via set-password link
-    const { randomBytes } = await import("crypto");
     const setupToken = randomBytes(32).toString("hex");
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -249,7 +268,7 @@ export async function POST(req: Request) {
     const emailText = `Hi ${fullName},\n\nYour account has been created by the Admin.\n\nRole: ${roleInfo.title}\n\nLogin Email: ${email}\n\nPlease set your password here:\n${setupLink}`;
 
     try {
-      if (typeof sendEmail === "function") {
+      if (sendWelcomeEmail !== false && typeof sendEmail === "function") {
         await sendEmail({
           to: email,
           subject: `Welcome to PropertyPro - Your ${roleInfo.title} Account`,

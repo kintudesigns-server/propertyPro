@@ -5,10 +5,15 @@ interface EmailOptions {
   subject: string;
   text?: string;
   html?: string;
+  attachments?: Array<{
+    filename: string;
+    content: string | Buffer;
+    contentType?: string;
+  }>;
 }
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  const { to, subject, text, html } = options;
+  const { to, subject, text, html, attachments } = options;
 
   // 1. Try SMTP if configured in .env
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
@@ -30,6 +35,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         subject,
         text: text || "",
         html: html || text || "",
+        attachments,
       });
       console.log(`[Email] Sent via SMTP to ${to}: "${subject}"`);
       return;

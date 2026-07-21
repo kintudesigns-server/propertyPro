@@ -15,7 +15,12 @@ export default function PricingSettingsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [tiers, setTiers] = useState<any[]>([]);
-  const [platformSettings, setPlatformSettings] = useState<any>({ adminFeePercent: 2.0 });
+  const [platformSettings, setPlatformSettings] = useState<any>({ 
+    adminFeePercent: 2.0,
+    tourMaxRequestsPerEmail: 3,
+    tourRateLimitWindowHours: 24,
+    tourOtpExpiryMinutes: 10
+  });
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   
@@ -120,13 +125,18 @@ export default function PricingSettingsPage() {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminFeePercent: Number(platformSettings.adminFeePercent) })
+        body: JSON.stringify({ 
+          adminFeePercent: Number(platformSettings.adminFeePercent),
+          tourMaxRequestsPerEmail: Number(platformSettings.tourMaxRequestsPerEmail),
+          tourRateLimitWindowHours: Number(platformSettings.tourRateLimitWindowHours),
+          tourOtpExpiryMinutes: Number(platformSettings.tourOtpExpiryMinutes)
+        })
       });
       
       if (!res.ok) throw new Error("Failed to save platform settings");
-      toast.success("Global commission rate updated successfully!");
+      toast.success("Platform settings updated successfully!");
     } catch (err) {
-      toast.error("Failed to update commission rate.");
+      toast.error("Failed to update platform settings.");
     } finally {
       setSavingSettings(false);
     }
@@ -192,6 +202,78 @@ export default function PricingSettingsPage() {
             </Button>
           </div>
         </CardContent>
+      </Card>
+
+      {/* Tour Booking Settings */}
+      <Card className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 mb-8">
+        <div className="flex flex-col gap-6">
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              🗓️ Tour Booking & Rate Limiting Controls
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">
+              Configure spam-prevention rules and email OTP settings for showing tour requests.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Max Request Limits</Label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  min="1"
+                  value={platformSettings?.tourMaxRequestsPerEmail || 3}
+                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourMaxRequestsPerEmail: e.target.value })}
+                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">tours</span>
+              </div>
+              <p className="text-[11px] text-slate-400">Maximum active/pending requests allowed per email address.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Rate Limit Window</Label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  min="1"
+                  value={platformSettings?.tourRateLimitWindowHours || 24}
+                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourRateLimitWindowHours: e.target.value })}
+                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">hours</span>
+              </div>
+              <p className="text-[11px] text-slate-400">The rolling window time frame enforced for the request limits.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">OTP Verification Code Expiry</Label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  min="1"
+                  value={platformSettings?.tourOtpExpiryMinutes || 10}
+                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourOtpExpiryMinutes: e.target.value })}
+                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">minutes</span>
+              </div>
+              <p className="text-[11px] text-slate-400">How long the 6-digit email verification OTP remains valid.</p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100">
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-11 px-6 font-bold"
+            >
+              {savingSettings && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Tour Settings
+            </Button>
+          </div>
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

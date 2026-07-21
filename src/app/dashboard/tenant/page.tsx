@@ -30,6 +30,7 @@ export default function TenantDashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [tours, setTours] = useState<any[]>([]);
   
   // App UI State
   const [loading, setLoading] = useState(true);
@@ -130,7 +131,7 @@ export default function TenantDashboard() {
 
   const fetchData = async () => {
     try {
-      const [leasesRes, invoicesRes, maintRes, docsRes, txsRes, msgsRes, ownersRes, inspectorsRes] = await Promise.all([
+      const [leasesRes, invoicesRes, maintRes, docsRes, txsRes, msgsRes, ownersRes, inspectorsRes, toursRes] = await Promise.all([
         fetch("/api/leases"),
         fetch("/api/invoices"),
         fetch("/api/maintenance"),
@@ -139,9 +140,10 @@ export default function TenantDashboard() {
         fetch("/api/messages"),
         fetch("/api/users?role=OWNER"),
         fetch("/api/users?role=INSPECTOR"),
+        fetch("/api/tours"),
       ]);
 
-      const [leasesData, invoicesData, maintData, docsData, txsData, msgsData, ownersData, inspectorsData] = await Promise.all([
+      const [leasesData, invoicesData, maintData, docsData, txsData, msgsData, ownersData, inspectorsData, toursData] = await Promise.all([
         leasesRes.json(),
         invoicesRes.json(),
         maintRes.json(),
@@ -150,6 +152,7 @@ export default function TenantDashboard() {
         msgsRes.json(),
         ownersRes.json(),
         inspectorsRes.json(),
+        toursRes.json(),
       ]);
 
       setLeases(leasesData);
@@ -158,6 +161,7 @@ export default function TenantDashboard() {
       setDocuments(docsData);
       setTransactions(txsData);
       setMessages(msgsData);
+      setTours(toursData);
 
       const allContacts = [...ownersData, ...inspectorsData];
       setContacts(allContacts);
@@ -901,6 +905,46 @@ export default function TenantDashboard() {
                     )}
                   </div>
                 </Card>
+
+                {/* Showing Tours Widget */}
+                {tours.length > 0 && (
+                  <Card className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-xs space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#F1F5F9]">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4 text-[#496E5C]" />
+                        Showing Visits ({tours.filter(t => t.status === "PENDING" || t.status === "CONFIRMED").length})
+                      </h3>
+                      <button 
+                        onClick={() => router.push("/dashboard/tenant/tours")}
+                        className="text-[10px] font-bold text-blue-600 hover:text-blue-700 underline"
+                      >
+                        Manage
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {tours.slice(0, 2).map((tour) => (
+                        <div key={tour.id} className="text-xs space-y-1 p-2.5 bg-slate-50 border border-slate-100 rounded-xl">
+                          <div className="flex justify-between items-center">
+                            <span className="font-extrabold text-slate-700 truncate max-w-[120px]">
+                              {tour.property?.name}
+                            </span>
+                            <Badge className={`text-[9px] px-1.5 py-0.2 border-0 font-bold ${
+                              tour.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-700" :
+                              tour.status === "PENDING" ? "bg-amber-50 text-amber-700" :
+                              "bg-slate-100 text-slate-600"
+                            }`}>
+                              {tour.status}
+                            </Badge>
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-semibold">
+                            {new Date(tour.scheduledAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} at {new Date(tour.scheduledAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
 
                 {/* Quick Repair Panel */}
                 <Card className="bg-[#496E5C] text-white border-0 rounded-[24px] p-6 relative overflow-hidden shadow-xs">

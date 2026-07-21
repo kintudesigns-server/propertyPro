@@ -202,7 +202,7 @@ export default function AdminPayoutsPage() {
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("File too large â€” maximum 10 MB.");
+      toast.error("File too large — maximum 10 MB.");
       return;
     }
     setProofFile(file);
@@ -243,7 +243,7 @@ export default function AdminPayoutsPage() {
         }),
       });
       if (res.ok) {
-        toast.success("âœ… Payout authorized and disbursed successfully!");
+        toast.success("Payout authorized and disbursed successfully!");
         setShowApproveModal(false);
         fetchPayouts(pagination.page);
       } else {
@@ -564,7 +564,7 @@ export default function AdminPayoutsPage() {
                           )}
                           {isStripe && (
                             <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-bold text-[10px] flex items-center w-fit">
-                              âš¡ Stripe
+                              ⚡ Stripe
                             </Badge>
                           )}
                         </div>
@@ -574,7 +574,7 @@ export default function AdminPayoutsPage() {
                       <TableCell className="py-5 align-top">
                         <p className="font-bold text-slate-800 text-sm leading-snug">{recipient?.name || "N/A"}</p>
                         <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />{recipient?.email || "â€”"}
+                          <Mail className="h-3.5 w-3.5 text-slate-400" />{recipient?.email || "—"}
                         </p>
                         {!isTenantRefund && po.owner?.balance !== undefined && (
                           <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
@@ -606,29 +606,24 @@ export default function AdminPayoutsPage() {
                       {/* Status */}
                       <TableCell className="py-5 align-top">
                         {po.status === "PENDING" && (
-                          <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-bold text-xs">â³ Pending</Badge>
+                          <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-bold text-xs flex items-center gap-1 w-fit">
+                            <Clock className="h-3 w-3" /> Pending
+                          </Badge>
                         )}
                         {po.status === "COMPLETED" && (
-                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">âœ“ Completed</Badge>
+                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs flex items-center gap-1 w-fit">
+                            <Check className="h-3 w-3" /> Completed
+                          </Badge>
                         )}
                         {po.status === "REJECTED" && (
                           <div>
-                            <Badge className="bg-red-50 text-red-700 border border-red-200 font-bold text-xs">âœ• Rejected</Badge>
+                            <Badge className="bg-red-50 text-red-700 border border-red-200 font-bold text-xs flex items-center gap-1 w-fit">
+                              <X className="h-3 w-3" /> Rejected
+                            </Badge>
                             {po.rejectionReason && (
                               <p className="text-[10px] text-slate-400 mt-1 max-w-[120px] truncate" title={po.rejectionReason}>{po.rejectionReason}</p>
                             )}
                           </div>
-                        )}
-                        {po.proofUrl && po.status === "COMPLETED" && (
-                          <a
-                            href={po.proofUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 mt-2 w-fit"
-                          >
-                            <FileText className="h-3.5 w-3.5" /> Proof
-                          </a>
                         )}
                       </TableCell>
 
@@ -669,15 +664,7 @@ export default function AdminPayoutsPage() {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        ) : (
-                          <button
-                            onClick={() => setDrawerPayout(po)}
-                            className="text-xs text-slate-400 hover:text-slate-600 font-semibold flex items-center gap-1 ml-auto"
-
-                          >
-                            <Eye className="h-3.5 w-3.5" /> Details
-                          </button>
-                        )}
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   );
@@ -686,41 +673,36 @@ export default function AdminPayoutsPage() {
             </Table>
           )}
         </CardContent>
+        {pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-slate-100">
+            <p className="text-xs text-slate-400 font-semibold">
+              Page {pagination.page} of {pagination.totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.page <= 1 || loading}
+                onClick={() => fetchPayouts(pagination.page - 1)}
+                className="rounded-xl border-slate-200 font-semibold"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.page >= pagination.totalPages || loading}
+                onClick={() => fetchPayouts(pagination.page + 1)}
+                className="rounded-xl border-slate-200 font-semibold"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
-      {/* â”€â”€ Pagination â”€â”€ */}
-      {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2">
-          <p className="text-sm text-slate-500">
-            Page <span className="font-bold text-slate-700">{pagination.page}</span> of <span className="font-bold text-slate-700">{pagination.totalPages}</span>
-            &nbsp;Â·&nbsp;<span className="font-bold text-slate-700">{pagination.totalCount}</span> total
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pagination.page <= 1 || loading}
-              onClick={() => fetchPayouts(pagination.page - 1)}
-              className="rounded-xl border-slate-200 font-semibold"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pagination.page >= pagination.totalPages || loading}
-              onClick={() => fetchPayouts(pagination.page + 1)}
-              className="rounded-xl border-slate-200 font-semibold"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      {/* Authorize Disbursement Modal                                           */}
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Authorize Disbursement Modal */}
       {showApproveModal && selectedPayout && (() => {
         const isTenantRefundModal = !!selectedPayout.tenantId;
         const recipientName = isTenantRefundModal ? selectedPayout.tenant?.name : selectedPayout.owner?.name;
@@ -732,19 +714,19 @@ export default function AdminPayoutsPage() {
         const CHECKLIST_ITEMS = [
           {
             key: "nameVerified",
-            icon: "ðŸ‘¤",
+            icon: "👤",
             label: "Identity confirmed",
             sublabel: `Account holder "${selectedPayout.accountName}" matches recipient ID on file`,
           },
           {
             key: "accountConfirmed",
-            icon: "ðŸ¦",
+            icon: "🏦",
             label: "Bank details verified",
             sublabel: `${selectedPayout.bankName} confirmed with recipient`,
           },
           {
             key: "amountReconciled",
-            icon: "âœ“",
+            icon: "✓",
             label: "Amount reconciled",
             sublabel: ledgerBalance !== null
               ? `$${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} verified against ledger ($${ledgerBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })} available)`
@@ -756,22 +738,22 @@ export default function AdminPayoutsPage() {
           { value: "RTGS",          label: "RTGS" },
           { value: "CHECK",         label: "Cheque / Check" },
           { value: "CASH",          label: "Cash" },
-          { value: "STRIPE",        label: "âš¡ Stripe (Auto)" },
+          { value: "STRIPE",        label: "⚡ Stripe (Auto)" },
           { value: "OTHER",         label: "Other" },
         ];
         return (
           <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
 
-              {/* â”€â”€ Sticky Header â”€â”€ */}
+              {/* Sticky Header */}
               <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
                     <Check className="h-5 w-5 text-emerald-600" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-extrabold text-slate-900 leading-tight">Authorize Disbursement</h2>
-                    <p className="text-xs text-slate-400 mt-0.5 font-medium">Complete all steps â€” this action is irreversible</p>
+                    <h3 className="text-[#0F172A] font-bold text-lg leading-tight">Authorize Disbursement</h3>
+                    <p className="text-xs text-slate-400 mt-0.5 font-medium">Complete all steps — this action is irreversible</p>
                   </div>
                 </div>
                 <button
@@ -782,7 +764,7 @@ export default function AdminPayoutsPage() {
                 </button>
               </div>
 
-              {/* â”€â”€ Scrollable Body â”€â”€ */}
+              {/* Scrollable Body */}
               <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
                 {/* High-Value Warning Banner */}
@@ -792,7 +774,7 @@ export default function AdminPayoutsPage() {
                     <div>
                       <p className="text-sm font-bold text-amber-800">High-Value Disbursement</p>
                       <p className="text-xs text-amber-700 mt-0.5">
-                        You are about to disburse <span className="font-bold">${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>. Double-check all details â€” this cannot be undone once confirmed.
+                        You are about to disburse <span className="font-bold">${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>. Double-check all details — this cannot be undone once confirmed.
                       </p>
                     </div>
                   </div>
@@ -801,7 +783,7 @@ export default function AdminPayoutsPage() {
                 {/* Stripe Auto-Refund */}
                 {isStripeRefund(selectedPayout) && (
                   <div className="bg-violet-50 border border-violet-200 rounded-2xl p-3.5 flex items-start gap-3">
-                    <span className="text-violet-500 text-xl flex-shrink-0">âš¡</span>
+                    <span className="text-violet-500 text-xl flex-shrink-0">⚡</span>
                     <div>
                       <p className="text-sm font-bold text-violet-800">Stripe Auto-Refund Will Fire</p>
                       <p className="text-xs text-violet-600 mt-0.5">No manual bank transfer is needed. Stripe will process the refund automatically to the original payment method. Enter the Stripe refund ID as the reference.</p>
@@ -809,7 +791,7 @@ export default function AdminPayoutsPage() {
                   </div>
                 )}
 
-                {/* â”€â”€ Recipient Identity Card â”€â”€ */}
+                {/* Recipient Identity Card */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center gap-2">
                     <Users className="h-3.5 w-3.5 text-slate-400" />
@@ -826,7 +808,7 @@ export default function AdminPayoutsPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-slate-400 font-semibold">Email</span>
                       <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                        <Mail className="h-3 w-3" />{recipientEmail || "â€”"}
+                        <Mail className="h-3 w-3" />{recipientEmail || "—"}
                       </span>
                     </div>
                     {!isTenantRefundModal && ledgerBalance !== null && (
@@ -843,11 +825,11 @@ export default function AdminPayoutsPage() {
                   </div>
                 </div>
 
-                {/* â”€â”€ Bank Details Card â”€â”€ */}
+                {/* Bank Details Card */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center gap-2">
                     <DollarSign className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Bank &amp; Payout Details</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Bank & Payout Details</span>
                   </div>
                   <div className="px-4 py-3 space-y-2">
                     <div className="flex justify-between items-center">
@@ -875,7 +857,7 @@ export default function AdminPayoutsPage() {
                 {selectedPayout.lease?.moveOutStatus === "ADMIN_MEDIATION" && (
                   <div className="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-3">
                     <h3 className="font-bold text-red-800 text-sm flex items-center gap-2">
-                      <Shield className="h-4 w-4" /> Admin Mediation â€” Adjust Amount
+                      <Shield className="h-4 w-4" /> Admin Mediation — Adjust Amount
                     </h3>
                     <p className="text-xs text-red-700 bg-red-100 rounded-xl px-3 py-2"><span className="font-bold">Tenant dispute:</span> {selectedPayout.lease.tenantDisputeNote}</p>
                     <div>
@@ -886,7 +868,7 @@ export default function AdminPayoutsPage() {
                         onChange={(e) => setAdjustedAmount(e.target.value)}
                         className="mt-1.5 rounded-xl border-red-200 text-slate-900 font-extrabold bg-white text-right text-lg"
                       />
-                      <p className="text-[10px] text-red-600 font-medium mt-1.5">âš  Your adjusted amount is final and binding. The tenant will be notified.</p>
+                      <p className="text-[10px] text-red-600 font-medium mt-1.5">⚠️ Your adjusted amount is final and binding. The tenant will be notified.</p>
                     </div>
                   </div>
                 )}
@@ -902,7 +884,7 @@ export default function AdminPayoutsPage() {
                       {(selectedPayout.lease.deductions as any[]).map((d: any, idx: number) => (
                         <div key={idx} className="flex justify-between text-xs border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
                           <span className="text-slate-600 font-medium">{d.description}</span>
-                          <span className="text-red-500 font-bold">âˆ’${Number(d.amount).toFixed(2)}</span>
+                          <span className="text-red-500 font-bold">−${Number(d.amount).toFixed(2)}</span>
                         </div>
                       ))}
                       <div className="flex justify-between text-sm font-bold pt-1 border-t border-slate-200">
@@ -913,7 +895,7 @@ export default function AdminPayoutsPage() {
                   </div>
                 )}
 
-                {/* â”€â”€ Verification Checklist â”€â”€ */}
+                {/* Verification Checklist */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Verification Checklist</p>
@@ -960,7 +942,7 @@ export default function AdminPayoutsPage() {
                   </div>
                 </div>
 
-                {/* â”€â”€ Transfer Method + Reference â”€â”€ */}
+                {/* Transfer Method + Reference */}
                 <div className="space-y-3">
                   <p className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Transfer Details *</p>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -1081,7 +1063,7 @@ export default function AdminPayoutsPage() {
 
                 {/* â”€â”€ Admin Internal Notes â”€â”€ */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Notes <span className="text-slate-300 font-medium normal-case tracking-normal">(Internal only â€” not shown to recipient)</span></label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Notes <span className="text-slate-300 font-medium normal-case tracking-normal">(Internal only — not shown to recipient)</span></label>
                   <textarea
                     rows={2}
                     placeholder="e.g. Verified via phone call with owner. Processed as per Q3 schedule."
@@ -1104,7 +1086,7 @@ export default function AdminPayoutsPage() {
                         onClick={() => setConfirmGate(true)}
                         className="mt-2.5 text-xs font-bold text-amber-400 hover:text-amber-300 underline underline-offset-2"
                       >
-                        I have verified all details â€” proceed to confirm
+                        I have verified all details — proceed to confirm
                       </button>
                     </div>
                   </div>
@@ -1331,8 +1313,8 @@ export default function AdminPayoutsPage() {
                   <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Property Context</p>
                   <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
                     {[
-                      ["Unit", drawerPayout.lease.unit.name || "â€”"],
-                      ["Property", drawerPayout.lease.unit.property?.name || "â€”"],
+                      ["Unit", drawerPayout.lease.unit.name || "—"],
+                      ["Property", drawerPayout.lease.unit.property?.name || "—"],
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between text-sm">
                         <span className="text-slate-400 font-semibold">{label}</span>

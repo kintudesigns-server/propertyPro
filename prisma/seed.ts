@@ -92,7 +92,9 @@ async function main() {
   await prisma.maintenanceRequest.deleteMany();
   await prisma.invoice.deleteMany();
   await prisma.lease.deleteMany();
+  await (prisma as any).tourOtp.deleteMany();
   await prisma.tour.deleteMany();
+  await (prisma as any).ownerAvailability.deleteMany();
   await prisma.application.deleteMany();
   await prisma.tenantInvitation.deleteMany();
   await prisma.unit.deleteMany();
@@ -106,7 +108,7 @@ async function main() {
 
   // ── SECTION 1: Platform Settings & Pricing Tiers ──────────────────────────
   console.log("⚙️  Creating platform settings and pricing tiers...");
-  await prisma.platformSettings.create({ data: { adminFeePercent: 2.00 } });
+  await (prisma as any).platformSettings.create({ data: { adminFeePercent: 2.00, tourCancellationWindowHours: 24 } });
 
   const tiers = await Promise.all([
     prisma.pricingTier.create({ data: { name: "Hobbyist", description: "Landlords just starting out", price: 0, minUnits: 1, maxUnits: 2, features: ["Up to 2 Units", "Basic Reporting"] } }),
@@ -587,7 +589,6 @@ async function main() {
       category: "APPLIANCE", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
       inspectorId: inspectorJake.id,
 
-      estimateSource: "INSPECTOR",
       inspectorNotes: "Dishwasher pump seal is cracked. Needs vendor to replace the pump.",
       entryPermission: true, hasPets: "No",
       photos: [IMG.maint.leak],
@@ -607,7 +608,6 @@ async function main() {
       vendorMagicToken: "DEMO-VENDOR-WATER-HEATER-REPLACE",
       vendorTokenExpiresAt: dDaysAfter(14),
       estimatedLabor: 750.00, estimatedMaterials: 650.00,
-      estimateSource: "VENDOR",
       inspectorNotes: "Tank is ~15 years old with severe base corrosion. Total replacement required. Inspector estimated $1,000, vendor quoted $1,400.",
       diagnosisDate: dDaysBefore(2),
       photos: [IMG.maint.waterHeater],
@@ -713,7 +713,6 @@ async function main() {
       category: "PLUMBING", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
       inspectorId: ownerAtlas.id, // Owner self-inspected
 
-      estimateSource: "INSPECTOR",
       inspectorNotes: "Self-diagnosed. Just needs a new O-ring and cartridge. I can fix this myself this weekend.",
       diagnosisDate: dDaysBefore(1),
       entryPermission: true, hasPets: "No",
@@ -731,12 +730,238 @@ async function main() {
   await prisma.payoutRequest.create({ data: { ownerId: ownerCoastal.id, amount: 14200, status: PayoutStatus.COMPLETED, bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow", disbursedAt: dBefore(3), refNumber: "WIRE-CST-2025-001" } });
 
   // ── SECTION 9: Tours ──────────────────────────────────────────────────────
-  console.log("🏡 Creating tours and applications...");
+  console.log("🏡 Creating tours, owner availability, and applications...");
 
-  await prisma.tour.create({ data: { propertyId: propGrand.id, unitId: u106.id, tenantName: "Emily Zhao", tenantEmail: "emily.tour@yopmail.com", tenantPhone: "+1 310-555-9001", tourType: TourType.IN_PERSON, scheduledAt: dDaysAfter(5), status: TourStatus.PENDING } });
-  await prisma.tour.create({ data: { propertyId: propGrand.id, unitId: u106.id, tenantName: "Marcus Webb", tenantEmail: "marcus.tour@yopmail.com", tenantPhone: "+1 310-555-9002", tourType: TourType.VIDEO_CALL, scheduledAt: dDaysAfter(3), status: TourStatus.CONFIRMED } });
-  await prisma.tour.create({ data: { propertyId: propVilla.id, unitId: propVilla.units[0].id, tenantName: "Patricia Lowe", tenantEmail: "patricia.tour@yopmail.com", tenantPhone: "+1 310-555-9003", tourType: TourType.IN_PERSON, scheduledAt: dDaysBefore(5), status: TourStatus.COMPLETED, feedbackRating: 5, feedbackComments: "Absolutely stunning property! Very interested in moving forward." } });
-  await prisma.tour.create({ data: { propertyId: propCommercial.id, unitId: suiteB.id, tenantName: "Vertex Analytics Contact", tenantEmail: "vertex.tour@yopmail.com", tenantPhone: "+1 415-555-9004", tourType: TourType.IN_PERSON, scheduledAt: dDaysAfter(8), status: TourStatus.PENDING } });
+  // ── Owner Availability (Calendly-style working hours) ──
+  console.log("📅 Creating owner availability schedules...");
+  const atlasWorkingHours = {
+    monday:    { start: "09:00", end: "18:00", enabled: true },
+    tuesday:   { start: "09:00", end: "18:00", enabled: true },
+    wednesday: { start: "09:00", end: "18:00", enabled: true },
+    thursday:  { start: "09:00", end: "18:00", enabled: true },
+    friday:    { start: "09:00", end: "17:00", enabled: true },
+    saturday:  { start: "10:00", end: "14:00", enabled: true },
+    sunday:    { start: "10:00", end: "14:00", enabled: false },
+  };
+  await (prisma as any).ownerAvailability.create({
+    data: {
+      ownerId: ownerAtlas.id,
+      workingHours: atlasWorkingHours,
+      blackoutDates: [
+        new Date(new Date().getFullYear(), new Date().getMonth(), 25).toISOString().split("T")[0],
+        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split("T")[0],
+      ],
+      timezone: "America/Los_Angeles",
+    },
+  });
+
+  const coastalWorkingHours = {
+    monday:    { start: "10:00", end: "17:00", enabled: true },
+    tuesday:   { start: "10:00", end: "17:00", enabled: true },
+    wednesday: { start: "10:00", end: "17:00", enabled: false },
+    thursday:  { start: "10:00", end: "17:00", enabled: true },
+    friday:    { start: "10:00", end: "16:00", enabled: true },
+    saturday:  { start: "11:00", end: "15:00", enabled: true },
+    sunday:    { start: "11:00", end: "15:00", enabled: false },
+  };
+  await (prisma as any).ownerAvailability.create({
+    data: {
+      ownerId: ownerCoastal.id,
+      workingHours: coastalWorkingHours,
+      blackoutDates: [],
+      timezone: "America/Los_Angeles",
+    },
+  });
+
+  // ── Tours ──
+
+  // Tour 1: PENDING — In-person, prospect viewing unit 106 (tenant.adam)
+  await prisma.tour.create({
+    data: {
+      propertyId: propGrand.id,
+      unitId: u106.id,
+      tenantName: "Adam Smith",
+      tenantEmail: "tenant.adam@yopmail.com",
+      tenantPhone: "+1 310-555-0010",
+      tenantMessage: "Hello, I am interested in checking the layout and morning sunlight. Is early AM available?",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysAfter(5),
+      status: TourStatus.PENDING,
+      verifiedEmail: true,
+    },
+  });
+
+  // Tour 2: CONFIRMED — Video Call with meeting link (tenant.oscar)
+  await prisma.tour.create({
+    data: {
+      propertyId: propGrand.id,
+      unitId: u106.id,
+      tenantName: "Oscar Wilde",
+      tenantEmail: "tenant.oscar@yopmail.com",
+      tenantPhone: "+1 310-555-0020",
+      tenantMessage: "Looking forward to a virtual tour — please send call link.",
+      tourType: TourType.VIDEO_CALL,
+      scheduledAt: dDaysAfter(2),
+      status: TourStatus.CONFIRMED,
+      meetingLink: "https://meet.google.com/abc-defg-hij",
+      ownerNotes: "Join via the Google Meet link 5 minutes before. I will share screen of the full unit walkthrough.",
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 3: CONFIRMED — In-person tomorrow (tenant.nora) — tests reminder cron
+  await prisma.tour.create({
+    data: {
+      propertyId: propVilla.id,
+      unitId: propVilla.units[0].id,
+      tenantName: "Nora Jones",
+      tenantEmail: "tenant.nora@yopmail.com",
+      tenantPhone: "+1 310-555-0040",
+      tenantMessage: "Very interested in the oceanfront layout. Will bring my partner.",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysAfter(1),
+      status: TourStatus.CONFIRMED,
+      ownerNotes: "Buzz gate code #1122 at the entrance. Park along the main drive.",
+      verifiedEmail: true,
+    },
+  });
+
+  // Tour 4: COMPLETED — Owner rated + full categorical feedback from tenant (tenant.adam)
+  await prisma.tour.create({
+    data: {
+      propertyId: propVilla.id,
+      unitId: propVilla.units[0].id,
+      tenantName: "Adam Smith",
+      tenantEmail: "tenant.adam@yopmail.com",
+      tenantPhone: "+1 310-555-0010",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysBefore(6),
+      status: TourStatus.COMPLETED,
+      ownerProspectRating: 5,
+      ownerProspectNotes: "Arrived exactly on time. Very professional. Strong credit & income. Highly qualified.",
+      feedbackRating: 5,
+      feedbackComments: "Absolutely beautiful villa! Marcus was incredibly informative and punctual.",
+      feedbackCategories: {
+        propertyCondition: 5,
+        photoAccuracy: 5,
+        landlordPunctuality: 5,
+        neighborhoodSafety: 4,
+      },
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 5: COMPLETED — In-person with moderate ratings (tenant.marvin)
+  await prisma.tour.create({
+    data: {
+      propertyId: propGrand.id,
+      unitId: u106.id,
+      tenantName: "Marvin Gaye",
+      tenantEmail: "tenant.marvin@yopmail.com",
+      tenantPhone: "+1 310-555-0030",
+      tenantMessage: "Interested in the penthouse views and commercial lease potential.",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysBefore(3),
+      status: TourStatus.COMPLETED,
+      ownerProspectRating: 4,
+      ownerProspectNotes: "Polite and qualified. Expressed interest in a longer lease term.",
+      feedbackRating: 4,
+      feedbackComments: "Great property, photos matched perfectly. Slight parking issue on arrival.",
+      feedbackCategories: {
+        propertyCondition: 4,
+        photoAccuracy: 5,
+        landlordPunctuality: 4,
+        neighborhoodSafety: 3,
+      },
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 6: CANCELLED by owner — unit no longer available (tenant.nora)
+  await prisma.tour.create({
+    data: {
+      propertyId: propGrand.id,
+      unitId: u106.id,
+      tenantName: "Nora Jones",
+      tenantEmail: "tenant.nora@yopmail.com",
+      tenantPhone: "+1 310-555-0040",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysBefore(8),
+      status: TourStatus.CANCELLED,
+      cancellationReason: "We apologize — this unit has just been leased and is no longer available for showings.",
+      cancelledAt: dDaysBefore(9),
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 7: CANCELLED by tenant within 24h window (tenant.oscar)
+  await prisma.tour.create({
+    data: {
+      propertyId: propVilla.id,
+      unitId: propVilla.units[0].id,
+      tenantName: "Oscar Wilde",
+      tenantEmail: "tenant.oscar@yopmail.com",
+      tenantPhone: "+1 310-555-0020",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysBefore(1),
+      status: TourStatus.CANCELLED,
+      cancellationReason: "I found a unit closer to my workplace. Thank you.",
+      cancelledAt: dDaysBefore(1),
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 8: RESCHEDULED — Video call, tenant rescheduled once (tenant.nora)
+  await prisma.tour.create({
+    data: {
+      propertyId: propVilla.id,
+      unitId: propVilla.units[0].id,
+      tenantName: "Nora Jones",
+      tenantEmail: "tenant.nora@yopmail.com",
+      tenantPhone: "+1 310-555-0040",
+      tourType: TourType.VIDEO_CALL,
+      scheduledAt: dDaysAfter(8),
+      status: TourStatus.CONFIRMED,
+      meetingLink: "https://zoom.us/j/12345678901",
+      rescheduledAt: dDaysBefore(2),
+      ownerNotes: "Join the Zoom call 2 minutes early. Recording will be shared after the tour.",
+      verifiedEmail: true,
+    } as any,
+  });
+
+  // Tour 9: PENDING — In-person (tenant.kelly) — for slot conflict / double-booking test
+  await prisma.tour.create({
+    data: {
+      propertyId: propGrand.id,
+      unitId: u105.id,
+      tenantName: "Kelly Huang",
+      tenantEmail: "tenant.kelly@yopmail.com",
+      tenantPhone: "+1 310-555-3010",
+      tenantMessage: "I would love to see the 2BR unit on the 3rd floor.",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysAfter(5),
+      status: TourStatus.PENDING,
+      verifiedEmail: true,
+    },
+  });
+
+  // Tour 10: Commercial VIDEO_CALL — CONFIRMED with meeting link (tenant.carlos)
+  await prisma.tour.create({
+    data: {
+      propertyId: propCommercial.id,
+      unitId: suiteB.id,
+      tenantName: "Carlos Ruiz",
+      tenantEmail: "tenant.carlos@yopmail.com",
+      tenantPhone: "+1 415-555-4001",
+      tenantMessage: "Interested in Suite B for Ruiz Enterprises expansion. Would like a virtual walkthrough first.",
+      tourType: TourType.VIDEO_CALL,
+      scheduledAt: dDaysAfter(3),
+      status: TourStatus.CONFIRMED,
+      meetingLink: "https://teams.microsoft.com/l/meetup-join/19%3ameeting_DEMO",
+      ownerNotes: "Join via Microsoft Teams. I will screen-share the full suite floor plan during the call.",
+      verifiedEmail: true,
+    } as any,
+  });
 
   // ── SECTION 10: Applications ──────────────────────────────────────────────
   // Pending application (Unit 106)
@@ -836,15 +1061,19 @@ async function main() {
   console.log("🔔 Creating notifications...");
   await prisma.notification.createMany({
     data: [
-      // Owner Atlas
+      // Owner Atlas — Tour notifications
       { userId: ownerAtlas.id, title: "New Maintenance Estimate Pending", message: "Jake Thorpe submitted a $1,400 estimate for Unit 104 water heater replacement. Review & approve.", type: "MAINTENANCE", priority: "HIGH", relatedEntityId: ticketWaterHeater.id },
       { userId: ownerAtlas.id, title: "Move-Out Request Received", message: "Liam Walsh (Unit 201) has submitted a move-out request. Inspection needs to be scheduled.", type: "SYSTEM", priority: "HIGH" },
       { userId: ownerAtlas.id, title: "Payout Request Under Review", message: "Your $12,500 disbursement request is pending admin review. Estimated 1-2 business days.", type: "BILLING", priority: "MEDIUM" },
       { userId: ownerAtlas.id, title: "Tenant Dispute Raised", message: "Dan Gibbs (Unit 203) has disputed deposit deductions of $375. Resolution required.", type: "SYSTEM", priority: "HIGH" },
       { userId: ownerAtlas.id, title: "Renewal Window Open", message: "Adam Brooks' lease (Unit 102) expires in 6 months. Renewal decision needed.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: ownerAtlas.id, title: "🏡 New Tour Request — Unit 106", message: "Adam Smith has requested an in-person tour of Unit 106 at Grand Horizon Towers. Review and confirm.", type: "SYSTEM", priority: "HIGH" },
+      { userId: ownerAtlas.id, title: "📹 New Video Call Tour Request — Unit 106", message: "Oscar Wilde requested a video call tour of Unit 106. Add a meeting link when confirming.", type: "SYSTEM", priority: "HIGH" },
+      { userId: ownerAtlas.id, title: "⭐ High Prospect Rating — Apply Invitation Sent", message: "Adam Smith received a 5-star prospect rating. A rental application invite was automatically sent.", type: "SYSTEM", priority: "MEDIUM" },
       // Owner Coastal
       { userId: ownerCoastal.id, title: "Commercial Maintenance Request", message: "Carlos Ruiz (Suite A) submitted an HVAC maintenance request. Assign an inspector.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketCommercial.id },
       { userId: ownerCoastal.id, title: "New Commercial Application", message: "Vertex Analytics Inc. applied for Suite B — 36-month NNN lease, $6,500/month.", type: "SYSTEM", priority: "HIGH" },
+      { userId: ownerCoastal.id, title: "📹 Video Tour Confirmed — Suite B", message: "Carlos Ruiz's Microsoft Teams video tour for Suite B is confirmed for 3 days from now.", type: "SYSTEM", priority: "MEDIUM" },
       // Admin
       { userId: admin.id, title: "Payout Request — Atlas Properties", message: "Marcus Reed (Atlas Properties LLC) requested a $12,500 disbursement. Admin action required.", type: "BILLING", priority: "HIGH" },
       { userId: admin.id, title: "Property Pending Approval", message: "Raj Patel submitted 'Patel Family Home' for platform listing approval. Review required.", type: "SYSTEM", priority: "HIGH" },
@@ -852,18 +1081,27 @@ async function main() {
       // Tenant Adam
       { userId: tenantAdam.id, title: "Rent Receipt Confirmed", message: "Your rent payment of $3,000 has been received and recorded. Receipt available in your dashboard.", type: "BILLING", isRead: true, priority: "LOW" },
       { userId: tenantAdam.id, title: "Lease Renewal Offer", message: "Your lease expires in 6 months. Your owner Marcus Reed has sent a renewal offer for review.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantAdam.id, title: "🏡 Tour Confirmed — Grand Horizon Unit 106", message: "Your in-person tour at Grand Horizon Towers (Unit 106) is confirmed. Check your email for the calendar invite.", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantAdam.id, title: "📋 Submit Rental Application — You're a Top Prospect!", message: "Great news! The landlord rated you 5 stars after your tour. Submit your rental application now to secure your unit.", type: "SYSTEM", priority: "HIGH" },
       // Tenant Oscar
       { userId: tenantOscar.id, title: "⚠️ Rent Overdue Notice", message: "Your rent of $2,400 is now overdue. A late fee of $120 has been applied. Please pay immediately.", type: "BILLING", priority: "HIGH" },
+      { userId: tenantOscar.id, title: "📹 Video Tour Confirmed — Join via Google Meet", message: "Your virtual tour of Grand Horizon Unit 106 is confirmed. Meeting link: https://meet.google.com/abc-defg-hij", type: "SYSTEM", priority: "HIGH" },
       // Tenant Marvin
       { userId: tenantMarvin.id, title: "Inspection Scheduled", message: "Jake Thorpe will inspect your HVAC on Thursday at 10 AM. Ensure entry access is available.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketHvac.id },
+      { userId: tenantMarvin.id, title: "🏡 Tour Complete — Leave Feedback", message: "Your in-person tour of Grand Horizon Unit 106 is now marked complete. Please rate your experience.", type: "SYSTEM", priority: "LOW" },
       // Tenant Nora
       { userId: tenantNora.id, title: "Action Required: Sign Your Lease", message: "Your lease for Unit 101 is ready for signature and deposit payment. Complete now to confirm your move-in.", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantNora.id, title: "🏡 Tour Confirmed — Sunset Villa Tomorrow", message: "Your in-person tour at Sunset Villa is confirmed for tomorrow. Gate code: #1122.", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantNora.id, title: "📹 Video Tour Rescheduled — Zoom Link Ready", message: "Your Zoom video tour at Sunset Villa was rescheduled. New date is in 8 days. Join: https://zoom.us/j/12345678901", type: "SYSTEM", priority: "MEDIUM" },
       // Tenant Liam
       { userId: tenantLiam.id, title: "Move-Out Inspection Scheduled", message: "Your move-out inspection is scheduled for next Thursday at 2 PM. Inspector: Jake Thorpe.", type: "SYSTEM", priority: "MEDIUM" },
       // Tenant Dan
       { userId: tenantDan.id, title: "Dispute Under Review", message: "Your deposit dispute has been submitted. The owner will respond within 3 business days.", type: "SYSTEM", priority: "MEDIUM" },
       // Tenant Kelly
       { userId: tenantKelly.id, title: "Keys Confirmed — Deposit Decision Pending", message: "Your key return has been confirmed. Your deposit of $2,500 will be processed within 21 days.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantKelly.id, title: "🏡 Tour Request Received — Unit 105", message: "Your in-person tour request for Grand Horizon Unit 105 has been submitted. You'll be notified once confirmed.", type: "SYSTEM", priority: "MEDIUM" },
+      // Tenant Carlos
+      { userId: tenantCarlos.id, title: "📹 Commercial Video Tour Confirmed — Suite B", message: "Your Microsoft Teams virtual tour of Suite B at Pacific Commerce Center is confirmed for 3 days from now.", type: "SYSTEM", priority: "HIGH" },
     ],
   });
 
@@ -896,29 +1134,40 @@ async function main() {
   console.log("====================================================");
   console.log("");
   console.log("🔑 LOGIN MATRIX  (Universal password: Demo@1234)");
-  console.log("─────────────────────────────────────────────────────");
-  console.log(" ROLE              | EMAIL");
-  console.log("─────────────────────────────────────────────────────");
+  console.log("─────────────────────────────────────────────────────────────────────");
+  console.log(" ROLE              | EMAIL                         | TOUR STATE");
+  console.log("─────────────────────────────────────────────────────────────────────");
   console.log(" Super Admin       | admin@yopmail.com");
-  console.log(" Owner (Full)      | owner.atlas@yopmail.com");
-  console.log(" Owner (Commercial)| owner.coastal@yopmail.com");
+  console.log(" Owner (Full)      | owner.atlas@yopmail.com       ← 7 tours, availability set");
+  console.log(" Owner (Commercial)| owner.coastal@yopmail.com     ← commercial video tour");
   console.log(" Owner (Hobbyist)  | owner.patel@yopmail.com");
-  console.log(" Owner (New)  ★    | owner.new@yopmail.com     ← First-time onboarding wizard");
+  console.log(" Owner (New)  ★    | owner.new@yopmail.com         ← First-time onboarding wizard");
   console.log(" Inspector         | inspector.jake@yopmail.com");
   console.log(" Inspector         | inspector.sara@yopmail.com");
-  console.log(" Tenant (Perfect)  | tenant.adam@yopmail.com   ← All paid, renewals");
-  console.log(" Tenant (Overdue)  | tenant.oscar@yopmail.com  ← Overdue rent + late fee");
-  console.log(" Tenant (Maint.)   | tenant.marvin@yopmail.com ← Active maintenance tickets");
-  console.log(" Tenant (Sign)     | tenant.nora@yopmail.com   ← Pending signature + deposit");
-  console.log(" Tenant (Move-Out) | tenant.liam@yopmail.com   ← Inspection scheduled");
-  console.log(" Tenant (Dispute)  | tenant.dan@yopmail.com    ← Deposit dispute");
-  console.log(" Tenant (Comm.)    | tenant.carlos@yopmail.com ← Commercial NNN lease");
-  console.log(" Tenant (New)  ★   | tenant.new@yopmail.com    ← First-time empty dashboard");
-  console.log("─────────────────────────────────────────────────────");
+  console.log(" Tenant (Perfect)  | tenant.adam@yopmail.com       ← 2 tours (pending+completed w/feedback)");
+  console.log(" Tenant (Overdue)  | tenant.oscar@yopmail.com      ← 1 confirmed video + 1 cancelled");
+  console.log(" Tenant (Maint.)   | tenant.marvin@yopmail.com     ← 1 completed tour w/ categories");
+  console.log(" Tenant (Sign)     | tenant.nora@yopmail.com       ← 1 confirmed + 1 rescheduled tour");
+  console.log(" Tenant (Move-Out) | tenant.liam@yopmail.com");
+  console.log(" Tenant (Dispute)  | tenant.dan@yopmail.com");
+  console.log(" Tenant (Kelly)    | tenant.kelly@yopmail.com      ← 1 pending tour (slot conflict demo)");
+  console.log(" Tenant (Comm.)    | tenant.carlos@yopmail.com     ← commercial video tour confirmed");
+  console.log(" Tenant (New)  ★   | tenant.new@yopmail.com        ← First-time empty dashboard");
+  console.log("─────────────────────────────────────────────────────────────────────");
+  console.log("");
+  console.log("🏡  Tour Flow Features Seeded:");
+  console.log("    ✅ 10 tours across all states (PENDING, CONFIRMED, COMPLETED, CANCELLED)");
+  console.log("    ✅ 2 VIDEO_CALL tours with meetingLink set");
+  console.log("    ✅ Structured feedbackCategories on completed tours");
+  console.log("    ✅ cancelledAt + rescheduledAt timestamps");
+  console.log("    ✅ OwnerAvailability for Atlas + Coastal (working hours + blackout dates)");
+  console.log("    ✅ PlatformSettings.tourCancellationWindowHours = 24");
   console.log("");
   console.log("📧  Email testing: https://yopmail.com");
   console.log("🔗  Vendor portal: /vendor/ticket/DEMO-VENDOR-BURST-PIPE-2025-TOKEN");
   console.log("🎫  Invite token:  /invite/DEMO-INVITE-IRIS-PHAM-2025");
+  console.log("📅  Cron endpoint: POST /api/cron/tour-reminders (Auth: Bearer {CRON_SECRET})");
+  console.log("⚙️   Owner availability: GET/POST /api/owner-availability");
   console.log("====================================================\\n");
 }
 

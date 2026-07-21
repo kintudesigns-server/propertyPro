@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ScheduleTourModal } from "@/components/modals/ScheduleTourModal";
 
 interface VacantUnit {
   id: string;
@@ -239,6 +240,22 @@ export default function ListingsPage() {
   const [tourTime, setTourTime] = useState("09:00:00");
   const [schedulingTour, setSchedulingTour] = useState(false);
 
+  // New Tour Overhaul State
+  const [tourStep, setTourStep] = useState<"FORM" | "OTP" | "SUCCESS">("FORM");
+  const [tourOtpCode, setTourOtpCode] = useState("");
+  const [tourHoneypot, setTourHoneypot] = useState("");
+  const [tourMessage, setTourMessage] = useState("");
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const [otpDevFallbackCode, setOtpDevFallbackCode] = useState("");
+
+  // Handle countdown for Resend OTP code
+  useEffect(() => {
+    if (otpCooldown > 0) {
+      const timer = setTimeout(() => setOtpCooldown(otpCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpCooldown]);
+
   useEffect(() => {
     if (session?.user) {
       setTourName((session.user as any).name || "");
@@ -404,10 +421,62 @@ export default function ListingsPage() {
   };
 
 
-  const handleTourSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!tourName || !tourEmail || !tourPhone || !tourDate || !selectedTourUnit) {
       toast.error("Please fill in all details.");
+      return;
+    }
+
+    // Phone validation
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    const cleanPhone = tourPhone.replace(/[\s\-\(\)]/g, "");
+    if (!phoneRegex.test(cleanPhone)) {
+      toast.error("Please enter a valid phone number (e.g. +15551234567).");
+      return;
+    }
+
+    setSchedulingTour(true);
+    setOtpDevFallbackCode("");
+
+    try {
+      const res = await fetch("/api/tours/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: tourEmail,
+          propertyId: selectedTourUnit.property.id,
+          unitId: selectedTourUnit.id,
+          honeypot: tourHoneypot,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Verification code sent to your email!");
+        setTourStep("OTP");
+        setOtpCooldown(60);
+        if (data.otpDevFallback) {
+          setOtpDevFallbackCode(data.otpDevFallback);
+        }
+      } else {
+        toast.error(data.error || "Failed to send verification code.");
+      }
+    } catch (err) {
+      toast.error("Error connecting to server. Please try again.");
+    } finally {
+      setSchedulingTour(false);
+    }
+  };
+
+  const handleTourSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTourUnit) {
+      toast.error("No unit selected.");
+      return;
+    }
+    if (!tourOtpCode || tourOtpCode.length < 6) {
+      toast.error("Please enter the 6-digit verification code.");
       return;
     }
 
@@ -423,24 +492,19 @@ export default function ListingsPage() {
           tenantName: tourName,
           tenantEmail: tourEmail,
           tenantPhone: tourPhone,
+          tenantMessage: tourMessage,
           tourType,
           scheduledAt,
+          otpCode: tourOtpCode,
         }),
       });
 
       if (res.ok) {
-        toast.success(
-          `Tour requested successfully for ${selectedTourUnit.name}! The landlord will confirm your slot.`
-        );
-        setTourDialogOpen(false);
-        setTourName("");
-        setTourEmail("");
-        setTourPhone("");
-        setTourDate("");
-        setTourTime("09:00:00");
+        toast.success("Verification successful! Tour request submitted.");
+        setTourStep("SUCCESS");
       } else {
         const err = await res.json();
-        toast.error(err.error || "Failed to schedule tour.");
+        toast.error(err.error || "Verification failed. Please try again.");
       }
     } catch (err) {
       toast.error("Error scheduling tour.");
@@ -1155,104 +1219,242 @@ export default function ListingsPage() {
       </Dialog>
 
       {/* ── TOUR SCHEDULING DIALOG ── */}
-      <Dialog open={tourDialogOpen} onOpenChange={setTourDialogOpen}>
-        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-md p-6">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
-              Schedule Visit for {selectedTourUnit?.name}
-            </DialogTitle>
-            <DialogDescription className="text-slate-400 text-xs">
-              Select a visit type, day, and time. We will notify the landlord of {selectedTourUnit?.property.name}.
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={tourDialogOpen} onOpenChange={(open) => {
+        setTourDialogOpen(open);
+        if (!open) {
+          setTourStep("FORM");
+          setTourOtpCode("");
+          setTourHoneypot("");
+          setTourMessage("");
+          setOtpDevFallbackCode("");
+        }
+      }}>
+        <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-[2rem] max-w-md p-6 max-h-[85vh] overflow-y-auto">
+          {tourStep === "FORM" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-lg font-extrabold flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                  Schedule Visit for {selectedTourUnit?.name}
+                </DialogTitle>
+                <DialogDescription className="text-slate-400 text-xs">
+                  Select a visit type, day, and time. We will notify the landlord of {selectedTourUnit?.property.name}.
+                </DialogDescription>
+              </DialogHeader>
 
-          <form onSubmit={handleTourSubmit} className="space-y-4 pt-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="tourType" className="text-xs font-bold text-slate-700">Tour Type</Label>
-              <select
-                id="tourType"
-                value={tourType}
-                onChange={(e) => setTourType(e.target.value)}
-                className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold"
+              <form onSubmit={handleSendOtp} className="space-y-4 pt-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="tourType" className="text-xs font-bold text-slate-700">Tour Type</Label>
+                  <select
+                    id="tourType"
+                    value={tourType}
+                    onChange={(e) => setTourType(e.target.value)}
+                    className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold"
+                  >
+                    <option value="IN_PERSON">In-Person Guided Tour</option>
+                    <option value="VIDEO_CALL">Virtual Video Tour</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tourDate" className="text-xs font-bold text-slate-700">Date</Label>
+                    <Input
+                      id="tourDate"
+                      type="date"
+                      required
+                      value={tourDate}
+                      onChange={(e) => setTourDate(e.target.value)}
+                      className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tourTime" className="text-xs font-bold text-slate-700">Time Slot</Label>
+                    <select
+                      id="tourTime"
+                      value={tourTime}
+                      onChange={(e) => setTourTime(e.target.value)}
+                      className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold"
+                    >
+                      <option value="09:00:00">9:00 AM</option>
+                      <option value="10:30:00">10:30 AM</option>
+                      <option value="12:00:00">12:00 PM</option>
+                      <option value="13:30:00">1:35 PM</option>
+                      <option value="15:00:00">3:00 PM</option>
+                      <option value="16:30:00">4:30 PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="tourName" className="text-xs font-bold text-slate-700">Your Full Name</Label>
+                  <Input
+                    id="tourName"
+                    placeholder="Jane Smith"
+                    value={tourName}
+                    onChange={(e) => setTourName(e.target.value)}
+                    className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="tourEmail" className="text-xs font-bold text-slate-700">Email Address</Label>
+                  <Input
+                    id="tourEmail"
+                    type="email"
+                    placeholder="jane@example.com"
+                    value={tourEmail}
+                    onChange={(e) => setTourEmail(e.target.value)}
+                    className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="tourPhone" className="text-xs font-bold text-slate-700">Phone Number (SMS OTP Verification)</Label>
+                  <Input
+                    id="tourPhone"
+                    placeholder="+1 (555) 123-4567"
+                    value={tourPhone}
+                    onChange={(e) => setTourPhone(e.target.value)}
+                    className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="tourMessage" className="text-xs font-bold text-slate-700">Message to Owner (Optional)</Label>
+                  <textarea
+                    id="tourMessage"
+                    placeholder="Any specific questions or details?"
+                    value={tourMessage}
+                    onChange={(e) => setTourMessage(e.target.value)}
+                    className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold min-h-[80px] resize-none"
+                    maxLength={300}
+                  />
+                </div>
+
+                {/* Honeypot field for bot spam prevention */}
+                <div className="hidden" aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website"
+                    value={tourHoneypot}
+                    onChange={(e) => setTourHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors mt-2">
+                  {schedulingTour ? "Checking Limits..." : "Next: Verify Email"}
+                </Button>
+              </form>
+            </>
+          )}
+
+          {tourStep === "OTP" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-lg font-extrabold flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-blue-600" />
+                  Email Verification Code
+                </DialogTitle>
+                <DialogDescription className="text-slate-400 text-xs">
+                  We sent a 6-digit code to <strong className="text-slate-600">{tourEmail}</strong>. Please enter it below.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleTourSubmit} className="space-y-6 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tourOtpCode" className="text-xs font-bold text-slate-700 uppercase tracking-wider block text-center">Enter 6-Digit Code</Label>
+                  <Input
+                    id="tourOtpCode"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={tourOtpCode}
+                    onChange={(e) => setTourOtpCode(e.target.value.replace(/\D/g, ""))}
+                    className="bg-slate-50 border-0 text-slate-800 rounded-xl h-12 text-center text-lg font-black tracking-widest"
+                    required
+                  />
+                </div>
+
+                {otpDevFallbackCode && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs font-semibold text-center">
+                    [DEV MODE ONLY] Code: <strong className="text-sm font-black">{otpDevFallbackCode}</strong>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-3">
+                  <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors">
+                    {schedulingTour ? "Verifying..." : "Confirm & Schedule Tour"}
+                  </Button>
+                  
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      disabled={otpCooldown > 0 || schedulingTour}
+                      onClick={() => handleSendOtp()}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700 disabled:text-slate-400 disabled:no-underline underline"
+                    >
+                      {otpCooldown > 0 ? `Resend Code in ${otpCooldown}s` : "Resend Verification Code"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </>
+          )}
+
+          {tourStep === "SUCCESS" && (
+            <div className="text-center space-y-6 py-4">
+              <div className="mx-auto h-20 w-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-inner">
+                <CheckCircle2 className="h-10 w-10 animate-bounce" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-slate-800 tracking-tight">Tour Requested!</h3>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed px-4">
+                  Your request for <strong className="text-slate-600">{selectedTourUnit?.name}</strong> has been successfully submitted. We've sent a confirmation email to <strong className="text-slate-600">{tourEmail}</strong>.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs space-y-2 text-left">
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-500">Date:</span>
+                  <span className="font-extrabold text-slate-800">
+                    {new Date(tourDate).toLocaleDateString("en-US", { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-500">Time:</span>
+                  <span className="font-extrabold text-slate-800">
+                    {new Date(`${tourDate}T${tourTime}`).toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-500">Type:</span>
+                  <span className="font-extrabold text-slate-800">
+                    {tourType === "VIDEO_CALL" ? "Virtual Video Tour" : "In-Person Showing"}
+                  </span>
+                </div>
+              </div>
+
+              <Button 
+                onClick={() => {
+                  setTourDialogOpen(false);
+                  setTourStep("FORM");
+                  setTourOtpCode("");
+                  setTourHoneypot("");
+                  setTourMessage("");
+                  setOtpDevFallbackCode("");
+                }} 
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl"
               >
-                <option value="IN_PERSON">In-Person Guided Tour</option>
-                <option value="VIDEO_CALL">Virtual Video Tour</option>
-                <option value="SELF_GUIDED">Self-Guided Tour (Smart Lock)</option>
-              </select>
+                Done
+              </Button>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="tourDate" className="text-xs font-bold text-slate-700">Date</Label>
-                <Input
-                  id="tourDate"
-                  type="date"
-                  required
-                  value={tourDate}
-                  onChange={(e) => setTourDate(e.target.value)}
-                  className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="tourTime" className="text-xs font-bold text-slate-700">Time Slot</Label>
-                <select
-                  id="tourTime"
-                  value={tourTime}
-                  onChange={(e) => setTourTime(e.target.value)}
-                  className="w-full bg-slate-50 border-0 text-slate-800 rounded-xl h-11 px-3 text-sm focus:ring-blue-500 focus:border-blue-500 font-semibold"
-                >
-                  <option value="09:00:00">9:00 AM</option>
-                  <option value="10:30:00">10:30 AM</option>
-                  <option value="12:00:00">12:00 PM</option>
-                  <option value="13:30:00">1:35 PM</option>
-                  <option value="15:00:00">3:00 PM</option>
-                  <option value="16:30:00">4:30 PM</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tourName" className="text-xs font-bold text-slate-700">Your Full Name</Label>
-              <Input
-                id="tourName"
-                placeholder="Jane Smith"
-                value={tourName}
-                onChange={(e) => setTourName(e.target.value)}
-                className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tourEmail" className="text-xs font-bold text-slate-700">Email Address</Label>
-              <Input
-                id="tourEmail"
-                type="email"
-                placeholder="jane@example.com"
-                value={tourEmail}
-                onChange={(e) => setTourEmail(e.target.value)}
-                className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tourPhone" className="text-xs font-bold text-slate-700">Phone Number (SMS OTP Verification)</Label>
-              <Input
-                id="tourPhone"
-                placeholder="+1 (555) 123-4567"
-                value={tourPhone}
-                onChange={(e) => setTourPhone(e.target.value)}
-                className="bg-slate-50 border-0 text-slate-800 rounded-xl h-11"
-                required
-              />
-            </div>
-
-            <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors mt-2">
-              {schedulingTour ? "Scheduling..." : "Request Tour Slot"}
-            </Button>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -2298,6 +2500,15 @@ export default function ListingsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {selectedTourUnit && (
+        <ScheduleTourModal
+          open={tourDialogOpen}
+          onOpenChange={setTourDialogOpen}
+          unit={selectedTourUnit}
+          onSuccess={() => setTourDialogOpen(false)}
+        />
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-8 text-center text-slate-400 text-xs font-bold mt-auto">

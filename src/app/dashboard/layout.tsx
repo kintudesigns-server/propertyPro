@@ -82,6 +82,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     if (tab === "add-card") return pathname === "/dashboard/payments/add-card";
     if (tab === "transactions") return pathname === "/dashboard/accounting/transactions";
     if (tab === "invoices") return pathname === "/dashboard/accounting/invoices";
+    if (tab === "my-tours") return pathname === "/dashboard/tenant/tours";
     return pathname === "/dashboard/tenant" && currentTab === tab;
   };
 
@@ -394,6 +395,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 >
                   <ClipboardList className="h-5 w-5" />
                   {sidebarOpen && <span>My Applications</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/tenant/tours"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    pathname === "/dashboard/tenant/tours"
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <Calendar className="h-5 w-5" />
+                  {sidebarOpen && <span>My Showing Tours</span>}
                 </Link>
                 
                 <Link
@@ -1299,9 +1312,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
                 
                 <Link
-                  href={isOwner ? "/dashboard/owner?tab=settings" : "/dashboard/admin/settings/pricing"}
+                  href={isOwner ? "/dashboard/owner?tab=settings" : isAdmin ? "/dashboard/admin/settings/profile" : "/dashboard/tenant?tab=settings"}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    (pathname === "/dashboard/owner" && currentTab === "settings") || pathname.startsWith("/dashboard/admin/settings")
+                    (pathname === "/dashboard/owner" && currentTab === "settings") || pathname === "/dashboard/admin/settings/profile" || (pathname === "/dashboard/tenant" && currentTab === "settings")
                       ? "bg-[#EFF6FF] text-[#3B82F6]"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
@@ -1379,7 +1392,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <MessageBadge />
             <NotificationDropdown />
             <Link
-              href={isOwner ? "/dashboard/owner?tab=settings" : isTenant ? "/dashboard/tenant?tab=settings" : "/dashboard/admin/settings/pricing"}
+              href={isOwner ? "/dashboard/owner?tab=settings" : isTenant ? "/dashboard/tenant?tab=settings" : "/dashboard/admin/settings/profile"}
               className="p-2.5 bg-white rounded-xl border border-[#E2E8F0] shadow-sm text-[#64748B] hover:text-[#0F172A] transition-colors hidden md:block"
               title="Profile Settings"
             >

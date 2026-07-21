@@ -30,21 +30,38 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { adminFeePercent } = await req.json();
-    if (adminFeePercent === undefined || adminFeePercent < 0 || adminFeePercent > 100) {
+    const { 
+      adminFeePercent, 
+      tourMaxRequestsPerEmail, 
+      tourRateLimitWindowHours, 
+      tourOtpExpiryMinutes 
+    } = await req.json();
+
+    if (adminFeePercent !== undefined && (adminFeePercent < 0 || adminFeePercent > 100)) {
       return NextResponse.json({ error: "Invalid percentage" }, { status: 400 });
     }
 
     let settings = await prisma.platformSettings.findFirst();
     
+    const updateData: any = {};
+    if (adminFeePercent !== undefined) updateData.adminFeePercent = adminFeePercent;
+    if (tourMaxRequestsPerEmail !== undefined) updateData.tourMaxRequestsPerEmail = Number(tourMaxRequestsPerEmail);
+    if (tourRateLimitWindowHours !== undefined) updateData.tourRateLimitWindowHours = Number(tourRateLimitWindowHours);
+    if (tourOtpExpiryMinutes !== undefined) updateData.tourOtpExpiryMinutes = Number(tourOtpExpiryMinutes);
+
     if (settings) {
       settings = await prisma.platformSettings.update({
         where: { id: settings.id },
-        data: { adminFeePercent },
+        data: updateData,
       });
     } else {
       settings = await prisma.platformSettings.create({
-        data: { adminFeePercent },
+        data: {
+          adminFeePercent: adminFeePercent !== undefined ? adminFeePercent : 2.00,
+          tourMaxRequestsPerEmail: tourMaxRequestsPerEmail !== undefined ? Number(tourMaxRequestsPerEmail) : 3,
+          tourRateLimitWindowHours: tourRateLimitWindowHours !== undefined ? Number(tourRateLimitWindowHours) : 24,
+          tourOtpExpiryMinutes: tourOtpExpiryMinutes !== undefined ? Number(tourOtpExpiryMinutes) : 10,
+        },
       });
     }
 

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notificationEmitter } from "@/lib/notification-events";
 
-type NotificationType = "PAYMENT" | "MAINTENANCE" | "LEASE" | "SYSTEM";
+type NotificationType = "PAYMENT" | "MAINTENANCE" | "LEASE" | "SYSTEM" | "TOUR" | "APPLICATION";
 type NotificationPriority = "HIGH" | "MEDIUM" | "LOW";
 
 interface CreateNotificationInput {

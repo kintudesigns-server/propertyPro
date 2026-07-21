@@ -63,9 +63,47 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
 
   const t = (title as string).toLowerCase();
   const isAdmin = userRole === "SUPERADMIN";
+  const isTenant = userRole === "TENANT";
 
-  // ── Applications ───────────────────────────
-  if (t.includes("owner application")) {
+  // ── 1. Tours / Showings / Tour Ratings / Nudges ──────────
+  if (
+    type === "TOUR" ||
+    t.includes("tour") ||
+    t.includes("showing") ||
+    t.includes("how was your tour") ||
+    t.includes("great news from property owner")
+  ) {
+    if (isTenant) {
+      actions.push({
+        href: `/dashboard/tenant/tours`,
+        label: "View My Showing Tours & Rate Visit",
+        description: "Review your tour schedule, meeting links, or rate your visit experience.",
+        Icon: Calendar,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+      actions.push({
+        href: `/listings`,
+        label: "Submit Rental Application",
+        description: "Browse available property listings and submit your rental application.",
+        Icon: ClipboardList,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      });
+    } else {
+      actions.push({
+        href: `/dashboard/tours`,
+        label: "Manage Showing Tours",
+        description: "Review prospect showing requests, confirm visit slots, provide video meeting links, or rate prospects.",
+        Icon: Calendar,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    }
+  }
+
+  // ── 2. Applications ───────────────────────────
+  else if (t.includes("owner application")) {
     if (isAdmin) {
       actions.push({
         href: `/dashboard/admin/owner-applications`,
@@ -77,7 +115,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       });
     }
   } else if (type === "APPLICATION" || t.includes("application")) {
-    if (userRole === "TENANT") {
+    if (isTenant) {
       actions.push({
         href: `/dashboard/tenant/applications`,
         label: "View My Applications",
@@ -108,11 +146,11 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     }
   }
 
-  // ── Maintenance ────────────────────────────
+  // ── 3. Maintenance ────────────────────────────
   else if (type === "MAINTENANCE" || t.includes("maintenance") || t.includes("repair")) {
     if (id) {
       let maintenanceDesc = "Inspect the full maintenance ticket, update status, or assign an inspector.";
-      if (userRole === "TENANT") {
+      if (isTenant) {
         maintenanceDesc = "View the status, scheduled date, and details of your request.";
       } else if (userRole === "INSPECTOR") {
         maintenanceDesc = "View details of this task, submit estimates, and update status.";
@@ -128,7 +166,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       });
     }
 
-    if (userRole === "TENANT") {
+    if (isTenant) {
       actions.push({
         href: `/dashboard/maintenance/my-requests`,
         label: "My Maintenance Requests",
@@ -158,11 +196,11 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     }
   }
 
-  // ── Mediation & Disputes ───────────────────
+  // ── 4. Mediation & Disputes ───────────────────
   else if (t.includes("mediation") || t.includes("dispute")) {
     if (isAdmin) {
       actions.push({
-        href: `/dashboard/admin/payouts`, // Or any mediation ledger if exists
+        href: `/dashboard/admin/payouts`,
         label: "View Mediation Dashboard",
         description: "Review disputes, inspect tenant move-out notes, and resolve conflicts.",
         Icon: AlertCircle,
@@ -172,7 +210,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     }
   }
 
-  // ── Payouts ────────────────────────────────
+  // ── 5. Payouts ────────────────────────────────
   else if (t.includes("payout")) {
     if (isAdmin) {
       actions.push({
@@ -195,9 +233,9 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     }
   }
 
-  // ── Payments / Invoices / Transactions / Refunds / Billing ──
+  // ── 6. Payments / Invoices / Transactions / Refunds / Billing ──
   else if (type === "PAYMENT" || type === "BILLING" || t.includes("payment") || t.includes("invoice") || t.includes("transaction") || t.includes("refund") || t.includes("chargeback") || t.includes("billing") || t.includes("deposit")) {
-    if (userRole === "TENANT") {
+    if (isTenant) {
       actions.push({
         href: `/dashboard/accounting/invoices`,
         label: "Go to Invoices",
@@ -245,7 +283,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     }
   }
 
-  // ── Lease ──────────────────────────────────
+  // ── 7. Lease ──────────────────────────────────
   else if (type === "LEASE" || t.includes("lease")) {
     if (id) {
       actions.push({
@@ -267,37 +305,48 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     });
   }
 
-  // ── Property approval ──────────────────────
-  else if (t.includes("propert")) {
-    if (id) {
+  // ── 8. Property Listing / Approval ────────────────
+  else if (t.includes("propert") || t.includes("unit")) {
+    if (isTenant) {
       actions.push({
-        href: `/dashboard/properties/${id}`,
-        label: "View Property",
-        description: "Open the property listing, manage units, and review approval status.",
+        href: `/listings`,
+        label: "Browse Property Listings",
+        description: "View available properties and rental units.",
         Icon: Building2,
-        color: "bg-indigo-50",
-        textColor: "text-indigo-600",
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
       });
-    }
-    if (isAdmin) {
-      actions.push({
-        href: `/dashboard/admin/properties`,
-        label: "Property Approvals",
-        description: "Review pending property listings waiting for admin approval.",
-        Icon: CheckCircle2,
-        color: "bg-slate-50",
-        textColor: "text-slate-600",
-      });
+    } else {
+      if (id) {
+        actions.push({
+          href: `/dashboard/properties/${id}`,
+          label: "View Property",
+          description: "Open the property listing, manage units, and review approval status.",
+          Icon: Building2,
+          color: "bg-indigo-50",
+          textColor: "text-indigo-600",
+        });
+      }
+      if (isAdmin) {
+        actions.push({
+          href: `/dashboard/admin/properties`,
+          label: "Property Approvals",
+          description: "Review pending property listings waiting for admin approval.",
+          Icon: CheckCircle2,
+          color: "bg-slate-50",
+          textColor: "text-slate-600",
+        });
+      }
     }
   }
 
-  // ── Generic SYSTEM fallback ────────────────
+  // ── 9. Generic SYSTEM fallback ────────────────
   else {
     actions.push({
-      href: `/dashboard`,
-      label: "Go to Dashboard",
-      description: "Return to the main dashboard to see an overview of platform activity.",
-      Icon: Home,
+      href: isTenant ? `/listings` : `/dashboard`,
+      label: isTenant ? "Browse Properties" : "Go to Dashboard",
+      description: isTenant ? "Explore available rental listings." : "Return to the main dashboard to see an overview of platform activity.",
+      Icon: isTenant ? Building2 : Home,
       color: "bg-slate-50",
       textColor: "text-slate-600",
     });

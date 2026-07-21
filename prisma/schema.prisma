@@ -95,6 +95,7 @@ model User {
   ownerId              String?
   owner                User?                @relation("OwnerInspectors", fields: [ownerId], references: [id])
   createdInspectors    User[]               @relation("OwnerInspectors")
+  availability         OwnerAvailability?
 }
 
 model PasswordResetToken {
@@ -560,45 +561,14 @@ model Notification {
   createdAt       DateTime @default(now())
 }
 
-enum TourType {
-  IN_PERSON
-  VIDEO_CALL
-  SELF_GUIDED
-}
-
-enum TourStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-model Tour {
-  id               String     @id @default(uuid())
-  propertyId       String
-  property         Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  unitId           String?
-  unit             Unit?      @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  
-  tenantName       String
-  tenantEmail      String
-  tenantPhone      String
-  
-  tourType         TourType   @default(IN_PERSON)
-  scheduledAt      DateTime
-  status           TourStatus @default(PENDING)
-  
-  feedbackRating   Int?
-  feedbackComments String?
-  
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-}
-
 model PlatformSettings {
-  id              String   @id @default(uuid())
-  adminFeePercent Decimal  @db.Decimal(5, 2) @default(2.00) // Default 2.00% admin commission
-  updatedAt       DateTime @updatedAt
+  id                       String   @id @default(uuid())
+  adminFeePercent          Decimal  @db.Decimal(5, 2) @default(2.00) // Default 2.00% admin commission
+  tourMaxRequestsPerEmail  Int      @default(3)
+  tourRateLimitWindowHours Int      @default(24)
+  tourOtpExpiryMinutes     Int      @default(10)
+  tourCancellationWindowHours Int    @default(24)
+  updatedAt                DateTime @updatedAt
 }
 
 model ExternalVendor {
@@ -636,3 +606,72 @@ model AuditLog {
   note         String?  // Human readable summary
   createdAt    DateTime @default(now())
 }
+
+enum TourType {
+  IN_PERSON
+  VIDEO_CALL
+}
+
+enum TourStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Tour {
+  id                  String     @id @default(uuid())
+  propertyId          String
+  property            Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitId              String?
+  unit                Unit?      @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  tenantName          String
+  tenantEmail         String
+  tenantPhone         String
+  tenantMessage       String?
+  
+  tourType            TourType   @default(IN_PERSON)
+  scheduledAt         DateTime
+  status              TourStatus @default(PENDING)
+  
+  cancellationReason  String?
+  cancelledAt         DateTime?
+  rescheduledAt       DateTime?
+  meetingLink         String?
+  ownerNotes          String?
+  ownerProspectRating Int?
+  ownerProspectNotes  String?
+  
+  feedbackRating      Int?
+  feedbackComments    String?
+  feedbackCategories  Json?
+  verifiedEmail       Boolean    @default(false)
+  
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model TourOtp {
+  id         String   @id @default(uuid())
+  email      String
+  otp        String
+  propertyId String
+  unitId     String?
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+model OwnerAvailability {
+  id           String   @id @default(uuid())
+  ownerId      String   @unique
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  workingHours Json     @default("{}")
+  blackoutDates String[] @default([])
+  timezone     String   @default("America/New_York")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+

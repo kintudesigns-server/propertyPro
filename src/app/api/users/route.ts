@@ -129,8 +129,25 @@ export async function PUT(req: NextRequest) {
       name, phone, bankName, accountNumber, accountName,
       emergencyName, emergencyPhone, emergencyRelationship, dob, 
       employmentStatus, employer, position, avatar,
-      approvalThreshold, emergencyOverrideLimit
+      approvalThreshold, emergencyOverrideLimit,
+      currentPassword, newPassword
     } = await req.json();
+
+    let passwordHash: string | undefined = undefined;
+    if (newPassword) {
+      if (!currentPassword) {
+        return NextResponse.json({ error: "Current password is required to set a new password." }, { status: 400 });
+      }
+      const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+      if (!existingUser) {
+        return NextResponse.json({ error: "User not found." }, { status: 404 });
+      }
+      const valid = await bcrypt.compare(currentPassword, existingUser.password);
+      if (!valid) {
+        return NextResponse.json({ error: "Incorrect current password." }, { status: 400 });
+      }
+      passwordHash = await bcrypt.hash(newPassword, 10);
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -150,6 +167,7 @@ export async function PUT(req: NextRequest) {
         avatar,
         approvalThreshold: approvalThreshold !== undefined ? (approvalThreshold === "" || approvalThreshold === null ? 200.00 : Number(approvalThreshold)) : undefined,
         emergencyOverrideLimit: emergencyOverrideLimit !== undefined ? (emergencyOverrideLimit === "" || emergencyOverrideLimit === null ? 1500.00 : Number(emergencyOverrideLimit)) : undefined,
+        ...(passwordHash ? { password: passwordHash } : {}),
       },
     });
 

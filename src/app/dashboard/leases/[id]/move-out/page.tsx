@@ -14,6 +14,7 @@ import { ArrowLeft, Trash2, ShieldAlert, CheckCircle2, FileDown, AlertTriangle, 
 import Link from "next/link";
 import { generateDispositionPDF } from "@/lib/pdfGenerator";
 import { UnmaskAccountNumber } from "@/components/UnmaskAccountNumber";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BypassConfirmationModal } from "@/components/modals/BypassConfirmationModal";
 
 const DEDUCTION_CATEGORIES = [
@@ -68,6 +69,7 @@ export default function FinalStatementPage() {
   const [customDeductionDesc, setCustomDeductionDesc] = useState("");
   const [customDeductionAmount, setCustomDeductionAmount] = useState("");
   const [customDeductionCat, setCustomDeductionCat] = useState("DAMAGE");
+  const [deleteDeductionIndex, setDeleteDeductionIndex] = useState<number | null>(null);
 
   type DeductionItem = { amount: string; description: string; category: string; photoUrl: string; invoiceId?: string };
   const [deductions, setDeductions] = useState<DeductionItem[]>([]);
@@ -857,10 +859,9 @@ export default function FinalStatementPage() {
                               className="w-24 h-9 text-right font-black bg-white text-slate-800 border-slate-200 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-lg text-xs"
                             />
                             <button
-                              onClick={() => {
-                                setDeductions(deductions.filter((_, idx) => idx !== i));
-                              }}
-                              className="text-red-400 hover:text-red-600 transition-colors p-1"
+                              onClick={() => setDeleteDeductionIndex(i)}
+                              title="Delete deduction"
+                              className="text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors p-1.5 rounded-lg"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -984,6 +985,55 @@ export default function FinalStatementPage() {
         onOpenChange={setShowBypassModal}
         onSuccess={fetchLease}
       />
+
+      {/* Delete Deduction Confirmation Alert Dialog */}
+      <Dialog open={deleteDeductionIndex !== null} onOpenChange={(open) => !open && setDeleteDeductionIndex(null)}>
+        <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
+              Remove Deduction / Charge?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 mt-1">
+              Are you sure you want to remove this deduction item from the move-out settlement statement?
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteDeductionIndex !== null && deductions[deleteDeductionIndex] && (
+            <div className="bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 space-y-1 my-2">
+              <p className="text-xs font-bold text-rose-950">
+                {deductions[deleteDeductionIndex].description}
+              </p>
+              <p className="text-base font-black text-rose-700">
+                ${Number(deductions[deleteDeductionIndex].amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 mt-4">
+            <Button
+              variant="ghost"
+              className="rounded-xl font-bold text-xs"
+              onClick={() => setDeleteDeductionIndex(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-xs"
+              onClick={() => {
+                if (deleteDeductionIndex !== null) {
+                  const removed = deductions[deleteDeductionIndex];
+                  setDeductions(deductions.filter((_, idx) => idx !== deleteDeductionIndex));
+                  setDeleteDeductionIndex(null);
+                  toast.success(`Removed "${removed?.description || 'Deduction'}" from settlement statement.`);
+                }
+              }}
+            >
+              Yes, Remove Deduction
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
