@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/usage-nudge",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/trial-ending",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/sync-subscription-status",
+      "schedule": "0 3 * * 0"
+    }
+  ]
+}

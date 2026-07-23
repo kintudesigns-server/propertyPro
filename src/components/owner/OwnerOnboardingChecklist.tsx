@@ -82,7 +82,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
              {isProfileComplete ? <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" /> : <Circle className="h-5 w-5 text-slate-300 shrink-0 mt-0.5" />}
              <div>
                 <p className={`font-bold text-sm ${isProfileComplete ? 'text-emerald-900' : 'text-slate-700'}`}>Complete Profile</p>
-                <p className={`text-xs mt-1 ${isProfileComplete ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>Add contact and bank details.</p>
+                <p className={`text-xs mt-1 ${isProfileComplete ? 'text-emerald-700' : 'text-[#6E6E73]'}`}>Add contact details.</p>
              </div>
              {!isProfileComplete && <ChevronRight className="h-4 w-4 text-[#8E8E93] ml-auto mt-0.5" />}
           </div>

@@ -8,7 +8,7 @@ import {
   Wallet, Building, Loader2, CheckCircle2, Clock,
   XCircle, AlertTriangle, ArrowDownRight, RefreshCw, Info,
   TrendingUp, Percent, ExternalLink, Copy, ArrowRight,
-  ShieldCheck, Banknote, CircleDollarSign, ChevronRight, X, Plus, ArrowUpRight,
+  ShieldCheck, Banknote, CircleDollarSign, ChevronRight, X, Plus, ArrowUpRight, Lock, ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -66,10 +66,34 @@ export default function WalletPage() {
   const [userProfileLoading, setUserProfileLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "COMPLETED" | "REJECTED">("ALL");
+  const [isPaused, setIsPaused] = useState(false);
+  const [blockPayouts, setBlockPayouts] = useState(false);
+  const [gracePeriodEnd, setGracePeriodEnd] = useState<string | null>(null);
+  const [pausedAt, setPausedAt] = useState<string | null>(null);
 
   const balance = Number((session?.user as any)?.balance || 0);
 
-  useEffect(() => { fetchPayouts(); fetchUserProfile(); fetchStats(); }, []);
+  useEffect(() => { 
+    fetchPayouts(); 
+    fetchUserProfile(); 
+    fetchStats(); 
+    fetchRules();
+  }, []);
+
+  const fetchRules = async () => {
+    try {
+      const res = await fetch("/api/subscription/rules");
+      if (res.ok) {
+        const rules = await res.json();
+        setIsPaused(!!rules.isPaused);
+        setBlockPayouts(!!rules.blockPayouts);
+        setGracePeriodEnd(rules.gracePeriodEnd || null);
+        setPausedAt(rules.pausedAt || null);
+      }
+    } catch (err) {
+      console.error("Failed to fetch subscription rules in wallet:", err);
+    }
+  };
 
   const fetchStats = async () => {
     try { const r = await fetch("/api/wallet/stats"); if (r.ok) setStats(await r.json()); } catch {}
@@ -129,6 +153,35 @@ export default function WalletPage() {
   return (
     <div className="max-w-7xl mx-auto pt-6 pb-20 px-4 sm:px-6 space-y-6">
 
+      {isPaused && (
+        <div className="bg-[#FFF9E6] border border-[#FFE0A3] rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-amber-900">
+                Your account is currently paused. Payouts are restricted.
+              </p>
+              {(() => {
+                if (!pausedAt) return null;
+                const pausedDate = new Date(pausedAt);
+                const archivalDate = new Date(pausedDate.getTime() + 60 * 24 * 60 * 60 * 1000);
+                const now = new Date();
+                const diffTime = archivalDate.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) {
+                  return <p className="text-xs font-semibold text-red-600 mt-0.5">Flagged for manual database archival review due to prolonged inactivity.</p>;
+                } else {
+                  return <p className="text-xs font-semibold text-amber-700 mt-0.5">{diffDays} days remaining before database archival review.</p>;
+                }
+              })()}
+            </div>
+          </div>
+          <a href="/dashboard/owner/billing" className="inline-flex items-center justify-center font-bold bg-[#B25E00] hover:bg-[#804400] text-white rounded-xl text-xs px-4 py-2 shadow-xs transition-colors shrink-0">
+            Reactivate Subscription
+          </a>
+        </div>
+      )}
+
       {/* PAGE HEADER */}
       <div className="flex items-center justify-between">
         <div>
@@ -163,10 +216,31 @@ export default function WalletPage() {
               </div>
             </div>
             <div className="flex flex-col items-start sm:items-end gap-3">
-              <Button onClick={() => setPanelOpen(true)}
-                className="flex items-center gap-2 bg-white text-slate-900 hover:bg-[#F2F2F7] font-black h-11 px-6 rounded-xl shadow-sm text-sm transition-all">
-                <ArrowUpRight className="h-4 w-4" /> Withdraw Funds
-              </Button>
+               <Button 
+                 onClick={() => {
+                   if (blockPayouts) {
+                     toast.error("Your account is currently paused. Payouts are restricted.");
+                     return;
+                   }
+                   setPanelOpen(true);
+                 }}
+                 disabled={blockPayouts}
+                 className={`flex items-center gap-2 font-black h-11 px-6 rounded-xl shadow-sm text-sm transition-all ${
+                   blockPayouts 
+                     ? "bg-[#D1D1D6] text-[#8E8E93] cursor-not-allowed hover:bg-[#D1D1D6]" 
+                     : "bg-white text-slate-900 hover:bg-[#F2F2F7]"
+                 }`}
+               >
+                 {blockPayouts ? (
+                   <>
+                     <Lock className="h-4 w-4 text-[#8E8E93]" /> Payouts Locked
+                   </>
+                 ) : (
+                   <>
+                     <ArrowUpRight className="h-4 w-4" /> Withdraw Funds
+                   </>
+                 )}
+               </Button>
               {bankName && !userProfileLoading && (
                 <div className="flex items-center gap-2 text-[11px] text-[#8E8E93]">
                   <Building className="h-3.5 w-3.5" />
@@ -383,7 +457,24 @@ export default function WalletPage() {
 
             {/* Panel Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* Balance recap */}
+              {blockPayouts ? (
+                <div className="flex flex-col items-center justify-center text-center h-full max-w-sm mx-auto space-y-4">
+                  <div className="h-16 w-16 bg-amber-50 rounded-2xl border border-[#FFE0A3] flex items-center justify-center text-[#B25E00]">
+                    <Lock className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-base font-black text-slate-800">Payouts Locked</h3>
+                  <p className="text-xs text-[#6E6E73] font-medium leading-relaxed">
+                    Your account is currently paused due to a billing issue. Reactivate your subscription in billing settings to transfer funds.
+                  </p>
+                  <a href="/dashboard/owner/billing" className="w-full">
+                    <Button className="w-full bg-[#B25E00] hover:bg-[#804400] text-white font-bold h-11 rounded-xl shadow-xs">
+                      Reactivate Subscription
+                    </Button>
+                  </a>
+                </div>
+              ) : (
+                <>
+                  {/* Balance recap */}
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest mb-1">Available to Withdraw</p>
                 <p className="text-3xl font-black text-slate-900">${fmt(balance)}</p>
@@ -473,10 +564,12 @@ export default function WalletPage() {
                   )}
                 </>
               )}
-            </div>
+            </>
+          )}
+        </div>
 
             {/* Panel Footer */}
-            {bankName && (
+            {bankName && !blockPayouts && (
               <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 space-y-3">
                 <Button onClick={handleWithdraw as any} disabled={submitting || !isAmountValid}
                   className="w-full h-12 rounded-xl font-black text-sm bg-slate-900 hover:bg-[#007AFF] text-white disabled:opacity-40 transition-all">

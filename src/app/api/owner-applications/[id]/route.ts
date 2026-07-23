@@ -48,12 +48,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const placeholderPassword = crypto.randomBytes(32).toString("hex");
       const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
 
-      // Determine appropriate pricing tier based on portfolio size
-      const portfolioNumber = parseInt(application.portfolioSize.split("-")[0]) || 1;
-      const tier = await prisma.pricingTier.findFirst({
-        where: { isActive: true, minUnits: { lte: portfolioNumber }, maxUnits: { gte: portfolioNumber } },
-        orderBy: { minUnits: "asc" },
+      // Always auto-enroll approved owners onto the free Hobbyist tier (price = 0)
+      let tier = await prisma.pricingTier.findFirst({
+        where: { name: "Hobbyist", isActive: true }
       });
+      if (!tier) {
+        tier = await prisma.pricingTier.findFirst({
+          where: { price: 0, isActive: true }
+        });
+      }
 
       // Create the owner user
       const newUser = await prisma.user.create({
@@ -66,8 +69,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           accountStatus: "ACTIVE",
           employmentStatus: application.entityType === "BUSINESS" ? "BUSINESS" : "INDIVIDUAL",
           notes: `Approved from application. Entity: ${application.entityType}. Portfolio: ${application.portfolioSize}. Website: ${application.website || "N/A"}`,
-          currentTierId: tier?.id,
-          subscriptionStatus: tier?.price === 0 ? "active" : null,
+          currentTierId: tier?.id || null,
+          subscriptionStatus: tier ? "Active" : "Inactive",
         },
       });
 

@@ -339,6 +339,39 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       }
     }
   }
+  // ── 8.5 Subscription / Billing / Plan / Overlimits ──────────
+  else if (
+    type === "SUBSCRIPTION" ||
+    type === "BILLING" ||
+    t.includes("subscription") ||
+    t.includes("plan") ||
+    t.includes("grace period") ||
+    t.includes("payouts blocked") ||
+    t.includes("paused by admin") ||
+    t.includes("account re-activated") ||
+    t.includes("account reactivated") ||
+    t.includes("billing")
+  ) {
+    if (isAdmin) {
+      actions.push({
+        href: `/dashboard/admin/subscriptions`,
+        label: "Manage Owner Subscriptions",
+        description: "Open the admin dashboard to inspect owner subscription status, override locks, or review MRR.",
+        Icon: ClipboardList,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    } else if (userRole === "OWNER") {
+      actions.push({
+        href: `/dashboard/owner/billing`,
+        label: "Update Payment Details & Billing",
+        description: "Go to your billing overview to update cards, reactivate subscription plans, or review invoices.",
+        Icon: CreditCard,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    }
+  }
 
   // ── 9. Generic SYSTEM fallback ────────────────
   else {

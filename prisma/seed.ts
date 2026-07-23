@@ -105,16 +105,31 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.pricingTier.deleteMany();
   await prisma.platformSettings.deleteMany();
+  await prisma.processedStripeEvent.deleteMany();
+  await prisma.subscriptionHistory.deleteMany();
 
-  // ── SECTION 1: Platform Settings & Pricing Tiers ──────────────────────────
-  console.log("⚙️  Creating platform settings and pricing tiers...");
-  await (prisma as any).platformSettings.create({ data: { adminFeePercent: 2.00, tourCancellationWindowHours: 24 } });
+  await prisma.platformSettings.create({
+    data: {
+      adminFeePercent: 2.00,
+      tourCancellationWindowHours: 24,
+      gracePeriodDays: 7,
+      blockPayoutsOnPastDue: true,
+      blockPayoutsOnPaused: true,
+      blockNewUnitsOnPaused: true,
+      allowMaintenanceOnPaused: true,
+      blockAddVendorOnPaused: true,
+      blockAddInspectorOnPaused: true,
+      blockProcessApplicationsOnPaused: true,
+      blockAddTenantOnPaused: true,
+      blockTourSlotsOnPaused: true,
+    }
+  });
 
   const tiers = await Promise.all([
-    prisma.pricingTier.create({ data: { name: "Hobbyist", description: "Landlords just starting out", price: 0, minUnits: 1, maxUnits: 2, features: ["Up to 2 Units", "Basic Reporting"] } }),
-    prisma.pricingTier.create({ data: { name: "Starter", description: "Independent landlords", price: 29, minUnits: 3, maxUnits: 15, features: ["Up to 15 Units", "Ticketing", "Tenant Portal"] } }),
-    prisma.pricingTier.create({ data: { name: "Professional", description: "Growing portfolio management", price: 79, minUnits: 16, maxUnits: 50, features: ["Up to 50 Units", "Priority Support", "Financial Reports", "Vendor Management"] } }),
-    prisma.pricingTier.create({ data: { name: "Enterprise", description: "Large-scale property companies", price: 149, minUnits: 51, maxUnits: 9999, features: ["Unlimited Units", "Custom API", "Dedicated Account Manager", "White-Label Options"], isCustom: true } }),
+    prisma.pricingTier.create({ data: { name: "Hobbyist", description: "Landlords just starting out", price: 0, minUnits: 1, maxUnits: 2, features: ["Up to 2 Units", "Basic Reporting"], maxInspectors: 1, trialDays: 0 } }),
+    prisma.pricingTier.create({ data: { name: "Starter", description: "Independent landlords", price: 29, minUnits: 3, maxUnits: 15, features: ["Up to 15 Units", "Ticketing", "Tenant Portal"], maxInspectors: 3, trialDays: 14 } }),
+    prisma.pricingTier.create({ data: { name: "Professional", description: "Growing portfolio management", price: 79, minUnits: 16, maxUnits: 50, features: ["Up to 50 Units", "Priority Support", "Financial Reports", "Vendor Management"], maxInspectors: 10, trialDays: 14 } }),
+    prisma.pricingTier.create({ data: { name: "Enterprise", description: "Large-scale property companies", price: 149, minUnits: 51, maxUnits: 9999, features: ["Unlimited Units", "Custom API", "Dedicated Account Manager", "White-Label Options"], isCustom: true, maxInspectors: 50, trialDays: 30 } }),
   ]);
   const [hobbyistTier, starterTier, proTier] = tiers;
 
@@ -136,6 +151,10 @@ async function main() {
       bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow",
       balance: 28750.50,
       currentTierId: proTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
+      stripeCustomerId: "cus_demo_atlas_123",
+      stripeSubscriptionId: "sub_demo_atlas_456",
+      cardBrand: "visa",
+      cardLast4: "4242",
       creditScore: 800, hasCompletedOnboarding: true, onboardingStep: 4,
       approvalThreshold: 500.00, emergencyOverrideLimit: 2000.00,
     },
@@ -149,6 +168,10 @@ async function main() {
       bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow",
       balance: 9200.00,
       currentTierId: starterTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
+      stripeCustomerId: "cus_demo_coastal_789",
+      stripeSubscriptionId: "sub_demo_coastal_012",
+      cardBrand: "mastercard",
+      cardLast4: "5555",
       creditScore: 760, hasCompletedOnboarding: true, onboardingStep: 4,
       approvalThreshold: 300.00, emergencyOverrideLimit: 1500.00,
     },
@@ -159,33 +182,132 @@ async function main() {
     data: {
       email: "owner.patel@yopmail.com", name: "Raj Patel", password: passwordHash, role: Role.OWNER,
       phone: "+1 408-555-0300",
-      currentTierId: hobbyistTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
+      currentTierId: hobbyistTier.id, subscriptionStatus: "Past_Due", accountStatus: "ACTIVE",
+      stripeCustomerId: "cus_demo_patel_345",
       creditScore: 720, hasCompletedOnboarding: false, onboardingStep: 2,
     },
   });
 
+  // SubscriptionOverride for Raj Patel: allow payouts despite being Past_Due
+  await prisma.subscriptionOverride.create({
+    data: {
+      userId: ownerPatel.id,
+      blockPayouts: false,
+      reason: "Payment dispute in progress — admin approved payout bypass",
+      adminId: admin.id,
+    }
+  });
+
   // Owner 4: Alex Morgan — FIRST-TIME LOGIN (no onboarding, no properties)
-  await prisma.user.create({
+  const ownerNew = await prisma.user.create({
     data: {
       email: "owner.new@yopmail.com", name: "Alex Morgan", password: passwordHash, role: Role.OWNER,
       phone: "+1 213-555-0400",
-      currentTierId: starterTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
+      currentTierId: hobbyistTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
       hasCompletedOnboarding: false, onboardingStep: 0, // ← sees full onboarding wizard
     },
   });
 
+  // Owner Paused: James Carter (Starter tier, Paused status, 10 units, 2 properties)
+  const ownerPaused = await prisma.user.create({
+    data: {
+      email: "james.carter@demo.com",
+      name: "James Carter",
+      password: passwordHash,
+      role: Role.OWNER,
+      phone: "+1 213-555-0450",
+      bankName: "Bank of America",
+      accountNumber: encrypt("999988887777"),
+      accountName: "Carter Properties Escrow",
+      balance: 1540.00,
+      currentTierId: starterTier.id,
+      subscriptionStatus: "Paused",
+      pausedAt: dDaysBefore(2),
+      payoutsBlockedAt: dDaysBefore(2),
+      accountStatus: "ACTIVE",
+      creditScore: 680,
+      hasCompletedOnboarding: true,
+      onboardingStep: 4,
+      approvalThreshold: 200.00,
+      emergencyOverrideLimit: 1200.00,
+      stripeCustomerId: "cus_demo_carter_123",
+      stripeSubscriptionId: "sub_demo_carter_456",
+      cardBrand: "visa",
+      cardLast4: "4242",
+      trialUsedTierIds: [starterTier.id],
+    }
+  });
+
+  // Owner Paused Impending Archival: James Impending (Starter tier, Paused status, 55 days ago)
+  const ownerPausedImpending = await prisma.user.create({
+    data: {
+      email: "james.impending@demo.com",
+      name: "James Impending",
+      password: passwordHash,
+      role: Role.OWNER,
+      phone: "+1 213-555-0460",
+      bankName: "Bank of America",
+      accountNumber: encrypt("111122223333"),
+      accountName: "Impending Properties Escrow",
+      balance: 500.00,
+      currentTierId: starterTier.id,
+      subscriptionStatus: "Paused",
+      pausedAt: dDaysBefore(55),
+      payoutsBlockedAt: dDaysBefore(55),
+      accountStatus: "ACTIVE",
+      creditScore: 650,
+      hasCompletedOnboarding: true,
+      onboardingStep: 4,
+      approvalThreshold: 200.00,
+      emergencyOverrideLimit: 1200.00,
+      stripeCustomerId: "cus_demo_impending_789",
+      stripeSubscriptionId: "sub_demo_impending_012",
+      cardBrand: "mastercard",
+      cardLast4: "5555",
+      trialUsedTierIds: [starterTier.id],
+    }
+  });
+
   // ── Inspectors ──
+  console.log("🔍 Seeding internal inspectors linked to owners according to subscription plans...");
+  // Atlas (Pro tier, max 10, seeding 3)
   const inspectorJake = await prisma.user.create({
-    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE" },
+    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
   });
   await prisma.user.create({
-    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE" },
+    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
   });
   await prisma.user.create({
-    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE" },
+    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
+  });
+
+  // Coastal (Starter tier, max 3, seeding 2)
+  await prisma.user.create({
+    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
   });
   await prisma.user.create({
-    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE" },
+    data: { email: "inspector.coastal2@yopmail.com", name: "Alex Wong", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2003", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
+  });
+
+  // Patel (Hobbyist tier, max 1, seeding 1)
+  await prisma.user.create({
+    data: { email: "inspector.patel1@yopmail.com", name: "Kumar Patel", password: passwordHash, role: Role.INSPECTOR, phone: "+1 408-555-3001", accountStatus: "ACTIVE", ownerId: ownerPatel.id },
+  });
+
+  // James Carter (Starter tier, max 3, seeding 2)
+  await prisma.user.create({
+    data: { email: "inspector.carter1@yopmail.com", name: "Tom Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4001", accountStatus: "ACTIVE", ownerId: ownerPaused.id },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.carter2@yopmail.com", name: "Jerry Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4002", accountStatus: "ACTIVE", ownerId: ownerPaused.id },
+  });
+
+  // James Impending (Starter tier, max 3, seeding 2)
+  await prisma.user.create({
+    data: { email: "inspector.impending1@yopmail.com", name: "Frank Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5001", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.impending2@yopmail.com", name: "Alice Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5002", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id },
   });
 
   // ── Tenants ──
@@ -227,6 +349,149 @@ async function main() {
     data: { email: "tenant.new@yopmail.com", name: "Sam Taylor", password: passwordHash, role: Role.TENANT, phone: "+1 213-555-5001", tenantStatus: "Pending Onboarding", creditScore: 700, annualIncome: 58000 },
   });
 
+  // ── SECTION 2.5: Subscription History Events (for SaaS Billing Audits) ──
+  console.log("📈 Seeding subscription history event stream...");
+  
+  // Owner 1 (Atlas): Hobbyist -> Starter -> Pro
+  await prisma.subscriptionHistory.createMany({
+    data: [
+      {
+        userId: ownerAtlas.id,
+        toTierId: hobbyistTier.id,
+        toTierName: hobbyistTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 0,
+        createdAt: dBefore(6),
+      },
+      {
+        userId: ownerAtlas.id,
+        fromTierId: hobbyistTier.id,
+        fromTierName: hobbyistTier.name,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "UPGRADED",
+        amountPaid: 29.00,
+        createdAt: dBefore(4),
+      },
+      {
+        userId: ownerAtlas.id,
+        fromTierId: starterTier.id,
+        fromTierName: starterTier.name,
+        toTierId: proTier.id,
+        toTierName: proTier.name,
+        event: "UPGRADED",
+        amountPaid: 79.00,
+        createdAt: dBefore(2),
+      },
+    ]
+  });
+
+  // Owner 2 (Coastal): Subscribed -> Canceled -> Reactivated
+  await prisma.subscriptionHistory.createMany({
+    data: [
+      {
+        userId: ownerCoastal.id,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 29.00,
+        createdAt: dBefore(3),
+      },
+      {
+        userId: ownerCoastal.id,
+        fromTierId: starterTier.id,
+        fromTierName: starterTier.name,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "CANCELED",
+        amountPaid: 0,
+        createdAt: dBefore(1.5),
+      },
+      {
+        userId: ownerCoastal.id,
+        fromTierId: starterTier.id,
+        fromTierName: starterTier.name,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "REACTIVATED",
+        amountPaid: 29.00,
+        createdAt: dBefore(1),
+      },
+    ]
+  });
+
+  // Owner 3 (Patel): Subscribed -> Past Due
+  await prisma.subscriptionHistory.createMany({
+    data: [
+      {
+        userId: ownerPatel.id,
+        toTierId: hobbyistTier.id,
+        toTierName: hobbyistTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 0,
+        createdAt: dBefore(2),
+      },
+      {
+        userId: ownerPatel.id,
+        fromTierId: hobbyistTier.id,
+        fromTierName: hobbyistTier.name,
+        toTierId: hobbyistTier.id,
+        toTierName: hobbyistTier.name,
+        event: "PAST_DUE",
+        amountPaid: 0,
+        createdAt: dDaysBefore(10),
+      },
+    ]
+  });
+
+  // Owner Paused: James Carter (Subscribed -> Paused)
+  await prisma.subscriptionHistory.createMany({
+    data: [
+      {
+        userId: ownerPaused.id,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 29.00,
+        createdAt: dDaysBefore(180),
+      },
+      {
+        userId: ownerPaused.id,
+        fromTierId: starterTier.id,
+        fromTierName: starterTier.name,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "PAUSED",
+        amountPaid: 0,
+        createdAt: dDaysBefore(2),
+      }
+    ]
+  });
+
+  // Owner Paused Impending: James Impending (Subscribed -> Paused)
+  await prisma.subscriptionHistory.createMany({
+    data: [
+      {
+        userId: ownerPausedImpending.id,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 29.00,
+        createdAt: dDaysBefore(180),
+      },
+      {
+        userId: ownerPausedImpending.id,
+        fromTierId: starterTier.id,
+        fromTierName: starterTier.name,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "PAUSED",
+        amountPaid: 0,
+        createdAt: dDaysBefore(55),
+      }
+    ]
+  });
+
   // ── SECTION 3: External Vendors ────────────────────────────────────────────
   console.log("🔧 Creating external vendors...");
 
@@ -247,6 +512,27 @@ async function main() {
   });
   await prisma.externalVendor.create({
     data: { name: "Bay Area Electrical", email: "vendor.bayelectric@yopmail.com", phone: "+1 415-555-7002", specialty: "Electrical", w9OnFile: false, insuranceOnFile: true, baseCallOutFee: 110.0, ownerId: ownerCoastal.id, bankName: "Citibank", routingNumber: encrypt("321171184"), accountNumber: encrypt("111222333") },
+  });
+
+  // Raj Patel vendors (1)
+  await prisma.externalVendor.create({
+    data: { name: "Patel Painting & Repair", email: "vendor.patel1@yopmail.com", phone: "+1 408-555-6001", specialty: "General", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 85.0, ownerId: ownerPatel.id },
+  });
+
+  // James Carter vendors (2)
+  await prisma.externalVendor.create({
+    data: { name: "Carter Handyman Services", email: "vendor.carter1@yopmail.com", phone: "+1 213-555-8001", specialty: "General", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 90.0, ownerId: ownerPaused.id },
+  });
+  await prisma.externalVendor.create({
+    data: { name: "Carter Roofing Services", email: "vendor.carter2@yopmail.com", phone: "+1 213-555-8002", specialty: "Roofing", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 150.0, ownerId: ownerPaused.id },
+  });
+
+  // James Impending vendors (2)
+  await prisma.externalVendor.create({
+    data: { name: "Impending Electric Services", email: "vendor.impending1@yopmail.com", phone: "+1 213-555-9001", specialty: "Electrical", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 100.0, ownerId: ownerPausedImpending.id },
+  });
+  await prisma.externalVendor.create({
+    data: { name: "Impending Plumbing Services", email: "vendor.impending2@yopmail.com", phone: "+1 213-555-9002", specialty: "Plumbing", w9OnFile: true, insuranceOnFile: true, baseCallOutFee: 95.0, ownerId: ownerPausedImpending.id },
   });
 
   // ── SECTION 4: Properties & Units ──────────────────────────────────────────
@@ -345,6 +631,453 @@ async function main() {
         { name: "Main Home", type: "House", rentAmount: 4200, depositAmt: 4200, rooms: 3, bathrooms: 2, sqFootage: 1850, status: "VACANT", maxOccupants: 5 },
       ]},
     },
+  });
+
+  // ── Property 6: Carter Square (Apartment, James Carter) ──
+  const propCarterSquare = await prisma.property.create({
+    data: {
+      name: "Carter Square", address: "404 Main Street", city: "Los Angeles", state: "CA", zip: "90012", country: "USA",
+      type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
+      yearBuilt: 2012, description: "A quiet, cozy apartment complex.", parkingSpaces: 20,
+      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      units: { create: [
+        { name: "Unit A1", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
+        { name: "Unit A2", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
+        { name: "Unit A3", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
+        { name: "Unit A4", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" },
+        { name: "Unit A5", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" },
+        { name: "Unit A6", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "VACANT" },
+      ]},
+    },
+    include: { units: true }
+  });
+
+  // ── Property 7: Carter Heights (Apartment, James Carter) ──
+  const propCarterHeights = await prisma.property.create({
+    data: {
+      name: "Carter Heights", address: "808 Hilltop Road", city: "Los Angeles", state: "CA", zip: "90028", country: "USA",
+      type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
+      yearBuilt: 2016, description: "Modern units with a view.", parkingSpaces: 10,
+      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      units: { create: [
+        { name: "Unit B1", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "OCCUPIED" },
+        { name: "Unit B2", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
+        { name: "Unit B3", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
+        { name: "Unit B4", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
+      ]},
+    },
+    include: { units: true }
+  });
+
+  // ── Property 8: Impending Plaza (Apartment, James Impending) ──
+  const propImpendingPlaza = await prisma.property.create({
+    data: {
+      name: "Impending Plaza", address: "777 Clock Tower Ave", city: "Los Angeles", state: "CA", zip: "90036", country: "USA",
+      type: "Apartment", ownerId: ownerPausedImpending.id, approvalStatus: "APPROVED",
+      yearBuilt: 2014, description: "A beautifully maintained apartment community near downtown.", parkingSpaces: 15,
+      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      units: { create: [
+        { name: "Unit 101", type: "Apartment", rentAmount: 1900, depositAmt: 1900, rooms: 1, bathrooms: 1, sqFootage: 700, status: "VACANT" },
+        { name: "Unit 102", type: "Apartment", rentAmount: 2300, depositAmt: 2300, rooms: 2, bathrooms: 2, sqFootage: 950, status: "OCCUPIED" },
+      ]},
+    },
+    include: { units: true }
+  });
+
+  // Create 6 new tenant users for James Carter
+  const carterTenants = [];
+  for (let i = 1; i <= 6; i++) {
+    const t = await prisma.user.create({
+      data: {
+        email: `tenant.carter${i}@yopmail.com`,
+        name: `Carter Tenant ${i}`,
+        password: passwordHash,
+        role: Role.TENANT,
+        phone: `+1 213-555-900${i}`,
+        tenantStatus: "Active",
+        creditScore: 700,
+        annualIncome: 80000,
+      }
+    });
+    carterTenants.push(t);
+  }
+
+  // Active Leases for Carter Square & Heights
+  const carterUnits = [
+    propCarterSquare.units[0], // A1
+    propCarterSquare.units[1], // A2
+    propCarterSquare.units[2], // A3
+    propCarterSquare.units[3], // A4
+    propCarterSquare.units[4], // A5
+    propCarterHeights.units[0], // B1
+  ];
+
+  for (let i = 0; i < 6; i++) {
+    const lease = await prisma.lease.create({
+      data: {
+        unitId: carterUnits[i].id,
+        tenantId: carterTenants[i].id,
+        status: "ACTIVE",
+        startDate: dBefore(6),
+        endDate: dAfter(6),
+        monthlyRent: carterUnits[i].rentAmount,
+        securityDeposit: carterUnits[i].depositAmt,
+        depositStatus: "HELD",
+        depositBalance: carterUnits[i].depositAmt,
+        depositPaidAt: dBefore(6),
+        depositPaidAmount: carterUnits[i].depositAmt,
+        signedAt: dBefore(6),
+        keysHandedOverAt: dBefore(6),
+        rentDueDay: 1,
+        gracePeriodDays: 5,
+        lateFeeAmount: 100,
+      }
+    });
+
+    // Create 6 months of paid rent invoices and matching transactions for James Carter
+    for (let m = 6; m >= 1; m--) {
+      const invoiceDate = dBefore(m);
+      invoiceDate.setDate(1);
+
+      const amount = Number(carterUnits[i].rentAmount);
+      const processingFee = amount * 0.029;
+      const adminFee = amount * 0.02;
+      const netToOwner = amount - adminFee;
+      const grossPaid = amount + processingFee;
+
+      const invoice = await prisma.invoice.create({
+        data: {
+          leaseId: lease.id,
+          amount,
+          dueDate: invoiceDate,
+          status: "PAID",
+          paymentMethod: "STRIPE",
+          invoiceType: "RENT",
+          processingFee,
+          adminFee,
+          netToOwner,
+          grossPaid,
+          createdAt: invoiceDate,
+        }
+      });
+
+      await prisma.transaction.create({
+        data: {
+          type: "INCOME",
+          category: "RENT",
+          amount,
+          reference: `STRIPE_PI_M${m}_${lease.id.slice(-4).toUpperCase()}`,
+          status: "COMPLETED",
+          tenantId: carterTenants[i].id,
+          invoiceId: invoice.id,
+          createdAt: invoiceDate,
+        }
+      });
+    }
+
+    // Unpaid/Overdue rent invoice for current month
+    const currentMonthDueDate = new Date();
+    currentMonthDueDate.setDate(1);
+
+    await prisma.invoice.create({
+      data: {
+        leaseId: lease.id,
+        amount: carterUnits[i].rentAmount,
+        dueDate: currentMonthDueDate,
+        status: i === 0 ? "UNPAID" : "PAID",
+        paymentMethod: i === 0 ? null : "STRIPE",
+        invoiceType: "RENT",
+        processingFee: Number(carterUnits[i].rentAmount) * 0.029,
+        adminFee: Number(carterUnits[i].rentAmount) * 0.02,
+        netToOwner: Number(carterUnits[i].rentAmount) * 0.98,
+        grossPaid: Number(carterUnits[i].rentAmount) * 1.029,
+        createdAt: currentMonthDueDate,
+      }
+    });
+  }
+
+  // Create completed payouts to show real history for James Carter
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPaused.id,
+      amount: 4000.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("999988887777"),
+      accountName: "Carter Properties Escrow",
+      status: PayoutStatus.COMPLETED,
+      disbursedAt: dBefore(5),
+      refNumber: "WIRE-CARTER-M5",
+      createdAt: dBefore(5),
+    }
+  });
+
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPaused.id,
+      amount: 4500.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("999988887777"),
+      accountName: "Carter Properties Escrow",
+      status: PayoutStatus.COMPLETED,
+      disbursedAt: dBefore(3),
+      refNumber: "WIRE-CARTER-M3",
+      createdAt: dBefore(3),
+    }
+  });
+
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPaused.id,
+      amount: 4800.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("999988887777"),
+      accountName: "Carter Properties Escrow",
+      status: PayoutStatus.COMPLETED,
+      disbursedAt: dBefore(1),
+      refNumber: "WIRE-CARTER-M1",
+      createdAt: dBefore(1),
+    }
+  });
+
+  // Seed 1 pending payout request for James Carter (to test soft-lock withdrawals)
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPaused.id,
+      amount: 500.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("999988887777"),
+      accountName: "Carter Properties Escrow",
+      status: PayoutStatus.PENDING,
+      createdAt: dDaysBefore(1),
+    }
+  });
+
+  // Seed Subscription History for James Carter
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPaused.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "SUBSCRIBED",
+      amountPaid: 29.00,
+      createdAt: dBefore(6),
+    }
+  });
+
+  for (let m = 5; m >= 1; m--) {
+    await prisma.subscriptionHistory.create({
+      data: {
+        userId: ownerPaused.id,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 29.00,
+        createdAt: dBefore(m),
+      }
+    });
+  }
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPaused.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "PAST_DUE",
+      createdAt: dDaysBefore(9),
+    }
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPaused.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "PAUSED",
+      createdAt: dDaysBefore(2),
+    }
+  });
+
+  // Create a tenant for James Impending
+  const impendingTenant = await prisma.user.create({
+    data: {
+      email: "tenant.impending@yopmail.com",
+      name: "Impending Tenant 1",
+      password: passwordHash,
+      role: Role.TENANT,
+      phone: "+1 213-555-9010",
+      tenantStatus: "Active",
+      creditScore: 710,
+      annualIncome: 95000,
+    }
+  });
+
+  // Lease for James Impending Unit 102
+  const leaseImpending = await prisma.lease.create({
+    data: {
+      unitId: propImpendingPlaza.units.find(u => u.name === "Unit 102")!.id,
+      tenantId: impendingTenant.id,
+      status: "ACTIVE",
+      startDate: dBefore(6),
+      endDate: dAfter(6),
+      monthlyRent: 2300,
+      securityDeposit: 2300,
+      depositStatus: "HELD",
+      depositBalance: 2300,
+      depositPaidAt: dBefore(6),
+      depositPaidAmount: 2300,
+      signedAt: dBefore(6),
+      keysHandedOverAt: dBefore(6),
+      rentDueDay: 1,
+      gracePeriodDays: 5,
+      lateFeeAmount: 100,
+    }
+  });
+
+  // Create 6 months of paid rent invoices and matching transactions for James Impending
+  for (let m = 6; m >= 1; m--) {
+    const invoiceDate = dBefore(m);
+    invoiceDate.setDate(1);
+
+    const amount = 2300;
+    const processingFee = amount * 0.029;
+    const adminFee = amount * 0.02;
+    const netToOwner = amount - adminFee;
+    const grossPaid = amount + processingFee;
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        leaseId: leaseImpending.id,
+        amount,
+        dueDate: invoiceDate,
+        status: "PAID",
+        paymentMethod: "STRIPE",
+        invoiceType: "RENT",
+        processingFee,
+        adminFee,
+        netToOwner,
+        grossPaid,
+        createdAt: invoiceDate,
+      }
+    });
+
+    await prisma.transaction.create({
+      data: {
+        type: "INCOME",
+        category: "RENT",
+        amount,
+        reference: `STRIPE_PI_M${m}_${leaseImpending.id.slice(-4).toUpperCase()}`,
+        status: "COMPLETED",
+        tenantId: impendingTenant.id,
+        invoiceId: invoice.id,
+        createdAt: invoiceDate,
+      }
+    });
+  }
+
+  // Create current month's UNPAID invoice for James Impending
+  const currentMonthDueImpending = new Date();
+  currentMonthDueImpending.setDate(1);
+
+  await prisma.invoice.create({
+    data: {
+      leaseId: leaseImpending.id,
+      amount: 2300,
+      dueDate: currentMonthDueImpending,
+      status: "UNPAID",
+      invoiceType: "RENT",
+      processingFee: 2300 * 0.029,
+      adminFee: 2300 * 0.02,
+      netToOwner: 2300 * 0.98,
+      grossPaid: 2300 * 1.029,
+      createdAt: currentMonthDueImpending,
+    }
+  });
+
+  // Create past completed payouts for James Impending
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPausedImpending.id,
+      amount: 2000.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("111122223333"),
+      accountName: "Impending Properties Escrow",
+      status: PayoutStatus.COMPLETED,
+      disbursedAt: dBefore(4),
+      refNumber: "WIRE-IMPENDING-M4",
+      createdAt: dBefore(4),
+    }
+  });
+
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPausedImpending.id,
+      amount: 2100.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("111122223333"),
+      accountName: "Impending Properties Escrow",
+      status: PayoutStatus.COMPLETED,
+      disbursedAt: dBefore(2),
+      refNumber: "WIRE-IMPENDING-M2",
+      createdAt: dBefore(2),
+    }
+  });
+
+  // Seed 1 pending payout request for James Impending
+  await prisma.payoutRequest.create({
+    data: {
+      ownerId: ownerPausedImpending.id,
+      amount: 350.00,
+      bankName: "Bank of America",
+      accountNumber: encrypt("111122223333"),
+      accountName: "Impending Properties Escrow",
+      status: PayoutStatus.PENDING,
+      createdAt: dDaysBefore(1),
+    }
+  });
+
+  // Seed Subscription History for James Impending
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPausedImpending.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "SUBSCRIBED",
+      amountPaid: 29.00,
+      createdAt: dBefore(6),
+    }
+  });
+
+  for (let m = 5; m >= 1; m--) {
+    await prisma.subscriptionHistory.create({
+      data: {
+        userId: ownerPausedImpending.id,
+        toTierId: starterTier.id,
+        toTierName: starterTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 29.00,
+        createdAt: dBefore(m),
+      }
+    });
+  }
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPausedImpending.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "PAST_DUE",
+      createdAt: dDaysBefore(62),
+    }
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPausedImpending.id,
+      toTierId: starterTier.id,
+      toTierName: starterTier.name,
+      event: "PAUSED",
+      createdAt: dDaysBefore(55),
+    }
   });
 
   // ── SECTION 5: Leases ──────────────────────────────────────────────────────
@@ -720,6 +1453,36 @@ async function main() {
     },
   });
 
+  // Maintenance Request 13: Loose Handrail (Carter Square, James Carter)
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: propCarterSquare.units.find(u => u.name === "Unit A1")!.id,
+      tenantId: carterTenants[0].id,
+      title: "Wobbly Staircase Handrail",
+      description: "The handrail on the stairs leading to the second floor is loose and wobbly.",
+      category: "GENERAL",
+      priority: "HIGH",
+      status: "SUBMITTED",
+      entryPermission: true,
+      photos: [IMG.maint.brokenWindow],
+    },
+  });
+
+  // Maintenance Request 14: Leaking sink (Impending Plaza, James Impending)
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: propImpendingPlaza.units.find(u => u.name === "Unit 102")!.id,
+      tenantId: carterTenants[1].id,
+      title: "Leaky Kitchen Faucet",
+      description: "The kitchen faucet is dripping constantly from the base.",
+      category: "PLUMBING",
+      priority: "LOW",
+      status: "SUBMITTED",
+      entryPermission: true,
+      photos: [IMG.maint.leak],
+    },
+  });
+
   // ── SECTION 8: Owner Payout Requests ──────────────────────────────────────
   console.log("💰 Creating payout requests and financial records...");
 
@@ -768,6 +1531,33 @@ async function main() {
     data: {
       ownerId: ownerCoastal.id,
       workingHours: coastalWorkingHours,
+      blackoutDates: [],
+      timezone: "America/Los_Angeles",
+    },
+  });
+
+  const carterWorkingHours = {
+    monday:    { start: "09:00", end: "17:00", enabled: true },
+    tuesday:   { start: "09:00", end: "17:00", enabled: true },
+    wednesday: { start: "09:00", end: "17:00", enabled: true },
+    thursday:  { start: "09:00", end: "17:00", enabled: true },
+    friday:    { start: "09:00", end: "17:00", enabled: true },
+    saturday:  { start: "09:00", end: "12:00", enabled: false },
+    sunday:    { start: "09:00", end: "12:00", enabled: false },
+  };
+  await (prisma as any).ownerAvailability.create({
+    data: {
+      ownerId: ownerPaused.id,
+      workingHours: carterWorkingHours,
+      blackoutDates: [],
+      timezone: "America/Los_Angeles",
+    },
+  });
+
+  await (prisma as any).ownerAvailability.create({
+    data: {
+      ownerId: ownerPausedImpending.id,
+      workingHours: carterWorkingHours,
       blackoutDates: [],
       timezone: "America/Los_Angeles",
     },
@@ -963,6 +1753,38 @@ async function main() {
     } as any,
   });
 
+  // Tour 11: Pending Tour for James Carter (to test pending count / welcome banner)
+  await prisma.tour.create({
+    data: {
+      propertyId: propCarterSquare.id,
+      unitId: propCarterSquare.units.find(u => u.name === "Unit A6")!.id,
+      tenantName: "Michael Scott",
+      tenantEmail: "michael.scott@dundermifflin.com",
+      tenantPhone: "+1 570-555-0199",
+      tenantMessage: "I want to schedule a showing for next week. Would love to see the balcony.",
+      tourType: TourType.IN_PERSON,
+      scheduledAt: dDaysAfter(6),
+      status: TourStatus.PENDING,
+      verifiedEmail: true,
+    },
+  });
+
+  // Tour 12: Pending Tour for James Impending (to test pending count)
+  await prisma.tour.create({
+    data: {
+      propertyId: propImpendingPlaza.id,
+      unitId: propImpendingPlaza.units.find(u => u.name === "Unit 101")!.id,
+      tenantName: "Jim Halpert",
+      tenantEmail: "jim.halpert@dundermifflin.com",
+      tenantPhone: "+1 570-555-0120",
+      tenantMessage: "Is this unit available for virtual showings?",
+      tourType: TourType.VIDEO_CALL,
+      scheduledAt: dDaysAfter(4),
+      status: TourStatus.PENDING,
+      verifiedEmail: true,
+    },
+  });
+
   // ── SECTION 10: Applications ──────────────────────────────────────────────
   // Pending application (Unit 106)
   await prisma.application.create({
@@ -1014,6 +1836,48 @@ async function main() {
       employerName: "Vertex Analytics Inc.", jobTitle: "Business", monthlyIncome: 150000,
       hasGuarantor: false, reasonForMoving: "Business expansion into SF financial district",
       backgroundCheckConsent: true, agreedToTerms: true,
+    },
+  });
+
+  // Pending application for James Carter (Unit A6 - Vacant)
+  await prisma.application.create({
+    data: {
+      unitId: propCarterSquare.units.find(u => u.name === "Unit A6")!.id,
+      name: "Pam Beesly",
+      email: "pam.beesly@dundermifflin.com",
+      phone: "+1 570-555-0144",
+      status: "PENDING",
+      leaseDuration: 12,
+      moveInDate: dDaysAfter(30),
+      occupantsCount: 1,
+      employerName: "Dunder Mifflin Paper Co",
+      jobTitle: "Receptionist",
+      monthlyIncome: 4500,
+      hasGuarantor: false,
+      reasonForMoving: "Closer to work",
+      backgroundCheckConsent: true,
+      agreedToTerms: true,
+    },
+  });
+
+  // Pending application for James Impending (Unit 101 - Vacant)
+  await prisma.application.create({
+    data: {
+      unitId: propImpendingPlaza.units.find(u => u.name === "Unit 101")!.id,
+      name: "Dwight Schrute",
+      email: "dwight.schrute@dundermifflin.com",
+      phone: "+1 570-555-0100",
+      status: "PENDING",
+      leaseDuration: 12,
+      moveInDate: dDaysAfter(15),
+      occupantsCount: 1,
+      employerName: "Schrute Farms",
+      jobTitle: "Owner / Sales",
+      monthlyIncome: 12000,
+      hasGuarantor: false,
+      reasonForMoving: "Expanding fields",
+      backgroundCheckConsent: true,
+      agreedToTerms: true,
     },
   });
 

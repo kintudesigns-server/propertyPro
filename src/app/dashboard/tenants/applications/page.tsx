@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, MoreVertical, Eye, RefreshCw, FileText, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Search, MoreVertical, Eye, RefreshCw, FileText, CheckCircle2, XCircle, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ReasonModal } from "@/components/ui/ReasonModal";
 
@@ -20,6 +20,10 @@ export default function ApplicationsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [rejectAppId, setRejectAppId] = useState<string | null>(null);
+
+  const [isPausedAccount, setIsPausedAccount] = useState(false);
+  const [pausedPlanName, setPausedPlanName] = useState<string | null>(null);
+  const [blockProcessApplications, setBlockProcessApplications] = useState(false);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -37,6 +41,10 @@ export default function ApplicationsPage() {
   };
 
   const handleUpdateStatus = async (appId: string, status: string, reason = "") => {
+    if (blockProcessApplications) {
+      toast.error("Your account is currently paused. Processing applications is restricted.");
+      return;
+    }
 
     try {
       const res = await fetch(`/api/applications/${appId}`, {
@@ -58,6 +66,10 @@ export default function ApplicationsPage() {
   };
 
   const handleApproveAndDraft = async (app: any) => {
+    if (blockProcessApplications) {
+      toast.error("Your account is currently paused. Processing applications is restricted.");
+      return;
+    }
     try {
       const res = await fetch(`/api/applications/${app.id}`, {
         method: "PATCH",
@@ -104,6 +116,26 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     fetchApplications();
+    const checkSubscription = async () => {
+      try {
+        const userRes = await fetch("/api/users");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          const rulesRes = await fetch("/api/subscription/rules");
+          if (rulesRes.ok) {
+            const rules = await rulesRes.json();
+            if (rules.isPaused && rules.blockProcessApplications) {
+              setIsPausedAccount(true);
+              setPausedPlanName(userData.pricingTier?.name || null);
+              setBlockProcessApplications(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Subscription check failed on applications page:", err);
+      }
+    };
+    checkSubscription();
   }, []);
 
   const filteredApps = applications.filter(app => {
@@ -116,6 +148,25 @@ export default function ApplicationsPage() {
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       
+      {isPausedAccount && blockProcessApplications && (
+        <div className="bg-[#FFF9E6] border border-[#FFE0A3] rounded-2xl p-5 shadow-xs flex items-start gap-3.5 animate-in fade-in slide-in-from-top-4">
+          <AlertCircle className="h-5 w-5 text-[#B25E00] shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-extrabold text-[#5C3300] text-sm">Application Processing Suspended</h4>
+            <p className="text-xs text-[#804400] mt-1 font-semibold">
+              Your subscription is currently paused. You can view applicant details, but approving or rejecting applications is temporarily restricted.
+            </p>
+            <p className="text-xs text-[#804400] mt-1.5">
+              Reactivate your subscription in{" "}
+              <a href="/dashboard/owner/billing" className="underline font-black hover:text-[#5C3300]">
+                Billing Settings
+              </a>{" "}
+              to resume application processing.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -213,25 +264,52 @@ export default function ApplicationsPage() {
                               </DropdownMenuItem>
                               {app.status === "PENDING" && (
                                 <>
-                                  <DropdownMenuItem onClick={() => handleApproveAndDraft(app)} className="cursor-pointer font-bold text-[#16A34A] rounded-lg">
-                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#16A34A]" /> Approve & Draft Lease
+                                  <DropdownMenuItem 
+                                    onClick={() => !blockProcessApplications && handleApproveAndDraft(app)} 
+                                    className={`font-bold rounded-lg ${blockProcessApplications ? 'text-[#8E8E93] cursor-not-allowed opacity-50' : 'text-[#16A34A] cursor-pointer'}`}
+                                  >
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#16A34A]" /> Approve & Draft Lease {blockProcessApplications && "🔒"}
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "APPROVED")} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
-                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#94A3B8]" /> Approve (Only)
+                                  <DropdownMenuItem 
+                                    onClick={() => !blockProcessApplications && handleUpdateStatus(app.id, "APPROVED")} 
+                                    className={`font-semibold rounded-lg ${blockProcessApplications ? 'text-[#8E8E93] cursor-not-allowed opacity-50' : 'text-[#1D1D1F] cursor-pointer'}`}
+                                  >
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-[#94A3B8]" /> Approve (Only) {blockProcessApplications && "🔒"}
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => setRejectAppId(app.id)} className="cursor-pointer font-semibold text-rose-600 rounded-lg">
-                                    <XCircle className="mr-2 h-4 w-4 text-[#FDA4AF]" /> Reject Application
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      if (blockProcessApplications) {
+                                        toast.error("Your account is currently paused. Processing applications is restricted.");
+                                        return;
+                                      }
+                                      setRejectAppId(app.id);
+                                    }} 
+                                    className={`font-semibold rounded-lg ${blockProcessApplications ? 'text-[#8E8E93] cursor-not-allowed opacity-50' : 'text-rose-600 cursor-pointer'}`}
+                                  >
+                                    <XCircle className="mr-2 h-4 w-4 text-[#FDA4AF]" /> Reject Application {blockProcessApplications && "🔒"}
                                   </DropdownMenuItem>
                                 </>
                               )}
                               {app.status === "APPROVED" && (
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/new?appId=${app.id}&unitId=${app.unitId}&tenantName=${encodeURIComponent(app.name)}&tenantEmail=${encodeURIComponent(app.email)}&tenantPhone=${encodeURIComponent(app.phone)}`)} className="cursor-pointer font-bold text-[#007AFF] rounded-lg">
-                                  <FileText className="mr-2 h-4 w-4 text-[#007AFF]" /> Draft Lease
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    if (blockProcessApplications) {
+                                      toast.error("Your account is currently paused. Processing applications is restricted.");
+                                      return;
+                                    }
+                                    router.push(`/dashboard/leases/new?appId=${app.id}&unitId=${app.unitId}&tenantName=${encodeURIComponent(app.name)}&tenantEmail=${encodeURIComponent(app.email)}&tenantPhone=${encodeURIComponent(app.phone)}`);
+                                  }} 
+                                  className={`font-bold rounded-lg ${blockProcessApplications ? 'text-[#8E8E93] cursor-not-allowed opacity-50' : 'text-[#007AFF] cursor-pointer'}`}
+                                >
+                                  <FileText className="mr-2 h-4 w-4 text-[#007AFF]" /> Draft Lease {blockProcessApplications && "🔒"}
                                 </DropdownMenuItem>
                               )}
                               {app.status === "REJECTED" && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, "PENDING")} className="cursor-pointer font-semibold text-slate-700 rounded-lg">
-                                  <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Re-evaluate Application
+                                <DropdownMenuItem 
+                                  onClick={() => !blockProcessApplications && handleUpdateStatus(app.id, "PENDING")} 
+                                  className={`font-semibold rounded-lg ${blockProcessApplications ? 'text-[#8E8E93] cursor-not-allowed opacity-50' : 'text-slate-700 cursor-pointer'}`}
+                                >
+                                  <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Re-evaluate Application {blockProcessApplications && "🔒"}
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={() => handleDeleteApplication(app.id)} className="cursor-pointer font-semibold text-rose-600 rounded-lg">

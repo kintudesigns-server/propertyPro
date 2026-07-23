@@ -137,6 +137,8 @@ export default function LoginPage() {
             <div>Admin: <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("admin@yopmail.com")}>admin@yopmail.com</span></div>
             <div>Owner (Full): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner.atlas@yopmail.com")}>owner.atlas@yopmail.com</span></div>
             <div>Owner (New): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("owner.new@yopmail.com")}>owner.new@yopmail.com</span></div>
+            <div>Owner (Paused): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("james.carter@demo.com")}>james.carter@demo.com</span></div>
+            <div>Owner (Impending): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("james.impending@demo.com")}>james.impending@demo.com</span></div>
             <div>Tenant (Perfect): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant.adam@yopmail.com")}>tenant.adam@yopmail.com</span></div>
             <div>Tenant (Overdue): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant.oscar@yopmail.com")}>tenant.oscar@yopmail.com</span></div>
             <div>Tenant (Maint.): <span className="text-[#007AFF] font-semibold cursor-pointer hover:underline" onClick={() => fillDemoAccount("tenant.marvin@yopmail.com")}>tenant.marvin@yopmail.com</span></div>

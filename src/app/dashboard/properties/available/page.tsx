@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, RefreshCw, MapPin, Building, BedDouble, Bath, Maximize, LayoutGrid, List, AlignJustify, MoreVertical, Eye, Edit, Trash2, Home, DollarSign, Activity, Square } from "lucide-react";
+import { Search, RefreshCw, MapPin, Building, BedDouble, Bath, Maximize, LayoutGrid, List, AlignJustify, MoreVertical, Eye, Edit, Trash2, Home, DollarSign, Activity, Square, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AvailableUnitsPage() {
@@ -101,9 +102,12 @@ export default function AvailableUnitsPage() {
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
-            Add Property
-          </Button>
+          <Link href="/dashboard/properties/new">
+            <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
+              <Plus className="h-5 w-5" />
+              Add Property
+            </Button>
+          </Link>
         </div>
       </div>
 

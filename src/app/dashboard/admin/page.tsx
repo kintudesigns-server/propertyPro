@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   Banknote,
   LayoutGrid,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -155,43 +156,57 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          href="/dashboard/admin/users"
-          title="Total Users"
-          value={totalUsers}
-          subtext={`${ownerCount} owners · ${tenantCount} tenants`}
-          icon={Users}
-          variant="blue"
-        />
+      {(() => {
+        const activeSubscribersCount = userList.filter((u) => u.role === "OWNER" && (u.subscriptionStatus === "Active" || u.subscriptionStatus === "Trialing" || u.subscriptionStatus === "Active (Canceling)")).length;
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <KpiCard
+              href="/dashboard/admin/users"
+              title="Total Users"
+              value={totalUsers}
+              subtext={`${ownerCount} owners · ${tenantCount} tenants`}
+              icon={Users}
+              variant="blue"
+            />
 
-        <KpiCard
-          href="/dashboard/admin/properties"
-          title="Properties"
-          value={Array.isArray(properties) ? properties.length : 0}
-          subtext={`${approvedProperties.length} approved · ${pendingProperties.length} pending`}
-          icon={Building}
-          variant="green"
-        />
+            <KpiCard
+              href="/dashboard/admin/properties"
+              title="Properties"
+              value={Array.isArray(properties) ? properties.length : 0}
+              subtext={`${approvedProperties.length} approved · ${pendingProperties.length} pending`}
+              icon={Building}
+              variant="green"
+            />
 
-        <KpiCard
-          href="/dashboard/admin/profit"
-          title="Platform Profit"
-          value={`$${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-          subtext="Net commissions"
-          icon={TrendingUp}
-          variant="emerald"
-        />
+            <KpiCard
+              href="/dashboard/admin/profit"
+              title="Platform Profit"
+              value={`$${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+              subtext="Net commissions"
+              icon={TrendingUp}
+              variant="emerald"
+            />
 
-        <KpiCard
-          href="/dashboard/admin/payouts"
-          title="Pending Payouts"
-          value={pendingPayouts.length}
-          subtext={pendingPayouts.length > 0 ? "Require admin action" : "All payouts settled"}
-          icon={Banknote}
-          variant={pendingPayouts.length > 0 ? "orange" : "slate"}
-        />
-      </div>
+            <KpiCard
+              href="/dashboard/admin/payouts"
+              title="Pending Payouts"
+              value={pendingPayouts.length}
+              subtext={pendingPayouts.length > 0 ? "Require admin action" : "All payouts settled"}
+              icon={Banknote}
+              variant={pendingPayouts.length > 0 ? "orange" : "slate"}
+            />
+
+            <KpiCard
+              href="/dashboard/admin/billing"
+              title="Billing (SaaS)"
+              value={activeSubscribersCount > 0 ? `${activeSubscribersCount} active` : "0 active"}
+              subtext="SaaS MRR Intelligence"
+              icon={CreditCard}
+              variant="blue"
+            />
+          </div>
+        );
+      })()}
 
       {/* Overview Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

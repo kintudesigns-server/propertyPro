@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Loader2, Search, RefreshCw, CheckCircle2, XCircle, Clock, Eye, FileText,
-  Building2, Globe, Phone, Mail, Users, ChevronRight, Filter, ExternalLink
+  Building2, Globe, Phone, Mail, Users, ChevronRight, Filter, ExternalLink, Shield
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -92,115 +94,192 @@ export default function AdminOwnerApplicationsPage() {
 
   if (loading || status === "loading") {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-[#EF4444]" />
+        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Loading owner applications...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Owner Applications</h1>
-          <p className="text-[#6E6E73] mt-0.5">Review and manage owner account requests</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-red-50 text-red-500 rounded-xl">
+            <Shield className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Owner Applications</h1>
+            <p className="text-[#6E6E73] text-base mt-0.5">Review and manage owner account requests</p>
+          </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={fetchApplications} className="text-[#6E6E73]">
-          <RefreshCw className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={fetchApplications} className="text-[#6E6E73] hover:bg-[#F2F2F7]">
+            <RefreshCw className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "Pending Review", count: stats.pending, color: "text-amber-700", bg: "bg-amber-100", border: "border-amber-200", icon: Clock },
-          { label: "Under Review", count: stats.underReview, color: "text-blue-700", bg: "bg-blue-100", border: "border-blue-200", icon: Search },
-          { label: "Approved", count: stats.approved, color: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-200", icon: CheckCircle2 },
-          { label: "Rejected", count: stats.rejected, color: "text-red-700", bg: "bg-red-100", border: "border-red-200", icon: XCircle },
-        ].map(s => (
-          <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl p-5 relative overflow-hidden group`}>
-            <s.icon className={`absolute -right-4 -bottom-4 h-24 w-24 opacity-10 group-hover:opacity-20 transition-opacity ${s.color}`} />
-            <div className="relative z-10 flex flex-col justify-between h-full space-y-2">
-              <div className="flex items-center gap-2">
-                <s.icon className={`h-5 w-5 ${s.color}`} />
-                <p className={`font-bold text-sm ${s.color}`}>{s.label}</p>
-              </div>
-              <p className={`text-4xl font-black tracking-tight ${s.color}`}>{s.count}</p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Pending Review</p>
+              <Clock className="h-5 w-5 text-amber-500" />
+            </div>
+            <p className="text-3xl font-black text-amber-600 mb-1 leading-none">{stats.pending}</p>
+            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Requires administrative action</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Under Review</p>
+              <Search className="h-5 w-5 text-blue-500" />
+            </div>
+            <p className="text-3xl font-black text-blue-600 mb-1 leading-none">{stats.underReview}</p>
+            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Currently being verified</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Approved</p>
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-black text-emerald-600 mb-1 leading-none">{stats.approved}</p>
+            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Access granted to platform</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Rejected</p>
+              <XCircle className="h-5 w-5 text-red-500" />
+            </div>
+            <p className="text-3xl font-black text-red-600 mb-1 leading-none">{stats.rejected}</p>
+            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Denied application requests</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filter and Register Ledger */}
+      <Card className="bg-white border border-[#E5E5EA] shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
+        <CardHeader className="border-b border-[#E5E5EA] pb-5 bg-slate-50/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 sm:p-8">
+          <div>
+            <CardTitle className="text-lg font-black text-[#1D1D1F]">Applications Register</CardTitle>
+            <CardDescription className="text-[#6E6E73] font-medium text-xs mt-0.5">Verify landlord credentials and set approval status.</CardDescription>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+            {/* Status Segment Filter */}
+            <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto border border-slate-200/30">
+              {["ALL", "PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED"].map((statusOption) => (
+                <button
+                  key={statusOption}
+                  onClick={() => setStatusFilter(statusOption)}
+                  className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    statusFilter === statusOption
+                      ? "bg-white text-slate-800 shadow-sm"
+                      : "text-[#6E6E73] hover:text-slate-800"
+                  }`}
+                >
+                  {statusOption === "ALL"
+                    ? "All"
+                    : statusOption === "PENDING"
+                    ? "Pending"
+                    : statusOption === "UNDER_REVIEW"
+                    ? "Under Review"
+                    : statusOption === "APPROVED"
+                    ? "Approved"
+                    : "Rejected"}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+              <Input
+                placeholder="Search applications..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 h-10 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#EF4444] text-[#1D1D1F] font-semibold text-sm shadow-sm placeholder:text-[#8E8E93]"
+              />
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Filters & Search Toolbar */}
-      <div className="bg-white border border-slate-200 p-2 rounded-[1.25rem] shadow-sm flex flex-col md:flex-row gap-3 items-center">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applications by name or email..." className="pl-10 h-12 w-full rounded-xl border-none bg-slate-50 focus-visible:ring-0 shadow-inner font-medium text-slate-800" />
-        </div>
-        <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
-        <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide px-1">
-          {["ALL", "PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED"].map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${statusFilter === s ? 'bg-slate-900 text-white shadow-md' : 'bg-transparent text-[#6E6E73] hover:bg-slate-100 hover:text-slate-900'}`}>
-              {s === "ALL" ? "All Applications" : s === "UNDER_REVIEW" ? "Under Review" : s.charAt(0) + s.slice(1).toLowerCase()}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Applications List */}
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <FileText className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-[#6E6E73] font-medium">No applications found</p>
-          </div>
-        ) : (
-          filtered.map(app => {
-            const cfg = statusConfig[app.status] || statusConfig.PENDING;
-            return (
-              <div key={app.id} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center gap-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all cursor-default group relative overflow-hidden">
-                {app.status === "PENDING" && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400"></div>}
-                
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    {app.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900 text-base">{app.name}</p>
-                    <p className="text-[#6E6E73] text-sm font-medium">{app.email}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-8 text-sm text-[#6E6E73] flex-1 justify-between md:justify-center">
-                  <div>
-                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Entity</p>
-                    <p className="font-bold text-slate-800">{app.entityType}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Portfolio</p>
-                    <p className="font-bold text-slate-800">{app.portfolioSize}</p>
-                  </div>
-                  <div className="hidden lg:block">
-                    <p className="text-[#8E8E93] text-[11px] font-bold uppercase tracking-wider mb-0.5">Applied</p>
-                    <p className="font-bold text-slate-800">{new Date(app.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4 justify-between md:justify-end">
-                  <div className="flex items-center gap-2">
-                    {app.status === "PENDING" && <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>}
-                    <Badge className={`${cfg.bg} ${cfg.color} border-0 text-xs font-black px-3 py-1 rounded-full shadow-sm`}>{cfg.label}</Badge>
-                  </div>
-                  <Button size="sm" onClick={() => { setSelectedApp(app); setAdminNotes(app.adminNotes || ""); }} className="rounded-xl gap-2 font-bold bg-slate-900 hover:bg-slate-800 text-white px-5 h-10 shadow-md">
-                    <Eye className="h-4 w-4" /> Review
-                  </Button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {filtered.length === 0 ? (
+            <div className="text-center py-20 text-[#6E6E73]">
+              <FileText className="h-14 w-14 mx-auto text-slate-200 mb-3" />
+              <p className="font-extrabold text-base">No applications matching filters.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-[#E5E5EA] hover:bg-transparent bg-slate-50/20">
+                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider pl-6 sm:pl-8 py-4">Landlord</TableHead>
+                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Entity</TableHead>
+                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Portfolio</TableHead>
+                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Applied</TableHead>
+                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Status</TableHead>
+                  <TableHead className="text-right text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider pr-6 sm:pr-8 py-4">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((app) => {
+                  const cfg = statusConfig[app.status] || statusConfig.PENDING;
+                  return (
+                    <TableRow key={app.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]">
+                      <TableCell className="font-bold text-[#1D1D1F] pl-6 sm:pl-8 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg shrink-0">
+                            {app.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 text-sm">{app.name}</p>
+                            <p className="text-[#6E6E73] text-xs font-semibold">{app.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-bold text-[#1D1D1F] py-4">{app.entityType}</TableCell>
+                      <TableCell className="font-bold text-[#1D1D1F] py-4">{app.portfolioSize}</TableCell>
+                      <TableCell className="font-semibold text-[#6E6E73] py-4">
+                        {new Date(app.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-2">
+                          {app.status === "PENDING" && <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>}
+                          <Badge className={`${cfg.bg} ${cfg.color} border text-xs font-extrabold px-2.5 py-1 rounded-lg`}>
+                            {cfg.label}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6 sm:pr-8 py-4">
+                        <Button 
+                          size="sm" 
+                          onClick={() => { setSelectedApp(app); setAdminNotes(app.adminNotes || ""); }} 
+                          className="rounded-xl gap-2 font-bold bg-slate-900 hover:bg-slate-800 text-white px-4 h-9 shadow-sm"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Review
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Review Modal */}
       {selectedApp && (

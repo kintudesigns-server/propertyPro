@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -61,8 +63,25 @@ export async function POST(req: NextRequest) {
 
   try {
     const owner = await prisma.user.findUnique({ where: { id: ownerId } });
+    const rules = await getEffectiveSubscriptionRules(ownerId);
+    if (rules.isPaused && rules.blockNewUnits) {
+      await auditLog({
+        entityType: "SUBSCRIPTION_GATE",
+        entityId: ownerId,
+        action: "BLOCKED_BY_PAUSE",
+        actorId: ownerId,
+        actorRole: "OWNER",
+        note: "Attempted: Create/Renew Lease. Blocked by: blockNewUnitsOnPaused",
+      });
+      return NextResponse.json({
+        error: "Your account is currently paused. Lease creation and renewals are restricted until your subscription is reactivated.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
     const subStatus = owner?.subscriptionStatus?.toLowerCase() ?? "";
-    const hasActiveSubscription = subStatus === "active" || subStatus === "active (canceling)";
+    const hasActiveSubscription = subStatus === "active" || subStatus === "active (canceling)" || rules.isCompedAccess;
     if (!hasActiveSubscription) {
       return NextResponse.json({ error: "Active subscription required to create leases." }, { status: 403 });
     }

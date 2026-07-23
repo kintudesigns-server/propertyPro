@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,9 @@ export default function DashboardPage() {
   // Landlord Stats State
   const [stats, setStats] = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pausedAt, setPausedAt] = useState<string | null>(null);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
 
   // Tenant State
   const [leases, setLeases] = useState<any[]>([]);
@@ -132,6 +136,24 @@ export default function DashboardPage() {
       fetchTenantData();
     } else {
       fetchLandlordStats();
+      fetch("/api/subscription/rules")
+        .then(res => (res.ok ? res.json() : null))
+        .then(rules => {
+          if (rules) {
+            setIsPaused(!!rules.isPaused);
+            setPausedAt(rules.pausedAt || null);
+            
+            // Check recently reactivated
+            const userId = (session?.user as any)?.id;
+            if (!rules.isPaused && rules.pausedAt && userId) {
+              const dismissedKey = `dismissed_welcome_${userId}`;
+              if (!localStorage.getItem(dismissedKey)) {
+                setShowWelcomeBack(true);
+              }
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, [status, isTenant, router]);
 
@@ -793,6 +815,73 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+      {isPaused && (
+        <div className="bg-[#FFF9E6] border border-[#FFE0A3] rounded-2xl p-5 flex items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-[#B25E00] shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-[#5C3300] text-sm">Account Suspension Warning</h3>
+              <p className="text-xs text-[#804400] font-semibold mt-0.5">
+                Your portfolio is currently restricted because your subscription is paused due to a billing issue.
+              </p>
+              {(() => {
+                if (!pausedAt) return null;
+                const pausedDate = new Date(pausedAt);
+                const archivalDate = new Date(pausedDate.getTime() + 60 * 24 * 60 * 60 * 1000);
+                const now = new Date();
+                const diffTime = archivalDate.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) {
+                  return <p className="text-xs font-semibold text-red-600 mt-1">Flagged for manual database archival review due to prolonged inactivity.</p>;
+                } else {
+                  return <p className="text-xs font-semibold text-amber-700 mt-1">{diffDays} days remaining before database archival review.</p>;
+                }
+              })()}
+            </div>
+          </div>
+          <Link href="/dashboard/owner/billing">
+            <Button className="bg-[#B25E00] hover:bg-[#804400] text-white font-bold rounded-xl text-xs px-4 h-9 shadow-xs whitespace-nowrap">
+              Reactivate Subscription
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {showWelcomeBack && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-emerald-950 text-sm">🎉 Welcome Back!</h3>
+              <p className="text-xs text-emerald-800 mt-1 font-semibold leading-relaxed">
+                Your subscription has been successfully reactivated. Here is what accumulated while you were paused:
+              </p>
+              <ul className="text-xs text-emerald-800 font-semibold mt-2 list-disc list-inside space-y-1">
+                <li>{stats?.pendingToursCount || 0} pending tour requests</li>
+                <li>{stats?.pendingApplicationsCount || 0} tenant applications awaiting review</li>
+                <li>{stats?.openMaintenanceCount || 0} active maintenance tickets</li>
+              </ul>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              const userId = (session?.user as any)?.id;
+              if (userId) {
+                localStorage.setItem(`dismissed_welcome_${userId}`, "true");
+              }
+              setShowWelcomeBack(false);
+            }} 
+            className="text-emerald-700 hover:bg-emerald-100 rounded-xl font-extrabold text-xs"
+          >
+            Dismiss
+          </Button>
+        </div>
+      )}
+
       {/* Premium Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-6 md:p-8 shadow-xl border border-slate-800">
         {/* Glowing Gradient Background Blobs */}
@@ -1087,7 +1176,7 @@ export default function DashboardPage() {
                 <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Payout Wallet</span>
               </button>
               <button
-                onClick={() => router.push("/dashboard/owner?tab=subscription")}
+                onClick={() => router.push("/dashboard/owner/billing")}
                 className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
                 <div className="p-2 bg-[#34C759] text-white rounded-lg shadow-sm">

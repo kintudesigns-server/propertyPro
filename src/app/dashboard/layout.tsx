@@ -29,6 +29,7 @@ import {
   X,
   ClipboardList,
   TrendingUp,
+  Tag,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MessageBadge } from "@/components/notifications/MessageBadge";
@@ -1347,16 +1348,44 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 
                 {isOwner && (
                   <Link
-                    href="/dashboard/owner?tab=subscription"
+                    href="/dashboard/owner/billing"
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      pathname === "/dashboard/owner" && currentTab === "subscription"
+                      pathname === "/dashboard/owner/billing"
                         ? "bg-[#EFF6FF] text-[#3B82F6]"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
                     <CreditCard className="h-5 w-5" />
-                    {sidebarOpen && <span>Subscription Plan</span>}
+                    {sidebarOpen && <span>Billing & Subscription</span>}
                   </Link>
+                )}
+
+                {isAdmin && (
+                  <>
+                    <Link
+                      href="/dashboard/admin/settings/pricing"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/settings/pricing"
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <Tag className="h-5 w-5" />
+                      {sidebarOpen && <span>Pricing Tiers & Plans</span>}
+                    </Link>
+
+                    <Link
+                      href="/dashboard/admin/settings/financials"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        pathname === "/dashboard/admin/settings/financials"
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <ShieldCheck className="h-5 w-5" />
+                      {sidebarOpen && <span>Financials & Operations</span>}
+                    </Link>
+                  </>
                 )}
               </>
             )}

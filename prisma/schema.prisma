@@ -65,6 +65,15 @@ model User {
   cardBrand                String?
   cardLast4                String?
 
+  // Subscription lifecycle tracking
+  gracePeriodEnd         DateTime?
+  pausedAt               DateTime?
+  payoutsBlockedAt       DateTime?
+  trialUsedTierIds       String[]
+  accessGrantedByAdmin   Boolean              @default(false)
+  accessGrantedExpiresAt DateTime?
+  subscriptionOverride   SubscriptionOverride?
+
   // Owner Limits
   approvalThreshold        Decimal              @default(200.00) @db.Decimal(10, 2)
   emergencyOverrideLimit   Decimal              @default(1500.00) @db.Decimal(10, 2)
@@ -96,6 +105,7 @@ model User {
   owner                User?                @relation("OwnerInspectors", fields: [ownerId], references: [id])
   createdInspectors    User[]               @relation("OwnerInspectors")
   availability         OwnerAvailability?
+  subscriptionHistory  SubscriptionHistory[]
 }
 
 model PasswordResetToken {
@@ -155,6 +165,8 @@ model PricingTier {
   price           Float
   minUnits        Int
   maxUnits        Int
+  maxInspectors   Int      @default(1)
+  trialDays       Int      @default(0)
   features        String[]
   isCustom        Boolean  @default(false)
   isActive        Boolean  @default(true)
@@ -568,6 +580,19 @@ model PlatformSettings {
   tourRateLimitWindowHours Int      @default(24)
   tourOtpExpiryMinutes     Int      @default(10)
   tourCancellationWindowHours Int    @default(24)
+
+  // Subscription Behavior Controls
+  gracePeriodDays              Int     @default(7)
+  blockPayoutsOnPastDue        Boolean @default(true)
+  blockPayoutsOnPaused         Boolean @default(true)
+  blockNewUnitsOnPaused        Boolean @default(true)
+  allowMaintenanceOnPaused     Boolean @default(true)
+  blockAddVendorOnPaused       Boolean @default(true)
+  blockAddInspectorOnPaused    Boolean @default(true)
+  blockProcessApplicationsOnPaused Boolean @default(true)
+  blockAddTenantOnPaused          Boolean @default(true)
+  blockTourSlotsOnPaused          Boolean @default(true)
+
   updatedAt                DateTime @updatedAt
 }
 
@@ -674,4 +699,54 @@ model OwnerAvailability {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model SubscriptionHistory {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromTierId  String?
+  toTierId    String?
+  fromTierName String?
+  toTierName  String?
+  event       String   // SUBSCRIBED | UPGRADED | DOWNGRADED | CANCELED | REACTIVATED | PAST_DUE | TRIAL_STARTED | TRIAL_ENDED
+  amountPaid  Float?
+  stripeInvoiceId String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ProcessedStripeEvent {
+  id            String   @id @default(uuid())
+  stripeEventId String   @unique
+  processedAt   DateTime @default(now())
+
+  @@index([stripeEventId])
+}
+
+model SubscriptionOverride {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Feature toggles — null = use PlatformSettings default
+  blockPayouts         Boolean?
+  blockNewUnits        Boolean?
+  allowMaintenance     Boolean?
+
+  // Manual lifecycle
+  extendedGraceUntil   DateTime?
+  manualPausedByAdmin  Boolean   @default(false)
+  manualRestored       Boolean   @default(false)
+
+  // Expiry
+  expiresAt            DateTime?
+
+  // Audit
+  adminId              String?
+  reason               String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
 

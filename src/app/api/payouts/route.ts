@@ -9,6 +9,7 @@ import { maskBankDetails } from "@/lib/sanitization";
 import { encryptSymmetric } from "@/lib/encryption";
 import { auditLog } from "@/lib/audit-log";
 import { sendEmail } from "@/lib/email";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -224,6 +225,29 @@ export async function POST(req: NextRequest) {
   }
 
   const ownerId = (session.user as any).id;
+
+  // Enforce subscription rules (owner actions only)
+  const rules = await getEffectiveSubscriptionRules(ownerId);
+  if (rules.blockPayouts) {
+    const reason = rules.isPaused
+      ? "Your account is paused due to a failed payment. Payouts are blocked until you resubscribe."
+      : "Payouts are temporarily on hold while your subscription payment is past due. Please update your card in Billing settings.";
+
+    await auditLog({
+      entityType: "SUBSCRIPTION_GATE",
+      entityId: ownerId,
+      action: "BLOCKED_BY_PAUSE",
+      actorId: ownerId,
+      actorRole: "OWNER",
+      note: "Attempted: Withdraw Payout. Blocked by: blockPayoutsOnPaused",
+    });
+
+    return NextResponse.json({
+      error: reason,
+      code: "ACCOUNT_PAUSED", // Updated to map correctly to ACCOUNT_PAUSED
+      isOverride: rules.isOverrideActive,
+    }, { status: 403 });
+  }
 
   try {
     const { amount, bankName, accountNumber, accountName } = await req.json();

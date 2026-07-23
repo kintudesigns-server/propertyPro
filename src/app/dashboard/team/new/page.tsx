@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, ShieldCheck, User } from "lucide-react";
+import { ArrowLeft, Mail, Phone, ShieldCheck, User, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import PausedAccountGate from "@/components/subscription/PausedAccountGate";
+import { toast } from "sonner";
 
 export default function AddTeamMember() {
   const router = useRouter();
@@ -18,6 +20,47 @@ export default function AddTeamMember() {
     password: "",
     role: "INSPECTOR",
   });
+
+  const [isPausedAccount, setIsPausedAccount] = useState(false);
+  const [pausedPlanName, setPausedPlanName] = useState<string | null>(null);
+  const [blockAddInspector, setBlockAddInspector] = useState(false);
+
+  const [isLimitReached, setIsLimitReached] = useState(false);
+  const [limitMax, setLimitMax] = useState(1);
+  const [planName, setPlanName] = useState("");
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const userRes = await fetch("/api/users");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          const rulesRes = await fetch("/api/subscription/rules");
+          if (rulesRes.ok) {
+            const rules = await rulesRes.json();
+            if (rules.isPaused && rules.blockAddInspector) {
+              setIsPausedAccount(true);
+              setPausedPlanName(userData.pricingTier?.name || null);
+              setBlockAddInspector(true);
+            }
+          }
+        }
+        const usageRes = await fetch("/api/billing/usage");
+        if (usageRes.ok) {
+          const usageData = await usageRes.json();
+          const { current, max } = usageData.usage.inspectors;
+          setPlanName(usageData.tier.name);
+          setLimitMax(max);
+          if (current >= max) {
+            setIsLimitReached(true);
+          }
+        }
+      } catch (err) {
+        console.error("Subscription check failed on team member creation page:", err);
+      }
+    };
+    checkSubscription();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,14 +80,15 @@ export default function AddTeamMember() {
       const data = await res.json();
       
       if (res.ok) {
+        toast.success("Team member added successfully!");
         router.push("/dashboard/team");
         router.refresh();
       } else {
-        alert(data.error || "Failed to create team member");
+        toast.error(data.message || data.error || "Failed to create team member");
       }
     } catch (error) {
       console.error("Submission error", error);
-      alert("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +109,36 @@ export default function AddTeamMember() {
         </div>
       </div>
 
-      {/* Main Form */}
+      {isLimitReached && (
+        <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-900 dark:text-red-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-semibold shadow-xs">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+            <div>
+              <p className="font-extrabold text-sm">Inspector Limit Reached</p>
+              <p className="text-red-800 dark:text-red-300 mt-0.5 font-medium">
+                You have reached the maximum of {limitMax} inspector{limitMax !== 1 ? "s" : ""} allowed on your {planName || "current"} plan. Upgrade your plan to invite more team members.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/owner/billing">
+            <button className="px-4 py-2 bg-red-650 hover:bg-red-750 text-white rounded-lg text-xs font-bold shrink-0 transition shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
+              Upgrade Subscription
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </Link>
+        </div>
+      )}
+
+      <PausedAccountGate
+        isLocked={blockAddInspector}
+        planName={pausedPlanName}
+        reason="Adding inspectors"
+        allowedActions={[
+          "Your existing team members and assignments are <strong>safe and unaffected.</strong>",
+          "Inspectors can still perform their scheduled inspections and submit feedback.",
+          "Adding new inspectors or team members is restricted until subscription reactivation."
+        ]}
+      >
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-[#E5E5EA] overflow-hidden">
         <div className="p-6 md:p-8 space-y-8">
           
@@ -82,6 +155,7 @@ export default function AddTeamMember() {
                   name="name" 
                   value={formData.name} 
                   onChange={handleChange} 
+                  disabled={isLimitReached}
                   placeholder="e.g. John Doe" 
                   className="h-12 bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] rounded-xl shadow-sm font-medium text-[#1D1D1F]" 
                   required 
@@ -112,6 +186,7 @@ export default function AddTeamMember() {
                   type="email" 
                   value={formData.email} 
                   onChange={handleChange} 
+                  disabled={isLimitReached}
                   placeholder="john@example.com" 
                   className="h-12 bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] rounded-xl shadow-sm font-medium text-[#1D1D1F]" 
                   required 
@@ -124,6 +199,7 @@ export default function AddTeamMember() {
                   name="phone" 
                   value={formData.phone} 
                   onChange={handleChange} 
+                  disabled={isLimitReached}
                   placeholder="+1 (555) 000-0000" 
                   className="h-12 bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] rounded-xl shadow-sm font-medium text-[#1D1D1F]" 
                 />
@@ -135,6 +211,7 @@ export default function AddTeamMember() {
                   type="password"
                   value={formData.password} 
                   onChange={handleChange} 
+                  disabled={isLimitReached}
                   placeholder="Set an initial password" 
                   className="h-12 bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] rounded-xl shadow-sm font-medium text-[#1D1D1F]" 
                   required
@@ -159,11 +236,16 @@ export default function AddTeamMember() {
               Cancel
             </Button>
           </Link>
-          <Button type="submit" disabled={loading} className="h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-8 rounded-xl shadow-sm shadow-blue-500/20 transition-all text-sm">
-            {loading ? "Creating..." : "Add Team Member"}
+          <Button 
+            type="submit" 
+            disabled={loading || isLimitReached} 
+            className="h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-8 rounded-xl shadow-sm shadow-blue-500/20 transition-all text-sm disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating..." : isLimitReached ? "Limit Reached" : "Add Team Member"}
           </Button>
         </div>
       </form>
+      </PausedAccountGate>
     </div>
   );
 }

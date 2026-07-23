@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import Stripe from "stripe";
 
 // POST /api/stripe/subscribe
 // Creates a Stripe SetupIntent + returns client_secret for embedded Stripe Elements.
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tierId } = await req.json();
+    const { tierId, confirm } = await req.json();
     if (!tierId) {
       return NextResponse.json({ error: "Pricing tier ID is required" }, { status: 400 });
     }
@@ -105,7 +106,13 @@ export async function POST(req: NextRequest) {
 
     // Handle Upgrading an Existing Subscription
     if (user.stripeSubscriptionId) {
-      const existingSub = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      let existingSub: Stripe.Subscription;
+      try {
+        existingSub = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      } catch (err: any) {
+        // Sub no longer exists in Stripe (API key swap, etc.) — fall through to create new
+        existingSub = { status: "canceled" } as any;
+      }
       
       if (existingSub.status === "active" || existingSub.status === "trialing") {
         if (user.pricingTier?.id === tierId) {
@@ -114,54 +121,172 @@ export async function POST(req: NextRequest) {
             alreadySubscribed: true,
           }, { status: 400 });
         }
-        
+
+        // Downgrade check
+        const isDowngrade = user.pricingTier ? (tier.price < user.pricingTier.price) : false;
+        if (isDowngrade && !confirm) {
+          return NextResponse.json({
+            requiresConfirmation: true,
+            currentTierName: user.pricingTier?.name,
+            targetTierName: tier.name,
+            currentPrice: user.pricingTier?.price,
+            targetPrice: tier.price,
+          });
+        }
+
+        if (isDowngrade && confirm) {
+          // Case 1: Downgrade to Free Hobbyist ($0)
+          if (tier.price === 0) {
+            await stripe.subscriptions.update(user.stripeSubscriptionId, {
+              cancel_at_period_end: true,
+            });
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                subscriptionStatus: "Active (Canceling)",
+              },
+            });
+            return NextResponse.json({ upgraded: true, scheduledCancel: true });
+          }
+
+          // Case 2: Downgrade to a paid tier (Starter etc.)
+          const updatedSub = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+            items: [{ id: existingSub.items.data[0].id, price: priceId }],
+            proration_behavior: "none",
+          });
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              currentTierId: tier.id,
+              subscriptionStatus: "Active",
+            },
+          });
+          return NextResponse.json({ upgraded: true });
+        }
+
+        // Check if the customer already has a default payment method
+        const stripeCustomer = await stripe.customers.retrieve(customerId!) as Stripe.Customer;
+        const hasDefaultPaymentMethod = !!(
+          stripeCustomer.invoice_settings?.default_payment_method ||
+          (stripeCustomer as any).default_source
+        );
+
+        // Also check subscription-level default payment method
+        const subDefaultPm = (existingSub as any).default_payment_method;
+        const hasPaymentMethod = hasDefaultPaymentMethod || !!subDefaultPm;
+
+        if (!hasPaymentMethod && Number(tier.price) > 0) {
+          // No card on file → collect card first via SetupIntent, then apply upgrade after confirmation
+          const setupIntent = await stripe.setupIntents.create({
+            customer: customerId!,
+            payment_method_types: ["card"],
+            metadata: {
+              userId: user.id,
+              tierId: tier.id,
+              upgradeFromSubId: user.stripeSubscriptionId,
+            },
+          });
+          return NextResponse.json({
+            setupClientSecret: setupIntent.client_secret,
+            tierName: tier.name,
+            tierPrice: tier.price,
+            requiresSetup: true,
+          });
+        }
+
         // Update the existing subscription
         const updatedSub = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-          items: [{
-            id: existingSub.items.data[0].id,
-            price: priceId,
-          }],
-          proration_behavior: 'always_invoice', // Invoice them immediately for the difference
+          items: [{ id: existingSub.items.data[0].id, price: priceId }],
+          proration_behavior: 'always_invoice',
           payment_behavior: 'pending_if_incomplete',
           expand: ['latest_invoice.payment_intent'],
-        });
-
-        // Update database
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { currentTierId: tier.id },
         });
 
         const invoice = updatedSub.latest_invoice as any;
         const paymentIntent = invoice?.payment_intent as any;
 
-        // If payment is required (e.g. card requires 3DS, or no default payment method on file)
-        if (paymentIntent && paymentIntent.status === 'requires_payment_method' || paymentIntent?.status === 'requires_action') {
-           return NextResponse.json({
-             clientSecret: paymentIntent.client_secret,
-             subscriptionId: updatedSub.id,
-             tierName: tier.name,
-             tierPrice: tier.price,
-           });
+        // If payment needs action (3DS etc.)
+        if (paymentIntent && (paymentIntent.status === 'requires_payment_method' || paymentIntent.status === 'requires_action')) {
+          return NextResponse.json({
+            clientSecret: paymentIntent.client_secret,
+            subscriptionId: updatedSub.id,
+            tierName: tier.name,
+            tierPrice: tier.price,
+          });
         }
 
-        // Otherwise, it was successful immediately (paid from balance or card charged successfully without action)
-        return NextResponse.json({ upgraded: true });
+        // Successfully upgraded immediately
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { 
+            currentTierId: tier.id,
+            subscriptionStatus: "Active"
+          },
+        });
+
+        return NextResponse.json({ 
+          upgraded: true, 
+          proratedAmount: invoice ? invoice.amount_due / 100 : 0 
+        });
       }
     }
 
-    // Create the subscription in incomplete state to get a PaymentIntent client_secret
-    const subscription = await stripe.subscriptions.create({
+    // Build Stripe subscription request options
+    const subscriptionOptions: Stripe.SubscriptionCreateParams = {
       customer: customerId,
       items: [{ price: priceId }],
-      payment_behavior: "default_incomplete",
-      payment_settings: { save_default_payment_method: "on_subscription" },
-      expand: ["latest_invoice.payment_intent"],
       metadata: {
         userId: user.id,
         tierId: tier.id,
       },
-    });
+    };
+
+    const hasPreviouslyPaid = user.pricingTier && Number(user.pricingTier.price) > 0;
+    const hasEverHadSubscription = !!user.stripeSubscriptionId;
+    const hasUsedAnyTrial = user.trialUsedTierIds && user.trialUsedTierIds.length > 0;
+
+    const isTrialEligible = !hasPreviouslyPaid && !hasEverHadSubscription && !hasUsedAnyTrial;
+    const isTrial = tier.trialDays && Number(tier.trialDays) > 0 && isTrialEligible;
+
+    // Check if we need to collect card payment via Checkout Session
+    if (Number(tier.price) > 0 && !isTrial) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const checkoutSession = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "subscription",
+        customer: customerId,
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          userId: user.id,
+          tierId: tier.id,
+        },
+        subscription_data: {
+          metadata: {
+            userId: user.id,
+            tierId: tier.id,
+          },
+        },
+        success_url: `${appUrl}/dashboard/owner/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/dashboard/owner/billing?checkout=cancelled`,
+      });
+
+      return NextResponse.json({ url: checkoutSession.url });
+    }
+
+    if (isTrial) {
+      subscriptionOptions.trial_period_days = Number(tier.trialDays);
+    } else {
+      subscriptionOptions.payment_behavior = "default_incomplete";
+      subscriptionOptions.payment_settings = { save_default_payment_method: "on_subscription" };
+      subscriptionOptions.expand = ["latest_invoice.payment_intent"];
+    }
+
+    const subscription = await stripe.subscriptions.create(subscriptionOptions);
 
     const invoice = subscription.latest_invoice as any;
     const paymentIntent = invoice?.payment_intent as any;
@@ -171,14 +296,37 @@ export async function POST(req: NextRequest) {
       where: { id: user.id },
       data: {
         stripeSubscriptionId: subscription.id,
-        currentTierId: tier.id,
-        // If price is 0, there is no payment intent, so we instantly mark it active
-        subscriptionStatus: Number(tier.price) === 0 ? "Active" : user.subscriptionStatus,
+        ...(isTrial ? {
+          trialUsedTierIds: {
+            push: tier.id,
+          }
+        } : {}),
+        ...(Number(tier.price) === 0 || isTrial ? {
+          currentTierId: tier.id,
+          subscriptionStatus: isTrial ? "Trialing" : "Active",
+          gracePeriodEnd: null,
+          pausedAt: null,
+          payoutsBlockedAt: null,
+        } : {}),
       },
     });
 
-    if (Number(tier.price) === 0 || (paymentIntent && paymentIntent.status === 'succeeded')) {
-       // It's a free tier or somehow instantly succeeded, no frontend checkout needed
+    if (Number(tier.price) === 0 || isTrial || (paymentIntent && paymentIntent.status === 'succeeded')) {
+       // If it instantly succeeded and it wasn't a free/trial tier, write currentTierId and subscriptionStatus active now
+       if (Number(tier.price) > 0 && !isTrial) {
+         await prisma.user.update({
+           where: { id: user.id },
+           data: {
+             currentTierId: tier.id,
+             subscriptionStatus: "Active",
+             gracePeriodEnd: null,
+             pausedAt: null,
+             payoutsBlockedAt: null,
+             accessGrantedByAdmin: false,
+             accessGrantedExpiresAt: null,
+           },
+         });
+       }
        return NextResponse.json({ upgraded: true });
     }
 

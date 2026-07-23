@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  Lock,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,9 @@ export default function OwnerAvailabilitySettingsPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [blockTourSlots, setBlockTourSlots] = useState(false);
+  const [pausedAt, setPausedAt] = useState<string | null>(null);
 
   const [timezone, setTimezone] = useState("America/New_York");
   const [workingHours, setWorkingHours] = useState<Record<string, { start: string; end: string; enabled: boolean }>>({
@@ -64,6 +69,17 @@ export default function OwnerAvailabilitySettingsPage() {
       })
       .catch((err) => toast.error("Failed to load availability settings"))
       .finally(() => setLoading(false));
+
+    fetch("/api/subscription/rules")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((rules) => {
+        if (rules) {
+          setIsPaused(!!rules.isPaused);
+          setBlockTourSlots(!!rules.blockTourSlots);
+          setPausedAt(rules.pausedAt || null);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleDayToggle = (dayKey: string) => {
@@ -127,6 +143,36 @@ export default function OwnerAvailabilitySettingsPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6 max-w-5xl mx-auto">
+
+      {isPaused && (
+        <div className="bg-[#FFF9E6] border border-[#FFE0A3] rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-amber-900">
+                Tour scheduling is paused. Reactivate to update your showing availability.
+              </p>
+              {(() => {
+                if (!pausedAt) return null;
+                const pausedDate = new Date(pausedAt);
+                const archivalDate = new Date(pausedDate.getTime() + 60 * 24 * 60 * 60 * 1000);
+                const now = new Date();
+                const diffTime = archivalDate.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) {
+                  return <p className="text-xs font-semibold text-red-600 mt-0.5">Flagged for manual database archival review due to prolonged inactivity.</p>;
+                } else {
+                  return <p className="text-xs font-semibold text-amber-700 mt-0.5">{diffDays} days remaining before database archival review.</p>;
+                }
+              })()}
+            </div>
+          </div>
+          <a href="/dashboard/owner/billing" className="inline-flex items-center justify-center font-bold bg-[#B25E00] hover:bg-[#804400] text-white rounded-xl text-xs px-4 py-2 shadow-xs transition-colors shrink-0">
+            Reactivate Subscription
+          </a>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900">Showing Availability Settings</h2>
@@ -135,12 +181,23 @@ export default function OwnerAvailabilitySettingsPage() {
           </p>
         </div>
         <Button
-          disabled={saving}
+          disabled={saving || blockTourSlots}
           onClick={handleSave}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 font-bold text-xs flex items-center gap-2 shadow-sm"
+          className={`rounded-xl h-11 px-6 font-bold text-xs flex items-center gap-2 shadow-sm transition-all ${
+            blockTourSlots 
+              ? "bg-[#D1D1D6] text-[#8E8E93] cursor-not-allowed hover:bg-[#D1D1D6]" 
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
+          title={blockTourSlots ? "Tour scheduling is paused while account is suspended" : undefined}
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save Availability
+          {saving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : blockTourSlots ? (
+            <Lock className="h-4 w-4" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          {blockTourSlots ? "Scheduling Paused" : "Save Availability"}
         </Button>
       </div>
 

@@ -14,8 +14,10 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Loader2, ArrowLeft, Lock, Zap, Shield } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowLeft, Lock, Zap, Shield, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import SetupForm from "./SetupForm";
+import CheckoutForm from "./CheckoutForm";
 
 // ─── Stripe Promise (singleton) ──────────────────────────────────────────────
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
@@ -38,139 +40,15 @@ interface EmbeddedSubscribeModalProps {
   currentUserUnitCount?: number;
   currentTierPrice?: number;
   /** Called after a successful subscription payment is confirmed */
-  onSuccess?: () => void;
+  onSuccess?: (newTierId: string) => void;
   /** Context message shown at top of modal */
   contextMessage?: string;
   title?: string;
+  required?: boolean;
 }
 
-// ─── Inner payment form (rendered inside <Elements>) ─────────────────────────
-function CheckoutForm({
-  tierName,
-  tierPrice,
-  onSuccess,
-  onBack,
-}: {
-  tierName: string;
-  tierPrice: number;
-  onSuccess: () => void;
-  onBack: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [ready, setReady] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
 
-    setIsProcessing(true);
-    setErrorMsg("");
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/dashboard/owner?subscribed=true`,
-      },
-      redirect: "if_required", // Stay on page if 3DS not needed
-    });
-
-    if (error) {
-      setErrorMsg(error.message || "Payment failed. Please try again.");
-      setIsProcessing(false);
-    } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      toast.success("🎉 Subscription activated! Setting up your account...");
-      onSuccess();
-    } else {
-      // Might need redirect for 3D Secure — handled by Stripe automatically
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Plan Summary */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-widest mb-1">Subscribing to</p>
-          <p className="text-xl font-black text-white">{tierName}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <Shield className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="text-xs text-[#8E8E93] font-medium">Cancel anytime · Secure payment</span>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-3xl font-black text-white">${tierPrice}</p>
-          <p className="text-xs text-[#8E8E93] font-medium">/month</p>
-        </div>
-      </div>
-
-      {/* Stripe PaymentElement */}
-      <div className={`transition-opacity duration-300 ${ready ? "opacity-100" : "opacity-0"}`}>
-        <PaymentElement
-          onReady={() => setReady(true)}
-          options={{
-            layout: "tabs",
-            fields: {
-              billingDetails: {
-                address: { country: "auto" },
-              },
-            },
-          }}
-        />
-      </div>
-
-      {!ready && (
-        <div className="h-48 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#8E8E93]" />
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl">
-          {errorMsg}
-        </div>
-      )}
-
-      <div className="flex gap-3 pt-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
-          disabled={isProcessing}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1.5" />
-          Back
-        </Button>
-        <Button
-          type="submit"
-          disabled={!stripe || !elements || isProcessing || !ready}
-          className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-60"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Lock className="h-4 w-4 mr-2" />
-              Subscribe · ${tierPrice}/mo
-            </>
-          )}
-        </Button>
-      </div>
-
-      <p className="text-center text-[11px] text-[#8E8E93] font-medium flex items-center justify-center gap-1.5">
-        <Lock className="h-3 w-3" />
-        Secured by Stripe · 256-bit SSL encryption
-      </p>
-    </form>
-  );
-}
 
 // ─── Main Modal Component ─────────────────────────────────────────────────────
 export default function EmbeddedSubscribeModal({
@@ -183,11 +61,13 @@ export default function EmbeddedSubscribeModal({
   onSuccess,
   contextMessage,
   title = "Choose Your Plan",
+  required = false,
 }: EmbeddedSubscribeModalProps) {
-  const [step, setStep] = useState<"plans" | "confirm" | "payment">("plans");
+  const [step, setStep] = useState<"plans" | "confirm" | "payment" | "setup" | "downgrade_blocked">("plans");
   const [confirmTier, setConfirmTier] = useState<PricingTier | null>(null);
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [setupClientSecret, setSetupClientSecret] = useState<string | null>(null);
   const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
   const [fetchedTiers, setFetchedTiers] = useState<PricingTier[]>([]);
   const [loadingTiers, setLoadingTiers] = useState(false);
@@ -219,12 +99,22 @@ export default function EmbeddedSubscribeModal({
         setSelectedTier(null);
         setConfirmTier(null);
         setClientSecret(null);
+        setSetupClientSecret(null);
         setLoadingTierId(null);
       }, 300);
     }
   }, [open]);
 
   const handleSelectPlan = (tier: PricingTier) => {
+    const isDowngrade = currentTierId && tier.price < currentTierPrice;
+    const isDowngradeBlocked = isDowngrade && currentUserUnitCount > tier.maxUnits;
+
+    if (isDowngradeBlocked) {
+      setSelectedTier(tier);
+      setStep("downgrade_blocked" as any);
+      return;
+    }
+
     // If user already has a plan and is switching, show confirmation
     if (currentTierId && tier.id !== currentTierId) {
       setConfirmTier(tier);
@@ -250,8 +140,20 @@ export default function EmbeddedSubscribeModal({
       }
 
       if (data.upgraded) {
-        toast.success(`🎉 Successfully switched to ${tier.name}!`);
-        handleSuccess();
+        if (data.proratedAmount > 0) {
+          toast.success(`🎉 Successfully switched to ${tier.name}! You've been charged a prorated amount of $${data.proratedAmount.toFixed(2)} for the remainder of this cycle.`, { duration: 8000 });
+        } else {
+          toast.success(`🎉 Successfully switched to ${tier.name}!`);
+        }
+        handleSuccess(tier.id);
+        return;
+      }
+
+      // No payment method on file — collect card first via SetupIntent
+      if (data.requiresSetup && data.setupClientSecret) {
+        setSelectedTier(tier);
+        setSetupClientSecret(data.setupClientSecret);
+        setStep("setup");
         return;
       }
 
@@ -265,10 +167,10 @@ export default function EmbeddedSubscribeModal({
     }
   };
 
-  const handleSuccess = async () => {
-    // Give webhook a moment to process
-    await new Promise((r) => setTimeout(r, 2500));
-    onSuccess?.();
+  const handleSuccess = async (tierId?: string) => {
+    // Give webhook a tiny moment to start committing
+    await new Promise((r) => setTimeout(r, 1000));
+    onSuccess?.(tierId || selectedTier?.id || confirmTier?.id || "");
     onOpenChange(false);
   };
 
@@ -291,8 +193,15 @@ export default function EmbeddedSubscribeModal({
     : {};
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-0 rounded-[28px] w-[95vw] sm:max-w-[680px] p-0 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+    <Dialog 
+      open={open} 
+      onOpenChange={(newOpen, details: any) => { 
+        if (required && (details?.reason === 'escape-key' || details?.reason === 'outside-press')) return; 
+        onOpenChange(newOpen); 
+      }}
+      disablePointerDismissal={required}
+    >
+      <DialogContent showCloseButton={!required} className="bg-white border-0 rounded-[28px] w-[95vw] sm:max-w-[680px] p-0 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
         <div className="px-8 pt-8 pb-4">
@@ -303,7 +212,9 @@ export default function EmbeddedSubscribeModal({
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black text-slate-900 leading-tight">
-                  {step === "payment" && selectedTier ? `Subscribe to ${selectedTier.name}` : title}
+                  {step === "payment" && selectedTier ? `Subscribe to ${selectedTier.name}` 
+                   : step === "setup" && selectedTier ? `Add Card to Upgrade to ${selectedTier.name}`
+                   : title}
                 </DialogTitle>
                 {contextMessage && step === "plans" && (
                   <DialogDescription className="text-[#6E6E73] text-sm font-medium mt-0.5">
@@ -338,10 +249,13 @@ export default function EmbeddedSubscribeModal({
                   ))}
                 </div>
               ) : (
-                pricingTiers.map((tier) => {
-                  const isCurrent = tier.id === currentTierId;
+                pricingTiers
+                  .filter((tier) => tier.id !== currentTierId)
+                  .map((tier) => {
+                    const isCurrent = tier.id === currentTierId;
                   const isLoading = loadingTierId === tier.id;
-                  const isDowngradeBlocked = !isCurrent && currentUserUnitCount > tier.maxUnits;
+                  const isDowngrade = currentTierId && tier.price < currentTierPrice;
+                  const isDowngradeBlocked = isDowngrade && currentUserUnitCount > tier.maxUnits;
 
                   return (
                     <div
@@ -349,8 +263,6 @@ export default function EmbeddedSubscribeModal({
                       className={`border-2 rounded-2xl p-5 transition-all ${
                         isCurrent
                           ? "border-slate-200 bg-slate-50 opacity-70 cursor-default"
-                          : isDowngradeBlocked
-                          ? "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed"
                           : "border-slate-200 hover:border-blue-400 hover:shadow-md hover:shadow-blue-50 cursor-pointer"
                       }`}
                     >
@@ -385,13 +297,13 @@ export default function EmbeddedSubscribeModal({
                             <span className="text-[#6E6E73] text-xs font-medium">/mo</span>
                           </div>
                           <Button
-                            onClick={() => !isDowngradeBlocked && handleSelectPlan(tier)}
-                            disabled={isCurrent || !!loadingTierId || isDowngradeBlocked}
+                            onClick={() => handleSelectPlan(tier)}
+                            disabled={isCurrent || !!loadingTierId}
                             className={`h-9 px-5 rounded-xl font-bold text-sm transition-all ${
                               isCurrent
                                 ? "bg-slate-200 text-[#8E8E93] cursor-not-allowed"
                                 : isDowngradeBlocked
-                                ? "bg-red-50 text-red-500 cursor-not-allowed hover:bg-red-50"
+                                ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 shadow-sm"
                                 : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
                             }`}
                           >
@@ -400,9 +312,11 @@ export default function EmbeddedSubscribeModal({
                             ) : isCurrent ? (
                               "Active"
                             ) : isDowngradeBlocked ? (
-                              `Limit Exceeded (${currentUserUnitCount}/${tier.maxUnits})`
+                              "Downgrade"
+                            ) : isDowngrade ? (
+                              "Downgrade"
                             ) : (
-                              "Select Plan"
+                              "Upgrade"
                             )}
                           </Button>
                         </div>
@@ -462,6 +376,51 @@ export default function EmbeddedSubscribeModal({
             </div>
           )}
 
+          {/* ── STEP 1.7: Downgrade Blocked ── */}
+          {step === "downgrade_blocked" && selectedTier && (
+            <div className="space-y-6">
+              <div className="p-6 rounded-2xl border border-red-100 bg-red-50 text-red-900">
+                <h3 className="text-lg font-black mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+                  Downgrade Blocked
+                </h3>
+                <p className="text-sm font-medium leading-relaxed opacity-90">
+                  You currently have <span className="font-bold">{currentUserUnitCount} active units</span> registered. 
+                  The <span className="font-bold">{selectedTier.name} plan</span> only allows up to <span className="font-bold">{selectedTier.maxUnits} units</span>.
+                </p>
+                <p className="text-sm font-medium leading-relaxed opacity-90 mt-2">
+                  To downgrade, please archive at least <span className="font-bold">{currentUserUnitCount - selectedTier.maxUnits} unit(s)</span> from your Properties tab, then return here.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep("plans")}
+                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1.5" />
+                  Back to Plans
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    onOpenChange(false);
+                    // Navigate to properties hash/tab
+                    window.location.hash = "#properties";
+                    // If they are on owner dashboard page, they can also trigger tab change directly
+                    const tabBtn = document.querySelector('[role="tab"][value="properties"]') as HTMLButtonElement;
+                    if (tabBtn) tabBtn.click();
+                  }}
+                  className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all"
+                >
+                  Go to Properties & Manage Units
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* ── STEP 2: Embedded Payment Form ── */}
           {step === "payment" && clientSecret && selectedTier && (
             <Elements stripe={stripePromise} options={elementsOptions}>
@@ -482,6 +441,22 @@ export default function EmbeddedSubscribeModal({
             <div className="h-64 flex items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             </div>
+          )}
+
+          {/* ── STEP 2b: Setup Card (no payment method on file) ── */}
+          {step === "setup" && setupClientSecret && selectedTier && (
+            <Elements stripe={stripePromise} options={{ clientSecret: setupClientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#0062CC", borderRadius: "12px" } } }}>
+              <SetupForm
+                tierName={selectedTier.name}
+                tierId={selectedTier.id}
+                onSuccess={handleSuccess}
+                onBack={() => {
+                  setStep("plans");
+                  setSetupClientSecret(null);
+                  setSelectedTier(null);
+                }}
+              />
+            </Elements>
           )}
         </div>
       </DialogContent>

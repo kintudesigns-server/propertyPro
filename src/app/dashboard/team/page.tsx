@@ -168,78 +168,11 @@ export default function InspectorsAndVendorsPage() {
             </Button>
           </Link>
         ) : (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="inline-flex items-center justify-center bg-[#007AFF] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
+          <Link href="/dashboard/vendors/new">
+            <Button className="w-full md:w-auto h-11 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-6 rounded-xl shadow-sm transition-all text-sm gap-2 border-none">
               <Plus className="h-5 w-5" /> Add New Vendor
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold">Add External Vendor</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
-                  <Input value={newVendor.name} onChange={e => setNewVendor({...newVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="e.g. Bob's Plumbing Pro" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
-                  <Input value={newVendor.email} onChange={e => setNewVendor({...newVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" placeholder="dispatch@bobsplumbing.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
-                  <Input value={newVendor.phone} onChange={e => setNewVendor({...newVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="(555) 123-4567" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
-                  <Select value={newVendor.specialty} onValueChange={v => setNewVendor({...newVendor, specialty: v || "General"})}>
-                    <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
-                      <SelectValue placeholder="Select specialty" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-white">
-                      <SelectItem value="Plumbing">Plumbing</SelectItem>
-                      <SelectItem value="Electrical">Electrical</SelectItem>
-                      <SelectItem value="HVAC">HVAC</SelectItem>
-                      <SelectItem value="Appliance Repair">Appliance Repair</SelectItem>
-                      <SelectItem value="Handyman">Handyman</SelectItem>
-                      <SelectItem value="Pest Control">Pest Control</SelectItem>
-                      <SelectItem value="Landscaping">Landscaping</SelectItem>
-                      <SelectItem value="Cleaning">Cleaning</SelectItem>
-                      <SelectItem value="General">General Construction</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
-                  <Input value={newVendor.baseCallOutFee} onChange={e => setNewVendor({...newVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" placeholder="e.g. 75" />
-                </div>
-                
-                <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
-                      <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
-                    </div>
-                    <Switch checked={newVendor.w9OnFile} onCheckedChange={c => setNewVendor({...newVendor, w9OnFile: c})} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
-                      <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
-                    </div>
-                    <Switch checked={newVendor.insuranceOnFile} onCheckedChange={c => setNewVendor({...newVendor, insuranceOnFile: c})} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 mt-4">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
-                  Cancel
-                </Button>
-                <Button onClick={handleVendorCreate} disabled={isSubmitting} className="bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl px-8 shadow-sm border-none">
-                  Save Vendor
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+            </Button>
+          </Link>
         )}
       </div>
 

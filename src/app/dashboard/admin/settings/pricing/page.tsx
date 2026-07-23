@@ -36,13 +36,8 @@ export default function PricingSettingsPage() {
   const fetchTiers = async () => {
     try {
       setLoading(true);
-      const [tiersRes, settingsRes] = await Promise.all([
-        fetch("/api/pricing-tiers"),
-        fetch("/api/admin/settings")
-      ]);
-      
+      const tiersRes = await fetch("/api/pricing-tiers");
       if (tiersRes.ok) setTiers(await tiersRes.json());
-      if (settingsRes.ok) setPlatformSettings(await settingsRes.json());
     } catch (err) {
       toast.error("Failed to load pricing tiers.");
     } finally {
@@ -119,29 +114,6 @@ export default function PricingSettingsPage() {
     }
   };
 
-  const handleSaveSettings = async () => {
-    try {
-      setSavingSettings(true);
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          adminFeePercent: Number(platformSettings.adminFeePercent),
-          tourMaxRequestsPerEmail: Number(platformSettings.tourMaxRequestsPerEmail),
-          tourRateLimitWindowHours: Number(platformSettings.tourRateLimitWindowHours),
-          tourOtpExpiryMinutes: Number(platformSettings.tourOtpExpiryMinutes)
-        })
-      });
-      
-      if (!res.ok) throw new Error("Failed to save platform settings");
-      toast.success("Platform settings updated successfully!");
-    } catch (err) {
-      toast.error("Failed to update platform settings.");
-    } finally {
-      setSavingSettings(false);
-    }
-  };
-
   if (loading || status === "loading") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
@@ -163,118 +135,10 @@ export default function PricingSettingsPage() {
             <p className="text-[#6E6E73] text-base mt-0.5">Manage subscription plans and features</p>
           </div>
         </div>
-        <Button onClick={() => setEditingTier({ name: "", description: "", price: 0, minUnits: 0, maxUnits: 0, features: [], isCustom: false, isActive: true })} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 shadow-sm">
+        <Button onClick={() => setEditingTier({ name: "", description: "", price: 0, minUnits: 0, maxUnits: 0, maxInspectors: 1, trialDays: 0, features: [], isCustom: false, isActive: true })} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 shadow-sm">
           <Plus className="h-4 w-4 mr-2" /> Add New Tier
         </Button>
       </div>
-
-      {/* Global Platform Settings */}
-      <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-none shadow-lg rounded-2xl text-white mb-8">
-        <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex-1">
-            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-400" />
-              Global Rent Commission Rate
-            </h2>
-            <p className="text-[#8E8E93] text-sm max-w-xl">
-              This is the flat percentage cut PropertyPro takes from every single rent and security deposit payment processed across the entire platform. This affects your "Rent Commissions" profit.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 p-2 rounded-xl backdrop-blur-sm border border-white/10">
-            <div className="relative">
-              <Input 
-                type="number" 
-                step="0.1"
-                min="0"
-                max="100"
-                value={platformSettings?.adminFeePercent || 0}
-                onChange={(e) => setPlatformSettings({ ...platformSettings, adminFeePercent: e.target.value })}
-                className="w-24 h-12 bg-white/10 border-white/20 text-white font-bold text-lg text-center pr-8 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 font-bold">%</span>
-            </div>
-            <Button 
-              onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-12 px-6 rounded-lg transition-colors"
-            >
-              {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Rate"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tour Booking Settings */}
-      <Card className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 mb-8">
-        <div className="flex flex-col gap-6">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              🗓️ Tour Booking & Rate Limiting Controls
-            </h2>
-            <p className="text-[#6E6E73] text-sm mt-1">
-              Configure spam-prevention rules and email OTP settings for showing tour requests.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Max Request Limits</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourMaxRequestsPerEmail || 3}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourMaxRequestsPerEmail: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">tours</span>
-              </div>
-              <p className="text-[11px] text-[#8E8E93]">Maximum active/pending requests allowed per email address.</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Rate Limit Window</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourRateLimitWindowHours || 24}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourRateLimitWindowHours: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">hours</span>
-              </div>
-              <p className="text-[11px] text-[#8E8E93]">The rolling window time frame enforced for the request limits.</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">OTP Verification Code Expiry</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourOtpExpiryMinutes || 10}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourOtpExpiryMinutes: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">minutes</span>
-              </div>
-              <p className="text-[11px] text-[#8E8E93]">How long the 6-digit email verification OTP remains valid.</p>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2 border-t border-slate-100">
-            <Button 
-              onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl h-11 px-6 font-bold"
-            >
-              {savingSettings && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Save Tour Settings
-            </Button>
-          </div>
-        </div>
-      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tiers.map((tier) => (
@@ -299,6 +163,14 @@ export default function PricingSettingsPage() {
                 <div className="flex justify-between border-b border-slate-100 pb-2">
                   <span className="font-semibold">Unit Range</span>
                   <span>{tier.minUnits} to {tier.maxUnits > 9000 ? 'Unlimited' : tier.maxUnits}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2 pt-1">
+                  <span className="font-semibold">Max Inspectors</span>
+                  <span>{tier.maxInspectors ?? 1}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2 pt-1">
+                  <span className="font-semibold">Trial Period</span>
+                  <span>{tier.trialDays ?? 0} days</span>
                 </div>
                 <div className="pt-2">
                   <span className="font-semibold block mb-2">Features ({tier.features.length})</span>
@@ -359,6 +231,17 @@ export default function PricingSettingsPage() {
                   <div className="space-y-2">
                     <Label>Maximum Units</Label>
                     <Input type="number" required value={editingTier.maxUnits} onChange={e => setEditingTier({...editingTier, maxUnits: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Max Inspectors</Label>
+                    <Input type="number" required value={editingTier.maxInspectors !== undefined ? editingTier.maxInspectors : 1} onChange={e => setEditingTier({...editingTier, maxInspectors: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Trial Days</Label>
+                    <Input type="number" required value={editingTier.trialDays !== undefined ? editingTier.trialDays : 0} onChange={e => setEditingTier({...editingTier, trialDays: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50" />
                   </div>
                 </div>
               

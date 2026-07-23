@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
-// Force TS reload for Prisma
 import { prisma } from "@/lib/prisma";
 import { sanitizeVendor } from "@/lib/sanitization";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -47,6 +47,18 @@ export async function POST(req: NextRequest) {
 
   if (role !== "OWNER" && role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Gate: paused OWNER accounts cannot add new vendors
+  if (role === "OWNER") {
+    const rules = await getEffectiveSubscriptionRules(userId);
+    if (rules.isPaused && rules.blockAddVendor) {
+      return NextResponse.json({
+        error: "Your account is currently paused. Adding new vendors is restricted until your subscription is reactivated.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
   }
 
   try {

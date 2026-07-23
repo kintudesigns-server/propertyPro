@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import { Home, Building, Users, Calendar, Wrench, Wallet, ArrowUpRight, LogOut, Loader2, Plus, DollarSign, CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, ClipboardList, Settings, Shield, TrendingUp, Percent, Briefcase, Clock, ArrowDownRight, AlertTriangle, Activity, FileText, RefreshCw, BarChart2, Target, LayoutGrid, List, Table2, MapPin, Eye, Edit2, MoreVertical, CheckCircle2, Trash2, Bed, Bath, Maximize2, Building2, ArrowLeft, Star, Image, Square, PanelLeft, Download, Lock } from "lucide-react";
+import { Home, Building, Users, Calendar, Wrench, Wallet, ArrowUpRight, LogOut, Loader2, Plus, DollarSign, CheckCircle, Search, Bell, User, ChevronDown, ChevronRight, ClipboardList, Settings, Shield, TrendingUp, Percent, Briefcase, Clock, ArrowDownRight, AlertTriangle, Activity, FileText, RefreshCw, BarChart2, Target, LayoutGrid, List, Table2, MapPin, Eye, Edit2, MoreVertical, CheckCircle2, Trash2, Bed, Bath, Maximize2, Building2, ArrowLeft, Star, Image, Square, PanelLeft, Download, Lock, PauseCircle } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -22,6 +22,51 @@ import SecuritySettings from "@/components/settings/SecuritySettings";
 import OwnerOnboardingChecklist from "@/components/owner/OwnerOnboardingChecklist";
 import InviteTenantModal from "@/components/owner/InviteTenantModal";
 import EmbeddedSubscribeModal from "@/components/subscription/EmbeddedSubscribeModal";
+import PlanUpgradeModal from "@/components/subscription/PlanUpgradeModal";
+import { PlanUsageWidget } from "@/components/PlanUsageWidget";
+
+const DRAFT_KEY = "pp_pending_property_draft";
+const DRAFT_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+const savePendingDraft = (data: any) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ data, expiresAt: Date.now() + DRAFT_TTL_MS }));
+  }
+};
+
+const loadPendingDraft = (): any | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const { data, expiresAt } = JSON.parse(raw);
+    if (Date.now() > expiresAt) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const clearPendingDraft = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+};
+
+const waitForTierUpdate = async (newTierId: string, maxMs = 12000) => {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    const res = await fetch("/api/users");
+    if (!res.ok) break;
+    const data = await res.json();
+    if (data.pricingTier?.id === newTierId) return data;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  return null;
+};
 
 export default function OwnerDashboard() {
   const { data: session, status } = useSession();
@@ -101,8 +146,9 @@ export default function OwnerDashboard() {
       hash = hash.split('#')[0];
       if (hash) {
         if (hash === "settings-subscription") {
-          setActiveTabState("settings");
-          setActiveSettingsTab("subscription");
+          // Redirect to dedicated billing page
+          router.replace("/dashboard/owner/billing");
+          return;
         } else if (hash === "settings") {
           setActiveTabState("settings");
           setActiveSettingsTab("profile");
@@ -120,8 +166,9 @@ export default function OwnerDashboard() {
     const tabParam = searchParams ? searchParams.get("tab") : null;
     if (tabParam) {
       if (tabParam === "subscription") {
-        setActiveTabState("settings");
-        setActiveSettingsTab("subscription");
+        // Redirect to dedicated billing page
+        router.replace("/dashboard/owner/billing");
+        return;
       } else if (tabParam === "settings") {
         setActiveTabState("settings");
         setActiveSettingsTab("profile");
@@ -244,18 +291,76 @@ export default function OwnerDashboard() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [pricingTier, setPricingTier] = useState<any>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState("Active");
+  const [gracePeriodEnd, setGracePeriodEnd] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [pendingPropertyDraft, setPendingPropertyDraft] = useState<any>(null);
   const [pricingModalContext, setPricingModalContext] = useState<"general" | "blocked_property">("general");
+  const [showUpgradeLimitModal, setShowUpgradeLimitModal] = useState(false);
+  const [requestedUnitsForUpgrade, setRequestedUnitsForUpgrade] = useState<number>(0);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
     }
   }, [status, router]);
+
+  const handleUpgradeSuccess = async (newTierId: string) => {
+    setShowUpgradeLimitModal(false);
+    setShowPricingModal(false);
+    setPricingModalContext("general");
+
+    toast.loading("Verifying your subscription upgrade...", { id: "verify-upgrade" });
+
+    const updated = await waitForTierUpdate(newTierId);
+    if (!updated) {
+      toast.warning("Plan upgraded, but details are still syncing. Please refresh in a moment. Your property draft is saved.", { id: "verify-upgrade", duration: 8000 });
+      fetchOwnerData();
+      return;
+    }
+
+    setPricingTier(updated.pricingTier || null);
+    setSubscriptionStatus(updated.subscriptionStatus || "");
+
+    const maxUnits = updated.pricingTier?.maxUnits ?? 0;
+    const draft = loadPendingDraft();
+
+    if (draft) {
+      const unitsRes = await fetch("/api/units?countOnly=true");
+      const unitsData = unitsRes.ok ? await unitsRes.json() : { count: 0 };
+      const currentUnits = unitsData.count ?? 0;
+      const requestedCount = currentUnits + (Array.isArray(draft.units) ? draft.units.length : 1);
+
+      if (maxUnits === 0 || requestedCount <= maxUnits) {
+        clearPendingDraft();
+        setPendingPropertyDraft(draft);
+        try {
+          const res = await fetch("/api/properties", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draft),
+          });
+          setPendingPropertyDraft(null);
+          if (res.ok) {
+            toast.success(`🎉 Property "${draft.name || "New Property"}" created successfully!`, { id: "verify-upgrade", duration: 6000 });
+            setActiveTab("properties");
+          } else {
+            toast.error("Upgrade successful! But property creation failed — please try adding it again.", { id: "verify-upgrade" });
+          }
+        } catch {
+          setPendingPropertyDraft(null);
+          toast.error("Upgrade successful! But property creation failed — please try adding it again.", { id: "verify-upgrade" });
+        }
+      } else {
+        toast.error(`Upgrade successful! But this property needs ${requestedCount} units (your new limit: ${maxUnits}).`, { id: "verify-upgrade" });
+      }
+    } else {
+      toast.success("Subscription upgraded successfully!", { id: "verify-upgrade", duration: 5000 });
+    }
+    fetchOwnerData();
+  };
 
   const fetchOwnerData = async () => {
     try {
@@ -322,13 +427,13 @@ export default function OwnerDashboard() {
             setPricingTier(userData.pricingTier || null);
             const currentStatus = userData.subscriptionStatus || "";
             setSubscriptionStatus(currentStatus);
+            setGracePeriodEnd(userData.gracePeriodEnd || null);
 
             // Auto-submit pending property draft if subscription is now active
-            const draft = sessionStorage.getItem("pp_pending_property_draft");
-            if (draft && currentStatus?.toLowerCase() === "active") {
+            const draftData = loadPendingDraft();
+            if (draftData && currentStatus?.toLowerCase() === "active") {
               try {
-                const draftData = JSON.parse(draft);
-                sessionStorage.removeItem("pp_pending_property_draft");
+                clearPendingDraft();
                 setPendingPropertyDraft(draftData);
                 // Auto-submit after a brief delay so UI is ready
                 setTimeout(async () => {
@@ -354,7 +459,7 @@ export default function OwnerDashboard() {
                   }
                 }, 1200);
               } catch {
-                sessionStorage.removeItem("pp_pending_property_draft");
+                clearPendingDraft();
               }
             }
           }
@@ -434,6 +539,7 @@ export default function OwnerDashboard() {
     }
   }, [status]);
 
+
   const handleSaveProperty = async (data: any) => {
     try {
       const method = data.id ? "PUT" : "POST";
@@ -450,16 +556,22 @@ export default function OwnerDashboard() {
         setActiveTab("properties");
       } else {
         const err = await res.json();
-        // Check if this is a subscription-gate error (403 with subscription message)
         const errMsg: string = err.error || "";
         const isSubscriptionError = res.status === 403 && (
           errMsg.toLowerCase().includes("subscription") ||
-          errMsg === "LIMIT_REACHED"
+          err.code === "NO_SUBSCRIPTION"
         );
-        if (isSubscriptionError && !data.id) {
-          // Save draft to sessionStorage so it survives the Stripe redirect
-          sessionStorage.setItem("pp_pending_property_draft", JSON.stringify(data));
-          // Open pricing modal inline, keeping the user on the same page
+
+        if (err.error === "LIMIT_REACHED" && !data.id) {
+          // Save draft to localStorage
+          savePendingDraft(data);
+          const requestedCount = units.length + (data.units && Array.isArray(data.units) ? data.units.length : 1);
+          setRequestedUnitsForUpgrade(requestedCount);
+          setShowUpgradeLimitModal(true);
+          toast.info("Property details saved. Please upgrade your plan to list it.", { duration: 6000 });
+        } else if (isSubscriptionError && !data.id) {
+          // Save draft to localStorage
+          savePendingDraft(data);
           setPricingModalContext("blocked_property");
           setShowPricingModal(true);
           toast.info("Your property details have been saved. Choose a plan below to activate your listing.", { duration: 6000 });
@@ -1097,8 +1209,8 @@ export default function OwnerDashboard() {
       return;
     }
     if (pricingTier && units.length >= pricingTier.maxUnits) {
-      setPricingModalContext("blocked_property");
-      setShowPricingModal(true);
+      setRequestedUnitsForUpgrade(units.length + 1);
+      setShowUpgradeLimitModal(true);
       return;
     }
     setActiveTab('add-property');
@@ -1110,26 +1222,7 @@ export default function OwnerDashboard() {
   const isActivityActive = ["inbox", "calendar"].includes(activeTab);
   const isAdministrationActive = ["settings"].includes(activeTab);
 
-  const handleCheckout = async (tierId: string) => {
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tierId })
-      });
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else if (data.requiresPortal) {
-        handlePortal();
-      } else {
-        alert(data.error || 'Checkout failed');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Failed to initiate checkout.');
-    }
-  };
+
 
   const handlePortal = async () => {
     try {
@@ -1148,11 +1241,47 @@ export default function OwnerDashboard() {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 pb-20">
-      {pricingTier && subscriptionStatus?.toLowerCase() !== "active" && (
+      <div className="mb-6">
+        <PlanUsageWidget />
+      </div>
+      {pricingTier && subscriptionStatus === "Paused" && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-2xl mb-6 text-sm font-bold shadow-sm flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <PauseCircle className="h-5 w-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="font-extrabold text-base text-[#111111]">Account Paused</p>
+              <p className="text-xs font-semibold text-amber-700 mt-0.5">Your properties, leases, and tenant data are completely safe. New property/unit creation and payout withdrawals are paused. Update payment to reactivate instantly.</p>
+            </div>
+          </div>
+          <Button onClick={handlePortal} className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-9 text-xs px-4 font-bold shrink-0 shadow-sm border-0">
+            Reactivate Plan / Update Billing
+          </Button>
+        </div>
+      )}
+
+      {pricingTier && subscriptionStatus === "Past_Due" && (
+        <div className="bg-orange-50 border border-orange-200 text-orange-800 px-5 py-4 rounded-2xl mb-6 text-sm font-bold shadow-sm flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-orange-600 shrink-0" />
+            <div>
+              <p className="font-extrabold text-base text-[#111111]">Payment Failed - Grace Active</p>
+              <p className="text-xs font-semibold text-orange-700 mt-0.5">
+                Your last subscription payment failed. Your access continues until{" "}
+                <strong>{gracePeriodEnd ? new Date(gracePeriodEnd).toLocaleDateString() : "soon"}</strong>. Please update your payment method to avoid suspension.
+              </p>
+            </div>
+          </div>
+          <Button onClick={handlePortal} className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-9 text-xs px-4 font-bold shrink-0 shadow-sm border-0">
+            Update Payment Details
+          </Button>
+        </div>
+      )}
+
+      {pricingTier && subscriptionStatus?.toLowerCase() !== "active" && subscriptionStatus !== "Paused" && subscriptionStatus !== "Past_Due" && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 text-sm font-bold shadow-sm flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
-            <span>Your subscription has expired or payment failed. Your account is in limited mode and penalty transaction fees apply.</span>
+            <span>Your subscription has expired or payment failed. Your account is in limited mode.</span>
           </div>
           <Button onClick={handlePortal} variant="outline" className="bg-white border-red-200 text-red-600 hover:bg-red-50 h-8 text-xs shrink-0">
             Reactivate Plan / Update Billing
@@ -1197,7 +1326,7 @@ export default function OwnerDashboard() {
                 onComplete={() => fetchOwnerData()} 
                 properties={properties} 
                 leases={leases} 
-                isProfileComplete={!!(profilePhone && bankName && accountNumber && emergencyPhone)}
+                isProfileComplete={!!(profilePhone && emergencyPhone)}
               />
             )}
 
@@ -3904,177 +4033,9 @@ export default function OwnerDashboard() {
               >
                 Security & Password
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveSettingsTab("subscription")}
-                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
-                  activeSettingsTab === "subscription" 
-                    ? "border-blue-600 text-blue-600" 
-                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
-                }`}
-              >
-                Subscription Plan
-              </button>
+
             </div>
 
-            {activeSettingsTab === "subscription" && (
-              <div className="space-y-6 mt-6 max-w-4xl">
-                {pricingTier ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Left Column: Plan Details */}
-                    <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-0 rounded-3xl shadow-xl p-8 col-span-2 text-white relative overflow-hidden">
-                      <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-                      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
-                      
-                      <div className="relative z-10 flex flex-col h-full">
-                        <div className="flex justify-between items-start mb-8">
-                          <div>
-                            <Badge className="bg-white/10 text-white hover:bg-white/20 border-0 rounded-lg px-3 py-1 font-bold text-xs uppercase tracking-widest backdrop-blur-md mb-3 inline-block">
-                              Current Plan
-                            </Badge>
-                            <h3 className="text-3xl font-black text-white">{pricingTier.name}</h3>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-3xl font-black text-white">${pricingTier.price}</span>
-                            <span className="text-[#8E8E93] font-medium text-sm">/mo</span>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-8 mb-8">
-                          <div>
-                            <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-2">Billing Cycle</p>
-                            <p className="font-semibold text-white flex items-center gap-2"><Calendar className="h-4 w-4 text-blue-400"/> Monthly</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-2">Status</p>
-                            <div className="flex items-center gap-2">
-                              <span className="relative flex h-3 w-3">
-                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${subscriptionStatus.toLowerCase() === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-                                <span className={`relative inline-flex rounded-full h-3 w-3 ${subscriptionStatus.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                              </span>
-                              <span className="font-semibold text-white capitalize">{subscriptionStatus}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-auto bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                          <div className="flex justify-between items-end mb-3">
-                            <div>
-                              <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Unit Usage</p>
-                              <p className="text-2xl font-black text-white">{units.length} <span className="text-sm font-medium text-[#8E8E93]">/ {pricingTier.maxUnits} Units</span></p>
-                            </div>
-                            <span className="text-sm font-bold text-blue-400">
-                              {Math.round((units.length / pricingTier.maxUnits) * 100)}% Used
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                            <div 
-                              className={`h-2.5 rounded-full transition-all duration-1000 ${
-                                (units.length / pricingTier.maxUnits) > 0.9 ? 'bg-red-500' : 
-                                (units.length / pricingTier.maxUnits) > 0.75 ? 'bg-amber-400' : 'bg-blue-500'
-                              }`} 
-                              style={{ width: `${Math.min((units.length / pricingTier.maxUnits) * 100, 100)}%` }}
-                            ></div>
-                          </div>
-                          {(units.length / pricingTier.maxUnits) >= 0.9 && (
-                            <p className="text-xs text-red-400 font-medium mt-3 flex items-center gap-1.5">
-                              <AlertTriangle className="h-3.5 w-3.5" /> You are approaching your unit limit. Upgrade to add more units.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-
-                    {/* Right Column: Features & Upgrade */}
-                    <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm flex flex-col">
-                      <div className="p-6 pb-4 border-b border-slate-100">
-                        <h4 className="text-lg font-bold text-[#111111]">Plan Features</h4>
-                      </div>
-                      <div className="p-6 flex-1 flex flex-col">
-                        <ul className="space-y-4 mb-8 flex-1">
-                          {pricingTier.features && Array.isArray(pricingTier.features) && pricingTier.features.map((feature: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-3">
-                              <div className="mt-0.5 bg-emerald-50 text-emerald-500 rounded-full p-0.5 shrink-0">
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                              </div>
-                              <span className="text-sm font-medium text-[#6E6E73] leading-snug">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="mt-auto space-y-3">
-                          <Button onClick={() => setShowPricingModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-md shadow-blue-600/20 transition-all">
-                            View & Purchase Plans
-                          </Button>
-                          <Button onClick={handlePortal} variant="outline" className="w-full bg-white hover:bg-[#F5F5F7] border-slate-200 text-slate-700 font-bold h-12 rounded-xl transition-all">
-                            Stripe Customer Portal
-                          </Button>
-                          <p className="text-center text-[11px] font-medium text-[#8E8E93] mt-1">Stripe Portal is used for changing cards & billing details.</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                ) : (
-                  <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm p-12 text-center flex flex-col items-center justify-center">
-                    <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                      <Activity className="h-10 w-10 text-slate-300" />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#111111] mb-2">No Active Subscription</h3>
-                    <p className="text-[#6E6E73] max-w-md mx-auto mb-8">You are currently not on an active plan. Upgrade your account to list properties, manage units, and start collecting rent.</p>
-                    <div className="flex gap-4 justify-center">
-                      <Button onClick={() => handleCheckout("starter")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 px-8 rounded-xl shadow-md shadow-blue-600/20">
-                        View Pricing Plans
-                      </Button>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Billing History Section */}
-                <div className="pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-bold text-[#111111]">Billing History</h4>
-                    <Button variant="outline" className="text-xs font-bold h-8 rounded-lg border-slate-200">
-                      Download All
-                    </Button>
-                  </div>
-                  <Card className="bg-white border border-[#E5E5EA] rounded-3xl shadow-sm overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-slate-50/50">
-                        <TableRow className="border-slate-100 hover:bg-transparent">
-                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3 pl-6">Date</TableHead>
-                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Description</TableHead>
-                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Amount</TableHead>
-                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3">Status</TableHead>
-                          <TableHead className="text-[#6E6E73] font-bold text-[10px] uppercase tracking-wider py-3 text-right pr-6">Receipt</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pricingTier ? (
-                          <TableRow className="border-slate-100 hover:bg-[#F5F5F7]/50">
-                            <TableCell className="py-4 pl-6 text-sm font-semibold text-slate-700">Oct 01, 2026</TableCell>
-                            <TableCell className="text-sm font-bold text-slate-900">{pricingTier.name} Subscription</TableCell>
-                            <TableCell className="text-sm font-black text-slate-900">${pricingTier.price}</TableCell>
-                            <TableCell>
-                              <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-50 rounded-full font-bold px-2.5 py-0.5 shadow-sm">Paid</Badge>
-                            </TableCell>
-                            <TableCell className="text-right pr-6">
-                              <Button variant="ghost" className="h-8 w-8 p-0 rounded-full text-[#8E8E93] hover:text-blue-600 hover:bg-blue-50">
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={5} className="py-8 text-center text-sm font-medium text-[#6E6E73]">
-                              No billing history available.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </Card>
-                </div>
-              </div>
-            )}
 
             {activeSettingsTab === "profile" && (
               <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -4423,10 +4384,9 @@ export default function OwnerDashboard() {
             <div className="w-full space-y-3">
               <Button onClick={() => {
                 setShowUpgradeModal(false);
-                setActiveTab('settings');
-                setActiveSettingsTab('subscription');
+                router.push('/dashboard/owner/billing');
               }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl">
-                View Subscription Settings
+                View Billing & Subscription
               </Button>
               <Button onClick={() => setShowUpgradeModal(false)} variant="ghost" className="w-full text-[#6E6E73] hover:text-slate-700 font-bold h-12 rounded-xl">
                 Cancel
@@ -4452,18 +4412,27 @@ export default function OwnerDashboard() {
         currentTierId={pricingTier?.id}
         currentUserUnitCount={units.length}
         currentTierPrice={pricingTier?.price ? Number(pricingTier.price) : 0}
+        required={false}
         title={pricingModalContext === "blocked_property" ? "One Step Away from Listing!" : "Choose Your Plan"}
         contextMessage={
           pricingModalContext === "blocked_property"
             ? "Your property details are saved. Subscribe below — your property will be created automatically right after payment. 🚀"
             : undefined
         }
-        onSuccess={() => {
-          setShowPricingModal(false);
-          setPricingModalContext("general");
-          fetchOwnerData();
-          toast.success("Subscription activated! Your account is now fully unlocked.", { duration: 5000 });
+        onSuccess={(newTierId) => {
+          sessionStorage.setItem('pp_plan_prompt_dismissed', '1');
+          handleUpgradeSuccess(newTierId);
         }}
+      />
+
+      {/* Contextual Plan Upgrade Modal (when hitting unit limits) */}
+      <PlanUpgradeModal
+        open={showUpgradeLimitModal}
+        onOpenChange={setShowUpgradeLimitModal}
+        pricingTiers={pricingTiers}
+        currentTier={pricingTier}
+        requestedUnits={requestedUnitsForUpgrade}
+        onSuccess={(newTierId) => handleUpgradeSuccess(newTierId)}
       />
     </div>
   );

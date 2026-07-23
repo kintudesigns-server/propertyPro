@@ -253,6 +253,23 @@ function ApplicationCard({ application }: { application: any }) {
             </div>
           </div>
         </div>
+
+        {(() => {
+          const daysPending = Math.ceil((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
+          const showReviewPendingWarning = (status === "PENDING" || status === "Application Submitted") && daysPending >= 5;
+          if (!showReviewPendingWarning) return null;
+          return (
+            <div className="mt-8 p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-3 shadow-xs">
+              <Clock className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-slate-700">Application Under Review</p>
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed mt-0.5 font-medium">
+                  Your application is being processed. Timeline duration might vary depending on screening verifications and administrative queue volume.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

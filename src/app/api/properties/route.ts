@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { notifyMany } from "@/lib/notify";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -99,7 +100,19 @@ export async function POST(req: NextRequest) {
       include: { pricingTier: true, ownedProperties: { include: { units: true } } },
     });
 
-    if (owner?.subscriptionStatus?.toLowerCase() !== "active") {
+    const rules = await getEffectiveSubscriptionRules(userId);
+    const subStatus = (owner?.subscriptionStatus || "").toLowerCase();
+    const isSubActive = subStatus === "active" || subStatus === "trialing" || subStatus.includes("canceling") || rules.isCompedAccess;
+
+    if (rules.isPaused && rules.blockNewUnits && !rules.isCompedAccess) {
+      return NextResponse.json({
+        error: "Your account is paused. Your existing units are safe, but new additions are blocked.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
+    if (!isSubActive) {
       return NextResponse.json({ error: "Active subscription required to add properties.", code: "NO_SUBSCRIPTION" }, { status: 403 });
     }
     const data = await req.json();

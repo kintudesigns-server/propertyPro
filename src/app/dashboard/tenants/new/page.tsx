@@ -8,12 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Save, UploadCloud, User, Briefcase, PhoneCall, FileText, Camera, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import PausedAccountGate from "@/components/subscription/PausedAccountGate";
 
 export default function AddTenantPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [blockAddTenant, setBlockAddTenant] = useState(false);
+  const [gracePeriodEnd, setGracePeriodEnd] = useState<string | null>(null);
+  const [pausedAt, setPausedAt] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -57,6 +61,18 @@ export default function AddTenantPage() {
       })
       .catch(() => toast.error("Failed to load properties"))
       .finally(() => setHasLoaded(true));
+
+    fetch("/api/subscription/rules")
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then(rules => {
+        setBlockAddTenant(!!rules.blockAddTenant);
+        setGracePeriodEnd(rules.gracePeriodEnd || null);
+        setPausedAt(rules.pausedAt || null);
+      })
+      .catch(() => {});
   }, []);
 
   const hasApprovedProperty = properties.some(p => p.approvalStatus === "APPROVED");
@@ -132,7 +148,17 @@ export default function AddTenantPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <PausedAccountGate 
+        isLocked={blockAddTenant} 
+        reason="Registering new tenants" 
+        gracePeriodEnd={gracePeriodEnd} 
+        pausedAt={pausedAt}
+        allowedActions={[
+          "All your existing tenant records and lease history are safe.",
+          "Existing tenants can still pay rent, submit maintenance, and message you."
+        ]}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Profile Photo */}
         <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
@@ -350,6 +376,7 @@ export default function AddTenantPage() {
           </Button>
         </div>
       </form>
+      </PausedAccountGate>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { ArrowLeft, Building, User, Calendar, DollarSign, Loader2, Home, Setting
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import PausedAccountGate from "@/components/subscription/PausedAccountGate";
 
 export default function CreateLeasePage() {
   const router = useRouter();
@@ -25,6 +26,33 @@ export default function CreateLeasePage() {
   const [selectedProperty, setSelectedProperty] = useState("");
   const [units, setUnits] = useState<any[]>([]);
   const [selectedUnitDetails, setSelectedUnitDetails] = useState<any>(null);
+
+  const [isPausedAccount, setIsPausedAccount] = useState(false);
+  const [pausedPlanName, setPausedPlanName] = useState<string | null>(null);
+  const [blockNewUnits, setBlockNewUnits] = useState(false);
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const userRes = await fetch("/api/users");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          const rulesRes = await fetch("/api/subscription/rules");
+          if (rulesRes.ok) {
+            const rules = await rulesRes.json();
+            if (rules.isPaused && rules.blockNewUnits) {
+              setIsPausedAccount(true);
+              setPausedPlanName(userData.pricingTier?.name || null);
+              setBlockNewUnits(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Subscription check failed on leases page:", err);
+      }
+    };
+    checkSubscription();
+  }, []);
 
   const [formData, setFormData] = useState({
     unitId: "",
@@ -308,7 +336,17 @@ export default function CreateLeasePage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <PausedAccountGate
+        isLocked={blockNewUnits}
+        planName={pausedPlanName}
+        reason="Lease creation"
+        allowedActions={[
+          "Your existing leases and active contracts remain <strong>safe and fully functional.</strong>",
+          "You can view files, send notifications, and handle maintenance on active leases.",
+          "Drafting or signing new lease agreements is restricted until subscription reactivation."
+        ]}
+      >
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Property & Tenant */}
@@ -786,6 +824,7 @@ export default function CreateLeasePage() {
           </div>
         </div>
       </form>
+      </PausedAccountGate>
     </div>
   );
 }

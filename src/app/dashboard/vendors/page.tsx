@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +11,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { DollarSign, ShieldAlert, FileSignature } from "lucide-react";
+import { DollarSign, ShieldAlert, FileSignature, Lock } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+  const [blockAddVendor, setBlockAddVendor] = useState(false);
 
   const [open, setOpen] = useState(false);
   const [newVendor, setNewVendor] = useState({ name: "", email: "", phone: "", specialty: "General", w9OnFile: false, insuranceOnFile: false, baseCallOutFee: "0" });
@@ -42,6 +45,22 @@ export default function VendorsPage() {
 
   useEffect(() => {
     fetchVendors();
+    // Query subscription rules
+    const checkSubscription = async () => {
+      try {
+        const rulesRes = await fetch("/api/subscription/rules");
+        if (rulesRes.ok) {
+          const rules = await rulesRes.json();
+          if (rules.isPaused && rules.blockAddVendor) {
+            setIsPaused(true);
+            setBlockAddVendor(true);
+          }
+        }
+      } catch (err) {
+        console.error("Subscription check in Vendors failed:", err);
+      }
+    };
+    checkSubscription();
   }, []);
 
   const handleCreate = async () => {
@@ -108,6 +127,18 @@ export default function VendorsPage() {
 
   return (
     <div className="p-8 pt-24 md:pt-12 max-w-7xl mx-auto space-y-8 pb-24">
+      {isPaused && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
+          <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+          <p className="text-sm font-semibold text-amber-800">
+            Your account is currently paused. Adding new vendors is restricted. Reactivate your subscription in{" "}
+            <a href="/dashboard/owner/billing" className="underline font-bold hover:text-amber-900">
+              Billing Settings
+            </a>.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -115,78 +146,16 @@ export default function VendorsPage() {
           <p className="text-[#6E6E73] mt-1 text-sm font-medium">Manage your network of 3rd-party contractors and specialists.</p>
         </div>
         
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger className="inline-flex items-center justify-center bg-[#007AFF] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
-            <Plus className="h-5 w-5" /> Add New Vendor
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold">Add External Vendor</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
-                <Input value={newVendor.name} onChange={e => setNewVendor({...newVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="e.g. Bob's Plumbing Pro" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
-                <Input value={newVendor.email} onChange={e => setNewVendor({...newVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" placeholder="dispatch@bobsplumbing.com" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
-                <Input value={newVendor.phone} onChange={e => setNewVendor({...newVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="(555) 123-4567" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
-                <Select value={newVendor.specialty} onValueChange={v => setNewVendor({...newVendor, specialty: v || "General"})}>
-                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
-                    <SelectValue placeholder="Select specialty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Plumbing">Plumbing</SelectItem>
-                    <SelectItem value="Electrical">Electrical</SelectItem>
-                    <SelectItem value="HVAC">HVAC</SelectItem>
-                    <SelectItem value="Appliance Repair">Appliance Repair</SelectItem>
-                    <SelectItem value="Handyman">Handyman</SelectItem>
-                    <SelectItem value="Pest Control">Pest Control</SelectItem>
-                    <SelectItem value="Landscaping">Landscaping</SelectItem>
-                    <SelectItem value="Cleaning">Cleaning</SelectItem>
-                    <SelectItem value="General">General Construction</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
-                <Input value={newVendor.baseCallOutFee} onChange={e => setNewVendor({...newVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" placeholder="e.g. 75" />
-              </div>
-              
-              <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
-                    <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
-                  </div>
-                  <Switch checked={newVendor.w9OnFile} onCheckedChange={c => setNewVendor({...newVendor, w9OnFile: c})} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
-                    <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
-                  </div>
-                  <Switch checked={newVendor.insuranceOnFile} onCheckedChange={c => setNewVendor({...newVendor, insuranceOnFile: c})} />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
-                Cancel
-              </Button>
-              <Button onClick={handleCreate} disabled={isSubmitting} className="bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl px-8 shadow-sm">
-                Save Vendor
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="flex flex-col items-end gap-1">
+          <Link href="/dashboard/vendors/new">
+            <Button
+              className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm border-none"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Add New Vendor</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Edit Dialog */}

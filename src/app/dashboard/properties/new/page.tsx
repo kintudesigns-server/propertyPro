@@ -6,10 +6,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Save, UploadCloud, Plus, Trash2, Building, ImageIcon, Loader2, Layers, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, Plus, Trash2, Building, ImageIcon, Loader2, Layers, AlertCircle, PauseCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import EmbeddedSubscribeModal from "@/components/subscription/EmbeddedSubscribeModal";
+import PlanUpgradeModal from "@/components/subscription/PlanUpgradeModal";
+import PausedAccountGate from "@/components/subscription/PausedAccountGate";
 
 // Helper for generic debouncing
 const useDebounce = (value: any, delay: number) => {
@@ -21,6 +23,49 @@ const useDebounce = (value: any, delay: number) => {
   return debouncedValue;
 };
 
+const DRAFT_KEY = "pp_pending_property_draft";
+const DRAFT_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+const savePendingDraft = (data: any) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ data, expiresAt: Date.now() + DRAFT_TTL_MS }));
+  }
+};
+
+const loadPendingDraft = (): any | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const { data, expiresAt } = JSON.parse(raw);
+    if (Date.now() > expiresAt) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const clearPendingDraft = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+};
+
+const waitForTierUpdate = async (newTierId: string, maxMs = 12000) => {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    const res = await fetch("/api/users");
+    if (!res.ok) break;
+    const data = await res.json();
+    if (data.pricingTier?.id === newTierId) return data;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  return null;
+};
+
 export default function NewPropertyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -30,6 +75,13 @@ export default function NewPropertyPage() {
   const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [limitModalMessage, setLimitModalMessage] = useState("");
   const [limitModalType, setLimitModalType] = useState<"limit" | "subscription">("limit");
+  const [pricingTier, setPricingTier] = useState<any>(null);
+  const [pricingTiers, setPricingTiers] = useState<any[]>([]);
+  const [showUpgradeLimitModal, setShowUpgradeLimitModal] = useState(false);
+  const [requestedUnitsForUpgrade, setRequestedUnitsForUpgrade] = useState<number>(0);
+  const [isPausedAccount, setIsPausedAccount] = useState(false);
+  const [pausedPlanName, setPausedPlanName] = useState<string | null>(null);
+  const [blockNewUnits, setBlockNewUnits] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -82,18 +134,106 @@ export default function NewPropertyPage() {
   const [bulkImages, setBulkImages] = useState<string[]>([]);
   const [uploadingBulkImages, setUploadingBulkImages] = useState(false);
 
-  // Check subscription status on mount
+  const handleUpgradeSuccess = async (newTierId: string) => {
+    setLimitModalOpen(false);
+    setShowUpgradeLimitModal(false);
+
+    toast.loading("Verifying your subscription upgrade...", { id: "verify-upgrade" });
+
+    const updated = await waitForTierUpdate(newTierId);
+    if (!updated) {
+      toast.warning("Plan upgraded, but details are still syncing. Please refresh in a moment. Your property draft is saved.", { id: "verify-upgrade", duration: 8000 });
+      return;
+    }
+
+    setPricingTier(updated.pricingTier || null);
+
+    const maxUnits = updated.pricingTier?.maxUnits ?? 0;
+    const draft = loadPendingDraft();
+
+    if (draft) {
+      const unitsRes = await fetch("/api/units?countOnly=true");
+      const unitsData = unitsRes.ok ? await unitsRes.json() : { count: 0 };
+      const currentUnits = unitsData.count ?? 0;
+      const requestedCount = currentUnits + (Array.isArray(draft.units) ? draft.units.length : 1);
+
+      if (maxUnits === 0 || requestedCount <= maxUnits) {
+        clearPendingDraft();
+        try {
+          const res = await fetch("/api/properties", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draft),
+          });
+          if (res.ok) {
+            localStorage.removeItem("propertyPro_draft"); // Cleanup Form Input Draft
+            toast.success(`🎉 Property "${draft.name || "New Property"}" created successfully!`, { id: "verify-upgrade", duration: 6000 });
+            router.push("/dashboard/properties");
+          } else {
+            toast.error("Upgrade successful! But property creation failed — please try adding it again.", { id: "verify-upgrade" });
+          }
+        } catch {
+          toast.error("Upgrade successful! But property creation failed — please try adding it again.", { id: "verify-upgrade" });
+        }
+      } else {
+        toast.error(`Upgrade successful! However, this property requires ${requestedCount} units, but your new plan limit is ${maxUnits}.`, { id: "verify-upgrade" });
+      }
+    } else {
+      toast.success("Subscription upgraded successfully!", { id: "verify-upgrade", duration: 5000 });
+      router.push("/dashboard/properties");
+    }
+  };
+
+  // Check subscription status + unit cap on mount
   useEffect(() => {
     const checkSubscription = async () => {
       try {
         const userRes = await fetch("/api/users");
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          const status = userData.subscriptionStatus?.toLowerCase();
-          if (!status || status !== "active") {
-            setLimitModalType("subscription");
-            setLimitModalMessage("You need an active subscription to list properties. Choose a plan below to get started.");
-            setLimitModalOpen(true);
+        if (!userRes.ok) return;
+        const userData = await userRes.json();
+        setPricingTier(userData.pricingTier || null);
+        
+        // Fetch pricing tiers for upgrade modal
+        const tiersRes = await fetch("/api/pricing-tiers");
+        if (tiersRes.ok) {
+          const tiersData = await tiersRes.json();
+          setPricingTiers(tiersData.filter((t: any) => t.isActive && !t.isCustom));
+        }
+
+        // Query our clean rules API
+        const rulesRes = await fetch("/api/subscription/rules");
+        if (rulesRes.ok) {
+          const rules = await rulesRes.json();
+          if (rules.isPaused && rules.blockNewUnits) {
+            setIsPausedAccount(true);
+            setPausedPlanName(userData.pricingTier?.name || null);
+            setBlockNewUnits(true);
+            return;
+          }
+        }
+
+        const status = (userData.subscriptionStatus || "").toLowerCase();
+        const isActive = status === "active" || status === "trialing" || status.includes("canceling");
+
+        if (!isActive) {
+          // Case 2: No subscription at all — show plan picker
+          setLimitModalType("subscription");
+          setLimitModalMessage("You need an active subscription to list properties. Choose a plan below to get started.");
+          setLimitModalOpen(true);
+          return;
+        }
+
+        // Case 3: Subscription is active — check if unit cap is already reached
+        const maxUnits = userData.pricingTier?.maxUnits ?? 0;
+        if (maxUnits > 0) {
+          const unitsRes = await fetch("/api/units?countOnly=true");
+          if (unitsRes.ok) {
+            const unitsData = await unitsRes.json();
+            const currentUnits = unitsData.count ?? 0;
+            if (currentUnits >= maxUnits) {
+              setRequestedUnitsForUpgrade(currentUnits + 1);
+              setShowUpgradeLimitModal(true);
+            }
           }
         }
       } catch (e) {
@@ -460,12 +600,23 @@ export default function NewPropertyPage() {
       } else {
         const err = await res.json();
         if (err.error === "LIMIT_REACHED") {
-          setLimitModalType("limit");
-          setLimitModalMessage(err.message || "You have reached your tier unit limit.");
-          setLimitModalOpen(true);
+          savePendingDraft(payload);
+          
+          // Fetch existing unit count to find total requested units
+          try {
+            const unitsRes = await fetch("/api/units?countOnly=true");
+            const unitsData = unitsRes.ok ? await unitsRes.json() : { count: 0 };
+            const currentCount = unitsData.count ?? 0;
+            const requestedCount = currentCount + payload.units.length;
+            setRequestedUnitsForUpgrade(requestedCount);
+          } catch (e) {
+            setRequestedUnitsForUpgrade(payload.units.length + 1);
+          }
+          
+          setShowUpgradeLimitModal(true);
+          toast.info("Property details saved as draft. Please upgrade your plan to complete creation.");
         } else if (res.status === 403 && (err.code === "NO_SUBSCRIPTION" || err.error?.toLowerCase().includes("subscription"))) {
-          // Save draft to sessionStorage so it survives the checkout redirect
-          sessionStorage.setItem("pp_pending_property_draft", JSON.stringify(payload));
+          savePendingDraft(payload);
           setLimitModalType("subscription");
           setLimitModalMessage("A subscription is required to list properties. Your details have been saved — choose a plan and your property will be created automatically after checkout.");
           setLimitModalOpen(true);
@@ -512,7 +663,17 @@ export default function NewPropertyPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <PausedAccountGate
+        isLocked={blockNewUnits}
+        planName={pausedPlanName}
+        reason="Adding new properties"
+        allowedActions={[
+          "Your existing properties and unit data are <strong>safe and untouched.</strong>",
+          "You can view, edit, and manage your current portfolio from the dashboard.",
+          "Adding new properties or units is restricted until subscription reactivation."
+        ]}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* General Info */}
         <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
@@ -630,7 +791,7 @@ export default function NewPropertyPage() {
               <label className="text-sm font-bold text-[#1D1D1F]">Street Address <span className="text-red-500">*</span></label>
               <div className="relative">
                 <Input 
-                  required 
+                  required={false}
                   name="address" 
                   value={formData.address} 
                   onChange={handleAddressChange} 
@@ -1124,68 +1285,32 @@ export default function NewPropertyPage() {
           </Button>
         </div>
       </form>
+      </PausedAccountGate>
 
       {/* Embedded Subscribe Modal */}
       {limitModalType === "subscription" ? (
         <EmbeddedSubscribeModal
           open={limitModalOpen}
           onOpenChange={setLimitModalOpen}
-          pricingTiers={[]}
+          pricingTiers={pricingTiers}
+          currentTierId={pricingTier?.id}
+          currentTierPrice={pricingTier?.price ? Number(pricingTier.price) : 0}
           title="One Step Away from Listing!"
           contextMessage={limitModalMessage}
-          onSuccess={async () => {
-            setLimitModalOpen(false);
-            toast.success("Subscription activated! Saving your property...", { duration: 4000 });
-            // Try to auto-submit the form if there's data
-            const draft = sessionStorage.getItem("pp_pending_property_draft");
-            if (draft) {
-              try {
-                const draftData = JSON.parse(draft);
-                sessionStorage.removeItem("pp_pending_property_draft");
-                const res = await fetch("/api/properties", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(draftData),
-                });
-                if (res.ok) {
-                  toast.success(`🎉 Property "${draftData.name || "New Property"}" created successfully!`, { duration: 5000 });
-                  router.push("/dashboard/properties");
-                } else {
-                  toast.info("Property data saved. You can now create your property.");
-                }
-              } catch {
-                toast.info("Subscription active! You can now create your property.");
-              }
-            } else {
-              toast.success("Subscription active! You can now add your property.");
-            }
-          }}
+          required={false}
+          onSuccess={(newTierId) => handleUpgradeSuccess(newTierId)}
         />
-      ) : (
-        // Plan limit modal (user has subscription but hit unit cap)
-        <Dialog open={limitModalOpen} onOpenChange={setLimitModalOpen}>
-          <DialogContent className="sm:max-w-md p-8 bg-white rounded-3xl border-0 shadow-2xl">
-            <DialogHeader>
-              <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Layers className="h-8 w-8" />
-              </div>
-              <DialogTitle className="text-center text-xl font-black text-slate-900 tracking-tight">Plan Limit Reached</DialogTitle>
-            </DialogHeader>
-            <div className="text-center text-[#6E6E73] font-medium my-4">{limitModalMessage}</div>
-            <DialogFooter className="flex-col sm:flex-col gap-3 mt-2 border-t border-slate-100 pt-4">
-              <Button
-                onClick={() => setLimitModalType("subscription")}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md"
-              >
-                Upgrade Plan
-              </Button>
-              <Button onClick={() => setLimitModalOpen(false)} variant="ghost" className="w-full h-12 rounded-xl font-bold text-[#6E6E73]">
-                Continue Editing
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      ) : null}
+
+      {/* Plan Upgrade Modal (when hitting unit limits) */}
+      <PlanUpgradeModal
+        open={showUpgradeLimitModal}
+        onOpenChange={setShowUpgradeLimitModal}
+        pricingTiers={pricingTiers}
+        currentTier={pricingTier}
+        requestedUnits={requestedUnitsForUpgrade}
+        onSuccess={(newTierId) => handleUpgradeSuccess(newTierId)}
+      />
 
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
         <DialogContent className="max-w-md bg-white border-[#E5E5EA] rounded-3xl p-0 overflow-hidden flex flex-col max-h-[90vh]">

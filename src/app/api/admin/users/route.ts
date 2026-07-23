@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
             createdAt: true,
             tenantStatus: true,
             accountStatus: true,
+            subscriptionStatus: true,
             avatar: true,
             pricingTier: {
               select: {
@@ -74,6 +75,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         tenantStatus: true,
         accountStatus: true,
+        subscriptionStatus: true,
         avatar: true,
         pricingTier: {
           select: {
