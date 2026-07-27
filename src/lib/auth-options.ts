@@ -92,10 +92,11 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.phone = (user as any).phone;
         token.hasCompletedOnboarding = (user as any).hasCompletedOnboarding;
+        token.subscriptionStatus = (user as any).subscriptionStatus;
       } else if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, phone: true, name: true, balance: true, hasCompletedOnboarding: true, accountStatus: true },
+          select: { role: true, phone: true, name: true, balance: true, hasCompletedOnboarding: true, accountStatus: true, subscriptionStatus: true },
         });
         if (dbUser && dbUser.accountStatus !== "SUSPENDED") {
           token.role = dbUser.role;
@@ -103,6 +104,7 @@ export const authOptions: NextAuthOptions = {
           token.name = dbUser.name;
           token.balance = dbUser.balance;
           token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
+          token.subscriptionStatus = dbUser.subscriptionStatus;
         } else {
           // User no longer exists or is suspended — return empty object to invalidate
           return {} as any;
@@ -118,6 +120,7 @@ export const authOptions: NextAuthOptions = {
           (session.user as any).phone = token.phone as string | null;
           (session.user as any).balance = token.balance ?? 0;
           (session.user as any).hasCompletedOnboarding = token.hasCompletedOnboarding as boolean;
+          (session.user as any).subscriptionStatus = token.subscriptionStatus as string | null;
         }
       } else {
         // Token is invalid/null (user deleted), clear the session user

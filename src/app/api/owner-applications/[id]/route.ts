@@ -48,16 +48,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const placeholderPassword = crypto.randomBytes(32).toString("hex");
       const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
 
-      // Always auto-enroll approved owners onto the free Hobbyist tier (price = 0)
-      let tier = await prisma.pricingTier.findFirst({
-        where: { name: "Hobbyist", isActive: true }
-      });
-      if (!tier) {
-        tier = await prisma.pricingTier.findFirst({
-          where: { price: 0, isActive: true }
-        });
-      }
-
       // Create the owner user
       const newUser = await prisma.user.create({
         data: {
@@ -69,8 +59,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           accountStatus: "ACTIVE",
           employmentStatus: application.entityType === "BUSINESS" ? "BUSINESS" : "INDIVIDUAL",
           notes: `Approved from application. Entity: ${application.entityType}. Portfolio: ${application.portfolioSize}. Website: ${application.website || "N/A"}`,
-          currentTierId: tier?.id || null,
-          subscriptionStatus: tier ? "Active" : "Inactive",
+          currentTierId: null,
+          subscriptionStatus: "PendingPlanSelection",
         },
       });
 
@@ -122,7 +112,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                       Your owner application has been reviewed and <strong style="color: #2563eb;">approved</strong>. Welcome to PropertyPro! 
                     </p>
                     <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
-                      Please click the button below to choose your private secure password and finish setting up your account.
+                      Please click the button below to choose your private secure password, select your pricing subscription plan, and finish setting up your account.
                     </p>
                     
                     <!-- CTA -->
@@ -143,10 +133,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
                       <tr>
                         <td style="padding: 20px;">
-                          <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Your Plan: ${tier?.name || "Hobbyist"}</h3>
-                          <ul style="color: #475569; font-size: 13px; line-height: 1.8; padding-left: 16px; margin: 0;">
-                            ${tier?.features.map(f => `<li style="margin-bottom: 4px;">${f}</li>`).join("") || "<li>Free plan — up to 2 units</li>"}
-                          </ul>
+                          <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Pricing Subscription Setup</h3>
+                          <p style="color: #475569; font-size: 13px; margin: 0; line-height: 1.6;">
+                            Upon your first login, you will be prompted to select a subscription plan (Essentials or Professional) and configure your payment method for card-first free trials.
+                          </p>
                         </td>
                       </tr>
                     </table>
@@ -156,7 +146,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                     <ul style="list-style: none; padding: 0; margin: 0; color: #475569; font-size: 14px; line-height: 2;">
                       <li><span style="color: #2563eb; font-weight: bold; margin-right: 8px;">✓</span> Owner application approved</li>
                       <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Set up your password</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Complete onboarding profile</li>
+                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Choose your subscription plan & add card details</li>
                       <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Add your first property list</li>
                     </ul>
                   </td>

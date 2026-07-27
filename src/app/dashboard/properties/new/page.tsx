@@ -212,6 +212,11 @@ export default function NewPropertyPage() {
           }
         }
 
+        const isBypass = userData.role === "SUPERADMIN" || userData.role === "ADMIN";
+        if (isBypass) {
+          return;
+        }
+
         const status = (userData.subscriptionStatus || "").toLowerCase();
         const isActive = status === "active" || status === "trialing" || status.includes("canceling");
 

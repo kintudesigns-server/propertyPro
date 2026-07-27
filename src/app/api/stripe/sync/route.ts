@@ -81,17 +81,27 @@ export async function POST(req: NextRequest) {
           activeSubId = checkoutSession.subscription as string;
           const targetTierId = checkoutSession.metadata?.tierId || user.currentTierId;
           
-          await prisma.user.update({
+          let checkStatus = "Active";
+          try {
+            const subDetail = await stripe.subscriptions.retrieve(activeSubId);
+            if (subDetail.status === "trialing") {
+              checkStatus = "Trialing";
+            }
+          } catch (e) {}
+
+          const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
               stripeSubscriptionId: activeSubId,
               currentTierId: targetTierId,
-              subscriptionStatus: "Active",
+              subscriptionStatus: checkStatus,
               gracePeriodEnd: null,
               pausedAt: null,
               payoutsBlockedAt: null,
             },
+            include: { pricingTier: true }
           });
+          Object.assign(user, updatedUser);
         }
       } catch (err: any) {
         console.error("Failed to retrieve or sync checkout session:", err);
@@ -125,7 +135,8 @@ export async function POST(req: NextRequest) {
     if (sub.status === "past_due") mappedStatus = "Past_Due";
     else if (sub.status === "unpaid" || sub.status === "paused") mappedStatus = "Paused";
     else if (sub.status === "canceled" || sub.status === "incomplete_expired") mappedStatus = "Inactive";
-    else if (sub.status === "active" || sub.status === "trialing") mappedStatus = "Active";
+    else if (sub.status === "active") mappedStatus = "Active";
+    else if (sub.status === "trialing") mappedStatus = "Trialing";
 
     const oldStatus = user.subscriptionStatus;
 
@@ -134,7 +145,7 @@ export async function POST(req: NextRequest) {
       subscriptionStatus: mappedStatus,
     };
 
-    if (mappedStatus === "Active") {
+    if (mappedStatus === "Active" || mappedStatus === "Trialing") {
       updateData.gracePeriodEnd = null;
       updateData.pausedAt = null;
       updateData.payoutsBlockedAt = null;
@@ -146,12 +157,21 @@ export async function POST(req: NextRequest) {
     });
 
     if (oldStatus !== mappedStatus) {
+      let historyEvent = "REACTIVATED";
+      if (oldStatus === "PendingPlanSelection") {
+        historyEvent = mappedStatus === "Trialing" ? "TRIAL_STARTED" : "SUBSCRIBED";
+      } else if (mappedStatus === "Past_Due") {
+        historyEvent = "PAST_DUE";
+      } else if (mappedStatus === "Inactive") {
+        historyEvent = "CANCELED";
+      }
+
       await prisma.subscriptionHistory.create({
         data: {
           userId: user.id,
           toTierId: user.currentTierId,
           toTierName: user.pricingTier?.name || "Plan",
-          event: mappedStatus === "Active" ? "REACTIVATED" : mappedStatus === "Past_Due" ? "PAST_DUE" : "CANCELED",
+          event: historyEvent,
           amountPaid: null,
         },
       });

@@ -362,7 +362,7 @@ export default function PropertyDetailsPage() {
                       <h3 className="text-2xl font-black text-[#1D1D1F] mb-1">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
                       <p className="text-[#6E6E73] font-semibold text-sm">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
                       {property.units?.[0]?.status !== "OCCUPIED" && (
-                        <Button onClick={() => router.push(`/dashboard/owner?tab=settings`)} className="mt-6 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl h-11 px-8 shadow-md">Invite Tenant</Button>
+                        <Button onClick={() => router.push(`/dashboard/tenants/new`)} className="mt-6 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl h-11 px-8 shadow-md">Invite Tenant</Button>
                       )}
                     </div>
                   ) : (

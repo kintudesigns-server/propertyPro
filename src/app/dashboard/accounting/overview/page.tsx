@@ -18,7 +18,11 @@ function fmt(n: number) {
   return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+
 export default function FinancialOverviewPage() {
+  const { allowed, loading: checkingAccess } = useModuleAccess("accounting");
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -50,8 +54,10 @@ export default function FinancialOverviewPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (allowed) {
+      fetchData();
+    }
+  }, [allowed]);
 
   // Filtered transactions for tabs
   const { rentTx, escrowTx } = useMemo(() => {
@@ -61,6 +67,19 @@ export default function FinancialOverviewPage() {
       escrowTx: txList.filter((tx: any) => tx.category === "DEPOSIT")
     };
   }, [data.transactions]);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return <ModuleLockedBanner module="accounting" />;
+  }
 
   if (loading) {
     return (

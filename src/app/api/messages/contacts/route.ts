@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { checkModuleAccess } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -18,12 +19,13 @@ export async function GET(req: NextRequest) {
 
     // Admins can see all users
     if (role === Role.SUPERADMIN) {
-      contacts = await prisma.user.findMany({
+      const users = await prisma.user.findMany({
         where: {
           id: { not: userId }
         },
         select: { id: true, name: true, email: true, role: true }
       });
+      contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }
     // Owner can message:
     // 1. Tenants with active leases on their properties
@@ -60,7 +62,7 @@ export async function GET(req: NextRequest) {
         },
         select: { id: true, name: true, email: true, role: true }
       });
-      contacts = users;
+      contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }
     // Tenant can message:
     // 1. Owners of their properties
@@ -108,7 +110,24 @@ export async function GET(req: NextRequest) {
         },
         select: { id: true, name: true, email: true, role: true }
       });
-      contacts = users;
+
+      contacts = await Promise.all(
+        users.map(async (u) => {
+          if (u.role === Role.OWNER) {
+            const access = await checkModuleAccess(u.id, "messages");
+            return {
+              ...u,
+              hasMessagingAccess: access.allowed,
+              messagingChannel: access.allowed ? "LIVE_CHAT" : "EMAIL_FALLBACK",
+            };
+          }
+          return {
+            ...u,
+            hasMessagingAccess: true,
+            messagingChannel: "LIVE_CHAT",
+          };
+        })
+      );
     }
     // Inspector can message:
     // 1. Owners of properties they have requests for
@@ -145,7 +164,7 @@ export async function GET(req: NextRequest) {
         },
         select: { id: true, name: true, email: true, role: true }
       });
-      contacts = users;
+      contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }
 
     return NextResponse.json(contacts);

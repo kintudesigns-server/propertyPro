@@ -88,7 +88,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "OWNER") {
+  const userRole = (session?.user as any)?.role;
+  const isBypass = userRole === "SUPERADMIN" || userRole === "ADMIN";
+
+  if (!session?.user || (!isBypass && userRole !== "OWNER")) {
     return NextResponse.json({ error: "Only property owners can add properties" }, { status: 403 });
   }
 
@@ -102,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     const rules = await getEffectiveSubscriptionRules(userId);
     const subStatus = (owner?.subscriptionStatus || "").toLowerCase();
-    const isSubActive = subStatus === "active" || subStatus === "trialing" || subStatus.includes("canceling") || rules.isCompedAccess;
+    const isSubActive = isBypass || subStatus === "active" || subStatus === "trialing" || subStatus.includes("canceling") || rules.isCompedAccess;
 
     if (rules.isPaused && rules.blockNewUnits && !rules.isCompedAccess) {
       return NextResponse.json({
@@ -135,6 +138,18 @@ export async function POST(req: NextRequest) {
       images: u.images || [],
       status: u.status || "VACANT"
     })) : [];
+
+    // Property Tier Enforcement Check (Max Properties Cap, 0 = Unlimited)
+    const tier = owner?.pricingTier as any;
+    if (owner && tier?.maxProperties && tier.maxProperties > 0) {
+      const currentPropertyCount = owner.ownedProperties.length;
+      if (currentPropertyCount >= tier.maxProperties) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. Your ${tier.name} plan allows up to ${tier.maxProperties} properties.` 
+        }, { status: 403 });
+      }
+    }
 
     // Tier Enforcement Check (Hard Cap)
     if (owner?.pricingTier?.maxUnits) {

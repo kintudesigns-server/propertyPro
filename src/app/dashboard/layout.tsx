@@ -30,6 +30,7 @@ import {
   ClipboardList,
   TrendingUp,
   Tag,
+  BarChart2,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MessageBadge } from "@/components/notifications/MessageBadge";
@@ -55,6 +56,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const currentTab = searchParams ? searchParams.get("tab") || "overview" : "overview";
   const { data: session, status } = useSession();
   const role = (session?.user as any)?.role;
+  const subscriptionStatus = (session?.user as any)?.subscriptionStatus;
   const isOwnerOrAdmin = role === "OWNER" || role === "SUPERADMIN";
   const isInspector = role === "INSPECTOR";
   const isAdmin = role === "SUPERADMIN";
@@ -99,10 +101,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    if (isOwner && subscriptionStatus === "PendingPlanSelection" && !pathname.startsWith("/dashboard/subscribe")) {
+      router.replace("/dashboard/subscribe");
+      return;
+    }
+
     if (isInspector && (pathname === "/dashboard" || pathname === "/dashboard/")) {
       router.push("/dashboard/inspector");
     }
-  }, [status, isInspector, pathname, router]);
+  }, [status, isInspector, isOwner, subscriptionStatus, pathname, router]);
 
   // Global Real-Time SSE Listener
   React.useEffect(() => {
@@ -1275,8 +1282,20 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   </span>
                 )}
 
-                {isOwner && (
+                {isOwnerOrAdmin && (
                   <>
+                    <Link
+                      href="/dashboard/analytics"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        isActive("/dashboard/analytics")
+                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      }`}
+                    >
+                      <BarChart2 className="h-5 w-5" />
+                      {sidebarOpen && <span>Portfolio Analytics</span>}
+                    </Link>
+
                     <Link
                       href="/dashboard/accounting/overview"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -1335,9 +1354,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
                 
                 <Link
-                  href={isOwner ? "/dashboard/owner?tab=settings" : isAdmin ? "/dashboard/admin/settings/profile" : "/dashboard/tenant?tab=settings"}
+                  href={isAdmin ? "/dashboard/admin/settings/profile" : "/dashboard/settings"}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    (pathname === "/dashboard/owner" && currentTab === "settings") || pathname === "/dashboard/admin/settings/profile" || (pathname === "/dashboard/tenant" && currentTab === "settings")
+                    pathname === "/dashboard/settings" || pathname === "/dashboard/admin/settings/profile"
                       ? "bg-[#EFF6FF] text-[#3B82F6]"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
@@ -1463,7 +1482,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <MessageBadge />
             <NotificationDropdown />
             <Link
-              href={isOwner ? "/dashboard/owner?tab=settings" : isTenant ? "/dashboard/tenant?tab=settings" : "/dashboard/admin/settings/profile"}
+              href={isAdmin ? "/dashboard/admin/settings/profile" : "/dashboard/settings"}
               className="p-2 rounded-full text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F0F0F0] transition-colors hidden md:flex"
               title="Profile Settings"
             >

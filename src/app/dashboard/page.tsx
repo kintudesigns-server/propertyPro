@@ -188,7 +188,7 @@ export default function DashboardPage() {
     const onboardingLease = leases.find(l => {
       if (l.status === "PENDING_SIGNATURE") return true;
       if (l.status === "ACTIVE") {
-        const unpaidDeposit = invoices.find(i => i.leaseId === l.id && Number(i.amount) === Number(l.securityDeposit) && (i.status === "UNPAID" || i.status === "OVERDUE"));
+        const unpaidDeposit = invoices.find(i => i.leaseId === l.id && i.invoiceType === "DEPOSIT" && (i.status === "UNPAID" || i.status === "OVERDUE"));
         return !!unpaidDeposit;
       }
       return false;
@@ -210,8 +210,7 @@ export default function DashboardPage() {
     // Rent due countdown
     const nextRentInvoice = unpaidInvoices
       .filter(i => {
-        const lease = leases.find((l: any) => l.id === i.leaseId);
-        return !(lease && Number(i.amount) === Number(lease.securityDeposit));
+        return i.invoiceType !== "DEPOSIT";
       })
       .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
 
@@ -249,7 +248,7 @@ export default function DashboardPage() {
 
     unpaidInvoices.forEach((inv) => {
       const lease = leases.find((l: any) => l.id === inv.leaseId);
-      const isDeposit = lease && Number(inv.amount) === Number(lease.securityDeposit);
+      const isDeposit = inv.invoiceType === "DEPOSIT";
       const daysLeft = Math.ceil((new Date(inv.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
       const isOverdue = daysLeft < 0;
       activities.push({
@@ -963,7 +962,7 @@ export default function DashboardPage() {
           <div className="p-6 md:p-8 space-y-3.5 bg-slate-900/30">
             <div 
               className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
-              onClick={() => router.push('/dashboard/owner#settings')}
+              onClick={() => router.push('/dashboard/settings')}
             >
               <div className="flex items-center gap-4">
                 <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.profileComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'}`}>
@@ -1158,7 +1157,7 @@ export default function DashboardPage() {
                 <span className="text-[11px] font-semibold text-[#1D1D1F] mt-2">Add Property</span>
               </button>
               <button
-                onClick={() => router.push("/dashboard/owner?tab=settings")}
+                onClick={() => router.push("/dashboard/tenants/new")}
                 className="h-[90px] bg-[#F2F2F7] hover:bg-[#E5E5EA]/80 text-[#1D1D1F] font-semibold flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-transparent hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0"
               >
                 <div className="p-2 bg-[#AF52DE] text-white rounded-lg shadow-sm">

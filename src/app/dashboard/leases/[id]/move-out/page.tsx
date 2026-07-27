@@ -882,74 +882,78 @@ export default function FinalStatementPage() {
       </Card>
 
       {/* Final Summary + Finalize */}
-      <Card className="rounded-[24px] shadow-sm border-[#E5E5EA] overflow-hidden">
-        <div className="p-8 bg-[#007AFF] text-white flex flex-col md:flex-row justify-between items-center gap-6">
+      <Card className="rounded-[24px] shadow-lg border border-[#E5E5EA] overflow-hidden bg-slate-900 text-white">
+        <div className="p-8 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex-1 w-full space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-              <span className="text-[#8E8E93] font-bold uppercase tracking-wider text-xs">Original Security Deposit</span>
-              <span className="text-xl font-bold">${originalDeposit.toFixed(2)}</span>
+            <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">Original Security Deposit</span>
+              <span className="text-xl font-extrabold text-slate-100">${originalDeposit.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-              <span className="text-[#8E8E93] font-bold uppercase tracking-wider text-xs">Total Deductions</span>
-              <span className="text-xl font-bold text-red-400">-${totalDeducted.toFixed(2)}</span>
+            <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">Total Deductions</span>
+              <span className="text-xl font-extrabold text-rose-450">-${totalDeducted.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center pt-2">
               <span className="text-slate-300 font-black uppercase tracking-wider text-sm">
                 {isExcess ? "Outstanding Balance (Owes You)" : "Final Refund Due to Tenant"}
               </span>
-              <span className={`text-4xl font-black ${isExcess ? "text-orange-400" : "text-emerald-400"}`}>
+              <span className={`text-4xl font-black tracking-tight ${isExcess ? "text-amber-450" : "text-emerald-450"}`}>
                 ${isExcess ? Math.abs(netBalance).toFixed(2) : refundAmount.toFixed(2)}
               </span>
             </div>
           </div>
 
-          <div className="w-full md:w-[320px] bg-slate-800 rounded-2xl p-6 space-y-4">
+          <div className="w-full md:w-[340px] bg-slate-950/60 border border-slate-800/80 rounded-2xl p-6 space-y-4">
             {isExcess ? (
-              <div className="bg-slate-700/50 border border-slate-600 rounded-xl p-4">
-                <p className="text-xs text-slate-300 font-semibold leading-relaxed">
-                  Deductions exceed the deposit by <strong>${Math.abs(netBalance).toFixed(2)}</strong>. Finalizing will generate a Notice of Outstanding Balance. You may need to pursue collection through small claims court.
+              <div className="bg-amber-950/20 border border-amber-905/40 rounded-xl p-4 flex items-start gap-2.5">
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-300 font-medium leading-relaxed">
+                  Deductions exceed the deposit by <strong className="text-amber-200">${Math.abs(netBalance).toFixed(2)}</strong>. Finalizing will generate a Notice of Outstanding Balance.
                 </p>
               </div>
             ) : (
               <>
                 {/* Refund Method Override */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">Refund Method</Label>
+                  <Label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Refund Method</Label>
                   <select
                     value={refundMethodOverride ?? (lease?.refundMethod || "OFFLINE")}
                     onChange={(e) => setRefundMethodOverride(e.target.value)}
                     disabled={!canFinalize}
-                    className="w-full h-11 bg-slate-700 border-0 rounded-xl px-3 text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="w-full h-11 bg-slate-800 border border-slate-700/60 rounded-xl px-3 text-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                   >
                     <option value="OFFLINE">Bank Wire / External Transfer</option>
                     <option value="CHECK">Mail a Physical Check</option>
                     <option value="ORIGINAL">Original Payment Method (Stripe)</option>
                   </select>
                   {lease?.refundMethod && refundMethodOverride && refundMethodOverride !== lease.refundMethod && (
-                    <p className="text-[10px] text-amber-400 font-semibold">⚠ Tenant requested: {lease.refundMethod === "ORIGINAL" ? "Stripe refund" : lease.refundMethod === "CHECK" ? "check" : "bank wire"}. You have overridden this.</p>
+                    <p className="text-[10px] text-amber-400 font-semibold flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" /> Tenant requested: {lease.refundMethod === "ORIGINAL" ? "Stripe" : lease.refundMethod === "CHECK" ? "check" : "wire"}.
+                    </p>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">
-                    Reference # <span className="text-slate-600 normal-case font-normal">(optional)</span>
+                  <Label className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                    Reference # <span className="text-slate-500 normal-case font-normal text-[10px]">(optional)</span>
                   </Label>
-                  <Input
+                  <input
+                    type="text"
                     value={refundRef}
                     onChange={(e) => setRefundRef(e.target.value)}
                     placeholder="Wire ref, TXN ID, check #..."
                     disabled={!canFinalize}
-                    className="h-11 bg-slate-700 border-0 rounded-xl px-3 text-white placeholder:text-[#6E6E73] focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="w-full h-11 bg-slate-805 border border-slate-700/60 rounded-xl px-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 text-xs transition-all"
                   />
                 </div>
+
               </>
             )}
-
 
             {lease.moveOutStatus === "OWNER_REVIEWING" ? (
               <Button
                 onClick={handleSubmitDisposition}
                 disabled={processing || isTerminated}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-sm transition-colors disabled:opacity-50"
+                className="w-full h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold rounded-xl shadow-md transition-all text-sm gap-2 border-none"
               >
                 {processing ? "Processing..." : "Submit Statement & Send to Tenant"}
               </Button>
@@ -957,7 +961,7 @@ export default function FinalStatementPage() {
               <Button
                 onClick={handleSaveDeductions}
                 disabled={processing || isTerminated}
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-sm transition-colors disabled:opacity-50"
+                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl shadow-md transition-all text-sm gap-2 border-none"
               >
                 {processing ? "Processing..." : "Send Revised Statement to Tenant"}
               </Button>
@@ -969,15 +973,16 @@ export default function FinalStatementPage() {
                   isTerminated ||
                   !canFinalize
                 }
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-sm transition-colors disabled:opacity-50"
+                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md transition-all text-sm gap-2 border-none disabled:opacity-50"
               >
                 {processing ? "Processing..." : isExcess ? "Finalize & Record Outstanding Balance" : "Finalize & Process Refund"}
               </Button>
             )}
-
           </div>
         </div>
       </Card>
+
+
       
       <BypassConfirmationModal
         leaseId={id}

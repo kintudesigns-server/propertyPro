@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import { ALWAYS_AVAILABLE } from "@/lib/modules-registry";
 
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -50,6 +51,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
       }
     }
 
+    const mergedModules = data.modules
+      ? Array.from(new Set([...ALWAYS_AVAILABLE, ...data.modules]))
+      : undefined;
+
     const updatedTier = await prisma.pricingTier.update({
       where: { id: id },
       data: {
@@ -59,12 +64,22 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         minUnits: data.minUnits !== undefined ? Number(data.minUnits) : undefined,
         maxUnits: data.maxUnits !== undefined ? Number(data.maxUnits) : undefined,
         maxInspectors: data.maxInspectors !== undefined ? Number(data.maxInspectors) : undefined,
+        maxProperties: data.maxProperties !== undefined ? Number(data.maxProperties) : undefined,
+        maxVendors: data.maxVendors !== undefined ? Number(data.maxVendors) : undefined,
+        maxDocumentStorageMB: data.maxDocumentStorageMB !== undefined ? Number(data.maxDocumentStorageMB) : undefined,
+        sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : undefined,
+        highlightBadge: data.highlightBadge !== undefined ? (data.highlightBadge || null) : undefined,
+        annualPrice: data.annualPrice !== undefined ? (data.annualPrice !== null ? Number(data.annualPrice) : null) : undefined,
+        customQuotePrice: data.customQuotePrice !== undefined ? (data.customQuotePrice !== null ? Number(data.customQuotePrice) : null) : undefined,
+        allowsTrial: data.allowsTrial !== undefined ? Boolean(data.allowsTrial) : undefined,
+        gracePeriodDays: data.gracePeriodDays !== undefined ? (data.gracePeriodDays !== null ? Number(data.gracePeriodDays) : null) : undefined,
         trialDays: data.trialDays !== undefined ? Number(data.trialDays) : undefined,
         features: data.features,
+        modules: mergedModules,
         isCustom: data.isCustom,
         isActive: data.isActive,
         stripePriceId: updatedStripePriceId,
-      }
+      } as any
     });
     return NextResponse.json(updatedTier);
   } catch (error: any) {

@@ -202,8 +202,8 @@ export default function TenantDashboard() {
     }
   }, [status]);
 
-  const activeLease = leases.find((l) => l.status === "ACTIVE");
-  const activeLeases = leases.filter((l) => l.status === "ACTIVE");
+  const activeLease = leases.find((l) => l.status === "ACTIVE" || l.status === "NOTICE_GIVEN");
+  const activeLeases = leases.filter((l) => l.status === "ACTIVE" || l.status === "NOTICE_GIVEN");
   const pendingLease = leases.find((l) => l.status === "PENDING_SIGNATURE");
 
   // Auto-select first lease unit when leases load

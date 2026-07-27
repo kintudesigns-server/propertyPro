@@ -268,7 +268,7 @@ export default function PayRentPage() {
     fetchData();
   }, [status, router, fetchData]);
 
-  const activeLease = leases.find((l) => l.status === "ACTIVE") || leases[0] || null;
+  const activeLease = leases.find((l) => l.status === "ACTIVE" || l.status === "NOTICE_GIVEN") || leases[0] || null;
   const pendingInvoices = invoices
     .filter((i) => i.status === "UNPAID" || i.status === "OVERDUE")
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());

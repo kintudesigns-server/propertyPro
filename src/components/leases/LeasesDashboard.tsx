@@ -121,8 +121,7 @@ export default function LeasesDashboard({
 
   const hasUnpaidDeposit = (l: any) => {
     return l.invoices?.some((inv: any) => 
-      l.securityDeposit &&
-      Number(inv.amount) === Number(l.securityDeposit) &&
+      inv.invoiceType === "DEPOSIT" &&
       inv.status === "UNPAID"
     );
   };

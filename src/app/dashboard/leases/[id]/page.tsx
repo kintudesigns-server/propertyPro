@@ -375,8 +375,7 @@ export default function LeaseDetailsPage() {
   const paymentProgress = totalLeaseValue > 0 ? Math.round((amountPaid / totalLeaseValue) * 100) : 0;
   const unpaidDepositInvoice = lease.invoices?.find(
     (inv: any) =>
-      lease.securityDeposit &&
-      Number(inv.amount) === Number(lease.securityDeposit) &&
+      inv.invoiceType === "DEPOSIT" &&
       inv.status === "UNPAID"
   );
 
@@ -905,7 +904,7 @@ export default function LeaseDetailsPage() {
       )}
 
       {/* Tenant banner: Limbo State for Move-Out */}
-      {isTenant && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (
+      {isTenant && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (lease.status === "TERMINATED" || !lease.keyReturnConfirmedAt) && (
         <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h4 className="font-extrabold text-base flex items-center gap-2">
@@ -1685,7 +1684,7 @@ export default function LeaseDetailsPage() {
                         <CreditCard className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-[#1D1D1F] text-sm truncate">{Number(inv.amount) === Number(lease.securityDeposit) ? 'Security Deposit' : 'Rent Payment'}</p>
+                        <p className="font-bold text-[#1D1D1F] text-sm truncate">{inv.invoiceType === "DEPOSIT" ? 'Security Deposit' : 'Rent Payment'}</p>
                         <p className="text-xs font-medium text-[#6E6E73] mt-0.5 truncate">Due on {new Date(inv.dueDate).toLocaleDateString()}</p>
                       </div>
                     </div>

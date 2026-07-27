@@ -57,6 +57,8 @@ interface UsageData {
   stripeSubscriptionId: string | null;
   currentPeriodEnd: number | null;
   cancelAtPeriodEnd: boolean;
+  cardLast4?: string | null;
+  cardBrand?: string | null;
   invoices: InvoiceItem[];
   subscriptionHistory: HistoryItem[];
   usage: {
@@ -82,6 +84,7 @@ interface Tier {
   price: number;
   minUnits: number;
   maxUnits: number;
+  isCustom?: boolean;
   features: string[];
 }
 
@@ -441,21 +444,31 @@ export default function BillingPage() {
       )}
 
       {subStatus.toLowerCase() === "trialing" && (
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 rounded-lg flex items-center justify-between gap-4 text-sm">
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 rounded-lg flex items-center justify-between gap-4 text-sm shadow-sm">
           <div className="flex items-center gap-3">
             <Zap className="w-6 h-6 text-blue-600 shrink-0" />
             <div>
-              <p className="font-semibold">Free Trial Active 🎁</p>
-              <p className="text-blue-800 dark:text-blue-300 text-xs mt-0.5">
-                {renewalDate ? `Your trial period ends on ${renewalDate}. Add a payment method to continue after your trial.` : "Add a payment method to ensure uninterrupted service when your trial ends."}
+              <p className="font-bold text-base text-blue-950 dark:text-blue-50">Free Trial Active 🎁</p>
+              <p className="text-blue-800 dark:text-blue-300 text-xs mt-0.5 font-semibold">
+                {data?.cardLast4 ? (
+                  <>
+                    Your 14-day free trial ends on <span className="font-extrabold text-blue-950 dark:text-blue-50">{renewalDate}</span>. Your saved card ending in <span className="font-extrabold text-blue-950 dark:text-blue-50">{data.cardLast4}</span> ({(data.cardBrand || "Card").toUpperCase()}) is securely stored and will be automatically charged when your trial ends. Cancel anytime.
+                  </>
+                ) : (
+                  renewalDate ? `Your trial period ends on ${renewalDate}. Add a payment method to continue after your trial.` : "Add a payment method to ensure uninterrupted service when your trial ends."
+                )}
               </p>
             </div>
           </div>
           <button
             onClick={handleOpenPortal}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold shrink-0 animate-pulse"
+            className={`px-4 py-2 text-white rounded-lg text-xs font-bold shrink-0 transition-all ${
+              data?.cardLast4 
+                ? "bg-indigo-600 hover:bg-indigo-700" 
+                : "bg-blue-600 hover:bg-blue-700 animate-pulse shadow-md"
+            }`}
           >
-            Add Payment Method
+            {data?.cardLast4 ? "Manage Billing on Stripe" : "Add Payment Method"}
           </button>
         </div>
       )}
@@ -749,14 +762,35 @@ export default function BillingPage() {
                 <div className="relative border-l border-gray-200 dark:border-gray-800 ml-3 pl-6 space-y-4 py-2">
                   {data.subscriptionHistory.map((item) => {
                     const eventColors: Record<string, string> = {
-                      SUBSCRIBED: "bg-emerald-100 text-emerald-800 border-emerald-200",
-                      UPGRADED: "bg-blue-100 text-blue-800 border-blue-200",
-                      DOWNGRADED: "bg-amber-100 text-amber-800 border-amber-200",
-                      REACTIVATED: "bg-teal-100 text-teal-800 border-teal-200",
-                      CANCELED: "bg-red-100 text-red-800 border-red-200",
-                      PAST_DUE: "bg-rose-100 text-rose-800 border-rose-200",
+                      SUBSCRIBED: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400",
+                      TRIAL_STARTED: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400",
+                      TRIAL_ENDED: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400",
+                      UPGRADED: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400",
+                      DOWNGRADED: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400",
+                      REACTIVATED: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950/40 dark:text-teal-400",
+                      CANCELED: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-400",
+                      PAST_DUE: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400",
                     };
-                    const colorClass = eventColors[item.event] || "bg-gray-100 text-gray-800 border-gray-200";
+                    const eventNames: Record<string, string> = {
+                      SUBSCRIBED: "Subscribed",
+                      TRIAL_STARTED: "Trial Started",
+                      TRIAL_ENDED: "Trial Ended",
+                      UPGRADED: "Upgraded",
+                      DOWNGRADED: "Downgraded",
+                      REACTIVATED: "Reactivated",
+                      CANCELED: "Cancelled",
+                      PAST_DUE: "Past Due",
+                    };
+
+                    const colorClass = eventColors[item.event] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
+                    const displayName = eventNames[item.event] || item.event;
+
+                    const formatPlanName = (name: string | null) => {
+                      if (!name) return "";
+                      if (name.toLowerCase() === "plan") return "Essentials Plan"; // default placeholder mapping
+                      if (name.toLowerCase().endsWith("plan")) return name;
+                      return `${name} Plan`;
+                    };
 
                     return (
                       <div key={item.id} className="relative">
@@ -769,12 +803,12 @@ export default function BillingPage() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${colorClass}`}>
-                                {item.event}
+                                {displayName}
                               </span>
                               <h4 className="text-xs font-bold text-gray-900 dark:text-white">
-                                {item.fromTierName ? `${item.fromTierName} Plan` : ""} 
+                                {item.fromTierName ? formatPlanName(item.fromTierName) : ""} 
                                 {item.fromTierName && item.toTierName ? " → " : ""}
-                                {item.toTierName ? `${item.toTierName} Plan` : ""}
+                                {item.toTierName ? formatPlanName(item.toTierName) : ""}
                               </h4>
                             </div>
                             {item.amountPaid !== null && (
@@ -825,9 +859,11 @@ export default function BillingPage() {
             const isCurrent = data?.tier.id === t.id;
             const isSubscribing = subscribingTierId === t.id;
             const currentPrice = data?.tier.price || 0;
-            const isUpgrade = t.price > currentPrice;
-            const isDowngrade = t.price < currentPrice;
-            const isFreeSwitch = t.price === 0 && isDowngrade;
+
+            const isCustomTier = t.isCustom || (t.price === 0 && t.maxUnits > 9000);
+            const isUpgrade = isCustomTier ? !isCurrent : t.price > currentPrice;
+            const isDowngrade = !isCustomTier && t.price < currentPrice;
+            const isFreeSwitch = !isCustomTier && t.price === 0 && isDowngrade;
             const hasActiveSubscription = subStatus === "Active" || subStatus === "Active (Canceling)" || subStatus === "Trialing";
 
             return (
@@ -847,7 +883,7 @@ export default function BillingPage() {
                       </h3>
                       {hasActiveSubscription && !isCurrent && isUpgrade && (
                         <span className="text-[10px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
-                          ▲ Higher Tier
+                          ▲ {isCustomTier ? "Enterprise Tier" : "Higher Tier"}
                         </span>
                       )}
                       {hasActiveSubscription && !isCurrent && isDowngrade && (
@@ -868,16 +904,25 @@ export default function BillingPage() {
                   </p>
 
                   <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
-                    ${t.price}
-                    <span className="text-sm font-normal text-gray-500"> / mo</span>
+                    {isCustomTier ? (
+                      <div>
+                        Custom Quote
+                        <span className="text-xs font-medium text-gray-500 block mt-0.5">Tailored enterprise rate</span>
+                      </div>
+                    ) : (
+                      <>
+                        ${t.price}
+                        <span className="text-sm font-normal text-gray-500"> / mo</span>
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-3 mb-6 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
                     <div className="flex items-center gap-2 font-medium text-gray-800 dark:text-gray-200">
                       <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                      Up to {t.maxUnits} Total Units
+                      Up to {t.maxUnits > 9000 ? "Unlimited" : t.maxUnits} Total Units
                     </div>
-                    {t.features.map((feat, fIdx) => (
+                    {t.features.map((feat: string, fIdx: number) => (
                       <div key={fIdx} className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                         <span>{feat}</span>
@@ -887,13 +932,21 @@ export default function BillingPage() {
                 </div>
 
                 <button
-                  onClick={() => handleSubscribe(t.id)}
+                  onClick={() => {
+                    if (isCustomTier) {
+                      window.open("mailto:sales@propertypro.com?subject=Enterprise%20Plan%20Inquiry", "_blank");
+                    } else {
+                      handleSubscribe(t.id);
+                    }
+                  }}
                   disabled={(isCurrent && hasActiveSubscription) || isSubscribing}
                   className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 ${
                     isCurrent && hasActiveSubscription
                       ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-default"
                       : isCurrent && !hasActiveSubscription
                       ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+                      : isCustomTier
+                      ? "bg-slate-900 hover:bg-black text-white shadow-sm"
                       : hasActiveSubscription && isUpgrade
                       ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                       : hasActiveSubscription && isFreeSwitch
@@ -909,6 +962,11 @@ export default function BillingPage() {
                     hasActiveSubscription
                       ? "Active Plan"
                       : "Reactivate This Plan"
+                  ) : isCustomTier ? (
+                    <>
+                      Contact Sales
+                      <ArrowUpRight className="w-4 h-4" />
+                    </>
                   ) : (
                     hasActiveSubscription ? (
                       isFreeSwitch ? (

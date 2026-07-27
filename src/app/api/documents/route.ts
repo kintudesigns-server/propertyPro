@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -11,6 +12,14 @@ export async function GET(req: NextRequest) {
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "documents");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const tenantIdParam = searchParams.get("tenantId");
 
@@ -41,6 +50,16 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const role = (session.user as any).role;
+  const userId = (session.user as any).id;
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "documents");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
   }
 
   try {

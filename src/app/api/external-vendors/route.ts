@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sanitizeVendor } from "@/lib/sanitization";
 import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,13 @@ export async function GET(req: NextRequest) {
 
   if (role !== "OWNER" && role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "vendors");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
   }
 
   try {
@@ -49,6 +57,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "vendors");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
   // Gate: paused OWNER accounts cannot add new vendors
   if (role === "OWNER") {
     const rules = await getEffectiveSubscriptionRules(userId);
@@ -58,6 +73,23 @@ export async function POST(req: NextRequest) {
         code: "ACCOUNT_PAUSED",
         isPaused: true,
       }, { status: 403 });
+    }
+
+    // Gate: maxVendors capacity check (0 = Unlimited)
+    const owner = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { pricingTier: true }
+    });
+    if (owner?.pricingTier?.maxVendors && owner.pricingTier.maxVendors > 0) {
+      const currentVendorCount = await prisma.externalVendor.count({
+        where: { ownerId: userId }
+      });
+      if (currentVendorCount >= owner.pricingTier.maxVendors) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. Your ${owner.pricingTier.name} plan allows up to ${owner.pricingTier.maxVendors} vendors.` 
+        }, { status: 403 });
+      }
     }
   }
 

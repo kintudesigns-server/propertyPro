@@ -12,16 +12,19 @@ import { MoreHorizontal } from "lucide-react";
 
 type TabState = "AWAITING_INSPECTION" | "READY_FOR_SETTLEMENT" | "COMPLETED";
 
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+
 export default function InspectionsPage() {
+  const { allowed, loading: checkingAccess } = useModuleAccess("inspections");
   const router = useRouter();
+
   const [leases, setLeases] = useState<any[]>([]);
   const [inspectors, setInspectors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<TabState>("AWAITING_INSPECTION");
 
-
-  
   const fetchLeases = async () => {
     setLoading(true);
     try {
@@ -44,15 +47,30 @@ export default function InspectionsPage() {
   };
 
   useEffect(() => {
-    fetchLeases();
-    fetch("/api/users?role=INSPECTOR")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to load inspectors");
-      })
-      .then((data) => setInspectors(data))
-      .catch((err) => console.error(err));
-  }, []);
+    if (allowed) {
+      fetchLeases();
+      fetch("/api/users?role=INSPECTOR")
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to load inspectors");
+        })
+        .then((data) => setInspectors(data))
+        .catch((err) => console.error(err));
+    }
+  }, [allowed]);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return <ModuleLockedBanner module="inspections" />;
+  }
 
   const getTabCount = (tab: TabState) => {
     return leases.filter(lease => {

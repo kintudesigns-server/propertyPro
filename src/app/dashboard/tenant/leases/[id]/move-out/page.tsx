@@ -75,7 +75,13 @@ export default function TenantFinalStatementPage() {
         const err = await res.json();
         throw new Error(err.error || "Failed to submit review");
       }
-      toast.success(action === "accept" ? "Report accepted. The owner has been notified to process your refund." : "Dispute submitted. The owner has been notified.");
+      toast.success(
+        action === "accept"
+          ? excessBalance > 0
+            ? "Report accepted. The owner has been notified to finalize the outstanding balance."
+            : "Report accepted. The owner has been notified to process your refund."
+          : "Dispute submitted. The owner has been notified."
+      );
       setDisputeNote("");
       fetchLease();
     } catch (err: any) {
@@ -129,17 +135,27 @@ export default function TenantFinalStatementPage() {
 
       {/* Status Banner */}
       {isCompleted && (
-        <Card className="rounded-[24px] border-emerald-200 bg-emerald-50 shadow-sm overflow-hidden">
+        <Card className={`rounded-[24px] border shadow-sm overflow-hidden ${
+          excessBalance > 0 ? "border-amber-200 bg-amber-50 text-amber-900" : "border-emerald-200 bg-emerald-50 text-emerald-900"
+        }`}>
           <div className="p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className="h-20 w-20 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+            <div className={`h-20 w-20 rounded-full flex items-center justify-center shrink-0 ${
+              excessBalance > 0 ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"
+            }`}>
+              {excessBalance > 0 ? (
+                <AlertTriangle className="h-10 w-10" />
+              ) : (
+                <CheckCircle2 className="h-10 w-10" />
+              )}
             </div>
             <div className="flex-1 space-y-3">
               <div>
-                <h2 className="text-xl font-black text-emerald-900">Move-Out Finalized</h2>
-                <p className="text-emerald-700 font-medium mt-1.5 leading-relaxed text-sm">
+                <h2 className={`text-xl font-black ${excessBalance > 0 ? "text-amber-900" : "text-emerald-900"}`}>
+                  {excessBalance > 0 ? "Move-Out Finalized (Outstanding Balance)" : "Move-Out Finalized"}
+                </h2>
+                <p className={`font-medium mt-1.5 leading-relaxed text-sm ${excessBalance > 0 ? "text-amber-700" : "text-emerald-700"}`}>
                   {excessBalance > 0
-                    ? `Your move-out has been finalized. Deductions exceeded your deposit by $${excessBalance.toFixed(2)}. Your landlord will contact you regarding the outstanding balance.`
+                    ? `Your move-out has been finalized. Deductions exceeded your deposit by $${excessBalance.toFixed(2)}. Please settle this outstanding balance with your landlord.`
                     : `A deposit refund of $${refundAmount.toFixed(2)} has been issued via ${
                         lease.refundMethod === "ORIGINAL" ? "your original payment method" :
                         lease.refundMethod === "CHECK" ? `mailed check to ${lease.forwardingAddress || "your forwarding address"}` :
@@ -149,7 +165,9 @@ export default function TenantFinalStatementPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 pt-1">
-                <Button onClick={() => generateDispositionPDF(lease)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-5 rounded-xl text-sm">
+                <Button onClick={() => generateDispositionPDF(lease)} className={`font-bold h-10 px-5 rounded-xl text-sm border-none ${
+                  excessBalance > 0 ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                }`}>
                   <FileDown className="h-4 w-4 mr-2" /> Download Disposition PDF
                 </Button>
               </div>
@@ -290,8 +308,10 @@ export default function TenantFinalStatementPage() {
               Your Review Required
             </CardTitle>
             <CardDescription>
-              Please review the deductions above and accept or dispute them within 72 hours.
-              Once accepted, the owner will process your refund.
+              Please review the deductions above and accept or dispute them within 72 hours.{" "}
+              {excessBalance > 0
+                ? "Once accepted, the outstanding balance will be recorded as due to the landlord."
+                : "Once accepted, the owner will process your refund."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -301,24 +321,33 @@ export default function TenantFinalStatementPage() {
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-sm"
             >
               <CheckCircle2 className="h-5 w-5 mr-2" />
-              {submittingAction ? "Submitting..." : "Accept Deductions & Request Refund"}
+              {submittingAction
+                ? "Submitting..."
+                : excessBalance > 0
+                ? "Accept Deductions & Acknowledge Balance"
+                : "Accept Deductions & Request Refund"}
             </Button>
 
-            <div className="space-y-2">
-              <Textarea
-                placeholder="State why you are disputing these charges (min. 10 characters). Be specific — e.g. 'The carpet damage was pre-existing as noted in my move-in photos.'"
-                value={disputeNote}
-                onChange={e => setDisputeNote(e.target.value)}
-                className="bg-slate-50 rounded-xl min-h-[80px] resize-none"
-              />
-              {disputeNote.length > 0 && disputeNote.length < 10 && (
-                <p className="text-red-500 text-xs">{10 - disputeNote.length} more characters required.</p>
-              )}
+            <div className="space-y-3 pt-2">
+              <div className="space-y-1.5">
+                <Textarea
+                  placeholder="State why you are disputing these charges (min. 10 characters). Be specific — e.g. 'The carpet damage was pre-existing as noted in my move-in photos.'"
+                  value={disputeNote}
+                  onChange={e => setDisputeNote(e.target.value)}
+                  className="bg-slate-50 border-slate-200 rounded-xl min-h-[90px] resize-none text-slate-800 focus-visible:ring-1 focus-visible:ring-amber-500"
+                />
+                <div className="flex justify-between items-center text-[11px] px-1">
+                  <span className="text-[#8E8E93] font-medium">To dispute deductions, a detailed explanation is required.</span>
+                  <span className={`font-bold transition-colors ${disputeNote.trim().length >= 10 ? "text-emerald-600" : "text-amber-600"}`}>
+                    {disputeNote.trim().length}/10 min chars
+                  </span>
+                </div>
+              </div>
               <Button
                 onClick={() => handleReview("dispute")}
                 disabled={submittingAction || disputeNote.trim().length < 10}
                 variant="outline"
-                className="w-full h-10 rounded-xl text-amber-700 hover:text-amber-800 hover:bg-amber-50 font-bold border-amber-200 text-sm"
+                className="w-full h-11 rounded-xl text-amber-700 hover:text-amber-800 hover:bg-amber-50 font-bold border-amber-200 text-sm disabled:opacity-40 transition-all"
               >
                 <AlertTriangle className="h-4 w-4 mr-2" />
                 {submittingAction ? "Submitting..." : "Dispute These Deductions"}

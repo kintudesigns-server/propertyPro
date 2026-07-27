@@ -162,12 +162,30 @@ export async function POST(req: NextRequest) {
             where: { id: tierId }
           });
 
+          // Retrieve actual subscription to check for trialing status
+          let status = "Active";
+          let isTrial = false;
+          try {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            if (subscription.status === "trialing") {
+              status = "Trialing";
+              isTrial = true;
+            }
+          } catch (e: any) {
+            console.warn("[Webhook] Failed to retrieve subscription to check trial status:", e.message);
+          }
+
           await prisma.user.update({
             where: { id: userId },
             data: {
               stripeSubscriptionId: subscriptionId,
               currentTierId: tierId,
-              subscriptionStatus: "Active",
+              subscriptionStatus: status,
+              ...(isTrial ? {
+                trialUsedTierIds: {
+                  push: tierId,
+                }
+              } : {}),
             },
           });
 
@@ -176,7 +194,7 @@ export async function POST(req: NextRequest) {
               userId,
               toTierId: tierId,
               toTierName: tier?.name || "Unknown Plan",
-              event: "SUBSCRIBED",
+              event: isTrial ? "TRIAL_STARTED" : "SUBSCRIBED",
               amountPaid: session.amount_total ? session.amount_total / 100 : null,
             }
           });
@@ -187,8 +205,8 @@ export async function POST(req: NextRequest) {
             action: "UPDATED",
             actorId: userId,
             actorRole: "OWNER",
-            newValue: { currentTierId: tierId, subscriptionStatus: "Active" },
-            note: `Stripe subscription checkout succeeded. Subscription activated.`,
+            newValue: { currentTierId: tierId, subscriptionStatus: status },
+            note: `Stripe subscription checkout succeeded. Status set to ${status}.`,
           });
         }
         break;

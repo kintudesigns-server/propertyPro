@@ -18,15 +18,11 @@ import {
   AlertTriangle,
   Pause,
   Play,
-  Calendar,
   X,
   ShieldCheck,
   Settings2,
-  Lock,
-  Unlock,
   AlertCircle,
   Users,
-  Copy,
   ChevronRight
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -64,20 +60,6 @@ export default function AdminSubscriptionsClient({
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Drawer / Override state
-  const [selectedOwner, setSelectedOwner] = useState<any | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [overrideReason, setOverrideReason] = useState("");
-  const [blockPayoutsOverride, setBlockPayoutsOverride] = useState<string>("default");
-  const [blockNewUnitsOverride, setBlockNewUnitsOverride] = useState<string>("default");
-  const [overrideExpiresAt, setOverrideExpiresAt] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
-  const [manualGrantDays, setManualGrantDays] = useState("30");
-  const [manualGraceDays, setManualGraceDays] = useState("7");
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [customGrantSelected, setCustomGrantSelected] = useState(false);
-  const [customGraceSelected, setCustomGraceSelected] = useState(false);
-
   // Formatting helpers
   const formatStatus = (status: string) => {
     if (!status) return "Inactive";
@@ -88,7 +70,6 @@ export default function AdminSubscriptionsClient({
     if (!dateStr) return "";
     const date = new Date(dateStr);
     const now = new Date();
-    // Normalize times to count clean days
     const cleanDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const cleanNow = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const diffTime = cleanDate.getTime() - cleanNow.getTime();
@@ -152,127 +133,6 @@ export default function AdminSubscriptionsClient({
       showToast(`Failed to save settings: ${err.message}`, "error");
     } finally {
       setSavingSettings(false);
-    }
-  };
-
-  const openDrawer = (owner: any) => {
-    setSelectedOwner(owner);
-    setIsDrawerOpen(true);
-    setShowDeleteConfirm(false);
-    setCustomGrantSelected(false);
-    setCustomGraceSelected(false);
-    setOverrideReason(owner.subscriptionOverride?.reason || "");
-    setBlockPayoutsOverride(
-      owner.subscriptionOverride?.blockPayouts === true ? "block" :
-      owner.subscriptionOverride?.blockPayouts === false ? "allow" : "default"
-    );
-    setBlockNewUnitsOverride(
-      owner.subscriptionOverride?.blockNewUnits === true ? "block" :
-      owner.subscriptionOverride?.blockNewUnits === false ? "allow" : "default"
-    );
-    setOverrideExpiresAt(
-      owner.subscriptionOverride?.expiresAt 
-        ? new Date(owner.subscriptionOverride.expiresAt).toISOString().split('T')[0]
-        : ""
-    );
-  };
-
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedOwner(null);
-    setShowDeleteConfirm(false);
-    setCustomGrantSelected(false);
-    setCustomGraceSelected(false);
-  };
-
-  const handleSaveOverride = async () => {
-    if (!selectedOwner) return;
-    if (!overrideReason || overrideReason.trim().length < 10) {
-      showToast("A valid reason of at least 10 characters is required for audit trails.", "error");
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      const payload = {
-        userId: selectedOwner.id,
-        blockPayouts: blockPayoutsOverride === "block" ? true : blockPayoutsOverride === "allow" ? false : null,
-        blockNewUnits: blockNewUnitsOverride === "block" ? true : blockNewUnitsOverride === "allow" ? false : null,
-        expiresAt: overrideExpiresAt ? new Date(overrideExpiresAt).toISOString() : null,
-        reason: overrideReason,
-      };
-
-      const res = await fetch("/api/admin/subscriptions/override", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      showToast("Subscription override saved successfully.", "success");
-      closeDrawer();
-      router.refresh();
-    } catch (err: any) {
-      showToast(`Failed to save override: ${err.message}`, "error");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const confirmClearOverride = async () => {
-    if (!selectedOwner) return;
-
-    try {
-      setActionLoading(true);
-      const res = await fetch(`/api/admin/subscriptions/override?userId=${selectedOwner.id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      showToast("Overrides cleared. Default platform policies applied.", "success");
-      setShowDeleteConfirm(false);
-      closeDrawer();
-      router.refresh();
-    } catch (err: any) {
-      showToast(`Failed to clear overrides: ${err.message}`, "error");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleManualAction = async (action: string, extraBody = {}) => {
-    if (!selectedOwner) return;
-    
-    // Validate reasons for pause/restore/extend_grace
-    if ((action === "manual_pause" || action === "restore_access" || action === "extend_grace") && (!overrideReason || overrideReason.trim().length < 10)) {
-      showToast("A valid reason of at least 10 characters is required to log this action.", "error");
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      const res = await fetch("/api/admin/subscriptions/manual-action", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          userId: selectedOwner.id,
-          reason: overrideReason,
-          ...extraBody
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      showToast(`Manual action completed successfully.`, "success");
-      closeDrawer();
-      router.refresh();
-    } catch (err: any) {
-      showToast(`Action failed: ${err.message}`, "error");
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -645,9 +505,9 @@ export default function AdminSubscriptionsClient({
                 <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Email Address</TableHead>
                 <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Plan / Tier</TableHead>
                 <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Details / Expiry</TableHead>
+                <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Overrides Status</TableHead>
                 <TableHead className="text-right text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Properties (Units)</TableHead>
-                <TableHead className="text-center text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider w-[100px]">Manage</TableHead>
+                <TableHead className="text-center text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider w-[120px]">Manage</TableHead>
                 <TableHead className="text-right text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -676,14 +536,20 @@ export default function AdminSubscriptionsClient({
 
                   const isCompedActive = owner.accessGrantedByAdmin &&
                     (!owner.accessGrantedExpiresAt || new Date(owner.accessGrantedExpiresAt) > new Date());
+                  
+                  const activeOverridesCount = owner.moduleGrants?.length || 0;
 
                   return (
-                    <TableRow key={owner.id} className="border-[#E5E5EA] hover:bg-blue-50/30 transition-colors cursor-pointer" onClick={() => openDrawer(owner)}>
+                    <TableRow 
+                      key={owner.id} 
+                      className="border-[#E5E5EA] hover:bg-blue-50/30 transition-colors cursor-pointer" 
+                      onClick={() => router.push(`/dashboard/admin/subscriptions/${owner.id}`)}
+                    >
                       <TableCell className="text-[#6E6E73] text-sm font-bold" onClick={(e) => e.stopPropagation()}>{idx + 1}</TableCell>
                       <TableCell className="font-bold text-[#1D1D1F]">
                         <div className="flex items-center gap-2">
                           {owner.name || "Unknown"}
-                          {isOverrideActive && <Badge className="bg-purple-50 text-purple-700 border border-purple-100 hover:bg-purple-50 font-bold text-[9px] px-1.5 py-0.5 rounded-md shadow-none">⚙ Override</Badge>}
+                          {isOverrideActive && <Badge className="bg-purple-50 text-purple-700 border border-purple-100 hover:bg-purple-50 font-bold text-[9px] px-1.5 py-0.5 rounded-md shadow-none">⚙ Policy</Badge>}
                           {isCompedActive && <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-50 font-bold text-[9px] px-1.5 py-0.5 rounded-md shadow-none">🎁 Comped</Badge>}
                         </div>
                       </TableCell>
@@ -719,18 +585,13 @@ export default function AdminSubscriptionsClient({
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-semibold text-[#6E6E73]">
-                        {owner.subscriptionStatus === 'Past_Due' && owner.gracePeriodEnd && (
-                          <span className="text-orange-600 font-bold">Grace ends {timeUntil(owner.gracePeriodEnd)}</span>
-                        )}
-                        {owner.subscriptionStatus === 'Paused' && owner.pausedAt && (
-                          <span className="text-amber-600 font-bold">Paused since {new Date(owner.pausedAt).toLocaleDateString()}</span>
-                        )}
-                        {isCompedActive && owner.accessGrantedExpiresAt && (
-                          <span className="text-indigo-600 font-bold">Admin grant ends {timeUntil(owner.accessGrantedExpiresAt)}</span>
-                        )}
-                        {!owner.gracePeriodEnd && !owner.pausedAt && !isCompedActive && (
-                          <span className="text-slate-400">—</span>
+                      <TableCell>
+                        {activeOverridesCount > 0 ? (
+                          <Badge className="bg-purple-100 hover:bg-purple-100 text-purple-700 font-extrabold text-[10px] rounded-lg px-2 py-0.5 shadow-none border-0">
+                            {activeOverridesCount} Override{activeOverridesCount > 1 ? "s" : ""}
+                          </Badge>
+                        ) : (
+                          <span className="text-slate-400 text-xs font-semibold">—</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right font-medium text-[#1D1D1F]">
@@ -742,9 +603,9 @@ export default function AdminSubscriptionsClient({
                           <span>{owner.ownedProperties.length} properties ({totalUnits} units)</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-center" onClick={(e) => { e.stopPropagation(); openDrawer(owner); }}>
+                      <TableCell className="text-center" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/admin/subscriptions/${owner.id}`); }}>
                         <span className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-0.5 hover:underline">
-                          Configure <ChevronRight size={14} />
+                          Manage Owner <ChevronRight size={14} />
                         </span>
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -789,423 +650,6 @@ export default function AdminSubscriptionsClient({
           </Table>
         </div>
       </Card>
-
-      {/* Side Slide-Out Control Drawer */}
-      {isDrawerOpen && selectedOwner && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex justify-end">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-0 overflow-hidden relative border-l border-[#E5E5EA]">
-            
-            {/* Drawer Header */}
-            <div className="p-6 border-b border-[#E5E5EA] flex justify-between items-center bg-[#F9F9FB]">
-              <div>
-                <h2 className="text-lg font-black text-[#1D1D1F] tracking-tight">{selectedOwner.name || "Owner Control Panel"}</h2>
-                <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">{selectedOwner.email}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <a 
-                  href={`/dashboard/admin/properties?search=${encodeURIComponent(selectedOwner.name || "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 bg-blue-50 px-2.5 py-1.5 rounded-xl border border-blue-100 transition-all shrink-0"
-                >
-                  View Portfolio <ExternalLink size={12} />
-                </a>
-                <button className="text-[#8E8E93] hover:text-[#1D1D1F] p-1.5 rounded-full hover:bg-[#E5E5EA] transition-colors" onClick={closeDrawer}>
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              
-              {/* Action Authorization Required Card - Promoted to the TOP of the drawer */}
-              <div className="bg-purple-50/50 border border-purple-100 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="text-purple-600 shrink-0" size={16} />
-                  <h3 className="text-xs font-bold text-purple-900 uppercase tracking-wider">Action Authorization</h3>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-purple-950 block">Audit Trail Reason * (Min 10 characters)</label>
-                  <textarea 
-                    value={overrideReason} 
-                    onChange={(e) => setOverrideReason(e.target.value)}
-                    placeholder="e.g. Approved payout bypass during billing dispute review."
-                    className="w-full min-h-[70px] rounded-xl border border-[#E5E5EA] bg-white p-3 text-sm focus:outline-none focus:border-purple-300 font-medium transition-all shadow-inner"
-                  />
-                  <p className="text-[10px] text-purple-700 leading-snug">You must provide an administrative justification before using any action controls below.</p>
-                </div>
-              </div>
-
-              {/* Owner Overview Card */}
-              <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-4 shadow-xs">
-                <h3 className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Owner Overview</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-0.5">
-                    <span className="text-[11px] font-semibold text-[#8E8E93]">Billing Status</span>
-                    <div>
-                      <Badge className={`border-0 font-extrabold text-xs px-2.5 py-0.5 rounded-lg ${
-                        selectedOwner.subscriptionStatus === 'Active' || selectedOwner.subscriptionStatus === 'Active (Canceling)' ? 'bg-emerald-50 text-emerald-700' :
-                        selectedOwner.subscriptionStatus === 'Past_Due' ? 'bg-orange-50 text-orange-700' :
-                        selectedOwner.subscriptionStatus === 'Paused' ? 'bg-amber-50 text-amber-700' :
-                        'bg-slate-50 text-slate-700'
-                      }`}>
-                        {formatStatus(selectedOwner.subscriptionStatus)}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-[11px] font-semibold text-[#8E8E93]">Pricing Tier</span>
-                    <p className="text-sm font-extrabold text-[#1D1D1F]">{selectedOwner.pricingTier?.name || "No Plan"}</p>
-                  </div>
-                </div>
-
-                {/* Progress Bar for Portfolio Units */}
-                <div className="pt-2 border-t border-[#F2F2F7]">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-[#6E6E73]">Portfolio Unit Cap Usage:</span>
-                    <span className="font-extrabold text-[#1D1D1F]">
-                      {selectedOwner.ownedProperties.reduce((acc: any, p: any) => acc + p.units.length, 0)} / {selectedOwner.pricingTier?.maxUnits || 2} Units
-                    </span>
-                  </div>
-                  {/* Visual Progress bar */}
-                  <div className="w-full bg-[#E5E5EA] h-2 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${
-                        (selectedOwner.ownedProperties.reduce((acc: any, p: any) => acc + p.units.length, 0) / (selectedOwner.pricingTier?.maxUnits || 2)) >= 1 
-                          ? "bg-rose-500" 
-                          : "bg-blue-600"
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, (selectedOwner.ownedProperties.reduce((acc: any, p: any) => acc + p.units.length, 0) / (selectedOwner.pricingTier?.maxUnits || 2)) * 100)}%` 
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                {selectedOwner.accessGrantedByAdmin && selectedOwner.accessGrantedExpiresAt && (
-                  <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-700 mt-2 flex flex-col gap-0.5 font-bold">
-                    <span>🎁 Temp Admin Comp Access Active</span>
-                    <span className="text-[10px] text-indigo-600 font-semibold">Expires: {timeUntil(selectedOwner.accessGrantedExpiresAt)}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Stripe Billing Portal details */}
-              <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
-                <h3 className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Stripe Gateway Details</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between items-center bg-[#F9F9FB] px-3 py-2 rounded-xl border border-[#E5E5EA]">
-                    <span className="font-bold text-[#6E6E73]">Stripe Customer ID</span>
-                    {selectedOwner.stripeCustomerId ? (
-                      <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-[#1D1D1F]">
-                        <span>{selectedOwner.stripeCustomerId}</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(selectedOwner.stripeCustomerId);
-                            showToast("Customer ID copied!", "success");
-                          }} 
-                          className="text-[#8E8E93] hover:text-[#1D1D1F] p-0.5 rounded hover:bg-[#E5E5EA] transition-colors"
-                        >
-                          <Copy size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 font-semibold">Not Created</span>
-                    )}
-                  </div>
-                  
-                  <div className="flex justify-between items-center bg-[#F9F9FB] px-3 py-2 rounded-xl border border-[#E5E5EA]">
-                    <span className="font-bold text-[#6E6E73]">Stripe Subscription ID</span>
-                    {selectedOwner.stripeSubscriptionId ? (
-                      <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-[#1D1D1F]">
-                        <span>{selectedOwner.stripeSubscriptionId}</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(selectedOwner.stripeSubscriptionId);
-                            showToast("Subscription ID copied!", "success");
-                          }} 
-                          className="text-[#8E8E93] hover:text-[#1D1D1F] p-0.5 rounded hover:bg-[#E5E5EA] transition-colors"
-                        >
-                          <Copy size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 font-semibold">No Active Subscription</span>
-                    )}
-                  </div>
-
-                  {selectedOwner.stripeCustomerId && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(`https://dashboard.stripe.com/customers/${selectedOwner.stripeCustomerId}`, '_blank')}
-                      className="w-full text-xs font-bold border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] h-9 rounded-xl mt-1 flex items-center justify-center gap-1.5 bg-white transition-all hover:border-[#1D1D1F]"
-                    >
-                      <ExternalLink size={13} className="text-emerald-600" />
-                      View Customer in Stripe
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Section: Manual Admin Lifecycle Overrides */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider flex items-center gap-1.5">
-                  <Play size={14} className="text-blue-500" /> Manual Account Overrides
-                </h3>
-
-                <div className="space-y-4">
-                  {/* Restore / Comp Access card */}
-                  <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-extrabold text-[#1D1D1F] flex items-center gap-1.5">
-                        <ShieldCheck size={14} className="text-emerald-500" /> Grant Comp Access
-                      </span>
-                      {customGrantSelected && (
-                        <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                          <Input 
-                            type="number" 
-                            value={manualGrantDays} 
-                            onChange={(e) => setManualGrantDays(e.target.value)} 
-                            placeholder="Days"
-                            className="w-16 rounded-lg text-center font-bold text-xs h-7 border-[#E5E5EA]"
-                          />
-                          <span className="text-[10px] font-bold text-[#6E6E73]">days</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="flex gap-1.5 bg-[#F2F2F7] p-1 rounded-xl">
-                        {["7", "14", "30"].map(days => (
-                          <button 
-                            key={days} 
-                            type="button" 
-                            onClick={() => {
-                              setManualGrantDays(days);
-                              setCustomGrantSelected(false);
-                            }} 
-                            className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                              manualGrantDays === days && !customGrantSelected
-                                ? "bg-white text-[#1D1D1F] shadow-sm" 
-                                : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                            }`}
-                          >
-                            {days}d
-                          </button>
-                        ))}
-                        <button 
-                          type="button" 
-                          onClick={() => setCustomGrantSelected(true)} 
-                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                            customGrantSelected
-                              ? "bg-white text-[#1D1D1F] shadow-sm" 
-                              : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                          }`}
-                        >
-                          Custom
-                        </button>
-                      </div>
-                      
-                      <Button 
-                        disabled={actionLoading} 
-                        onClick={() => handleManualAction("restore_access", { grantDays: parseInt(manualGrantDays) || 30 })} 
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-1 h-9 text-xs px-4"
-                      >
-                        Grant Access
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Extend Grace period card */}
-                  <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-extrabold text-[#1D1D1F] flex items-center gap-1.5">
-                        <Calendar size={14} className="text-blue-500" /> Extend Grace Period
-                      </span>
-                      {customGraceSelected && (
-                        <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                          <Input 
-                            type="number" 
-                            value={manualGraceDays} 
-                            onChange={(e) => setManualGraceDays(e.target.value)} 
-                            placeholder="Days"
-                            className="w-16 rounded-lg text-center font-bold text-xs h-7 border-[#E5E5EA]"
-                          />
-                          <span className="text-[10px] font-bold text-[#6E6E73]">days</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="flex gap-1.5 bg-[#F2F2F7] p-1 rounded-xl">
-                        {["3", "7", "14"].map(days => (
-                          <button 
-                            key={days} 
-                            type="button" 
-                            disabled={selectedOwner.subscriptionStatus !== "Past_Due"}
-                            onClick={() => {
-                              setManualGraceDays(days);
-                              setCustomGraceSelected(false);
-                            }} 
-                            className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all disabled:opacity-40 ${
-                              manualGraceDays === days && !customGraceSelected
-                                ? "bg-white text-[#1D1D1F] shadow-sm" 
-                                : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                            }`}
-                          >
-                            +{days}d
-                          </button>
-                        ))}
-                        <button 
-                          type="button" 
-                          disabled={selectedOwner.subscriptionStatus !== "Past_Due"}
-                          onClick={() => setCustomGraceSelected(true)} 
-                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all disabled:opacity-40 ${
-                            customGraceSelected
-                              ? "bg-white text-[#1D1D1F] shadow-sm" 
-                              : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                          }`}
-                        >
-                          Custom
-                        </button>
-                      </div>
-                      
-                      <Button 
-                        disabled={actionLoading || selectedOwner.subscriptionStatus !== "Past_Due"} 
-                        onClick={() => handleManualAction("extend_grace", { days: parseInt(manualGraceDays) || 7 })} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-1 h-9 text-xs px-4 disabled:opacity-40"
-                      >
-                        Extend Grace
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Pause / Reminder double button row */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button 
-                      disabled={actionLoading || selectedOwner.subscriptionStatus === "Paused"} 
-                      onClick={() => handleManualAction("manual_pause")} 
-                      className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 h-10 text-xs disabled:opacity-40 shadow-sm"
-                    >
-                      <Pause size={14} /> Pause Portfolio
-                    </Button>
-
-                    <Button 
-                      disabled={actionLoading} 
-                      onClick={() => handleManualAction("send_reminder")} 
-                      className="border border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl font-bold flex items-center justify-center gap-1.5 h-10 text-xs bg-white shadow-xs transition-all hover:border-[#1D1D1F]"
-                    >
-                      <Mail size={14} /> Send Reminder
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section: Custom Policy Overrides Dropdowns */}
-              <div className="space-y-4 pt-6 border-t border-[#E5E5EA]">
-                <h3 className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider flex items-center gap-1.5">
-                  <Settings2 size={14} className="text-purple-500" /> Custom Policy Exemptions
-                </h3>
-
-                <div className="space-y-4 bg-[#F9F9FB] border border-[#E5E5EA] rounded-2xl p-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                      <DollarSign size={14} className="text-[#6E6E73]" /> Payout Withdrawals
-                    </span>
-                    <Select value={blockPayoutsOverride} onValueChange={(val) => setBlockPayoutsOverride(val || "default")}>
-                      <SelectTrigger className="w-[140px] rounded-xl font-bold bg-white border-[#E5E5EA] h-9 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white rounded-xl border-[#E5E5EA]">
-                        <SelectItem value="default">Use Default Policy</SelectItem>
-                        <SelectItem value="block">Always Block</SelectItem>
-                        <SelectItem value="allow">Always Allow</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm pt-2 border-t border-[#E5E5EA]">
-                    <span className="font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                      <Layers size={14} className="text-[#6E6E73]" /> Add New Units
-                    </span>
-                    <Select value={blockNewUnitsOverride} onValueChange={(val) => setBlockNewUnitsOverride(val || "default")}>
-                      <SelectTrigger className="w-[140px] rounded-xl font-bold bg-white border-[#E5E5EA] h-9 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white rounded-xl border-[#E5E5EA]">
-                        <SelectItem value="default">Use Default Policy</SelectItem>
-                        <SelectItem value="block">Always Block</SelectItem>
-                        <SelectItem value="allow">Always Allow</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-[#E5E5EA]">
-                    <label className="text-xs font-bold text-[#6E6E73] block">Override Expiration Date (Optional)</label>
-                    <Input 
-                      type="date" 
-                      value={overrideExpiresAt} 
-                      onChange={(e) => setOverrideExpiresAt(e.target.value)}
-                      className="rounded-xl border-[#E5E5EA] bg-white h-9 text-xs font-bold"
-                    />
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Bottom Sticky Action Footer */}
-            <div className="p-6 border-t border-[#E5E5EA] bg-[#F9F9FB] flex flex-col justify-end">
-              <div className="space-y-3">
-                {selectedOwner.subscriptionOverride && (
-                  showDeleteConfirm ? (
-                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-3 flex flex-col gap-2 animate-in fade-in duration-200">
-                      <p className="text-xs font-bold text-rose-800 leading-normal">Are you sure you want to clear this override? Default platform policies will apply immediately.</p>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => setShowDeleteConfirm(false)} 
-                          className="text-xs font-bold h-8 rounded-lg bg-white border border-[#E5E5EA] flex-1 text-[#1D1D1F]"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm" 
-                          onClick={confirmClearOverride} 
-                          disabled={actionLoading}
-                          className="text-xs font-bold h-8 rounded-lg bg-red-600 text-white hover:bg-red-700 flex-1"
-                        >
-                          {actionLoading ? "Clearing..." : "Yes, Clear"}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button 
-                      disabled={actionLoading} 
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="w-full border border-[#E5E5EA] text-[#ef4444] hover:bg-rose-50 hover:border-rose-100 rounded-xl font-bold h-10 text-xs bg-white transition-all"
-                    >
-                      Clear Override Exceptions
-                    </Button>
-                  )
-                )}
-                
-                {!showDeleteConfirm && (
-                  <Button 
-                    disabled={actionLoading} 
-                    onClick={handleSaveOverride}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold h-10 text-xs shadow-sm transition-all"
-                  >
-                    {actionLoading ? "Saving..." : "Apply Override Exceptions"}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

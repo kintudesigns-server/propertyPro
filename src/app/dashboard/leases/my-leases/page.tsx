@@ -278,8 +278,7 @@ export default function MyLeasesPage() {
 
   const hasUnpaidDeposit = (l: any) => {
     return l.invoices?.some((inv: any) => 
-      l.securityDeposit &&
-      Number(inv.amount) === Number(l.securityDeposit) &&
+      inv.invoiceType === "DEPOSIT" &&
       inv.status === "UNPAID"
     );
   };
@@ -309,8 +308,7 @@ export default function MyLeasesPage() {
 
   const pendingLeaseUnpaidDepositInvoice = pendingLease && pendingLease.invoices?.find(
     (inv: any) =>
-      pendingLease.securityDeposit &&
-      Number(inv.amount) === Number(pendingLease.securityDeposit) &&
+      inv.invoiceType === "DEPOSIT" &&
       inv.status === "UNPAID"
   );
 

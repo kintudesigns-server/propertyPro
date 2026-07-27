@@ -51,11 +51,17 @@ interface Thread {
   unreadCount: number;
 }
 
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+
 export default function MessagesPage() {
   const { data: session } = useSession();
   const currentUserId = (session?.user as any)?.id;
+  const currentUserRole = (session?.user as any)?.role;
+  const { allowed, loading: checkingAccess } = useModuleAccess("messages");
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [contactsList, setContactsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
@@ -69,43 +75,7 @@ export default function MessagesPage() {
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Initial Fetch & Setup SSE
-  useEffect(() => {
-    fetchMessages(true);
-
-    const eventSource = new EventSource("/api/notifications/sse");
-    
-    eventSource.addEventListener("message", (e) => {
-      try {
-        const newMessage = JSON.parse(e.data);
-        setMessages((prev) => {
-          // Prevent duplicates if already in state
-          if (prev.some((m) => m.id === newMessage.id)) return prev;
-          return [...prev, newMessage];
-        });
-      } catch (err) {
-        console.error("Error parsing incoming message", err);
-      }
-    });
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-
-  // Scroll to bottom when messages or active thread changes
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeThreadId, messages]);
-
-  // Mark active thread messages as read when active thread changes or new messages arrive
-  useEffect(() => {
-    if (activeThreadId) {
-      markThreadAsRead(activeThreadId);
-    }
-  }, [activeThreadId, messages.length]);
 
   const fetchMessages = async (showLoading = false) => {
     try {
@@ -119,6 +89,20 @@ export default function MessagesPage() {
       console.error("Error fetching messages:", err);
     } finally {
       if (showLoading) setLoading(false);
+    }
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const res = await fetch("/api/messages/contacts");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setContactsList(data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching contacts:", err);
     }
   };
 
@@ -147,6 +131,57 @@ export default function MessagesPage() {
       console.error("Error marking messages as read:", err);
     }
   };
+
+  // Initial Fetch & Setup SSE
+  useEffect(() => {
+    if (!allowed && currentUserRole === "OWNER") return;
+    fetchMessages(true);
+    fetchContacts();
+
+    const eventSource = new EventSource("/api/notifications/sse");
+    
+    eventSource.addEventListener("message", (e) => {
+      try {
+        const newMessage = JSON.parse(e.data);
+        setMessages((prev) => {
+          // Prevent duplicates if already in state
+          if (prev.some((m) => m.id === newMessage.id)) return prev;
+          return [...prev, newMessage];
+        });
+      } catch (err) {
+        console.error("Error parsing incoming message", err);
+      }
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [allowed, currentUserRole]);
+
+  // Scroll to bottom when messages or active thread changes
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [activeThreadId, messages]);
+
+  // Mark active thread messages as read when active thread changes or new messages arrive
+  useEffect(() => {
+    if (activeThreadId) {
+      markThreadAsRead(activeThreadId);
+    }
+  }, [activeThreadId, messages.length]);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!allowed && currentUserRole === "OWNER") {
+    return <ModuleLockedBanner module="messages" />;
+  }
 
   // Group messages into threads
   const getThreads = (): Thread[] => {
@@ -205,6 +240,9 @@ export default function MessagesPage() {
     };
   }
 
+  const activeContactDetails = contactsList.find((c) => c.id === activeThreadId);
+  const isEmailFallback = activeContactDetails?.messagingChannel === "EMAIL_FALLBACK";
+
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if ((!newMessage.trim() && !attachmentFile) || !activeThreadId || sending || isUploading) return;
@@ -251,6 +289,9 @@ export default function MessagesPage() {
         setMessages((prev) => [...prev, data]);
         setAttachmentFile(null);
         setAttachmentPreview(null);
+        if (data.fallbackMode) {
+          toast.success("Message delivered via Email notification to property manager.");
+        }
       } else {
         toast.error("Failed to send message");
         setNewMessage(content); // Restore input on failure
@@ -450,8 +491,13 @@ export default function MessagesPage() {
                   {activeThread.contact.name ? activeThread.contact.name.charAt(0) : "U"}
                 </div>
                 <div>
-                  <h2 className="font-semibold text-sm text-[#1D1D1F]">
-                    {activeThread.contact.name || "User"}
+                  <h2 className="font-semibold text-sm text-[#1D1D1F] flex items-center gap-2">
+                    <span>{activeThread.contact.name || "User"}</span>
+                    {isEmailFallback && (
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/50 flex items-center gap-1">
+                        <Mail className="h-2.5 w-2.5" /> Email Notification
+                      </span>
+                    )}
                   </h2>
                   <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${getRoleColor(activeThread.contact.role)}`}>
                     {activeThread.contact.role}
@@ -470,6 +516,16 @@ export default function MessagesPage() {
                 <Info className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Email Fallback Channel Banner */}
+            {isEmailFallback && (
+              <div className="bg-amber-50/90 border-b border-amber-200/60 px-6 py-2.5 flex items-center gap-2.5 text-amber-800 text-xs font-semibold shadow-2xs">
+                <Mail className="h-4 w-4 text-amber-600 shrink-0" />
+                <span>
+                  This property manager's package relies on direct email notifications. Messages submitted here deliver directly to their registered inbox.
+                </span>
+              </div>
+            )}
 
             {/* Messages Scroll Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">

@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search } from "lucide-react";
+import { Search, Mail } from "lucide-react";
 
 interface Contact {
   id: string;
   name: string | null;
   email: string;
   role: string;
+  hasMessagingAccess?: boolean;
+  messagingChannel?: string;
 }
 
 interface NewChatModalProps {
@@ -105,8 +107,13 @@ export function NewChatModal({ isOpen, onClose, onSelectContact, activeContactId
                     {contact.name ? contact.name.charAt(0) : "U"}
                   </div>
                   <div>
-                    <div className="font-semibold text-sm text-[#1D1D1F] group-hover:text-[#007AFF] transition-colors">
-                      {contact.name || "User"}
+                    <div className="font-semibold text-sm text-[#1D1D1F] group-hover:text-[#007AFF] transition-colors flex items-center gap-2">
+                      <span>{contact.name || "User"}</span>
+                      {contact.messagingChannel === "EMAIL_FALLBACK" && (
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/50 flex items-center gap-1">
+                          <Mail className="h-2.5 w-2.5" /> Email
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-[#6E6E73]">{contact.email}</div>
                   </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Briefcase, Trash2, Mail, Phone, ShieldCheck, Wrench, Search, MoreHorizontal, Edit, CheckCircle2, DollarSign } from "lucide-react";
+import { Plus, Briefcase, Trash2, Mail, Phone, ShieldCheck, Wrench, Search, MoreHorizontal, Edit, CheckCircle2, DollarSign, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 export default function InspectorsAndVendorsPage() {
+  const { allowed: hasVendorAccess } = useModuleAccess("vendors");
   const [activeTab, setActiveTab] = useState<"inspectors" | "vendors">("inspectors");
   const [loading, setLoading] = useState(true);
 
@@ -167,13 +169,13 @@ export default function InspectorsAndVendorsPage() {
               <Plus className="h-5 w-5" /> Add Staff Member
             </Button>
           </Link>
-        ) : (
+        ) : hasVendorAccess ? (
           <Link href="/dashboard/vendors/new">
             <Button className="w-full md:w-auto h-11 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-6 rounded-xl shadow-sm transition-all text-sm gap-2 border-none">
               <Plus className="h-5 w-5" /> Add New Vendor
             </Button>
           </Link>
-        )}
+        ) : null}
       </div>
 
       {/* Tabs Switcher */}
@@ -190,13 +192,15 @@ export default function InspectorsAndVendorsPage() {
         </button>
         <button
           onClick={() => setActiveTab("vendors")}
-          className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all ${
+          className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${
             activeTab === "vendors"
               ? "border-[#007AFF] text-[#007AFF]"
               : "border-transparent text-[#6E6E73] hover:text-[#1D1D1F]"
           }`}
         >
-          🔧 External Contractors ({vendors.length})
+          🔧 External Contractors
+          {!hasVendorAccess && <Lock className="h-3.5 w-3.5 text-slate-400" />}
+          {hasVendorAccess && ` (${vendors.length})`}
         </button>
       </div>
 
@@ -266,6 +270,21 @@ export default function InspectorsAndVendorsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      ) : !hasVendorAccess ? (
+        <div className="bg-white rounded-2xl border border-[#E5E5EA] p-8 text-center max-w-xl mx-auto my-8 space-y-4 shadow-sm">
+          <div className="mx-auto w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <Lock className="h-6 w-6" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white">External Vendor Management is Locked</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Managing external contractors and tracking work orders is a Professional tier feature. Upgrade your plan to get full access.
+          </p>
+          <Link href="/dashboard/owner/billing">
+            <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold h-11 px-6 rounded-xl mt-2 border-none">
+              Upgrade Subscription
+            </Button>
+          </Link>
         </div>
       ) : (
         <div className="space-y-6">

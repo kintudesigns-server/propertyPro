@@ -48,11 +48,12 @@ export async function GET(req: NextRequest) {
 
     const maxUnits = user.pricingTier?.maxUnits ?? 5;
     const maxInspectors = user.pricingTier?.maxInspectors ?? 1;
-    const percentUnitsUsed = Math.min(100, Math.round((unitCount / maxUnits) * 100));
 
     // Retrieve subscription renewal and historical invoices from Stripe
     let currentPeriodEnd: number | null = null;
     let cancelAtPeriodEnd = false;
+    let cardLast4: string | null = null;
+    let cardBrand: string | null = null;
     let invoices: Array<{
       id: string;
       number: string | null;
@@ -69,11 +70,36 @@ export async function GET(req: NextRequest) {
         const stripe = getStripe();
         if (user.stripeSubscriptionId) {
           try {
-            const sub: any = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+            const sub: any = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+              expand: ['default_payment_method']
+            });
             currentPeriodEnd = sub.current_period_end ?? null;
             cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end);
+
+            const pm = sub.default_payment_method;
+            if (pm && pm.type === 'card') {
+              cardLast4 = pm.card?.last4 || null;
+              cardBrand = pm.card?.brand || null;
+            }
           } catch (e: any) {
             console.warn("[Billing API] Stripe subscription fetch notice:", e?.message);
+          }
+        }
+
+        if (!cardLast4 && user.stripeCustomerId) {
+          try {
+            const paymentMethods = await stripe.paymentMethods.list({
+              customer: user.stripeCustomerId,
+              type: 'card',
+              limit: 1,
+            });
+            if (paymentMethods.data.length > 0) {
+              const pm = paymentMethods.data[0];
+              cardLast4 = pm.card?.last4 || null;
+              cardBrand = pm.card?.brand || null;
+            }
+          } catch (e: any) {
+            console.warn("[Billing API] Stripe paymentMethods fetch notice:", e?.message);
           }
         }
 
@@ -109,6 +135,12 @@ export async function GET(req: NextRequest) {
         price: user.pricingTier.price,
         maxUnits: user.pricingTier.maxUnits,
         maxInspectors: user.pricingTier.maxInspectors,
+        maxProperties: user.pricingTier.maxProperties,
+        maxVendors: user.pricingTier.maxVendors,
+        maxDocumentStorageMB: user.pricingTier.maxDocumentStorageMB,
+        annualPrice: user.pricingTier.annualPrice,
+        sortOrder: user.pricingTier.sortOrder,
+        highlightBadge: user.pricingTier.highlightBadge,
         features: user.pricingTier.features,
       } : {
         id: "starter_default",
@@ -116,6 +148,12 @@ export async function GET(req: NextRequest) {
         price: 0,
         maxUnits: 5,
         maxInspectors: 1,
+        maxProperties: 3,
+        maxVendors: 2,
+        maxDocumentStorageMB: 500,
+        annualPrice: null,
+        sortOrder: 0,
+        highlightBadge: null,
         features: ["Up to 5 Units", "Standard Support"],
       },
       subscriptionStatus: user.subscriptionStatus || "Active",
@@ -123,18 +161,21 @@ export async function GET(req: NextRequest) {
       stripeCustomerId: user.stripeCustomerId,
       stripeSubscriptionId: user.stripeSubscriptionId,
       currentPeriodEnd,
+      cancelAtPeriodEnd,
+      cardLast4,
+      cardBrand,
       invoices,
       subscriptionHistory: user.subscriptionHistory || [],
       usage: {
         units: {
           current: unitCount,
           max: maxUnits,
-          percent: percentUnitsUsed,
+          percent: maxUnits > 0 ? Math.min(100, Math.round((unitCount / maxUnits) * 100)) : 0,
         },
         inspectors: {
           current: inspectorCount,
           max: maxInspectors,
-          percent: Math.min(100, Math.round((inspectorCount / maxInspectors) * 100)),
+          percent: maxInspectors > 0 ? Math.min(100, Math.round((inspectorCount / maxInspectors) * 100)) : 0,
         },
         properties: propertyCount,
         activeLeases: activeLeaseCount,

@@ -27,6 +27,7 @@ export async function GET(
         phone: true,
         createdAt: true,
         tenantStatus: true,
+        accountStatus: true,
         dob: true,
         ssn: true,
         employer: true,
@@ -60,17 +61,191 @@ export async function GET(
             name: true,
             address: true,
             city: true,
+            units: {
+              select: {
+                id: true,
+                name: true,
+                leases: {
+                  where: {
+                    status: {
+                      in: ["ACTIVE", "NOTICE_GIVEN"]
+                    }
+                  },
+                  select: {
+                    id: true,
+                    startDate: true,
+                    endDate: true,
+                    monthlyRent: true,
+                    tenant: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
         },
         leases: {
           include: {
             unit: {
               include: {
-                property: true,
+                property: {
+                  select: {
+                    id: true,
+                    name: true,
+                    owner: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true
+                      }
+                    }
+                  }
+                },
               },
             },
           },
         },
+        createdInspectors: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            createdAt: true,
+            accountStatus: true
+          }
+        },
+        ownedVendors: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            specialty: true,
+            createdAt: true
+          }
+        },
+        payoutRequests: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            bankName: true,
+            accountNumber: true,
+            accountName: true,
+            createdAt: true,
+            disbursedAt: true,
+            refNumber: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
+        subscriptionHistory: {
+          select: {
+            id: true,
+            fromTierId: true,
+            toTierId: true,
+            fromTierName: true,
+            toTierName: true,
+            event: true,
+            amountPaid: true,
+            createdAt: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
+        maintenanceRequest: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            priority: true,
+            status: true,
+            createdAt: true,
+            unit: {
+              select: {
+                id: true,
+                name: true,
+                property: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
+        transactions: {
+          select: {
+            id: true,
+            type: true,
+            category: true,
+            amount: true,
+            status: true,
+            createdAt: true,
+            reference: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        },
+        assignedInspections: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            priority: true,
+            status: true,
+            createdAt: true,
+            scheduledDate: true,
+            unit: {
+              select: {
+                id: true,
+                name: true,
+                property: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
+              }
+            },
+            tenant: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        }
       },
     });
 
@@ -104,7 +279,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { name, email, phone, role, tenantStatus } = body;
+    const { name, email, phone, role, tenantStatus, accountStatus, notes } = body;
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -114,6 +289,8 @@ export async function PATCH(
         phone,
         role,
         tenantStatus,
+        accountStatus,
+        notes,
       },
     });
 
@@ -123,7 +300,7 @@ export async function PATCH(
       action: "UPDATED",
       actorId: (session.user as any).id,
       actorRole: "SUPERADMIN",
-      newValue: { name, email, phone, role, tenantStatus },
+      newValue: { name, email, phone, role, tenantStatus, accountStatus, notes },
       note: `Admin updated user details.`,
     });
 

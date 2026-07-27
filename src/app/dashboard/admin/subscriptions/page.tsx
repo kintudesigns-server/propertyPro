@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSubscriptionsPage() {
   const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== "SUPERADMIN") {
+  const role = (session?.user as any)?.role;
+  if (!session?.user || role !== "SUPERADMIN") {
     redirect("/dashboard");
   }
 
@@ -20,6 +20,7 @@ export default async function AdminSubscriptionsPage() {
     include: {
       pricingTier: true,
       subscriptionOverride: true,
+      moduleGrants: true,
       ownedProperties: {
         include: { units: true }
       }

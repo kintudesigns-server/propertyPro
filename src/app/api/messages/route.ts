@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notificationEmitter } from "@/lib/notification-events";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -11,6 +12,14 @@ export async function GET(req: NextRequest) {
   }
 
   const userId = (session.user as any).id;
+  const userRole = (session.user as any).role;
+
+  if (userRole === "OWNER") {
+    const access = await checkModuleAccess(userId, "messages");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
 
   try {
     const { searchParams } = new URL(req.url);
@@ -108,6 +117,13 @@ export async function POST(req: NextRequest) {
   const userId = (session.user as any).id;
   const userRole = (session.user as any).role;
 
+  if (userRole === "OWNER") {
+    const access = await checkModuleAccess(userId, "messages");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
   try {
     const { receiverId, content, attachmentUrl, messageType, ticketId, leaseId } = await req.json();
 
@@ -115,9 +131,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing receiver ID or message content" }, { status: 400 });
     }
 
-    // 🔒 SCOPE RESTRICTION: Validate sender-receiver relationship
-    // Tenants can only message owners of properties they rent from, or SUPERADMIN
     // Owners can only message their own tenants or SUPERADMIN
+    let deliveryChannel = "LIVE_CHAT";
+
     if (userRole === "TENANT") {
       const receiver = await prisma.user.findUnique({
         where: { id: receiverId },
@@ -149,6 +165,12 @@ export async function POST(req: NextRequest) {
             { error: "You can only message the owner of properties you rent from." },
             { status: 403 }
           );
+        }
+
+        // Check if target owner has messaging module unlocked
+        const ownerAccess = await checkModuleAccess(receiverId, "messages");
+        if (!ownerAccess.allowed) {
+          deliveryChannel = "EMAIL_NOTIFIED";
         }
       } else {
         return NextResponse.json({ error: "You cannot message this user." }, { status: 403 });
@@ -210,6 +232,7 @@ export async function POST(req: NextRequest) {
         conversationId,
         attachmentUrl: attachmentUrl || null,
         messageType: messageType || "TEXT",
+        deliveryChannel,
         ticketId: ticketId || null,
         leaseId: leaseId || null,
       },
@@ -218,6 +241,30 @@ export async function POST(req: NextRequest) {
         receiver: { select: { id: true, name: true, email: true, role: true } },
       },
     });
+
+    if (deliveryChannel === "EMAIL_NOTIFIED") {
+      await prisma.notification.create({
+        data: {
+          userId: receiverId,
+          title: "New Tenant Inquiry (Email Notification)",
+          message: `Tenant ${session.user.name || session.user.email} sent an inquiry: "${content.substring(0, 100)}...". Upgrade your subscription plan to enable 1-click live chat reply.`,
+          type: "MESSAGE",
+          priority: "HIGH",
+          relatedEntityId: message.id
+        }
+      });
+      notificationEmitter.emit(`notification:${receiverId}`, {
+        type: "MESSAGE",
+        title: "New Tenant Inquiry (Email Notification)",
+        message: `Tenant ${session.user.name || session.user.email} sent an inquiry.`
+      });
+
+      return NextResponse.json({
+        ...message,
+        fallbackMode: true,
+        info: "Message delivered via Email notification to property manager."
+      }, { status: 201 });
+    }
 
     // Phase 1: Real-time broadcast to the receiver
     notificationEmitter.emit(`message:${receiverId}`, message);

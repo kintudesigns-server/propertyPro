@@ -248,10 +248,20 @@ export async function POST(req: NextRequest) {
     const isTrialEligible = !hasPreviouslyPaid && !hasEverHadSubscription && !hasUsedAnyTrial;
     const isTrial = tier.trialDays && Number(tier.trialDays) > 0 && isTrialEligible;
 
-    // Check if we need to collect card payment via Checkout Session
-    if (Number(tier.price) > 0 && !isTrial) {
+    // Check if we need to collect card payment via Checkout Session (Always for paid tiers, including trials)
+    if (Number(tier.price) > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const checkoutSession = await stripe.checkout.sessions.create({
+      const isNewOwner = user.subscriptionStatus === "PendingPlanSelection";
+
+      const successUrl = isNewOwner
+        ? `${appUrl}/dashboard/subscribe?checkout=success&session_id={CHECKOUT_SESSION_ID}`
+        : `${appUrl}/dashboard/owner/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+      
+      const cancelUrl = isNewOwner
+        ? `${appUrl}/dashboard/subscribe?checkout=cancelled`
+        : `${appUrl}/dashboard/owner/billing?checkout=cancelled`;
+
+      const sessionParams: Stripe.Checkout.SessionCreateParams = {
         payment_method_types: ["card"],
         mode: "subscription",
         customer: customerId,
@@ -271,10 +281,15 @@ export async function POST(req: NextRequest) {
             tierId: tier.id,
           },
         },
-        success_url: `${appUrl}/dashboard/owner/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${appUrl}/dashboard/owner/billing?checkout=cancelled`,
-      });
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      };
 
+      if (isTrial) {
+        sessionParams.subscription_data!.trial_period_days = Number(tier.trialDays);
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create(sessionParams);
       return NextResponse.json({ url: checkoutSession.url });
     }
 
