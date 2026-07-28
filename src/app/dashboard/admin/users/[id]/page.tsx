@@ -2306,16 +2306,16 @@ export default function UserProfilePage() {
                       {/* SECTION 1: WELFARE PROTECTED & EXEMPT FEATURES */}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between border-b border-blue-100 pb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-blue-600 text-white rounded-xl shadow-2xs">
                               <ShieldCheck className="h-4 w-4" />
                             </div>
                             <div>
-                              <h4 className="text-sm font-black text-[#1D1D1F] tracking-tight">Welfare & Legal Protected Features</h4>
+                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Welfare & Legal Protected Features</h4>
                               <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities that are immune to administrative blocks.</p>
                             </div>
                           </div>
-                          <Badge className="bg-blue-50 text-blue-800 border border-blue-200 font-bold text-[10px] px-2.5 py-0.5">
+                          <Badge className="bg-blue-50 text-blue-800 border border-blue-200/80 font-extrabold text-[11px] px-3 py-1 rounded-xl shadow-2xs">
                             {protectedFeatures.length} Protected Capabilities
                           </Badge>
                         </div>
@@ -2324,33 +2324,36 @@ export default function UserProfilePage() {
                           {protectedFeatures.map((f: any) => (
                             <div
                               key={f.key}
-                              className="relative overflow-hidden rounded-2xl border border-blue-200/80 bg-blue-50/30 p-5 shadow-2xs flex flex-col justify-between space-y-4"
+                              className="relative overflow-hidden rounded-2xl border border-blue-200/90 bg-[#F8FAFC] p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
                             >
-                              <div className="space-y-2">
+                              <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="p-2 rounded-xl bg-blue-100 text-blue-700 shrink-0">
+                                  <div className="flex items-start gap-3 min-w-0">
+                                    <div className="p-2 rounded-xl bg-blue-600 text-white shadow-2xs shrink-0 mt-0.5">
                                       <ShieldCheck className="h-4 w-4" />
                                     </div>
-                                    <div className="min-w-0">
-                                      <p className="font-extrabold text-sm text-[#1D1D1F] tracking-tight truncate">{f.label}</p>
-                                      <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">{f.key}</p>
+                                    <div className="min-w-0 space-y-1">
+                                      <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
+                                      <code className="inline-block text-[10px] font-mono font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                        {f.key}
+                                      </code>
                                     </div>
                                   </div>
 
-                                  <span className="text-[10px] font-black text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shrink-0">
+                                  <span className="text-[10px] font-black text-blue-800 bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-full shrink-0 shadow-2xs">
                                     Protected
                                   </span>
                                 </div>
 
                                 <div className="pt-1">
-                                  <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-[10px] font-bold">
-                                    🛡 Welfare Protected (Always Active)
+                                  <Badge className="bg-blue-100/90 text-blue-900 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs w-fit">
+                                    <ShieldCheck className="h-3 w-3 text-blue-700" />
+                                    Welfare Protected (Always Active)
                                   </Badge>
                                 </div>
                               </div>
 
-                              <div className="pt-2 border-t border-blue-100 flex justify-between items-center text-[10px] font-bold text-blue-600">
+                              <div className="pt-3 border-t border-blue-100/90 flex justify-between items-center text-[10px] font-extrabold text-blue-700 uppercase tracking-wider">
                                 <span>Statutory Right</span>
                                 <span>Non-Restricted</span>
                               </div>
@@ -2362,16 +2365,16 @@ export default function UserProfilePage() {
                       {/* SECTION 2: CONFIGURABLE ROLE FEATURES & ADMIN OVERRIDES */}
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between border-b border-purple-100 pb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-slate-900 text-white rounded-xl shadow-2xs">
                               <Key className="h-4 w-4" />
                             </div>
                             <div>
-                              <h4 className="text-sm font-black text-[#1D1D1F] tracking-tight">Configurable Role Feature Access</h4>
+                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Configurable Role Feature Access</h4>
                               <p className="text-slate-500 text-xs font-medium">Operational features that can be selectively blocked or granted based on administrative review.</p>
                             </div>
                           </div>
-                          <Badge className="bg-purple-50 text-purple-800 border border-purple-200 font-bold text-[10px] px-2.5 py-0.5">
+                          <Badge className="bg-purple-50 text-purple-800 border border-purple-200/80 font-extrabold text-[11px] px-3 py-1 rounded-xl shadow-2xs">
                             {configurableFeatures.length} Configurable Capabilities
                           </Badge>
                         </div>
@@ -2386,25 +2389,27 @@ export default function UserProfilePage() {
                                 key={f.key}
                                 className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between space-y-4 ${
                                   isBlocked
-                                    ? "bg-rose-50/40 border-rose-200 shadow-2xs"
-                                    : "bg-white border-slate-200/80 shadow-2xs hover:border-[#007AFF]"
+                                    ? "bg-gradient-to-b from-rose-50/70 via-rose-50/30 to-white border-rose-200/90 shadow-2xs hover:shadow-xs"
+                                    : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400"
                                 }`}
                               >
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                   <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                      <div className={`p-2 rounded-xl shrink-0 ${
-                                        isBlocked ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
+                                    <div className="flex items-start gap-3 min-w-0">
+                                      <div className={`p-2 rounded-xl shrink-0 shadow-2xs mt-0.5 ${
+                                        isBlocked ? "bg-rose-600 text-white" : "bg-slate-900 text-white"
                                       }`}>
                                         {isBlocked ? <Ban className="h-4 w-4" /> : <Key className="h-4 w-4" />}
                                       </div>
-                                      <div className="min-w-0">
-                                        <p className="font-extrabold text-sm text-[#1D1D1F] tracking-tight truncate">{f.label}</p>
-                                        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{f.key}</p>
+                                      <div className="min-w-0 space-y-1">
+                                        <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
+                                        <code className="inline-block text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                          {f.key}
+                                        </code>
                                       </div>
                                     </div>
 
-                                    {/* Interactive SaaS Toggle Switch */}
+                                    {/* Interactive Modern SaaS Toggle Switch */}
                                     <button
                                       type="button"
                                       disabled={saving || (!isBlocked && featureReason.trim().length < 10)}
@@ -2416,7 +2421,7 @@ export default function UserProfilePage() {
                                         }
                                       }}
                                       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        isBlocked ? "bg-rose-500" : "bg-emerald-500"
+                                        isBlocked ? "bg-rose-600" : "bg-emerald-500"
                                       } ${(!isBlocked && featureReason.trim().length < 10) ? "opacity-50 cursor-not-allowed" : ""}`}
                                       title={isBlocked ? "Click to restore access" : featureReason.trim().length < 10 ? "Enter audit reason above to block" : "Click to block feature"}
                                     >
@@ -2432,49 +2437,55 @@ export default function UserProfilePage() {
                                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
                                     {isBlocked ? (
                                       <>
-                                        <Badge className="bg-rose-100 text-rose-800 border-rose-200 text-[10px] font-bold flex items-center gap-1">
-                                          <span className="h-1.5 w-1.5 rounded-full bg-rose-600 animate-ping" /> Administrative Block Active
+                                        <Badge className="bg-rose-100 text-rose-900 border border-rose-200/90 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
+                                          <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" /> Administrative Block Active
                                         </Badge>
                                         {activeOverride.expiresAt && (
-                                          <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] font-bold">
+                                          <Badge className="bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-2xs">
+                                            <Clock className="h-3 w-3 text-amber-700" />
                                             Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
                                           </Badge>
                                         )}
                                       </>
                                     ) : (
-                                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-bold">
-                                        ✓ Default Role Access Allowed
+                                      <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                        Default Role Access Allowed
                                       </Badge>
                                     )}
                                   </div>
 
                                   {activeOverride?.reason && (
-                                    <p className="text-[11px] text-slate-600 italic font-medium leading-normal bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 mt-2">
+                                    <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-xl text-xs text-slate-700 font-medium leading-relaxed shadow-2xs mt-2">
+                                      <span className="font-bold text-slate-900 block mb-0.5 text-[10px] uppercase tracking-wider">Admin Note:</span>
                                       "{activeOverride.reason}"
-                                    </p>
+                                    </div>
                                   )}
                                 </div>
 
                                 {/* Action Button Footer */}
-                                <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
-                                  <span className="text-[10px] font-bold text-slate-400">
+                                <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                     {isBlocked ? "Blocked by Admin" : "Standard Role Policy"}
                                   </span>
                                   {isBlocked ? (
                                     <button
                                       disabled={saving}
                                       onClick={() => handleRevokeFeatureOverride(f.key)}
-                                      className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-0.5 hover:underline"
+                                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center gap-1"
                                     >
-                                      Restore Access →
+                                      <CheckCircle className="h-3.5 w-3.5" />
+                                      Restore Access
                                     </button>
                                   ) : (
                                     <button
                                       disabled={saving || featureReason.trim().length < 10}
                                       onClick={() => handleSetFeatureOverride(f.key, "BLOCK")}
-                                      className={`text-xs font-bold ${featureReason.trim().length < 10 ? "text-slate-400 cursor-not-allowed" : "text-rose-600 hover:text-rose-700 hover:underline"}`}
+                                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-rose-600"
+                                      title={featureReason.trim().length < 10 ? "Enter at least 10 characters in reason box above to enable block" : "Apply block"}
                                     >
-                                      Force Block →
+                                      <Ban className="h-3.5 w-3.5" />
+                                      Force Block
                                     </button>
                                   )}
                                 </div>
