@@ -61,6 +61,8 @@ export async function GET(
             name: true,
             address: true,
             city: true,
+            coverPhoto: true,
+            images: true,
             units: {
               select: {
                 id: true,
@@ -98,6 +100,8 @@ export async function GET(
                   select: {
                     id: true,
                     name: true,
+                    coverPhoto: true,
+                    images: true,
                     owner: {
                       select: {
                         id: true,
@@ -253,9 +257,24 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const decryptedUser = { ...user };
+    const decryptedUser: any = { ...user };
     if (decryptedUser.ssn) decryptedUser.ssn = decrypt(decryptedUser.ssn);
     if (decryptedUser.accountNumber) decryptedUser.accountNumber = decrypt(decryptedUser.accountNumber);
+
+    // Fetch tenant's latest submitted rental application if available
+    const application = await prisma.application.findFirst({
+      where: { email: user.email },
+      include: {
+        unit: {
+          include: {
+            property: { select: { id: true, name: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    decryptedUser.application = application || null;
 
     return NextResponse.json(decryptedUser);
   } catch (error: any) {
@@ -279,19 +298,37 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { name, email, phone, role, tenantStatus, accountStatus, notes } = body;
+    const { 
+      name, email, phone, role, tenantStatus, accountStatus, notes,
+      avatar, dob, ssn, employer, position, annualIncome,
+      emergencyName, emergencyRelationship, emergencyPhone, emergencyEmail,
+      creditScore, bankName, accountNumber, accountName
+    } = body;
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    if (role !== undefined) updateData.role = role;
+    if (tenantStatus !== undefined) updateData.tenantStatus = tenantStatus;
+    if (accountStatus !== undefined) updateData.accountStatus = accountStatus;
+    if (notes !== undefined) updateData.notes = notes;
+    if (avatar !== undefined) updateData.avatar = avatar;
+    if (dob !== undefined) updateData.dob = dob;
+    if (employer !== undefined) updateData.employer = employer;
+    if (position !== undefined) updateData.position = position;
+    if (annualIncome !== undefined && annualIncome !== "") updateData.annualIncome = Number(annualIncome);
+    if (emergencyName !== undefined) updateData.emergencyName = emergencyName;
+    if (emergencyRelationship !== undefined) updateData.emergencyRelationship = emergencyRelationship;
+    if (emergencyPhone !== undefined) updateData.emergencyPhone = emergencyPhone;
+    if (emergencyEmail !== undefined) updateData.emergencyEmail = emergencyEmail;
+    if (creditScore !== undefined && creditScore !== "") updateData.creditScore = Number(creditScore);
+    if (bankName !== undefined) updateData.bankName = bankName;
+    if (accountName !== undefined) updateData.accountName = accountName;
 
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: {
-        name,
-        email,
-        phone,
-        role,
-        tenantStatus,
-        accountStatus,
-        notes,
-      },
+      data: updateData,
     });
 
     await auditLog({

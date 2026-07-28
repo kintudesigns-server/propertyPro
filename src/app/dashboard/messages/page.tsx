@@ -21,6 +21,8 @@ import {
 import { NewChatModal } from "@/components/messages/NewChatModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
 
 interface UserInfo {
   id: string;
@@ -55,6 +57,7 @@ import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function MessagesPage() {
+  const featureAccess = useFeatureAccess("message_owner");
   const { data: session } = useSession();
   const currentUserId = (session?.user as any)?.id;
   const currentUserRole = (session?.user as any)?.role;
@@ -619,40 +622,63 @@ export default function MessagesPage() {
               </div>
             )}
 
-            {/* Composer */}
-            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-[#E5E5EA] flex gap-3 sticky bottom-0 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] items-center">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={sending || isUploading}
-                className="p-2 text-[#94A3B8] hover:text-[#007AFF] hover:bg-[#EFF6FF] rounded-xl transition-colors shrink-0 disabled:opacity-50"
-                title="Attach file"
-              >
-                <Paperclip className="h-5 w-5" />
-              </button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileUpload}
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
-                className="hidden" 
-              />
-              <input
-                type="text"
-                placeholder={isUploading ? "Uploading attachment..." : "Type a message..."}
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                disabled={sending || isUploading}
-                className="flex-1 px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-sm text-[#1D1D1F] placeholder-[#94A3B8] focus:outline-none focus:border-[#007AFF] transition-all disabled:opacity-50"
-              />
-              <Button
-                type="submit"
-                disabled={(!newMessage.trim() && !attachmentFile) || sending || isUploading}
-                className="h-11 w-11 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white flex items-center justify-center shadow-md shadow-blue-500/10 p-0"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
-            </form>
+            {/* Composer or Administrative Block Notice */}
+            {currentUserRole === "TENANT" && !featureAccess.allowed ? (
+              <div className="p-4 bg-rose-50/90 border-t border-rose-200 flex items-center justify-between gap-4 sticky bottom-0 z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-rose-100 text-rose-700 shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-rose-950 uppercase tracking-wider">
+                      Messaging Restricted by Administrator
+                    </p>
+                    <p className="text-xs font-medium text-rose-800 mt-0.5">
+                      "{featureAccess.adminNote || featureAccess.reason || "Outbound messaging is restricted for your account."}"
+                    </p>
+                  </div>
+                </div>
+                {featureAccess.expiresAt && (
+                  <span className="text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-200 px-2.5 py-1 rounded-full shrink-0">
+                    Restores in ~{featureAccess.daysRemaining ?? 1}d
+                  </span>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-[#E5E5EA] flex gap-3 sticky bottom-0 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] items-center">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending || isUploading}
+                  className="p-2 text-[#94A3B8] hover:text-[#007AFF] hover:bg-[#EFF6FF] rounded-xl transition-colors shrink-0 disabled:opacity-50"
+                  title="Attach file"
+                >
+                  <Paperclip className="h-5 w-5" />
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload}
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
+                  className="hidden" 
+                />
+                <input
+                  type="text"
+                  placeholder={isUploading ? "Uploading attachment..." : "Type a message..."}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  disabled={sending || isUploading}
+                  className="flex-1 px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-sm text-[#1D1D1F] placeholder-[#94A3B8] focus:outline-none focus:border-[#007AFF] transition-all disabled:opacity-50"
+                />
+                <Button
+                  type="submit"
+                  disabled={(!newMessage.trim() && !attachmentFile) || sending || isUploading}
+                  className="h-11 w-11 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white flex items-center justify-center shadow-md shadow-blue-500/10 p-0"
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </form>
+            )}
           </>
         ) : (
           <div className="flex-1 flex flex-col justify-center items-center p-8 text-center bg-white">

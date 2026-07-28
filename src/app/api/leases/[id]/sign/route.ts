@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { auditLog } from "@/lib/audit-log";
 
-import { otpStore } from "@/lib/otpStore";
+import { verifyAndClearOtp } from "@/lib/otpStore";
 
 export async function POST(req: NextRequest, ctx: any) {
   const session = await getServerSession(authOptions);
@@ -31,22 +31,10 @@ export async function POST(req: NextRequest, ctx: any) {
       return NextResponse.json({ error: "OTP verification code is required." }, { status: 400 });
     }
 
-    const storedOtpData = otpStore.get(id as string);
-    if (!storedOtpData) {
-      return NextResponse.json({ error: "OTP not found or expired. Please request a new one." }, { status: 400 });
+    const isValidOtp = await verifyAndClearOtp(id as string, otp.toString().trim());
+    if (!isValidOtp) {
+      return NextResponse.json({ error: "Invalid, missing, or expired OTP code." }, { status: 400 });
     }
-
-    if (Date.now() > storedOtpData.expiresAt) {
-      otpStore.delete(id as string);
-      return NextResponse.json({ error: "OTP has expired. Please request a new one." }, { status: 400 });
-    }
-
-    if (storedOtpData.code !== otp.toString().trim()) {
-      return NextResponse.json({ error: "Invalid OTP code." }, { status: 400 });
-    }
-
-    // OTP verified successfully, clear it
-    otpStore.delete(id as string);
 
     const lease = await prisma.lease.findUnique({
       where: { id },

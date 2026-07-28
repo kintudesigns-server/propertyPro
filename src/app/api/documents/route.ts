@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,6 +18,16 @@ export async function GET(req: NextRequest) {
     const access = await checkModuleAccess(userId, "documents");
     if (!access.allowed) {
       return moduleLockedResponse(access);
+    }
+  }
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "view_documents");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Access to document vault restricted by administrator." },
+        { status: 403 }
+      );
     }
   }
 

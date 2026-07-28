@@ -252,9 +252,17 @@ export default function TenantsPage() {
                     <TableRow key={t.id} className="border-b border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-bold text-lg shrink-0">
-                            {t.name ? t.name.charAt(0).toUpperCase() : "U"}
-                          </div>
+                          {t.avatar ? (
+                            <img
+                              src={t.avatar}
+                              alt={t.name || "Tenant Avatar"}
+                              className="h-10 w-10 rounded-full object-cover shrink-0 border border-slate-200"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-bold text-lg shrink-0">
+                              {t.name ? t.name.charAt(0).toUpperCase() : "U"}
+                            </div>
+                          )}
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-[#1D1D1F] truncate">{t.name}</span>
                             <span className="text-xs text-[#6E6E73] truncate">{t.email}</span>
@@ -362,9 +370,17 @@ export default function TenantsPage() {
                   </div>
 
                   <div className="flex flex-col items-center text-center mt-2 mb-4">
-                    <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
-                      {t.name ? t.name.charAt(0).toUpperCase() : "U"}
-                    </div>
+                    {t.avatar ? (
+                      <img
+                        src={t.avatar}
+                        alt={t.name || "Tenant Avatar"}
+                        className="h-16 w-16 rounded-full object-cover mb-3 ring-4 ring-[#EFF6FF]/50 border border-slate-200"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
+                        {t.name ? t.name.charAt(0).toUpperCase() : "U"}
+                      </div>
+                    )}
                     <h3 className="font-extrabold text-[#1D1D1F] text-lg truncate w-full">{t.name}</h3>
                     <p className="text-sm text-[#6E6E73] truncate w-full">{t.email}</p>
                     <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2 w-full text-center">

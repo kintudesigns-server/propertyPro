@@ -1414,9 +1414,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="p-4 mt-auto border-t border-[#E2E8F0] bg-[#F8FAFC]/50">
             <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} gap-3`}>
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 min-w-[40px] rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
-                  {session?.user?.name ? session.user.name.charAt(0) : "U"}
-                </div>
+                {(session?.user as any)?.avatar || (session?.user as any)?.image ? (
+                  <img
+                    src={(session?.user as any)?.avatar || (session?.user as any)?.image}
+                    alt={session?.user?.name || "Profile"}
+                    className="h-10 w-10 min-w-[40px] rounded-full object-cover shadow-sm border border-slate-200"
+                  />
+                ) : (
+                  <div className="h-10 w-10 min-w-[40px] rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
+                    {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                  </div>
+                )}
                 {sidebarOpen && (
                   <div className="flex flex-col overflow-hidden">
                     <span className="font-extrabold text-xs text-[#0F172A] truncate">
@@ -1436,7 +1444,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Topbar */}
-        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA] flex items-center justify-between px-4 md:px-8 shrink-0 z-20 sticky top-0">
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA] flex items-center justify-between px-4 md:px-8 shrink-0 z-[100] sticky top-0">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger Drawer Trigger */}
             <button

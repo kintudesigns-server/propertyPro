@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notificationEmitter } from "@/lib/notification-events";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -115,10 +116,21 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = (session.user as any).id;
+  const senderId = userId;
   const userRole = (session.user as any).role;
 
+  if (userRole === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(senderId, "message_owner");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Outbound messaging is restricted for your account by an administrator." },
+        { status: 403 }
+      );
+    }
+  }
+
   if (userRole === "OWNER") {
-    const access = await checkModuleAccess(userId, "messages");
+    const access = await checkModuleAccess(senderId, "messages");
     if (!access.allowed) {
       return moduleLockedResponse(access);
     }

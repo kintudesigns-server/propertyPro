@@ -45,6 +45,9 @@ export async function PUT(req: NextRequest) {
       blockAddInspectorOnPaused,
       blockAddTenantOnPaused,
       blockTourSlotsOnPaused,
+      welfareAllowMoveOut,
+      welfareAllowBillingView,
+      welfareAllowEmergencyDispatch,
     } = await req.json();
 
     if (adminFeePercent !== undefined && (adminFeePercent < 0 || adminFeePercent > 100)) {
@@ -67,6 +70,9 @@ export async function PUT(req: NextRequest) {
     if (blockAddInspectorOnPaused !== undefined) updateData.blockAddInspectorOnPaused = Boolean(blockAddInspectorOnPaused);
     if (blockAddTenantOnPaused !== undefined) updateData.blockAddTenantOnPaused = Boolean(blockAddTenantOnPaused);
     if (blockTourSlotsOnPaused !== undefined) updateData.blockTourSlotsOnPaused = Boolean(blockTourSlotsOnPaused);
+    if (welfareAllowMoveOut !== undefined) updateData.welfareAllowMoveOut = Boolean(welfareAllowMoveOut);
+    if (welfareAllowBillingView !== undefined) updateData.welfareAllowBillingView = Boolean(welfareAllowBillingView);
+    if (welfareAllowEmergencyDispatch !== undefined) updateData.welfareAllowEmergencyDispatch = Boolean(welfareAllowEmergencyDispatch);
 
     if (settings) {
       settings = await prisma.platformSettings.update({
@@ -89,6 +95,9 @@ export async function PUT(req: NextRequest) {
           blockAddInspectorOnPaused: blockAddInspectorOnPaused !== undefined ? Boolean(blockAddInspectorOnPaused) : true,
           blockAddTenantOnPaused: blockAddTenantOnPaused !== undefined ? Boolean(blockAddTenantOnPaused) : true,
           blockTourSlotsOnPaused: blockTourSlotsOnPaused !== undefined ? Boolean(blockTourSlotsOnPaused) : true,
+          welfareAllowMoveOut: welfareAllowMoveOut !== undefined ? Boolean(welfareAllowMoveOut) : true,
+          welfareAllowBillingView: welfareAllowBillingView !== undefined ? Boolean(welfareAllowBillingView) : true,
+          welfareAllowEmergencyDispatch: welfareAllowEmergencyDispatch !== undefined ? Boolean(welfareAllowEmergencyDispatch) : true,
         },
       });
     }

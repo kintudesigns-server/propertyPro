@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
-import { otpStore } from "@/lib/otpStore";
+import { setOtp } from "@/lib/otpStore";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -34,9 +34,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    otpStore.set(lease.id, { code: otp, expiresAt });
+    await setOtp(lease.id, otp);
 
     const htmlBody = `
       <div style="font-family: sans-serif; max-w-lg; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">

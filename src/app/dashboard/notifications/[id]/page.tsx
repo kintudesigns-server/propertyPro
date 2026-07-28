@@ -413,6 +413,20 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
     notification.isRead = true;
   }
 
+  let overrideDetail: any = null;
+  if (notification.title.includes("Feature Restricted") || notification.title.includes("Feature Access")) {
+    // Extract feature key from message if possible (e.g. 'Your access to the "view_documents" feature')
+    const match = notification.message.match(/"([^"]+)"/);
+    const featureKey = match ? match[1] : null;
+
+    if (featureKey) {
+      overrideDetail = await db.userAccessOverride.findFirst({
+        where: { userId, feature: featureKey },
+        orderBy: { createdAt: "desc" }
+      });
+    }
+  }
+
   const navActions = resolveNavActions(notification, userRole);
 
   return (
@@ -448,11 +462,55 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
               </div>
               <h2 className="text-2xl font-extrabold text-[#1D1D1F] max-w-2xl">{notification.title}</h2>
             </div>
-            <div className="p-8">
-              <h3 className="text-xs font-extrabold text-[#94A3B8] uppercase tracking-wider mb-4">Message Content</h3>
-              <div className="bg-slate-50 p-6 rounded-xl border border-[#E5E5EA]">
-                <p className="whitespace-pre-wrap leading-relaxed text-base text-[#1D1D1F]">{notification.message}</p>
+            <div className="p-8 space-y-6">
+              <div>
+                <h3 className="text-xs font-extrabold text-[#94A3B8] uppercase tracking-wider mb-3">Message Content</h3>
+                <div className="bg-slate-50 p-6 rounded-xl border border-[#E5E5EA]">
+                  <p className="whitespace-pre-wrap leading-relaxed text-base text-[#1D1D1F]">{notification.message}</p>
+                </div>
               </div>
+
+              {/* Rich Block Policy Card for Feature Restrictions */}
+              {overrideDetail && (
+                <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-purple-200/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                      <h4 className="text-xs font-black text-purple-950 uppercase tracking-wider">Administrative Authorization Policy Record</h4>
+                    </div>
+                    <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                      {overrideDetail.overrideType === "BLOCK" ? "🔒 Active Block" : "🔑 Granted Access"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-purple-800/80 uppercase tracking-wider block">Admin Audit Reason Note</span>
+                      <p className="text-xs font-bold text-purple-950 bg-white p-3 rounded-xl border border-purple-200/60 italic">
+                        "{overrideDetail.reason}"
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-purple-800/80 uppercase tracking-wider block">Restriction Timeline</span>
+                      <div className="bg-white p-3 rounded-xl border border-purple-200/60 space-y-1">
+                        <p className="text-xs font-bold text-purple-950">
+                          {overrideDetail.expiresAt
+                            ? `Auto-restores on ${new Date(overrideDetail.expiresAt).toLocaleDateString()}`
+                            : "Permanent restriction (manual admin unlock)"}
+                        </p>
+                        {overrideDetail.expiresAt && (
+                          <p className="text-[11px] font-semibold text-purple-700">
+                            ~{Math.max(1, Math.ceil((new Date(overrideDetail.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days remaining
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

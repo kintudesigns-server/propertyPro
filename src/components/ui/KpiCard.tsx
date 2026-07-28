@@ -108,8 +108,8 @@ export function KpiCard({
         ${className}
       `}
     >
-      <div className="flex justify-between items-start mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6E6E73] truncate">
+      <div className="flex justify-between items-start mb-2 gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-[#6E6E73] leading-tight line-clamp-2 min-h-[28px] flex-1">
           {title}
         </span>
         {Icon && (

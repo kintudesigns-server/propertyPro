@@ -156,10 +156,25 @@ export async function GET(req: NextRequest) {
   }
 }
 
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "submit_maintenance");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Submitting maintenance requests is restricted for your account." },
+        { status: 403 }
+      );
+    }
   }
 
   try {

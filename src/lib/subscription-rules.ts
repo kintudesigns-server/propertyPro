@@ -96,43 +96,74 @@ export async function getEffectiveSubscriptionRules(
     (!user.accessGrantedExpiresAt || new Date(user.accessGrantedExpiresAt) > new Date())
   );
 
-  // Override validity check
+  // Override validity check helper
   const override = user?.subscriptionOverride;
-  const isOverrideValid = override &&
-    (!override.expiresAt || new Date(override.expiresAt) > new Date());
-  const activeOverride = isOverrideValid ? override : null;
+  const now = new Date();
+
+  const isPolicyOverrideActive = (val: boolean | null | undefined, specExpiry: Date | null | undefined) => {
+    if (!override || val === null || val === undefined) return null;
+    if (override.expiresAt && new Date(override.expiresAt) <= now) return null;
+    if (specExpiry && new Date(specExpiry) <= now) return null;
+    return val;
+  };
+
+  const activeBlockPayouts = isPolicyOverrideActive(override?.blockPayouts, override?.blockPayoutsExpiresAt);
+  const activeBlockNewUnits = isPolicyOverrideActive(override?.blockNewUnits, override?.blockNewUnitsExpiresAt);
+  const activeAllowAddVendor = isPolicyOverrideActive(override?.allowAddVendor, override?.allowAddVendorExpiresAt);
+  const activeAllowAddInspector = isPolicyOverrideActive(override?.allowAddInspector, override?.allowAddInspectorExpiresAt);
+  const activeAllowProcessApplications = isPolicyOverrideActive(override?.allowProcessApplications, override?.allowProcessApplicationsExpiresAt);
+  const activeAllowAddTenant = isPolicyOverrideActive(override?.allowAddTenant, override?.allowAddTenantExpiresAt);
+  const activeAllowTourSlots = isPolicyOverrideActive(override?.allowTourSlots, override?.allowTourSlotsExpiresAt);
+
+  const isOverrideActive = !!(
+    activeBlockPayouts !== null ||
+    activeBlockNewUnits !== null ||
+    activeAllowAddVendor !== null ||
+    activeAllowAddInspector !== null ||
+    activeAllowProcessApplications !== null ||
+    activeAllowAddTenant !== null ||
+    activeAllowTourSlots !== null
+  );
 
   return {
-    blockPayouts: activeOverride?.blockPayouts ??
+    blockPayouts: activeBlockPayouts ??
       (isPastDue ? settings.blockPayoutsOnPastDue : (isPaused ? settings.blockPayoutsOnPaused : false)),
-    blockNewUnits: activeOverride?.blockNewUnits ??
+    blockNewUnits: activeBlockNewUnits ??
       (isPaused ? settings.blockNewUnitsOnPaused : false),
-    // Vendor, inspector, tenant and tour availability gating: only Paused, not comped, not override-exempt
-    blockAddVendor: isPaused && !isCompedAccess
-      ? settings.blockAddVendorOnPaused
-      : false,
-    blockAddInspector: isPaused && !isCompedAccess
-      ? settings.blockAddInspectorOnPaused
-      : false,
-    blockProcessApplications: isPaused && !isCompedAccess
-      ? settings.blockProcessApplicationsOnPaused
-      : false,
-    blockAddTenant: isPaused && !isCompedAccess
-      ? settings.blockAddTenantOnPaused
-      : false,
-    blockTourSlots: isPaused && !isCompedAccess
-      ? settings.blockTourSlotsOnPaused
-      : false,
-    allowMaintenance: activeOverride?.allowMaintenance ??
-      settings.allowMaintenanceOnPaused,
+    blockAddVendor: activeAllowAddVendor === true
+      ? false
+      : (activeAllowAddVendor === false
+        ? true
+        : (isPaused && !isCompedAccess ? settings.blockAddVendorOnPaused : false)),
+    blockAddInspector: activeAllowAddInspector === true
+      ? false
+      : (activeAllowAddInspector === false
+        ? true
+        : (isPaused && !isCompedAccess ? settings.blockAddInspectorOnPaused : false)),
+    blockProcessApplications: activeAllowProcessApplications === true
+      ? false
+      : (activeAllowProcessApplications === false
+        ? true
+        : (isPaused && !isCompedAccess ? settings.blockProcessApplicationsOnPaused : false)),
+    blockAddTenant: activeAllowAddTenant === true
+      ? false
+      : (activeAllowAddTenant === false
+        ? true
+        : (isPaused && !isCompedAccess ? settings.blockAddTenantOnPaused : false)),
+    blockTourSlots: activeAllowTourSlots === true
+      ? false
+      : (activeAllowTourSlots === false
+        ? true
+        : (isPaused && !isCompedAccess ? settings.blockTourSlotsOnPaused : false)),
+    allowMaintenance: override?.allowMaintenance ?? settings.allowMaintenanceOnPaused,
     gracePeriodDays: settings.gracePeriodDays,
     isPaused,
     isPastDue,
     isTrialing,
     isCompedAccess,
-    isOverrideActive: !!activeOverride,
-    overrideReason: activeOverride?.reason ?? null,
-    overrideExpiresAt: activeOverride?.expiresAt ? new Date(activeOverride.expiresAt) : null,
+    isOverrideActive,
+    overrideReason: override?.reason ?? null,
+    overrideExpiresAt: override?.expiresAt ? new Date(override.expiresAt) : null,
     gracePeriodEnd: user?.gracePeriodEnd ? new Date(user.gracePeriodEnd) : null,
     pausedAt: user?.pausedAt ? new Date(user.pausedAt) : null,
   };

@@ -16,20 +16,37 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
 
 export default function VendorsPage() {
-  const { allowed, loading: checkingAccess } = useModuleAccess("vendors");
+  const { allowed: moduleAllowed, loading: checkingAccess } = useModuleAccess("vendors");
+  const featureAccess = useFeatureAccess("access_vendor_portal");
 
-  if (checkingAccess) {
+  if (checkingAccess || featureAccess.loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Verifying vendor access...</p>
       </div>
     );
   }
 
-  if (!allowed) {
+  if (!featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="access_vendor_portal"
+        featureLabel={featureAccess.featureLabel || "Vendor Portal Access"}
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      />
+    );
+  }
+
+  if (!moduleAllowed) {
     return <ModuleLockedBanner module="vendors" />;
   }
 

@@ -119,7 +119,7 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-[#E5E5EA] z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.15)] border border-[#E5E5EA] z-[1000] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top-right">
           {/* Header */}
           <div className="p-4 border-b border-[#E5E5EA] bg-[#F2F2F7] flex justify-between items-center">
             <div>

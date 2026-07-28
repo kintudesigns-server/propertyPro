@@ -25,6 +25,8 @@ import {
 
 import { toast } from "sonner";
 import Link from "next/link";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PRIORITY_CFG: Record<string, { label: string; dot: string; text: string; bg: string; border: string; sort: number }> = {
@@ -69,6 +71,7 @@ function PipelineBadge({ status }: { status: string }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function InspectorActiveTasksPage() {
+  const featureAccess = useFeatureAccess("view_assignments");
   const { status } = useSession();
   const router = useRouter();
   const [tasks,   setTasks]   = useState<any[]>([]);
@@ -180,6 +183,29 @@ export default function InspectorActiveTasksPage() {
   }, [active, prioFilter, stFilter, search, sortField, sortDir]);
 
   const emergencyCount = active.filter(t => t.priority === "EMERGENCY").length;
+
+  if (featureAccess.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <p className="text-[#8E8E93] font-semibold text-sm">Verifying assignment permissions...</p>
+      </div>
+    );
+  }
+
+  if (!featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="view_assignments"
+        featureLabel={featureAccess.featureLabel || "View Assigned Jobs"}
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      />
+    );
+  }
 
   if (loading || status === "loading") {
     return (

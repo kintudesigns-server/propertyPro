@@ -12,13 +12,7 @@ export async function checkModuleAccess(
   ownerId: string,
   module: ModuleKey
 ): Promise<ModuleGuardResult> {
-  
-  // 1. Always-available modules — fast exit, no DB query needed
-  if (ALWAYS_AVAILABLE.includes(module)) {
-    return { allowed: true, source: "always_available" };
-  }
-
-  // 2. Fetch owner's tier + active grants in ONE query
+  // 1. Fetch owner's tier + active grants/blocks in ONE query
   const owner = await prisma.user.findUnique({
     where: { id: ownerId },
     select: {
@@ -37,12 +31,28 @@ export async function checkModuleAccess(
 
   if (!owner) return { allowed: false, reason: "Owner not found" };
 
-  // 3. Admin grant — highest priority
-  if (owner.moduleGrants.length > 0) {
+  // 2. Admin block override check — highest priority
+  const hasBlock = owner.moduleGrants.some(g => (g as any).overrideType === "BLOCK");
+  if (hasBlock) {
+    return {
+      allowed: false,
+      source: "admin_block" as any,
+      reason: `Access to ${module} has been restricted by administrator.`
+    };
+  }
+
+  // 3. Always-available modules (only if not blocked)
+  if (ALWAYS_AVAILABLE.includes(module)) {
+    return { allowed: true, source: "always_available" };
+  }
+
+  // 4. Admin grant override check
+  const hasGrant = owner.moduleGrants.some(g => !(g as any).overrideType || (g as any).overrideType === "GRANT");
+  if (hasGrant) {
     return { allowed: true, source: "admin_grant" };
   }
 
-  // 4. Check tier
+  // 5. Check tier
   const tierModules = owner.pricingTier?.modules ?? [];
   
   // If tier has no modules set (backward compatibility/legacy)
@@ -54,7 +64,7 @@ export async function checkModuleAccess(
     return { allowed: true, source: "tier" };
   }
 
-  // 5. Denied
+  // 6. Denied
   return {
     allowed: false,
     reason: `Your ${owner.pricingTier?.name ?? "current"} plan does not include ${module}.`,

@@ -39,7 +39,26 @@ export async function POST(req: NextRequest) {
   const adminId = (session.user as any).id;
 
   try {
-    const { userId, blockPayouts, blockNewUnits, allowMaintenance, expiresAt, reason } = await req.json();
+    const { 
+      userId, 
+      blockPayouts, 
+      blockNewUnits, 
+      allowMaintenance, 
+      allowAddVendor,
+      allowAddInspector,
+      allowProcessApplications,
+      allowAddTenant,
+      allowTourSlots,
+      blockPayoutsExpiresAt,
+      blockNewUnitsExpiresAt,
+      allowAddVendorExpiresAt,
+      allowAddInspectorExpiresAt,
+      allowProcessApplicationsExpiresAt,
+      allowAddTenantExpiresAt,
+      allowTourSlotsExpiresAt,
+      expiresAt, 
+      reason 
+    } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
@@ -51,27 +70,43 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const expiryDate = expiresAt ? new Date(expiresAt) : null;
+    const parseExpiry = (d: any) => (d ? new Date(d) : null);
+    const expiryDate = parseExpiry(expiresAt);
+
+    const blockPayoutsExp = parseExpiry(blockPayoutsExpiresAt);
+    const blockNewUnitsExp = parseExpiry(blockNewUnitsExpiresAt);
+    const allowAddVendorExp = parseExpiry(allowAddVendorExpiresAt);
+    const allowAddInspectorExp = parseExpiry(allowAddInspectorExpiresAt);
+    const allowProcessApplicationsExp = parseExpiry(allowProcessApplicationsExpiresAt);
+    const allowAddTenantExp = parseExpiry(allowAddTenantExpiresAt);
+    const allowTourSlotsExp = parseExpiry(allowTourSlotsExpiresAt);
+
+    const overrideData = {
+      userId,
+      blockPayouts,
+      blockNewUnits,
+      allowMaintenance,
+      allowAddVendor,
+      allowAddInspector,
+      allowProcessApplications,
+      allowAddTenant,
+      allowTourSlots,
+      blockPayoutsExpiresAt: blockPayoutsExp,
+      blockNewUnitsExpiresAt: blockNewUnitsExp,
+      allowAddVendorExpiresAt: allowAddVendorExp,
+      allowAddInspectorExpiresAt: allowAddInspectorExp,
+      allowProcessApplicationsExpiresAt: allowProcessApplicationsExp,
+      allowAddTenantExpiresAt: allowAddTenantExp,
+      allowTourSlotsExpiresAt: allowTourSlotsExp,
+      expiresAt: expiryDate,
+      adminId,
+      reason,
+    };
 
     const override = await prisma.subscriptionOverride.upsert({
       where: { userId },
-      create: {
-        userId,
-        blockPayouts,
-        blockNewUnits,
-        allowMaintenance,
-        expiresAt: expiryDate,
-        adminId,
-        reason,
-      },
-      update: {
-        blockPayouts,
-        blockNewUnits,
-        allowMaintenance,
-        expiresAt: expiryDate,
-        adminId,
-        reason,
-      }
+      create: overrideData,
+      update: overrideData,
     });
 
     await auditLog({
@@ -80,7 +115,7 @@ export async function POST(req: NextRequest) {
       action: "UPDATED",
       actorId: adminId,
       actorRole: "SUPERADMIN",
-      newValue: { blockPayouts, blockNewUnits, expiresAt: expiryDate, reason },
+      newValue: overrideData,
       note: `Admin set subscription override on user ${userId}. Reason: ${reason}`,
     });
 

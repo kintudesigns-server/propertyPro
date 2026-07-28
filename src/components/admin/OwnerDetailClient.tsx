@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,12 @@ import {
   History,
   Clock
 } from "lucide-react";
+import { toast } from "sonner";
 import { GATABLE_MODULES } from "@/lib/modules-registry";
+import { ReasonModal } from "@/components/ui/ReasonModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PolicyToggleTable } from "@/components/admin/PolicyToggleTable";
+import { getAuditMeta, getRelativeTime, AuditCategory } from "@/lib/audit-utils";
 
 export default function OwnerDetailClient({
   owner,
@@ -47,15 +53,41 @@ export default function OwnerDetailClient({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'overrides' | 'activity'>('overview');
   
-  // Toast state
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const showToast = (message: string, type: "success" | "error" | "info" = "info") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    if (type === "success") toast.success(message);
+    else if (type === "error") toast.error(message);
+    else toast.info(message);
   };
 
   // State variables migrated from drawer
-  const [overrideReason, setOverrideReason] = useState(owner.subscriptionOverride?.reason || "");
+  const [reasonModal, setReasonModal] = useState<{
+    open: boolean;
+    title: string;
+    description?: string;
+    actionSummary?: string;
+    confirmLabel?: string;
+    confirmVariant?: "primary" | "destructive" | "warning";
+    onConfirm: (reason: string) => void | Promise<void>;
+  }>({
+    open: false,
+    title: "",
+    onConfirm: () => {},
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmLabel?: string;
+    confirmVariant?: "destructive" | "default";
+    onConfirm: () => void | Promise<void>;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+  });
+
   const [blockPayoutsOverride, setBlockPayoutsOverride] = useState<string>(
     owner.subscriptionOverride?.blockPayouts === true ? "block" :
     owner.subscriptionOverride?.blockPayouts === false ? "allow" : "default"
@@ -64,11 +96,37 @@ export default function OwnerDetailClient({
     owner.subscriptionOverride?.blockNewUnits === true ? "block" :
     owner.subscriptionOverride?.blockNewUnits === false ? "allow" : "default"
   );
-  const [overrideExpiresAt, setOverrideExpiresAt] = useState(
-    owner.subscriptionOverride?.expiresAt 
-      ? new Date(owner.subscriptionOverride.expiresAt).toISOString().split('T')[0]
-      : ""
+  const [allowAddVendorOverride, setAllowAddVendorOverride] = useState<string>(
+    owner.subscriptionOverride?.allowAddVendor === true ? "allow" :
+    owner.subscriptionOverride?.allowAddVendor === false ? "block" : "default"
   );
+  const [allowAddInspectorOverride, setAllowAddInspectorOverride] = useState<string>(
+    owner.subscriptionOverride?.allowAddInspector === true ? "allow" :
+    owner.subscriptionOverride?.allowAddInspector === false ? "block" : "default"
+  );
+  const [allowProcessApplicationsOverride, setAllowProcessApplicationsOverride] = useState<string>(
+    owner.subscriptionOverride?.allowProcessApplications === true ? "allow" :
+    owner.subscriptionOverride?.allowProcessApplications === false ? "block" : "default"
+  );
+  const [allowAddTenantOverride, setAllowAddTenantOverride] = useState<string>(
+    owner.subscriptionOverride?.allowAddTenant === true ? "allow" :
+    owner.subscriptionOverride?.allowAddTenant === false ? "block" : "default"
+  );
+  const [allowTourSlotsOverride, setAllowTourSlotsOverride] = useState<string>(
+    owner.subscriptionOverride?.allowTourSlots === true ? "allow" :
+    owner.subscriptionOverride?.allowTourSlots === false ? "block" : "default"
+  );
+  const getInitialExpiry = (dateVal: any) =>
+    dateVal ? new Date(dateVal).toISOString().split('T')[0] : "";
+
+  const [blockPayoutsExpiresAt, setBlockPayoutsExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.blockPayoutsExpiresAt));
+  const [blockNewUnitsExpiresAt, setBlockNewUnitsExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.blockNewUnitsExpiresAt));
+  const [allowAddVendorExpiresAt, setAllowAddVendorExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.allowAddVendorExpiresAt));
+  const [allowAddInspectorExpiresAt, setAllowAddInspectorExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.allowAddInspectorExpiresAt));
+  const [allowProcessApplicationsExpiresAt, setAllowProcessApplicationsExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.allowProcessApplicationsExpiresAt));
+  const [allowAddTenantExpiresAt, setAllowAddTenantExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.allowAddTenantExpiresAt));
+  const [allowTourSlotsExpiresAt, setAllowTourSlotsExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.allowTourSlotsExpiresAt));
+  const [overrideExpiresAt, setOverrideExpiresAt] = useState(getInitialExpiry(owner.subscriptionOverride?.expiresAt));
   
   const [actionLoading, setActionLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -79,6 +137,8 @@ export default function OwnerDetailClient({
   const [customGraceSelected, setCustomGraceSelected] = useState(false);
   const [ownerGrants, setOwnerGrants] = useState<any[]>(initialGrants);
   const [grantExpiresAt, setGrantExpiresAt] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<"ALL" | AuditCategory>("ALL");
+  const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
 
   // Helpers
   const formatStatus = (status: string) => {
@@ -139,12 +199,7 @@ export default function OwnerDetailClient({
   };
 
   // Module grants handlers
-  const handleGrantModule = async (moduleKey: string) => {
-    if (!overrideReason || overrideReason.trim().length < 10) {
-      showToast("A valid reason of at least 10 characters is required to log this grant.", "error");
-      return;
-    }
-
+  const handleGrantModule = async (moduleKey: string, overrideType: "GRANT" | "BLOCK" = "GRANT", reason: string) => {
     try {
       setActionLoading(true);
       const res = await fetch(`/api/admin/owners/${owner.id}/module-grants`, {
@@ -153,18 +208,24 @@ export default function OwnerDetailClient({
         body: JSON.stringify({
           module: moduleKey,
           expiresAt: grantExpiresAt ? new Date(grantExpiresAt).toISOString() : null,
-          reason: overrideReason
+          reason: reason,
+          overrideType
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      showToast(`Access to ${moduleKey} granted successfully.`, "success");
+      showToast(
+        overrideType === "BLOCK"
+          ? `Access to ${moduleKey} blocked successfully.`
+          : `Access to ${moduleKey} granted successfully.`,
+        "success"
+      );
       setGrantExpiresAt("");
       fetchUpdatedGrants();
       router.refresh();
     } catch (err: any) {
-      showToast(`Failed to grant module: ${err.message}`, "error");
+      showToast(`Failed to update module access: ${err.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -189,12 +250,7 @@ export default function OwnerDetailClient({
     }
   };
 
-  const handleGrantAllModules = async () => {
-    if (!overrideReason || overrideReason.trim().length < 10) {
-      showToast("A valid reason of at least 10 characters is required to log this grant.", "error");
-      return;
-    }
-
+  const handleGrantAllModules = async (reason: string) => {
     try {
       setActionLoading(true);
       const nonCoreGatable = GATABLE_MODULES.filter(m => !m.alwaysIncluded);
@@ -207,7 +263,7 @@ export default function OwnerDetailClient({
           body: JSON.stringify({
             module: mod.key,
             expiresAt: grantExpiresAt ? new Date(grantExpiresAt).toISOString() : null,
-            reason: overrideReason
+            reason: reason
           })
         });
       }
@@ -244,20 +300,27 @@ export default function OwnerDetailClient({
   };
 
   // Lifecycle Override Handlers
-  const handleSaveOverride = async () => {
-    if (!overrideReason || overrideReason.trim().length < 10) {
-      showToast("A valid reason of at least 10 characters is required for audit trails.", "error");
-      return;
-    }
-
+  const handleSaveOverride = async (reason: string) => {
     try {
       setActionLoading(true);
       const payload = {
         userId: owner.id,
         blockPayouts: blockPayoutsOverride === "block" ? true : blockPayoutsOverride === "allow" ? false : null,
         blockNewUnits: blockNewUnitsOverride === "block" ? true : blockNewUnitsOverride === "allow" ? false : null,
+        allowAddVendor: allowAddVendorOverride === "allow" ? true : allowAddVendorOverride === "block" ? false : null,
+        allowAddInspector: allowAddInspectorOverride === "allow" ? true : allowAddInspectorOverride === "block" ? false : null,
+        allowProcessApplications: allowProcessApplicationsOverride === "allow" ? true : allowProcessApplicationsOverride === "block" ? false : null,
+        allowAddTenant: allowAddTenantOverride === "allow" ? true : allowAddTenantOverride === "block" ? false : null,
+        allowTourSlots: allowTourSlotsOverride === "allow" ? true : allowTourSlotsOverride === "block" ? false : null,
+        blockPayoutsExpiresAt: blockPayoutsExpiresAt ? new Date(blockPayoutsExpiresAt).toISOString() : null,
+        blockNewUnitsExpiresAt: blockNewUnitsExpiresAt ? new Date(blockNewUnitsExpiresAt).toISOString() : null,
+        allowAddVendorExpiresAt: allowAddVendorExpiresAt ? new Date(allowAddVendorExpiresAt).toISOString() : null,
+        allowAddInspectorExpiresAt: allowAddInspectorExpiresAt ? new Date(allowAddInspectorExpiresAt).toISOString() : null,
+        allowProcessApplicationsExpiresAt: allowProcessApplicationsExpiresAt ? new Date(allowProcessApplicationsExpiresAt).toISOString() : null,
+        allowAddTenantExpiresAt: allowAddTenantExpiresAt ? new Date(allowAddTenantExpiresAt).toISOString() : null,
+        allowTourSlotsExpiresAt: allowTourSlotsExpiresAt ? new Date(allowTourSlotsExpiresAt).toISOString() : null,
         expiresAt: overrideExpiresAt ? new Date(overrideExpiresAt).toISOString() : null,
-        reason: overrideReason,
+        reason: reason,
       };
 
       const res = await fetch("/api/admin/subscriptions/override", {
@@ -287,6 +350,21 @@ export default function OwnerDetailClient({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast("Overrides cleared. Default platform policies applied.", "success");
+      setBlockPayoutsOverride("default");
+      setBlockNewUnitsOverride("default");
+      setAllowAddVendorOverride("default");
+      setAllowAddInspectorOverride("default");
+      setAllowProcessApplicationsOverride("default");
+      setAllowAddTenantOverride("default");
+      setAllowTourSlotsOverride("default");
+      setBlockPayoutsExpiresAt("");
+      setBlockNewUnitsExpiresAt("");
+      setAllowAddVendorExpiresAt("");
+      setAllowAddInspectorExpiresAt("");
+      setAllowProcessApplicationsExpiresAt("");
+      setAllowAddTenantExpiresAt("");
+      setAllowTourSlotsExpiresAt("");
+      setOverrideExpiresAt("");
       setShowDeleteConfirm(false);
       router.refresh();
     } catch (err: any) {
@@ -296,12 +374,7 @@ export default function OwnerDetailClient({
     }
   };
 
-  const handleManualAction = async (action: string, extraBody = {}) => {
-    if (!overrideReason || overrideReason.trim().length < 10) {
-      showToast("A valid reason of at least 10 characters is required to log this action.", "error");
-      return;
-    }
-
+  const handleManualAction = async (action: string, extraBody = {}, reason: string) => {
     try {
       setActionLoading(true);
       const res = await fetch("/api/admin/subscriptions/manual-action", {
@@ -310,7 +383,7 @@ export default function OwnerDetailClient({
         body: JSON.stringify({
           action,
           userId: owner.id,
-          reason: overrideReason,
+          reason: reason,
           ...extraBody
         }),
       });
@@ -332,45 +405,174 @@ export default function OwnerDetailClient({
     return d.toISOString().split("T")[0];
   };
 
+  const getCategorizedModules = () => {
+    const core: any[] = [];
+    const plan: any[] = [];
+    const granted: any[] = [];
+    const blocked: any[] = [];
+    const locked: any[] = [];
+
+    GATABLE_MODULES.forEach(mod => {
+      const tierIncluded = owner.pricingTier?.modules?.includes(mod.key);
+      const activeGrant = ownerGrants.find(g => g.module === mod.key);
+      const isOverrideActive = activeGrant && (!activeGrant.expiresAt || new Date(activeGrant.expiresAt) > new Date());
+      const isBlockActive = isOverrideActive && activeGrant.overrideType === "BLOCK";
+      const isGrantActive = isOverrideActive && activeGrant.overrideType === "GRANT";
+
+      const item = {
+        ...mod,
+        tierIncluded,
+        activeGrant,
+        isOverrideActive,
+        isBlockActive,
+        isGrantActive
+      };
+
+      if (isBlockActive) {
+        blocked.push(item);
+      } else if (mod.alwaysIncluded) {
+        core.push(item);
+      } else if (isGrantActive) {
+        granted.push(item);
+      } else if (tierIncluded) {
+        plan.push(item);
+      } else {
+        locked.push(item);
+      }
+    });
+
+    return [
+      { id: "core", label: "Core Features (Always Active)", items: core },
+      { id: "plan", label: "Subscribed Plan Features", items: plan },
+      { id: "granted", label: "Admin Override Grants", items: granted },
+      { id: "blocked", label: "Admin Forced Blocks", items: blocked },
+      { id: "locked", label: "Plan Excluded Features", items: locked }
+    ];
+  };
+
+  const getChangedPoliciesPreview = () => {
+    const changes: { label: string; from: string; to: string }[] = [];
+    const defaults = {
+      blockPayouts: owner.subscriptionOverride?.blockPayouts === true ? "block" : owner.subscriptionOverride?.blockPayouts === false ? "allow" : "default",
+      blockNewUnits: owner.subscriptionOverride?.blockNewUnits === true ? "block" : owner.subscriptionOverride?.blockNewUnits === false ? "allow" : "default",
+      allowAddVendor: owner.subscriptionOverride?.allowAddVendor === true ? "allow" : owner.subscriptionOverride?.allowAddVendor === false ? "block" : "default",
+      allowAddInspector: owner.subscriptionOverride?.allowAddInspector === true ? "allow" : owner.subscriptionOverride?.allowAddInspector === false ? "block" : "default",
+      allowProcessApplications: owner.subscriptionOverride?.allowProcessApplications === true ? "allow" : owner.subscriptionOverride?.allowProcessApplications === false ? "block" : "default",
+      allowAddTenant: owner.subscriptionOverride?.allowAddTenant === true ? "allow" : owner.subscriptionOverride?.allowAddTenant === false ? "block" : "default",
+      allowTourSlots: owner.subscriptionOverride?.allowTourSlots === true ? "allow" : owner.subscriptionOverride?.allowTourSlots === false ? "block" : "default",
+      blockPayoutsExp: getInitialExpiry(owner.subscriptionOverride?.blockPayoutsExpiresAt),
+      blockNewUnitsExp: getInitialExpiry(owner.subscriptionOverride?.blockNewUnitsExpiresAt),
+      allowAddVendorExp: getInitialExpiry(owner.subscriptionOverride?.allowAddVendorExpiresAt),
+      allowAddInspectorExp: getInitialExpiry(owner.subscriptionOverride?.allowAddInspectorExpiresAt),
+      allowProcessApplicationsExp: getInitialExpiry(owner.subscriptionOverride?.allowProcessApplicationsExpiresAt),
+      allowAddTenantExp: getInitialExpiry(owner.subscriptionOverride?.allowAddTenantExpiresAt),
+      allowTourSlotsExp: getInitialExpiry(owner.subscriptionOverride?.allowTourSlotsExpiresAt),
+    };
+
+    const getDisplayValue = (val: string, expDate?: string) => {
+      if (val === "default") return "Platform Default";
+      const base = val === "allow" ? "Forced Allow" : "Forced Block";
+      return expDate ? `${base} (Expires ${expDate})` : `${base} (Permanent)`;
+    };
+
+    if (blockPayoutsOverride !== defaults.blockPayouts || blockPayoutsExpiresAt !== defaults.blockPayoutsExp) {
+      changes.push({ label: "Payout Controls Exception", from: getDisplayValue(defaults.blockPayouts, defaults.blockPayoutsExp), to: getDisplayValue(blockPayoutsOverride, blockPayoutsExpiresAt) });
+    }
+    if (blockNewUnitsOverride !== defaults.blockNewUnits || blockNewUnitsExpiresAt !== defaults.blockNewUnitsExp) {
+      changes.push({ label: "Portfolio Property/Unit Cap", from: getDisplayValue(defaults.blockNewUnits, defaults.blockNewUnitsExp), to: getDisplayValue(blockNewUnitsOverride, blockNewUnitsExpiresAt) });
+    }
+    if (allowAddVendorOverride !== defaults.allowAddVendor || allowAddVendorExpiresAt !== defaults.allowAddVendorExp) {
+      changes.push({ label: "Vendor Gating Override (When Paused)", from: getDisplayValue(defaults.allowAddVendor, defaults.allowAddVendorExp), to: getDisplayValue(allowAddVendorOverride, allowAddVendorExpiresAt) });
+    }
+    if (allowAddInspectorOverride !== defaults.allowAddInspector || allowAddInspectorExpiresAt !== defaults.allowAddInspectorExp) {
+      changes.push({ label: "Inspector Gating Override (When Paused)", from: getDisplayValue(defaults.allowAddInspector, defaults.allowAddInspectorExp), to: getDisplayValue(allowAddInspectorOverride, allowAddInspectorExpiresAt) });
+    }
+    if (allowProcessApplicationsOverride !== defaults.allowProcessApplications || allowProcessApplicationsExpiresAt !== defaults.allowProcessApplicationsExp) {
+      changes.push({ label: "Application Processing Override (When Paused)", from: getDisplayValue(defaults.allowProcessApplications, defaults.allowProcessApplicationsExp), to: getDisplayValue(allowProcessApplicationsOverride, allowProcessApplicationsExpiresAt) });
+    }
+    if (allowAddTenantOverride !== defaults.allowAddTenant || allowAddTenantExpiresAt !== defaults.allowAddTenantExp) {
+      changes.push({ label: "Tenant Registration Override (When Paused)", from: getDisplayValue(defaults.allowAddTenant, defaults.allowAddTenantExp), to: getDisplayValue(allowAddTenantOverride, allowAddTenantExpiresAt) });
+    }
+    if (allowTourSlotsOverride !== defaults.allowTourSlots || allowTourSlotsExpiresAt !== defaults.allowTourSlotsExp) {
+      changes.push({ label: "Tour Availability Override (When Paused)", from: getDisplayValue(defaults.allowTourSlots, defaults.allowTourSlotsExp), to: getDisplayValue(allowTourSlotsOverride, allowTourSlotsExpiresAt) });
+    }
+
+    return changes;
+  };
+
+  const handleExportCsv = () => {
+    const headers = ["Timestamp", "Action", "Category", "Actor Role", "Actor ID", "Audit Note", "Old State", "New State"];
+    const rows = auditLogs.map(log => {
+      const meta = getAuditMeta(log.action);
+      return [
+        new Date(log.createdAt).toISOString(),
+        log.action,
+        meta.category,
+        log.actorRole || "SYSTEM",
+        log.actorId || "",
+        log.note || "",
+        log.oldValue ? JSON.stringify(log.oldValue).replace(/"/g, '""') : "",
+        log.newValue ? JSON.stringify(log.newValue).replace(/"/g, '""') : "",
+      ];
+    });
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(r => r.map(val => `"${val}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `audit_log_${owner.name.toLowerCase().replace(/\s+/g, "_")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const toggleRow = (id: string) => {
+    setExpandedLogs(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const filteredLogs = auditLogs.filter((log: any) => {
+    if (categoryFilter === "ALL") return true;
+    const meta = getAuditMeta(log.action);
+    return meta.category === categoryFilter;
+  });
+
   const totalUnits = owner.ownedProperties.reduce((acc: any, p: any) => acc + p.units.length, 0);
   const isOverLimit = owner.pricingTier && totalUnits > owner.pricingTier.maxUnits;
   const hasActiveOverride = owner.subscriptionOverride && 
     (!owner.subscriptionOverride.expiresAt || new Date(owner.subscriptionOverride.expiresAt) > new Date());
-
   return (
     <div className="space-y-6">
-      {/* Toast Alert */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom duration-300">
-          <div className={`rounded-2xl p-4 shadow-2xl flex items-center gap-3 border text-sm font-bold min-w-[320px] ${
-            toast.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-100" :
-            toast.type === "error" ? "bg-rose-50 text-rose-800 border-rose-100" :
-            "bg-blue-50 text-blue-800 border-blue-100"
-          }`}>
-            {toast.type === "success" && <ShieldCheck className="text-emerald-600 shrink-0" size={18} />}
-            {toast.type === "error" && <AlertTriangle className="text-rose-600 shrink-0" size={18} />}
-            {toast.type === "info" && <AlertCircle className="text-blue-600 shrink-0" size={18} />}
-            <span className="flex-1">{toast.message}</span>
-            <button onClick={() => setToast(null)} className="text-[#8E8E93] hover:text-[#1D1D1F]">
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Back button and Page Title */}
-      <div className="flex flex-col gap-3">
+      {/* iOS-Style Breadcrumbs and Header */}
+      <div className="flex flex-col gap-2">
+        {/* Breadcrumb Trail */}
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">
+          <Link href="/dashboard/admin" className="hover:text-[#1D1D1F] transition-colors">Admin</Link>
+          <span>/</span>
+          <Link href="/dashboard/admin/subscriptions" className="hover:text-[#1D1D1F] transition-colors">Subscriptions</Link>
+          <span>/</span>
+          <span className="text-[#1D1D1F]">{owner.name || "Owner Details"}</span>
+        </div>
+
         <button 
           onClick={() => router.push("/dashboard/admin/subscriptions")}
-          className="flex items-center gap-1.5 text-sm font-semibold text-[#6E6E73] hover:text-[#1D1D1F] transition-colors w-fit"
+          className="flex items-center gap-1.5 text-xs font-bold text-[#6E6E73] hover:text-[#1D1D1F] transition-colors w-fit mt-1"
         >
-          <ChevronLeft size={16} /> Back to Subscriptions
+          <ChevronLeft size={14} /> Back to Subscriptions
         </button>
         
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-2">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold tracking-tight text-[#1D1D1F]">{owner.name || "Owner Management"}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl font-black tracking-tight text-[#1D1D1F]">{owner.name || "Owner Management"}</h1>
               {hasActiveOverride && <Badge className="bg-purple-50 text-purple-700 border border-purple-100 font-bold text-xs px-2 py-0.5 rounded-lg shadow-none">⚙ Policy Override Active</Badge>}
             </div>
             <p className="text-[#6E6E73] text-sm mt-0.5">{owner.email} · Registered {new Date(owner.createdAt).toLocaleDateString()}</p>
@@ -398,38 +600,13 @@ export default function OwnerDetailClient({
         </div>
       </div>
 
-      {/* Custom Audit Action Reason Header - Promoted to page top as a prerequisite */}
-      <Card className="border border-purple-100 bg-purple-50/20 rounded-2xl shadow-xs">
-        <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <div className="p-3 bg-purple-100 rounded-xl text-purple-700 shrink-0">
-            <ShieldCheck size={20} />
-          </div>
-          <div className="flex-1 w-full space-y-1.5">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-purple-950 block uppercase tracking-wider">Administrative Reason * (Minimum 10 Characters Required)</label>
-              {overrideReason.trim().length >= 10 ? (
-                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold text-[10px]">Ready to Authorize Actions</Badge>
-              ) : (
-                <Badge className="bg-rose-50 text-rose-700 border-rose-100 font-bold text-[10px]">Action Locked</Badge>
-              )}
-            </div>
-            <textarea 
-              value={overrideReason} 
-              onChange={(e) => setOverrideReason(e.target.value)}
-              placeholder="e.g. Approved payout grace bypass during Stripe bank transfer dispute review."
-              className="w-full min-h-[60px] rounded-xl border border-[#E5E5EA] bg-white p-3 text-sm focus:outline-none focus:border-purple-300 font-medium transition-all shadow-inner"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Tab Switcher */}
       <div className="flex border-b border-[#E5E5EA] gap-6">
         {[
           { key: 'overview', label: 'Overview', icon: User },
-          { key: 'modules', label: 'Module Access Controls', icon: Layers },
+          { key: 'modules', label: 'Module Access', icon: Layers },
           { key: 'overrides', label: 'Billing Overrides', icon: Settings2 },
-          { key: 'activity', label: 'Account Activity Log', icon: History }
+          { key: 'activity', label: 'Activity Log', icon: History }
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -621,15 +798,25 @@ export default function OwnerDetailClient({
             <CardContent className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[#1D1D1F]">Fine-Grained Module Overrides</h3>
-                  <p className="text-[#6E6E73] text-xs mt-0.5">Admin-granted modules act as override options that grant access even if the owner's plan does not include them.</p>
+                  <h3 className="text-sm font-bold text-[#1D1D1F]">Feature Access Manager</h3>
+                  <p className="text-[#6E6E73] text-xs mt-0.5">Control which platform features this owner can access, regardless of their subscription plan.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline"
                     size="sm"
-                    disabled={actionLoading || overrideReason.trim().length < 10}
-                    onClick={handleGrantAllModules}
+                    disabled={actionLoading}
+                    onClick={() => {
+                      setReasonModal({
+                        open: true,
+                        title: "Grant All Modules",
+                        description: `This will grant all custom modules to ${owner.name}. This action will be logged.`,
+                        actionSummary: `Grant access to all premium modules for ${owner.name}`,
+                        confirmLabel: "Confirm Bulk Grant",
+                        confirmVariant: "primary",
+                        onConfirm: (reason) => handleGrantAllModules(reason)
+                      });
+                    }}
                     className="border-[#E5E5EA] hover:border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl font-bold text-xs h-9"
                   >
                     Grant All Modules
@@ -638,7 +825,16 @@ export default function OwnerDetailClient({
                     variant="outline"
                     size="sm"
                     disabled={actionLoading}
-                    onClick={handleClearAllGrants}
+                    onClick={() => {
+                      setConfirmDialog({
+                        open: true,
+                        title: "Clear Override Grants",
+                        description: `Are you sure you want to clear all custom module overrides for ${owner.name}? Platform defaults will take over immediately.`,
+                        confirmLabel: "Clear Overrides",
+                        confirmVariant: "destructive",
+                        onConfirm: handleClearAllGrants
+                      });
+                    }}
                     className="border-[#E5E5EA] hover:border-rose-200 text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs h-9"
                   >
                     Clear Override Grants
@@ -696,84 +892,228 @@ export default function OwnerDetailClient({
                 </div>
               </div>
 
-              {/* Modules List Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {GATABLE_MODULES.map(mod => {
-                  const alwaysIncluded = mod.alwaysIncluded;
-                  const tierIncluded = owner.pricingTier?.modules?.includes(mod.key);
-                  const activeGrant = ownerGrants.find(g => g.module === mod.key);
-                  const isGrantActive = activeGrant && (!activeGrant.expiresAt || new Date(activeGrant.expiresAt) > new Date());
-                  const isBlocked = !alwaysIncluded && !tierIncluded && !isGrantActive;
+              {/* Grouped Feature Table */}
+              <div className="overflow-hidden border border-[#E5E5EA] rounded-2xl bg-white shadow-xs">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/70 border-b border-slate-100 text-[#8E8E93] text-[10px] font-extrabold tracking-wider uppercase">
+                      <th className="py-3 px-4">Feature Name</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4">Plan Status</th>
+                      <th className="py-3 px-4">Override Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm">
+                    {getCategorizedModules().map(section => {
+                      if (section.items.length === 0) return null;
+                      return (
+                        <React.Fragment key={section.id}>
+                          <tr className="bg-slate-50/40">
+                            <td colSpan={5} className="py-2 px-4 font-extrabold text-[10px] text-slate-500 tracking-wider uppercase border-b border-slate-100">
+                              {section.label}
+                            </td>
+                          </tr>
+                          {section.items.map(item => {
+                            let statusText = "Locked";
+                            let statusDot = "bg-slate-300";
+                            let statusColor = "text-slate-500";
+                            
+                            if (item.isBlockActive) {
+                              statusText = "Blocked by Admin";
+                              statusDot = "bg-rose-500 animate-pulse";
+                              statusColor = "text-rose-700";
+                            } else if (item.alwaysIncluded) {
+                              statusText = "Always On";
+                              statusDot = "bg-emerald-500";
+                              statusColor = "text-emerald-700";
+                            } else if (item.tierIncluded) {
+                              statusText = `Subscribed Plan (${owner.pricingTier?.name || "Plan"})`;
+                              statusDot = "bg-blue-500";
+                              statusColor = "text-blue-700";
+                            } else if (item.isGrantActive) {
+                              statusText = item.activeGrant.expiresAt ? "Temporary Grant" : "Permanent Override Grant";
+                              statusDot = "bg-purple-500";
+                              statusColor = "text-purple-700";
+                            }
 
-                  let statusText = "Locked";
-                  let badgeTheme = "bg-slate-50 text-slate-500 border border-slate-200/60";
-                  
-                  if (alwaysIncluded) {
-                    statusText = "Always Available";
-                    badgeTheme = "bg-emerald-50 text-emerald-700 border border-emerald-100";
-                  } else if (tierIncluded) {
-                    statusText = "Subscribed (Tier)";
-                    badgeTheme = "bg-blue-50 text-blue-700 border border-blue-100";
-                  } else if (isGrantActive) {
-                    statusText = activeGrant.expiresAt ? `Override Grant (Expires)` : "Override Grant (Permanent)";
-                    badgeTheme = "bg-purple-50 text-purple-700 border border-purple-100";
-                  }
+                            const showExpires = item.isOverrideActive && item.activeGrant.expiresAt;
 
-                  return (
-                    <div 
-                      key={mod.key} 
-                      className={`border rounded-2xl p-4 flex justify-between items-center transition-all ${
-                        isBlocked ? "border-[#E5E5EA] bg-[#F9F9FB]/50 opacity-70" : "border-[#E5E5EA] bg-white shadow-xs"
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-[#1D1D1F]">{mod.label}</span>
-                          <span className="text-[10px] font-semibold text-[#8E8E93]">({mod.category})</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${badgeTheme} rounded-lg text-[10px] font-bold px-2 py-0.5 shadow-none`}>
-                            {statusText}
-                          </Badge>
-                          {isGrantActive && activeGrant.expiresAt && (
-                            <span className="text-[10px] font-bold text-purple-600">Expires {timeUntil(activeGrant.expiresAt)}</span>
-                          )}
-                        </div>
-                        {isGrantActive && activeGrant.reason && (
-                          <p className="text-[10px] text-slate-500 italic mt-1.5 font-medium leading-normal max-w-sm">"Reason: {activeGrant.reason}"</p>
-                        )}
-                      </div>
-
-                      <div>
-                        {alwaysIncluded || tierIncluded ? (
-                          <div className="text-emerald-500 font-extrabold text-xs flex items-center gap-1 px-3 py-1.5">
-                            <ShieldCheck size={14} /> Full Access
-                          </div>
-                        ) : isGrantActive ? (
-                          <Button 
-                            variant="destructive"
-                            size="sm"
-                            disabled={actionLoading}
-                            onClick={() => handleRevokeModule(mod.key)}
-                            className="bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs h-8 px-3 shadow-none border border-red-100"
-                          >
-                            Revoke Override
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            disabled={actionLoading || overrideReason.trim().length < 10}
-                            onClick={() => handleGrantModule(mod.key)}
-                            className="border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl font-bold text-xs h-8 px-3"
-                          >
-                            Grant Override
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                            return (
+                              <tr key={item.key} className="hover:bg-slate-50/40 transition-colors">
+                                <td className="py-3.5 px-4 font-bold text-slate-800">
+                                  {item.label}
+                                </td>
+                                <td className="py-3.5 px-4 font-semibold text-xs text-[#8E8E93]">
+                                  {item.category}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${statusColor}`}>
+                                    <span className={`h-1.5 w-1.5 rounded-full ${statusDot}`} />
+                                    {statusText}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  {item.isOverrideActive ? (
+                                    <div className="space-y-0.5">
+                                      <span className="text-[11px] font-bold text-purple-700">Override Active</span>
+                                      {showExpires && (
+                                        <div className="text-[10px] text-purple-500 font-semibold">
+                                          Expires {timeUntil(item.activeGrant.expiresAt)}
+                                        </div>
+                                      )}
+                                      {item.activeGrant.reason && (
+                                        <div className="text-[10px] text-slate-400 italic line-clamp-1 max-w-[200px]" title={item.activeGrant.reason}>
+                                          "{item.activeGrant.reason}"
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-400 font-semibold text-xs">—</span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4 text-right">
+                                  <div className="flex gap-2 justify-end items-center">
+                                    {item.isBlockActive ? (
+                                      <Button 
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={actionLoading}
+                                        onClick={() => {
+                                          setConfirmDialog({
+                                            open: true,
+                                            title: `Lift Block for ${item.label}`,
+                                            description: `Are you sure you want to lift the administrative block and restore the standard pricing tier policies for ${item.label}?`,
+                                            confirmLabel: "Lift Block",
+                                            confirmVariant: "default",
+                                            onConfirm: () => handleRevokeModule(item.key)
+                                          });
+                                        }}
+                                        className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl font-bold text-xs h-8 px-3"
+                                      >
+                                        Lift Block
+                                      </Button>
+                                    ) : item.isGrantActive ? (
+                                      <>
+                                        <Button 
+                                          variant="destructive"
+                                          size="sm"
+                                          disabled={actionLoading}
+                                          onClick={() => {
+                                            setConfirmDialog({
+                                              open: true,
+                                              title: `Revoke Custom Grant`,
+                                              description: `Are you sure you want to revoke ${owner.name || "this owner"}'s custom grant for ${item.label}? standard pricing tier rules will take over.`,
+                                              confirmLabel: "Revoke Override",
+                                              confirmVariant: "destructive",
+                                              onConfirm: () => handleRevokeModule(item.key)
+                                            });
+                                          }}
+                                          className="bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-xs h-8 px-3 shadow-none border border-red-100"
+                                        >
+                                          Revoke Grant
+                                        </Button>
+                                        <Button 
+                                          variant="outline"
+                                          size="sm"
+                                          disabled={actionLoading}
+                                          onClick={() => {
+                                            setReasonModal({
+                                              open: true,
+                                              title: `Force Block "${item.label}"`,
+                                              description: `Administratively suspend access to ${item.label} for ${owner.name}.`,
+                                              actionSummary: `Force block module access to ${item.label}`,
+                                              confirmLabel: "Apply Block",
+                                              confirmVariant: "destructive",
+                                              onConfirm: (reason) => handleGrantModule(item.key, "BLOCK", reason)
+                                            });
+                                          }}
+                                          className="border-rose-200 text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs h-8 px-3"
+                                        >
+                                          Force Block
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        {item.alwaysIncluded || item.tierIncluded ? (
+                                          <>
+                                            <span className="text-emerald-500 font-extrabold text-xs flex items-center gap-1 mr-2 select-none">
+                                              <ShieldCheck size={14} /> Full Access
+                                            </span>
+                                            <Button 
+                                              variant="outline"
+                                              size="sm"
+                                              disabled={actionLoading}
+                                              onClick={() => {
+                                                setReasonModal({
+                                                  open: true,
+                                                  title: `Force Block "${item.label}"`,
+                                                  description: `Administratively suspend access to ${item.label} for ${owner.name}.`,
+                                                  actionSummary: `Force block module access to ${item.label}`,
+                                                  confirmLabel: "Apply Block",
+                                                  confirmVariant: "destructive",
+                                                  onConfirm: (reason) => handleGrantModule(item.key, "BLOCK", reason)
+                                                });
+                                              }}
+                                              className="border-rose-200 text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs h-8 px-3"
+                                            >
+                                              Force Block
+                                            </Button>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Button 
+                                              variant="outline"
+                                              size="sm"
+                                              disabled={actionLoading}
+                                              onClick={() => {
+                                                setReasonModal({
+                                                  open: true,
+                                                  title: `Grant "${item.label}" Override`,
+                                                  description: `Grant temporary or permanent administrative access to ${item.label} for ${owner.name}.`,
+                                                  actionSummary: `Grant module override for ${item.label}`,
+                                                  confirmLabel: "Apply Grant",
+                                                  confirmVariant: "primary",
+                                                  onConfirm: (reason) => handleGrantModule(item.key, "GRANT", reason)
+                                                });
+                                              }}
+                                              className="border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl font-bold text-xs h-8 px-3"
+                                            >
+                                              Grant Override
+                                            </Button>
+                                            <Button 
+                                              variant="outline"
+                                              size="sm"
+                                              disabled={actionLoading}
+                                              onClick={() => {
+                                                setReasonModal({
+                                                  open: true,
+                                                  title: `Force Block "${item.label}"`,
+                                                  description: `Administratively suspend access to ${item.label} for ${owner.name}.`,
+                                                  actionSummary: `Force block module access to ${item.label}`,
+                                                  confirmLabel: "Apply Block",
+                                                  confirmVariant: "destructive",
+                                                  onConfirm: (reason) => handleGrantModule(item.key, "BLOCK", reason)
+                                                });
+                                              }}
+                                              className="border-rose-200 text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs h-8 px-3"
+                                            >
+                                              Force Block
+                                            </Button>
+                                          </>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
@@ -782,316 +1122,671 @@ export default function OwnerDetailClient({
         {/* BILLING OVERRIDES TAB */}
         {activeTab === 'overrides' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Manual Actions */}
-              <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl">
-                <CardContent className="p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#F2F2F7] pb-3">Administrative Lifespan Toggles</h3>
-                  
-                  {/* Restore / Comp Access */}
-                  <div className="border border-[#E5E5EA] rounded-2xl p-4 space-y-3 bg-white">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-1.5">
-                        <ShieldCheck size={14} className="text-emerald-500" /> Grant Comp Access Exceptions
-                      </span>
-                      {customGrantSelected && (
-                        <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                          <Input 
-                            type="number" 
-                            value={manualGrantDays} 
-                            onChange={(e) => setManualGrantDays(e.target.value)} 
-                            placeholder="Days"
-                            className="w-16 rounded-lg text-center font-bold text-xs h-7 border-[#E5E5EA]"
-                          />
-                          <span className="text-[10px] font-bold text-[#6E6E73]">days</span>
+              {/* Left/Middle Columns: Policy Exception Matrix */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-sm font-bold text-[#1D1D1F]">Policy Exception Rules</h3>
+                      <p className="text-[#6E6E73] text-xs mt-0.5">Enforce custom allow or block parameters to override standard platform logic.</p>
+                    </div>
+                  </div>
+                  <PolicyToggleTable
+                    rows={[
+                      {
+                        key: "blockPayouts",
+                        label: "Payout Controls Exception",
+                        description: "Force payouts to be enabled or blocked regardless of subscription state.",
+                        icon: CreditCard,
+                        value: blockPayoutsOverride,
+                        onChange: setBlockPayoutsOverride,
+                        expiresAt: blockPayoutsExpiresAt,
+                        onExpiryChange: setBlockPayoutsExpiresAt,
+                      },
+                      {
+                        key: "blockNewUnits",
+                        label: "Portfolio Property/Unit Cap",
+                        description: "Allow owner to exceed unit caps or strictly enforce blocks.",
+                        icon: Building2,
+                        value: blockNewUnitsOverride,
+                        onChange: setBlockNewUnitsOverride,
+                        expiresAt: blockNewUnitsExpiresAt,
+                        onExpiryChange: setBlockNewUnitsExpiresAt,
+                      },
+                      {
+                        key: "allowAddVendor",
+                        label: "Vendor Gating Override (When Paused)",
+                        description: "Force access to register external vendors when delinquent/paused.",
+                        icon: Users,
+                        value: allowAddVendorOverride,
+                        onChange: setAllowAddVendorOverride,
+                        expiresAt: allowAddVendorExpiresAt,
+                        onExpiryChange: setAllowAddVendorExpiresAt,
+                      },
+                      {
+                        key: "allowAddInspector",
+                        label: "Inspector Gating Override (When Paused)",
+                        description: "Force access to add inspectors to the portfolio when delinquent/paused.",
+                        icon: ShieldCheck,
+                        value: allowAddInspectorOverride,
+                        onChange: setAllowAddInspectorOverride,
+                        expiresAt: allowAddInspectorExpiresAt,
+                        onExpiryChange: setAllowAddInspectorExpiresAt,
+                      },
+                      {
+                        key: "allowProcessApplications",
+                        label: "Application Processing Override",
+                        description: "Override block on processing rental applications when paused.",
+                        icon: Settings2,
+                        value: allowProcessApplicationsOverride,
+                        onChange: setAllowProcessApplicationsOverride,
+                        expiresAt: allowProcessApplicationsExpiresAt,
+                        onExpiryChange: setAllowProcessApplicationsExpiresAt,
+                      },
+                      {
+                        key: "allowAddTenant",
+                        label: "Tenant Registration Override",
+                        description: "Override block on adding tenants when paused.",
+                        icon: User,
+                        value: allowAddTenantOverride,
+                        onChange: setAllowAddTenantOverride,
+                        expiresAt: allowAddTenantExpiresAt,
+                        onExpiryChange: setAllowAddTenantExpiresAt,
+                      },
+                      {
+                        key: "allowTourSlots",
+                        label: "Tour Availability Override",
+                        description: "Override block on tour slots and showings when paused.",
+                        icon: Calendar,
+                        value: allowTourSlotsOverride,
+                        onChange: setAllowTourSlotsOverride,
+                        expiresAt: allowTourSlotsExpiresAt,
+                        onExpiryChange: setAllowTourSlotsExpiresAt,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              {/* Right Column: Actions, Save Matrix, Danger Zone */}
+              <div className="space-y-5">
+
+                {/* ─── Account Status Controls ─── */}
+                <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl overflow-hidden">
+                  {/* Card Header */}
+                  <div className="px-5 pt-5 pb-3 border-b border-[#F2F2F7]">
+                    <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">Account Status Controls</h3>
+                    <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">Grant temporary access or extend billing grace outside Stripe.</p>
+                  </div>
+
+                  <div className="p-5 space-y-4">
+                    {/* Complimentary Access Block */}
+                    <div className="rounded-xl border border-[#E5E5EA] overflow-hidden">
+                      <div className="bg-emerald-50/60 px-4 py-2.5 flex items-center gap-2 border-b border-emerald-100">
+                        <ShieldCheck size={13} className="text-emerald-600 shrink-0" />
+                        <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">Complimentary Access</span>
+                      </div>
+                      <div className="px-4 py-3.5 space-y-3">
+                        <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                          Bypass billing restrictions for a set number of days. The owner retains full feature access as if actively subscribed.
+                        </p>
+                        {/* Duration Selector */}
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider block">Duration</span>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {["7", "14", "30"].map(days => (
+                              <button
+                                key={days}
+                                type="button"
+                                onClick={() => { setManualGrantDays(days); setCustomGrantSelected(false); }}
+                                className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                  manualGrantDays === days && !customGrantSelected
+                                    ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                                    : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-emerald-300 hover:text-emerald-700"
+                                }`}
+                              >
+                                {days}d
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => setCustomGrantSelected(true)}
+                              className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                customGrantSelected
+                                  ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                                  : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-emerald-300 hover:text-emerald-700"
+                              }`}
+                            >
+                              Custom
+                            </button>
+                          </div>
+                          {customGrantSelected && (
+                            <div className="flex items-center gap-2 animate-in fade-in duration-200">
+                              <Input
+                                type="number"
+                                value={manualGrantDays}
+                                onChange={(e) => setManualGrantDays(e.target.value)}
+                                placeholder="e.g. 45"
+                                className="h-8 text-xs font-bold text-center border-[#E5E5EA] rounded-lg focus:border-emerald-400 flex-1"
+                              />
+                              <span className="text-[11px] font-bold text-[#6E6E73] whitespace-nowrap">days</span>
+                            </div>
+                          )}
                         </div>
+                        <Button
+                          disabled={actionLoading}
+                          onClick={() => {
+                            setReasonModal({
+                              open: true,
+                              title: "Grant Complimentary Access",
+                              description: `Grant administrative complimentary access exception to ${owner.name} for ${manualGrantDays} days.`,
+                              actionSummary: `Grant ${manualGrantDays} days comp access to ${owner.name}`,
+                              confirmLabel: "Apply Access Grant",
+                              confirmVariant: "primary",
+                              onConfirm: (reason) => handleManualAction("restore_access", { grantDays: parseInt(manualGrantDays) || 30 }, reason)
+                            });
+                          }}
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1"
+                        >
+                          <ShieldCheck size={13} />
+                          Grant {manualGrantDays}d Access
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Grace Period Extension Block */}
+                    <div className="rounded-xl border border-[#E5E5EA] overflow-hidden">
+                      <div className="bg-amber-50/60 px-4 py-2.5 flex items-center gap-2 border-b border-amber-100">
+                        <Clock size={13} className="text-amber-600 shrink-0" />
+                        <span className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">Extend Grace Period</span>
+                      </div>
+                      <div className="px-4 py-3.5 space-y-3">
+                        <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                          Push out the billing delinquency deadline. The account won&apos;t lock during the extension window.
+                        </p>
+                        {/* Duration Selector */}
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider block">Extension</span>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {["3", "7", "14"].map(days => (
+                              <button
+                                key={days}
+                                type="button"
+                                onClick={() => { setManualGraceDays(days); setCustomGraceSelected(false); }}
+                                className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                  manualGraceDays === days && !customGraceSelected
+                                    ? "bg-amber-500 border-amber-500 text-white shadow-xs"
+                                    : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-amber-300 hover:text-amber-700"
+                                }`}
+                              >
+                                {days}d
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => setCustomGraceSelected(true)}
+                              className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                customGraceSelected
+                                  ? "bg-amber-500 border-amber-500 text-white shadow-xs"
+                                  : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-amber-300 hover:text-amber-700"
+                              }`}
+                            >
+                              Custom
+                            </button>
+                          </div>
+                          {customGraceSelected && (
+                            <div className="flex items-center gap-2 animate-in fade-in duration-200">
+                              <Input
+                                type="number"
+                                value={manualGraceDays}
+                                onChange={(e) => setManualGraceDays(e.target.value)}
+                                placeholder="e.g. 10"
+                                className="h-8 text-xs font-bold text-center border-[#E5E5EA] rounded-lg focus:border-amber-400 flex-1"
+                              />
+                              <span className="text-[11px] font-bold text-[#6E6E73] whitespace-nowrap">days</span>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          disabled={actionLoading}
+                          onClick={() => {
+                            setReasonModal({
+                              open: true,
+                              title: "Extend Grace Period",
+                              description: `Extend the subscription grace period for ${owner.name} by ${manualGraceDays} days.`,
+                              actionSummary: `Extend billing grace period by ${manualGraceDays} days`,
+                              confirmLabel: "Extend Grace",
+                              confirmVariant: "warning",
+                              onConfirm: (reason) => handleManualAction("extend_grace", { graceDays: parseInt(manualGraceDays) || 7 }, reason)
+                            });
+                          }}
+                          className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1"
+                        >
+                          <Clock size={13} />
+                          Extend by {manualGraceDays}d
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* ─── Save Matrix Configurations ─── */}
+                <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl overflow-hidden">
+                  <div className="px-5 pt-5 pb-3 border-b border-[#F2F2F7] flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">Save Matrix Configurations</h3>
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">Review pending changes before committing overrides.</p>
+                    </div>
+                    {getChangedPoliciesPreview().length > 0 && (
+                      <span className="text-[10px] font-extrabold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                        {getChangedPoliciesPreview().length} change{getChangedPoliciesPreview().length > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-5 space-y-4">
+                    {/* Live Diff Preview */}
+                    {getChangedPoliciesPreview().length > 0 ? (
+                      <div className="bg-purple-50 border border-purple-100 rounded-xl p-3.5 space-y-2">
+                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+                          <Settings2 size={11} />
+                          Pending Changes
+                        </div>
+                        <div className="space-y-2 max-h-[160px] overflow-y-auto">
+                          {getChangedPoliciesPreview().map((change: { label: string; from: string; to: string }, idx: number) => (
+                            <div key={idx} className="bg-white border border-purple-100 rounded-lg px-3 py-2 space-y-1">
+                              <div className="text-[11px] font-bold text-slate-700">{change.label}</div>
+                              <div className="flex items-center gap-1.5 text-[10px] font-semibold">
+                                <span className="text-slate-400 line-through">{change.from}</span>
+                                <span className="text-purple-400">→</span>
+                                <span className="text-purple-800 font-extrabold">{change.to}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-[#F9F9FB] border border-dashed border-[#E5E5EA] rounded-xl p-4 text-center">
+                        <div className="text-[11px] font-bold text-[#8E8E93]">No unsaved changes</div>
+                        <div className="text-[10px] text-[#C7C7CC] mt-0.5">Modify policy toggles above to see a diff preview.</div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Button
+                        disabled={actionLoading || getChangedPoliciesPreview().length === 0}
+                        onClick={() => {
+                          setReasonModal({
+                            open: true,
+                            title: "Apply Policy Exceptions",
+                            description: `Save persistent administrative policy overrides for ${owner.name}.`,
+                            actionSummary: `Apply custom rule exception matrix for ${owner.name}`,
+                            confirmLabel: "Save Overrides",
+                            confirmVariant: "primary",
+                            onConfirm: (reason) => handleSaveOverride(reason)
+                          });
+                        }}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-40"
+                      >
+                        <Settings2 size={13} />
+                        {actionLoading ? "Applying Changes..." : "Apply Exceptions Matrix"}
+                      </Button>
+
+                      {owner.subscriptionOverride && (
+                        <Button
+                          disabled={actionLoading}
+                          onClick={() => {
+                            setConfirmDialog({
+                              open: true,
+                              title: "Clear Exceptions & Overrides",
+                              description: `Are you sure you want to clear all custom exceptions and overrides for ${owner.name}? The system will fall back to platform subscription rules.`,
+                              confirmLabel: "Yes, Clear Overrides",
+                              confirmVariant: "destructive",
+                              onConfirm: confirmClearOverride
+                            });
+                          }}
+                          className="w-full border border-[#E5E5EA] text-[#6E6E73] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 rounded-xl font-bold h-9 text-xs bg-white transition-all"
+                        >
+                          Clear Active Exceptions
+                        </Button>
                       )}
                     </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="flex gap-1.5 bg-[#F2F2F7] p-1 rounded-xl">
-                        {["7", "14", "30"].map(days => (
-                          <button 
-                            key={days} 
-                            type="button" 
-                            onClick={() => {
-                              setManualGrantDays(days);
-                              setCustomGrantSelected(false);
-                            }} 
-                            className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                              manualGrantDays === days && !customGrantSelected
-                                ? "bg-white text-[#1D1D1F] shadow-sm" 
-                                : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                            }`}
-                          >
-                            {days}d
-                          </button>
-                        ))}
-                        <button 
-                          type="button" 
-                          onClick={() => setCustomGrantSelected(true)} 
-                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                            customGrantSelected
-                              ? "bg-white text-[#1D1D1F] shadow-sm" 
-                              : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                          }`}
-                        >
-                          Custom
-                        </button>
-                      </div>
-                      
-                      <Button 
-                        disabled={actionLoading || overrideReason.trim().length < 10} 
-                        onClick={() => handleManualAction("restore_access", { grantDays: parseInt(manualGrantDays) || 30 })} 
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-1 h-9 text-xs px-4"
-                      >
-                        Grant Access
-                      </Button>
+                  </div>
+                </Card>
+
+                {/* ─── Danger Zone ─── */}
+                <div className="rounded-2xl border border-red-200 bg-white overflow-hidden">
+                  {/* Red header stripe */}
+                  <div className="bg-red-50 px-5 py-3 border-b border-red-200 flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-red-600 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-extrabold text-red-800 uppercase tracking-wider">Danger Zone</h4>
+                      <p className="text-[10px] text-red-600 font-semibold">Irreversible administrative actions</p>
                     </div>
                   </div>
 
-                  {/* Grace Extender */}
-                  <div className="border border-[#E5E5EA] rounded-2xl p-4 space-y-3 bg-white">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-1.5">
-                        <Clock size={14} className="text-orange-500" /> Extend Grace Period Days
-                      </span>
-                      {customGraceSelected && (
-                        <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                          <Input 
-                            type="number" 
-                            value={manualGraceDays} 
-                            onChange={(e) => setManualGraceDays(e.target.value)} 
-                            placeholder="Days"
-                            className="w-16 rounded-lg text-center font-bold text-xs h-7 border-[#E5E5EA]"
-                          />
-                          <span className="text-[10px] font-bold text-[#6E6E73]">days</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="flex gap-1.5 bg-[#F2F2F7] p-1 rounded-xl">
-                        {["3", "7", "14"].map(days => (
-                          <button 
-                            key={days} 
-                            type="button" 
-                            onClick={() => {
-                              setManualGraceDays(days);
-                              setCustomGraceSelected(false);
-                            }} 
-                            className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                              manualGraceDays === days && !customGraceSelected
-                                ? "bg-white text-[#1D1D1F] shadow-sm" 
-                                : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                            }`}
-                          >
-                            {days}d
-                          </button>
-                        ))}
-                        <button 
-                          type="button" 
-                          onClick={() => setCustomGraceSelected(true)} 
-                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                            customGraceSelected
-                              ? "bg-white text-[#1D1D1F] shadow-sm" 
-                              : "text-[#6E6E73] hover:text-[#1D1D1F]"
-                          }`}
-                        >
-                          Custom
-                        </button>
-                      </div>
-                      
-                      <Button 
-                        disabled={actionLoading || overrideReason.trim().length < 10} 
-                        onClick={() => handleManualAction("extend_grace", { graceDays: parseInt(manualGraceDays) || 7 })} 
-                        className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold flex items-center justify-center gap-1 h-9 text-xs px-4"
-                      >
-                        Extend Grace
-                      </Button>
-                    </div>
-                  </div>
+                  <div className="px-5 py-4 space-y-3">
+                    <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                      Manually pausing or resuming this account bypasses Stripe billing. Every action is permanently recorded in the audit log.
+                    </p>
 
-                  {/* Manual Suspend / Manual Resume triggers */}
-                  <div className="pt-2 border-t border-[#F2F2F7] flex justify-between gap-3">
+                    {/* Active Status Pill */}
+                    <div className="flex items-center gap-2 py-2 px-3 bg-[#F9F9FB] rounded-lg border border-[#E5E5EA]">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${
+                        owner.subscriptionStatus === "Paused" ? "bg-amber-500 animate-pulse" :
+                        owner.subscriptionStatus === "Past_Due" ? "bg-orange-500 animate-pulse" :
+                        "bg-emerald-500"
+                      }`} />
+                      <div>
+                        <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Current Status: </span>
+                        <span className="text-[11px] font-extrabold text-[#1D1D1F]">
+                          {owner.subscriptionStatus === "Paused" ? "Suspended" :
+                           owner.subscriptionStatus === "Past_Due" ? "Past Due / Grace" :
+                           owner.subscriptionStatus === "Active" ? "Active & Healthy" :
+                           owner.subscriptionStatus || "Unknown"}
+                        </span>
+                      </div>
+                    </div>
+
                     {owner.subscriptionStatus === "Paused" ? (
-                      <Button 
-                        disabled={actionLoading || overrideReason.trim().length < 10} 
-                        onClick={() => handleManualAction("manual_resume")}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold h-10 text-xs flex items-center justify-center gap-1.5"
+                      <Button
+                        disabled={actionLoading}
+                        onClick={() => {
+                          setReasonModal({
+                            open: true,
+                            title: "Force Resume Account",
+                            description: `Administratively lift all subscription constraints and force resume ${owner.name}'s account.`,
+                            actionSummary: `Force resume subscription active status for ${owner.name}`,
+                            confirmLabel: "Resume Account",
+                            confirmVariant: "primary",
+                            onConfirm: (reason) => handleManualAction("manual_resume", {}, reason)
+                          });
+                        }}
+                        className="w-full bg-[#007AFF] hover:bg-[#0066D9] text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all"
                       >
                         <Play size={13} />
                         Force Resume Account
                       </Button>
                     ) : (
-                      <Button 
-                        disabled={actionLoading || overrideReason.trim().length < 10} 
-                        onClick={() => handleManualAction("manual_pause")}
-                        className="w-full border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl font-bold h-10 text-xs flex items-center justify-center gap-1.5"
+                      <Button
+                        disabled={actionLoading}
+                        onClick={() => {
+                          setReasonModal({
+                            open: true,
+                            title: "Force Suspend Account",
+                            description: `Immediately suspend all portfolio features and pause operations for ${owner.name}.`,
+                            actionSummary: `Force suspend and lock features for ${owner.name}`,
+                            confirmLabel: "Suspend Account",
+                            confirmVariant: "destructive",
+                            onConfirm: (reason) => handleManualAction("manual_pause", {}, reason)
+                          });
+                        }}
+                        className="w-full border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all"
                       >
                         <Pause size={13} />
                         Force Suspend Account
                       </Button>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Exception Settings overrides */}
-              <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl">
-                <CardContent className="p-6 space-y-5">
-                  <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#F2F2F7] pb-3">Permanent Exception Overrides</h3>
-                  
-                  {/* Block Payouts Toggle Option */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider block">Payout Controls Override</label>
-                    <select 
-                      value={blockPayoutsOverride} 
-                      onChange={(e) => setBlockPayoutsOverride(e.target.value)}
-                      className="w-full bg-white border border-[#E5E5EA] rounded-xl h-10 px-3 text-xs font-bold text-[#1D1D1F] focus:outline-none focus:border-purple-300 transition-all"
-                    >
-                      <option value="default">Use Platform Subscription Policies (Default)</option>
-                      <option value="allow">Force Allow Payouts (Ignore failures/suspension)</option>
-                      <option value="block">Force Block Payouts (Administrative Hold)</option>
-                    </select>
-                  </div>
-
-                  {/* Block New Units Toggle Option */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider block">Portfolio Property/Unit Cap Controls</label>
-                    <select 
-                      value={blockNewUnitsOverride} 
-                      onChange={(e) => setBlockNewUnitsOverride(e.target.value)}
-                      className="w-full bg-white border border-[#E5E5EA] rounded-xl h-10 px-3 text-xs font-bold text-[#1D1D1F] focus:outline-none focus:border-purple-300 transition-all"
-                    >
-                      <option value="default">Use Subscribed Pricing Tier Limits (Default)</option>
-                      <option value="allow">Allow Unlimited Portfolio Unit Overages</option>
-                      <option value="block">Strictly Block Adding Properties/Units</option>
-                    </select>
-                  </div>
-
-                  {/* Override Expiration Date Selector */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider block">Set Exception Expiration Date (Optional)</label>
-                    <Input 
-                      type="date" 
-                      value={overrideExpiresAt} 
-                      onChange={(e) => setOverrideExpiresAt(e.target.value)}
-                      className="bg-white rounded-xl border-[#E5E5EA] h-10 text-xs font-bold text-[#1D1D1F]"
-                    />
-                  </div>
-
-                  {/* Form Trigger Footer buttons */}
-                  <div className="pt-4 border-t border-[#F2F2F7] flex flex-col gap-3">
-                    {owner.subscriptionOverride && (
-                      showDeleteConfirm ? (
-                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-3 flex flex-col gap-2 animate-in fade-in duration-200">
-                          <p className="text-xs font-bold text-rose-800 leading-normal">Are you sure you want to clear Marcus Reed's policy exceptions? Default parameters will take over immediately.</p>
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => setShowDeleteConfirm(false)} 
-                              className="text-xs font-bold h-8 rounded-lg bg-white border border-[#E5E5EA] flex-1 text-[#1D1D1F]"
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="sm" 
-                              onClick={confirmClearOverride} 
-                              disabled={actionLoading}
-                              className="text-xs font-bold h-8 rounded-lg bg-red-600 text-white hover:bg-red-700 flex-1"
-                            >
-                              {actionLoading ? "Clearing..." : "Yes, Clear Exceptions"}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button 
-                          disabled={actionLoading} 
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="w-full border border-[#E5E5EA] text-[#ef4444] hover:bg-rose-50 hover:border-rose-100 rounded-xl font-bold h-10 text-xs bg-white transition-all shadow-none"
-                        >
-                          Clear Policy Override Settings
-                        </Button>
-                      )
-                    )}
-                    
-                    {!showDeleteConfirm && (
-                      <Button 
-                        disabled={actionLoading || overrideReason.trim().length < 10} 
-                        onClick={handleSaveOverride}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold h-10 text-xs shadow-sm transition-all"
-                      >
-                        {actionLoading ? "Saving..." : "Apply Policy Overrides"}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
+              </div>
             </div>
           </div>
         )}
 
         {/* ACTIVITY LOG TAB */}
         {activeTab === 'activity' && (
-          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-[#F2F2F7] flex justify-between items-center">
-              <div>
-                <h3 className="text-sm font-bold text-[#1D1D1F]">Administrative Action Audit Trail</h3>
-                <p className="text-[#6E6E73] text-xs mt-0.5">Chronological record of manual overrides, policy bypasses, and account status transitions logged for this owner.</p>
+          <div className="space-y-4">
+            {/* Header controls bar */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 border border-[#E5E5EA] rounded-2xl shadow-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                {(["ALL", "ACCESS", "BILLING", "SECURITY", "SYSTEM"] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategoryFilter(cat)}
+                    className={`text-[10px] font-extrabold px-3 py-1.5 rounded-full border transition-all ${
+                      categoryFilter === cat
+                        ? "bg-[#1D1D1F] border-[#1D1D1F] text-white shadow-xs"
+                        : "bg-white text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7]"
+                    }`}
+                  >
+                    {cat === "ALL" ? `All Events (${auditLogs.length})` : cat}
+                  </button>
+                ))}
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCsv}
+                className="border-[#E5E5EA] hover:bg-slate-50 text-[#1D1D1F] rounded-xl font-bold text-xs h-9"
+              >
+                Export Audit Trail (CSV)
+              </Button>
             </div>
-            
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-[#F9F9FB]">
-                  <TableRow className="border-[#E5E5EA] hover:bg-transparent">
-                    <TableHead className="w-40 text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Timestamp</TableHead>
-                    <TableHead className="w-32 text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Action</TableHead>
-                    <TableHead className="w-32 text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Role</TableHead>
-                    <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider">Audit Details & Rationale</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {auditLogs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-32 text-center text-[#6E6E73] text-sm font-semibold">
-                        No custom activities logged for this owner.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    auditLogs.map((log) => (
-                      <TableRow key={log.id} className="border-[#E5E5EA] hover:bg-slate-50/50 transition-colors">
-                        <TableCell className="text-xs font-bold text-[#1D1D1F]">
-                          {new Date(log.createdAt).toLocaleString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-slate-100 border-0 text-slate-800 rounded-lg px-2 py-0.5 text-[10px] font-extrabold shadow-none uppercase">
-                            {log.action}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs font-bold text-purple-700 capitalize">
-                          {log.actorRole?.toLowerCase() || "System"}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium text-[#1D1D1F] leading-normal py-3 max-w-lg">
-                          {log.note || "No audit comments recorded."}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
+
+            {/* Log Timeline */}
+            {filteredLogs.length === 0 ? (
+              <div className="bg-white border border-[#E5E5EA] rounded-2xl py-16 text-center shadow-xs">
+                <History size={32} className="text-[#C7C7CC] mx-auto mb-3" />
+                <div className="text-sm font-bold text-[#8E8E93]">No events in this category</div>
+                <div className="text-xs text-[#C7C7CC] mt-1">Try switching to &quot;All Events&quot; to see the full audit trail.</div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredLogs.map((log) => {
+                  const meta = getAuditMeta(log.action);
+                  const isExpanded = !!expandedLogs[log.id];
+
+                  // Build a human-readable diff from oldValue / newValue
+                  const POLICY_LABELS: Record<string, string> = {
+                    blockPayouts: "Payout Processing",
+                    blockNewUnits: "Add New Units",
+                    allowMaintenance: "Maintenance Requests",
+                    allowAddVendor: "Add Vendors",
+                    allowAddInspector: "Add Inspectors",
+                    allowProcessApplications: "Process Applications",
+                    allowAddTenant: "Tenant Registration",
+                    allowTourSlots: "Tour Availability",
+                    expiresAt: "Override Expiry",
+                    reason: "Admin Reason",
+                    gracePeriodDays: "Grace Period",
+                    subscriptionStatus: "Subscription Status",
+                    compAccessDays: "Comp. Access Days",
+                  };
+
+                  const formatVal = (key: string, val: unknown): string => {
+                    if (val === null || val === undefined) return "—";
+                    if (key === "expiresAt" && typeof val === "string") {
+                      try { return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+                      catch { return String(val); }
+                    }
+                    if (typeof val === "boolean") return val ? "Enabled" : "Disabled";
+                    return String(val);
+                  };
+
+                  const buildDiff = () => {
+                    const oldObj: Record<string, unknown> = log.oldValue && typeof log.oldValue === "object" ? log.oldValue as Record<string, unknown> : {};
+                    const newObj: Record<string, unknown> = log.newValue && typeof log.newValue === "object" ? log.newValue as Record<string, unknown> : {};
+                    const allKeys = Array.from(new Set([...Object.keys(oldObj), ...Object.keys(newObj)]));
+                    return allKeys
+                      .filter(k => k !== "id" && k !== "userId" && k !== "createdAt" && k !== "updatedAt")
+                      .filter(k => JSON.stringify(oldObj[k]) !== JSON.stringify(newObj[k]))
+                      .map(k => ({
+                        label: POLICY_LABELS[k] || k,
+                        from: formatVal(k, oldObj[k]),
+                        to: formatVal(k, newObj[k]),
+                        key: k,
+                        isNew: oldObj[k] === undefined,
+                        isRemoved: newObj[k] === undefined || newObj[k] === null,
+                        isBool: typeof newObj[k] === "boolean" || typeof oldObj[k] === "boolean",
+                      }));
+                  };
+
+                  const diff = (log.oldValue || log.newValue) ? buildDiff() : [];
+                  const hasDiff = diff.length > 0;
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={`bg-white border rounded-2xl overflow-hidden transition-all ${
+                        isExpanded ? "border-[#007AFF]/30 shadow-sm" : "border-[#E5E5EA] hover:border-[#C7C7CC]"
+                      }`}
+                    >
+                      {/* Row Summary */}
+                      <div className="flex items-center gap-3 px-4 py-3.5">
+                        {/* Category dot + icon */}
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.color}`}>
+                          <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
+                        </div>
+
+                        {/* Event info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                            <span className="text-[11px] font-extrabold text-[#1D1D1F]">{meta.label}</span>
+                            <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${meta.color}`}>
+                              {meta.category}
+                            </span>
+                            {hasDiff && (
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wide bg-purple-50 text-purple-600 border border-purple-100">
+                                {diff.length} field{diff.length > 1 ? "s" : ""} changed
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-[#6E6E73] font-medium truncate max-w-lg">
+                            {log.note || "No audit note recorded."}
+                          </div>
+                        </div>
+
+                        {/* Timestamp + actor + toggle */}
+                        <div className="flex items-center gap-3 shrink-0 ml-2">
+                          <div className="text-right hidden sm:block">
+                            <div className="text-[11px] font-bold text-[#1D1D1F]" title={new Date(log.createdAt).toLocaleString()}>
+                              {getRelativeTime(log.createdAt)}
+                            </div>
+                            <div className="text-[10px] font-semibold text-purple-600 capitalize mt-0.5">
+                              {log.actorRole?.toLowerCase() || "system"}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleRow(log.id)}
+                            className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                              isExpanded
+                                ? "bg-[#1D1D1F] border-[#1D1D1F] text-white"
+                                : "bg-white border-[#E5E5EA] text-[#6E6E73] hover:border-[#007AFF] hover:text-[#007AFF]"
+                            }`}
+                          >
+                            {isExpanded ? (
+                              <><X size={11} /> Close</>
+                            ) : (
+                              <>View</>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Detail Panel */}
+                      {isExpanded && (
+                        <div className="border-t border-[#F2F2F7] bg-[#FAFAFA] px-5 py-4 space-y-4">
+                          
+                          {/* Timestamp + Actor row */}
+                          <div className="flex flex-wrap gap-4">
+                            <div className="bg-white border border-[#E5E5EA] rounded-xl px-3.5 py-2.5">
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-1">Event Time</div>
+                              <div className="text-[11px] font-bold text-[#1D1D1F]">
+                                {new Date(log.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                              </div>
+                            </div>
+                            <div className="bg-white border border-[#E5E5EA] rounded-xl px-3.5 py-2.5">
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-1">Performed By</div>
+                              <div className="text-[11px] font-bold text-purple-700 capitalize">{log.actorRole?.toLowerCase() || "System"}</div>
+                            </div>
+                            <div className="bg-white border border-[#E5E5EA] rounded-xl px-3.5 py-2.5">
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-1">Event Type</div>
+                              <div className="text-[11px] font-bold text-[#1D1D1F]">{meta.label}</div>
+                            </div>
+                          </div>
+
+                          {/* Rationale */}
+                          {log.note && (
+                            <div className="bg-white border border-[#E5E5EA] rounded-xl p-3.5">
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-2">Admin Rationale</div>
+                              <p className="text-[11px] font-medium text-[#3A3A3C] leading-relaxed">
+                                &ldquo;{log.note}&rdquo;
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Human-readable diff */}
+                          {hasDiff ? (
+                            <div>
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-2">Changes Made</div>
+                              <div className="grid gap-2">
+                                {diff.map((item, i) => (
+                                  <div key={i} className="bg-white border border-[#E5E5EA] rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                                    <span className="text-[11px] font-bold text-[#3A3A3C] shrink-0">{item.label}</span>
+                                    <div className="flex items-center gap-2 text-[11px] font-semibold ml-auto">
+                                      {!item.isNew && (
+                                        <span className="text-[#8E8E93] line-through bg-slate-50 px-2 py-0.5 rounded-lg">{item.from}</span>
+                                      )}
+                                      {!item.isNew && <span className="text-[#C7C7CC]">→</span>}
+                                      <span className={`px-2 py-0.5 rounded-lg font-extrabold ${
+                                        item.isRemoved ? "bg-rose-50 text-rose-700" :
+                                        item.isBool && item.to === "Enabled" ? "bg-emerald-50 text-emerald-700" :
+                                        item.isBool && item.to === "Disabled" ? "bg-rose-50 text-rose-700" :
+                                        "bg-blue-50 text-blue-700"
+                                      }`}>{item.to}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (log.oldValue || log.newValue) ? (
+                            <div>
+                              <div className="text-[9px] font-extrabold text-[#C7C7CC] uppercase tracking-wider mb-2">State Snapshot</div>
+                              <div className="bg-white border border-[#E5E5EA] rounded-xl p-3 text-[10px] font-mono text-[#3A3A3C] overflow-auto max-h-[120px]">
+                                {JSON.stringify(log.newValue || log.oldValue, null, 2)}
+                              </div>
+                            </div>
+                          ) : null}
+
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
+
+      {/* Dynamic Modals */}
+      <ReasonModal
+        open={reasonModal.open}
+        onOpenChange={(open) => setReasonModal(prev => ({ ...prev, open }))}
+        title={reasonModal.title}
+        description={reasonModal.description}
+        actionSummary={reasonModal.actionSummary}
+        confirmLabel={reasonModal.confirmLabel}
+        confirmVariant={reasonModal.confirmVariant}
+        isLoading={actionLoading}
+        onConfirm={reasonModal.onConfirm}
+      />
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel={confirmDialog.confirmLabel}
+        confirmVariant={confirmDialog.confirmVariant}
+        onConfirm={confirmDialog.onConfirm}
+      />
     </div>
   );
 }

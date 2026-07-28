@@ -380,9 +380,17 @@ export default function AdminUsersPage() {
                     <TableCell className="text-[#64748B] text-sm font-bold">{idx + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md">
-                          {user.name?.charAt(0) || "U"}
-                        </div>
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name || "User Avatar"}
+                            className="h-10 w-10 rounded-full object-cover shrink-0 shadow-xs border border-slate-200"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                            {user.name?.charAt(0)?.toUpperCase() || "U"}
+                          </div>
+                        )}
                         <div>
                           <p className="font-extrabold text-[#0F172A] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
                           <p className="text-xs font-medium text-[#64748B]">{user.email}</p>

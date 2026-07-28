@@ -35,7 +35,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ userId
   const adminId = (session.user as any).id;
 
   try {
-    const { module, expiresAt, reason } = await req.json();
+    const { module, expiresAt, reason, overrideType } = await req.json();
 
     if (!module) {
       return NextResponse.json({ error: "module is required" }, { status: 400 });
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ userId
       }, { status: 400 });
     }
 
+    const type = overrideType === "BLOCK" ? "BLOCK" : "GRANT";
     const expiryDate = expiresAt ? new Date(expiresAt) : null;
 
     const grant = await prisma.ownerModuleGrant.upsert({
@@ -67,32 +68,40 @@ export async function POST(req: NextRequest, context: { params: Promise<{ userId
         expiresAt: expiryDate,
         reason,
         adminId,
+        overrideType: type,
       },
       update: {
         expiresAt: expiryDate,
         reason,
         adminId,
+        overrideType: type,
       }
     });
+
+    const isBlock = type === "BLOCK";
 
     await auditLog({
       entityType: "USER",
       entityId: userId,
-      action: "UPDATED",
+      action: isBlock ? "MODULE_BLOCKED" : "MODULE_GRANT",
       actorId: adminId,
       actorRole: "SUPERADMIN",
-      newValue: { module, expiresAt: expiryDate, reason },
-      note: `Admin granted module "${matchedModule.label}" access to user ${userId}. Reason: ${reason}`,
+      newValue: { module, expiresAt: expiryDate, reason, overrideType: type },
+      note: isBlock 
+        ? `Admin blocked module "${matchedModule.label}" access for user ${userId}. Reason: ${reason}`
+        : `Admin granted module "${matchedModule.label}" access to user ${userId}. Reason: ${reason}`,
     });
 
     // Notify user
     await prisma.notification.create({
       data: {
         userId,
-        title: "🔑 Premium Module Access Granted",
-        message: `Admin has granted you access to "${matchedModule.label}"${expiryDate ? ` until ${expiryDate.toLocaleDateString()}` : ""}.`,
+        title: isBlock ? "⚙️ Premium Module Access Restricted" : "🔑 Premium Module Access Granted",
+        message: isBlock
+          ? `Admin has restricted your access to "${matchedModule.label}"${expiryDate ? ` until ${expiryDate.toLocaleDateString()}` : ""}.`
+          : `Admin has granted you access to "${matchedModule.label}"${expiryDate ? ` until ${expiryDate.toLocaleDateString()}` : ""}.`,
         type: "SYSTEM",
-        priority: "MEDIUM",
+        priority: isBlock ? "HIGH" : "MEDIUM",
       }
     });
 
@@ -121,6 +130,10 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ user
   const matchedModule = GATABLE_MODULES.find(m => m.key === module);
 
   try {
+    const existing = await prisma.ownerModuleGrant.findFirst({
+      where: { userId, module }
+    });
+
     await prisma.ownerModuleGrant.deleteMany({
       where: {
         userId,
@@ -128,21 +141,27 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ user
       }
     });
 
+    const isBlock = existing?.overrideType === "BLOCK";
+
     await auditLog({
       entityType: "USER",
       entityId: userId,
-      action: "UPDATED",
+      action: isBlock ? "MODULE_BLOCK_LIFTED" : "UPDATED",
       actorId: adminId,
       actorRole: "SUPERADMIN",
-      note: `Admin revoked module "${matchedModule?.label || module}" access from user ${userId}`,
+      note: isBlock
+        ? `Admin lifted module "${matchedModule?.label || module}" block for user ${userId}`
+        : `Admin revoked module "${matchedModule?.label || module}" access from user ${userId}`,
     });
 
     // Notify user
     await prisma.notification.create({
       data: {
         userId,
-        title: "⚙️ Premium Module Access Revoked",
-        message: `Your access to "${matchedModule?.label || module}" has been revoked by admin.`,
+        title: isBlock ? "⚙️ Module Access Restored" : "⚙️ Premium Module Access Revoked",
+        message: isBlock
+          ? `Your access to "${matchedModule?.label || module}" has been restored.`
+          : `Your access to "${matchedModule?.label || module}" has been revoked by admin.`,
         type: "SYSTEM",
         priority: "MEDIUM",
       }

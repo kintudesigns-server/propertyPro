@@ -12,8 +12,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
 
 export default function NewMaintenanceRequestPage() {
+  const featureAccess = useFeatureAccess("submit_maintenance");
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -240,6 +243,29 @@ export default function NewMaintenanceRequestPage() {
       setLoading(false);
     }
   };
+
+  if (isTenant && featureAccess.loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[#007AFF]" />
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Checking maintenance permissions...</p>
+      </div>
+    );
+  }
+
+  if (isTenant && !featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="submit_maintenance"
+        featureLabel={featureAccess.featureLabel || "Submit Maintenance Requests"}
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 pb-20">

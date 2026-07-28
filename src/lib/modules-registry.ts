@@ -41,3 +41,7 @@ export const MODULES_BY_CATEGORY = GATABLE_MODULES.reduce(
   },
   {} as Record<string, typeof GATABLE_MODULES[number][]>
 );
+
+// All modules can be blocked by admin, even core ones
+export const BLOCKABLE_MODULES = GATABLE_MODULES.map(m => m.key);
+

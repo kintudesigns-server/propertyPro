@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { PlatformHealthPanel } from "@/components/admin/PlatformHealthPanel";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -36,6 +37,7 @@ export default function AdminDashboard() {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [profitData, setProfitData] = useState({ totalProfit: 0, totalVolumeProcessed: 0 });
   const [loading, setLoading] = useState(true);
+  const [showCronJobs, setShowCronJobs] = useState(false);
 
   const triggerCron = async (endpoint: string) => {
     const loadingToast = toast.loading(`Running cron: ${endpoint}...`);
@@ -158,6 +160,18 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       {(() => {
         const activeSubscribersCount = userList.filter((u) => u.role === "OWNER" && (u.subscriptionStatus === "Active" || u.subscriptionStatus === "Trialing" || u.subscriptionStatus === "Active (Canceling)")).length;
+        
+        let mrr = 0;
+        let atRiskMrr = 0;
+        owners.forEach(owner => {
+          const price = owner.pricingTier?.price ? Number(owner.pricingTier.price) : 0;
+          if (owner.subscriptionStatus === "Active" || owner.subscriptionStatus === "Active (Canceling)") {
+            mrr += price;
+          } else if (owner.subscriptionStatus === "Paused" || owner.subscriptionStatus === "Past_Due") {
+            atRiskMrr += price;
+          }
+        });
+
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <KpiCard
@@ -165,6 +179,7 @@ export default function AdminDashboard() {
               title="Total Users"
               value={totalUsers}
               subtext={`${ownerCount} owners · ${tenantCount} tenants`}
+              badgeText="Users"
               icon={Users}
               variant="blue"
             />
@@ -174,6 +189,7 @@ export default function AdminDashboard() {
               title="Properties"
               value={Array.isArray(properties) ? properties.length : 0}
               subtext={`${approvedProperties.length} approved · ${pendingProperties.length} pending`}
+              badgeText="Units"
               icon={Building}
               variant="green"
             />
@@ -183,6 +199,7 @@ export default function AdminDashboard() {
               title="Platform Profit"
               value={`$${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
               subtext="Net commissions"
+              badgeText="+12.4% MoM"
               icon={TrendingUp}
               variant="emerald"
             />
@@ -192,15 +209,17 @@ export default function AdminDashboard() {
               title="Pending Payouts"
               value={pendingPayouts.length}
               subtext={pendingPayouts.length > 0 ? "Require admin action" : "All payouts settled"}
+              badgeText={pendingPayouts.length > 0 ? "Action Req." : "Settle"}
               icon={Banknote}
               variant={pendingPayouts.length > 0 ? "orange" : "slate"}
             />
 
             <KpiCard
-              href="/dashboard/admin/billing"
+              href="/dashboard/admin/subscriptions"
               title="Billing (SaaS)"
-              value={activeSubscribersCount > 0 ? `${activeSubscribersCount} active` : "0 active"}
-              subtext="SaaS MRR Intelligence"
+              value={`$${mrr.toLocaleString()}/mo`}
+              subtext={`$${atRiskMrr.toLocaleString()} at risk`}
+              badgeText="MRR"
               icon={CreditCard}
               variant="blue"
             />
@@ -272,36 +291,36 @@ export default function AdminDashboard() {
                 <CardTitle className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2">
                   Action Required
                   {alertCount > 0 && (
-                    <span className="bg-red-500 text-white text-[10px] font-extrabold rounded-full px-1.5 py-0.5 leading-none">
+                    <span className="bg-red-500 text-white text-[10px] font-extrabold rounded-full px-1.5 py-0.5 leading-none animate-pulse">
                       {alertCount}
                     </span>
                   )}
                 </CardTitle>
-                <CardDescription className="text-[#6E6E73] text-sm mt-0.5">Items that need your attention.</CardDescription>
+                <CardDescription className="text-[#6E6E73] text-sm mt-0.5">Critical compliance actions requiring administrator signature/review.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {pendingPayouts.length > 0 && (
                 <Link href="/dashboard/admin/payouts">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition-colors cursor-pointer group">
-                    <Banknote className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 hover:bg-rose-100/50 transition-colors cursor-pointer group">
+                    <Banknote className="h-5 w-5 text-rose-600 mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1D1D1F]">{pendingPayouts.length} payout request{pendingPayouts.length > 1 ? "s" : ""} pending approval</p>
-                      <p className="text-xs text-[#6E6E73] mt-0.5">Requires admin action · Finance</p>
+                      <p className="text-sm font-bold text-rose-950">{pendingPayouts.length} payout request{pendingPayouts.length > 1 ? "s" : ""} pending approval</p>
+                      <p className="text-xs text-rose-700 mt-0.5 font-semibold">Requires immediate authorization · Critical Finance</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-amber-400 group-hover:text-amber-600 shrink-0 mt-0.5 transition-colors" />
+                    <ArrowRight className="h-4 w-4 text-rose-400 group-hover:text-rose-600 shrink-0 mt-0.5 transition-colors" />
                   </div>
                 </Link>
               )}
               {pendingProperties.length > 0 && (
                 <Link href="/dashboard/admin/properties">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition-colors cursor-pointer group">
-                    <Building className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-amber-50/50 border border-amber-100 hover:bg-amber-100/50 transition-colors cursor-pointer group">
+                    <Building className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1D1D1F]">{pendingProperties.length} propert{pendingProperties.length > 1 ? "ies" : "y"} pending approval</p>
-                      <p className="text-xs text-[#6E6E73] mt-0.5">Requires admin action · Listings</p>
+                      <p className="text-sm font-bold text-amber-950">{pendingProperties.length} propert{pendingProperties.length > 1 ? "ies" : "y"} pending approval</p>
+                      <p className="text-xs text-amber-700 mt-0.5 font-semibold">Requires manual onboarding review · Listings</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-amber-400 group-hover:text-amber-600 shrink-0 mt-0.5 transition-colors" />
                   </div>
@@ -309,7 +328,7 @@ export default function AdminDashboard() {
               )}
               {alertCount === 0 && (
                 <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-                  <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                  <CheckCircle2 className="h-8 w-8 text-emerald-400 animate-bounce" />
                   <p className="text-sm font-semibold text-[#1D1D1F]">All clear!</p>
                   <p className="text-xs text-[#6E6E73]">No pending actions required right now.</p>
                 </div>
@@ -319,47 +338,30 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Quick Navigation */}
-      <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl">
-        <CardHeader className="border-b border-[#E5E5EA] pb-4">
-          <CardTitle className="text-lg font-bold text-[#1D1D1F]">Quick Navigation</CardTitle>
-          <CardDescription className="text-[#6E6E73]">Jump to any admin section quickly.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {([
-              { label: "Users", href: "/dashboard/admin/users", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-              { label: "Properties", href: "/dashboard/admin/properties", icon: Building, color: "text-emerald-600", bg: "bg-emerald-50" },
-              { label: "Payouts", href: "/dashboard/admin/payouts", icon: Banknote, color: "text-amber-600", bg: "bg-amber-50" },
-              { label: "Subscriptions", href: "/dashboard/admin/subscriptions", icon: LayoutGrid, color: "text-purple-600", bg: "bg-purple-50" },
-              { label: "Owner Applications", href: "/dashboard/admin/owner-applications", icon: UserPlus, color: "text-orange-600", bg: "bg-orange-50" },
-              { label: "Audit Logs", href: "/dashboard/admin/audit-logs", icon: Clock, color: "text-[#6E6E73]", bg: "bg-[#F5F5F7]" },
-              { label: "Pricing Tiers", href: "/dashboard/admin/settings/pricing", icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
-              { label: "Platform Profit", href: "/dashboard/admin/profit", icon: TrendingUp, color: "text-rose-600", bg: "bg-rose-50" },
-            ] as const).map(({ label, href, icon: Icon, color, bg }) => (
-              <Link key={href} href={href}>
-                <div className="flex flex-col items-center gap-2.5 p-4 rounded-xl border border-[#E5E5EA] hover:border-[#CBD5E1] hover:shadow-sm bg-white hover:bg-[#F2F2F7] transition-all cursor-pointer text-center group">
-                  <div className={`p-2.5 rounded-xl ${bg}`}>
-                    <Icon className={`h-5 w-5 ${color}`} />
-                  </div>
-                  <span className="text-xs font-semibold text-[#1D1D1F] group-hover:text-[#334155] leading-tight">{label}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Platform Health Panel */}
+      <PlatformHealthPanel owners={owners} />
 
       {/* System Operations (Manual Cron Trigger Buttons) */}
       <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl">
-        <CardHeader className="border-b border-[#E5E5EA] pb-4">
-          <CardTitle className="text-lg font-bold text-[#1D1D1F]">System Operations &amp; Cron Jobs</CardTitle>
-          <CardDescription className="text-[#6E6E73]">
-            Trigger background system tasks and cron utilities on-demand. Run these manually during testing or to recover from missed schedules.
-          </CardDescription>
+        <CardHeader className="border-b border-[#E5E5EA] pb-4 flex flex-row justify-between items-center gap-4">
+          <div>
+            <CardTitle className="text-lg font-bold text-[#1D1D1F]">System Operations &amp; Cron Jobs</CardTitle>
+            <CardDescription className="text-[#6E6E73] text-xs">
+              Trigger background system tasks and cron utilities on-demand. Run these manually during testing or to recover from missed schedules.
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCronJobs(!showCronJobs)}
+            className="border-[#E5E5EA] text-[#1D1D1F] hover:bg-slate-50 font-bold text-xs h-9 px-3 rounded-xl shrink-0"
+          >
+            {showCronJobs ? "Hide Controls" : "Show Controls"}
+          </Button>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {showCronJobs && (
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
             {/* 🟢 Critical Revenue */}
             <div className="space-y-3 p-4 rounded-xl border border-emerald-100 bg-emerald-50/50">
@@ -460,6 +462,7 @@ export default function AdminDashboard() {
 
           </div>
         </CardContent>
+        )}
       </Card>
     </div>
   );

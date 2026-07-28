@@ -39,9 +39,9 @@ function encrypt(text: string): string {
   return payload.toString('hex');
 }
 
-// ─── Image URL Constants (Unsplash) ──────────────────────────────────────────
+// ─── Image URL Constants (Unsplash - Distinct Property Cover Photos) ──────────
 const IMG = {
-  apartment: {
+  grand: {
     cover:     "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200",
     unit1br:   "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200",
     unit2br:   "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200",
@@ -50,15 +50,39 @@ const IMG = {
     interior2: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=1200",
     interior3: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200",
   },
-  house: {
+  villa: {
     cover:    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200",
     interior: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200",
-    exterior: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200",
+    exterior: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200",
+  },
+  sandbox: {
+    cover:    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200",
+    interior: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
   },
   commercial: {
     cover:  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200",
     lobby:  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200",
     office: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200",
+  },
+  patelHome: {
+    cover:    "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200",
+    interior: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200",
+  },
+  patelCondo: {
+    cover:    "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200",
+    interior: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200",
+  },
+  carterSquare: {
+    cover:    "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=1200",
+    interior: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200",
+  },
+  carterHeights: {
+    cover:    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200",
+    interior: "https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=1200",
+  },
+  impendingPlaza: {
+    cover:    "https://images.unsplash.com/photo-1460317442991-0ec209397118?w=1200",
+    interior: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=1200",
   },
   maint: {
     smokeDetector: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800",
@@ -106,6 +130,9 @@ async function main() {
   await prisma.pricingTier.deleteMany();
   await prisma.platformSettings.deleteMany();
   await prisma.processedStripeEvent.deleteMany();
+  await (prisma as any).ownerModuleGrant.deleteMany();
+  await (prisma as any).userAccessOverride.deleteMany();
+  await (prisma as any).otpToken.deleteMany();
   await prisma.subscriptionHistory.deleteMany();
 
   await prisma.platformSettings.create({
@@ -122,7 +149,10 @@ async function main() {
       blockProcessApplicationsOnPaused: true,
       blockAddTenantOnPaused: true,
       blockTourSlotsOnPaused: true,
-    }
+      welfareAllowMoveOut: true,
+      welfareAllowBillingView: true,
+      welfareAllowEmergencyDispatch: true,
+    } as any
   });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -371,7 +401,14 @@ async function main() {
 
   // ── Admin ──
   const admin = await prisma.user.create({
-    data: { email: "admin@yopmail.com", name: "System Admin", password: passwordHash, role: Role.SUPERADMIN, accountStatus: "ACTIVE" },
+    data: {
+      email: "admin@yopmail.com",
+      name: "System Admin",
+      password: passwordHash,
+      role: Role.SUPERADMIN,
+      accountStatus: "ACTIVE",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
+    },
   });
 
   // ── Owners ──
@@ -380,6 +417,7 @@ async function main() {
     data: {
       email: "owner.atlas@yopmail.com", name: "Marcus Reed", password: passwordHash, role: Role.OWNER,
       phone: "+1 310-555-0100",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
       bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow",
       balance: 28750.50,
       currentTierId: enterpriseTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
@@ -397,6 +435,7 @@ async function main() {
     data: {
       email: "owner.coastal@yopmail.com", name: "Linda Chen", password: passwordHash, role: Role.OWNER,
       phone: "+1 415-555-0200",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400",
       bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow",
       balance: 9200.00,
       currentTierId: proTier.id, subscriptionStatus: "Active", accountStatus: "ACTIVE",
@@ -414,6 +453,7 @@ async function main() {
     data: {
       email: "owner.patel@yopmail.com", name: "Raj Patel", password: passwordHash, role: Role.OWNER,
       phone: "+1 408-555-0300",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
       bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Patel Realty Escrow",
       balance: 8500.00,
       currentTierId: essentialsTier.id, subscriptionStatus: "Past_Due", accountStatus: "ACTIVE",
@@ -438,6 +478,7 @@ async function main() {
     data: {
       email: "owner.new@yopmail.com", name: "Alex Morgan", password: passwordHash, role: Role.OWNER,
       phone: "+1 213-555-0400",
+      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
       currentTierId: null, subscriptionStatus: "PendingPlanSelection", accountStatus: "ACTIVE",
       hasCompletedOnboarding: false, onboardingStep: 0, // ← sees full onboarding wizard
     },
@@ -451,6 +492,7 @@ async function main() {
       password: passwordHash,
       role: Role.OWNER,
       phone: "+1 213-555-0450",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
       bankName: "Bank of America",
       accountNumber: encrypt("999988887777"),
       accountName: "Carter Properties Escrow",
@@ -481,6 +523,7 @@ async function main() {
       password: passwordHash,
       role: Role.OWNER,
       phone: "+1 213-555-0460",
+      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
       bankName: "Bank of America",
       accountNumber: encrypt("111122223333"),
       accountName: "Impending Properties Escrow",
@@ -504,85 +547,75 @@ async function main() {
   });
 
   // ── Inspectors ──
-  // Inspector counts per tier (from implementation plan fix):
-  //   Essentials:   maxInspectors = 1  (FIX: was 0)
-  //   Professional: maxInspectors = 5  (UP from 3)
-  //   Enterprise:   maxInspectors = 99 (effectively unlimited)
   console.log("🔍 Seeding inspectors — respecting updated per-tier limits...");
-  // Atlas (Professional tier → 5 max; seeding 3 to test headroom, not at cap)
   const inspectorJake = await prisma.user.create({
-    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
+    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400" },
   });
   await prisma.user.create({
-    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
+    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400" },
   });
   await prisma.user.create({
-    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id },
-  });
-
-  // Coastal (Professional tier → 5 max; seeding 2 — within limit)
-  await prisma.user.create({
-    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
-  });
-  await prisma.user.create({
-    data: { email: "inspector.coastal2@yopmail.com", name: "Alex Wong", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2003", accountStatus: "ACTIVE", ownerId: ownerCoastal.id },
+    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
   });
 
-  // Patel (Essentials tier → maxInspectors:1 — FIXED from 0. Seeding 1 = AT the cap.
-  //   Gate test: try adding a 2nd inspector for Patel → should return 403)
   await prisma.user.create({
-    data: { email: "inspector.patel1@yopmail.com", name: "Kumar Patel", password: passwordHash, role: Role.INSPECTOR, phone: "+1 408-555-3001", accountStatus: "ACTIVE", ownerId: ownerPatel.id },
+    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.coastal2@yopmail.com", name: "Alex Wong", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2003", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
   });
 
-  // James Carter (Professional tier → 5 max; seeding 2 — within limit)
   await prisma.user.create({
-    data: { email: "inspector.carter1@yopmail.com", name: "Tom Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4001", accountStatus: "ACTIVE", ownerId: ownerPaused.id },
-  });
-  await prisma.user.create({
-    data: { email: "inspector.carter2@yopmail.com", name: "Jerry Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4002", accountStatus: "ACTIVE", ownerId: ownerPaused.id },
+    data: { email: "inspector.patel1@yopmail.com", name: "Kumar Patel", password: passwordHash, role: Role.INSPECTOR, phone: "+1 408-555-3001", accountStatus: "ACTIVE", ownerId: ownerPatel.id, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" },
   });
 
-  // James Impending (Professional tier → 5 max; seeding 2 — within limit)
   await prisma.user.create({
-    data: { email: "inspector.impending1@yopmail.com", name: "Frank Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5001", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id },
+    data: { email: "inspector.carter1@yopmail.com", name: "Tom Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4001", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400" },
   });
   await prisma.user.create({
-    data: { email: "inspector.impending2@yopmail.com", name: "Alice Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5002", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id },
+    data: { email: "inspector.carter2@yopmail.com", name: "Jerry Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4002", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400" },
+  });
+
+  await prisma.user.create({
+    data: { email: "inspector.impending1@yopmail.com", name: "Frank Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5001", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400" },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.impending2@yopmail.com", name: "Alice Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5002", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400" },
   });
 
   // ── Tenants ──
   const tenantAdam = await prisma.user.create({
-    data: { email: "tenant.adam@yopmail.com", name: "Adam Brooks", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3001", tenantStatus: "Active", creditScore: 780, annualIncome: 115000, ssn: encrypt("123-45-6789"), employer: "TechCorp Inc.", position: "Senior Engineer", employmentStatus: "EMPLOYED", emergencyName: "Lisa Brooks", emergencyRelationship: "Spouse", emergencyPhone: "+1 310-555-3002" },
+    data: { email: "tenant.adam@yopmail.com", name: "Adam Brooks", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3001", tenantStatus: "Active", creditScore: 780, annualIncome: 115000, ssn: encrypt("123-45-6789"), employer: "TechCorp Inc.", position: "Senior Engineer", employmentStatus: "EMPLOYED", emergencyName: "Lisa Brooks", emergencyRelationship: "Spouse", emergencyPhone: "+1 310-555-3002", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400" },
   });
   const tenantNora = await prisma.user.create({
-    data: { email: "tenant.nora@yopmail.com", name: "Nora Klein", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3003", tenantStatus: "Pending Onboarding", creditScore: 710, annualIncome: 72000, ssn: encrypt("234-56-7890"), employer: "Design Studio LA", position: "Graphic Designer", employmentStatus: "EMPLOYED" },
+    data: { email: "tenant.nora@yopmail.com", name: "Nora Klein", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3003", tenantStatus: "Pending Onboarding", creditScore: 710, annualIncome: 72000, ssn: encrypt("234-56-7890"), employer: "Design Studio LA", position: "Graphic Designer", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400" },
   });
   const tenantOscar = await prisma.user.create({
-    data: { email: "tenant.oscar@yopmail.com", name: "Oscar Diaz", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3004", tenantStatus: "Active", creditScore: 620, annualIncome: 52000, ssn: encrypt("345-67-8901"), employer: "Warehouse Co.", position: "Supervisor" },
+    data: { email: "tenant.oscar@yopmail.com", name: "Oscar Diaz", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3004", tenantStatus: "Active", creditScore: 620, annualIncome: 52000, ssn: encrypt("345-67-8901"), employer: "Warehouse Co.", position: "Supervisor", avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=400" },
   });
   const tenantMarvin = await prisma.user.create({
-    data: { email: "tenant.marvin@yopmail.com", name: "Marvin Torres", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3005", tenantStatus: "Active", creditScore: 740, annualIncome: 88000, ssn: encrypt("456-78-9012"), employer: "Metro Health", position: "Nurse Practitioner", employmentStatus: "EMPLOYED" },
+    data: { email: "tenant.marvin@yopmail.com", name: "Marvin Torres", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3005", tenantStatus: "Active", creditScore: 740, annualIncome: 88000, ssn: encrypt("456-78-9012"), employer: "Metro Health", position: "Nurse Practitioner", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" },
   });
   const tenantLiam = await prisma.user.create({
-    data: { email: "tenant.liam@yopmail.com", name: "Liam Walsh", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3006", tenantStatus: "Active", creditScore: 690, annualIncome: 65000, ssn: encrypt("567-89-0123") },
+    data: { email: "tenant.liam@yopmail.com", name: "Liam Walsh", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3006", tenantStatus: "Active", creditScore: 690, annualIncome: 65000, ssn: encrypt("567-89-0123"), avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400" },
   });
   const tenantAmy = await prisma.user.create({
-    data: { email: "tenant.amy@yopmail.com", name: "Amy Foster", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3007", tenantStatus: "Active", creditScore: 730, annualIncome: 78000, ssn: encrypt("678-90-1234") },
+    data: { email: "tenant.amy@yopmail.com", name: "Amy Foster", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3007", tenantStatus: "Active", creditScore: 730, annualIncome: 78000, ssn: encrypt("678-90-1234"), avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400" },
   });
   const tenantDan = await prisma.user.create({
-    data: { email: "tenant.dan@yopmail.com", name: "Dan Gibbs", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3008", tenantStatus: "Active", creditScore: 680, annualIncome: 60000, ssn: encrypt("789-01-2345") },
+    data: { email: "tenant.dan@yopmail.com", name: "Dan Gibbs", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3008", tenantStatus: "Active", creditScore: 680, annualIncome: 60000, ssn: encrypt("789-01-2345"), avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400" },
   });
   const tenantEve = await prisma.user.create({
-    data: { email: "tenant.eve@yopmail.com", name: "Eve Morales", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3009", tenantStatus: "Inactive", creditScore: 760, annualIncome: 90000, ssn: encrypt("890-12-3456") },
+    data: { email: "tenant.eve@yopmail.com", name: "Eve Morales", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3009", tenantStatus: "Inactive", creditScore: 760, annualIncome: 90000, ssn: encrypt("890-12-3456"), avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400" },
   });
   const tenantKelly = await prisma.user.create({
-    data: { email: "tenant.kelly@yopmail.com", name: "Kelly Huang", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3010", tenantStatus: "Active", creditScore: 715, annualIncome: 70000, ssn: encrypt("901-23-4567") },
+    data: { email: "tenant.kelly@yopmail.com", name: "Kelly Huang", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3010", tenantStatus: "Active", creditScore: 715, annualIncome: 70000, ssn: encrypt("901-23-4567"), avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
   });
   const tenantScott = await prisma.user.create({
-    data: { email: "tenant.scott@yopmail.com", name: "Scott Park", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3011", tenantStatus: "Active", creditScore: 750, annualIncome: 82000, ssn: encrypt("012-34-5678") },
+    data: { email: "tenant.scott@yopmail.com", name: "Scott Park", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3011", tenantStatus: "Active", creditScore: 750, annualIncome: 82000, ssn: encrypt("012-34-5678"), avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
   });
   const tenantCarlos = await prisma.user.create({
-    data: { email: "tenant.carlos@yopmail.com", name: "Carlos Ruiz", password: passwordHash, role: Role.TENANT, phone: "+1 415-555-4001", tenantStatus: "Active", creditScore: 800, annualIncome: 250000, ssn: encrypt("111-22-3333"), employer: "Ruiz Enterprises LLC", position: "CEO", employmentStatus: "EMPLOYED" },
+    data: { email: "tenant.carlos@yopmail.com", name: "Carlos Ruiz", password: passwordHash, role: Role.TENANT, phone: "+1 415-555-4001", tenantStatus: "Active", creditScore: 800, annualIncome: 250000, ssn: encrypt("111-22-3333"), employer: "Ruiz Enterprises LLC", position: "CEO", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
   });
   const tenantPatel = await prisma.user.create({
     data: { 
@@ -597,12 +630,13 @@ async function main() {
       ssn: encrypt("999-88-7777"), 
       employer: "Google LLC", 
       position: "Associate Product Manager", 
-      employmentStatus: "EMPLOYED" 
+      employmentStatus: "EMPLOYED",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400"
     },
   });
   // FIRST-TIME TENANT — no lease, empty dashboard
   await prisma.user.create({
-    data: { email: "tenant.new@yopmail.com", name: "Sam Taylor", password: passwordHash, role: Role.TENANT, phone: "+1 213-555-5001", tenantStatus: "Pending Onboarding", creditScore: 700, annualIncome: 58000 },
+    data: { email: "tenant.new@yopmail.com", name: "Sam Taylor", password: passwordHash, role: Role.TENANT, phone: "+1 213-555-5001", tenantStatus: "Pending Onboarding", creditScore: 700, annualIncome: 58000, avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400" },
   });
 
   // ── SECTION 2.5: Subscription History Events (for SaaS Billing Audits) ──
@@ -801,14 +835,14 @@ async function main() {
       type: "Apartment", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
       yearBuilt: 2018, description: "Modern luxury apartment complex in downtown LA with premium amenities.", parkingSpaces: 120,
       amenities: ["Pool", "Gym", "Rooftop Deck", "Concierge", "EV Charging"],
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover, IMG.apartment.unit2br, IMG.apartment.unit3br],
+      coverPhoto: IMG.grand.cover, images: [IMG.grand.cover, IMG.grand.unit2br, IMG.grand.unit3br],
       units: { create: [
-        { name: "101", type: "Apartment", floor: 1, rentAmount: 2000, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 800, status: "OCCUPIED", maxOccupants: 2, amenities: ["Balcony", "In-unit W/D"], images: [IMG.apartment.unit1br] },
-        { name: "102", type: "Apartment", floor: 1, rentAmount: 3000, depositAmt: 3500, rooms: 2, bathrooms: 2, sqFootage: 1200, status: "OCCUPIED", maxOccupants: 3, amenities: ["City Views", "Stainless Appliances"], images: [IMG.apartment.unit2br] },
-        { name: "103", type: "Apartment", floor: 2, rentAmount: 2400, depositAmt: 2800, rooms: 1, bathrooms: 1, sqFootage: 900, status: "OCCUPIED", maxOccupants: 2, images: [IMG.apartment.interior1] },
-        { name: "104", type: "Apartment", floor: 2, rentAmount: 3200, depositAmt: 3800, rooms: 2, bathrooms: 2, sqFootage: 1300, status: "OCCUPIED", maxOccupants: 4, amenities: ["Corner Unit"], images: [IMG.apartment.interior2] },
-        { name: "105", type: "Apartment", floor: 3, rentAmount: 2800, depositAmt: 3000, rooms: 2, bathrooms: 1, sqFootage: 1100, status: "VACANT", maxOccupants: 2, images: [IMG.apartment.interior3] },
-        { name: "106", type: "Apartment", floor: 3, rentAmount: 4500, depositAmt: 5000, rooms: 3, bathrooms: 2, sqFootage: 1800, status: "VACANT", maxOccupants: 5, amenities: ["Penthouse Views", "Premium Finishes"], images: [IMG.apartment.unit3br] },
+        { name: "101", type: "Apartment", floor: 1, rentAmount: 2000, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 800, status: "OCCUPIED", maxOccupants: 2, amenities: ["Balcony", "In-unit W/D"], images: [IMG.grand.unit1br] },
+        { name: "102", type: "Apartment", floor: 1, rentAmount: 3000, depositAmt: 3500, rooms: 2, bathrooms: 2, sqFootage: 1200, status: "OCCUPIED", maxOccupants: 3, amenities: ["City Views", "Stainless Appliances"], images: [IMG.grand.unit2br] },
+        { name: "103", type: "Apartment", floor: 2, rentAmount: 2400, depositAmt: 2800, rooms: 1, bathrooms: 1, sqFootage: 900, status: "OCCUPIED", maxOccupants: 2, images: [IMG.grand.interior1] },
+        { name: "104", type: "Apartment", floor: 2, rentAmount: 3200, depositAmt: 3800, rooms: 2, bathrooms: 2, sqFootage: 1300, status: "OCCUPIED", maxOccupants: 4, amenities: ["Corner Unit"], images: [IMG.grand.interior2] },
+        { name: "105", type: "Apartment", floor: 3, rentAmount: 2800, depositAmt: 3000, rooms: 2, bathrooms: 1, sqFootage: 1100, status: "VACANT", maxOccupants: 2, images: [IMG.grand.interior3] },
+        { name: "106", type: "Apartment", floor: 3, rentAmount: 4500, depositAmt: 5000, rooms: 3, bathrooms: 2, sqFootage: 1800, status: "VACANT", maxOccupants: 5, amenities: ["Penthouse Views", "Premium Finishes"], images: [IMG.grand.unit3br] },
       ]},
     },
     include: { units: true },
@@ -827,9 +861,9 @@ async function main() {
       type: "House", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
       yearBuilt: 2015, description: "Stunning oceanfront villa with panoramic views. Perfect for executive tenants.", parkingSpaces: 4,
       amenities: ["Private Pool", "Ocean Views", "Home Theater", "Chef Kitchen"],
-      coverPhoto: IMG.house.cover, images: [IMG.house.cover, IMG.house.interior, IMG.house.exterior],
+      coverPhoto: IMG.villa.cover, images: [IMG.villa.cover, IMG.villa.interior, IMG.villa.exterior],
       units: { create: [
-        { name: "Main Villa", type: "House", rentAmount: 7500, depositAmt: 7500, rooms: 4, bathrooms: 3, sqFootage: 3200, status: "VACANT", maxOccupants: 6, amenities: ["Pool", "Ocean View", "3-Car Garage"], images: [IMG.house.interior] },
+        { name: "Main Villa", type: "House", rentAmount: 7500, depositAmt: 7500, rooms: 4, bathrooms: 3, sqFootage: 3200, status: "VACANT", maxOccupants: 6, amenities: ["Pool", "Ocean View", "3-Car Garage"], images: [IMG.villa.interior] },
       ]},
     },
     include: { units: true },
@@ -840,7 +874,7 @@ async function main() {
     data: {
       name: "Move-Out Sandbox Estates", address: "999 Testing Lane", city: "Los Angeles", state: "CA", zip: "90001", country: "USA",
       type: "Apartment", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      coverPhoto: IMG.sandbox.cover, images: [IMG.sandbox.cover, IMG.sandbox.interior],
       units: { create: [
         { name: "201", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Liam
         { name: "202", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Amy
@@ -882,7 +916,7 @@ async function main() {
       type: "House", ownerId: ownerPatel.id, approvalStatus: "APPROVED",
       yearBuilt: 2002, description: "Charming single-family home in a quiet residential neighborhood.", parkingSpaces: 2,
       amenities: ["Backyard", "Garage", "Hardwood Floors"],
-      coverPhoto: IMG.house.exterior, images: [IMG.house.exterior, IMG.house.interior],
+      coverPhoto: IMG.patelHome.cover, images: [IMG.patelHome.cover, IMG.patelHome.interior],
       units: { create: [
         { name: "Main Home", type: "House", rentAmount: 4200, depositAmt: 4200, rooms: 3, bathrooms: 2, sqFootage: 1850, status: "OCCUPIED", maxOccupants: 5 },
       ]},
@@ -898,7 +932,7 @@ async function main() {
       type: "Apartment", ownerId: ownerPatel.id, approvalStatus: "PENDING", // ← tests admin approval queue
       yearBuilt: 2021, description: "Modern luxury condos in high demand neighborhood.", parkingSpaces: 1,
       amenities: ["Rooftop Pool", "Underground Parking"],
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      coverPhoto: IMG.patelCondo.cover, images: [IMG.patelCondo.cover, IMG.patelCondo.interior],
       units: { create: [
         { name: "Unit 305", type: "Apartment", rentAmount: 3200, depositAmt: 3200, rooms: 1, bathrooms: 1, sqFootage: 750, status: "VACANT", maxOccupants: 2 },
       ]},
@@ -911,7 +945,7 @@ async function main() {
       name: "Carter Square", address: "404 Main Street", city: "Los Angeles", state: "CA", zip: "90012", country: "USA",
       type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
       yearBuilt: 2012, description: "A quiet, cozy apartment complex.", parkingSpaces: 20,
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      coverPhoto: IMG.carterSquare.cover, images: [IMG.carterSquare.cover, IMG.carterSquare.interior],
       units: { create: [
         { name: "Unit A1", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
         { name: "Unit A2", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
@@ -930,7 +964,7 @@ async function main() {
       name: "Carter Heights", address: "808 Hilltop Road", city: "Los Angeles", state: "CA", zip: "90028", country: "USA",
       type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
       yearBuilt: 2016, description: "Modern units with a view.", parkingSpaces: 10,
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      coverPhoto: IMG.carterHeights.cover, images: [IMG.carterHeights.cover, IMG.carterHeights.interior],
       units: { create: [
         { name: "Unit B1", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "OCCUPIED" },
         { name: "Unit B2", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
@@ -947,7 +981,7 @@ async function main() {
       name: "Impending Plaza", address: "777 Clock Tower Ave", city: "Los Angeles", state: "CA", zip: "90036", country: "USA",
       type: "Apartment", ownerId: ownerPausedImpending.id, approvalStatus: "APPROVED",
       yearBuilt: 2014, description: "A beautifully maintained apartment community near downtown.", parkingSpaces: 15,
-      coverPhoto: IMG.apartment.cover, images: [IMG.apartment.cover],
+      coverPhoto: IMG.impendingPlaza.cover, images: [IMG.impendingPlaza.cover, IMG.impendingPlaza.interior],
       units: { create: [
         { name: "Unit 101", type: "Apartment", rentAmount: 1900, depositAmt: 1900, rooms: 1, bathrooms: 1, sqFootage: 700, status: "VACANT" },
         { name: "Unit 102", type: "Apartment", rentAmount: 2300, depositAmt: 2300, rooms: 2, bathrooms: 2, sqFootage: 950, status: "OCCUPIED" },
@@ -958,6 +992,14 @@ async function main() {
 
   // Create 6 new tenant users for James Carter
   const carterTenants = [];
+  const carterAvatars = [
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
+    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400",
+  ];
   for (let i = 1; i <= 6; i++) {
     const t = await prisma.user.create({
       data: {
@@ -969,6 +1011,7 @@ async function main() {
         tenantStatus: "Active",
         creditScore: 700,
         annualIncome: 80000,
+        avatar: carterAvatars[(i - 1) % carterAvatars.length],
       }
     });
     carterTenants.push(t);
@@ -2462,6 +2505,310 @@ async function main() {
   await prisma.ownerApplication.create({ data: { name: "Greenfield Holdings LLC", email: "greenfield@yopmail.com", phone: "+1 212-555-0001", entityType: "Property Management Company", portfolioSize: "50+", currentSoftware: "Buildium", status: "PENDING", trackingId: "trk_greenfield_001" } });
   await prisma.ownerApplication.create({ data: { name: "Sunrise Properties Corp.", email: "sunrise@yopmail.com", phone: "+1 305-555-0002", entityType: "Real Estate Investor", portfolioSize: "10-50", status: "UNDER_REVIEW", adminNotes: "Large portfolio. Needs enterprise-tier verification.", trackingId: "trk_sunrise_002" } });
   await prisma.ownerApplication.create({ data: { name: "John Solo Landlord", email: "john.solo@yopmail.com", phone: "+1 713-555-0003", entityType: "Independent Landlord", portfolioSize: "1-5", status: "REJECTED", rejectionReason: "Insufficient documentation. Business license could not be verified after 3 attempts.", trackingId: "trk_solo_003" } });
+
+  // ── SECTION 16: Access Controls, Overrides & Audit Logs ─────────────────────
+  console.log("🔒 Seeding access control overrides, grants, and audit logs...");
+
+  // Owner Module Grants / Blocks
+  await (prisma as any).ownerModuleGrant.createMany({
+    data: [
+      {
+        userId: ownerPatel.id,
+        module: "inspections",
+        overrideType: "BLOCK",
+        reason: "Tier restriction block — upgrade required for inspections",
+        adminId: admin.id,
+      },
+      {
+        userId: ownerCoastal.id,
+        module: "messages",
+        overrideType: "GRANT",
+        reason: "Promotional preview grant authorized by Admin",
+        adminId: admin.id,
+      },
+    ],
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Fine-Grained Tenant & Inspector Feature Access Overrides
+  //
+  // Test Scenarios Covered:
+  //
+  //  TENANTS:
+  //  ① Oscar Diaz      — submit_maintenance BLOCKED (permanent, no expiry)
+  //      → Tests: FeatureBlockedBanner on /dashboard/maintenance/new
+  //      → Tests: API 403 on POST /api/maintenance
+  //      → Tests: no expiresAt shown in notification detail
+  //  ② Marvin Torres   — view_documents BLOCKED (expires in 7 days)
+  //      → Tests: FeatureBlockedBanner on /dashboard/leases/documents
+  //      → Tests: expiry countdown shown in notification detail
+  //  ③ Marvin Torres   — message_owner BLOCKED (expires in 14 days)
+  //      → Tests: Message compose/send disabled in /dashboard/messages
+  //      → Tests: existing threads still readable (welfare rule)
+  //  ④ Adam Brooks     — GRANT on view_lease (admin explicit grant)
+  //      → Tests: access is explicitly granted even if tier blocked
+  //
+  //  INSPECTORS:
+  //  ⑤ Jake Thorpe     — access_vendor_portal BLOCKED (permanent)
+  //      → Tests: FeatureBlockedBanner on /dashboard/vendors
+  //  ⑥ Jake Thorpe     — submit_reports BLOCKED (expires in 3 days — urgent)
+  //      → Tests: FeatureBlockedBanner on /dashboard/inspector/inspections
+  //      → Tests: low daysRemaining shows urgent warning styling
+  //  ⑦ Sara Malone     — view_assignments BLOCKED (expires in 30 days)
+  //      → Tests: FeatureBlockedBanner on /dashboard/inspector/active
+  //
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // ① Oscar — submit_maintenance (permanent BLOCK)
+  const blockOscarMaint = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: tenantOscar.id,
+      feature: "submit_maintenance",
+      overrideType: "BLOCK",
+      reason: "Maintenance submission suspended pending active dispute investigation (Case #2025-1147). Do not submit new tickets until dispute is resolved.",
+      expiresAt: null, // permanent until admin manually revokes
+      adminId: admin.id,
+    },
+  });
+
+  // ② Marvin — view_documents (BLOCK with 7-day expiry)
+  const blockMarvinDocs = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: tenantMarvin.id,
+      feature: "view_documents",
+      overrideType: "BLOCK",
+      reason: "Document vault access restricted for 7 days while our compliance team conducts a routine audit of uploaded lease documents. Access will auto-restore upon expiry.",
+      expiresAt: dDaysAfter(7),
+      adminId: admin.id,
+    },
+  });
+
+  // ③ Marvin — message_owner (BLOCK with 14-day expiry)
+  const blockMarvinMsg = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: tenantMarvin.id,
+      feature: "message_owner",
+      overrideType: "BLOCK",
+      reason: "New message threads temporarily restricted for 14 days. You may still read your existing message history. This restriction will lift automatically upon expiry.",
+      expiresAt: dDaysAfter(14),
+      adminId: admin.id,
+    },
+  });
+
+  // ④ Adam — view_lease (explicit admin GRANT — allows even if tier blocks it)
+  await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: tenantAdam.id,
+      feature: "view_lease",
+      overrideType: "GRANT",
+      reason: "Explicit admin grant — tenant requested access during lease dispute. Overrides any tier-level restrictions.",
+      expiresAt: dDaysAfter(30),
+      adminId: admin.id,
+    },
+  });
+
+  // ⑤ Jake — access_vendor_portal (permanent BLOCK)
+  const blockJakeVendor = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: inspectorJake.id,
+      feature: "access_vendor_portal",
+      overrideType: "BLOCK",
+      reason: "Inspector Jake Thorpe operates in a read-only audit role. Vendor portal write access has been revoked to prevent unauthorized vendor onboarding. Contact admin to request access.",
+      expiresAt: null, // permanent
+      adminId: admin.id,
+    },
+  });
+
+  // ⑥ Jake — submit_reports (BLOCK expiring in 3 days — urgent warning scenario)
+  const blockJakeReports = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: inspectorJake.id,
+      feature: "submit_reports",
+      overrideType: "BLOCK",
+      reason: "Report submission paused pending certification renewal (ASHI Inspector Cert #2025-JT-4421). Resume submissions after certificate upload. This block expires automatically in 3 days.",
+      expiresAt: dDaysAfter(3), // urgent — tests low-day warning UI
+      adminId: admin.id,
+    },
+  });
+
+  // ⑦ Sara — view_assignments (BLOCK with 30-day expiry)
+  const blockSaraAssign = await (prisma as any).userAccessOverride.create({
+    data: {
+      userId: (await prisma.user.findUnique({ where: { email: "inspector.sara@yopmail.com" } }))!.id,
+      feature: "view_assignments",
+      overrideType: "BLOCK",
+      reason: "Inspector Sara Malone is currently on approved leave. Assignment visibility has been suspended until return. Access will auto-restore in 30 days. Emergency contacts remain available.",
+      expiresAt: dDaysAfter(30),
+      adminId: admin.id,
+    },
+  });
+
+  // ── SECTION 16b: Feature-Restricted Notifications ──────────────────────────
+  // These mirror the notifications that would be sent by admin when applying blocks.
+  // relatedEntityId = the UserAccessOverride.id so the notification detail page
+  // can fetch full block metadata (reason, expiresAt, daysRemaining) dynamically.
+  console.log("🔔 Seeding feature-restriction notifications...");
+
+  // Fetch Sara's ID (created earlier in the inspector block)
+  const inspectorSara = await prisma.user.findUnique({ where: { email: "inspector.sara@yopmail.com" } });
+
+  await prisma.notification.createMany({
+    data: [
+      // Tenant Oscar — submit_maintenance BLOCKED (permanent, no expiry)
+      {
+        userId: tenantOscar.id,
+        title: "🔒 Feature Restricted: Submit Maintenance Requests",
+        message: "An administrator has restricted your access to Submit Maintenance Requests. Reason: Maintenance submission suspended pending active dispute investigation (Case #2025-1147). This restriction has no automatic expiry — contact support for assistance.",
+        type: "SYSTEM",
+        priority: "HIGH",
+        relatedEntityId: blockOscarMaint.id,
+      },
+      // Tenant Marvin — view_documents BLOCKED (7-day expiry)
+      {
+        userId: tenantMarvin.id,
+        title: "🔒 Feature Restricted: Document Vault",
+        message: "An administrator has temporarily restricted your access to the Document Vault for 7 days. Our compliance team is conducting a routine audit. Access will auto-restore when the restriction expires.",
+        type: "SYSTEM",
+        priority: "HIGH",
+        relatedEntityId: blockMarvinDocs.id,
+      },
+      // Tenant Marvin — message_owner BLOCKED (14-day expiry)
+      {
+        userId: tenantMarvin.id,
+        title: "🔒 Feature Restricted: Message Owner",
+        message: "An administrator has temporarily restricted your ability to send new messages for 14 days. You may still read your existing message history. Access will auto-restore in 14 days.",
+        type: "SYSTEM",
+        priority: "MEDIUM",
+        relatedEntityId: blockMarvinMsg.id,
+      },
+      // Inspector Jake — access_vendor_portal BLOCKED (permanent)
+      {
+        userId: inspectorJake.id,
+        title: "🔒 Feature Restricted: Vendor Portal Access",
+        message: "An administrator has restricted your Vendor Portal Access. You operate in a read-only audit role. Vendor portal write access has been revoked. Contact admin to request access.",
+        type: "SYSTEM",
+        priority: "HIGH",
+        relatedEntityId: blockJakeVendor.id,
+      },
+      // Inspector Jake — submit_reports BLOCKED (3 days — urgent)
+      {
+        userId: inspectorJake.id,
+        title: "⚠️ Feature Restricted: Submit Inspection Reports",
+        message: "URGENT: Your ability to submit inspection reports is blocked for 3 days. Certification renewal required (ASHI Cert #2025-JT-4421). Upload your renewed certificate to restore access early.",
+        type: "SYSTEM",
+        priority: "HIGH",
+        relatedEntityId: blockJakeReports.id,
+      },
+      // Inspector Sara — view_assignments BLOCKED (30-day expiry — approved leave)
+      {
+        userId: inspectorSara!.id,
+        title: "🔒 Feature Restricted: View Assigned Jobs",
+        message: "An administrator has temporarily suspended your assignment visibility for 30 days (approved leave period). Access will automatically restore upon your return. Emergency contacts remain available.",
+        type: "SYSTEM",
+        priority: "MEDIUM",
+        relatedEntityId: blockSaraAssign.id,
+      },
+    ],
+  });
+
+  // Persistent OtpTokens (Testing Distributed OTP Storage)
+  await (prisma as any).otpToken.createMany({
+    data: [
+      {
+        key: "tour_otp:tenant.nora@yopmail.com",
+        code: "654321",
+        expiresAt: dDaysAfter(1),
+      },
+      {
+        key: "lease_otp:demo-lease-signature",
+        code: "987654",
+        expiresAt: dDaysAfter(1),
+      },
+    ],
+  });
+
+  // System Audit Logs
+  await (prisma as any).auditLog.createMany({
+    data: [
+      // Subscription change
+      {
+        entityType: "USER",
+        entityId: ownerAtlas.id,
+        action: "STATUS_CHANGED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Owner Marcus Reed upgraded to Enterprise Tier",
+      },
+      // Owner-level module block
+      {
+        entityType: "USER",
+        entityId: ownerPatel.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Module block applied for inspections on Patel Realty account (Essentials tier does not include inspections)",
+      },
+      // Tenant feature blocks
+      {
+        entityType: "USER",
+        entityId: tenantOscar.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked submit_maintenance for tenant Oscar Diaz — pending dispute investigation (Case #2025-1147)",
+      },
+      {
+        entityType: "USER",
+        entityId: tenantMarvin.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked view_documents for tenant Marvin Torres — 7-day compliance audit. Expires automatically.",
+      },
+      {
+        entityType: "USER",
+        entityId: tenantMarvin.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked message_owner for tenant Marvin Torres — 14-day restriction. Existing threads preserved per welfare policy.",
+      },
+      // Tenant feature grant
+      {
+        entityType: "USER",
+        entityId: tenantAdam.id,
+        action: "USER_FEATURE_GRANTED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Explicit grant on view_lease for tenant Adam Brooks — overrides any tier-level restriction during lease dispute.",
+      },
+      // Inspector feature blocks
+      {
+        entityType: "USER",
+        entityId: inspectorJake.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked access_vendor_portal for Inspector Jake Thorpe — read-only audit role, permanent restriction.",
+      },
+      {
+        entityType: "USER",
+        entityId: inspectorJake.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked submit_reports for Inspector Jake Thorpe — ASHI certification pending renewal. Expires in 3 days.",
+      },
+      {
+        entityType: "USER",
+        entityId: (await prisma.user.findUnique({ where: { email: "inspector.sara@yopmail.com" } }))!.id,
+        action: "USER_FEATURE_BLOCKED",
+        actorId: admin.id,
+        actorRole: "SUPERADMIN",
+        note: "Blocked view_assignments for Inspector Sara Malone — approved leave, auto-restores in 30 days.",
+      },
+    ],
+  });
 
   // ── DONE ──────────────────────────────────────────────────────────────────
   console.log("\\n====================================================");

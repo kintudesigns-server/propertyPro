@@ -107,6 +107,11 @@ model User {
   createdInspectors    User[]               @relation("OwnerInspectors")
   availability         OwnerAvailability?
   subscriptionHistory  SubscriptionHistory[]
+  userAccessOverrides  UserAccessOverride[] @relation("UserAccessOverrides")
+
+  @@index([email])
+  @@index([role])
+  @@index([accountStatus])
 }
 
 model PasswordResetToken {
@@ -226,6 +231,8 @@ model Property {
   units       Unit[]
   documents   Document[]
   tours       Tour[]
+
+  @@index([ownerId])
 }
 
 model Unit {
@@ -252,6 +259,9 @@ model Unit {
   applications Application[]
   tours        Tour[]
   invitations  TenantInvitation[]
+
+  @@index([propertyId])
+  @@index([status])
 }
 
 model Lease {
@@ -355,6 +365,10 @@ model Lease {
   depositBalance           Decimal   @default(0.00) @db.Decimal(10, 2) // Current remaining balance in escrow
   depositTransactionId     String?             // Transaction.id for the deposit payment record
   messages                 Message[]
+
+  @@index([tenantId])
+  @@index([unitId])
+  @@index([status])
 }
 
 model Invoice {
@@ -377,6 +391,10 @@ model Invoice {
   note          String?
 
   transactions  Transaction[]
+
+  @@index([leaseId])
+  @@index([status])
+  @@index([dueDate])
 }
 
 model MaintenanceRequest {
@@ -449,6 +467,10 @@ model MaintenanceRequest {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   messages      Message[]
+
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([status])
 }
 
 model PayoutRequest {
@@ -592,6 +614,9 @@ model Notification {
   isRead          Boolean  @default(false)
   relatedEntityId String?
   createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
 }
 
 model PlatformSettings {
@@ -613,6 +638,11 @@ model PlatformSettings {
   blockProcessApplicationsOnPaused Boolean @default(true)
   blockAddTenantOnPaused          Boolean @default(true)
   blockTourSlotsOnPaused          Boolean @default(true)
+
+  // Welfare exemption flags (these bypass all paused locks)
+  welfareAllowMoveOut       Boolean @default(true)
+  welfareAllowBillingView   Boolean @default(true)
+  welfareAllowEmergencyDispatch Boolean @default(true)
 
   updatedAt                DateTime @updatedAt
 }
@@ -651,6 +681,10 @@ model AuditLog {
   newValue     Json?    // New state (key fields only)
   note         String?  // Human readable summary
   createdAt    DateTime @default(now())
+
+  @@index([entityId])
+  @@index([actorId])
+  @@index([createdAt])
 }
 
 enum TourType {
@@ -760,6 +794,26 @@ model SubscriptionOverride {
   manualPausedByAdmin  Boolean   @default(false)
   manualRestored       Boolean   @default(false)
 
+  // Fine-grained paused-restriction overrides (null = use platform default)
+  allowAddVendor            Boolean?  // null = use global policy
+  allowAddInspector         Boolean?
+  allowProcessApplications  Boolean?
+  allowAddTenant            Boolean?
+  allowTourSlots            Boolean?
+
+  // Emergency Grant metadata
+  emergencyGrantReason      String?
+  emergencyGrantedAt        DateTime?
+
+  // Per-policy expiration overrides (null = indefinite or fallback to expiresAt)
+  blockPayoutsExpiresAt             DateTime?
+  blockNewUnitsExpiresAt            DateTime?
+  allowAddVendorExpiresAt           DateTime?
+  allowAddInspectorExpiresAt        DateTime?
+  allowProcessApplicationsExpiresAt DateTime?
+  allowAddTenantExpiresAt           DateTime?
+  allowTourSlotsExpiresAt           DateTime?
+
   // Expiry
   expiresAt            DateTime?
 
@@ -778,11 +832,45 @@ model OwnerModuleGrant {
   expiresAt   DateTime? 
   reason      String    
   adminId     String    
+  overrideType String   @default("GRANT")  // "GRANT" | "BLOCK"
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@unique([userId, module])
   @@index([userId])
+}
+
+model UserAccessOverride {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation("UserAccessOverrides", fields: [userId], references: [id], onDelete: Cascade)
+  
+  feature       String    // e.g. "submit_maintenance", "view_lease", "view_documents"
+  overrideType  String    // "BLOCK" | "GRANT"
+  
+  reason        String
+  adminId       String
+  expiresAt     DateTime?
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedByAdminId String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, feature])
+}
+
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }
 
 

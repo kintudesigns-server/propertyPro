@@ -10,8 +10,11 @@ import { Loader2, Calendar, ClipboardCheck, CheckCircle2, User, MapPin, Eye, Arr
 import { toast } from "sonner";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
 
 export default function InspectorInspectionsPage() {
+  const featureAccess = useFeatureAccess("submit_reports");
   const { data: session, status } = useSession();
   const [leases, setLeases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +38,29 @@ export default function InspectorInspectionsPage() {
       fetchLeases();
     }
   }, [status]);
+
+  if (featureAccess.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+        <p className="text-[#8E8E93] font-extrabold text-sm tracking-wider uppercase">Verifying report permissions...</p>
+      </div>
+    );
+  }
+
+  if (!featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="submit_reports"
+        featureLabel={featureAccess.featureLabel || "Submit Inspection Reports"}
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      />
+    );
+  }
 
   if (loading || status === "loading") {
     return (
