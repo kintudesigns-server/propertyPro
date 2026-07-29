@@ -199,7 +199,7 @@ export default function AdminProfileSettingsPage() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             Admin Profile & Security Settings
           </h1>
-          <p className="text-slate-500 text-sm mt-0.5 font-medium">
+          <p className="text-[#6E6E73] text-sm mt-0.5 font-medium">
             Manage your personal administrator credentials, profile details, and security configuration
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function AdminProfileSettingsPage() {
             <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
               <User className="h-4 w-4 text-blue-600" /> Personal Profile Information
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 font-medium">
+            <CardDescription className="text-xs text-[#6E6E73] font-medium">
               Your name and contact details visible across administrator audit logs
             </CardDescription>
           </CardHeader>
@@ -235,7 +235,7 @@ export default function AdminProfileSettingsPage() {
               />
               <div 
                 onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-                className="h-24 w-24 rounded-full bg-slate-900 text-white flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-all relative overflow-hidden shrink-0 border-2 border-slate-200 shadow-md group"
+                className="h-24 w-24 rounded-full bg-[#007AFF] text-white flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-all relative overflow-hidden shrink-0 border-2 border-slate-200 shadow-md group"
               >
                 {uploadingAvatar ? (
                   <Loader2 className="h-6 w-6 animate-spin text-white" />
@@ -253,7 +253,7 @@ export default function AdminProfileSettingsPage() {
 
               <div className="space-y-2 text-center sm:text-left flex-1">
                 <h4 className="font-bold text-slate-900 text-sm">Administrator Photo</h4>
-                <p className="text-xs text-slate-500 font-medium">Upload your profile image (JPG, PNG, WEBP up to 10MB)</p>
+                <p className="text-xs text-[#6E6E73] font-medium">Upload your profile image (JPG, PNG, WEBP up to 10MB)</p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
                   <Button 
                     type="button"
@@ -287,7 +287,7 @@ export default function AdminProfileSettingsPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-slate-700">Full Name *</Label>
                 <div className="relative">
-                  <User className="h-4 w-4 absolute left-3 top-3.5 text-slate-400" />
+                  <User className="h-4 w-4 absolute left-3 top-3.5 text-[#8E8E93]" />
                   <Input 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -301,11 +301,11 @@ export default function AdminProfileSettingsPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-slate-700">Email Address (Account ID)</Label>
                 <div className="relative">
-                  <Mail className="h-4 w-4 absolute left-3 top-3.5 text-slate-400" />
+                  <Mail className="h-4 w-4 absolute left-3 top-3.5 text-[#8E8E93]" />
                   <Input 
                     value={email}
                     disabled
-                    className="pl-9 bg-slate-100 border-slate-200 rounded-xl h-11 text-xs font-semibold text-slate-500 cursor-not-allowed"
+                    className="pl-9 bg-slate-100 border-slate-200 rounded-xl h-11 text-xs font-semibold text-[#6E6E73] cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -314,7 +314,7 @@ export default function AdminProfileSettingsPage() {
               <div className="space-y-1.5 sm:col-span-2">
                 <Label className="text-xs font-bold text-slate-700">Contact Phone Number</Label>
                 <div className="relative">
-                  <Phone className="h-4 w-4 absolute left-3 top-3.5 text-slate-400" />
+                  <Phone className="h-4 w-4 absolute left-3 top-3.5 text-[#8E8E93]" />
                   <Input 
                     type="tel"
                     value={phone}
@@ -336,7 +336,7 @@ export default function AdminProfileSettingsPage() {
             <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
               <KeyRound className="h-4 w-4 text-emerald-600" /> Security & Password Update
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 font-medium">
+            <CardDescription className="text-xs text-[#6E6E73] font-medium">
               Leave blank if you do not wish to change your current password
             </CardDescription>
           </CardHeader>
@@ -356,7 +356,7 @@ export default function AdminProfileSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-3.5 text-[#8E8E93] hover:text-[#6E6E73]"
                 >
                   {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -379,7 +379,7 @@ export default function AdminProfileSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-3.5 text-[#8E8E93] hover:text-[#6E6E73]"
                   >
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -409,7 +409,7 @@ export default function AdminProfileSettingsPage() {
             <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
               <Bell className="h-4 w-4 text-purple-600" /> Platform Event Notification Preferences
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 font-medium">
+            <CardDescription className="text-xs text-[#6E6E73] font-medium">
               Choose which high-priority platform events dispatch instant alert notifications to you
             </CardDescription>
           </CardHeader>
@@ -418,7 +418,7 @@ export default function AdminProfileSettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-bold text-slate-900 text-sm">New Owner Registrations</h4>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Receive notifications when property owners submit applications</p>
+                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Receive notifications when property owners submit applications</p>
               </div>
               <Switch 
                 checked={notifyOwnerApplications}
@@ -431,7 +431,7 @@ export default function AdminProfileSettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-bold text-slate-900 text-sm">Owner Payout Requests</h4>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Receive alert when landlord requests withdrawal payout</p>
+                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Receive alert when landlord requests withdrawal payout</p>
               </div>
               <Switch 
                 checked={notifyPayoutRequests}
@@ -444,7 +444,7 @@ export default function AdminProfileSettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-bold text-slate-900 text-sm">Maintenance Escalations</h4>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Alert on emergency maintenance requests exceeding threshold limit</p>
+                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Alert on emergency maintenance requests exceeding threshold limit</p>
               </div>
               <Switch 
                 checked={notifyMaintenanceEscalations}
@@ -460,7 +460,7 @@ export default function AdminProfileSettingsPage() {
           <Button 
             type="submit"
             disabled={saving || uploadingAvatar}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 h-12 px-8 shadow-sm transition-all text-sm"
+            className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 h-12 px-8 shadow-sm transition-all text-sm"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             Save Profile & Security Changes

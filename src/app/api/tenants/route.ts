@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sanitizeUser } from "@/lib/sanitization";
 import { encryptSymmetric as encrypt } from "@/lib/encryption";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -95,7 +97,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
+  const ownerId = (session.user as any).id;
   try {
+    const rules = await getEffectiveSubscriptionRules(ownerId);
+    if (rules.blockAddTenant) {
+      await auditLog({
+        entityType: "SUBSCRIPTION_GATE",
+        entityId: ownerId,
+        action: "BLOCKED_BY_PAUSE",
+        actorId: ownerId,
+        actorRole: "OWNER",
+        note: "Attempted: Add Tenant. Blocked by: blockAddTenantOnPaused",
+      });
+      return NextResponse.json({
+        error: "Your account is currently paused. Adding new tenants is restricted until subscription is reactivated.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
     const data = await req.json();
     
     if (!data.email || !data.password || !data.name) {

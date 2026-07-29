@@ -121,27 +121,27 @@ export function CalendarGrid() {
       {/* Events Banner (Always at the very top) */}
       <div className={`border rounded-2xl p-5 shadow-sm transition-all ${
         isShowingSelected ? "bg-purple-50 border-purple-200" :
-        isShowingNext ? "bg-slate-50 border-slate-200" : "bg-[#EFF6FF] border-[#3B82F6]/20"
+        isShowingNext ? "bg-slate-50 border-slate-200" : "bg-[#EFF6FF] border-[#007AFF]/20"
       }`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Bell className={`h-5 w-5 ${
               isShowingSelected ? "text-purple-600" :
-              isShowingNext ? "text-[#64748B]" : "text-[#3B82F6]"
+              isShowingNext ? "text-[#6E6E73]" : "text-[#007AFF]"
             }`} />
             <h3 className={`text-base font-extrabold ${
               isShowingSelected ? "text-purple-900" :
-              isShowingNext ? "text-[#0F172A]" : "text-[#1E3A8A]"
+              isShowingNext ? "text-[#1D1D1F]" : "text-[#1E3A8A]"
             }`}>
               {bannerTitle}
             </h3>
             {(isShowingNext || isShowingSelected) && displayEvents[0] && (
-              <span className="text-xs font-bold text-[#64748B] ml-2">
+              <span className="text-xs font-bold text-[#6E6E73] ml-2">
                 • {format(new Date(displayEvents[0].date), "MMM d, yyyy")}
               </span>
             )}
             {!isShowingNext && !isShowingSelected && displayEvents.length > 0 && (
-              <span className="bg-[#3B82F6] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-2">
+              <span className="bg-[#007AFF] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-2">
                 {displayEvents.length}
               </span>
             )}
@@ -160,7 +160,7 @@ export function CalendarGrid() {
         
         {displayEvents.length === 0 ? (
            <div className={`text-sm font-bold py-4 text-center bg-white/50 rounded-xl border ${
-             isShowingSelected ? "text-purple-700/70 border-purple-100" : "text-slate-500 border-slate-200"
+             isShowingSelected ? "text-purple-700/70 border-purple-100" : "text-[#6E6E73] border-slate-200"
            }`}>
              {isShowingSelected 
                ? "No events scheduled for this day." 
@@ -173,7 +173,7 @@ export function CalendarGrid() {
                 key={event.id}
                 className={`bg-white p-4 rounded-xl border transition-colors shadow-sm flex items-start gap-3 ${
                   isShowingSelected ? "border-purple-200 hover:border-purple-400" :
-                  isShowingNext ? "border-[#E2E8F0] hover:border-[#CBD5E1]" : "border-[#BFDBFE] hover:border-[#3B82F6]"
+                  isShowingNext ? "border-[#E5E5EA] hover:border-[#CBD5E1]" : "border-[#BFDBFE] hover:border-[#007AFF]"
                 }`}
               >
                 <div className={`p-2 rounded-lg shrink-0 ${
@@ -187,17 +187,17 @@ export function CalendarGrid() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    <span className="text-[10px] font-extrabold text-[#6E6E73] uppercase tracking-wider">
                       {event.type}
                     </span>
                     {event.priority === "HIGH" && (
                       <span className="h-2 w-2 rounded-full bg-red-500" title="High Priority" />
                     )}
                   </div>
-                  <p className="font-bold text-[#0F172A] text-sm truncate mb-1">{event.title}</p>
+                  <p className="font-bold text-[#1D1D1F] text-sm truncate mb-1">{event.title}</p>
                   
                   {event.metadata?.propertyName && (
-                    <p className="text-xs font-medium text-[#64748B] truncate mb-2">
+                    <p className="text-xs font-medium text-[#6E6E73] truncate mb-2">
                       {event.metadata.propertyName} {event.metadata.unitNumber ? `— Unit ${event.metadata.unitNumber}` : ""}
                     </p>
                   )}
@@ -205,7 +205,7 @@ export function CalendarGrid() {
                   <div className="pt-2 mt-2 border-t border-slate-100 flex justify-end">
                     <Link 
                       href={getEventActionLink(event)}
-                      className="flex items-center gap-1 text-[11px] font-bold text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+                      className="flex items-center gap-1 text-[11px] font-bold text-[#007AFF] hover:text-[#0062CC] transition-colors"
                     >
                       View Details <ChevronRight className="h-3 w-3" />
                     </Link>
@@ -220,31 +220,31 @@ export function CalendarGrid() {
       {/* Top Header / Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">Calendar</h1>
-          <p className="text-sm text-[#64748B] font-medium mt-1">Manage your property events, appointments, and schedules</p>
+          <h1 className="text-2xl font-extrabold text-[#1D1D1F] tracking-tight">Calendar</h1>
+          <p className="text-sm text-[#6E6E73] font-medium mt-1">Manage your property events, appointments, and schedules</p>
         </div>
         
         <div className="flex items-center gap-3">
           <button 
             onClick={goToToday}
-            className="px-4 py-2 text-sm font-bold text-[#64748B] bg-white border border-[#E2E8F0] rounded-xl shadow-sm hover:bg-slate-50 hover:text-[#0F172A] transition-colors"
+            className="px-4 py-2 text-sm font-bold text-[#6E6E73] bg-white border border-[#E5E5EA] rounded-xl shadow-sm hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors"
           >
             Today
           </button>
 
-          <div className="flex items-center bg-white border border-[#E2E8F0] rounded-xl shadow-sm overflow-hidden">
+          <div className="flex items-center bg-white border border-[#E5E5EA] rounded-xl shadow-sm overflow-hidden">
             <button 
               onClick={prevMonth}
-              className="p-2 text-[#64748B] hover:bg-slate-50 hover:text-[#0F172A] transition-colors border-r border-[#E2E8F0]"
+              className="p-2 text-[#6E6E73] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors border-r border-[#E5E5EA]"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <div className="px-4 py-2 text-sm font-bold text-[#0F172A] min-w-[120px] text-center">
+            <div className="px-4 py-2 text-sm font-bold text-[#1D1D1F] min-w-[120px] text-center">
               {format(currentDate, "MMMM yyyy")}
             </div>
             <button 
               onClick={nextMonth}
-              className="p-2 text-[#64748B] hover:bg-slate-50 hover:text-[#0F172A] transition-colors border-l border-[#E2E8F0]"
+              className="p-2 text-[#6E6E73] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors border-l border-[#E5E5EA]"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -253,15 +253,15 @@ export function CalendarGrid() {
       </div>
 
       {/* Calendar View */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col relative">
+      <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-sm overflow-hidden flex flex-col relative">
         {loading && (
           <div className="absolute top-0 left-0 w-full h-1">
-            <div className="h-full bg-[#3B82F6] animate-pulse"></div>
+            <div className="h-full bg-[#007AFF] animate-pulse"></div>
           </div>
         )}
 
         {/* Days of Week Header */}
-        <div className="grid grid-cols-7 border-b border-[#E2E8F0] bg-white">
+        <div className="grid grid-cols-7 border-b border-[#E5E5EA] bg-white">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div key={day} className="py-3 text-center text-xs font-extrabold text-[#94A3B8] uppercase tracking-wider">
               {day}
@@ -270,7 +270,7 @@ export function CalendarGrid() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 auto-rows-fr bg-[#E2E8F0] gap-px border-b border-[#E2E8F0]">
+        <div className="grid grid-cols-7 auto-rows-fr bg-[#E5E5EA] gap-px border-b border-[#E5E5EA]">
           {days.map((day, idx) => {
             const dayEvents = getEventsForDay(day);
             const isCurrentMonth = isSameMonth(day, monthStart);
@@ -282,22 +282,22 @@ export function CalendarGrid() {
                 onClick={() => dayEvents.length > 0 && setSelectedDate(day)}
                 className={`min-h-[120px] bg-white p-2 transition-colors relative flex flex-col ${
                   !isCurrentMonth ? "bg-slate-50/50" : ""
-                } ${dayEvents.length > 0 ? "cursor-pointer hover:bg-slate-50" : ""}`}
+                } ${dayEvents.length > 0 ? "cursor-pointer hover:bg-[#F5F5F7]" : ""}`}
               >
                 {/* Date Number */}
                 <div className="flex justify-between items-start mb-2">
                   <span className={`text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${
                     isTodayDate 
-                      ? "bg-[#3B82F6] text-white" 
+                      ? "bg-[#007AFF] text-white" 
                       : !isCurrentMonth 
                         ? "text-[#CBD5E1]" 
-                        : "text-[#0F172A]"
+                        : "text-[#1D1D1F]"
                   }`}>
                     {format(day, "d")}
                   </span>
                   
                   {dayEvents.length > 0 && (
-                    <span className="text-[10px] font-bold text-[#64748B] bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-[#6E6E73] bg-slate-100 px-1.5 py-0.5 rounded">
                       {dayEvents.length}
                     </span>
                   )}
@@ -320,7 +320,7 @@ export function CalendarGrid() {
                     </div>
                   ))}
                   {dayEvents.length > 3 && (
-                    <div className="text-[10px] font-bold text-[#64748B] px-1.5">
+                    <div className="text-[10px] font-bold text-[#6E6E73] px-1.5">
                       +{dayEvents.length - 3} more
                     </div>
                   )}

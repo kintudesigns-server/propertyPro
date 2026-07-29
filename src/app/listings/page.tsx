@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import dynamic from "next/dynamic";
 import {
   Home,
   MapPin,
@@ -39,11 +40,22 @@ import {
   GraduationCap,
   Wallet,
   Lock,
-  Loader2
+  Loader2,
+  List,
+  SlidersHorizontal
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ScheduleTourModal } from "@/components/modals/ScheduleTourModal";
+
+const ListingsMap = dynamic(() => import("@/components/listings/ListingsMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full rounded-[22px] bg-[#EBF1F6] flex items-center justify-center text-[#8E8E93] text-xs font-semibold animate-pulse">
+      Loading Map...
+    </div>
+  ),
+});
 
 interface VacantUnit {
   id: string;
@@ -90,6 +102,9 @@ export default function ListingsPage() {
   // Favorites State (Stored in localStorage)
   const [favorites, setFavorites] = useState<string[]>([]);
   
+  // Mobile View Switcher (list vs map)
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+
   // Hovered Property ID to link map interaction
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
 
@@ -731,131 +746,140 @@ export default function ListingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F2F2F7] text-[#1D1D1F] flex flex-col font-sans selection:bg-[#007AFF]/20">
       
-      {/* Premium Header Aligned with Landing Page */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/50 px-6 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <Building2 className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-black tracking-tight text-[#0F172A]">PropertyPro</span>
-        </Link>
-        <Link href={session ? "/dashboard" : "/auth/login"}>
-          <Button className="bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold px-6 py-2 rounded-xl text-xs transition-colors shadow-sm">
-            {session ? "Workspace Dashboard" : "Sign In"}
-          </Button>
-        </Link>
+      {/* iOS Translucent Blurred Navigation Bar */}
+      <header className="sticky top-0 z-40 bg-white/75 backdrop-blur-xl border-b border-black/10 px-4 sm:px-8 py-3 flex items-center justify-between transition-all">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="h-9 w-9 bg-[#007AFF] rounded-2xl flex items-center justify-center shadow-md shadow-[#007AFF]/25 group-hover:scale-105 transition-transform duration-200">
+              <Building2 className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-extrabold tracking-tight text-[#1D1D1F] leading-tight">PropertyPro</span>
+              <span className="text-[10px] text-[#8E8E93] font-medium tracking-wide">Verified Listings</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Mobile View Toggle Segmented Control (List / Map) */}
+        <div className="flex lg:hidden items-center bg-[#E5E5EA] p-1 rounded-full text-xs font-semibold">
+          <button
+            onClick={() => setViewMode("list")}
+            className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
+              viewMode === "list" ? "bg-white text-[#1D1D1F] shadow-sm font-bold" : "text-[#8E8E93]"
+            }`}
+          >
+            <List className="h-3.5 w-3.5" /> List
+          </button>
+          <button
+            onClick={() => setViewMode("map")}
+            className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
+              viewMode === "map" ? "bg-white text-[#1D1D1F] shadow-sm font-bold" : "text-[#8E8E93]"
+            }`}
+          >
+            <MapIcon className="h-3.5 w-3.5" /> Map
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link href={session ? "/dashboard" : "/auth/login"}>
+            <Button className="bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold px-4 py-2 rounded-full text-xs transition-all shadow-sm shadow-[#007AFF]/20 active:scale-95">
+              {session ? "Workspace" : "Sign In"}
+            </Button>
+          </Link>
+        </div>
       </header>
 
-      {/* Hero Header Section */}
-      <div className="relative overflow-hidden py-14 px-6 text-center bg-slate-50 border-b border-slate-200/40">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.06),transparent_50%)] pointer-events-none" />
-        <div className="max-w-4xl mx-auto space-y-4">
-          <Badge className="bg-blue-50 border border-blue-200/80 text-blue-700 font-extrabold px-3 py-1 rounded-full text-[10px] tracking-wider uppercase shadow-sm">
-            <Sparkle className="h-3 w-3 fill-current mr-1 text-blue-600 animate-pulse" /> Verified Listings Only
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-[#0F172A] leading-none">
-            Discover Verified Rental Homes
-          </h1>
-          <p className="text-slate-500 text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-            Browse active apartments, single-family houses, and commercial spaces listed directly by verified owners.
-          </p>
-        </div>
-      </div>
-
-      {/* Quick Info & Checkout Steps Bar */}
-      <div className="max-w-7xl mx-auto px-6 mt-8 w-full">
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-          <div className="space-y-1 text-left max-w-lg">
-            <h3 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-emerald-500" />
-              100% Free Application Checkout
-            </h3>
-            <p className="text-slate-500 text-xs font-semibold leading-relaxed">
-              No deposit or application fees required. Once a landlord approves your profile, sign the agreement digitally and make secure bond payouts using Stripe.
-            </p>
-          </div>
-          <div className="flex gap-2 text-center text-[10px] font-bold text-slate-500 bg-slate-50 p-2 rounded-2xl border border-slate-200/40 shrink-0 w-full md:w-auto overflow-x-auto">
-            {["1. Apply Free", "2. Approval", "3. Digital Sign", "4. Stripe Bond"].map((step, idx) => (
-              <span key={idx} className="bg-white px-3 py-1.5 rounded-lg border border-slate-250/30 whitespace-nowrap shadow-sm">
-                {step}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Split Layout Container */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full flex flex-col lg:flex-row gap-8">
-        
-        {/* Left Side: Filter bar + Listings Grid (65% width) */}
-        <div className="lg:w-[65%] space-y-6 flex flex-col">
-          
-          {/* Advanced Filter Toolbar */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Search by city, property, or unit name..."
-                  value={searchCity}
-                  onChange={(e) => setSearchCity(e.target.value)}
-                  className="pl-10 bg-slate-50/50 border-slate-200 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-xl h-11 text-xs font-semibold"
-                />
-              </div>
-              <div className="grid grid-cols-2 md:flex items-center gap-2">
-                <select
-                  value={propertyType}
-                  onChange={(e) => setPropertyType(e.target.value)}
-                  className="bg-slate-50/50 border border-slate-200 text-slate-700 rounded-xl h-11 px-3 text-xs focus:ring-1 focus:ring-blue-500 font-extrabold cursor-pointer"
+      {/* iOS Search & Segmented Filter Bar */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-1 w-full space-y-3">
+        <div className="bg-white/80 backdrop-blur-md rounded-[20px] p-3.5 border border-black/5 shadow-sm space-y-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
+            {/* iOS Pill Search Input */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+              <input
+                type="text"
+                placeholder="Search city, neighborhood, or building..."
+                value={searchCity}
+                onChange={(e) => setSearchCity(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 bg-[#F2F2F7] text-[#1D1D1F] placeholder-[#8E8E93] text-xs font-medium rounded-full border-0 focus:ring-2 focus:ring-[#007AFF] transition-all outline-none"
+              />
+              {searchCity && (
+                <button
+                  onClick={() => setSearchCity("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8E8E93] hover:text-[#1D1D1F]"
                 >
-                  <option value="all">All Types</option>
-                  <option value="apartment">Apartments</option>
-                  <option value="house">Houses</option>
-                  <option value="commercial">Commercial</option>
-                </select>
-                
-                <div className="relative">
-                  <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                  <Input
-                    type="number"
-                    placeholder="Max Rent"
-                    value={maxRent}
-                    onChange={(e) => setMaxRent(e.target.value)}
-                    className="pl-7 bg-slate-50/50 border-slate-200 text-slate-800 placeholder-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-xl h-11 text-xs font-semibold w-full md:w-28"
-                  />
-                </div>
-              </div>
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
 
-            <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-bold text-slate-400">
-              <div className="flex gap-4">
-                <span>{processedUnits.length} units matching</span>
-                <span className="text-slate-350">|</span>
-                <select
-                  value={minRooms}
-                  onChange={(e) => setMinRooms(e.target.value)}
-                  className="bg-transparent border-none text-slate-500 hover:text-[#0F172A] font-bold cursor-pointer text-[11px] p-0 focus:ring-0"
+            {/* iOS Segmented Pill Selector for Property Type */}
+            <div className="flex items-center bg-[#F2F2F7] p-1 rounded-full text-xs font-medium shrink-0 w-full md:w-auto overflow-x-auto">
+              {[
+                { id: "all", label: "All Types" },
+                { id: "apartment", label: "Apartments" },
+                { id: "house", label: "Houses" },
+                { id: "commercial", label: "Commercial" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setPropertyType(t.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
+                    propertyType === t.id
+                      ? "bg-white text-[#007AFF] font-bold shadow-sm"
+                      : "text-[#8E8E93] hover:text-[#1D1D1F]"
+                  }`}
                 >
-                  <option value="all">Any Bedroom Count</option>
-                  <option value="1">1+ Bed</option>
-                  <option value="2">2+ Beds</option>
-                  <option value="3">3+ Beds</option>
-                </select>
-                <span className="text-slate-350">|</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent border-none text-slate-500 hover:text-[#0F172A] font-bold cursor-pointer text-[11px] p-0 focus:ring-0"
-                >
-                  <option value="featured">Featured First</option>
-                  <option value="rent_asc">Rent: Low to High</option>
-                  <option value="rent_desc">Rent: High to Low</option>
-                  <option value="sqft_desc">Size: Large First</option>
-                </select>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Secondary Pill Filters */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-black/5 text-xs text-[#8E8E93]">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Bedrooms Pill */}
+              <select
+                value={minRooms}
+                onChange={(e) => setMinRooms(e.target.value)}
+                className="bg-[#F2F2F7] border-0 text-[#1D1D1F] text-xs font-medium px-3.5 py-1.5 rounded-full cursor-pointer focus:ring-2 focus:ring-[#007AFF] outline-none"
+              >
+                <option value="all">Bedrooms: Any</option>
+                <option value="1">1+ Bed</option>
+                <option value="2">2+ Beds</option>
+                <option value="3">3+ Beds</option>
+              </select>
+
+              {/* Max Rent Pill */}
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-[#8E8E93] font-medium text-xs">$</span>
+                <input
+                  type="number"
+                  placeholder="Max Rent"
+                  value={maxRent}
+                  onChange={(e) => setMaxRent(e.target.value)}
+                  className="w-28 pl-6 pr-3 py-1.5 bg-[#F2F2F7] text-[#1D1D1F] placeholder-[#8E8E93] text-xs font-medium rounded-full border-0 focus:ring-2 focus:ring-[#007AFF] outline-none"
+                />
               </div>
 
+              {/* Sort By Pill */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-[#F2F2F7] border-0 text-[#1D1D1F] text-xs font-medium px-3.5 py-1.5 rounded-full cursor-pointer focus:ring-2 focus:ring-[#007AFF] outline-none"
+              >
+                <option value="featured">Featured First</option>
+                <option value="rent_asc">Rent: Low to High</option>
+                <option value="rent_desc">Rent: High to Low</option>
+                <option value="sqft_desc">Size: Largest</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="font-medium text-[#1D1D1F]">{processedUnits.length} units matching</span>
               {(searchCity || maxRent || minRooms !== "all" || propertyType !== "all") && (
                 <button
                   onClick={() => {
@@ -865,36 +889,43 @@ export default function ListingsPage() {
                     setPropertyType("all");
                     setSortBy("featured");
                   }}
-                  className="text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                  className="text-[#007AFF] hover:underline font-medium flex items-center gap-1"
                 >
                   Clear Filters <X className="h-3 w-3" />
                 </button>
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Results Grid */}
+      {/* Main Split Layout Container (55% Cards Grid / 45% Sticky Real Map) */}
+      <main className="flex-1 max-w-[1400px] mx-auto px-4 sm:px-6 py-4 w-full flex flex-col lg:flex-row gap-6">
+        
+        {/* Left Side: Property Cards Grid */}
+        <div className={`lg:w-[55%] space-y-4 flex flex-col ${viewMode === "map" ? "hidden lg:flex" : "flex"}`}>
+          
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="h-80 rounded-3xl bg-white border border-slate-200/80 animate-pulse shadow-sm" />
+                <div key={n} className="h-80 rounded-[22px] bg-white border border-black/5 animate-pulse shadow-sm" />
               ))}
             </div>
           ) : groupedList.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 max-w-md mx-auto shadow-sm w-full">
-              <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-extrabold text-[#0F172A] mb-1">No Listings Match</h3>
-              <p className="text-xs text-slate-400 font-semibold px-4">Adjust your filters, budget parameters, or try a different city query.</p>
+            <div className="text-center py-20 bg-white rounded-[22px] border border-dashed border-black/10 max-w-md mx-auto shadow-sm w-full">
+              <Home className="h-12 w-12 text-[#8E8E93] mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-[#1D1D1F] mb-1">No Properties Found</h3>
+              <p className="text-xs text-[#8E8E93] font-medium px-4">Try adjusting your filters, max rent budget, or search terms.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {groupedList.map((group: any) => {
                 const isMultiUnit = group.units.length > 1;
                 const unit = group.units[0];
                 const isFav = favorites.includes(group.property.id);
 
                 return (
-                  <Card
+                  <div
                     key={group.property.id}
                     onMouseEnter={() => setHoveredPropertyId(group.property.id)}
                     onMouseLeave={() => setHoveredPropertyId(null)}
@@ -905,90 +936,86 @@ export default function ListingsPage() {
                         window.location.href = `/listings/${unit.id}`;
                       }
                     }}
-                    className={`overflow-hidden bg-white border rounded-[2rem] shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-300 flex flex-col text-left cursor-pointer group ${
-                      hoveredPropertyId === group.property.id ? "border-blue-400 scale-[1.01]" : "border-slate-200/70"
+                    className={`group relative bg-white rounded-[22px] border transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden cursor-pointer flex flex-col ${
+                      hoveredPropertyId === group.property.id
+                        ? "border-[#007AFF] shadow-xl shadow-blue-500/10 -translate-y-1"
+                        : "border-black/5 shadow-sm hover:shadow-md"
                     }`}
                   >
                     {/* Visual Media Cover */}
-                    <div className="h-48 overflow-hidden relative bg-slate-100 shrink-0">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#E5E5EA]">
                       <img
                         src={group.property.coverPhoto || unit.images?.[0] || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
                         alt={group.property.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
                         }}
                       />
-                      
-                      {/* Dark gradient shadow */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
 
                       {/* Top Action Buttons (Favorite + Share) */}
-                      <div className="absolute top-4 right-4 flex gap-1.5 z-10">
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                         <button
                           onClick={(e) => copyShareLink(unit.id, e)}
-                          className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-650 hover:text-blue-600 flex items-center justify-center shadow-sm backdrop-blur-sm transition-all"
+                          className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-[#1D1D1F] flex items-center justify-center backdrop-blur-md shadow-sm transition-all active:scale-90"
                           title="Copy Link"
                         >
                           <Share2 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => toggleFavorite(group.property.id, e)}
-                          className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-650 flex items-center justify-center shadow-sm backdrop-blur-sm transition-all"
+                          className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-[#1D1D1F] flex items-center justify-center backdrop-blur-md shadow-sm transition-all active:scale-90"
                           title="Save Home"
                         >
-                          <Heart className={`h-3.5 w-3.5 transition-colors ${isFav ? "fill-rose-500 text-rose-500" : "text-slate-500 hover:text-rose-500"}`} />
+                          <Heart className={`h-3.5 w-3.5 transition-colors ${isFav ? "fill-[#FF2D55] text-[#FF2D55]" : "text-[#1D1D1F]"}`} />
                         </button>
                       </div>
 
                       {/* Property Type Badge */}
-                      <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
-                        <Badge className={`font-black text-[9px] px-2.5 py-1 border-0 rounded-lg shadow-sm uppercase tracking-wider backdrop-blur-sm ${
-                          group.property.type === "House" ? "bg-amber-500/90 text-white" :
-                          group.property.type === "Commercial" ? "bg-indigo-500/90 text-white" :
-                          "bg-emerald-500/90 text-white"
-                        }`}>
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                        <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide">
+                          <span className={`h-1.5 w-1.5 rounded-full ${
+                            group.property.type === "House" ? "bg-amber-400" :
+                            group.property.type === "Commercial" ? "bg-indigo-400" : "bg-emerald-400"
+                          }`} />
                           {group.property.type}
-                        </Badge>
-                        {group.property.type === "Commercial" && group.property.zoningType && (
-                          <Badge className="bg-blue-600/90 text-white border-0 shadow-sm rounded-lg px-2.5 py-1 font-bold text-[9px] uppercase tracking-wider backdrop-blur-sm">
-                            Zoning: {group.property.zoningType}
-                          </Badge>
-                        )}
+                        </span>
                       </div>
 
-                      {/* Rent details overlay */}
-                      <div className="absolute bottom-4 left-4 text-white">
-                        <span className="font-black text-lg drop-shadow-md">
+                      {/* Rent Price Pill Overlay */}
+                      <div className="absolute bottom-3 left-3 z-10">
+                        <span className="bg-white/95 backdrop-blur-md text-[#1D1D1F] px-3 py-1 rounded-full font-black text-sm shadow-md flex items-center gap-1 border border-white/60">
                           {isMultiUnit ? (
                             group.minRent === group.maxRent ? `$${group.minRent.toLocaleString()}` : `$${group.minRent.toLocaleString()} - $${group.maxRent.toLocaleString()}`
                           ) : (
                             `$${Number(unit.rentAmount).toLocaleString()}`
                           )}
-                          <span className="text-[10px] text-slate-200 font-semibold">/mo</span>
+                          <span className="text-[10px] text-[#8E8E93] font-normal">/mo</span>
                         </span>
                       </div>
                     </div>
 
-                    <CardHeader className="pb-2 px-5 pt-4">
-                      <div className="flex items-center gap-1 text-[10px] text-blue-600 font-black uppercase tracking-wider">
-                        <MapPin className="h-3 w-3" />
-                        <span>{group.property.city}, {group.property.country}</span>
+                    {/* Card Body */}
+                    <div className="p-4 flex-1 flex flex-col justify-between space-y-3 text-left">
+                      <div>
+                        <div className="flex items-center gap-1 text-[10px] text-[#007AFF] font-bold uppercase tracking-wider">
+                          <MapPin className="h-3 w-3" />
+                          <span>{group.property.city}, {group.property.country}</span>
+                        </div>
+                        <h3 className="text-base font-extrabold text-[#1D1D1F] group-hover:text-[#007AFF] transition-colors line-clamp-1 mt-0.5">
+                          {group.property.name}
+                        </h3>
+                        <p className="text-xs text-[#8E8E93] font-normal truncate mt-0.5">
+                          {group.property.address}
+                        </p>
                       </div>
-                      <CardTitle className="text-base text-[#0F172A] font-extrabold group-hover:text-blue-600 transition-colors line-clamp-1">
-                        {group.property.name}
-                      </CardTitle>
-                      <CardDescription className="text-slate-450 font-semibold truncate text-[11px] flex items-center gap-1">
-                        {group.property.address}
-                      </CardDescription>
-                    </CardHeader>
 
-                    <CardContent className="pb-3 px-5 flex-1 flex flex-col justify-between">
-                      <div className="flex items-center gap-3 text-slate-500 text-xs border-y border-slate-100 py-2.5 font-bold">
+                      <div className="flex items-center gap-3 text-xs text-[#8E8E93] border-t border-black/5 pt-3 font-medium">
                         {group.property.type !== "Commercial" && (
                           <span className="flex items-center gap-1">
-                            <BedDouble className="h-4 w-4 text-blue-500" />
-                            <strong className="text-[#0F172A]">
+                            <BedDouble className="h-4 w-4 text-[#007AFF]" />
+                            <strong className="text-[#1D1D1F]">
                               {isMultiUnit 
                                 ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}-${group.maxBeds}`) 
                                 : unit.rooms}
@@ -996,123 +1023,58 @@ export default function ListingsPage() {
                           </span>
                         )}
                         <span className="flex items-center gap-1">
-                          <Square className="h-4 w-4 text-blue-500" />
-                          <strong className="text-[#0F172A]">
+                          <Square className="h-4 w-4 text-[#007AFF]" />
+                          <strong className="text-[#1D1D1F]">
                             {isMultiUnit 
                               ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}-${group.maxSqft}`)
                               : unit.sqFootage}
                           </strong> sqft
                         </span>
-                      </div>
-                      
-                      {isMultiUnit && (
-                        <div className="mt-2.5 text-[10px] font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg self-start">
-                          {group.units.length} Floorplans Available
-                        </div>
-                      )}
-                    </CardContent>
 
-                    <CardFooter className="pt-0 p-5 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        onClick={() => {
+                        {isMultiUnit && (
+                          <span className="ml-auto text-[10px] font-bold text-[#007AFF] bg-blue-50 px-2.5 py-0.5 rounded-full">
+                            {group.units.length} Floorplans
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (isMultiUnit) {
                             setSelectedGroup(group);
                           } else {
                             window.location.href = `/listings/${unit.id}`;
                           }
                         }}
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl h-10 flex justify-center items-center gap-1.5 transition-colors shadow-none text-xs"
+                        className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold text-xs py-2.5 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-98"
                       >
-                        {isMultiUnit ? "Browse Floor Plans" : "Details & Checkout"}
-                        <ArrowRight className="h-3 w-3" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                        {isMultiUnit ? "Browse Floorplans" : "View Details"}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
           )}
         </div>
 
-        {/* Right Side: Sticky Premium Interactive Map Visual (35% width) */}
-        <div className="hidden lg:block lg:w-[35%]">
-          <div className="sticky top-24 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
-                <MapIcon className="h-4 w-4 text-blue-600" /> Interactive Neighborhood Directory
-              </span>
-              <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Los Angeles</span>
-            </div>
-
-            {/* Stylized Vector Map representation */}
-            <div className="flex-1 bg-[#EBF1F6] rounded-2xl relative overflow-hidden border border-slate-300/80 flex flex-col justify-between shadow-inner">
-              
-              {/* Styled Mock Water bodies & Parks */}
-              <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#C8DFFC]/90 rounded-tl-[180px] pointer-events-none" />
-              <div className="absolute top-0 left-0 w-32 h-32 bg-[#C8DFFC]/70 rounded-br-[120px] pointer-events-none" />
-              <div className="absolute top-1/4 right-8 w-28 h-20 bg-[#E2F0D9]/80 rounded-[36px] pointer-events-none" />
-              
-              {/* Styled Roads / Streets */}
-              <div className="absolute top-1/2 left-0 w-full h-3.5 bg-white shadow-sm transform -rotate-12 pointer-events-none" />
-              <div className="absolute top-0 left-1/4 w-3.5 h-full bg-white shadow-sm transform rotate-45 pointer-events-none" />
-              <div className="absolute top-0 right-1/3 w-3 h-full bg-white shadow-sm transform -rotate-12 pointer-events-none" />
-              
-              {/* Dynamic Coordinate Pins based on database properties */}
-              {groupedList.map((group: any) => {
-                const coords = mapCoordinates[group.property.name] || { x: 50, y: 50 };
-                const isHovered = hoveredPropertyId === group.property.id;
-                
-                return (
-                  <div
-                    key={group.property.id}
-                    onMouseEnter={() => setHoveredPropertyId(group.property.id)}
-                    onMouseLeave={() => setHoveredPropertyId(null)}
-                    onClick={() => {
-                      if (group.units.length > 1) {
-                        setSelectedGroup(group);
-                      } else {
-                        window.location.href = `/listings/${group.units[0].id}`;
-                      }
-                    }}
-                    style={{ left: `${coords.x}%`, top: `${coords.y}%` }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group/pin"
-                  >
-                    {/* Ring highlight animation */}
-                    <div className={`absolute -inset-2.5 rounded-full transition-all duration-300 ${
-                      isHovered ? "bg-blue-500/30 scale-100 animate-ping" : "bg-transparent scale-0"
-                    }`} />
-                    
-                    {/* Hover Card preview tooltip */}
-                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 border border-slate-800 text-white rounded-xl py-1.5 px-3 whitespace-nowrap shadow-xl transition-all duration-200 pointer-events-none ${
-                      isHovered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-1 scale-95"
-                    }`}>
-                      <p className="text-[10px] font-black">{group.property.name}</p>
-                      <p className="text-[9px] text-blue-400 font-extrabold mt-0.5">${group.minRent.toLocaleString()}+/mo</p>
-                    </div>
- 
-                    {/* Styled pin bubble */}
-                    <div className={`px-2.5 py-1 rounded-full font-black text-[9px] shadow-md flex items-center justify-center transition-all ${
-                      isHovered 
-                        ? "bg-blue-600 text-white border-2 border-white scale-110 shadow-lg shadow-blue-600/30" 
-                        : "bg-white text-slate-800 border-2 border-slate-300 hover:border-slate-400"
-                    }`}>
-                      ${group.minRent >= 1000 ? `${(group.minRent / 1000).toFixed(1)}k` : group.minRent}
-                    </div>
-                  </div>
-                );
-              })}
- 
-              {/* Map Footer Helper */}
-              <div className="absolute bottom-4 left-4 right-4 bg-slate-900/95 backdrop-blur-md border border-slate-800/80 p-3 rounded-xl z-10 flex items-center gap-3 text-white">
-                <div className="h-6 w-6 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
-                  <MapPin className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex-1 leading-tight">
-                  <span className="text-[9px] text-slate-200 font-bold block uppercase tracking-wider">Hover pins to preview</span>
-                  <span className="text-[8px] text-slate-400 font-semibold">Properties mapped based on verified street location.</span>
-                </div>
-              </div>
-            </div>
+        {/* Right Side: Real Leaflet Interactive Map Component */}
+        <div className={`lg:w-[45%] ${viewMode === "list" ? "hidden lg:block" : "block"}`}>
+          <div className="sticky top-20 h-[calc(100vh-100px)] min-h-[480px] w-full">
+            <ListingsMap
+              groupedProperties={groupedList}
+              hoveredPropertyId={hoveredPropertyId}
+              onHoverProperty={setHoveredPropertyId}
+              onSelectProperty={(group) => {
+                if (group.units.length > 1) {
+                  setSelectedGroup(group);
+                } else {
+                  window.location.href = `/listings/${group.units[0].id}`;
+                }
+              }}
+            />
           </div>
         </div>
       </main>

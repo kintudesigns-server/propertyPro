@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { notifyMany } from "@/lib/notify";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -87,7 +88,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "OWNER") {
+  const userRole = (session?.user as any)?.role;
+  const isBypass = userRole === "SUPERADMIN" || userRole === "ADMIN";
+
+  if (!session?.user || (!isBypass && userRole !== "OWNER")) {
     return NextResponse.json({ error: "Only property owners can add properties" }, { status: 403 });
   }
 
@@ -99,7 +103,19 @@ export async function POST(req: NextRequest) {
       include: { pricingTier: true, ownedProperties: { include: { units: true } } },
     });
 
-    if (owner?.subscriptionStatus?.toLowerCase() !== "active") {
+    const rules = await getEffectiveSubscriptionRules(userId);
+    const subStatus = (owner?.subscriptionStatus || "").toLowerCase();
+    const isSubActive = isBypass || subStatus === "active" || subStatus === "trialing" || subStatus.includes("canceling") || rules.isCompedAccess;
+
+    if (rules.isPaused && rules.blockNewUnits && !rules.isCompedAccess) {
+      return NextResponse.json({
+        error: "Your account is paused. Your existing units are safe, but new additions are blocked.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
+    if (!isSubActive) {
       return NextResponse.json({ error: "Active subscription required to add properties.", code: "NO_SUBSCRIPTION" }, { status: 403 });
     }
     const data = await req.json();
@@ -122,6 +138,18 @@ export async function POST(req: NextRequest) {
       images: u.images || [],
       status: u.status || "VACANT"
     })) : [];
+
+    // Property Tier Enforcement Check (Max Properties Cap, 0 = Unlimited)
+    const tier = owner?.pricingTier as any;
+    if (owner && tier?.maxProperties && tier.maxProperties > 0) {
+      const currentPropertyCount = owner.ownedProperties.length;
+      if (currentPropertyCount >= tier.maxProperties) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. Your ${tier.name} plan allows up to ${tier.maxProperties} properties.` 
+        }, { status: 403 });
+      }
+    }
 
     // Tier Enforcement Check (Hard Cap)
     if (owner?.pricingTier?.maxUnits) {

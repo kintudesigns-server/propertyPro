@@ -130,7 +130,7 @@ export default function ConductInspectionPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-        <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Loading property details...</p>
+        <p className="text-[#8E8E93] font-extrabold text-sm tracking-wider uppercase">Loading property details...</p>
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function ConductInspectionPage() {
           <h1 className="text-xl font-black text-slate-900 leading-tight">
             Conduct {inspectionType === "PRELIMINARY" ? "Preliminary" : "Final"} Walkthrough
           </h1>
-          <p className="text-sm font-semibold text-slate-500">{lease.unit?.property?.name} - {lease.unit?.name}</p>
+          <p className="text-sm font-semibold text-[#6E6E73]">{lease.unit?.property?.name} - {lease.unit?.name}</p>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ export default function ConductInspectionPage() {
               <ClipboardCheck className="h-5 w-5 text-indigo-600" />
               Log Damages & Deductions
             </CardTitle>
-            <CardDescription className="text-xs font-semibold text-slate-500">
+            <CardDescription className="text-xs font-semibold text-[#6E6E73]">
               Record any issues found during the walkthrough. These will be reviewed by the owner.
             </CardDescription>
           </CardHeader>
@@ -238,7 +238,7 @@ export default function ConductInspectionPage() {
             {!noDamagesFound && (
               <div className="space-y-4">
               <div>
-                <Label className="text-xs font-bold text-slate-500 uppercase">Category</Label>
+                <Label className="text-xs font-bold text-[#6E6E73] uppercase">Category</Label>
                 <select
                   value={newDeduction.category}
                   onChange={(e) => setNewDeduction({ ...newDeduction, category: e.target.value })}
@@ -253,7 +253,7 @@ export default function ConductInspectionPage() {
               </div>
 
               <div>
-                <Label className="text-xs font-bold text-slate-500 uppercase">Description</Label>
+                <Label className="text-xs font-bold text-[#6E6E73] uppercase">Description</Label>
                 <Input
                   placeholder="e.g., Hole in living room wall"
                   value={newDeduction.description}
@@ -264,10 +264,10 @@ export default function ConductInspectionPage() {
 
               <div className="flex items-center gap-3">
                 <div className="flex-1">
-                  <Label className="text-xs font-bold text-slate-500 uppercase">Attach Photo Evidence</Label>
+                  <Label className="text-xs font-bold text-[#6E6E73] uppercase">Attach Photo Evidence</Label>
                   <div className="mt-1 flex items-center gap-3">
-                    <label className="flex items-center justify-center h-11 px-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer text-xs font-bold text-slate-600 gap-2 shrink-0">
-                      <Camera className="h-5 w-5 text-slate-500" />
+                    <label className="flex items-center justify-center h-11 px-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-[#F2F2F7] cursor-pointer text-xs font-bold text-slate-600 gap-2 shrink-0">
+                      <Camera className="h-5 w-5 text-[#6E6E73]" />
                       {uploadingPhoto ? "Uploading..." : newDeductionPhotoUrl ? "Change Photo" : "Take Photo / Upload"}
                       <input 
                         type="file" 
@@ -296,7 +296,7 @@ export default function ConductInspectionPage() {
               <div className="flex justify-end pt-2">
                 <Button 
                   onClick={handleAddDeduction}
-                  className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-none"
+                  className="w-full h-11 bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-none"
                 >
                   <Plus className="h-5 w-5" /> Add Damage Finding
                 </Button>
@@ -307,7 +307,7 @@ export default function ConductInspectionPage() {
             {/* List of Deductions */}
             {deductions.length > 0 && (
               <div className="mt-6 space-y-3">
-                <h4 className="text-xs font-bold text-slate-400 uppercase border-b border-slate-100 pb-2">Logged Items ({deductions.length})</h4>
+                <h4 className="text-xs font-bold text-[#8E8E93] uppercase border-b border-slate-100 pb-2">Logged Items ({deductions.length})</h4>
                 {deductions.map((d, index) => (
                   <div key={index} className="flex justify-between items-start p-3 bg-red-50 border border-red-100 rounded-xl gap-4">
                     <div className="flex-1 min-w-0">
@@ -350,7 +350,7 @@ export default function ConductInspectionPage() {
 
         {/* Notes */}
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-slate-500 uppercase pl-1">Inspector Notes</Label>
+          <Label className="text-xs font-bold text-[#6E6E73] uppercase pl-1">Inspector Notes</Label>
           <textarea
             placeholder="General assessment of the property's condition..."
             value={inspectionNotes}

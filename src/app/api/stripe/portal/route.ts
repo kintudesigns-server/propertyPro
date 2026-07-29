@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     try {
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: `${origin}/dashboard/owner`,
+        return_url: `${origin}/dashboard/owner/billing`,
       });
       return NextResponse.json({ url: portalSession.url });
     } catch (stripeErr: any) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         const newPortalSession = await stripe.billingPortal.sessions.create({
           customer: newCustomer.id,
-          return_url: `${origin}/dashboard/owner`,
+          return_url: `${origin}/dashboard/owner/billing`,
         });
         return NextResponse.json({ url: newPortalSession.url });
       }

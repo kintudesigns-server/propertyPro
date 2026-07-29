@@ -24,7 +24,7 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
       case "LEASE":
         return <FileText className="h-5 w-5 text-purple-500" />;
       default:
-        return <Calendar className="h-5 w-5 text-slate-500" />;
+        return <Calendar className="h-5 w-5 text-[#6E6E73]" />;
     }
   };
 
@@ -48,18 +48,18 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+        <div className="flex items-center justify-between p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]">
           <div>
-            <h2 className="text-xl font-extrabold text-[#0F172A] tracking-tight">
+            <h2 className="text-xl font-extrabold text-[#1D1D1F] tracking-tight">
               {format(date, "MMMM d, yyyy")}
             </h2>
-            <p className="text-sm font-medium text-[#64748B] mt-1">
+            <p className="text-sm font-medium text-[#6E6E73] mt-1">
               {events.length} {events.length === 1 ? "event" : "events"} scheduled
             </p>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 bg-white rounded-xl text-[#64748B] hover:text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-slate-50 transition-colors"
+            className="p-2 bg-white rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] border border-[#E5E5EA] shadow-sm hover:bg-[#F5F5F7] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -69,18 +69,18 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
         <div className="p-6 max-h-[60vh] overflow-y-auto">
           {events.length === 0 ? (
             <div className="text-center py-10">
-              <Calendar className="h-12 w-12 text-[#E2E8F0] mx-auto mb-4" />
-              <p className="text-sm font-bold text-[#64748B]">No events on this day.</p>
+              <Calendar className="h-12 w-12 text-[#E5E5EA] mx-auto mb-4" />
+              <p className="text-sm font-bold text-[#6E6E73]">No events on this day.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {events.map((event) => (
                 <div 
                   key={event.id}
-                  className="flex flex-col gap-3 p-4 rounded-2xl border border-[#E2E8F0] bg-white hover:border-[#CBD5E1] transition-colors"
+                  className="flex flex-col gap-3 p-4 rounded-2xl border border-[#E5E5EA] bg-white hover:border-[#CBD5E1] transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-[#E2E8F0] shrink-0">
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-[#E5E5EA] shrink-0">
                       {getEventIcon(event.type)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -94,21 +94,21 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
                           </span>
                         )}
                       </div>
-                      <h4 className="font-bold text-[#0F172A] text-sm leading-tight mb-1">
+                      <h4 className="font-bold text-[#1D1D1F] text-sm leading-tight mb-1">
                         {event.title}
                       </h4>
                       {event.metadata?.propertyName && (
-                        <p className="text-xs font-medium text-[#64748B] truncate">
+                        <p className="text-xs font-medium text-[#6E6E73] truncate">
                           {event.metadata.propertyName} {event.metadata.unitNumber ? `— Unit ${event.metadata.unitNumber}` : ""}
                         </p>
                       )}
                     </div>
                   </div>
                   
-                  <div className="pt-3 border-t border-[#E2E8F0] flex justify-end">
+                  <div className="pt-3 border-t border-[#E5E5EA] flex justify-end">
                     <Link 
                       href={getEventActionLink(event)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#007AFF] hover:text-[#0062CC] transition-colors"
                     >
                       View Details <ChevronRight className="h-3.5 w-3.5" />
                     </Link>

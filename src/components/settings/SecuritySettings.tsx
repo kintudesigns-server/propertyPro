@@ -74,7 +74,7 @@ export default function SecuritySettings() {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 pl-10"
               />
-              <Lock className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <Lock className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
             </div>
           </div>
 
@@ -88,7 +88,7 @@ export default function SecuritySettings() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 pl-10"
               />
-              <Key className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <Key className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
             </div>
           </div>
 
@@ -102,7 +102,7 @@ export default function SecuritySettings() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 pl-10"
               />
-              <Key className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <Key className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
             </div>
           </div>
 
@@ -128,17 +128,17 @@ export default function SecuritySettings() {
 
       <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
         <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6 flex items-center gap-2">
-          <Shield className="h-5 w-5 text-slate-400" /> Two-Factor Authentication
+          <Shield className="h-5 w-5 text-[#8E8E93]" /> Two-Factor Authentication
         </h3>
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
           <div>
             <h4 className="font-bold text-slate-800 text-sm">2FA is not enabled</h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-md">
+            <p className="text-xs text-[#6E6E73] mt-1 max-w-md">
               We strongly recommend enabling 2FA to prevent unauthorized access to your account.
             </p>
           </div>
-          <Button variant="outline" className="shrink-0 font-bold rounded-xl h-10 px-6 bg-white border-slate-200 hover:bg-slate-100">
+          <Button variant="outline" className="shrink-0 font-bold rounded-xl h-10 px-6 bg-white border-slate-200 hover:bg-[#F2F2F7]">
             Enable 2FA
           </Button>
         </div>

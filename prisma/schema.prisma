@@ -65,6 +65,16 @@ model User {
   cardBrand                String?
   cardLast4                String?
 
+  // Subscription lifecycle tracking
+  gracePeriodEnd         DateTime?
+  pausedAt               DateTime?
+  payoutsBlockedAt       DateTime?
+  trialUsedTierIds       String[]
+  accessGrantedByAdmin   Boolean              @default(false)
+  accessGrantedExpiresAt DateTime?
+  subscriptionOverride   SubscriptionOverride?
+  moduleGrants           OwnerModuleGrant[]   @relation("OwnerModuleGrants")
+
   // Owner Limits
   approvalThreshold        Decimal              @default(200.00) @db.Decimal(10, 2)
   emergencyOverrideLimit   Decimal              @default(1500.00) @db.Decimal(10, 2)
@@ -96,6 +106,12 @@ model User {
   owner                User?                @relation("OwnerInspectors", fields: [ownerId], references: [id])
   createdInspectors    User[]               @relation("OwnerInspectors")
   availability         OwnerAvailability?
+  subscriptionHistory  SubscriptionHistory[]
+  userAccessOverrides  UserAccessOverride[] @relation("UserAccessOverrides")
+
+  @@index([email])
+  @@index([role])
+  @@index([accountStatus])
 }
 
 model PasswordResetToken {
@@ -153,9 +169,12 @@ model PricingTier {
   name            String
   description     String
   price           Float
-  minUnits        Int
+  minUnits        Int      // Display hint only — NOT enforced as a hard gate. Shown as "Ideal for X+ units" on pricing card.
   maxUnits        Int
+  maxInspectors   Int      @default(1)
+  trialDays       Int      @default(0)
   features        String[]
+  modules         String[] @default([])
   isCustom        Boolean  @default(false)
   isActive        Boolean  @default(true)
   stripeProductId String?
@@ -163,8 +182,26 @@ model PricingTier {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // ── Display & Marketing ────────────────────────────────────────────────────
+  sortOrder         Int     @default(0)    // Controls display order on pricing page (ascending)
+  highlightBadge    String?               // e.g. "Most Popular", "Best Value" — shown on pricing card header
+
+  // ── Hard Capacity Limits (0 = unlimited) ──────────────────────────────────
+  maxProperties           Int  @default(0)  // Max distinct property records. 0 = unlimited.
+  maxVendors              Int  @default(0)  // Max external vendor accounts. 0 = unlimited.
+  maxDocumentStorageMB    Int  @default(0)  // Max document upload storage in MB. 0 = unlimited.
+
+  // ── Billing Flexibility ────────────────────────────────────────────────────
+  annualPrice      Float?                 // If set, annual billing option is offered to owners on this tier
+  customQuotePrice Float?                 // Actual negotiated price for Enterprise/custom tiers (for analytics only — not shown to owner)
+
+  // ── Subscription Behaviour Overrides ──────────────────────────────────────
+  allowsTrial       Boolean @default(true) // Set false for direct Enterprise deals that skip the trial
+  gracePeriodDays   Int?                   // Per-tier override of platform-level grace period. null = use platform default.
+
   users           User[]
 }
+
 
 model Property {
   id          String   @id @default(uuid())
@@ -194,6 +231,8 @@ model Property {
   units       Unit[]
   documents   Document[]
   tours       Tour[]
+
+  @@index([ownerId])
 }
 
 model Unit {
@@ -220,6 +259,9 @@ model Unit {
   applications Application[]
   tours        Tour[]
   invitations  TenantInvitation[]
+
+  @@index([propertyId])
+  @@index([status])
 }
 
 model Lease {
@@ -323,6 +365,10 @@ model Lease {
   depositBalance           Decimal   @default(0.00) @db.Decimal(10, 2) // Current remaining balance in escrow
   depositTransactionId     String?             // Transaction.id for the deposit payment record
   messages                 Message[]
+
+  @@index([tenantId])
+  @@index([unitId])
+  @@index([status])
 }
 
 model Invoice {
@@ -345,6 +391,10 @@ model Invoice {
   note          String?
 
   transactions  Transaction[]
+
+  @@index([leaseId])
+  @@index([status])
+  @@index([dueDate])
 }
 
 model MaintenanceRequest {
@@ -417,6 +467,10 @@ model MaintenanceRequest {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   messages      Message[]
+
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([status])
 }
 
 model PayoutRequest {
@@ -506,6 +560,7 @@ model Message {
   conversationId String?  // Sort-joined user IDs e.g. "userId1_userId2"
   attachmentUrl  String?  // Document or photo attachment link
   messageType    String   @default("TEXT") // TEXT, SYSTEM, IMAGE, FILE
+  deliveryChannel String  @default("LIVE_CHAT") // LIVE_CHAT, EMAIL_NOTIFIED
   
   // Phase 2 Context Relationships
   ticketId       String?
@@ -559,6 +614,9 @@ model Notification {
   isRead          Boolean  @default(false)
   relatedEntityId String?
   createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
 }
 
 model PlatformSettings {
@@ -568,6 +626,24 @@ model PlatformSettings {
   tourRateLimitWindowHours Int      @default(24)
   tourOtpExpiryMinutes     Int      @default(10)
   tourCancellationWindowHours Int    @default(24)
+
+  // Subscription Behavior Controls
+  gracePeriodDays              Int     @default(7)
+  blockPayoutsOnPastDue        Boolean @default(true)
+  blockPayoutsOnPaused         Boolean @default(true)
+  blockNewUnitsOnPaused        Boolean @default(true)
+  allowMaintenanceOnPaused     Boolean @default(true)
+  blockAddVendorOnPaused       Boolean @default(true)
+  blockAddInspectorOnPaused    Boolean @default(true)
+  blockProcessApplicationsOnPaused Boolean @default(true)
+  blockAddTenantOnPaused          Boolean @default(true)
+  blockTourSlotsOnPaused          Boolean @default(true)
+
+  // Welfare exemption flags (these bypass all paused locks)
+  welfareAllowMoveOut       Boolean @default(true)
+  welfareAllowBillingView   Boolean @default(true)
+  welfareAllowEmergencyDispatch Boolean @default(true)
+
   updatedAt                DateTime @updatedAt
 }
 
@@ -605,6 +681,10 @@ model AuditLog {
   newValue     Json?    // New state (key fields only)
   note         String?  // Human readable summary
   createdAt    DateTime @default(now())
+
+  @@index([entityId])
+  @@index([actorId])
+  @@index([createdAt])
 }
 
 enum TourType {
@@ -674,4 +754,124 @@ model OwnerAvailability {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model SubscriptionHistory {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromTierId  String?
+  toTierId    String?
+  fromTierName String?
+  toTierName  String?
+  event       String   // SUBSCRIBED | UPGRADED | DOWNGRADED | CANCELED | REACTIVATED | PAST_DUE | TRIAL_STARTED | TRIAL_ENDED
+  amountPaid  Float?
+  stripeInvoiceId String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ProcessedStripeEvent {
+  id            String   @id @default(uuid())
+  stripeEventId String   @unique
+  processedAt   DateTime @default(now())
+
+  @@index([stripeEventId])
+}
+
+model SubscriptionOverride {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Feature toggles — null = use PlatformSettings default
+  blockPayouts         Boolean?
+  blockNewUnits        Boolean?
+  allowMaintenance     Boolean?
+
+  // Manual lifecycle
+  extendedGraceUntil   DateTime?
+  manualPausedByAdmin  Boolean   @default(false)
+  manualRestored       Boolean   @default(false)
+
+  // Fine-grained paused-restriction overrides (null = use platform default)
+  allowAddVendor            Boolean?  // null = use global policy
+  allowAddInspector         Boolean?
+  allowProcessApplications  Boolean?
+  allowAddTenant            Boolean?
+  allowTourSlots            Boolean?
+
+  // Emergency Grant metadata
+  emergencyGrantReason      String?
+  emergencyGrantedAt        DateTime?
+
+  // Per-policy expiration overrides (null = indefinite or fallback to expiresAt)
+  blockPayoutsExpiresAt             DateTime?
+  blockNewUnitsExpiresAt            DateTime?
+  allowAddVendorExpiresAt           DateTime?
+  allowAddInspectorExpiresAt        DateTime?
+  allowProcessApplicationsExpiresAt DateTime?
+  allowAddTenantExpiresAt           DateTime?
+  allowTourSlotsExpiresAt           DateTime?
+
+  // Expiry
+  expiresAt            DateTime?
+
+  // Audit
+  adminId              String?
+  reason               String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model OwnerModuleGrant {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation("OwnerModuleGrants", fields: [userId], references: [id], onDelete: Cascade)
+  module      String    
+  expiresAt   DateTime? 
+  reason      String    
+  adminId     String    
+  overrideType String   @default("GRANT")  // "GRANT" | "BLOCK"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, module])
+  @@index([userId])
+}
+
+model UserAccessOverride {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation("UserAccessOverrides", fields: [userId], references: [id], onDelete: Cascade)
+  
+  feature       String    // e.g. "submit_maintenance", "view_lease", "view_documents"
+  overrideType  String    // "BLOCK" | "GRANT"
+  
+  reason        String
+  adminId       String
+  expiresAt     DateTime?
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedByAdminId String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, feature])
+}
+
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+
 

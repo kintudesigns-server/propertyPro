@@ -122,7 +122,7 @@ export default function EmergencyMaintenancePage() {
   };
 
   const getElapsedColor = (dateString: string, status: string) => {
-    if (status === "RESOLVED" || status === "CLOSED") return "text-[#64748B]";
+    if (status === "RESOLVED" || status === "CLOSED") return "text-[#6E6E73]";
     const hrs = differenceInHours(new Date(), new Date(dateString));
     if (hrs > 24) return "text-red-600 font-black";
     if (hrs > 4) return "text-orange-600 font-bold";
@@ -146,7 +146,7 @@ export default function EmergencyMaintenancePage() {
           <h1 className="text-[28px] font-black text-red-600 tracking-tight flex items-center gap-2">
             <AlertTriangle className="h-7 w-7" /> Emergency Response
           </h1>
-          <p className="text-[#64748B] text-sm font-medium mt-0.5">High priority and emergency maintenance tickets requiring immediate action.</p>
+          <p className="text-[#6E6E73] text-sm font-medium mt-0.5">High priority and emergency maintenance tickets requiring immediate action.</p>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ export default function EmergencyMaintenancePage() {
               <Flame className="h-6 w-6 text-red-600" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#64748B] uppercase tracking-wide">Critical (Active)</p>
+              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">Critical (Active)</p>
               <h3 className="text-2xl font-black text-red-600">{critical}</h3>
             </div>
           </CardContent>
@@ -180,8 +180,8 @@ export default function EmergencyMaintenancePage() {
               <Clock className="h-6 w-6 text-orange-600" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#64748B] uppercase tracking-wide">In Progress</p>
-              <h3 className="text-2xl font-black text-[#0F172A]">{active}</h3>
+              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">In Progress</p>
+              <h3 className="text-2xl font-black text-[#1D1D1F]">{active}</h3>
             </div>
           </CardContent>
         </Card>
@@ -197,8 +197,8 @@ export default function EmergencyMaintenancePage() {
               <UserX className="h-6 w-6 text-red-500" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#64748B] uppercase tracking-wide">Unassigned</p>
-              <h3 className="text-2xl font-black text-[#0F172A]">{unassigned}</h3>
+              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">Unassigned</p>
+              <h3 className="text-2xl font-black text-[#1D1D1F]">{unassigned}</h3>
             </div>
           </CardContent>
         </Card>
@@ -218,7 +218,7 @@ export default function EmergencyMaintenancePage() {
           </div>
           <div className="flex items-center gap-3">
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-              <SelectTrigger className="h-11 rounded-xl bg-white border-red-200 font-semibold text-[#0F172A] min-w-[140px] shadow-sm focus:ring-red-400 w-full">
+              <SelectTrigger className="h-11 rounded-xl bg-white border-red-200 font-semibold text-[#1D1D1F] min-w-[140px] shadow-sm focus:ring-red-400 w-full">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-red-200">
@@ -250,7 +250,7 @@ export default function EmergencyMaintenancePage() {
             </thead>
             <tbody className="divide-y divide-red-50">
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-12 text-center text-[#64748B] font-medium">Loading emergency requests...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-[#6E6E73] font-medium">Loading emergency requests...</td></tr>
               ) : filteredRequests.length === 0 ? (
                 <tr><td colSpan={7} className="px-6 py-12 text-center text-green-600 font-bold">🎉 No emergency maintenance requests found!</td></tr>
               ) : (
@@ -262,17 +262,17 @@ export default function EmergencyMaintenancePage() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                         </div>
                         <div>
-                          <p className="font-bold text-[#0F172A]">{req.title}</p>
-                          <p className="text-xs text-[#64748B] font-medium">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
+                          <p className="font-bold text-[#1D1D1F]">{req.title}</p>
+                          <p className="text-xs text-[#6E6E73] font-medium">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-[#0F172A]">{req.unit.property.name}</p>
-                      <p className="text-xs text-[#64748B] font-medium">Unit: {req.unit.name}</p>
+                      <p className="font-bold text-[#1D1D1F]">{req.unit.property.name}</p>
+                      <p className="text-xs text-[#6E6E73] font-medium">Unit: {req.unit.name}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-[#0F172A]">{req.tenant.name}</p>
+                      <p className="font-semibold text-[#1D1D1F]">{req.tenant.name}</p>
                       <p className="text-xs text-red-600 font-bold">{req.tenant.phone || req.tenant.email}</p>
                     </td>
                     <td className="px-6 py-4">
@@ -294,7 +294,7 @@ export default function EmergencyMaintenancePage() {
                           <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold text-red-700">
                             {req.inspector.name?.charAt(0)}
                           </div>
-                          <span className="font-semibold text-[#0F172A]">{req.inspector.name}</span>
+                          <span className="font-semibold text-[#1D1D1F]">{req.inspector.name}</span>
                         </div>
                       ) : (
                         <span className="text-red-500 font-bold text-xs">Action Required</span>
@@ -302,16 +302,16 @@ export default function EmergencyMaintenancePage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#64748B] hover:text-red-600 hover:bg-red-100 rounded-lg outline-none focus:ring-2 focus:ring-red-400">
+                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#6E6E73] hover:text-red-600 hover:bg-red-100 rounded-lg outline-none focus:ring-2 focus:ring-red-400">
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-red-200 p-1">
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-red-50">
-                            <Eye className="h-4 w-4 text-[#64748B]" />
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-red-50">
+                            <Eye className="h-4 w-4 text-[#6E6E73]" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#0F172A] p-2 rounded-lg hover:bg-red-50">
-                            <Edit className="h-4 w-4 text-[#64748B]" />
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-red-50">
+                            <Edit className="h-4 w-4 text-[#6E6E73]" />
                             Edit Request
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50">
@@ -339,13 +339,13 @@ export default function EmergencyMaintenancePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-red-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#0F172A] mb-1">Assign Inspector</h2>
-              <p className="text-sm font-medium text-[#64748B] mb-6">Select a team member to handle this emergency.</p>
+              <h2 className="text-xl font-bold text-[#1D1D1F] mb-1">Assign Inspector</h2>
+              <p className="text-sm font-medium text-[#6E6E73] mb-6">Select a team member to handle this emergency.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#0F172A] uppercase tracking-wide">Inspector</label>
+                <label className="text-[13px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Inspector</label>
                 <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
-                  <SelectTrigger className="w-full h-12 bg-white border-red-200 rounded-xl focus:ring-red-500 font-medium text-[#0F172A] shadow-sm">
+                  <SelectTrigger className="w-full h-12 bg-white border-red-200 rounded-xl focus:ring-red-500 font-medium text-[#1D1D1F] shadow-sm">
                     <SelectValue placeholder="Select an inspector" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-red-200">
@@ -358,7 +358,7 @@ export default function EmergencyMaintenancePage() {
               </div>
             </div>
             <div className="p-4 bg-red-50/50 border-t border-red-100 flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#64748B] hover:text-[#0F172A]">Cancel</Button>
+              <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#6E6E73] hover:text-[#1D1D1F]">Cancel</Button>
               <Button onClick={handleAssignSubmit} className="rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm">Confirm Assignment</Button>
             </div>
           </div>

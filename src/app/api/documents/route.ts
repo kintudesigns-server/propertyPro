@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -11,6 +13,24 @@ export async function GET(req: NextRequest) {
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "documents");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "view_documents");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Access to document vault restricted by administrator." },
+        { status: 403 }
+      );
+    }
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const tenantIdParam = searchParams.get("tenantId");
 
@@ -41,6 +61,16 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const role = (session.user as any).role;
+  const userId = (session.user as any).id;
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "documents");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
   }
 
   try {

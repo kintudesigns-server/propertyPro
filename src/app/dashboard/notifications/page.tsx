@@ -98,7 +98,7 @@ export default function NotificationsPage() {
       case "PAYMENT": return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       case "MAINTENANCE": return <Info className="h-5 w-5 text-blue-500" />;
       case "LEASE": return <FileText className="h-5 w-5 text-purple-500" />;
-      default: return <Bell className="h-5 w-5 text-slate-500" />;
+      default: return <Bell className="h-5 w-5 text-[#6E6E73]" />;
     }
   };
 
@@ -121,13 +121,13 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">Notifications</h1>
-          <p className="text-sm text-[#64748B] font-medium mt-1">Review your system alerts and activity logs.</p>
+          <h1 className="text-2xl font-extrabold text-[#1D1D1F] tracking-tight">Notifications</h1>
+          <p className="text-sm text-[#6E6E73] font-medium mt-1">Review your system alerts and activity logs.</p>
         </div>
         <button 
           onClick={markAllAsRead}
           disabled={unreadCount === 0}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 shadow-sm transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E5EA] rounded-xl text-sm font-bold text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] shadow-sm transition-colors disabled:opacity-50"
         >
           <CheckCheck className="h-4 w-4" />
           Mark all as read
@@ -136,56 +136,56 @@ export default function NotificationsPage() {
 
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm">
-          <div className="flex items-center gap-3 mb-2 text-[#64748B]">
+        <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-sm">
+          <div className="flex items-center gap-3 mb-2 text-[#6E6E73]">
             <Bell className="h-5 w-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Total</span>
           </div>
-          <div className="text-2xl font-extrabold text-[#0F172A]">{total}</div>
+          <div className="text-2xl font-extrabold text-[#1D1D1F]">{total}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm">
-          <div className="flex items-center gap-3 mb-2 text-[#3B82F6]">
+        <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-sm">
+          <div className="flex items-center gap-3 mb-2 text-[#007AFF]">
             <Info className="h-5 w-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Unread</span>
           </div>
-          <div className="text-2xl font-extrabold text-[#0F172A]">{unreadCount}</div>
+          <div className="text-2xl font-extrabold text-[#1D1D1F]">{unreadCount}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-sm">
           <div className="flex items-center gap-3 mb-2 text-red-500">
             <AlertCircle className="h-5 w-5" />
             <span className="text-xs font-bold uppercase tracking-wider">High Priority</span>
           </div>
-          <div className="text-2xl font-extrabold text-[#0F172A]">{highPriorityCount}</div>
+          <div className="text-2xl font-extrabold text-[#1D1D1F]">{highPriorityCount}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-sm">
           <div className="flex items-center gap-3 mb-2 text-emerald-500">
             <CheckCircle2 className="h-5 w-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Actionable</span>
           </div>
-          <div className="text-2xl font-extrabold text-[#0F172A]">{Math.floor(total * 0.4)}</div>
+          <div className="text-2xl font-extrabold text-[#1D1D1F]">{Math.floor(total * 0.4)}</div>
         </div>
       </div>
 
       {/* Filters and List */}
-      <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm flex flex-col overflow-hidden">
         {/* Controls */}
-        <div className="p-4 border-b border-[#E2E8F0] flex flex-col md:flex-row gap-4 justify-between items-center bg-[#F8FAFC]">
+        <div className="p-4 border-b border-[#E5E5EA] flex flex-col md:flex-row gap-4 justify-between items-center bg-[#F2F2F7]">
           <div className="flex gap-2 w-full md:w-auto">
             <button 
               onClick={() => { setTabFilter("ALL"); setPage(1); }}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "ALL" ? "bg-[#3B82F6] text-white border-[#3B82F6]" : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-slate-50"}`}
+              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "ALL" ? "bg-[#007AFF] text-white border-[#007AFF]" : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:bg-[#F5F5F7]"}`}
             >
               All
             </button>
             <button 
               onClick={() => { setTabFilter("UNREAD"); setPage(1); }}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "UNREAD" ? "bg-[#3B82F6] text-white border-[#3B82F6]" : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-slate-50"}`}
+              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "UNREAD" ? "bg-[#007AFF] text-white border-[#007AFF]" : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:bg-[#F5F5F7]"}`}
             >
               Unread
             </button>
             <button 
               onClick={() => { setTabFilter("HIGH"); setPage(1); }}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "HIGH" ? "bg-[#3B82F6] text-white border-[#3B82F6]" : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-slate-50"}`}
+              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${tabFilter === "HIGH" ? "bg-[#007AFF] text-white border-[#007AFF]" : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:bg-[#F5F5F7]"}`}
             >
               High Priority
             </button>
@@ -199,13 +199,13 @@ export default function NotificationsPage() {
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="pl-10 pr-4 py-2 w-full bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                className="pl-10 pr-4 py-2 w-full bg-white border border-[#E5E5EA] rounded-xl text-sm text-[#1D1D1F] placeholder-[#94A3B8] focus:outline-none focus:border-[#007AFF]"
               />
             </div>
             <select 
               value={typeFilter}
               onChange={(e) => { setTypeFilter(e.target.value as any); setPage(1); }}
-              className="bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
+              className="bg-white border border-[#E5E5EA] rounded-xl text-sm text-[#1D1D1F] px-3 py-2 focus:outline-none focus:border-[#007AFF]"
             >
               <option value="ALL">All Categories</option>
               <option value="PAYMENT">Payments</option>
@@ -220,10 +220,10 @@ export default function NotificationsPage() {
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
             <div className="flex justify-center items-center h-full py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3B82F6]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007AFF]"></div>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="flex flex-col justify-center items-center py-20 text-[#64748B]">
+            <div className="flex flex-col justify-center items-center py-20 text-[#6E6E73]">
               <Bell className="h-12 w-12 mb-4 opacity-20" />
               <p className="font-semibold text-sm">No notifications found</p>
               <p className="text-xs mt-1">Try adjusting your filters</p>
@@ -231,7 +231,7 @@ export default function NotificationsPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                <tr className="border-b border-[#E5E5EA] bg-[#F2F2F7]">
                   <th className="px-6 py-4 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Notification</th>
                   <th className="px-6 py-4 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Priority</th>
@@ -244,11 +244,11 @@ export default function NotificationsPage() {
                   <tr 
                     key={notif.id} 
                     onClick={() => router.push(`/dashboard/notifications/${notif.id}`)}
-                    className={`border-b border-slate-50 hover:bg-[#F8FAFC] transition-colors cursor-pointer group ${!notif.isRead ? "bg-slate-50/50" : ""}`}
+                    className={`border-b border-slate-50 hover:bg-[#F2F2F7] transition-colors cursor-pointer group ${!notif.isRead ? "bg-slate-50/50" : ""}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       {notif.isRead ? (
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#8E8E93]">
                           <CheckCheck className="h-4 w-4" /> Read
                         </span>
                       ) : (
@@ -259,25 +259,25 @@ export default function NotificationsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-start gap-4">
-                        <div className={`p-2.5 rounded-xl shrink-0 ${!notif.isRead ? "bg-white shadow-sm border border-slate-200" : "bg-slate-100"}`}>
+                        <div className={`p-2.5 rounded-xl shrink-0 ${!notif.isRead ? "bg-white shadow-sm border border-slate-200" : "bg-[#F2F2F7]"}`}>
                           {getIconForType(notif.type, notif.priority)}
                         </div>
                         <div>
-                          <p className={`text-sm ${!notif.isRead ? "font-bold text-[#0F172A]" : "font-semibold text-slate-700"} group-hover:text-[#3B82F6] transition-colors line-clamp-1`}>
+                          <p className={`text-sm ${!notif.isRead ? "font-bold text-[#1D1D1F]" : "font-semibold text-slate-700"} group-hover:text-[#007AFF] transition-colors line-clamp-1`}>
                             {notif.title}
                           </p>
-                          <p className="text-xs text-[#64748B] mt-1 line-clamp-1">{notif.message}</p>
+                          <p className="text-xs text-[#6E6E73] mt-1 line-clamp-1">{notif.message}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getPriorityBadge(notif.priority)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-[#64748B] font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-[#6E6E73] font-medium">
                       {formatDate(notif.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="p-2 text-[#94A3B8] hover:text-[#0F172A] rounded-lg hover:bg-white transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="p-2 text-[#94A3B8] hover:text-[#1D1D1F] rounded-lg hover:bg-white transition-colors opacity-0 group-hover:opacity-100">
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </td>
@@ -289,23 +289,23 @@ export default function NotificationsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="p-4 border-t border-[#E2E8F0] flex justify-between items-center bg-[#F8FAFC]">
-          <span className="text-xs font-semibold text-[#64748B]">
-            Showing <span className="text-[#0F172A]">{(page - 1) * limit + 1}</span> to <span className="text-[#0F172A]">{Math.min(page * limit, total)}</span> of <span className="text-[#0F172A]">{total}</span> notifications
+        <div className="p-4 border-t border-[#E5E5EA] flex justify-between items-center bg-[#F2F2F7]">
+          <span className="text-xs font-semibold text-[#6E6E73]">
+            Showing <span className="text-[#1D1D1F]">{(page - 1) * limit + 1}</span> to <span className="text-[#1D1D1F]">{Math.min(page * limit, total)}</span> of <span className="text-[#1D1D1F]">{total}</span> notifications
           </span>
           <div className="flex items-center gap-2">
             <button 
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="p-2 rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg border border-[#E5E5EA] bg-white text-[#6E6E73] hover:text-[#1D1D1F] disabled:opacity-50 transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-xs font-bold text-[#0F172A] px-2">Page {page} of {totalPages}</span>
+            <span className="text-xs font-bold text-[#1D1D1F] px-2">Page {page} of {totalPages}</span>
             <button 
               disabled={page === totalPages || totalPages === 0}
               onClick={() => setPage(page + 1)}
-              className="p-2 rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg border border-[#E5E5EA] bg-white text-[#6E6E73] hover:text-[#1D1D1F] disabled:opacity-50 transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

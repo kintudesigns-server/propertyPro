@@ -66,7 +66,7 @@ export default function ApplicationDetailsPage() {
   }, [appId, router]);
 
   if (loading) {
-    return <div className="p-10 text-center font-bold text-[#64748B]">Loading Application...</div>;
+    return <div className="p-10 text-center font-bold text-[#6E6E73]">Loading Application...</div>;
   }
   if (!app) return null;
 
@@ -76,7 +76,7 @@ export default function ApplicationDetailsPage() {
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 sm:p-8 rounded-[24px] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
         <div className="flex flex-col gap-2">
-          <Link href="/dashboard/tenants/applications" className="text-xs font-bold text-slate-400 hover:text-blue-600 flex items-center gap-2 mb-1 transition-colors w-fit uppercase tracking-widest">
+          <Link href="/dashboard/tenants/applications" className="text-xs font-bold text-[#8E8E93] hover:text-blue-600 flex items-center gap-2 mb-1 transition-colors w-fit uppercase tracking-widest">
             <ArrowLeft className="h-4 w-4" /> Back to Applications
           </Link>
           <div className="flex items-center gap-3 flex-wrap">
@@ -89,7 +89,7 @@ export default function ApplicationDetailsPage() {
               {app.status}
             </Badge>
           </div>
-          <p className="text-xs font-semibold text-slate-400">App ID: <span className="font-mono text-slate-500 select-all">{app.id}</span></p>
+          <p className="text-xs font-semibold text-[#8E8E93]">App ID: <span className="font-mono text-[#6E6E73] select-all">{app.id}</span></p>
         </div>
 
         {app.status === "PENDING" && (
@@ -104,7 +104,7 @@ export default function ApplicationDetailsPage() {
             <Button 
               disabled={updating}
               onClick={() => handleStatusChange("APPROVED")}
-              className="flex-1 md:flex-none bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/10 rounded-xl h-11 font-bold px-6 cursor-pointer"
+              className="flex-1 md:flex-none bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-md shadow-blue-500/10 rounded-xl h-11 font-bold px-6 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4 mr-2" /> Approve
             </Button>
@@ -147,7 +147,7 @@ export default function ApplicationDetailsPage() {
                 <card.Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{card.label}</p>
+                <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">{card.label}</p>
                 <p className="font-extrabold text-slate-800 text-base mt-0.5">{card.value}</p>
               </div>
             </CardContent>
@@ -172,7 +172,7 @@ export default function ApplicationDetailsPage() {
               { label: "Expected Occupants", value: `${app.occupantsCount || 1} people` },
             ].map((row, i) => (
               <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                 <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
               </div>
             ))}
@@ -193,7 +193,7 @@ export default function ApplicationDetailsPage() {
                 { label: "Proposed Rent", value: `$${Number(app.unit?.rentAmount || 0).toLocaleString()}/mo` },
               ].map((row, i) => (
                 <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                  <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                   <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
                 </div>
               ))}
@@ -202,7 +202,7 @@ export default function ApplicationDetailsPage() {
           <div className="p-6 pt-0 mt-auto">
             {app.unit?.property?.id && (
               <Link href={`/dashboard/properties/${app.unit.property.id}`}>
-                <Button variant="outline" className="w-full font-bold border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-sm rounded-xl h-11 cursor-pointer">
+                <Button variant="outline" className="w-full font-bold border-slate-200 text-slate-700 bg-white hover:bg-[#F5F5F7] shadow-sm rounded-xl h-11 cursor-pointer">
                   View Property Portfolio
                 </Button>
               </Link>
@@ -223,7 +223,7 @@ export default function ApplicationDetailsPage() {
               { label: "Monthly Income", value: app.monthlyIncome ? `$${Number(app.monthlyIncome).toLocaleString()}` : "Not Provided" },
             ].map((row, i) => (
               <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                 <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
               </div>
             ))}
@@ -245,7 +245,7 @@ export default function ApplicationDetailsPage() {
                 { label: "Monthly Income", value: app.guarantorIncome ? `$${Number(app.guarantorIncome).toLocaleString()}/mo` : "N/A" },
               ].map((row, i) => (
                 <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                  <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                   <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
                 </div>
               ))}
@@ -255,7 +255,7 @@ export default function ApplicationDetailsPage() {
           /* Landlord Reference */
           <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
             <div className="p-6 border-b border-slate-100 bg-slate-50/20 flex items-center gap-2">
-              <PhoneCall className="h-5 w-5 text-[#3B82F6]" />
+              <PhoneCall className="h-5 w-5 text-[#007AFF]" />
               <h2 className="font-black text-slate-800 text-base">Landlord Reference</h2>
             </div>
             <CardContent className="p-6 space-y-4">
@@ -266,7 +266,7 @@ export default function ApplicationDetailsPage() {
                 { label: "Reason for Moving", value: app.reasonForMoving || "N/A" },
               ].map((row, i) => (
                 <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                  <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                   <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
                 </div>
               ))}
@@ -287,7 +287,7 @@ export default function ApplicationDetailsPage() {
               { label: "Relationship", value: app.emergencyContactRelation || "N/A" },
             ].map((row, i) => (
               <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 last:pb-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{row.label}</span>
+                <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">{row.label}</span>
                 <span className="font-extrabold text-slate-800 text-sm">{row.value}</span>
               </div>
             ))}
@@ -297,20 +297,20 @@ export default function ApplicationDetailsPage() {
         {/* Compliance, Consents & Parking */}
         <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/20 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-[#3B82F6]" />
+            <FileText className="h-5 w-5 text-[#007AFF]" />
             <h2 className="font-black text-slate-800 text-base">Compliance & Parking</h2>
           </div>
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-center py-2.5 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pets Allowed Count</span>
+              <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Pets Allowed Count</span>
               <span className="font-extrabold text-slate-800 text-sm">{app.petsCount || 0} pets</span>
             </div>
             <div className="flex justify-between items-center py-2.5 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pet Details</span>
+              <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Pet Details</span>
               <span className="font-extrabold text-slate-800 text-sm">{app.petDetails || "None"}</span>
             </div>
             <div className="flex justify-between items-center py-2.5 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Parking Vehicle</span>
+              <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">Parking Vehicle</span>
               <span className="font-extrabold text-slate-800 text-sm">{app.vehicleInfo || "No Vehicles"}</span>
             </div>
             
@@ -331,7 +331,7 @@ export default function ApplicationDetailsPage() {
                     </>
                   )}
                 </div>
-                <span className="text-[10px] text-slate-400 font-semibold leading-tight">Consent for background & credit checks.</span>
+                <span className="text-[10px] text-[#8E8E93] font-semibold leading-tight">Consent for background & credit checks.</span>
               </div>
 
               <div className={`p-3 rounded-xl border flex flex-col justify-between gap-1.5 ${
@@ -350,7 +350,7 @@ export default function ApplicationDetailsPage() {
                     </>
                   )}
                 </div>
-                <span className="text-[10px] text-slate-400 font-semibold leading-tight">Applicant certification correctness confirmation.</span>
+                <span className="text-[10px] text-[#8E8E93] font-semibold leading-tight">Applicant certification correctness confirmation.</span>
               </div>
             </div>
           </CardContent>
@@ -369,10 +369,10 @@ export default function ApplicationDetailsPage() {
             {!app.idDocumentUrl && !app.incomeProofUrl ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center mb-3 border border-slate-100">
-                  <Paperclip className="h-6 w-6 text-slate-400" />
+                  <Paperclip className="h-6 w-6 text-[#8E8E93]" />
                 </div>
-                <p className="font-bold text-[#0F172A] text-sm">No documents uploaded</p>
-                <p className="text-xs text-[#64748B] mt-1">The applicant did not attach any supporting documents.</p>
+                <p className="font-bold text-[#1D1D1F] text-sm">No documents uploaded</p>
+                <p className="text-xs text-[#6E6E73] mt-1">The applicant did not attach any supporting documents.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,14 +384,14 @@ export default function ApplicationDetailsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-800 truncate">Government ID</p>
-                        <p className="text-xs text-slate-400 font-semibold mt-0.5">Uploaded ID Verification Card</p>
+                        <p className="text-xs text-[#8E8E93] font-semibold mt-0.5">Uploaded ID Verification Card</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                       <a href={app.idDocumentUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-blue-600 bg-white border border-blue-100 rounded-xl hover:bg-blue-50 transition-colors">
                         <ExternalLink className="h-3.5 w-3.5" /> View ID
                       </a>
-                      <a href={app.idDocumentUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                      <a href={app.idDocumentUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors">
                         <Download className="h-3.5 w-3.5" /> Download
                       </a>
                     </div>
@@ -405,14 +405,14 @@ export default function ApplicationDetailsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-800 truncate">Proof of Income</p>
-                        <p className="text-xs text-slate-400 font-semibold mt-0.5">Pay stubs & Tax Returns</p>
+                        <p className="text-xs text-[#8E8E93] font-semibold mt-0.5">Pay stubs & Tax Returns</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                       <a href={app.incomeProofUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-blue-600 bg-white border border-blue-100 rounded-xl hover:bg-blue-50 transition-colors">
                         <ExternalLink className="h-3.5 w-3.5" /> View Proof
                       </a>
-                      <a href={app.incomeProofUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                      <a href={app.incomeProofUrl} download className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors">
                         <Download className="h-3.5 w-3.5" /> Download
                       </a>
                     </div>

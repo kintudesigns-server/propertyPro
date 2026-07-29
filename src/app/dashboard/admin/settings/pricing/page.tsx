@@ -3,46 +3,85 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Plus, Settings, Loader2, Save, Trash2, Edit2, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Plus, 
+  Settings, 
+  Loader2, 
+  Trash2, 
+  Edit2, 
+  Copy, 
+  Layers, 
+  Check, 
+  Users, 
+  DollarSign, 
+  AlertTriangle,
+  FileText,
+  Sparkles,
+  ArrowUpRight,
+  ShieldCheck,
+  CreditCard,
+  Building,
+  Wrench,
+  Clock,
+  CheckCircle2,
+  Lock
+} from "lucide-react";
 import { toast } from "sonner";
+import { GATABLE_MODULES } from "@/lib/modules-registry";
+
+const HERO_SLIDES = [
+  {
+    src: "/images/hero/hero_pricing_tiers.png",
+    tag: "SaaS Plan Matrix & Pricing Tiers",
+  },
+  {
+    src: "/images/hero/hero_pricing_licensing.png",
+    tag: "Feature Access Gating & Licensing",
+  },
+  {
+    src: "/images/hero/hero_subscription_analytics.png",
+    tag: "Recurring MRR & Quota Forecast",
+  },
+];
 
 export default function PricingSettingsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [tiers, setTiers] = useState<any[]>([]);
-  const [platformSettings, setPlatformSettings] = useState<any>({ 
-    adminFeePercent: 2.0,
-    tourMaxRequestsPerEmail: 3,
-    tourRateLimitWindowHours: 24,
-    tourOtpExpiryMinutes: 10
-  });
   const [loading, setLoading] = useState(true);
-  const [savingSettings, setSavingSettings] = useState(false);
-  
-  // Edit state
-  const [editingTier, setEditingTier] = useState<any>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  // Background slide rotation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated" || (session?.user as any)?.role !== "SUPERADMIN") {
       router.push("/dashboard");
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   const fetchTiers = async () => {
     try {
       setLoading(true);
-      const [tiersRes, settingsRes] = await Promise.all([
-        fetch("/api/pricing-tiers"),
-        fetch("/api/admin/settings")
-      ]);
-      
-      if (tiersRes.ok) setTiers(await tiersRes.json());
-      if (settingsRes.ok) setPlatformSettings(await settingsRes.json());
+      const res = await fetch("/api/pricing-tiers");
+      if (res.ok) {
+        const data = await res.json();
+        setTiers(data);
+      } else {
+        toast.error("Failed to load pricing tiers.");
+      }
     } catch (err) {
       toast.error("Failed to load pricing tiers.");
     } finally {
@@ -54,379 +93,365 @@ export default function PricingSettingsPage() {
     if (status === "authenticated") fetchTiers();
   }, [status]);
 
-  const handleSaveTier = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editingTier) return;
-    
+  const handleDuplicate = async (tier: any) => {
     try {
-      if (editingTier.maxUnits < editingTier.minUnits) {
-        toast.error("Maximum units cannot be less than minimum units.");
-        return;
-      }
-      if (editingTier.features.length === 0 || editingTier.features.some((f: string) => !f.trim())) {
-        toast.error("Please provide valid features for this tier.");
-        return;
-      }
-
-      const url = editingTier.id ? `/api/pricing-tiers/${editingTier.id}` : "/api/pricing-tiers";
-      const method = editingTier.id ? "PUT" : "POST";
-      
+      setDuplicatingId(tier.id);
       const payload = {
-        ...editingTier,
-        features: editingTier.features.filter((f: string) => f.trim() !== "")
+        name: `${tier.name} (Copy)`,
+        description: tier.description,
+        price: tier.price,
+        minUnits: tier.minUnits,
+        maxUnits: tier.maxUnits,
+        maxInspectors: tier.maxInspectors,
+        maxProperties: tier.maxProperties ?? 0,
+        maxVendors: tier.maxVendors ?? 0,
+        maxDocumentStorageMB: tier.maxDocumentStorageMB ?? 0,
+        sortOrder: (tier.sortOrder ?? 0) + 1,
+        highlightBadge: null,
+        annualPrice: tier.annualPrice ?? null,
+        allowsTrial: tier.allowsTrial ?? true,
+        gracePeriodDays: tier.gracePeriodDays ?? null,
+        trialDays: tier.trialDays,
+        isCustom: tier.isCustom,
+        isActive: false,
+        modules: tier.modules || [],
+        features: tier.features || []
       };
-      
-      const res = await fetch(url, {
-        method,
+
+      const res = await fetch("/api/pricing-tiers", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) throw new Error("Failed to duplicate tier");
       
-      toast.success(editingTier.id ? "Tier updated successfully" : "Tier created successfully");
-      setEditingTier(null);
+      toast.success(`Duplicated plan as "${tier.name} (Copy)"`);
       fetchTiers();
-    } catch (err) {
-      toast.error("An error occurred while saving the tier.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to duplicate tier");
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
-  const handleAddFeature = () => {
-    setEditingTier({ ...editingTier, features: [...editingTier.features, ""] });
-  };
-
-  const handleUpdateFeature = (index: number, value: string) => {
-    const newFeatures = [...editingTier.features];
-    newFeatures[index] = value;
-    setEditingTier({ ...editingTier, features: newFeatures });
-  };
-
-  const handleRemoveFeature = (index: number) => {
-    const newFeatures = editingTier.features.filter((_: any, i: number) => i !== index);
-    setEditingTier({ ...editingTier, features: newFeatures });
-  };
-
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this pricing tier? This may break subscriptions for assigned users.")) return;
+    if (!confirm("Are you sure you want to delete this pricing tier? This will archive Stripe products and may affect current subscriptions.")) return;
+    
     try {
+      setDeletingId(id);
       const res = await fetch(`/api/pricing-tiers/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       toast.success("Tier deleted successfully");
       fetchTiers();
     } catch (err) {
       toast.error("Failed to delete tier.");
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    try {
-      setSavingSettings(true);
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          adminFeePercent: Number(platformSettings.adminFeePercent),
-          tourMaxRequestsPerEmail: Number(platformSettings.tourMaxRequestsPerEmail),
-          tourRateLimitWindowHours: Number(platformSettings.tourRateLimitWindowHours),
-          tourOtpExpiryMinutes: Number(platformSettings.tourOtpExpiryMinutes)
-        })
-      });
-      
-      if (!res.ok) throw new Error("Failed to save platform settings");
-      toast.success("Platform settings updated successfully!");
-    } catch (err) {
-      toast.error("Failed to update platform settings.");
     } finally {
-      setSavingSettings(false);
+      setDeletingId(null);
     }
   };
 
   if (loading || status === "loading") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#EF4444]" />
-        <p className="text-[#64748B] font-bold text-sm uppercase tracking-wider">Loading settings...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
+        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Loading pricing plans...</p>
       </div>
     );
   }
 
+  // Calculate platform billing stats
+  const activeTiers = tiers.filter(t => t.isActive).length;
+  const totalSubscribers = tiers.reduce((acc, t) => acc + (t._count?.users || 0), 0);
+  const estimatedMrr = tiers.reduce((acc, t) => {
+    const subs = t._count?.users || 0;
+    const price = t.price || 0;
+    return acc + (subs * price);
+  }, 0);
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-xl">
-            <Settings className="h-8 w-8" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Pricing Tiers</h1>
-            <p className="text-[#64748B] text-base mt-0.5">Manage subscription plans and features</p>
-          </div>
-        </div>
-        <Button onClick={() => setEditingTier({ name: "", description: "", price: 0, minUnits: 0, maxUnits: 0, features: [], isCustom: false, isActive: true })} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 shadow-sm">
-          <Plus className="h-4 w-4 mr-2" /> Add New Tier
-        </Button>
-      </div>
-
-      {/* Global Platform Settings */}
-      <Card className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-none shadow-lg rounded-2xl text-white mb-8">
-        <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex-1">
-            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-400" />
-              Global Rent Commission Rate
-            </h2>
-            <p className="text-slate-400 text-sm max-w-xl">
-              This is the flat percentage cut PropertyPro takes from every single rent and security deposit payment processed across the entire platform. This affects your "Rent Commissions" profit.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 p-2 rounded-xl backdrop-blur-sm border border-white/10">
-            <div className="relative">
-              <Input 
-                type="number" 
-                step="0.1"
-                min="0"
-                max="100"
-                value={platformSettings?.adminFeePercent || 0}
-                onChange={(e) => setPlatformSettings({ ...platformSettings, adminFeePercent: e.target.value })}
-                className="w-24 h-12 bg-white/10 border-white/20 text-white font-bold text-lg text-center pr-8 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
+    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-4 sm:px-6">
+      
+      {/* 1. MATCHING DASHBOARD HERO BANNER WITH MOTION BACKGROUND */}
+      <div className="relative overflow-hidden rounded-3xl bg-white border border-[#E5E5EA] shadow-sm min-h-[220px] w-full">
+        {/* Background Image Crossfade Stack */}
+        <div className="absolute inset-0 z-0 overflow-hidden bg-slate-100">
+          {HERO_SLIDES.map((slide, idx) => {
+            const isActive = idx === slideIndex;
+            return (
+              <motion.img
+                key={slide.src}
+                src={slide.src}
+                alt={slide.tag}
+                initial={false}
+                animate={{
+                  opacity: isActive ? 0.78 : 0,
+                  scale: isActive ? 1.07 : 1.0,
+                }}
+                transition={{
+                  opacity: { duration: 1.6, ease: "easeInOut" },
+                  scale: { duration: 6, ease: "linear" },
+                }}
+                className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 font-bold">%</span>
-            </div>
-            <Button 
-              onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-12 px-6 rounded-lg transition-colors"
-            >
-              {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Rate"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            );
+          })}
 
-      {/* Tour Booking Settings */}
-      <Card className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 mb-8">
-        <div className="flex flex-col gap-6">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              🗓️ Tour Booking & Rate Limiting Controls
-            </h2>
-            <p className="text-slate-500 text-sm mt-1">
-              Configure spam-prevention rules and email OTP settings for showing tour requests.
+          {/* Light theme gradient overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-white/40 z-10" />
+          
+          <div
+            className="absolute inset-0 opacity-[0.03] z-10 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(circle, #0F172A 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+        </div>
+
+        {/* Hero Foreground Content */}
+        <div className="relative z-20 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="space-y-2.5 max-w-2xl"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[#007AFF] shadow-2xs font-extrabold text-[10px] tracking-widest uppercase">
+                <Sparkles className="h-3.5 w-3.5" />
+                SaaS Subscription Products
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold text-[10px]">
+                {HERO_SLIDES[slideIndex].tag}
+              </span>
+            </div>
+
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-[#1D1D1F]">
+              Pricing Plans & Tier Licensing
+            </h1>
+            <p className="text-slate-600 text-xs md:text-sm font-medium leading-relaxed">
+              Configure landlord subscription products, Stripe price IDs, module access gating lists, and property unit quotas.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Max Request Limits</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourMaxRequestsPerEmail || 3}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourMaxRequestsPerEmail: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">tours</span>
-              </div>
-              <p className="text-[11px] text-slate-400">Maximum active/pending requests allowed per email address.</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Rate Limit Window</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourRateLimitWindowHours || 24}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourRateLimitWindowHours: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">hours</span>
-              </div>
-              <p className="text-[11px] text-slate-400">The rolling window time frame enforced for the request limits.</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">OTP Verification Code Expiry</Label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={platformSettings?.tourOtpExpiryMinutes || 10}
-                  onChange={(e) => setPlatformSettings({ ...platformSettings, tourOtpExpiryMinutes: e.target.value })}
-                  className="rounded-xl h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 pr-24 font-bold text-slate-800"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">minutes</span>
-              </div>
-              <p className="text-[11px] text-slate-400">How long the 6-digit email verification OTP remains valid.</p>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2 border-t border-slate-100">
-            <Button 
-              onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-11 px-6 font-bold"
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/dashboard/admin/subscriptions"
+              className="inline-flex items-center bg-white/90 hover:bg-white text-[#1D1D1F] border border-[#E5E5EA] rounded-xl font-bold text-xs h-10 px-4 transition-all shadow-xs"
             >
-              {savingSettings && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Save Tour Settings
+              <CreditCard className="h-4 w-4 mr-2 text-slate-600" />
+              Active Subscriptions <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
+            </Link>
+
+            <Button 
+              onClick={() => router.push("/dashboard/admin/settings/pricing/new")} 
+              className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl h-10 px-5 shadow-xs font-bold text-xs"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add New Tier
             </Button>
           </div>
         </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tiers.map((tier) => (
-          <Card key={tier.id} className={`rounded-2xl border ${tier.isActive ? 'border-slate-200' : 'border-dashed border-slate-300 opacity-60'} shadow-sm`}>
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-xl font-bold text-slate-900">{tier.name}</CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">{tier.description}</p>
-                </div>
-                {!tier.isActive && (
-                  <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">Inactive</span>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <span className="text-3xl font-black text-slate-900">{tier.isCustom ? 'Custom' : `$${tier.price}`}</span>
-                {!tier.isCustom && <span className="text-slate-500 font-medium"> / mo</span>}
-              </div>
-              <div className="space-y-2 mb-6 text-sm text-slate-700">
-                <div className="flex justify-between border-b border-slate-100 pb-2">
-                  <span className="font-semibold">Unit Range</span>
-                  <span>{tier.minUnits} to {tier.maxUnits > 9000 ? 'Unlimited' : tier.maxUnits}</span>
-                </div>
-                <div className="pt-2">
-                  <span className="font-semibold block mb-2">Features ({tier.features.length})</span>
-                  <ul className="list-disc pl-4 space-y-1 text-slate-600">
-                    {tier.features.slice(0, 3).map((f: string, i: number) => (
-                      <li key={i}>{f}</li>
-                    ))}
-                    {tier.features.length > 3 && <li>+{tier.features.length - 3} more...</li>}
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="flex gap-3 pt-4 border-t border-slate-100">
-                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setEditingTier(tier)}>
-                  <Edit2 className="h-4 w-4 mr-2" /> Edit
-                </Button>
-                <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl px-3" onClick={() => handleDelete(tier.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
-      {editingTier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 sm:p-6 backdrop-blur-sm">
-          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-            {/* Fixed Header */}
-            <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-100 shrink-0 bg-white z-10">
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">{editingTier.id ? 'Edit Pricing Tier' : 'New Pricing Tier'}</h2>
+      {/* 2. PRICING STATS OVERVIEW CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+          <CardContent className="p-0 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Total SaaS Plans</p>
+              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">{tiers.length} plans</p>
+              <p className="text-[11px] font-semibold text-emerald-600">{activeTiers} active in marketplace</p>
             </div>
-            
-            {/* Scrollable Form Body */}
-            <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-white">
-              <form id="tier-form" onSubmit={handleSaveTier} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Plan Name</Label>
-                    <Input required value={editingTier.name} onChange={e => setEditingTier({...editingTier, name: e.target.value})} placeholder="e.g. Starter" className="h-11 rounded-xl bg-slate-50" />
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+              <Layers className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+          <CardContent className="p-0 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Plan Subscribers</p>
+              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">{totalSubscribers} owners</p>
+              <p className="text-[11px] font-semibold text-[#6E6E73]">Paying landlord contracts</p>
+            </div>
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+              <Users className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+          <CardContent className="p-0 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Est. Monthly MRR Forecast</p>
+              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">${estimatedMrr.toLocaleString()}/mo</p>
+              <p className="text-[11px] font-semibold text-indigo-600">Stripe recurring forecast</p>
+            </div>
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+              <DollarSign className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 3. PRICING TIERS GRID CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tiers.map((tier) => {
+          const subCount = tier._count?.users || 0;
+          const isUnlimited = tier.maxUnits > 9000;
+          const isTrialActive = tier.trialDays > 0;
+          
+          return (
+            <Card 
+              key={tier.id} 
+              className={`rounded-3xl border flex flex-col justify-between bg-white transition-all duration-300 hover:shadow-md ${
+                tier.isActive 
+                  ? 'border-[#E5E5EA] shadow-2xs hover:border-[#007AFF]' 
+                  : 'border-dashed border-slate-300 opacity-75 bg-slate-50/50'
+              }`}
+            >
+              <div className="p-6 space-y-6">
+                
+                {/* Header Title & Badges */}
+                <div className="flex justify-between items-start gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <h3 className="text-xl font-black text-[#1D1D1F] tracking-tight truncate">{tier.name}</h3>
+                    <p className="text-xs text-[#6E6E73] font-medium leading-relaxed line-clamp-2">{tier.description}</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Monthly Price ($)</Label>
-                    <Input type="number" required={!editingTier.isCustom} value={editingTier.price} onChange={e => setEditingTier({...editingTier, price: Number(e.target.value)})} disabled={editingTier.isCustom} className="h-11 rounded-xl bg-slate-50" />
+                  
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    {tier.isActive ? (
+                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                        Draft
+                      </Badge>
+                    )}
+                    
+                    {tier.isCustom && (
+                      <Badge className="bg-purple-50 text-purple-700 border border-purple-200/60 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                        Enterprise
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
+                {/* Price Display Box */}
+                <div className="bg-slate-50/80 border border-[#E5E5EA] rounded-2xl p-4 flex justify-between items-baseline">
+                  <div>
+                    <span className="text-3xl font-black text-[#1D1D1F] tracking-tight">
+                      {tier.isCustom ? 'Custom' : `$${tier.price}`}
+                    </span>
+                    {!tier.isCustom && <span className="text-[#6E6E73] font-bold text-xs"> / month</span>}
+                  </div>
+                  
+                  <span className="text-xs font-bold text-[#6E6E73] flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5 text-blue-500" />
+                    {subCount} subscriber{subCount === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                {/* Core Quotas & Boundaries */}
+                <div className="space-y-3 text-xs text-slate-700 font-semibold border-b border-[#F2F2F7] pb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                      <Building className="h-3.5 w-3.5 text-slate-400" />
+                      Portfolio Unit Cap
+                    </span>
+                    <span className="text-[#1D1D1F] font-extrabold">
+                      Up to {isUnlimited ? 'Unlimited' : `${tier.maxUnits} units`}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                      <Wrench className="h-3.5 w-3.5 text-slate-400" />
+                      Max Inspectors
+                    </span>
+                    <span className="text-[#1D1D1F] font-extrabold">
+                      {tier.maxInspectors ?? 1} inspector accounts
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-slate-400" />
+                      Evaluation Period
+                    </span>
+                    <span className="text-[#1D1D1F] font-extrabold">
+                      {isTrialActive ? `${tier.trialDays} days free` : 'No free trial'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Enabled Modules Tags */}
                 <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Input required value={editingTier.description} onChange={e => setEditingTier({...editingTier, description: e.target.value})} placeholder="e.g. Perfect for small landlords" className="h-11 rounded-xl bg-slate-50" />
+                  <span className="text-[10px] font-black text-[#8E8E93] uppercase tracking-wider block">Enabled Modules</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {GATABLE_MODULES.filter(m => (tier.modules || []).includes(m.key)).slice(0, 6).map((mod) => (
+                      <Badge key={mod.key} className="bg-slate-100 text-slate-800 border border-slate-200/60 rounded-lg text-[9px] font-extrabold shadow-none px-2.5 py-0.5">
+                        {mod.label}
+                      </Badge>
+                    ))}
+                    {(tier.modules || []).length > 6 && (
+                      <Badge className="bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-[9px] font-extrabold shadow-none px-2.5 py-0.5">
+                        +{(tier.modules || []).length - 6} more
+                      </Badge>
+                    )}
+                    {(tier.modules || []).length === 0 && (
+                      <span className="text-xs text-slate-400 font-medium italic">No modules enabled</span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Minimum Units</Label>
-                    <Input type="number" required value={editingTier.minUnits} onChange={e => setEditingTier({...editingTier, minUnits: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Maximum Units</Label>
-                    <Input type="number" required value={editingTier.maxUnits} onChange={e => setEditingTier({...editingTier, maxUnits: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50" />
-                  </div>
-                </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="font-bold text-slate-800">Tier Features</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={handleAddFeature} className="h-8 text-xs font-bold bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 hover:text-blue-700">
-                    <Plus className="h-3 w-3 mr-1" /> Add Feature
+              </div>
+
+              {/* Card Footer Actions */}
+              <div className="p-6 pt-0 border-t border-[#F2F2F7] mt-2">
+                <div className="flex items-center gap-2 pt-4">
+                  <Button 
+                    onClick={() => router.push(`/dashboard/admin/settings/pricing/${tier.id}`)}
+                    className="flex-1 bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl h-10 font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" /> Edit Plan & Gating
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    disabled={duplicatingId === tier.id}
+                    onClick={() => handleDuplicate(tier)}
+                    className="rounded-xl h-10 w-10 p-0 border-[#E5E5EA] text-[#1D1D1F] hover:bg-slate-100 shrink-0"
+                    title="Duplicate pricing plan"
+                  >
+                    {duplicatingId === tier.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  <Button 
+                    variant="ghost" 
+                    disabled={deletingId === tier.id || subCount > 0}
+                    onClick={() => handleDelete(tier.id)}
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-10 w-10 p-0 shrink-0"
+                    title={subCount > 0 ? "Cannot delete tier with active subscribers" : "Delete plan"}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
-                  {editingTier.features.length === 0 && (
-                    <p className="text-sm text-slate-500 text-center py-4">No features added yet.</p>
-                  )}
-                  {editingTier.features.map((feature: string, index: number) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0" />
-                      <Input 
-                        value={feature} 
-                        onChange={(e) => handleUpdateFeature(index, e.target.value)} 
-                        placeholder="e.g. Dedicated Account Manager" 
-                        className="h-10 rounded-lg bg-white shadow-sm flex-1"
-                        required
-                      />
-                      <Button type="button" variant="ghost" onClick={() => handleRemoveFeature(index)} className="h-10 w-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg shrink-0">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-slate-500" /> Advanced Settings
-                </h4>
-                <div className="flex flex-col gap-4">
-                  <label className="flex items-center justify-between cursor-pointer p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 block">Custom / Enterprise Tier</span>
-                      <span className="text-xs text-slate-500">Requires manual billing, disables fixed monthly price.</span>
-                    </div>
-                    <Switch checked={editingTier.isCustom} onCheckedChange={(checked) => setEditingTier({...editingTier, isCustom: checked, price: checked ? 0 : editingTier.price})} />
-                  </label>
-                  
-                  <label className="flex items-center justify-between cursor-pointer p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 block">Visibility Status</span>
-                      <span className="text-xs text-slate-500">Enable this to allow new owners to select this tier.</span>
-                    </div>
-                    <Switch checked={editingTier.isActive} onCheckedChange={(checked) => setEditingTier({...editingTier, isActive: checked})} />
-                  </label>
-                </div>
-              </div>
-            </form>
-          </div>
+            </Card>
+          );
+        })}
+      </div>
 
-            {/* Fixed Footer */}
-            <div className="px-6 py-4 sm:px-8 sm:py-5 border-t border-slate-100 shrink-0 bg-slate-50/80 backdrop-blur-md flex gap-4">
-              <Button type="button" variant="outline" className="flex-1 h-12 rounded-xl font-bold bg-white" onClick={() => setEditingTier(null)}>Cancel</Button>
-              <Button type="submit" form="tier-form" className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all">
-                <Save className="h-4 w-4 mr-2" /> Save Tier
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

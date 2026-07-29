@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { enforcePlanLimit } from "@/lib/plan-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -14,6 +15,17 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const propertyId = searchParams.get("propertyId");
   const id = searchParams.get("id");
+  const countOnly = searchParams.get("countOnly") === "true";
+
+  // Fast path: just return the count of units for this owner
+  if (countOnly && role === "OWNER") {
+    try {
+      const count = await prisma.unit.count({ where: { property: { ownerId: userId } } });
+      return NextResponse.json({ count });
+    } catch (e) {
+      return NextResponse.json({ count: 0 });
+    }
+  }
 
   try {
     if (id) {
@@ -104,21 +116,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Tier Enforcement Check
-    const owner = await prisma.user.findUnique({
-      where: { id: ownerId },
-      include: { pricingTier: true }
-    });
-
-    if (owner?.pricingTier?.maxUnits) {
-      const currentUnitCount = await prisma.unit.count({
-        where: { property: { ownerId: ownerId } }
-      });
-      if (currentUnitCount + 1 > owner.pricingTier.maxUnits) {
-        return NextResponse.json({ 
-          error: "LIMIT_REACHED", 
-          message: `Plan limit reached. You can only have up to ${owner.pricingTier.maxUnits} units on your current plan.` 
-        }, { status: 403 });
-      }
+    const planGuard = await enforcePlanLimit(ownerId, "ADD_UNIT");
+    if (!planGuard.allowed) {
+      return NextResponse.json({
+        error: planGuard.code || "LIMIT_REACHED",
+        message: planGuard.message,
+      }, { status: 403 });
     }
 
     const unit = await prisma.unit.create({

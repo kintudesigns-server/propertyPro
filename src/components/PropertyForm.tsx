@@ -178,16 +178,16 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-10 w-10 rounded-xl bg-slate-50 text-slate-500 hover:text-slate-900 shrink-0">
+          <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-10 w-10 rounded-xl bg-slate-50 text-[#6E6E73] hover:text-[#1D1D1F] shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
             <h2 className="text-2xl font-black text-slate-900">{initialData ? "Edit Property" : "Add New Property"}</h2>
-            <p className="text-sm text-slate-500 mt-1">Complete the details below to list your property.</p>
+            <p className="text-sm text-[#6E6E73] mt-1">Complete the details below to list your property.</p>
           </div>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl px-6 h-11 font-bold">
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl px-6 h-11 font-bold">
             Cancel
           </Button>
           <Button type="submit" disabled={loading} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 h-11 rounded-xl shadow-md">
@@ -286,23 +286,23 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
         {formData.units.length === 0 ? (
           <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
             <Building2 className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-sm font-bold text-slate-500">No units added yet</p>
-            <p className="text-xs text-slate-400 mt-1">Click the Add Unit button above to define units for this property.</p>
+            <p className="text-sm font-bold text-[#6E6E73]">No units added yet</p>
+            <p className="text-xs text-[#8E8E93] mt-1">Click the Add Unit button above to define units for this property.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {formData.units.map((unit, index) => (
               <div key={index} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 relative group">
-                <button type="button" onClick={() => handleRemoveUnit(index)} className="absolute top-4 right-4 h-8 w-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 shadow-sm transition-all opacity-0 group-hover:opacity-100">
+                <button type="button" onClick={() => handleRemoveUnit(index)} className="absolute top-4 right-4 h-8 w-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-red-500 hover:border-red-200 shadow-sm transition-all opacity-0 group-hover:opacity-100">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pr-10">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Unit Name / Number *</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Unit Name / Number *</Label>
                     <Input value={unit.name} onChange={(e) => handleUnitChange(index, "name", e.target.value)} required className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Unit Type</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Unit Type</Label>
                     <Select value={unit.type || "Studio"} onValueChange={(v) => handleUnitChange(index, "type", v)}>
                       <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -314,27 +314,27 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Rent ($)</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Rent ($)</Label>
                     <Input type="number" value={unit.rentAmount} onChange={(e) => handleUnitChange(index, "rentAmount", e.target.value)} className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Deposit ($)</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Deposit ($)</Label>
                     <Input type="number" value={unit.depositAmt} onChange={(e) => handleUnitChange(index, "depositAmt", e.target.value)} className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Bedrooms</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Bedrooms</Label>
                     <Input type="number" value={unit.rooms} onChange={(e) => handleUnitChange(index, "rooms", e.target.value)} className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Bathrooms</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Bathrooms</Label>
                     <Input type="number" value={unit.bathrooms || ""} onChange={(e) => handleUnitChange(index, "bathrooms", e.target.value)} className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Sq. Footage</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Sq. Footage</Label>
                     <Input type="number" value={unit.sqFootage} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} className="h-9 bg-white border-slate-200 rounded-lg text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase">Status</Label>
+                    <Label className="text-[10px] font-bold text-[#6E6E73] uppercase">Status</Label>
                     <Select value={unit.status || "VACANT"} onValueChange={(v) => handleUnitChange(index, "status", v)}>
                       <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -357,7 +357,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
           <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl"><Star className="h-5 w-5" /></div>
           <div>
             <h3 className="text-lg font-bold text-slate-900">Amenities & Features</h3>
-            <p className="text-sm text-slate-500 mt-0.5">Select the core amenities and features that best describe this property.</p>
+            <p className="text-sm text-[#6E6E73] mt-0.5">Select the core amenities and features that best describe this property.</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -368,7 +368,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
                 type="button"
                 key={amenity}
                 onClick={() => toggleAmenity(amenity)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-sm font-medium ${selected ? "border-blue-600 bg-blue-50/50 text-blue-900" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-sm font-medium ${selected ? "border-blue-600 bg-blue-50/50 text-blue-900" : "border-slate-200 bg-white text-[#6E6E73] hover:border-slate-300"}`}
               >
                 <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${selected ? "border-blue-600 bg-blue-600" : "border-slate-300 bg-white"}`}>
                   {selected && <CheckCircle className="h-2.5 w-2.5 text-white" />}
@@ -382,7 +382,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
           <Label className="text-xs font-bold text-slate-700 uppercase mb-2 block">Add custom amenity or feature</Label>
           <div className="flex gap-2">
             <Input value={newAmenity} onChange={(e) => setNewAmenity(e.target.value)} placeholder="e.g., Rooftop terrace, Smart home" className="bg-white border-slate-200 rounded-xl h-11 max-w-sm" onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddAmenity())} />
-            <Button type="button" variant="outline" onClick={handleAddAmenity} className="border-slate-200 text-slate-600 hover:bg-white rounded-xl h-11 px-4">
+            <Button type="button" variant="outline" onClick={handleAddAmenity} className="border-slate-200 text-[#6E6E73] hover:bg-white rounded-xl h-11 px-4">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -391,7 +391,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
               {formData.amenities.filter(a => !PREDEFINED_AMENITIES.includes(a)).map((amenity, i) => (
                 <div key={i} className="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm">
                   {amenity}
-                  <button type="button" onClick={() => handleRemoveAmenity(amenity)} className="text-slate-400 hover:text-red-500"><X className="h-3.5 w-3.5" /></button>
+                  <button type="button" onClick={() => handleRemoveAmenity(amenity)} className="text-[#8E8E93] hover:text-red-500"><X className="h-3.5 w-3.5" /></button>
                 </div>
               ))}
             </div>
@@ -404,7 +404,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
           <div className="bg-green-50 text-green-500 p-2.5 rounded-xl"><ImageIcon className="h-5 w-5" /></div>
           <div>
             <h3 className="text-lg font-bold text-slate-900">Property Images</h3>
-            <p className="text-sm text-slate-500 mt-0.5">Upload high-quality images to showcase your property.</p>
+            <p className="text-sm text-[#6E6E73] mt-0.5">Upload high-quality images to showcase your property.</p>
           </div>
         </div>
         
@@ -421,7 +421,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
             <UploadCloud className="h-8 w-8" />
           </div>
           <h4 className="text-lg font-bold text-slate-900 mb-1">Upload property images</h4>
-          <p className="text-sm text-slate-500 mb-4">Drag and drop your images here, or click to browse files</p>
+          <p className="text-sm text-[#6E6E73] mb-4">Drag and drop your images here, or click to browse files</p>
           <div className="flex items-center justify-center gap-4 text-xs font-bold text-green-600 mb-6">
             <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> PNG, JPG, GIF</span>
             <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Up to 10MB each</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +11,50 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { DollarSign, ShieldAlert, FileSignature } from "lucide-react";
+import { DollarSign, ShieldAlert, FileSignature, Lock } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+
 export default function VendorsPage() {
+  const { allowed: moduleAllowed, loading: checkingAccess } = useModuleAccess("vendors");
+  const featureAccess = useFeatureAccess("access_vendor_portal");
+
+  if (checkingAccess || featureAccess.loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Verifying vendor access...</p>
+      </div>
+    );
+  }
+
+  if (!featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="access_vendor_portal"
+        featureLabel={featureAccess.featureLabel || "Vendor Portal Access"}
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      />
+    );
+  }
+
+  if (!moduleAllowed) {
+    return <ModuleLockedBanner module="vendors" />;
+  }
+
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+  const [blockAddVendor, setBlockAddVendor] = useState(false);
 
   const [open, setOpen] = useState(false);
   const [newVendor, setNewVendor] = useState({ name: "", email: "", phone: "", specialty: "General", w9OnFile: false, insuranceOnFile: false, baseCallOutFee: "0" });
@@ -42,6 +80,22 @@ export default function VendorsPage() {
 
   useEffect(() => {
     fetchVendors();
+    // Query subscription rules
+    const checkSubscription = async () => {
+      try {
+        const rulesRes = await fetch("/api/subscription/rules");
+        if (rulesRes.ok) {
+          const rules = await rulesRes.json();
+          if (rules.isPaused && rules.blockAddVendor) {
+            setIsPaused(true);
+            setBlockAddVendor(true);
+          }
+        }
+      } catch (err) {
+        console.error("Subscription check in Vendors failed:", err);
+      }
+    };
+    checkSubscription();
   }, []);
 
   const handleCreate = async () => {
@@ -108,85 +162,35 @@ export default function VendorsPage() {
 
   return (
     <div className="p-8 pt-24 md:pt-12 max-w-7xl mx-auto space-y-8 pb-24">
+      {isPaused && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
+          <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+          <p className="text-sm font-semibold text-amber-800">
+            Your account is currently paused. Adding new vendors is restricted. Reactivate your subscription in{" "}
+            <a href="/dashboard/owner/billing" className="underline font-bold hover:text-amber-900">
+              Billing Settings
+            </a>.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Vendor Directory</h1>
-          <p className="text-[#64748B] mt-1 text-sm font-medium">Manage your network of 3rd-party contractors and specialists.</p>
+          <h1 className="text-3xl font-extrabold text-[#1D1D1F] tracking-tight">Vendor Directory</h1>
+          <p className="text-[#6E6E73] mt-1 text-sm font-medium">Manage your network of 3rd-party contractors and specialists.</p>
         </div>
         
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger className="inline-flex items-center justify-center bg-[#3B82F6] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
-            <Plus className="h-5 w-5" /> Add New Vendor
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold">Add External Vendor</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Company / Name *</Label>
-                <Input value={newVendor.name} onChange={e => setNewVendor({...newVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="e.g. Bob's Plumbing Pro" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Email *</Label>
-                <Input value={newVendor.email} onChange={e => setNewVendor({...newVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" placeholder="dispatch@bobsplumbing.com" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Phone</Label>
-                <Input value={newVendor.phone} onChange={e => setNewVendor({...newVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" placeholder="(555) 123-4567" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Specialty *</Label>
-                <Select value={newVendor.specialty} onValueChange={v => setNewVendor({...newVendor, specialty: v || "General"})}>
-                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E2E8F0]">
-                    <SelectValue placeholder="Select specialty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Plumbing">Plumbing</SelectItem>
-                    <SelectItem value="Electrical">Electrical</SelectItem>
-                    <SelectItem value="HVAC">HVAC</SelectItem>
-                    <SelectItem value="Appliance Repair">Appliance Repair</SelectItem>
-                    <SelectItem value="Handyman">Handyman</SelectItem>
-                    <SelectItem value="Pest Control">Pest Control</SelectItem>
-                    <SelectItem value="Landscaping">Landscaping</SelectItem>
-                    <SelectItem value="Cleaning">Cleaning</SelectItem>
-                    <SelectItem value="General">General Construction</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Base Call-Out Fee ($)</Label>
-                <Input value={newVendor.baseCallOutFee} onChange={e => setNewVendor({...newVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" placeholder="e.g. 75" />
-              </div>
-              
-              <div className="space-y-4 pt-4 border-t border-[#E2E8F0] mt-2">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">W-9 Form on File</Label>
-                    <p className="text-[11px] text-[#64748B]">Required for 1099 tax reporting.</p>
-                  </div>
-                  <Switch checked={newVendor.w9OnFile} onCheckedChange={c => setNewVendor({...newVendor, w9OnFile: c})} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">Liability Insurance</Label>
-                    <p className="text-[11px] text-[#64748B]">Verify active insurance coverage.</p>
-                  </div>
-                  <Switch checked={newVendor.insuranceOnFile} onCheckedChange={c => setNewVendor({...newVendor, insuranceOnFile: c})} />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E2E8F0]">
-                Cancel
-              </Button>
-              <Button onClick={handleCreate} disabled={isSubmitting} className="bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl px-8 shadow-sm">
-                Save Vendor
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="flex flex-col items-end gap-1">
+          <Link href="/dashboard/vendors/new">
+            <Button
+              className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm border-none"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Add New Vendor</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Edit Dialog */}
@@ -198,21 +202,21 @@ export default function VendorsPage() {
           {editVendor && (
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Company / Name *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
                 <Input value={editVendor.name} onChange={e => setEditVendor({...editVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Email *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
                 <Input value={editVendor.email} onChange={e => setEditVendor({...editVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Phone</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
                 <Input value={editVendor.phone} onChange={e => setEditVendor({...editVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Specialty *</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
                 <Select value={editVendor.specialty} onValueChange={v => setEditVendor({...editVendor, specialty: v || "General"})}>
-                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E2E8F0]">
+                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
                     <SelectValue placeholder="Select specialty" />
                   </SelectTrigger>
                   <SelectContent>
@@ -229,22 +233,22 @@ export default function VendorsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#0F172A] uppercase">Base Call-Out Fee ($)</Label>
+                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
                 <Input value={editVendor.baseCallOutFee} onChange={e => setEditVendor({...editVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" />
               </div>
               
-              <div className="space-y-4 pt-4 border-t border-[#E2E8F0] mt-2">
+              <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">W-9 Form on File</Label>
-                    <p className="text-[11px] text-[#64748B]">Required for 1099 tax reporting.</p>
+                    <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
+                    <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
                   </div>
                   <Switch checked={editVendor.w9OnFile} onCheckedChange={c => setEditVendor({...editVendor, w9OnFile: c})} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#0F172A]">Liability Insurance</Label>
-                    <p className="text-[11px] text-[#64748B]">Verify active insurance coverage.</p>
+                    <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
+                    <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
                   </div>
                   <Switch checked={editVendor.insuranceOnFile} onCheckedChange={c => setEditVendor({...editVendor, insuranceOnFile: c})} />
                 </div>
@@ -252,10 +256,10 @@ export default function VendorsPage() {
             </div>
           )}
           <div className="flex justify-end gap-3 mt-4">
-            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E2E8F0]">
+            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
               Cancel
             </Button>
-            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-[#3B82F6] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm">
+            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-[#007AFF] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm">
               Update Vendor
             </Button>
           </div>
@@ -263,7 +267,7 @@ export default function VendorsPage() {
       </Dialog>
 
       {/* Toolbar */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col md:flex-row gap-4 justify-between">
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E5E5EA] flex flex-col md:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-3 w-full md:max-w-xl">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
@@ -271,11 +275,11 @@ export default function VendorsPage() {
               placeholder="Search vendors or specialties..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-11 bg-slate-50 border-[#E2E8F0] rounded-xl text-sm font-medium focus-visible:ring-[#3B82F6]"
+              className="pl-10 h-11 bg-slate-50 border-[#E5E5EA] rounded-xl text-sm font-medium focus-visible:ring-[#007AFF]"
             />
           </div>
           <Select value={filterSpecialty} onValueChange={(v) => setFilterSpecialty(v || "All")}>
-            <SelectTrigger className="w-full sm:w-[200px] h-11 bg-slate-50 border-[#E2E8F0] rounded-xl">
+            <SelectTrigger className="w-full sm:w-[200px] h-11 bg-slate-50 border-[#E5E5EA] rounded-xl">
               <Filter className="h-4 w-4 mr-2 text-[#94A3B8]" />
               <SelectValue placeholder="All Specialties" />
             </SelectTrigger>
@@ -298,18 +302,18 @@ export default function VendorsPage() {
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-[#64748B] font-medium">Loading directory...</div>
+          <div className="col-span-full py-12 text-center text-[#6E6E73] font-medium">Loading directory...</div>
         ) : filtered.length === 0 ? (
           <div className="col-span-full py-12 text-center bg-white border border-dashed border-[#CBD5E1] rounded-2xl">
             <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <Wrench className="h-6 w-6 text-[#94A3B8]" />
             </div>
-            <h3 className="text-[#0F172A] font-bold text-lg mb-1">No Vendors Found</h3>
-            <p className="text-[#64748B] text-sm">Add a vendor to your directory to start dispatching maintenance requests.</p>
+            <h3 className="text-[#1D1D1F] font-bold text-lg mb-1">No Vendors Found</h3>
+            <p className="text-[#6E6E73] text-sm">Add a vendor to your directory to start dispatching maintenance requests.</p>
           </div>
         ) : (
           filtered.map((vendor) => (
-            <Card key={vendor.id} className="bg-white border border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
+            <Card key={vendor.id} className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-4 min-w-0">
@@ -317,19 +321,19 @@ export default function VendorsPage() {
                       <Wrench className="h-6 w-6" />
                     </div>
                     <div className="truncate pr-4 min-w-0">
-                      <h3 className="font-bold text-[#0F172A] text-lg leading-tight truncate">{vendor.name}</h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 mt-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-[#64748B]">
+                      <h3 className="font-bold text-[#1D1D1F] text-lg leading-tight truncate">{vendor.name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 mt-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-[#6E6E73]">
                         {vendor.specialty}
                       </span>
                     </div>
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="h-8 w-8 text-[#94A3B8] hover:text-[#0F172A] hover:bg-slate-100 rounded-lg flex items-center justify-center transition-colors shrink-0 outline-none">
+                    <DropdownMenuTrigger className="h-8 w-8 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-lg flex items-center justify-center transition-colors shrink-0 outline-none">
                       <MoreHorizontal className="h-5 w-5" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 rounded-xl p-2">
                       <DropdownMenuItem onClick={() => { setEditVendor(vendor); setEditOpen(true); }} className="cursor-pointer font-medium text-slate-700 py-2 focus:bg-slate-50 focus:text-slate-900 rounded-lg">
-                        <Edit className="h-4 w-4 mr-2 text-slate-400" /> Edit Details
+                        <Edit className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Details
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(vendor.id)} className="cursor-pointer font-medium text-red-600 py-2 focus:bg-red-50 focus:text-red-700 rounded-lg">
                         <Trash className="h-4 w-4 mr-2 text-red-500" /> Remove Vendor
@@ -339,15 +343,15 @@ export default function VendorsPage() {
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#64748B]">
+                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
                     <Mail className="h-4 w-4 text-[#94A3B8]" />
-                    <a href={`mailto:${vendor.email}`} className="hover:text-[#3B82F6] hover:underline truncate">{vendor.email}</a>
+                    <a href={`mailto:${vendor.email}`} className="hover:text-[#007AFF] hover:underline truncate">{vendor.email}</a>
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#64748B]">
+                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
                     <Phone className="h-4 w-4 text-[#94A3B8]" />
                     <span>{vendor.phone || "No phone provided"}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#64748B]">
+                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
                     <DollarSign className="h-4 w-4 text-[#94A3B8]" />
                     <span>{vendor.baseCallOutFee > 0 ? `$${vendor.baseCallOutFee.toFixed(2)} Base Fee` : "No base fee set"}</span>
                   </div>
@@ -364,7 +368,7 @@ export default function VendorsPage() {
                 </div>
                 
                 <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs font-bold text-[#94A3B8] uppercase">
-                  <span>Jobs Completed: <span className="text-[#0F172A]">{vendor._count?.maintenanceRequests || 0}</span></span>
+                  <span>Jobs Completed: <span className="text-[#1D1D1F]">{vendor._count?.maintenanceRequests || 0}</span></span>
                   <span className="flex items-center gap-1 text-emerald-600"><CheckCircle2 className="h-3.5 w-3.5" /> Active</span>
                 </div>
               </div>

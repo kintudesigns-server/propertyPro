@@ -173,6 +173,20 @@ export async function GET(req: NextRequest) {
       : !!user?.employmentStatus;
     const bankConnected = !!user?.bankName;
 
+    const pendingToursCount = await prisma.tour.count({
+      where: {
+        property: ownerFilter,
+        status: "PENDING",
+      }
+    });
+
+    const pendingApplicationsCount = await prisma.application.count({
+      where: {
+        unit: { property: ownerFilter },
+        status: "PENDING",
+      }
+    });
+
     return NextResponse.json({
       totalProperties,
       occupancyRate: occupancyRate.toFixed(1),
@@ -195,6 +209,9 @@ export async function GET(req: NextRequest) {
       subscriptionStatus: user?.subscriptionStatus || "Inactive",
       revenueHistory,
       recentMaintenanceRequests: recentMaintenance,
+      pendingToursCount,
+      pendingApplicationsCount,
+      openMaintenanceCount: maintenanceRequests.filter(m => m.status !== "RESOLVED" && m.status !== "CLOSED").length,
     });
   } catch (err: any) {
     console.error("Dashboard Stats Error:", err);

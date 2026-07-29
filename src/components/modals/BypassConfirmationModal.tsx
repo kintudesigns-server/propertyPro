@@ -65,14 +65,14 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
           <DialogTitle className="text-xl font-black text-slate-900 leading-tight">
             Confirm Bypass Inspection
           </DialogTitle>
-          <DialogDescription className="text-xs font-semibold text-slate-400 leading-relaxed">
+          <DialogDescription className="text-xs font-semibold text-[#8E8E93] leading-relaxed">
             Bypassing the walkthrough inspection creates a legal gap if the tenant disputes their refund. Please provide a reason to confirm.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
           <div className="space-y-1.5">
-            <Label htmlFor="bypassReason" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <Label htmlFor="bypassReason" className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">
               Reason for Bypassing <span className="text-red-500 font-extrabold">*</span>
             </Label>
             <textarea
@@ -80,7 +80,7 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
               placeholder="e.g. Unit was recently renovated and inspected, tenant is highly trusted, or no tenant walkthrough required."
               value={bypassReason}
               onChange={(e) => setBypassReason(e.target.value)}
-              className="w-full min-h-[90px] p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all resize-none text-slate-800 placeholder:text-slate-400 font-medium"
+              className="w-full min-h-[90px] p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all resize-none text-slate-800 placeholder:text-[#8E8E93] font-medium"
             />
           </div>
 
@@ -101,7 +101,7 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
             <Button
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="flex-1 font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl h-11"
+              className="flex-1 font-bold text-[#6E6E73] hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl h-11"
             >
               Cancel
             </Button>

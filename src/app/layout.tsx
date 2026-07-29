@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import React from "react";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
+const inter = {
+  variable: "font-sans",
+};
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMono = {
+  variable: "font-mono",
+};
 
 export const metadata: Metadata = {
   title: "PropertyPro | Premium Property Management Platform",
@@ -26,9 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased font-sans bg-[#F5F5F3] text-[#111111]`}>
+      <body className={`${inter.variable} ${geistMono.variable} h-full antialiased font-sans bg-[#F5F5F7] text-[#1D1D1F]`}>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+

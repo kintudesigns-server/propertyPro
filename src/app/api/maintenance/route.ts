@@ -6,6 +6,13 @@ import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
 import { sanitizeVendor } from "@/lib/sanitization";
 
+// ─── TENANT PORTAL GUARANTEE (F5) ───────────────────────────────────────────
+// Tenant-facing actions (such as maintenance ticket submissions or rent payments)
+// must NEVER enforce subscription-level blocks on the owner.
+// Tenants have legal rights independent of their landlord's billing status.
+// Therefore, subscription gating is bypassed for tenant-facing routes.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -149,10 +156,25 @@ export async function GET(req: NextRequest) {
   }
 }
 
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "submit_maintenance");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Submitting maintenance requests is restricted for your account." },
+        { status: 403 }
+      );
+    }
   }
 
   try {

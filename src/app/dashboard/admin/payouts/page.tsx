@@ -295,7 +295,7 @@ export default function AdminPayoutsPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-red-500" />
-        <p className="text-slate-500 font-bold text-sm uppercase tracking-wider">Loading payouts ledger...</p>
+        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Loading payouts ledger...</p>
       </div>
     );
   }
@@ -314,7 +314,7 @@ export default function AdminPayoutsPage() {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Payouts Control Ledger</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Authorize withdrawals Â· Disburse refunds Â· Audit all transactions</p>
+            <p className="text-[#6E6E73] text-sm mt-0.5">Authorize withdrawals Â· Disburse refunds Â· Audit all transactions</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export default function AdminPayoutsPage() {
             variant="ghost"
             size="icon"
             onClick={() => fetchPayouts(pagination.page)}
-            className="text-slate-500 hover:bg-slate-100 rounded-xl"
+            className="text-[#6E6E73] hover:bg-slate-100 rounded-xl"
           >
             <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
           </Button>
@@ -384,13 +384,13 @@ export default function AdminPayoutsPage() {
           <Card className="bg-white border-slate-200 rounded-2xl shadow-sm">
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Avg Time</p>
+                <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Avg Time</p>
                 <Timer className="h-4 w-4 text-violet-400" />
               </div>
               <p className="text-2xl font-extrabold text-slate-800">
                 {stats.avgProcessingHours < 48 ? `${stats.avgProcessingHours}h` : `${Math.round(stats.avgProcessingHours / 24)}d`}
               </p>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">Avg to disburse</p>
+              <p className="text-xs text-[#6E6E73] font-semibold mt-0.5">Avg to disburse</p>
             </CardContent>
           </Card>
 
@@ -398,11 +398,11 @@ export default function AdminPayoutsPage() {
           <Card className="bg-white border-slate-200 rounded-2xl shadow-sm">
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Processed</p>
+                <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Processed</p>
                 <Activity className="h-4 w-4 text-blue-400" />
               </div>
               <p className="text-2xl font-extrabold text-slate-800">{stats.processedCount}</p>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">Total completed + rejected</p>
+              <p className="text-xs text-[#6E6E73] font-semibold mt-0.5">Total completed + rejected</p>
             </CardContent>
           </Card>
         </div>
@@ -417,7 +417,7 @@ export default function AdminPayoutsPage() {
             className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
               activeTab === tab
                 ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-[#6E6E73] hover:text-slate-700"
             }`}
           >
             {tab === "ALL" ? "All Payouts" : tab === "OWNER" ? "Owner Withdrawals" : "Tenant Refunds"}
@@ -429,7 +429,7 @@ export default function AdminPayoutsPage() {
       <div className="flex flex-wrap gap-3 items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
           <Input
             placeholder="Name, email or bank..."
             value={searchTerm}
@@ -458,7 +458,7 @@ export default function AdminPayoutsPage() {
             onChange={(e) => setFromDate(e.target.value)}
             className="h-9 rounded-xl border-slate-200 bg-white text-slate-700 text-sm font-semibold w-36 shadow-sm"
           />
-          <span className="text-slate-400 text-sm">â†’</span>
+          <span className="text-[#8E8E93] text-sm">â†’</span>
           <Input
             type="date"
             value={toDate}
@@ -466,13 +466,13 @@ export default function AdminPayoutsPage() {
             className="h-9 rounded-xl border-slate-200 bg-white text-slate-700 text-sm font-semibold w-36 shadow-sm"
           />
           {(fromDate || toDate) && (
-            <button onClick={() => { setFromDate(""); setToDate(""); }} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => { setFromDate(""); setToDate(""); }} className="text-[#8E8E93] hover:text-[#6E6E73]">
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
 
-        <span className="text-xs text-slate-400 font-semibold ml-auto">
+        <span className="text-xs text-[#8E8E93] font-semibold ml-auto">
           {pagination.totalCount} result{pagination.totalCount !== 1 ? "s" : ""}
         </span>
       </div>
@@ -485,7 +485,7 @@ export default function AdminPayoutsPage() {
               ? "Pending Payout Requests"
               : statusFilter === "COMPLETED" ? "Completed Payouts" : "Rejected Payouts"}
           </CardTitle>
-          <CardDescription className="text-slate-500 text-sm">
+          <CardDescription className="text-[#6E6E73] text-sm">
             Review recipient credentials and process disbursements. Click any row for full details.
           </CardDescription>
         </CardHeader>
@@ -493,10 +493,10 @@ export default function AdminPayoutsPage() {
           {loading ? (
             <div className="flex items-center justify-center py-16 gap-3">
               <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
-              <span className="text-slate-400 font-semibold text-sm">Loading...</span>
+              <span className="text-[#8E8E93] font-semibold text-sm">Loading...</span>
             </div>
           ) : payouts.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
+            <div className="text-center py-16 text-[#8E8E93]">
               <Wallet className="h-12 w-12 mx-auto text-slate-200 mb-3" />
               <p className="font-bold">No payouts match your filters.</p>
               <p className="text-sm mt-1">Try adjusting the search or date range.</p>
@@ -505,13 +505,13 @@ export default function AdminPayoutsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent">
-                  <TableHead className="w-[140px] text-slate-400 font-extrabold text-[10px] uppercase tracking-wider pl-5 align-top pt-4">Requested</TableHead>
-                  <TableHead className="w-[170px] text-slate-400 font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Type</TableHead>
-                  <TableHead className="text-slate-400 font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Recipient</TableHead>
-                  <TableHead className="w-[200px] text-slate-400 font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Bank Details</TableHead>
-                  <TableHead className="w-[140px] text-slate-400 font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Amount</TableHead>
-                  <TableHead className="w-[130px] text-slate-400 font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Status</TableHead>
-                  <TableHead className="w-[90px] text-right text-slate-400 font-extrabold text-[10px] uppercase tracking-wider pr-5 align-top pt-4">Actions</TableHead>
+                  <TableHead className="w-[140px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pl-5 align-top pt-4">Requested</TableHead>
+                  <TableHead className="w-[170px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Type</TableHead>
+                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Recipient</TableHead>
+                  <TableHead className="w-[200px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Bank Details</TableHead>
+                  <TableHead className="w-[140px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Amount</TableHead>
+                  <TableHead className="w-[130px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Status</TableHead>
+                  <TableHead className="w-[90px] text-right text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pr-5 align-top pt-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -532,7 +532,7 @@ export default function AdminPayoutsPage() {
                         <p className="font-semibold text-slate-800 text-sm">
                           {new Date(po.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </p>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs text-[#8E8E93] mt-0.5">
                           {new Date(po.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
                         </p>
                         {aging && (
@@ -573,13 +573,13 @@ export default function AdminPayoutsPage() {
                       {/* Recipient */}
                       <TableCell className="py-5 align-top">
                         <p className="font-bold text-slate-800 text-sm leading-snug">{recipient?.name || "N/A"}</p>
-                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />{recipient?.email || "—"}
+                        <p className="text-xs text-[#8E8E93] flex items-center gap-1 mt-1">
+                          <Mail className="h-3.5 w-3.5 text-[#8E8E93]" />{recipient?.email || "—"}
                         </p>
                         {!isTenantRefund && po.owner?.balance !== undefined && (
-                          <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
+                          <p className="text-[11px] text-[#8E8E93] mt-2 flex items-center gap-1.5 font-medium">
                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            Ledger Balance: <span className="font-bold text-slate-600">${Number(po.owner.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            Ledger Balance: <span className="font-bold text-[#6E6E73]">${Number(po.owner.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                           </p>
                         )}
                       </TableCell>
@@ -587,7 +587,7 @@ export default function AdminPayoutsPage() {
                       {/* Bank */}
                       <TableCell className="py-5 align-top">
                         <p className="font-semibold text-slate-800 text-sm leading-snug">{po.bankName}</p>
-                        <p className="text-xs text-slate-500 mt-1">{po.accountName}</p>
+                        <p className="text-xs text-[#6E6E73] mt-1">{po.accountName}</p>
                         <div className="mt-1.5">
                           <UnmaskAccountNumber apiUrl={`/api/payouts/${po.id}/unmask`} maskedNumber={po.accountNumber || "N/A"} />
                         </div>
@@ -597,7 +597,7 @@ export default function AdminPayoutsPage() {
                       <TableCell className="py-5 align-top">
                         <p className="font-extrabold text-slate-900 text-base leading-none">${Number(po.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                         {po.status === "COMPLETED" && po.refNumber && (
-                          <p className="text-[10px] text-slate-400 font-semibold font-mono mt-2 bg-slate-50 border border-slate-100 px-1 py-0.5 rounded w-fit">
+                          <p className="text-[10px] text-[#8E8E93] font-semibold font-mono mt-2 bg-slate-50 border border-slate-100 px-1 py-0.5 rounded w-fit">
                             Ref: {po.refNumber}
                           </p>
                         )}
@@ -621,7 +621,7 @@ export default function AdminPayoutsPage() {
                               <X className="h-3 w-3" /> Rejected
                             </Badge>
                             {po.rejectionReason && (
-                              <p className="text-[10px] text-slate-400 mt-1 max-w-[120px] truncate" title={po.rejectionReason}>{po.rejectionReason}</p>
+                              <p className="text-[10px] text-[#8E8E93] mt-1 max-w-[120px] truncate" title={po.rejectionReason}>{po.rejectionReason}</p>
                             )}
                           </div>
                         )}
@@ -631,7 +631,7 @@ export default function AdminPayoutsPage() {
                       <TableCell className="text-right pr-5 py-5 align-top" onClick={(e) => e.stopPropagation()}>
                         {po.status === "PENDING" ? (
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center ml-auto text-slate-500 focus:outline-none">
+                            <DropdownMenuTrigger className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center ml-auto text-[#6E6E73] focus:outline-none">
                               <MoreVertical className="h-4 w-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-52 bg-white border border-slate-200 shadow-lg rounded-xl p-1 z-50">
@@ -640,14 +640,14 @@ export default function AdminPayoutsPage() {
                                   onClick={() => router.push(`/dashboard/leases/${po.leaseId}`)}
                                   className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer"
                                 >
-                                  <Eye className="h-4 w-4 text-slate-400" /> View Lease
+                                  <Eye className="h-4 w-4 text-[#8E8E93]" /> View Lease
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
                                   onClick={() => router.push(`/dashboard/admin/users?search=${recipient?.email || ""}`)}
                                   className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer"
                                 >
-                                  <Eye className="h-4 w-4 text-slate-400" /> View Owner Profile
+                                  <Eye className="h-4 w-4 text-[#8E8E93]" /> View Owner Profile
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
@@ -675,7 +675,7 @@ export default function AdminPayoutsPage() {
         </CardContent>
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between p-4 border-t border-slate-100">
-            <p className="text-xs text-slate-400 font-semibold">
+            <p className="text-xs text-[#8E8E93] font-semibold">
               Page {pagination.page} of {pagination.totalPages}
             </p>
             <div className="flex gap-2">
@@ -752,13 +752,13 @@ export default function AdminPayoutsPage() {
                     <Check className="h-5 w-5 text-emerald-600" />
                   </div>
                   <div>
-                    <h3 className="text-[#0F172A] font-bold text-lg leading-tight">Authorize Disbursement</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 font-medium">Complete all steps — this action is irreversible</p>
+                    <h3 className="text-[#1D1D1F] font-bold text-lg leading-tight">Authorize Disbursement</h3>
+                    <p className="text-xs text-[#8E8E93] mt-0.5 font-medium">Complete all steps — this action is irreversible</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowApproveModal(false)}
-                  className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl p-1.5 transition-colors flex-shrink-0 ml-2"
+                  className="text-[#8E8E93] hover:text-[#6E6E73] hover:bg-slate-100 rounded-xl p-1.5 transition-colors flex-shrink-0 ml-2"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -794,26 +794,26 @@ export default function AdminPayoutsPage() {
                 {/* Recipient Identity Card */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center gap-2">
-                    <Users className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Recipient</span>
+                    <Users className="h-3.5 w-3.5 text-[#8E8E93]" />
+                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Recipient</span>
                     <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                       isTenantRefundModal ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}>{isTenantRefundModal ? "Tenant Refund" : "Owner Withdrawal"}</span>
                   </div>
                   <div className="px-4 py-3 space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-slate-400 font-semibold">Full Name</span>
+                      <span className="text-xs text-[#8E8E93] font-semibold">Full Name</span>
                       <span className="text-sm font-bold text-slate-900">{recipientName || "N/A"}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-slate-400 font-semibold">Email</span>
-                      <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+                      <span className="text-xs text-[#8E8E93] font-semibold">Email</span>
+                      <span className="text-xs font-semibold text-[#6E6E73] flex items-center gap-1.5">
                         <Mail className="h-3 w-3" />{recipientEmail || "—"}
                       </span>
                     </div>
                     {!isTenantRefundModal && ledgerBalance !== null && (
                       <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
-                        <span className="text-xs text-slate-400 font-semibold">Ledger Balance</span>
+                        <span className="text-xs text-[#8E8E93] font-semibold">Ledger Balance</span>
                         <span className={`text-sm font-extrabold ${
                           ledgerBalance >= payoutAmount ? "text-emerald-600" : "text-red-600"
                         }`}>
@@ -828,24 +828,24 @@ export default function AdminPayoutsPage() {
                 {/* Bank Details Card */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center gap-2">
-                    <DollarSign className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Bank & Payout Details</span>
+                    <DollarSign className="h-3.5 w-3.5 text-[#8E8E93]" />
+                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Bank & Payout Details</span>
                   </div>
                   <div className="px-4 py-3 space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-slate-400 font-semibold">Bank</span>
+                      <span className="text-xs text-[#8E8E93] font-semibold">Bank</span>
                       <span className="text-sm font-bold text-slate-800">{selectedPayout.bankName}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-slate-400 font-semibold">Account Holder</span>
+                      <span className="text-xs text-[#8E8E93] font-semibold">Account Holder</span>
                       <span className="text-sm font-bold text-slate-800">{selectedPayout.accountName}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-slate-400 font-semibold">Account Number</span>
+                      <span className="text-xs text-[#8E8E93] font-semibold">Account Number</span>
                       <UnmaskAccountNumber apiUrl={`/api/payouts/${selectedPayout.id}/unmask`} maskedNumber={selectedPayout.accountNumber || "N/A"} />
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                      <span className="text-xs font-bold text-slate-600">Disbursement Amount</span>
+                      <span className="text-xs font-bold text-[#6E6E73]">Disbursement Amount</span>
                       <span className="text-xl font-extrabold text-emerald-600">
                         ${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </span>
@@ -877,13 +877,13 @@ export default function AdminPayoutsPage() {
                 {selectedPayout.lease?.deductions && (selectedPayout.lease.deductions as any[]).length > 0 && (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
                     <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center gap-2">
-                      <FileText className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Inspection Deductions</span>
+                      <FileText className="h-3.5 w-3.5 text-[#8E8E93]" />
+                      <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Inspection Deductions</span>
                     </div>
                     <div className="px-4 py-3 space-y-2">
                       {(selectedPayout.lease.deductions as any[]).map((d: any, idx: number) => (
                         <div key={idx} className="flex justify-between text-xs border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
-                          <span className="text-slate-600 font-medium">{d.description}</span>
+                          <span className="text-[#6E6E73] font-medium">{d.description}</span>
                           <span className="text-red-500 font-bold">−${Number(d.amount).toFixed(2)}</span>
                         </div>
                       ))}
@@ -898,9 +898,9 @@ export default function AdminPayoutsPage() {
                 {/* Verification Checklist */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Verification Checklist</p>
+                    <p className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Verification Checklist</p>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      allChecked ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+                      allChecked ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-[#6E6E73]"
                     }`}>
                       {Object.values(checklist).filter(Boolean).length}/3 Complete
                     </span>
@@ -934,7 +934,7 @@ export default function AdminPayoutsPage() {
                             }`}>
                               <span className="mr-1.5">{item.icon}</span>{item.label}
                             </p>
-                            <p className="text-[11px] text-slate-400 font-medium mt-0.5 leading-snug">{item.sublabel}</p>
+                            <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5 leading-snug">{item.sublabel}</p>
                           </div>
                         </label>
                       );
@@ -944,10 +944,10 @@ export default function AdminPayoutsPage() {
 
                 {/* Transfer Method + Reference */}
                 <div className="space-y-3">
-                  <p className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Transfer Details *</p>
+                  <p className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Transfer Details *</p>
                   <div className="grid grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Method</label>
+                      <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Method</label>
                       <select
                         value={transferMethod}
                         onChange={(e) => setTransferMethod(e.target.value)}
@@ -959,7 +959,7 @@ export default function AdminPayoutsPage() {
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">
                         {transferMethod === "CHECK" ? "Check Number *" : transferMethod === "STRIPE" ? "Stripe Refund ID *" : "Transaction Reference *"}
                       </label>
                       <Input
@@ -980,7 +980,7 @@ export default function AdminPayoutsPage() {
                 {/* Receipt / Proof of Payment Upload */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">
                       Bank Receipt / Proof of Payment
                       <span className="ml-1.5 text-slate-300 font-medium normal-case tracking-normal">(Optional)</span>
                     </label>
@@ -1023,10 +1023,10 @@ export default function AdminPayoutsPage() {
                     </div>
                   ) : proofUploading ? (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex items-center gap-3">
-                      <Loader2 className="h-5 w-5 text-slate-400 animate-spin flex-shrink-0" />
+                      <Loader2 className="h-5 w-5 text-[#8E8E93] animate-spin flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-bold text-slate-600">Uploading receipt...</p>
-                        <p className="text-[10px] text-slate-400">{proofFile?.name}</p>
+                        <p className="text-xs font-bold text-[#6E6E73]">Uploading receipt...</p>
+                        <p className="text-[10px] text-[#8E8E93]">{proofFile?.name}</p>
                       </div>
                     </div>
                   ) : (
@@ -1040,13 +1040,13 @@ export default function AdminPayoutsPage() {
                       }}
                     >
                       <div className="h-10 w-10 rounded-2xl bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center transition-colors">
-                        <Upload className="h-5 w-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                        <Upload className="h-5 w-5 text-[#8E8E93] group-hover:text-emerald-600 transition-colors" />
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-bold text-slate-600 group-hover:text-emerald-700">
+                        <p className="text-sm font-bold text-[#6E6E73] group-hover:text-emerald-700">
                           Drop receipt here or <span className="text-emerald-600 underline underline-offset-2">browse files</span>
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP or PDF Â· Max 10 MB</p>
+                        <p className="text-[10px] text-[#8E8E93] mt-0.5">JPG, PNG, WEBP or PDF Â· Max 10 MB</p>
                       </div>
                       <input
                         type="file"
@@ -1063,7 +1063,7 @@ export default function AdminPayoutsPage() {
 
                 {/* â”€â”€ Admin Internal Notes â”€â”€ */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Notes <span className="text-slate-300 font-medium normal-case tracking-normal">(Internal only — not shown to recipient)</span></label>
+                  <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Admin Notes <span className="text-slate-300 font-medium normal-case tracking-normal">(Internal only — not shown to recipient)</span></label>
                   <textarea
                     rows={2}
                     placeholder="e.g. Verified via phone call with owner. Processed as per Q3 schedule."
@@ -1079,7 +1079,7 @@ export default function AdminPayoutsPage() {
                     <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-bold text-white">Final confirmation required</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-[#8E8E93] mt-0.5">
                         You're about to irreversibly disburse <span className="text-white font-bold">${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> to <span className="text-white font-bold">{recipientName}</span>.
                       </p>
                       <button
@@ -1129,7 +1129,7 @@ export default function AdminPayoutsPage() {
               <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
                 <X className="h-5 w-5 text-red-500 bg-red-50 rounded-full p-0.5" /> Reject Payout Request
               </h2>
-              <p className="text-sm text-slate-500 mt-1">Rejected funds are automatically returned to the sender's ledger.</p>
+              <p className="text-sm text-[#6E6E73] mt-1">Rejected funds are automatically returned to the sender's ledger.</p>
             </div>
 
             {/* Summary */}
@@ -1150,7 +1150,7 @@ export default function AdminPayoutsPage() {
 
             {/* Rejection reason dropdown */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rejection Reason *</label>
+              <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Rejection Reason *</label>
               <select
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
@@ -1164,7 +1164,7 @@ export default function AdminPayoutsPage() {
 
             {/* Optional note */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Additional Note (Optional)</label>
+              <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Additional Note (Optional)</label>
               <textarea
                 rows={3}
                 placeholder="Add details for the owner/tenant notification..."
@@ -1211,9 +1211,9 @@ export default function AdminPayoutsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-900">Payout Details</h2>
-                  <p className="text-xs text-slate-400 font-mono mt-0.5">{drawerPayout.id}</p>
+                  <p className="text-xs text-[#8E8E93] font-mono mt-0.5">{drawerPayout.id}</p>
                 </div>
-                <button onClick={() => setDrawerPayout(null)} className="text-slate-400 hover:text-slate-600 rounded-lg p-1 hover:bg-slate-100">
+                <button onClick={() => setDrawerPayout(null)} className="text-[#8E8E93] hover:text-[#6E6E73] rounded-lg p-1 hover:bg-slate-100">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -1227,7 +1227,7 @@ export default function AdminPayoutsPage() {
 
               {/* Amount */}
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider mb-1">
                   {drawerPayout.tenantId ? "Tenant Refund" : "Owner Withdrawal"}
                 </p>
                 <p className="text-4xl font-extrabold text-slate-900">${Number(drawerPayout.amount).toFixed(2)}</p>
@@ -1238,7 +1238,7 @@ export default function AdminPayoutsPage() {
 
               {/* Recipient */}
               <section>
-                <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2 flex items-center gap-1">
                   <Users className="h-3.5 w-3.5" /> Recipient
                 </p>
                 <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
@@ -1248,7 +1248,7 @@ export default function AdminPayoutsPage() {
                     ...(!drawerPayout.tenantId && drawerPayout.owner?.balance !== undefined ? [["Current Ledger Balance", `$${Number(drawerPayout.owner.balance).toFixed(2)}`]] : []),
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between text-sm">
-                      <span className="text-slate-400 font-semibold">{label}</span>
+                      <span className="text-[#8E8E93] font-semibold">{label}</span>
                       <span className="font-bold text-slate-800">{value}</span>
                     </div>
                   ))}
@@ -1257,25 +1257,25 @@ export default function AdminPayoutsPage() {
 
               {/* Bank */}
               <section>
-                <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2 flex items-center gap-1">
                   <DollarSign className="h-3.5 w-3.5" /> Bank Details
                 </p>
                 <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400 font-semibold">Bank</span>
+                    <span className="text-[#8E8E93] font-semibold">Bank</span>
                     <span className="font-bold text-slate-800">{drawerPayout.bankName}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400 font-semibold">Account Holder</span>
+                    <span className="text-[#8E8E93] font-semibold">Account Holder</span>
                     <span className="font-bold text-slate-800">{drawerPayout.accountName}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400 font-semibold">Account Number</span>
+                    <span className="text-[#8E8E93] font-semibold">Account Number</span>
                     <UnmaskAccountNumber apiUrl={`/api/payouts/${drawerPayout.id}/unmask`} maskedNumber={drawerPayout.accountNumber || "N/A"} />
                   </div>
                   {drawerPayout.refNumber && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400 font-semibold">Reference</span>
+                      <span className="text-[#8E8E93] font-semibold">Reference</span>
                       <span className="font-bold text-slate-800">{drawerPayout.refNumber}</span>
                     </div>
                   )}
@@ -1285,7 +1285,7 @@ export default function AdminPayoutsPage() {
               {/* Rejection reason */}
               {drawerPayout.rejectionReason && (
                 <section>
-                  <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Rejection Reason</p>
+                  <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2">Rejection Reason</p>
                   <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                     <p className="text-sm text-red-700 font-semibold">{drawerPayout.rejectionReason}</p>
                   </div>
@@ -1295,7 +1295,7 @@ export default function AdminPayoutsPage() {
               {/* Proof */}
               {drawerPayout.proofUrl && (
                 <section>
-                  <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Proof of Payment</p>
+                  <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2">Proof of Payment</p>
                   <a
                     href={drawerPayout.proofUrl}
                     target="_blank"
@@ -1310,14 +1310,14 @@ export default function AdminPayoutsPage() {
               {/* Lease context */}
               {drawerPayout.lease?.unit && (
                 <section>
-                  <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Property Context</p>
+                  <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2">Property Context</p>
                   <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
                     {[
                       ["Unit", drawerPayout.lease.unit.name || "—"],
                       ["Property", drawerPayout.lease.unit.property?.name || "—"],
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between text-sm">
-                        <span className="text-slate-400 font-semibold">{label}</span>
+                        <span className="text-[#8E8E93] font-semibold">{label}</span>
                         <span className="font-bold text-slate-800">{value}</span>
                       </div>
                     ))}
@@ -1337,17 +1337,17 @@ export default function AdminPayoutsPage() {
 
               {/* Timeline */}
               <section>
-                <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Timeline</p>
+                <p className="text-xs font-extrabold text-[#8E8E93] uppercase tracking-wider mb-2">Timeline</p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 text-sm">
                     <div className="h-2 w-2 rounded-full bg-blue-400 flex-shrink-0" />
-                    <span className="text-slate-500">Requested</span>
+                    <span className="text-[#6E6E73]">Requested</span>
                     <span className="font-bold text-slate-800 ml-auto">{new Date(drawerPayout.createdAt).toLocaleString()}</span>
                   </div>
                   {drawerPayout.disbursedAt && (
                     <div className="flex items-center gap-3 text-sm">
                       <div className="h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                      <span className="text-slate-500">Disbursed</span>
+                      <span className="text-[#6E6E73]">Disbursed</span>
                       <span className="font-bold text-slate-800 ml-auto">{new Date(drawerPayout.disbursedAt).toLocaleString()}</span>
                     </div>
                   )}

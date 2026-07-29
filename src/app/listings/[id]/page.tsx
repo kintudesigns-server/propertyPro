@@ -2,14 +2,14 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   Building, MapPin, BedDouble, Square, ShieldCheck, 
   Sparkles, Info, Users, DollarSign, Calendar, ArrowRight, Share2, Heart,
-  ImageIcon, ArrowLeft
+  ImageIcon, ArrowLeft, CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
 import { TourButtonClient } from "./TourButtonClient";
+import { GalleryClient } from "./GalleryClient";
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -64,173 +64,262 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <Link href="/listings">
-          <Button variant="ghost" className="h-10 px-4 rounded-xl font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors -ml-4 mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to all listings
-          </Button>
+    <div className="min-h-screen bg-[#F2F2F7] text-[#1D1D1F] flex flex-col font-sans selection:bg-[#007AFF]/20 pb-28 lg:pb-16">
+      
+      {/* 1. STICKY TRANSLUCENT NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-white/75 backdrop-blur-xl border-b border-black/10 px-4 sm:px-8 py-3 flex items-center justify-between transition-all">
+        <Link href="/listings" className="inline-flex items-center text-[#007AFF] font-semibold text-sm hover:opacity-80 transition-opacity">
+          <ArrowLeft className="h-4 w-4 mr-1 stroke-[2.5]" />
+          <span>Listings</span>
         </Link>
-      </div>
 
-      {/* 1. HERO GALLERY (AIRBNB STYLE) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">{displayName}</h1>
-            <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 mt-1">
-              <MapPin className="h-4 w-4" /> {fullAddress}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="rounded-full shadow-sm font-bold text-xs"><Share2 className="h-4 w-4 mr-2" /> Share</Button>
-            <Button variant="outline" className="rounded-full shadow-sm font-bold text-xs"><Heart className="h-4 w-4 mr-2 text-rose-500" /> Save</Button>
-          </div>
+        <div className="hidden sm:block font-bold text-xs text-[#1D1D1F] truncate max-w-xs">
+          {displayName}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[400px] md:h-[500px] rounded-3xl overflow-hidden relative">
-          {/* Main Hero Image */}
-          <div className="md:col-span-2 md:row-span-2 h-full bg-slate-200">
-            <img src={uniqueImages[0]} alt="Main" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-          </div>
-          {/* 4 Grid Images */}
-          {uniqueImages.slice(1, 5).map((img, idx) => (
-            <div key={idx} className="hidden md:block h-full bg-slate-200">
-              <img src={img} alt={`Gallery ${idx+1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-            </div>
-          ))}
-          <Button variant="secondary" className="absolute bottom-4 right-4 rounded-xl shadow-lg font-bold bg-white/90 hover:bg-white text-slate-800 border border-slate-200 backdrop-blur-md">
-            <ImageIcon className="h-4 w-4 mr-2" /> Show all photos
-          </Button>
+        <div className="flex items-center gap-2">
+          <button
+            className="h-8 w-8 rounded-full bg-[#E5E5EA] hover:bg-[#D1D1D6] text-[#1D1D1F] flex items-center justify-center transition-colors"
+            title="Share"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+          <button
+            className="h-8 w-8 rounded-full bg-[#E5E5EA] hover:bg-[#D1D1D6] text-[#1D1D1F] flex items-center justify-center transition-colors"
+            title="Save"
+          >
+            <Heart className="h-4 w-4 text-[#FF2D55]" />
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* 2. CONTENT & STICKY SIDEBAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-12 relative">
+      {/* MAIN CONTENT WRAPPER */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full space-y-6">
         
-        {/* Left Column (Details) */}
-        <div className="lg:col-span-2 space-y-10">
-          
-          {/* Quick Stats */}
-          <div className="flex items-center gap-6 pb-8 border-b border-slate-200">
-            <div>
-              <p className="text-xl font-bold text-slate-800">{isHouse ? "Single Family Home" : isCommercial ? "Commercial Space" : "Apartment"}</p>
-              <p className="text-sm font-semibold text-slate-500">Managed by {unit.property.name} Team</p>
-            </div>
-            <div className="h-12 w-px bg-slate-200 hidden sm:block"></div>
-            {!isCommercial && (
-              <>
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-black text-slate-800">{unit.rooms}</span>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Beds</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-black text-slate-800">{unit.bathrooms || 1}</span>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Baths</span>
-                </div>
-              </>
-            )}
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-black text-slate-800">{unit.sqFootage}</span>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sq Ft</span>
-            </div>
-          </div>
-
-          {/* Description */}
+        {/* 2. TITLE & HEADER HERO BLOCK */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Info className="h-5 w-5 text-blue-600"/> About this space</h3>
-            <p className="text-slate-600 leading-relaxed text-sm font-medium">
-              {unit.property.description || "Welcome to your new space! This property is professionally managed and features top-tier amenities tailored for modern living or business needs. With exceptional attention to detail, you will find everything you need to thrive."}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="bg-[#007AFF]/10 text-[#007AFF] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                {isHouse ? "House" : isCommercial ? "Commercial" : "Apartment"}
+              </span>
+              {unit.leaseStructure && (
+                <span className="bg-emerald-500/10 text-emerald-600 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  {unit.leaseStructure} Lease
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1D1D1F] tracking-tight">{displayName}</h1>
+            <p className="text-xs sm:text-sm text-[#8E8E93] font-normal flex items-center gap-1.5 mt-1">
+              <MapPin className="h-3.5 w-3.5 text-[#007AFF] shrink-0" /> {fullAddress}
             </p>
           </div>
 
-          {/* Amenities */}
-          <div>
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Sparkles className="h-5 w-5 text-blue-600"/> What this place offers</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-2">
-              {Array.from(new Set([...(unit.amenities || []), ...(unit.property.amenities || [])])).map((am) => (
-                <div key={am} className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                    <CheckCircleIcon className="h-4 w-4 text-slate-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-700">{am}</span>
-                </div>
-              ))}
+          {/* Price Tag Header Display */}
+          <div className="sm:text-right shrink-0">
+            <div className="text-2xl sm:text-3xl font-black text-[#1D1D1F]">
+              ${Number(unit.rentAmount).toLocaleString()}
+              <span className="text-xs font-normal text-[#8E8E93]"> / mo</span>
+            </div>
+            <div className="text-[11px] text-emerald-600 font-semibold flex items-center sm:justify-end gap-1 mt-0.5">
+              <ShieldCheck className="h-3.5 w-3.5" /> Deposit: ${Number(unit.depositAmt || unit.rentAmount).toLocaleString()}
             </div>
           </div>
-
-          {/* Interactive Map Embed */}
-          <div className="pt-4">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><MapPin className="h-5 w-5 text-blue-600"/> Neighborhood Map</h3>
-            <div className="w-full h-[400px] rounded-3xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                frameBorder="0" 
-                style={{ border: 0 }} 
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`}
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-
         </div>
 
-        {/* Right Column (Sticky Apply Card) */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-28">
-            <Card className="rounded-[2rem] border border-[#E2E8F0] shadow-xl shadow-blue-900/5 overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-end mb-6">
-                  <div>
-                    <span className="text-3xl font-black text-slate-800">${Number(unit.rentAmount).toLocaleString()}</span>
-                    <span className="text-sm font-semibold text-slate-500"> / month</span>
+        {/* 3. HERO GALLERY (Client interactive component) */}
+        <GalleryClient images={uniqueImages} title={displayName} />
+
+        {/* 4. QUICK STATS SCROLLABLE PILL ROW */}
+        <div className="flex items-center gap-2.5 overflow-x-auto py-1 text-xs font-semibold no-scrollbar">
+          <div className="bg-white border border-black/5 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 shrink-0">
+            <Building className="h-4 w-4 text-[#007AFF]" />
+            <span>{isHouse ? "Single Family Home" : isCommercial ? "Commercial Space" : "Apartment"}</span>
+          </div>
+          {!isCommercial && (
+            <>
+              <div className="bg-white border border-black/5 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 shrink-0">
+                <BedDouble className="h-4 w-4 text-[#007AFF]" />
+                <span>{unit.rooms} {unit.rooms === 1 ? "Bedroom" : "Bedrooms"}</span>
+              </div>
+              <div className="bg-white border border-black/5 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 shrink-0">
+                <Users className="h-4 w-4 text-[#007AFF]" />
+                <span>{unit.bathrooms || 1} Bathrooms</span>
+              </div>
+            </>
+          )}
+          <div className="bg-white border border-black/5 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 shrink-0">
+            <Square className="h-4 w-4 text-[#007AFF]" />
+            <span>{unit.sqFootage} sq ft</span>
+          </div>
+          <div className="bg-white border border-black/5 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 shrink-0 text-emerald-600">
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <span>Available Immediately</span>
+          </div>
+        </div>
+
+        {/* 5. SPLIT CONTENT (Left Detail Grouped Cards / Right Sticky Apply Card) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative items-start">
+          
+          {/* Left 2 Columns: Inset Grouped Cards */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* About Section Inset Card */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider ml-1">About this space</span>
+              <div className="bg-white rounded-[22px] border border-black/5 p-5 shadow-sm space-y-2">
+                <p className="text-xs sm:text-sm text-[#3C3C43] leading-relaxed font-normal">
+                  {unit.property.description || "Welcome to your new space! Professionally managed with top-tier amenities, refined craftsmanship, and prompt maintenance support. Designed to maximize natural light and functional space."}
+                </p>
+                <div className="pt-2 border-t border-black/5 flex items-center gap-2 text-xs text-[#8E8E93]">
+                  <ShieldCheck className="h-4 w-4 text-[#007AFF]" />
+                  <span>Managed directly by {unit.property.name} team</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Amenities Section Inset Grouped Table Rows */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider ml-1">What this place offers</span>
+              <div className="bg-white rounded-[22px] border border-black/5 overflow-hidden shadow-sm">
+                {Array.from(new Set([...(unit.amenities || []), ...(unit.property.amenities || [])])).map((am, idx, arr) => (
+                  <div
+                    key={am}
+                    className={`flex items-center justify-between py-3.5 px-5 text-xs font-medium ${
+                      idx !== arr.length - 1 ? "border-b border-black/5" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-7 w-7 rounded-full bg-[#007AFF]/10 flex items-center justify-center text-[#007AFF] shrink-0">
+                        <Sparkles className="h-3.5 w-3.5" />
+                      </div>
+                      <span className="text-[#1D1D1F] font-semibold">{am}</span>
+                    </div>
+                    <CheckCircle2 className="h-4 w-4 text-[#34C759]" />
                   </div>
-                  {(unit as any).leaseStructure && (
-                    <Badge className="bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-0 font-bold px-3 py-1">
-                      {(unit as any).leaseStructure} Lease
-                    </Badge>
-                  )}
+                ))}
+              </div>
+            </div>
+
+            {/* Lease Details Inset Card */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider ml-1">Lease & Payment Terms</span>
+              <div className="bg-white rounded-[22px] border border-black/5 overflow-hidden shadow-sm">
+                <div className="flex justify-between items-center py-3.5 px-5 border-b border-black/5 text-xs">
+                  <span className="text-[#8E8E93] font-medium flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-[#007AFF]" /> Monthly Rent
+                  </span>
+                  <span className="font-bold text-[#1D1D1F]">${Number(unit.rentAmount).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center py-3.5 px-5 border-b border-black/5 text-xs">
+                  <span className="text-[#8E8E93] font-medium flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-[#34C759]" /> Security Deposit
+                  </span>
+                  <span className="font-bold text-[#1D1D1F]">${Number(unit.depositAmt || unit.rentAmount).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center py-3.5 px-5 border-b border-black/5 text-xs">
+                  <span className="text-[#8E8E93] font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-[#007AFF]" /> Move-in Availability
+                  </span>
+                  <span className="font-bold text-[#34C759]">Immediate</span>
+                </div>
+                <div className="flex justify-between items-center py-3.5 px-5 text-xs">
+                  <span className="text-[#8E8E93] font-medium flex items-center gap-2">
+                    <Building className="h-4 w-4 text-[#007AFF]" /> Application Fee
+                  </span>
+                  <span className="font-bold text-[#34C759]">Free ($0)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Map Section */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider ml-1">Neighborhood Map</span>
+              <div className="bg-white rounded-[22px] border border-black/5 overflow-hidden shadow-sm p-2">
+                <div className="w-full h-[320px] rounded-[18px] overflow-hidden border border-black/5">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0 }}
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`}
+                    allowFullScreen
+                  />
+                </div>
+                <div className="p-3 flex items-center gap-2 text-xs text-[#8E8E93] font-medium">
+                  <MapPin className="h-4 w-4 text-[#007AFF] shrink-0" />
+                  <span className="truncate">{fullAddress}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right 1 Column: Sticky Desktop Apply Card */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-20">
+              <div className="bg-white rounded-[22px] border border-black/5 p-6 shadow-lg space-y-5">
+                <div>
+                  <span className="text-3xl font-black text-[#1D1D1F]">
+                    ${Number(unit.rentAmount).toLocaleString()}
+                  </span>
+                  <span className="text-xs text-[#8E8E93] font-medium"> / month</span>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                    <span className="text-sm font-semibold text-slate-500 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500"/> Security Deposit</span>
-                    <span className="text-sm font-bold text-slate-800">${Number(unit.depositAmt || unit.rentAmount).toLocaleString()}</span>
+                <div className="space-y-3 pt-2 border-t border-black/5 text-xs text-[#8E8E93]">
+                  <div className="flex justify-between items-center py-1">
+                    <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#34C759]" /> Deposit</span>
+                    <span className="font-bold text-[#1D1D1F]">${Number(unit.depositAmt || unit.rentAmount).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                    <span className="text-sm font-semibold text-slate-500 flex items-center gap-2"><Building className="h-4 w-4 text-blue-500"/> Available</span>
-                    <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Immediately</span>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-[#007AFF]" /> Available</span>
+                    <span className="font-bold text-[#34C759]">Immediately</span>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 pt-2">
                   <Link href={`/listings?applyUnitId=${unit.id}`} className="block">
-                    <Button className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex justify-center items-center gap-2">
+                    <Button className="w-full h-12 rounded-full bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold text-xs transition-all shadow-md shadow-[#007AFF]/25 flex items-center justify-center gap-2 active:scale-98">
                       Apply Now <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                   <TourButtonClient unit={unit} />
                 </div>
-                
-                <p className="text-[11px] text-center text-slate-400 font-semibold mt-4">
-                  You won't be charged anything to apply or tour.
-                </p>
-              </CardContent>
-            </Card>
+
+                <div className="pt-3 border-t border-black/5 flex items-center justify-center gap-2 text-[11px] text-[#8E8E93]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#34C759]" />
+                  <span>Free to apply &bull; Digital Lease Agreement</span>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
-    </div>
-  );
-}
 
-function CheckCircleIcon(props: any) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-      <polyline points="22 4 12 14.01 9 11.01"/>
-    </svg>
+      {/* 6. MOBILE FLOATING BOTTOM ACTION BAR */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-black/10 px-4 py-3 pb-safe shadow-2xl flex items-center justify-between gap-3">
+        <div>
+          <div className="text-lg font-black text-[#1D1D1F]">
+            ${Number(unit.rentAmount).toLocaleString()}
+            <span className="text-[10px] font-normal text-[#8E8E93]">/mo</span>
+          </div>
+          <div className="text-[9px] text-[#34C759] font-bold">No application fee</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <TourButtonClient
+            unit={unit}
+            className="h-10 px-3.5 rounded-full font-semibold text-xs text-[#007AFF] border border-[#007AFF] bg-[#007AFF]/5 flex items-center gap-1"
+          />
+          <Link href={`/listings?applyUnitId=${unit.id}`}>
+            <Button className="h-10 px-4 rounded-full bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold text-xs shadow-md shadow-[#007AFF]/20 flex items-center gap-1 active:scale-95">
+              Apply <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+    </div>
   );
 }

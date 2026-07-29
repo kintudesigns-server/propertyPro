@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
-// Force TS reload for Prisma
 import { prisma } from "@/lib/prisma";
 import { sanitizeVendor } from "@/lib/sanitization";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,13 @@ export async function GET(req: NextRequest) {
 
   if (role !== "OWNER" && role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "vendors");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
   }
 
   try {
@@ -47,6 +55,42 @@ export async function POST(req: NextRequest) {
 
   if (role !== "OWNER" && role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "vendors");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
+  // Gate: paused OWNER accounts cannot add new vendors
+  if (role === "OWNER") {
+    const rules = await getEffectiveSubscriptionRules(userId);
+    if (rules.isPaused && rules.blockAddVendor) {
+      return NextResponse.json({
+        error: "Your account is currently paused. Adding new vendors is restricted until your subscription is reactivated.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
+    // Gate: maxVendors capacity check (0 = Unlimited)
+    const owner = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { pricingTier: true }
+    });
+    if (owner?.pricingTier?.maxVendors && owner.pricingTier.maxVendors > 0) {
+      const currentVendorCount = await prisma.externalVendor.count({
+        where: { ownerId: userId }
+      });
+      if (currentVendorCount >= owner.pricingTier.maxVendors) {
+        return NextResponse.json({ 
+          error: "LIMIT_REACHED", 
+          message: `Plan limit reached. Your ${owner.pricingTier.name} plan allows up to ${owner.pricingTier.maxVendors} vendors.` 
+        }, { status: 403 });
+      }
+    }
   }
 
   try {

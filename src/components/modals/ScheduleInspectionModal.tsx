@@ -92,13 +92,13 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
       <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-slate-900">Schedule Inspection Walkthrough</DialogTitle>
-          <DialogDescription className="text-xs font-semibold text-slate-400">
+          <DialogDescription className="text-xs font-semibold text-[#8E8E93]">
             Assign an inspector and choose a type and date/time for the walkthrough.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleScheduleInspection} className="space-y-4 mt-4">
           <div className="space-y-1">
-            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inspection Type</Label>
+            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Inspection Type</Label>
             <select
               value={inspectionType}
               onChange={(e) => setInspectionType(e.target.value as "PRELIMINARY" | "FINAL")}
@@ -109,7 +109,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
             </select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Date</Label>
+            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Date</Label>
             <Input
               type="date"
               required
@@ -124,7 +124,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
             )}
           </div>
           <div className="space-y-1">
-            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Time</Label>
+            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Time</Label>
             <Input
               type="time"
               required
@@ -134,7 +134,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
             />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Assign Inspector</Label>
+            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Assign Inspector</Label>
             <select
               value={selectedInspectorId}
               onChange={(e) => setSelectedInspectorId(e.target.value)}
@@ -150,7 +150,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
             </select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Notes / Instructions</Label>
+            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Notes / Instructions</Label>
             <textarea
               placeholder="e.g. Check kitchen cabinets and master bathroom ceiling..."
               value={inspectionNotes}
@@ -163,7 +163,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="flex-1 border border-slate-200 rounded-xl h-11 text-xs font-bold text-slate-500 hover:bg-slate-50"
+              className="flex-1 border border-slate-200 rounded-xl h-11 text-xs font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
             >
               Cancel
             </Button>

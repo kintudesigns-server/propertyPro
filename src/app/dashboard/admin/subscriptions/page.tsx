@@ -9,16 +9,18 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSubscriptionsPage() {
   const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== "SUPERADMIN") {
+  const role = (session?.user as any)?.role;
+  if (!session?.user || role !== "SUPERADMIN") {
     redirect("/dashboard");
   }
 
-  // Fetch all owners and their pricing tiers
+  // Fetch all owners and their pricing tiers + overrides + soft-lock lifecycle fields
   const owners = await prisma.user.findMany({
     where: { role: "OWNER" },
     include: {
       pricingTier: true,
+      subscriptionOverride: true,
+      moduleGrants: true,
       ownedProperties: {
         include: { units: true }
       }
@@ -26,27 +28,50 @@ export default async function AdminSubscriptionsPage() {
     orderBy: { createdAt: "desc" }
   });
 
-  // Calculate some basic stats
+  const platformSettings = await prisma.platformSettings.findFirst() || {
+    gracePeriodDays: 7,
+    blockPayoutsOnPastDue: true,
+    blockPayoutsOnPaused: true,
+    blockNewUnitsOnPaused: true,
+    allowMaintenanceOnPaused: true,
+    blockAddVendorOnPaused: true,
+    blockAddInspectorOnPaused: true,
+    blockProcessApplicationsOnPaused: true,
+    blockAddTenantOnPaused: true,
+    blockTourSlotsOnPaused: true,
+  };
+
+  // Calculate stats
   let mrr = 0;
+  let atRiskMrr = 0;
   owners.forEach(owner => {
-    if (owner.subscriptionStatus === "Active" && owner.pricingTier?.price) {
-      mrr += Number(owner.pricingTier.price);
+    const price = owner.pricingTier?.price ? Number(owner.pricingTier.price) : 0;
+    if (owner.subscriptionStatus === "Active" || owner.subscriptionStatus === "Active (Canceling)") {
+      mrr += price;
+    } else if (owner.subscriptionStatus === "Paused" || owner.subscriptionStatus === "Past_Due") {
+      atRiskMrr += price;
     }
   });
 
-  // Serialize owners to avoid "Only plain objects can be passed to Client Components" error for Prisma Decimal/Date objects
+  // Serialize to avoid Prisma Decimal/Date NextJS serialization error
   const serializedOwners = JSON.parse(JSON.stringify(owners));
+  const serializedSettings = JSON.parse(JSON.stringify(platformSettings));
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Owner Subscriptions</h1>
-          <p className="text-[#64748B] text-base mt-0.5">Overview of property owners and their active subscription tiers.</p>
+          <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Owner Subscriptions</h1>
+          <p className="text-[#6E6E73] text-base mt-0.5">Overview and management panel for property owners and subscription lifecycles.</p>
         </div>
       </div>
 
-      <AdminSubscriptionsClient owners={serializedOwners} mrr={mrr} />
+      <AdminSubscriptionsClient 
+        owners={serializedOwners} 
+        mrr={mrr} 
+        atRiskMrr={atRiskMrr}
+        platformSettings={serializedSettings} 
+      />
     </div>
   );
 }

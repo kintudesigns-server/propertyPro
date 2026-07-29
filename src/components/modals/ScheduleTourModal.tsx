@@ -253,7 +253,7 @@ export function ScheduleTourModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-[#E2E8F0] text-slate-800 rounded-3xl max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white border-[#E5E5EA] text-slate-800 rounded-3xl max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-4">
             <DialogTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -264,7 +264,7 @@ export function ScheduleTourModal({
               Verified Showing
             </Badge>
           </div>
-          <DialogDescription className="text-xs text-slate-400 font-semibold">
+          <DialogDescription className="text-xs text-[#8E8E93] font-semibold">
             {unit?.property?.name} {unit?.name ? `(${unit.name})` : ""} — {unit?.property?.address}
           </DialogDescription>
         </DialogHeader>
@@ -294,7 +294,7 @@ export function ScheduleTourModal({
                   className={`flex items-center justify-center gap-2 p-3 rounded-2xl border-2 font-bold text-xs transition-all ${
                     tourType === "IN_PERSON"
                       ? "border-blue-600 bg-blue-50 text-blue-900 shadow-xs"
-                      : "border-slate-100 bg-white text-slate-600 hover:border-slate-200"
+                      : "border-slate-100 bg-white text-[#6E6E73] hover:border-slate-200"
                   }`}
                 >
                   <MapPin className="h-4 w-4 text-blue-600" /> In-Person Showing
@@ -305,7 +305,7 @@ export function ScheduleTourModal({
                   className={`flex items-center justify-center gap-2 p-3 rounded-2xl border-2 font-bold text-xs transition-all ${
                     tourType === "VIDEO_CALL"
                       ? "border-blue-600 bg-blue-50 text-blue-900 shadow-xs"
-                      : "border-slate-100 bg-white text-slate-600 hover:border-slate-200"
+                      : "border-slate-100 bg-white text-[#6E6E73] hover:border-slate-200"
                   }`}
                 >
                   <Video className="h-4 w-4 text-purple-600" /> Virtual Video Call
@@ -476,7 +476,7 @@ export function ScheduleTourModal({
               <button
                 type="button"
                 onClick={() => setTourStep("FORM")}
-                className="text-slate-500 hover:text-slate-800 font-bold"
+                className="text-[#6E6E73] hover:text-slate-800 font-bold"
               >
                 ← Change Email
               </button>
@@ -519,22 +519,22 @@ export function ScheduleTourModal({
 
             <div>
               <h3 className="text-xl font-black text-slate-900">Tour Request Submitted!</h3>
-              <p className="text-xs text-slate-500 font-semibold mt-1">
+              <p className="text-xs text-[#6E6E73] font-semibold mt-1">
                 The landlord has been notified and will confirm your visit shortly.
               </p>
             </div>
 
             <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl text-left space-y-2 text-xs">
               <div className="flex justify-between border-b border-slate-200/60 pb-2">
-                <span className="font-semibold text-slate-500">Property:</span>
+                <span className="font-semibold text-[#6E6E73]">Property:</span>
                 <span className="font-bold text-slate-800">{unit?.property?.name}</span>
               </div>
               <div className="flex justify-between border-b border-slate-200/60 pb-2">
-                <span className="font-semibold text-slate-500">Date & Time:</span>
+                <span className="font-semibold text-[#6E6E73]">Date & Time:</span>
                 <span className="font-bold text-slate-800">{dateStr} at {timeStr} {tzAbbrev}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-semibold text-slate-500">Showing Type:</span>
+                <span className="font-semibold text-[#6E6E73]">Showing Type:</span>
                 <span className="font-bold text-blue-600">
                   {tourType === "VIDEO_CALL" ? "Virtual Video Call" : "In-Person Showing"}
                 </span>
@@ -543,7 +543,7 @@ export function ScheduleTourModal({
 
             <div className="space-y-3">
               <a href={googleCalUrl} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="outline" className="w-full h-11 rounded-xl font-bold text-xs border-slate-300 hover:bg-slate-100 flex items-center justify-center gap-2 text-slate-800">
+                <Button variant="outline" className="w-full h-11 rounded-xl font-bold text-xs border-slate-300 hover:bg-[#F2F2F7] flex items-center justify-center gap-2 text-slate-800">
                   <CalendarIcon className="h-4 w-4 text-blue-600" /> Add to Google Calendar <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </a>
@@ -555,7 +555,7 @@ export function ScheduleTourModal({
               </Link>
             </div>
 
-            <p className="text-[10px] text-slate-400 font-semibold">
+            <p className="text-[10px] text-[#8E8E93] font-semibold">
               Closing automatically in {autoCloseSeconds} seconds...
             </p>
           </div>

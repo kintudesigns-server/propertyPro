@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
             createdAt: true,
             tenantStatus: true,
             accountStatus: true,
+            subscriptionStatus: true,
             avatar: true,
             pricingTier: {
               select: {
@@ -74,6 +75,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         tenantStatus: true,
         accountStatus: true,
+        subscriptionStatus: true,
         avatar: true,
         pricingTier: {
           select: {

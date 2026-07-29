@@ -121,7 +121,7 @@ export function MockCardForm({
       case "discover":
         return <span className="text-[#FF6600] font-black italic text-[11px] select-none">DISCOVER</span>;
       default:
-        return <CreditCard className="w-5 h-5 text-slate-400" />;
+        return <CreditCard className="w-5 h-5 text-[#8E8E93]" />;
     }
   };
 
@@ -139,7 +139,7 @@ export function MockCardForm({
       </div>
 
       {/* Visual Credit Card Preview */}
-      <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden h-44 flex flex-col justify-between">
+      <div className="bg-gradient-to-br from-[#1E293B] to-[#1D1D1F] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden h-44 flex flex-col justify-between">
         <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-16 translate-x-16" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-10 -translate-x-10" />
         
@@ -175,18 +175,18 @@ export function MockCardForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-[#0F172A]">Cardholder Name</Label>
+          <Label className="text-xs font-bold text-[#1D1D1F]">Cardholder Name</Label>
           <Input
             placeholder="Jane Doe"
             value={cardName}
             onChange={(e) => setCardName(e.target.value)}
-            className="h-11 rounded-xl border-[#E2E8F0] focus-visible:ring-1 focus-visible:ring-[#635BFF]"
+            className="h-11 rounded-xl border-[#E5E5EA] focus-visible:ring-1 focus-visible:ring-[#007AFF]"
           />
         </div>
 
         {/* Card Number */}
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-[#0F172A]">Card Number</Label>
+          <Label className="text-xs font-bold text-[#1D1D1F]">Card Number</Label>
           <div className="relative">
             <Input
               placeholder="4242 4242 4242 4242"
@@ -198,7 +198,7 @@ export function MockCardForm({
               onBlur={() => setTouched(prev => ({ ...prev, cardNumber: true }))}
               maxLength={19}
               className={cn(
-                "h-11 rounded-xl border-[#E2E8F0] pr-12 font-mono focus-visible:ring-1 focus-visible:ring-[#635BFF]",
+                "h-11 rounded-xl border-[#E5E5EA] pr-12 font-mono focus-visible:ring-1 focus-visible:ring-[#007AFF]",
                 errors.cardNumber && touched.cardNumber && "border-red-300 bg-red-50/30 focus-visible:ring-red-500"
               )}
             />
@@ -214,7 +214,7 @@ export function MockCardForm({
         {/* Expiry & CVV */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-[#0F172A]">Expiration Date</Label>
+            <Label className="text-xs font-bold text-[#1D1D1F]">Expiration Date</Label>
             <Input
               placeholder="MM/YY"
               value={expiry}
@@ -222,7 +222,7 @@ export function MockCardForm({
               onBlur={() => setTouched(prev => ({ ...prev, expiry: true }))}
               maxLength={5}
               className={cn(
-                "h-11 rounded-xl border-[#E2E8F0] font-mono text-center focus-visible:ring-1 focus-visible:ring-[#635BFF]",
+                "h-11 rounded-xl border-[#E5E5EA] font-mono text-center focus-visible:ring-1 focus-visible:ring-[#007AFF]",
                 errors.expiry && touched.expiry && "border-red-300 bg-red-50/30 focus-visible:ring-red-500"
               )}
             />
@@ -232,7 +232,7 @@ export function MockCardForm({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-[#0F172A]">CVV</Label>
+            <Label className="text-xs font-bold text-[#1D1D1F]">CVV</Label>
             <Input
               placeholder="123"
               value={cvv}
@@ -243,7 +243,7 @@ export function MockCardForm({
               onBlur={() => setTouched(prev => ({ ...prev, cvv: true }))}
               maxLength={4}
               className={cn(
-                "h-11 rounded-xl border-[#E2E8F0] font-mono text-center focus-visible:ring-1 focus-visible:ring-[#635BFF]",
+                "h-11 rounded-xl border-[#E5E5EA] font-mono text-center focus-visible:ring-1 focus-visible:ring-[#007AFF]",
                 errors.cvv && touched.cvv && "border-red-300 bg-red-50/30 focus-visible:ring-red-500"
               )}
             />
@@ -253,7 +253,7 @@ export function MockCardForm({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 text-[11px] text-[#8E8E93]">
           <Lock className="h-3.5 w-3.5" />
           <span>Secure AES-256 simulation · Simulated SSL Certificate</span>
         </div>
@@ -266,7 +266,7 @@ export function MockCardForm({
               variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="flex-1 h-11 rounded-xl border-[#E2E8F0] font-semibold text-sm"
+              className="flex-1 h-11 rounded-xl border-[#E5E5EA] font-semibold text-sm"
             >
               {cancelButtonText}
             </Button>

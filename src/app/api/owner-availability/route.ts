@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { auditLog } from "@/lib/audit-log";
 
 export async function GET(req: NextRequest) {
   try {
@@ -65,6 +67,23 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const rules = await getEffectiveSubscriptionRules(ownerId);
+    if (rules.blockTourSlots) {
+      await auditLog({
+        entityType: "SUBSCRIPTION_GATE",
+        entityId: ownerId,
+        action: "BLOCKED_BY_PAUSE",
+        actorId: ownerId,
+        actorRole: "OWNER",
+        note: "Attempted: Save Tour Availability. Blocked by: blockTourSlotsOnPaused",
+      });
+      return NextResponse.json({
+        error: "Your account is currently paused. Tour scheduling is restricted until subscription is reactivated.",
+        code: "ACCOUNT_PAUSED",
+        isPaused: true,
+      }, { status: 403 });
+    }
+
     const { workingHours, blackoutDates, timezone } = await req.json();
 
     const availability = await prisma.ownerAvailability.upsert({

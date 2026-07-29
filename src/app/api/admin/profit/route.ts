@@ -86,22 +86,28 @@ export async function GET(req: NextRequest) {
     const activeSubscribers = await prisma.user.findMany({
       where: {
         role: "OWNER",
-        subscriptionStatus: { in: ["active", "Active", "ACTIVE"] },
+        subscriptionStatus: { in: ["Active", "Active (Canceling)", "Trialing", "active", "trialing", "Active (canceling)", "ACTIVE"] },
         pricingTier: { isNot: null }
       },
       include: { pricingTier: true }
     });
 
-    const subscriptionMRR = activeSubscribers.reduce((sum, owner) => sum + Number(owner.pricingTier?.price || 0), 0);
+    const subscriptionMRR = activeSubscribers.reduce((sum, owner) => {
+      const isTrialing = ["trialing", "Trialing", "TRIALING"].includes(owner.subscriptionStatus || "");
+      return sum + (isTrialing ? 0 : Number(owner.pricingTier?.price || 0));
+    }, 0);
 
-    const detailedSubscriptions = activeSubscribers.map(owner => ({
-      id: owner.id,
-      owner: owner.name || owner.email,
-      tier: owner.pricingTier?.name || "Unknown",
-      monthlyPrice: Number(owner.pricingTier?.price || 0),
-      status: owner.subscriptionStatus,
-      joinedAt: owner.createdAt
-    }));
+    const detailedSubscriptions = activeSubscribers.map(owner => {
+      const isTrialing = ["trialing", "Trialing", "TRIALING"].includes(owner.subscriptionStatus || "");
+      return {
+        id: owner.id,
+        owner: owner.name || owner.email,
+        tier: owner.pricingTier?.name || "Unknown",
+        monthlyPrice: isTrialing ? 0 : Number(owner.pricingTier?.price || 0),
+        status: owner.subscriptionStatus,
+        joinedAt: owner.createdAt
+      };
+    });
 
     const netVolume = Math.max(0, Number(totalVolume._sum.amount || 0) - Number(totalRefunds._sum.amount || 0));
 

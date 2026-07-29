@@ -51,7 +51,7 @@ export default function InviteTenantModal({ unitId, unitName, propertyName, rent
             <DialogTitle className="text-2xl font-black text-slate-900 flex items-center gap-2">
               <Mail className="h-6 w-6 text-blue-600" /> Invite Tenant
             </DialogTitle>
-            <DialogDescription className="text-slate-500 font-medium">
+            <DialogDescription className="text-[#6E6E73] font-medium">
               Send a magic link to invite an existing tenant to {unitName} ({propertyName}). They will be able to set up their account and automatically link to this unit.
             </DialogDescription>
           </DialogHeader>
@@ -60,13 +60,13 @@ export default function InviteTenantModal({ unitId, unitName, propertyName, rent
         <form onSubmit={handleInvite} className="p-6 pt-4 space-y-5">
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-2">
              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-semibold">Monthly Rent</span>
+                <span className="text-[#6E6E73] font-semibold">Monthly Rent</span>
                 <span className="text-slate-900 font-black">${Number(rentAmount).toLocaleString()}</span>
              </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tenantEmail" className="text-xs font-bold uppercase tracking-wider text-slate-600">Tenant Email Address</Label>
+            <Label htmlFor="tenantEmail" className="text-xs font-bold uppercase tracking-wider text-[#6E6E73]">Tenant Email Address</Label>
             <Input
               id="tenantEmail"
               type="email"

@@ -27,7 +27,7 @@ export function ConfirmDialog({
       <DialogContent className="bg-white text-slate-800 rounded-3xl max-w-sm p-6 border-0">
         <DialogHeader>
           <DialogTitle className="text-lg font-black text-slate-900">{title}</DialogTitle>
-          <DialogDescription className="text-sm font-semibold text-slate-500 mt-1 leading-relaxed">
+          <DialogDescription className="text-sm font-semibold text-[#6E6E73] mt-1 leading-relaxed">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -36,7 +36,7 @@ export function ConfirmDialog({
             type="button"
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="flex-1 border border-slate-200 hover:bg-slate-50 rounded-xl h-11 text-xs font-bold text-slate-500"
+            className="flex-1 border border-slate-200 hover:bg-[#F5F5F7] rounded-xl h-11 text-xs font-bold text-[#6E6E73]"
           >
             Cancel
           </Button>

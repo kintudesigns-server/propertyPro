@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
       if (unit?.property?.ownerId) {
         const owner = await prisma.user.findUnique({ where: { id: unit.property.ownerId } });
         if (owner?.email) {
-          const ownerReviewLink = `${origin}/dashboard/owner`; // Linking to their dashboard
+          const ownerReviewLink = `${origin}/dashboard/applications`; // Linking to applications list
           await sendEmail({
             to: owner.email,
             subject: `New Application: Unit ${unit?.name} at ${unit?.property?.name}`,

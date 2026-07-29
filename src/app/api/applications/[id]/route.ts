@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
+import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -127,6 +128,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (!isOwner && !isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (isOwner) {
+      const rules = await getEffectiveSubscriptionRules(userId);
+      if (rules.isPaused && rules.blockProcessApplications) {
+        return NextResponse.json({
+          error: "Your account is currently paused. Processing tenant applications is restricted until your subscription is reactivated.",
+          code: "ACCOUNT_PAUSED",
+          isPaused: true,
+        }, { status: 403 });
+      }
     }
 
     const updatedApp = await prisma.application.update({

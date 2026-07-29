@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export interface CalendarEvent {
   id: string;
@@ -20,6 +21,14 @@ export async function GET(req: NextRequest) {
 
   const role = (session.user as any).role;
   const userId = (session.user as any).id;
+
+  if (role === "OWNER") {
+    const access = await checkModuleAccess(userId, "calendar");
+    if (!access.allowed) {
+      return moduleLockedResponse(access);
+    }
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const start = searchParams.get("start");
   const end = searchParams.get("end");
