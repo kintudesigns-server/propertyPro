@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, gracePeriodEnd: newGraceEnd });
       }
 
+      case "manual_resume":
       case "restore_access": {
         const adminReason = reason || "Admin manual restoration of account access";
         if (adminReason.trim().length < 10) {

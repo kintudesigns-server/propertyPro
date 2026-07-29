@@ -146,15 +146,21 @@ export default function DashboardPage() {
         msgsRes.json(),
       ]);
 
-      setLeases(leasesData);
-      setInvoices(invoicesData);
-      setMaintenance(maintData);
-      setDocuments(docsData);
-      setMessages(msgsData);
+      const cleanLeases = Array.isArray(leasesData) ? leasesData : Array.isArray(leasesData?.leases) ? leasesData.leases : [];
+      const cleanInvoices = Array.isArray(invoicesData) ? invoicesData : Array.isArray(invoicesData?.invoices) ? invoicesData.invoices : [];
+      const cleanMaint = Array.isArray(maintData) ? maintData : Array.isArray(maintData?.maintenance) ? maintData.maintenance : [];
+      const cleanDocs = Array.isArray(docsData) ? docsData : Array.isArray(docsData?.documents) ? docsData.documents : [];
+      const cleanMsgs = Array.isArray(msgsData) ? msgsData : Array.isArray(msgsData?.messages) ? msgsData.messages : [];
 
-      if (leasesData.length > 0) {
-        const active = leasesData.find((l: any) => l.status === "ACTIVE");
-        setSelectedLeaseId(active ? active.id : leasesData[0].id);
+      setLeases(cleanLeases);
+      setInvoices(cleanInvoices);
+      setMaintenance(cleanMaint);
+      setDocuments(cleanDocs);
+      setMessages(cleanMsgs);
+
+      if (cleanLeases.length > 0) {
+        const active = cleanLeases.find((l: any) => l.status === "ACTIVE");
+        setSelectedLeaseId(active ? active.id : cleanLeases[0].id);
       }
     } catch (err) {
       console.error(err);
@@ -285,7 +291,7 @@ export default function DashboardPage() {
       iconBg: string; urgent?: boolean; action?: () => void; actionLabel?: string;
     }[] = [];
 
-    unpaidInvoices.forEach((inv) => {
+    (Array.isArray(unpaidInvoices) ? unpaidInvoices : []).forEach((inv) => {
       const lease = leases.find((l: any) => l.id === inv.leaseId);
       const isDeposit = inv.invoiceType === "DEPOSIT";
       const daysLeft = Math.ceil((new Date(inv.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -309,7 +315,7 @@ export default function DashboardPage() {
       });
     });
 
-    maintenance.forEach((m) => {
+    (Array.isArray(maintenance) ? maintenance : []).forEach((m) => {
       const isPendingConfirm = m.status === "PENDING_TENANT_CONFIRMATION";
       const isEmergency = m.priority === "EMERGENCY";
       activities.push({
@@ -331,7 +337,7 @@ export default function DashboardPage() {
       });
     });
 
-    documents.forEach((d) => {
+    (Array.isArray(documents) ? documents : []).forEach((d) => {
       activities.push({
         id: `document-${d.id}`,
         title: d.name,

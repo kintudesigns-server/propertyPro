@@ -574,7 +574,7 @@ export default function AdminSubscriptionsClient({
                     <TableRow 
                       key={owner.id} 
                       className="border-[#E5E5EA] hover:bg-slate-50/60 transition-colors cursor-pointer" 
-                      onClick={() => router.push(`/dashboard/admin/users/${owner.id}`)}
+                      onClick={() => router.push(`/dashboard/admin/subscriptions/${owner.id}`)}
                     >
                       <TableCell className="text-[#6E6E73] text-xs font-bold" onClick={(e) => e.stopPropagation()}>
                         {idx + 1}
@@ -665,7 +665,7 @@ export default function AdminSubscriptionsClient({
                       </TableCell>
 
                       {/* Manage Column Link */}
-                      <TableCell className="text-right whitespace-nowrap" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/admin/users/${owner.id}`); }}>
+                      <TableCell className="text-right whitespace-nowrap" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/admin/subscriptions/${owner.id}`); }}>
                         <span className="inline-flex items-center gap-1 bg-white hover:bg-[#007AFF] text-[#007AFF] hover:text-white border border-[#007AFF]/30 hover:border-[#007AFF] font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all shadow-2xs group">
                           <span>Manage Owner</span>
                           <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -681,6 +681,12 @@ export default function AdminSubscriptionsClient({
                           <DropdownMenuContent align="end" className="w-56 bg-white rounded-2xl shadow-xl border-[#E5E5EA] p-1.5">
                             <DropdownMenuGroup>
                               <DropdownMenuLabel className="font-bold text-[#8E8E93] text-[10px] uppercase tracking-wider px-3 py-1.5">Account Administration</DropdownMenuLabel>
+                              <DropdownMenuItem 
+                                className="flex items-center gap-2 cursor-pointer font-bold text-xs text-[#1D1D1F] rounded-xl px-3 py-2 focus:bg-slate-100" 
+                                onClick={() => router.push(`/dashboard/admin/subscriptions/${owner.id}`)}
+                              >
+                                <CreditCard className="h-4 w-4 text-emerald-500" /> Manage Subscription
+                              </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="flex items-center gap-2 cursor-pointer font-bold text-xs text-[#1D1D1F] rounded-xl px-3 py-2 focus:bg-slate-100" 
                                 onClick={() => router.push(`/dashboard/admin/users/${owner.id}`)}

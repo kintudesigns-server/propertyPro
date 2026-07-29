@@ -186,18 +186,6 @@ export default function ToursDashboard() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [detailTour]);
 
-  if (checkingAccess) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!allowed) {
-    return <ModuleLockedBanner module="tours" />;
-  }
 
   // Actions
   async function handleConfirm(tour: Tour) {

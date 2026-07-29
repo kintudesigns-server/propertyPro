@@ -67,7 +67,7 @@ export default function PricingSettingsPage() {
   }, []);
 
   useEffect(() => {
-    if (status === "unauthenticated" || (session?.user as any)?.role !== "SUPERADMIN") {
+    if (status === "unauthenticated" || (status === "authenticated" && (session?.user as any)?.role !== "SUPERADMIN")) {
       router.push("/dashboard");
     }
   }, [status, router, session]);

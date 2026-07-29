@@ -79,6 +79,7 @@ async function main() {
         "documents",
         "tours",
         "inspections",
+        "team_management",
         "vendors",
         "invoices",
         "accounting"

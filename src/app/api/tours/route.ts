@@ -6,6 +6,7 @@ import { auditLog } from "@/lib/audit-log";
 import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -54,6 +55,9 @@ export async function GET(req: NextRequest) {
     let whereClause: any = {};
 
     if (role === "OWNER") {
+      const guard = await checkModuleAccess(userId, "tours");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+
       whereClause.property = { ownerId: userId };
     } else if (role === "TENANT") {
       whereClause.OR = [

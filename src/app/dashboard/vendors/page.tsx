@@ -23,6 +23,21 @@ export default function VendorsPage() {
   const { allowed: moduleAllowed, loading: checkingAccess } = useModuleAccess("vendors");
   const featureAccess = useFeatureAccess("access_vendor_portal");
 
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+  const [blockAddVendor, setBlockAddVendor] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const [newVendor, setNewVendor] = useState({ name: "", email: "", phone: "", specialty: "General", w9OnFile: false, insuranceOnFile: false, baseCallOutFee: "0" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editVendor, setEditVendor] = useState<any>(null);
+
+  const [filterSpecialty, setFilterSpecialty] = useState("All");
+
   if (checkingAccess || featureAccess.loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
@@ -45,25 +60,6 @@ export default function VendorsPage() {
       />
     );
   }
-
-  if (!moduleAllowed) {
-    return <ModuleLockedBanner module="vendors" />;
-  }
-
-  const [vendors, setVendors] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [isPaused, setIsPaused] = useState(false);
-  const [blockAddVendor, setBlockAddVendor] = useState(false);
-
-  const [open, setOpen] = useState(false);
-  const [newVendor, setNewVendor] = useState({ name: "", email: "", phone: "", specialty: "General", w9OnFile: false, insuranceOnFile: false, baseCallOutFee: "0" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [editOpen, setEditOpen] = useState(false);
-  const [editVendor, setEditVendor] = useState<any>(null);
-
-  const [filterSpecialty, setFilterSpecialty] = useState("All");
 
   const fetchVendors = async () => {
     setLoading(true);

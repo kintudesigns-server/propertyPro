@@ -31,10 +31,12 @@ import {
   TrendingUp,
   Tag,
   BarChart2,
+  Lock,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MessageBadge } from "@/components/notifications/MessageBadge";
 import { toast } from "sonner";
+import { ModuleAccessProvider, useModuleAccessContext } from "@/contexts/ModuleAccessContext";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -44,12 +46,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Loading...</p>
       </div>
     }>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <ModuleAccessProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </ModuleAccessProvider>
     </React.Suspense>
   );
 }
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
+  const moduleAccess = useModuleAccessContext();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -62,6 +67,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const isAdmin = role === "SUPERADMIN";
   const isOwner = role === "OWNER";
   const isTenant = role === "TENANT";
+
+  const isAllowed = (key: string) => (isOwner ? moduleAccess.isAllowed(key) : true);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(true);
@@ -826,6 +834,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("properties")) {
+                          router.push("/dashboard/properties");
+                          return;
+                        }
                         setPropertiesOpen(!propertiesOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -836,6 +848,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <Building className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Properties</span>}
+                      {sidebarOpen && isOwner && !isAllowed("properties") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${propertiesOpen ? "rotate-180" : ""}`}
@@ -844,7 +859,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu (Tree) */}
-                    {sidebarOpen && propertiesOpen && (
+                    {sidebarOpen && propertiesOpen && isAllowed("properties") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/properties"
@@ -901,6 +916,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("tenants")) {
+                          router.push("/dashboard/tenants");
+                          return;
+                        }
                         setTenantsOpen(!tenantsOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -911,6 +930,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <Users className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Tenants</span>}
+                      {sidebarOpen && isOwner && !isAllowed("tenants") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${tenantsOpen ? "rotate-180" : ""}`}
@@ -919,7 +941,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu (Tree) */}
-                    {sidebarOpen && tenantsOpen && (
+                    {sidebarOpen && tenantsOpen && isAllowed("tenants") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/tenants"
@@ -967,6 +989,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("leases")) {
+                          router.push("/dashboard/leases");
+                          return;
+                        }
                         setLeasesOpen(!leasesOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -977,6 +1003,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <FileText className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Leases</span>}
+                      {sidebarOpen && isOwner && !isAllowed("leases") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${leasesOpen ? "rotate-180" : ""}`}
@@ -985,7 +1014,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu */}
-                    {sidebarOpen && leasesOpen && (
+                    {sidebarOpen && leasesOpen && isAllowed("leases") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/leases"
@@ -1049,6 +1078,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("tours")) {
+                          router.push("/dashboard/tours");
+                          return;
+                        }
                         setToursOpen(!toursOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -1059,6 +1092,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <Calendar className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Showing Tours</span>}
+                      {sidebarOpen && isOwner && !isAllowed("tours") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${toursOpen ? "rotate-180" : ""}`}
@@ -1067,7 +1103,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu */}
-                    {sidebarOpen && toursOpen && (
+                    {sidebarOpen && toursOpen && isAllowed("tours") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/tours"
@@ -1091,6 +1127,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("inspections")) {
+                          router.push("/dashboard/inspections");
+                          return;
+                        }
                         setInspectionsOpen(!inspectionsOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -1101,6 +1141,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <ShieldCheck className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Inspections</span>}
+                      {sidebarOpen && isOwner && !isAllowed("inspections") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${inspectionsOpen ? "rotate-180" : ""}`}
@@ -1109,7 +1152,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu */}
-                    {sidebarOpen && inspectionsOpen && (
+                    {sidebarOpen && inspectionsOpen && isAllowed("inspections") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/inspections"
@@ -1144,6 +1187,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
+                        if (isOwner && !isAllowed("maintenance")) {
+                          router.push("/dashboard/maintenance");
+                          return;
+                        }
                         setMaintenanceOpen(!maintenanceOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -1154,6 +1201,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <Wrench className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Maintenance</span>}
+                      {sidebarOpen && isOwner && !isAllowed("maintenance") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                       {sidebarOpen && (
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${maintenanceOpen ? "rotate-180" : ""}`}
@@ -1162,7 +1212,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu */}
-                    {sidebarOpen && maintenanceOpen && (
+                    {sidebarOpen && maintenanceOpen && isAllowed("maintenance") && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/maintenance"
@@ -1293,7 +1343,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       <BarChart2 className="h-5 w-5" />
-                      {sidebarOpen && <span>Portfolio Analytics</span>}
+                      {sidebarOpen && <span className="flex-1">Portfolio Analytics</span>}
+                      {sidebarOpen && isOwner && !isAllowed("analytics") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                     </Link>
 
                     <Link
@@ -1305,7 +1358,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       <TrendingUp className="h-5 w-5" />
-                      {sidebarOpen && <span>Financial Overview</span>}
+                      {sidebarOpen && <span className="flex-1">Financial Overview</span>}
+                      {sidebarOpen && isOwner && !isAllowed("accounting") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                     </Link>
 
                     <Link
@@ -1317,7 +1373,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       <DollarSign className="h-5 w-5" />
-                      {sidebarOpen && <span>Wallet & Payouts</span>}
+                      {sidebarOpen && <span className="flex-1">Wallet & Payouts</span>}
+                      {sidebarOpen && isOwner && !isAllowed("wallet") && (
+                        <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                      )}
                     </Link>
                   </>
                 )}
@@ -1331,7 +1390,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }`}
                   >
                     <Wallet className="h-5 w-5" />
-                    {sidebarOpen && <span>Transactions</span>}
+                    {sidebarOpen && <span className="flex-1">Transactions</span>}
+                    {sidebarOpen && isOwner && !isAllowed("transactions") && (
+                      <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                    )}
                   </Link>
                 )}
 
@@ -1344,7 +1406,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <Receipt className="h-5 w-5" />
-                  {sidebarOpen && <span>Invoices</span>}
+                  {sidebarOpen && <span className="flex-1">Invoices</span>}
+                  {sidebarOpen && isOwner && !isAllowed("invoices") && (
+                    <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                  )}
                 </Link>
 
                 {sidebarOpen && (

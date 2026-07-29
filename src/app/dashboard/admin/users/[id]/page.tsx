@@ -2159,43 +2159,43 @@ export default function UserProfilePage() {
               );
             })()}
 
-            {/* Audit Reason & Custom Expiration Configuration Drawer */}
-            <div className="bg-[#FAF9FE] border border-purple-200/80 p-5 sm:p-6 rounded-3xl shadow-2xs space-y-4">
+            {/* Audit Reason & Expiration Policy Panel */}
+            <div className="bg-white border border-slate-200/90 p-6 rounded-2xl shadow-2xs space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-purple-700" />
-                  <h4 className="text-xs font-black text-purple-950 uppercase tracking-wider">Administrative Authorization Policy</h4>
+                  <Lock className="h-4 w-4 text-slate-700" />
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Administrative Policy & Audit Governance</h4>
                 </div>
                 {featureReason.trim().length >= 10 ? (
-                  <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold text-[10px]">
-                    <CheckCircle className="h-3 w-3 mr-1" /> Authorization Reason Valid
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-extrabold text-[10px]">
+                    <CheckCircle className="h-3 w-3 mr-1 text-emerald-600" /> Audit Note Valid
                   </Badge>
                 ) : (
-                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 font-bold text-[10px]">
-                    <AlertCircle className="h-3 w-3 mr-1" /> Requires 10+ Chars Reason To Block
+                  <Badge className="bg-amber-50 text-amber-800 border-amber-200 font-extrabold text-[10px]">
+                    <AlertCircle className="h-3 w-3 mr-1 text-amber-600" /> Requires 10+ Chars Note To Override
                   </Badge>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Audit Log Reason Input */}
                 <div className="lg:col-span-6 space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">Audit Log Reason Note *</label>
+                  <label className="text-[11px] font-extrabold text-slate-600 block uppercase tracking-wider">Audit Log Reason Note *</label>
                   <input
                     type="text"
                     value={featureReason}
                     onChange={(e) => setFeatureReason(e.target.value)}
-                    placeholder="Enter confidential audit reason (e.g. Restricted due to pending lease dispute review)..."
-                    className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium focus:outline-none focus:border-purple-500 shadow-2xs"
+                    placeholder="Enter confidential audit reason (e.g. Restricted due to active lease dispute review)..."
+                    className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 shadow-2xs transition-all"
                   />
                 </div>
 
-                {/* Expiration Duration Selector with Presets & Custom Days */}
+                {/* Expiration Duration Selector */}
                 <div className="lg:col-span-6 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">Override Expiration</label>
+                    <label className="text-[11px] font-extrabold text-slate-600 block uppercase tracking-wider">Override Expiration</label>
                     {featureExpiresAt && (
-                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-extrabold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
                         Expires: {new Date(featureExpiresAt).toLocaleDateString()}
                       </span>
                     )}
@@ -2232,10 +2232,10 @@ export default function UserProfilePage() {
                               setFeatureExpiresAt(d.toISOString().split("T")[0]);
                             }
                           }}
-                          className={`text-xs px-3 h-10 rounded-xl font-bold transition-all border ${
+                          className={`text-xs px-3 h-9 rounded-xl font-extrabold transition-all border ${
                             isSelected
-                              ? "bg-purple-900 border-purple-900 text-white shadow-2xs"
-                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                              ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                              : "bg-slate-50/80 text-slate-600 border-slate-200/80 hover:bg-slate-100 hover:text-slate-900"
                           }`}
                         >
                           {opt.label}
@@ -2244,7 +2244,7 @@ export default function UserProfilePage() {
                     })}
                   </div>
 
-                  {/* Inline Custom Days Input Box when Custom Days selected */}
+                  {/* Inline Custom Days Input Box */}
                   {expiryOption === "custom_days" && (
                     <div className="flex items-center gap-2 pt-2 animate-in fade-in duration-200">
                       <span className="text-xs font-bold text-slate-600">Block duration for:</span>
@@ -2265,23 +2265,22 @@ export default function UserProfilePage() {
                             setFeatureExpiresAt("");
                           }
                         }}
-                        className="w-20 h-9 rounded-lg border border-purple-300 bg-white px-2 text-center text-xs font-black text-purple-950 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs"
+                        className="w-20 h-9 rounded-lg border border-slate-200 bg-white px-2 text-center text-xs font-black text-slate-900 focus:outline-none focus:border-slate-400 shadow-2xs"
                       />
                       <span className="text-xs font-bold text-slate-700">Days</span>
-                      <span className="text-[11px] text-slate-400 font-semibold">(e.g. 2, 6, 11, 45...)</span>
                     </div>
                   )}
 
-                  {/* Inline Date Picker when Pick Date selected */}
+                  {/* Inline Date Picker */}
                   {expiryOption === "custom_date" && (
                     <div className="flex items-center gap-2 pt-2 animate-in fade-in duration-200">
-                      <span className="text-xs font-bold text-slate-600">Select Expiration Date:</span>
+                      <span className="text-xs font-bold text-slate-600">Select Date:</span>
                       <input
                         type="date"
                         value={featureExpiresAt}
                         min={new Date().toISOString().split("T")[0]}
                         onChange={(e) => setFeatureExpiresAt(e.target.value)}
-                        className="h-9 rounded-lg border border-purple-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-2xs"
+                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-400 shadow-2xs"
                       />
                     </div>
                   )}
@@ -2292,7 +2291,7 @@ export default function UserProfilePage() {
             {/* Feature Access Divided Section-Wise */}
             {overridesLoading ? (
               <div className="flex items-center justify-center p-12">
-                <Loader2 className="animate-spin text-purple-600 h-8 w-8" />
+                <Loader2 className="animate-spin text-slate-700 h-8 w-8" />
               </div>
             ) : (
               <div className="space-y-8">
@@ -2303,103 +2302,35 @@ export default function UserProfilePage() {
 
                   return (
                     <>
-                      {/* SECTION 1: WELFARE PROTECTED & EXEMPT FEATURES */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-blue-100 pb-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 bg-blue-600 text-white rounded-xl shadow-2xs">
-                              <ShieldCheck className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Welfare & Legal Protected Features</h4>
-                              <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities that are immune to administrative blocks.</p>
-                            </div>
-                          </div>
-                          <Badge className="bg-blue-50 text-blue-800 border border-blue-200/80 font-extrabold text-[11px] px-3 py-1 rounded-xl shadow-2xs">
-                            {protectedFeatures.length} Protected Capabilities
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {protectedFeatures.map((f: any) => (
-                            <div
-                              key={f.key}
-                              className="relative overflow-hidden rounded-2xl border border-blue-200/90 bg-[#F8FAFC] p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
-                            >
-                              <div className="space-y-3">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-start gap-3 min-w-0">
-                                    <div className="p-2 rounded-xl bg-blue-600 text-white shadow-2xs shrink-0 mt-0.5">
-                                      <ShieldCheck className="h-4 w-4" />
-                                    </div>
-                                    <div className="min-w-0 space-y-1">
-                                      <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
-                                      <code className="inline-block text-[10px] font-mono font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                        {f.key}
-                                      </code>
-                                    </div>
-                                  </div>
-
-                                  <span className="text-[10px] font-black text-blue-800 bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-full shrink-0 shadow-2xs">
-                                    Protected
-                                  </span>
-                                </div>
-
-                                <div className="pt-1">
-                                  <Badge className="bg-blue-100/90 text-blue-900 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs w-fit">
-                                    <ShieldCheck className="h-3 w-3 text-blue-700" />
-                                    Welfare Protected (Always Active)
-                                  </Badge>
-                                </div>
+                      {/* SECTION 1: WELFARE & LEGAL PROTECTED FEATURES */}
+                      {protectedFeatures.length > 0 && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 bg-slate-900 text-white rounded-xl shadow-2xs">
+                                <ShieldCheck className="h-4 w-4 text-emerald-400" />
                               </div>
-
-                              <div className="pt-3 border-t border-blue-100/90 flex justify-between items-center text-[10px] font-extrabold text-blue-700 uppercase tracking-wider">
-                                <span>Statutory Right</span>
-                                <span>Non-Restricted</span>
+                              <div>
+                                <h4 className="text-sm font-black text-slate-900 tracking-tight">Welfare & Statutory Rights</h4>
+                                <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities protected under statutory compliance.</p>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* SECTION 2: CONFIGURABLE ROLE FEATURES & ADMIN OVERRIDES */}
-                      <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between border-b border-purple-100 pb-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 bg-slate-900 text-white rounded-xl shadow-2xs">
-                              <Key className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Configurable Role Feature Access</h4>
-                              <p className="text-slate-500 text-xs font-medium">Operational features that can be selectively blocked or granted based on administrative review.</p>
-                            </div>
+                            <Badge className="bg-slate-100 text-slate-800 border border-slate-200 font-extrabold text-[11px] px-3 py-1 rounded-xl">
+                              {protectedFeatures.length} Statutory Rights
+                            </Badge>
                           </div>
-                          <Badge className="bg-purple-50 text-purple-800 border border-purple-200/80 font-extrabold text-[11px] px-3 py-1 rounded-xl shadow-2xs">
-                            {configurableFeatures.length} Configurable Capabilities
-                          </Badge>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {configurableFeatures.map((f: any) => {
-                            const activeOverride = userAccessOverrides.find((o: any) => o.feature === f.key);
-                            const isBlocked = activeOverride && activeOverride.overrideType === "BLOCK";
-
-                            return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {protectedFeatures.map((f: any) => (
                               <div
                                 key={f.key}
-                                className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between space-y-4 ${
-                                  isBlocked
-                                    ? "bg-gradient-to-b from-rose-50/70 via-rose-50/30 to-white border-rose-200/90 shadow-2xs hover:shadow-xs"
-                                    : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400"
-                                }`}
+                                className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
                               >
                                 <div className="space-y-3">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-start gap-3 min-w-0">
-                                      <div className={`p-2 rounded-xl shrink-0 shadow-2xs mt-0.5 ${
-                                        isBlocked ? "bg-rose-600 text-white" : "bg-slate-900 text-white"
-                                      }`}>
-                                        {isBlocked ? <Ban className="h-4 w-4" /> : <Key className="h-4 w-4" />}
+                                      <div className="p-2 rounded-xl bg-slate-100 text-slate-800 shrink-0 mt-0.5 border border-slate-200">
+                                        <ShieldCheck className="h-4 w-4 text-emerald-600" />
                                       </div>
                                       <div className="min-w-0 space-y-1">
                                         <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
@@ -2408,85 +2339,214 @@ export default function UserProfilePage() {
                                         </code>
                                       </div>
                                     </div>
+                                  </div>
 
-                                    {/* Interactive Modern SaaS Toggle Switch */}
-                                    <button
-                                      type="button"
-                                      disabled={saving || (!isBlocked && featureReason.trim().length < 10)}
-                                      onClick={() => {
-                                        if (isBlocked) {
-                                          handleRevokeFeatureOverride(f.key);
-                                        } else {
-                                          handleSetFeatureOverride(f.key, "BLOCK");
-                                        }
-                                      }}
-                                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        isBlocked ? "bg-rose-600" : "bg-emerald-500"
-                                      } ${(!isBlocked && featureReason.trim().length < 10) ? "opacity-50 cursor-not-allowed" : ""}`}
-                                      title={isBlocked ? "Click to restore access" : featureReason.trim().length < 10 ? "Enter audit reason above to block" : "Click to block feature"}
-                                    >
-                                      <span
-                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                                          isBlocked ? "translate-x-0" : "translate-x-5"
+                                  {f.description && (
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                      {f.description}
+                                    </p>
+                                  )}
+
+                                  <div className="pt-1">
+                                    <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs w-fit">
+                                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                                      Statutory Welfare Protection (Active)
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SECTION 2: CONFIGURABLE ROLE FEATURES & ADMIN OVERRIDES */}
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-slate-900 text-white rounded-xl shadow-2xs">
+                              <Key className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Configurable Capability Matrix</h4>
+                              <p className="text-slate-500 text-xs font-medium">Selectively override feature access with 3-state administrative controls.</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-slate-100 text-slate-800 border border-slate-200 font-extrabold text-[11px] px-3 py-1 rounded-xl">
+                            {configurableFeatures.length} Configurable Features
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {configurableFeatures.map((f: any) => {
+                            const activeOverride = userAccessOverrides.find((o: any) => o.feature === f.key && !o.isRevoked);
+                            const currentState = activeOverride ? activeOverride.overrideType : "DEFAULT"; // "GRANT" | "BLOCK" | "DEFAULT"
+
+                            const handleStateChange = async (newState: "DEFAULT" | "GRANT" | "BLOCK") => {
+                              if (newState === currentState) return;
+                              if (newState !== "DEFAULT" && featureReason.trim().length < 10) {
+                                toast.error("Please enter an audit log reason of at least 10 characters in the authorization panel above.");
+                                return;
+                              }
+
+                              setSaving(true);
+                              try {
+                                const res = await fetch(`/api/admin/users/${params.id}/access-overrides`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    feature: f.key,
+                                    overrideType: newState,
+                                    reason: newState === "DEFAULT" ? "Reset to role default" : featureReason,
+                                    expiresAt: newState === "DEFAULT" ? null : (featureExpiresAt || null),
+                                  }),
+                                });
+                                const data = await res.json();
+                                if (!res.ok) throw new Error(data.error);
+
+                                toast.success(
+                                  newState === "DEFAULT"
+                                    ? `Restored ${f.label} to Default Role Access.`
+                                    : newState === "GRANT"
+                                    ? `Force Allowed ${f.label} access.`
+                                    : `Force Blocked ${f.label} access.`
+                                );
+
+                                const refreshRes = await fetch(`/api/admin/users/${params.id}/access-overrides`);
+                                const updated = await refreshRes.json();
+                                if (!updated.error) setUserAccessOverrides(updated);
+                              } catch (err: any) {
+                                toast.error(`Action failed: ${err.message}`);
+                              } finally {
+                                setSaving(false);
+                              }
+                            };
+
+                            return (
+                              <div
+                                key={f.key}
+                                className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between space-y-4 ${
+                                  currentState === "BLOCK"
+                                    ? "bg-white border-rose-200 shadow-2xs ring-1 ring-rose-100"
+                                    : currentState === "GRANT"
+                                    ? "bg-white border-emerald-200 shadow-2xs ring-1 ring-emerald-100"
+                                    : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-slate-300"
+                                }`}
+                              >
+                                <div className="space-y-3">
+                                  {/* Top Header */}
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-start gap-3 min-w-0">
+                                      <div className={`p-2 rounded-xl shrink-0 shadow-2xs mt-0.5 ${
+                                        currentState === "BLOCK"
+                                          ? "bg-rose-600 text-white"
+                                          : currentState === "GRANT"
+                                          ? "bg-emerald-600 text-white"
+                                          : "bg-slate-900 text-white"
+                                      }`}>
+                                        {currentState === "BLOCK" ? <Ban className="h-4 w-4" /> : currentState === "GRANT" ? <CheckCircle2 className="h-4 w-4" /> : <Key className="h-4 w-4" />}
+                                      </div>
+                                      <div className="min-w-0 space-y-1">
+                                        <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
+                                        <code className="inline-block text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                          {f.key}
+                                        </code>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Description */}
+                                  {f.description && (
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                      {f.description}
+                                    </p>
+                                  )}
+
+                                  {/* 3-State Segmented Pill Control Buttons */}
+                                  <div className="pt-2">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                                      Access Override Control:
+                                    </p>
+                                    <div className="bg-slate-100/90 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
+                                      <button
+                                        type="button"
+                                        disabled={saving}
+                                        onClick={() => handleStateChange("DEFAULT")}
+                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
+                                          currentState === "DEFAULT"
+                                            ? "bg-white text-slate-900 shadow-2xs"
+                                            : "text-slate-500 hover:text-slate-800"
                                         }`}
-                                      />
-                                    </button>
+                                      >
+                                        Default
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={saving || (currentState !== "GRANT" && featureReason.trim().length < 10)}
+                                        onClick={() => handleStateChange("GRANT")}
+                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
+                                          currentState === "GRANT"
+                                            ? "bg-emerald-600 text-white shadow-2xs"
+                                            : "text-slate-500 hover:text-emerald-700"
+                                        } ${(currentState !== "GRANT" && featureReason.trim().length < 10) ? "opacity-50" : ""}`}
+                                        title={featureReason.trim().length < 10 ? "Enter 10+ char reason above to grant" : "Force Allow capability"}
+                                      >
+                                        Force Allow
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={saving || (currentState !== "BLOCK" && featureReason.trim().length < 10)}
+                                        onClick={() => handleStateChange("BLOCK")}
+                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
+                                          currentState === "BLOCK"
+                                            ? "bg-rose-600 text-white shadow-2xs"
+                                            : "text-slate-500 hover:text-rose-700"
+                                        } ${(currentState !== "BLOCK" && featureReason.trim().length < 10) ? "opacity-50" : ""}`}
+                                        title={featureReason.trim().length < 10 ? "Enter 10+ char reason above to block" : "Force Block capability"}
+                                      >
+                                        Force Block
+                                      </button>
+                                    </div>
                                   </div>
 
                                   {/* Status Badges & Expiration Pill */}
                                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                    {isBlocked ? (
+                                    {currentState === "BLOCK" ? (
                                       <>
-                                        <Badge className="bg-rose-100 text-rose-900 border border-rose-200/90 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-                                          <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" /> Administrative Block Active
+                                        <Badge className="bg-rose-50 text-rose-800 border border-rose-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                          <span className="h-1.5 w-1.5 rounded-full bg-rose-600 animate-pulse" /> Restricted
                                         </Badge>
-                                        {activeOverride.expiresAt && (
-                                          <Badge className="bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-2xs">
-                                            <Clock className="h-3 w-3 text-amber-700" />
+                                        {activeOverride?.expiresAt && (
+                                          <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                            <Clock className="h-3 w-3 text-slate-500" />
+                                            Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
+                                          </Badge>
+                                        )}
+                                      </>
+                                    ) : currentState === "GRANT" ? (
+                                      <>
+                                        <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Administrative Grant
+                                        </Badge>
+                                        {activeOverride?.expiresAt && (
+                                          <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                            <Clock className="h-3 w-3 text-slate-500" />
                                             Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
                                           </Badge>
                                         )}
                                       </>
                                     ) : (
-                                      <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                                        Default Role Access Allowed
+                                      <Badge className="bg-slate-100 text-slate-600 border border-slate-200/80 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                        Default Role Access
                                       </Badge>
                                     )}
                                   </div>
 
                                   {activeOverride?.reason && (
-                                    <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-xl text-xs text-slate-700 font-medium leading-relaxed shadow-2xs mt-2">
-                                      <span className="font-bold text-slate-900 block mb-0.5 text-[10px] uppercase tracking-wider">Admin Note:</span>
+                                    <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-600 font-medium leading-relaxed mt-2">
+                                      <span className="font-extrabold text-slate-800 block mb-0.5 text-[10px] uppercase tracking-wider">Reason Note:</span>
                                       "{activeOverride.reason}"
                                     </div>
-                                  )}
-                                </div>
-
-                                {/* Action Button Footer */}
-                                <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    {isBlocked ? "Blocked by Admin" : "Standard Role Policy"}
-                                  </span>
-                                  {isBlocked ? (
-                                    <button
-                                      disabled={saving}
-                                      onClick={() => handleRevokeFeatureOverride(f.key)}
-                                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center gap-1"
-                                    >
-                                      <CheckCircle className="h-3.5 w-3.5" />
-                                      Restore Access
-                                    </button>
-                                  ) : (
-                                    <button
-                                      disabled={saving || featureReason.trim().length < 10}
-                                      onClick={() => handleSetFeatureOverride(f.key, "BLOCK")}
-                                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-rose-600"
-                                      title={featureReason.trim().length < 10 ? "Enter at least 10 characters in reason box above to enable block" : "Apply block"}
-                                    >
-                                      <Ban className="h-3.5 w-3.5" />
-                                      Force Block
-                                    </button>
                                   )}
                                 </div>
                               </div>

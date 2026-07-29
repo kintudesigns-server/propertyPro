@@ -6,7 +6,11 @@ import { ClipboardList, Clock, CheckCircle2, XCircle, ArrowRight, Home } from "l
 import Link from "next/link";
 import { format } from "date-fns";
 
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+
 export default function TenantApplicationsPage() {
+  const featureAccess = useFeatureAccess("tenant_applications");
   const { data: session } = useSession();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +31,26 @@ export default function TenantApplicationsPage() {
         });
     }
   }, [session]);
+
+  if (!featureAccess.allowed) {
+    return (
+      <FeatureBlockedBanner
+        featureKey="tenant_applications"
+        featureLabel="My Rental Applications"
+        reason={featureAccess.reason}
+        adminNote={featureAccess.adminNote}
+        expiresAt={featureAccess.expiresAt}
+        daysRemaining={featureAccess.daysRemaining}
+        blockedAt={featureAccess.blockedAt}
+      >
+        <div className="w-full max-w-5xl mx-auto space-y-6 pb-20 opacity-50 pointer-events-none">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-slate-900">My Rental Applications</h1>
+          </div>
+        </div>
+      </FeatureBlockedBanner>
+    );
+  }
 
   if (loading) {
     return (

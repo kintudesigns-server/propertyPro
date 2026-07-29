@@ -1,42 +1,60 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useModuleAccessContext } from "@/contexts/ModuleAccessContext";
 
 export function useModuleAccess(moduleKey: string) {
+  const context = useModuleAccessContext();
   const { data: session, status } = useSession();
-  const [allowed, setAllowed] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [fallbackAllowed, setFallbackAllowed] = useState<boolean>(true);
+  const [fallbackLoading, setFallbackLoading] = useState<boolean>(false);
 
+  // If context is available and finished loading
+  if (context && !context.loading && Object.keys(context.modulesAccess).length > 0) {
+    const role = (session?.user as any)?.role;
+    if (role !== "OWNER") {
+      return { allowed: true, loading: false };
+    }
+    const state = context.modulesAccess[moduleKey];
+    return {
+      allowed: state ? state.allowed : true,
+      loading: false,
+      reason: state?.reason,
+      source: state?.source
+    };
+  }
+
+  // Fallback behavior if rendered outside ModuleAccessProvider
   useEffect(() => {
     if (status === "loading") return;
-
     if (status === "unauthenticated") {
-      setAllowed(false);
-      setLoading(false);
+      setFallbackAllowed(false);
+      setFallbackLoading(false);
       return;
     }
 
     const role = (session?.user as any)?.role;
     if (role !== "OWNER") {
-      setAllowed(true);
-      setLoading(false);
+      setFallbackAllowed(true);
+      setFallbackLoading(false);
       return;
     }
 
+    setFallbackLoading(true);
     fetch(`/api/subscription/check-access?module=${moduleKey}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
       })
       .then((data) => {
-        setAllowed(data.allowed);
+        setFallbackAllowed(data.allowed);
       })
       .catch(() => {
-        setAllowed(false);
+        setFallbackAllowed(false);
       })
       .finally(() => {
-        setLoading(false);
+        setFallbackLoading(false);
       });
   }, [moduleKey, status, session]);
 
-  return { allowed, loading };
+  return { allowed: fallbackAllowed, loading: fallbackLoading, reason: undefined, source: undefined };
 }

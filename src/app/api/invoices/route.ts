@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -24,6 +25,10 @@ export async function GET(req: NextRequest) {
     let whereClause: any = {};
 
     if (role === "OWNER") {
+      // Module access guard
+      const guard = await checkModuleAccess(userId, "invoices");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+
       whereClause = { lease: { unit: { property: { ownerId: userId } } } };
     } else if (role === "TENANT") {
       whereClause = { lease: { tenantId: userId } };
@@ -65,8 +70,13 @@ export async function POST(req: NextRequest) {
   if (!session?.user || (session.user as any).role !== "OWNER") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
+  const userId = (session.user as any).id;
 
   try {
+    // Module access guard
+    const guard = await checkModuleAccess(userId, "invoices");
+    if (!guard.allowed) return moduleLockedResponse(guard);
+
     const { leaseId, amount, dueDate, status, invoiceType } = await req.json();
     if (!leaseId || !amount || !dueDate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -151,8 +161,13 @@ export async function PUT(req: NextRequest) {
   if (!session?.user || (session.user as any).role !== "OWNER") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
+  const userId = (session.user as any).id;
 
   try {
+    // Module access guard
+    const guard = await checkModuleAccess(userId, "invoices");
+    if (!guard.allowed) return moduleLockedResponse(guard);
+
     const { id, status, paymentMethod } = await req.json();
     if (!id || !status) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

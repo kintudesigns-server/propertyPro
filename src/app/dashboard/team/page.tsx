@@ -12,10 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function InspectorsAndVendorsPage() {
   const { allowed: hasVendorAccess } = useModuleAccess("vendors");
+  const { allowed: hasTeamAccess, loading: teamLoading } = useModuleAccess("team_management");
+  const { data: session } = useSession();
+  const isOwner = (session?.user as any)?.role === "OWNER";
   const [activeTab, setActiveTab] = useState<"inspectors" | "vendors">("inspectors");
   const [loading, setLoading] = useState(true);
 
@@ -153,6 +158,8 @@ export default function InspectorsAndVendorsPage() {
     const matchesFilter = filterSpecialty === "All" || v.specialty === filterSpecialty;
     return matchesSearch && matchesFilter;
   });
+
+
 
   return (
     <div className="p-8 pt-24 md:pt-12 max-w-7xl mx-auto space-y-8 pb-24">

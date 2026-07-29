@@ -9,9 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import PausedAccountGate from "@/components/subscription/PausedAccountGate";
 import { toast } from "sonner";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useSession } from "next-auth/react";
 
 export default function AddTeamMember() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const { allowed: teamAllowed, loading: teamLoading } = useModuleAccess("team_management");
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -93,6 +99,8 @@ export default function AddTeamMember() {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pt-6 pb-20">

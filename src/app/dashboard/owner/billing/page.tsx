@@ -354,16 +354,6 @@ export default function BillingPage() {
               <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
               Verify & Sync Status
             </button>
-            {isLocalhost && (
-              <button
-                onClick={() => handleSyncStatus(true)}
-                disabled={syncing}
-                className="flex-1 md:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-55"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Simulate Payment (Demo Bypass)
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -406,16 +396,6 @@ export default function BillingPage() {
               <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
               Verify & Sync Status
             </button>
-            {isLocalhost && (
-              <button
-                onClick={() => handleSyncStatus(true)}
-                disabled={syncing}
-                className="flex-1 md:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-55"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Simulate Payment (Demo Bypass)
-              </button>
-            )}
           </div>
         </div>
       )}

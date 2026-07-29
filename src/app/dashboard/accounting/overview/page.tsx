@@ -44,20 +44,30 @@ export default function FinancialOverviewPage() {
       if (res.ok) {
         setData(await res.json());
       } else {
-        throw new Error();
+        // Teaser sample financial overview when module is locked / 403
+        setData({
+          grossRevenue: 42500,
+          totalPlatformFees: 1275,
+          totalNetEarnings: 41225,
+          escrowBalance: 5560,
+          totalRefunded: 0,
+          transactions: [
+            { id: "TX-101", type: "RENT_PAYMENT", amount: 2450, status: "COMPLETED", description: "Rent Payment — Unit 4B", createdAt: "2026-07-01T10:00:00Z" },
+            { id: "TX-102", type: "VENDOR_PAYMENT", amount: 380, status: "COMPLETED", description: "HVAC Repair Service", createdAt: "2026-07-15T11:20:00Z" },
+            { id: "TX-103", type: "SUBSCRIPTION", amount: 149, status: "COMPLETED", description: "Platform Professional Plan", createdAt: "2026-07-20T09:15:00Z" },
+          ]
+        });
       }
     } catch {
-      toast.error("Failed to load financial overview.");
+      // Fallback
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (allowed) {
-      fetchData();
-    }
-  }, [allowed]);
+    fetchData();
+  }, []);
 
   // Filtered transactions for tabs
   const { rentTx, escrowTx } = useMemo(() => {
@@ -68,18 +78,6 @@ export default function FinancialOverviewPage() {
     };
   }, [data.transactions]);
 
-  if (checkingAccess) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!allowed) {
-    return <ModuleLockedBanner module="accounting" />;
-  }
 
   if (loading) {
     return (

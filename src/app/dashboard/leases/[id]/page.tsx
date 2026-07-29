@@ -17,6 +17,8 @@ import { ScheduleInspectionModal } from "@/components/modals/ScheduleInspectionM
 import { SelfInspectionModal } from "@/components/modals/SelfInspectionModal";
 import { BypassConfirmationModal } from "@/components/modals/BypassConfirmationModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function LeaseDetailsPage() {
   const params = useParams();
@@ -29,6 +31,7 @@ export default function LeaseDetailsPage() {
   const isTenant = (session?.user as any)?.role === "TENANT";
   const isOwner = (session?.user as any)?.role === "OWNER";
   const [activatingLease, setActivatingLease] = useState(false);
+  const { allowed: documentsAllowed } = useModuleAccess("documents");
 
   const [inspectors, setInspectors] = useState<any[]>([]);
   const [scheduleInspectionType, setScheduleInspectionType] = useState<"FINAL" | "PRELIMINARY" | null>(null);
@@ -1703,6 +1706,11 @@ export default function LeaseDetailsPage() {
       {/* Documents Tab Content */}
       {activeTab === 'documents' && (
         <div className="space-y-6">
+          {/* Module access guard for Owners */}
+          {isOwner && !documentsAllowed ? (
+            <ModuleLockedBanner module="documents" />
+          ) : (
+            <>
           <div className="flex justify-between items-center bg-white p-6 rounded-[24px] shadow-sm border border-[#E5E5EA]">
             <div>
               <h3 className="font-bold text-[#1D1D1F] text-lg">Lease Documents</h3>
@@ -1805,6 +1813,8 @@ export default function LeaseDetailsPage() {
               <p className="text-[#6E6E73] max-w-sm font-medium">The lease agreement must be signed before the official document is available.</p>
             </Card>
           )}
+          </>
+          )}
         </div>
       )}
 
@@ -1860,6 +1870,7 @@ export default function LeaseDetailsPage() {
           </Card>
         </div>
       )}
+
 
       {/* Settings Tab Content */}
       {activeTab === 'settings' && !isTenant && (

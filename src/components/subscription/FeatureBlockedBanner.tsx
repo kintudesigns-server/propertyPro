@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { ShieldAlert, Lock, Clock, Calendar, Mail, AlertTriangle, ArrowLeft } from "lucide-react";
+import { ShieldAlert, Lock, Clock, Calendar, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface FeatureBlockedBannerProps {
   featureKey?: string;
@@ -14,141 +13,106 @@ interface FeatureBlockedBannerProps {
   expiresAt?: string | null;
   daysRemaining?: number | null;
   blockedAt?: string | null;
+  children?: React.ReactNode;
 }
 
 export default function FeatureBlockedBanner({
   featureKey,
   featureLabel = "This Feature",
-  reason = "Access to this feature has been temporarily restricted by an administrator.",
+  reason = "Access to this feature has been restricted by platform administration.",
   adminNote,
   expiresAt,
   daysRemaining,
   blockedAt,
+  children,
 }: FeatureBlockedBannerProps) {
+  const router = useRouter();
+
   const formattedExpiry = expiresAt
     ? new Date(expiresAt).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
-
-  const formattedBlockedDate = blockedAt
-    ? new Date(blockedAt).toLocaleDateString("en-US", {
-        month: "long",
+        month: "short",
         day: "numeric",
         year: "numeric",
       })
     : null;
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in duration-300">
-      <div className="max-w-2xl w-full bg-white rounded-3xl border border-rose-200 shadow-xl overflow-hidden">
-        {/* Top Gradient Header */}
-        <div className="bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 p-6 sm:p-8 text-white relative overflow-hidden">
-          <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-10 pointer-events-none">
-            <Lock className="w-64 h-64" />
-          </div>
+    <div className="relative w-full min-h-screen">
+      {/* Background Page Content — Full 100% Width & Height of real page, blurred */}
+      <div className="w-full pointer-events-none select-none filter blur-[2.5px] opacity-75">
+        {children}
+      </div>
 
-          <div className="relative z-10 flex flex-col items-start gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-black tracking-wider uppercase border border-white/30">
-              <ShieldAlert className="h-4 w-4" />
-              Administrative Restriction Active
-            </div>
+      {/* Fixed Overlay Container — Perfectly Centered relative to Main Workspace */}
+      <div className="fixed inset-0 pl-0 md:pl-64 w-full h-full backdrop-blur-[2px] flex items-center justify-center p-4 sm:p-6 z-30 pointer-events-none"
+        style={{
+          background: "linear-gradient(135deg, rgba(15,23,42,0.22) 0%, rgba(30,27,75,0.18) 100%)"
+        }}
+      >
+        {/* ─── ADMIN BLOCK CARD — Clean Single-Surface Production Card ─── */}
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-[0_8px_40px_-4px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/8 animate-in fade-in zoom-in-95 duration-300 pointer-events-auto overflow-hidden">
+          
+          {/* Thin red top accent bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-red-500 via-red-400 to-orange-400" />
 
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              {featureLabel} Access Restricted
-            </h2>
-            <p className="text-rose-100 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
-              An administrative policy is currently restricting access to this module. Below are the details regarding your restriction status and restoration timeline.
-            </p>
-          </div>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-6 sm:p-8 space-y-6">
-          {/* Reason Card */}
-          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
-              Authorization & Audit Log Reason
-            </span>
-            <p className="text-sm font-bold text-slate-900 leading-normal italic">
-              "{adminNote || reason}"
-            </p>
-          </div>
-
-          {/* Key Metadata Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Expiration Status */}
-            <div className="bg-purple-50/60 border border-purple-200/80 p-4 rounded-2xl space-y-1">
-              <div className="flex items-center gap-1.5 text-purple-800">
-                <Clock className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Restoration Timeline</span>
+          <div className="p-6 space-y-5">
+            {/* Icon + Badge row */}
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+                <ShieldAlert size={22} className="text-red-500 stroke-[1.8]" />
               </div>
-              {expiresAt ? (
-                <div>
-                  <p className="text-lg font-black text-purple-950">
-                    {daysRemaining && daysRemaining > 0
-                      ? `~${daysRemaining} ${daysRemaining === 1 ? "Day" : "Days"} Remaining`
-                      : "Expiring Soon"}
-                  </p>
-                  <p className="text-xs font-semibold text-purple-700">
-                    Access auto-restores on {formattedExpiry}
-                  </p>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-red-50 border border-red-100 rounded-full mb-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                  <span className="text-[9px] font-black text-red-600 uppercase tracking-widest">Restricted</span>
                 </div>
-              ) : (
-                <div>
-                  <p className="text-lg font-black text-purple-950">Permanent Block</p>
-                  <p className="text-xs font-semibold text-purple-700">
-                    Requires manual admin review to reinstate
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Date Imposed */}
-            <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl space-y-1">
-              <div className="flex items-center gap-1.5 text-slate-700">
-                <Calendar className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Restriction Applied</span>
+                <h2 className="text-[15px] font-bold text-[#111111] tracking-tight leading-tight">
+                  {featureLabel} Access Restricted
+                </h2>
               </div>
-              <p className="text-lg font-black text-slate-900">
-                {formattedBlockedDate || "Recently Applied"}
-              </p>
-              <p className="text-xs font-semibold text-slate-500">
-                Logged in audit governance registry
-              </p>
             </div>
-          </div>
 
-          {/* Welfare Notice Callout */}
-          <div className="flex items-start gap-3 bg-amber-50/80 border border-amber-200 p-4 rounded-2xl text-amber-900 text-xs">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            {/* Divider */}
+            <div className="h-px bg-slate-100" />
+
+            {/* Reason */}
             <div className="space-y-1">
-              <p className="font-extrabold text-amber-950">Statutory Welfare Protection Note</p>
-              <p className="font-medium text-amber-800 leading-relaxed">
-                If you believe this restriction was applied in error or if this affects an urgent housing emergency, please contact your platform administrator or support team immediately.
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reason</p>
+              <p className="text-[13px] text-slate-700 leading-relaxed">
+                {adminNote || reason}
               </p>
             </div>
-          </div>
 
-          {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <Link
-              href="/dashboard"
-              className="w-full sm:w-auto font-bold text-xs rounded-xl h-10 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 inline-flex items-center justify-center px-4 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Return to Dashboard
-            </Link>
+            {/* Meta row */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-center">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Timeline</p>
+                <span className="text-[12px] font-bold text-slate-800">
+                  {expiresAt ? `Until ${formattedExpiry}` : "Permanent"}
+                </span>
+              </div>
+              <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-center">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Restricted By</p>
+                <span className="text-[12px] font-bold text-slate-800">Super Admin</span>
+              </div>
+            </div>
 
-            <Link
-              href="/dashboard/notifications"
-              className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl h-10 inline-flex items-center justify-center px-4 shadow-xs transition-colors"
-            >
-              <Mail className="h-4 w-4 mr-2" />
-              View Admin Notifications
-            </Link>
+            {/* Buttons */}
+            <div className="flex gap-2.5 pt-1">
+              <Button
+                onClick={() => window.open(`mailto:support@propertypro.com?subject=Access%20Restriction%20Inquiry%20-%20${featureLabel}`)}
+                className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-[13px] shadow-sm hover:shadow-md transition-all"
+              >
+                Contact Support
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/dashboard")}
+                className="flex-1 h-10 border-slate-200 text-slate-700 rounded-xl font-semibold text-[13px] bg-white hover:bg-slate-50 transition-all"
+              >
+                Dashboard
+              </Button>
+            </div>
           </div>
         </div>
       </div>

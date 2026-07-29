@@ -97,42 +97,38 @@ export const authOptions: NextAuthOptions = {
         token.picture = (user as any).avatar;
         token.hasCompletedOnboarding = (user as any).hasCompletedOnboarding;
         token.subscriptionStatus = (user as any).subscriptionStatus;
-      } else if (token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { role: true, phone: true, name: true, avatar: true, balance: true, hasCompletedOnboarding: true, accountStatus: true, subscriptionStatus: true },
-        });
-        if (dbUser && dbUser.accountStatus !== "SUSPENDED") {
-          token.role = dbUser.role;
-          token.phone = dbUser.phone;
-          token.name = dbUser.name;
-          token.avatar = dbUser.avatar;
-          token.picture = dbUser.avatar;
-          token.balance = dbUser.balance;
-          token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
-          token.subscriptionStatus = dbUser.subscriptionStatus;
-        } else {
-          // User no longer exists or is suspended — return empty object to invalidate
-          return {} as any;
+      } else if (token?.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, phone: true, name: true, avatar: true, balance: true, hasCompletedOnboarding: true, accountStatus: true, subscriptionStatus: true },
+          });
+          if (dbUser && dbUser.accountStatus !== "SUSPENDED") {
+            token.role = dbUser.role;
+            token.phone = dbUser.phone;
+            token.name = dbUser.name;
+            token.avatar = dbUser.avatar;
+            token.picture = dbUser.avatar;
+            token.balance = dbUser.balance;
+            token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
+            token.subscriptionStatus = dbUser.subscriptionStatus;
+          }
+        } catch {
+          // Graceful fallback to existing token values if DB query transiently fails
         }
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && token.id) {
-        if (session.user) {
-          (session.user as any).id = token.id as string;
-          (session.user as any).role = token.role as string;
-          (session.user as any).phone = token.phone as string | null;
-          (session.user as any).avatar = token.avatar as string | null;
-          (session.user as any).image = token.avatar as string | null;
-          (session.user as any).balance = token.balance ?? 0;
-          (session.user as any).hasCompletedOnboarding = token.hasCompletedOnboarding as boolean;
-          (session.user as any).subscriptionStatus = token.subscriptionStatus as string | null;
-        }
-      } else {
-        // Token is invalid/null (user deleted), clear the session user
-        session.user = undefined as any;
+      if (token && token.id && session?.user) {
+        (session.user as any).id = token.id as string;
+        (session.user as any).role = token.role as string;
+        (session.user as any).phone = token.phone as string | null;
+        (session.user as any).avatar = token.avatar as string | null;
+        (session.user as any).image = token.avatar as string | null;
+        (session.user as any).balance = token.balance ?? 0;
+        (session.user as any).hasCompletedOnboarding = token.hasCompletedOnboarding as boolean;
+        (session.user as any).subscriptionStatus = token.subscriptionStatus as string | null;
       }
       return session;
     },

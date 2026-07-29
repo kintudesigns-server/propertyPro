@@ -11,10 +11,15 @@ import { toast } from "sonner";
 
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function TenantDocumentsPage() {
   const featureAccess = useFeatureAccess("view_documents");
   const { data: session, status } = useSession();
+  const role = (session?.user as any)?.role;
+  const isOwner = role === "OWNER";
+  const { allowed: moduleAllowed, loading: moduleLoading } = useModuleAccess("documents");
   const router = useRouter();
 
   const [documents, setDocuments] = useState<any[]>([]);
@@ -82,13 +87,7 @@ export default function TenantDocumentsPage() {
       router.push("/auth/login");
       return;
     }
-
-    const role = (session?.user as any)?.role;
-    if (role && role !== "TENANT") {
-      router.push("/dashboard/leases");
-      return;
-    }
-
+    // Allow both TENANT and OWNER — module guard below handles OWNER access control
     fetchData();
   }, [status, session, router]);
 
@@ -224,7 +223,10 @@ export default function TenantDocumentsPage() {
     }
   };
 
-  if (featureAccess.loading) {
+
+
+  // Tenant feature-level access guard
+  if (!isOwner && featureAccess.loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -233,7 +235,7 @@ export default function TenantDocumentsPage() {
     );
   }
 
-  if (!featureAccess.allowed) {
+  if (!isOwner && !featureAccess.allowed) {
     return (
       <FeatureBlockedBanner
         featureKey="view_documents"

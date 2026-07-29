@@ -13,6 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { generateLeasePDF, generateInvoicePDF } from "@/lib/pdfGenerator";
 import { MoreVertical, Eye, FileDown, ShieldAlert } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useSession } from "next-auth/react";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function LeasesDashboard({ 
   initialFilter = "ALL",
@@ -24,6 +27,9 @@ export default function LeasesDashboard({
   subtitle?: string;
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const { allowed: moduleAllowed, loading: moduleLoading } = useModuleAccess("leases");
   const [leases, setLeases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,10 +44,16 @@ export default function LeasesDashboard({
       if (res.ok) {
         setLeases(await res.json());
       } else {
-        toast.error("Failed to load leases");
+        // Teaser sample leases when module is locked / 403
+        setLeases([
+          { id: "LEASE-2026-01", status: "ACTIVE", rentAmount: 2450, startDate: "2026-01-01", endDate: "2026-12-31", tenant: { name: "John Doe", email: "john@example.com" }, unit: { unitNumber: "4B", property: { name: "Sunset Heights Apartments" } } },
+          { id: "LEASE-2026-02", status: "ACTIVE", rentAmount: 1850, startDate: "2026-02-01", endDate: "2027-01-31", tenant: { name: "Alice Smith", email: "alice@example.com" }, unit: { unitNumber: "Suite 12", property: { name: "Oakridge Commercial Hub" } } },
+          { id: "LEASE-2026-03", status: "NOTICE_GIVEN", rentAmount: 1650, startDate: "2025-08-01", endDate: "2026-08-31", tenant: { name: "Robert Taylor", email: "robert@example.com" }, unit: { unitNumber: "Apt 2A", property: { name: "Maplewood Terrace" } } },
+          { id: "LEASE-2026-04", status: "EXPIRED", rentAmount: 2100, startDate: "2025-06-01", endDate: "2026-05-31", tenant: { name: "Emily Davis", email: "emily@example.com" }, unit: { unitNumber: "Unit 101", property: { name: "Highland Residences" } } },
+        ]);
       }
     } catch (err) {
-      toast.error("An error occurred");
+      // Fallback
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ModuleKey, ALWAYS_AVAILABLE } from "@/lib/modules-registry";
+import { ModuleKey, ALWAYS_AVAILABLE, GATABLE_MODULES } from "@/lib/modules-registry";
 
 export interface ModuleGuardResult {
   allowed: boolean;
@@ -72,6 +72,76 @@ export async function checkModuleAccess(
   };
 }
 
+export async function checkAllModulesAccess(
+  ownerId: string
+): Promise<Record<string, ModuleGuardResult>> {
+  const owner = await prisma.user.findUnique({
+    where: { id: ownerId },
+    select: {
+      pricingTier: { select: { modules: true, name: true } },
+      moduleGrants: {
+        where: {
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } }
+          ]
+        }
+      }
+    }
+  });
+
+  const results: Record<string, ModuleGuardResult> = {};
+
+  if (!owner) {
+    for (const m of GATABLE_MODULES) {
+      results[m.key] = { allowed: false, reason: "Owner not found" };
+    }
+    return results;
+  }
+
+  const tierModules = owner.pricingTier?.modules ?? [];
+  const tierName = owner.pricingTier?.name ?? "current";
+
+  for (const m of GATABLE_MODULES) {
+    const key = m.key;
+    const grantsForModule = owner.moduleGrants.filter(g => g.module === key);
+    const hasBlock = grantsForModule.some(g => (g as any).overrideType === "BLOCK");
+
+    if (hasBlock) {
+      results[key] = {
+        allowed: false,
+        source: "admin_block" as any,
+        reason: `Access to ${m.label} has been restricted by administrator.`
+      };
+      continue;
+    }
+
+    if (m.alwaysIncluded) {
+      results[key] = { allowed: true, source: "always_available" };
+      continue;
+    }
+
+    const hasGrant = grantsForModule.some(g => !(g as any).overrideType || (g as any).overrideType === "GRANT");
+    if (hasGrant) {
+      results[key] = { allowed: true, source: "admin_grant" };
+      continue;
+    }
+
+    if (tierModules.length === 0 || tierModules.includes(key as any)) {
+      results[key] = { allowed: true, source: tierModules.length === 0 ? "legacy_tier" : "tier" };
+      continue;
+    }
+
+    results[key] = {
+      allowed: false,
+      reason: `Your ${tierName} plan does not include ${m.label}.`,
+      upgradeUrl: "/dashboard/owner/billing"
+    };
+  }
+
+  return results;
+}
+
 // Helper: returns 403 response with SaaS-standard body
 export function moduleLockedResponse(result: ModuleGuardResult) {
   return new Response(JSON.stringify({
@@ -83,3 +153,4 @@ export function moduleLockedResponse(result: ModuleGuardResult) {
     headers: { "Content-Type": "application/json" }
   });
 }
+

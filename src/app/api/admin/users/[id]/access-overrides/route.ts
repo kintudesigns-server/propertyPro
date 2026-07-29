@@ -55,7 +55,26 @@ export async function POST(
 
     const expiryDate = expiresAt ? new Date(expiresAt) : null;
 
-    // Revoke any existing active override for this feature first (since we want only one active at a time)
+    // If DEFAULT action requested, revoke existing overrides and return success
+    if (overrideType === "DEFAULT") {
+      await prisma.userAccessOverride.updateMany({
+        where: { userId, feature, isRevoked: false },
+        data: { isRevoked: true, revokedAt: new Date(), revokedByAdminId: adminId }
+      });
+
+      await auditLog({
+        entityType: "USER",
+        entityId: userId,
+        action: "USER_FEATURE_REVOKED",
+        actorId: adminId,
+        actorRole: "SUPERADMIN",
+        note: `Admin reset user feature override "${feature}" to DEFAULT for user ${userId}.`,
+      });
+
+      return NextResponse.json({ success: true, overrideType: "DEFAULT" });
+    }
+
+    // Revoke any existing active override for this feature first
     await prisma.userAccessOverride.updateMany({
       where: { userId, feature, isRevoked: false },
       data: { isRevoked: true, revokedAt: new Date(), revokedByAdminId: adminId }

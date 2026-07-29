@@ -18,19 +18,6 @@ export default function AddVendorPage() {
   const { allowed, loading: checkingAccess } = useModuleAccess("vendors");
   const router = useRouter();
 
-  if (checkingAccess) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!allowed) {
-    return <ModuleLockedBanner module="vendors" />;
-  }
-
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -71,6 +58,19 @@ export default function AddVendorPage() {
     };
     checkSubscription();
   }, []);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return <ModuleLockedBanner module="vendors" />;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

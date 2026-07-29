@@ -34,8 +34,21 @@ import {
   AlertTriangle,
   Info
 } from "lucide-react";
-import { GATABLE_MODULES, MODULES_BY_CATEGORY } from "@/lib/modules-registry";
+import { 
+  GATABLE_MODULES, 
+  MODULES_BY_CATEGORY, 
+  ALWAYS_AVAILABLE,
+  ModuleKey 
+} from "@/lib/modules-registry";
 import { toast } from "sonner";
+
+// Module dependency mapping
+const MODULE_DEPENDENCIES: Record<string, { required: string[]; label: string }> = {
+  inspections: { required: ["team_management"], label: "Inspector & Team Management" },
+  invoices: { required: ["payments"], label: "Rent Payments" },
+  accounting: { required: ["transactions"], label: "Transaction History" },
+  wallet: { required: ["payments", "payouts"], label: "Rent Payments & Payouts" },
+};
 
 // Icon mapping helper
 function getModuleIcon(iconName: string, size = 16, className = "") {
@@ -101,7 +114,7 @@ export default function TierForm({
 
   // Gatable modules selection
   const [selectedModules, setSelectedModules] = useState<string[]>(
-    initialTier?.modules || ["properties", "leases", "tenants", "applications", "payments"]
+    initialTier?.modules || [...ALWAYS_AVAILABLE]
   );
 
   const [saving, setSaving] = useState(false);
@@ -120,11 +133,17 @@ export default function TierForm({
     }
   }, [isUnlimitedUnits]);
 
+  // Sync maxInspectors with team_management module state: when team_management is unticked, auto-zero maxInspectors
+  useEffect(() => {
+    if (!selectedModules.includes("team_management") && maxInspectors > 0) {
+      setMaxInspectors(0);
+    }
+  }, [selectedModules]);
+
   // Handle module toggle checkbox
   const handleToggleModule = (key: string) => {
     // Core always included
-    const coreKeys = ["properties", "leases", "tenants", "applications", "payments"];
-    if (coreKeys.includes(key)) return;
+    if (ALWAYS_AVAILABLE.includes(key as any)) return;
 
     if (selectedModules.includes(key)) {
       setSelectedModules(selectedModules.filter(m => m !== key));
@@ -360,15 +379,34 @@ export default function TierForm({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="font-bold text-[#1D1D1F] text-xs uppercase tracking-wider block">Maximum Inspector Accounts</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="font-bold text-[#1D1D1F] text-xs uppercase tracking-wider block">Maximum Inspector Accounts</Label>
+                    {!selectedModules.includes("team_management") && (
+                      <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        Module Disabled
+                      </span>
+                    )}
+                  </div>
                   <Input 
                     type="number" 
                     required 
                     min={0}
-                    value={maxInspectors} 
-                    onChange={e => setMaxInspectors(Number(e.target.value))} 
-                    className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA]" 
+                    disabled={!selectedModules.includes("team_management")}
+                    value={!selectedModules.includes("team_management") ? 0 : maxInspectors} 
+                    onChange={e => {
+                      const val = Number(e.target.value);
+                      setMaxInspectors(val);
+                    }} 
+                    placeholder={!selectedModules.includes("team_management") ? "0 (Enable Team Management to set)" : "1"}
+                    className={`h-11 rounded-xl bg-slate-50 border-[#E5E5EA] ${
+                      !selectedModules.includes("team_management") ? "opacity-60 cursor-not-allowed bg-slate-100" : ""
+                    }`}
                   />
+                  <p className="text-[10px] text-[#8E8E93] font-medium">
+                    {!selectedModules.includes("team_management") 
+                      ? "Requires 'Inspector & Team Management' module entitlement to be enabled."
+                      : "Maximum inspector team accounts permitted for subscribers on this tier."}
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -404,14 +442,25 @@ export default function TierForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-bold text-[#1D1D1F] text-xs uppercase tracking-wider block">Max Vendors (0 = Unlimited)</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="font-bold text-[#1D1D1F] text-xs uppercase tracking-wider block">Max Vendors</Label>
+                    {!selectedModules.includes("vendors") && (
+                      <span className="text-[9px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                        Disabled
+                      </span>
+                    )}
+                  </div>
                   <Input 
                     type="number" 
                     min={0}
-                    value={maxVendors} 
+                    disabled={!selectedModules.includes("vendors")}
+                    value={!selectedModules.includes("vendors") ? 0 : maxVendors} 
                     onChange={e => setMaxVendors(Number(e.target.value))} 
-                    className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA]" 
+                    className={`h-11 rounded-xl bg-slate-50 border-[#E5E5EA] ${
+                      !selectedModules.includes("vendors") ? "opacity-60 cursor-not-allowed bg-slate-100" : ""
+                    }`}
                   />
+                  <p className="text-[9px] text-[#8E8E93] font-medium">0 = Unlimited</p>
                 </div>
 
                 <div className="space-y-2">
@@ -484,54 +533,114 @@ export default function TierForm({
           <Card className="border-[#E5E5EA] shadow-xs rounded-2xl bg-white">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h3 className="text-sm font-bold text-[#1D1D1F]">Plan Module Entitlements</h3>
-                <p className="text-xs text-[#6E6E73] mt-0.5">Toggle administrative access to the platform's module registry. Core modules are locked as always included.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#F2F2F7] pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#1D1D1F]">Plan Module Entitlements</h3>
+                    <p className="text-xs text-[#6E6E73] mt-0.5">Toggle administrative access to the platform's module registry. Core modules are locked as always included.</p>
+                  </div>
+                  
+                  {/* Fix 4: Module Count Summary Strip */}
+                  <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-700">
+                    <span className="text-blue-600 font-extrabold">{selectedModules.length}</span> / {GATABLE_MODULES.length} Enabled
+                    <span className="text-slate-400">·</span>
+                    <span className="text-emerald-600">{ALWAYS_AVAILABLE.length} Always-On</span>
+                    <span className="text-slate-400">·</span>
+                    <span className="text-amber-600">{selectedModules.length - ALWAYS_AVAILABLE.length} Add-on</span>
+                  </div>
+                </div>
+
+                {/* Fix 3: Two-Layer Access System Callout */}
+                <div className="mt-3 bg-blue-50/60 border border-blue-200/80 rounded-xl p-3 flex gap-2.5 items-start text-xs text-blue-900 leading-relaxed">
+                  <Info size={16} className="text-blue-600 mt-0.5 shrink-0" />
+                  <p>
+                    <strong>Two-Layer Access System:</strong> Entitlements configured here define what subscribers on this tier receive by default. Separately, individual owner accounts can be granted or blocked specific modules on the <strong>Module Access</strong> management page.
+                  </p>
+                </div>
+
+                {/* Fix 2: Module Dependency Warnings */}
+                {Object.entries(MODULE_DEPENDENCIES).map(([modKey, dep]) => {
+                  const isModEnabled = selectedModules.includes(modKey);
+                  const missingDeps = dep.required.filter(r => !selectedModules.includes(r));
+                  if (!isModEnabled || missingDeps.length === 0) return null;
+
+                  return (
+                    <div key={modKey} className="mt-3 bg-amber-50 border border-amber-200/90 rounded-xl p-3 flex items-center justify-between gap-3 text-xs text-amber-900">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+                        <p>
+                          <strong>"{GATABLE_MODULES.find(m => m.key === modKey)?.label}"</strong> requires <strong>"{dep.label}"</strong> to function properly.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          const toAdd = missingDeps.filter(d => !selectedModules.includes(d));
+                          setSelectedModules([...selectedModules, ...toAdd]);
+                          toast.success(`Added ${dep.label} entitlement`);
+                        }}
+                        className="h-7 px-2.5 text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-lg shrink-0"
+                      >
+                        Add Dependency
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
 
-              <div className="space-y-6">
-                {Object.entries(MODULES_BY_CATEGORY).map(([category, modules]) => (
-                  <div key={category} className="space-y-2.5">
-                    <h5 className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider border-b border-[#F2F2F7] pb-1">{category}</h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {modules.map((mod) => {
-                        const isAlways = mod.alwaysIncluded;
-                        const isChecked = isAlways || selectedModules.includes(mod.key);
-                        return (
-                          <div 
-                            key={mod.key} 
-                            onClick={() => !isAlways && handleToggleModule(mod.key)}
-                            className={`flex items-center justify-between p-3.5 rounded-xl border transition-all select-none ${
-                              isAlways 
-                                ? 'bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed' 
-                                : isChecked 
-                                  ? 'border-blue-500 bg-blue-50/20 cursor-pointer ring-2 ring-blue-500/10' 
-                                  : 'border-[#E5E5EA] hover:border-slate-300 bg-white cursor-pointer'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg shrink-0 ${isChecked ? "text-blue-600 bg-blue-50" : "text-[#6E6E73] bg-[#F2F2F7]"}`}>
-                                {getModuleIcon(mod.icon, 16)}
+                <div className="space-y-6">
+                  {Object.entries(MODULES_BY_CATEGORY).map(([category, modules]) => (
+                    <div key={category} className="space-y-2.5">
+                      <h5 className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider border-b border-[#F2F2F7] pb-1">{category}</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {modules.map((mod: any) => {
+                          const isAlways = mod.alwaysIncluded;
+                          const isChecked = isAlways || selectedModules.includes(mod.key);
+                          return (
+                            <div 
+                              key={mod.key} 
+                              onClick={() => !isAlways && handleToggleModule(mod.key)}
+                              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all select-none ${
+                                isAlways 
+                                  ? 'bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed' 
+                                  : isChecked 
+                                    ? 'border-blue-500 bg-blue-50/20 cursor-pointer ring-2 ring-blue-500/10' 
+                                    : 'border-[#E5E5EA] hover:border-slate-300 bg-white cursor-pointer'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-lg shrink-0 ${isChecked ? "text-blue-600 bg-blue-50" : "text-[#6E6E73] bg-[#F2F2F7]"}`}>
+                                  {getModuleIcon(mod.icon, 16)}
+                                </div>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-[#1D1D1F]">{mod.label}</span>
+                                    
+                                    {/* Fix 5: Module Description Tooltip */}
+                                    {mod.description && (
+                                      <span title={mod.description} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                                        <Info size={12} className="text-slate-400 hover:text-blue-600 cursor-help" />
+                                      </span>
+                                    )}
+                                  </div>
+                                  {isAlways && <span className="text-[8px] text-[#8E8E93] font-bold uppercase tracking-wider mt-0.5">Always On</span>}
+                                </div>
                               </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-[#1D1D1F]">{mod.label}</span>
-                                {isAlways && <span className="text-[8px] text-[#8E8E93] font-bold uppercase tracking-wider mt-0.5">Always On</span>}
-                              </div>
+                              
+                              {!isAlways && (
+                                <Switch 
+                                  checked={isChecked} 
+                                  onCheckedChange={() => handleToggleModule(mod.key)}
+                                  className="pointer-events-none"
+                                />
+                              )}
                             </div>
-                            
-                            {!isAlways && (
-                              <Switch 
-                                checked={isChecked} 
-                                onCheckedChange={() => handleToggleModule(mod.key)}
-                                className="pointer-events-none"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
             </CardContent>
           </Card>
 

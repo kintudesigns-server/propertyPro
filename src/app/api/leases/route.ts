@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 import { auditLog } from "@/lib/audit-log";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -24,6 +25,9 @@ export async function GET(req: NextRequest) {
         include: { tenant: true, unit: { include: { property: true } }, invoices: true },
       });
     } else if (role === "OWNER") {
+      const guard = await checkModuleAccess(userId, "leases");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+
       leases = await prisma.lease.findMany({
         where: { unit: { property: { ownerId: userId } } },
         include: { tenant: true, unit: { include: { property: true } }, invoices: true },

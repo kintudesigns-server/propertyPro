@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
 import { sanitizeVendor } from "@/lib/sanitization";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 // ─── TENANT PORTAL GUARANTEE (F5) ───────────────────────────────────────────
 // Tenant-facing actions (such as maintenance ticket submissions or rent payments)
@@ -26,6 +27,11 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
+    if (role === "OWNER") {
+      const guard = await checkModuleAccess(userId, "maintenance");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+    }
+
     if (id) {
       let request = (await prisma.maintenanceRequest.findUnique({
         where: { id },

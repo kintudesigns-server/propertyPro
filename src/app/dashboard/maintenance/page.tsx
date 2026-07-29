@@ -13,10 +13,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function MaintenancePage() {
   const { data: session } = useSession();
   const ownerId = (session?.user as any)?.id;
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const { allowed: moduleAllowed, loading: moduleLoading } = useModuleAccess("maintenance");
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
   const [inspectors, setInspectors] = useState<any[]>([]);

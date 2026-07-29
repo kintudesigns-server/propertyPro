@@ -28,10 +28,14 @@ import {
   MapPin
 } from "lucide-react";
 import { toast } from "sonner";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function PropertiesPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const { allowed: moduleAllowed, loading: moduleLoading } = useModuleAccess("properties");
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

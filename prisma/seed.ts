@@ -199,8 +199,8 @@ async function main() {
       maxUnits: 10,             // ENFORCED: owner cannot add more units beyond this cap
 
       // ── Capacity Limits ──
-      maxInspectors: 1,         // FIX: was 0 — now 1 (allows solo landlord to have 1 inspector)
-      maxProperties: 3,         // NEW: max 3 distinct property records
+      maxInspectors: 0,         // Solo landlord tier — 0 inspector accounts
+      maxProperties: 3,         // max 3 distinct property records
       maxVendors: 2,            // NEW: max 2 external vendor accounts
       maxDocumentStorageMB: 500, // NEW: 500MB upload cap for documents
 
@@ -289,10 +289,11 @@ async function main() {
         "properties", "leases", "tenants", "applications",
         "payments", "payouts", "maintenance", "documents", "tours",
         // Professional unlocks:
-        "inspections",   // Property inspection workflows
-        "vendors",       // External vendor/contractor management
-        "invoices",      // Invoice management for commercial/NNN leases
-        "accounting",    // Financial reporting & accounting overview
+        "inspections",     // Property inspection workflows
+        "team_management", // Inspector & Team Management
+        "vendors",         // External vendor/contractor management
+        "invoices",        // Invoice management for commercial/NNN leases
+        "accounting",      // Financial reporting & accounting overview
         // Still locked (Enterprise-only): messages, calendar
       ],
       features: [

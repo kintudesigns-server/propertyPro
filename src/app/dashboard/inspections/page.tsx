@@ -59,18 +59,7 @@ export default function InspectionsPage() {
     }
   }, [allowed]);
 
-  if (checkingAccess) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Loading...</p>
-      </div>
-    );
-  }
 
-  if (!allowed) {
-    return <ModuleLockedBanner module="inspections" />;
-  }
 
   const getTabCount = (tab: TabState) => {
     return leases.filter(lease => {
@@ -134,6 +123,7 @@ export default function InspectionsPage() {
     const dateB = b.moveOutRequestDate ? new Date(b.moveOutRequestDate).getTime() : 0;
     return dateB - dateA;
   });
+
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pb-20 relative">

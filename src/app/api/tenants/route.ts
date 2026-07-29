@@ -7,6 +7,7 @@ import { sanitizeUser } from "@/lib/sanitization";
 import { encryptSymmetric as encrypt } from "@/lib/encryption";
 import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
 import { auditLog } from "@/lib/audit-log";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -20,6 +21,11 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
+    if (role === "OWNER") {
+      const guard = await checkModuleAccess(userId, "tenants");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+    }
+
     // Single tenant lookup
     if (id) {
       // Tenants can only look up themselves

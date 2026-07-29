@@ -15,9 +15,15 @@ import {
   MoreVertical, Eye, Edit, Trash2, RefreshCw, Plus
 } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
+import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function TenantsPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isOwner = (session?.user as any)?.role === "OWNER";
+  const { allowed: moduleAllowed, loading: moduleLoading } = useModuleAccess("tenants");
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

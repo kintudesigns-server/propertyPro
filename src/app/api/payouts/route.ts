@@ -10,6 +10,7 @@ import { encryptSymmetric } from "@/lib/encryption";
 import { auditLog } from "@/lib/audit-log";
 import { sendEmail } from "@/lib/email";
 import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -19,6 +20,11 @@ export async function GET(req: NextRequest) {
 
   const role = (session.user as any).role;
   const userId = (session.user as any).id;
+
+  if (role === "OWNER") {
+    const guard = await checkModuleAccess(userId, "payouts");
+    if (!guard.allowed) return moduleLockedResponse(guard);
+  }
 
   // Parse query params for filtering / pagination / export
   const { searchParams } = new URL(req.url);

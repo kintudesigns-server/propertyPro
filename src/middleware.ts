@@ -8,19 +8,19 @@ export default withAuth(
     const role = (token?.role as string) || "";
 
     // Role-based route access enforcement
-    if (pathname.startsWith("/dashboard/admin") && role !== "SUPERADMIN") {
+    if ((pathname === "/dashboard/admin" || pathname.startsWith("/dashboard/admin/")) && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    if (pathname.startsWith("/dashboard/owner") && role !== "OWNER" && role !== "SUPERADMIN") {
+    if ((pathname === "/dashboard/owner" || pathname.startsWith("/dashboard/owner/")) && role !== "OWNER" && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    if (pathname.startsWith("/dashboard/tenant") && role !== "TENANT" && role !== "SUPERADMIN") {
+    if ((pathname === "/dashboard/tenant" || pathname.startsWith("/dashboard/tenant/")) && role !== "TENANT" && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    if (pathname.startsWith("/dashboard/inspector") && role !== "INSPECTOR" && role !== "SUPERADMIN") {
+    if ((pathname === "/dashboard/inspector" || pathname.startsWith("/dashboard/inspector/")) && role !== "INSPECTOR" && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 

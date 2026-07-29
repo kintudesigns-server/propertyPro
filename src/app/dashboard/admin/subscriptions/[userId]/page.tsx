@@ -7,14 +7,18 @@ import OwnerDetailClient from "@/components/admin/OwnerDetailClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function OwnerDetailPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function OwnerDetailPage({ params }: { params: Promise<{ userId: string }> | { userId: string } }) {
   const session = await getServerSession(authOptions);
   const role = (session?.user as any)?.role;
   if (!session?.user || role !== "SUPERADMIN") {
     redirect("/dashboard");
   }
 
-  const { userId } = await params;
+  const resolvedParams = await Promise.resolve(params);
+  const userId = resolvedParams?.userId;
+  if (!userId) {
+    notFound();
+  }
 
   // Fetch full owner data
   const owner = await prisma.user.findUnique({

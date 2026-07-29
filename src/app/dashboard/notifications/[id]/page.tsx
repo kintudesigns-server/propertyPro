@@ -23,6 +23,7 @@ import {
   Home,
 } from "lucide-react";
 import { NotificationActions } from "@/components/notifications/NotificationActions";
+import { GATABLE_MODULES } from "@/lib/modules-registry";
 
 // ── Icon per notification type ──────────────────────────────────
 const getIconForType = (type: string, priority: string) => {
@@ -339,7 +340,7 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
       }
     }
   }
-  // ── 8.5 Subscription / Billing / Plan / Overlimits ──────────
+  // ── 8.5 Subscription / Billing / Plan / Overlimits / Access Restrictions / Module Grants ──────────
   else if (
     type === "SUBSCRIPTION" ||
     type === "BILLING" ||
@@ -350,8 +351,145 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     t.includes("paused by admin") ||
     t.includes("account re-activated") ||
     t.includes("account reactivated") ||
-    t.includes("billing")
+    t.includes("billing") ||
+    t.includes("restricted") ||
+    t.includes("access") ||
+    t.includes("module") ||
+    t.includes("feature") ||
+    t.includes("grant")
   ) {
+    const fullText = `${t} ${(notification.message || "").toLowerCase()}`;
+
+    // 1. Direct Module Action (if notification mentions a specific module)
+    if (fullText.includes("lease management") || fullText.includes("lease")) {
+      actions.push({
+        href: `/dashboard/leases`,
+        label: "Open Lease Management",
+        description: "Jump directly to your Lease Management workspace.",
+        Icon: FileText,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    } else if (fullText.includes("properties & units") || fullText.includes("propert")) {
+      actions.push({
+        href: `/dashboard/properties`,
+        label: "Open Properties Portfolio",
+        description: "Jump directly to your Property Portfolio workspace.",
+        Icon: Building2,
+        color: "bg-indigo-50",
+        textColor: "text-indigo-600",
+      });
+    } else if (fullText.includes("tenant portal") || fullText.includes("tenant")) {
+      actions.push({
+        href: `/dashboard/tenants`,
+        label: "Open Tenant Directory",
+        description: "Jump directly to your Tenant Directory workspace.",
+        Icon: Users,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    } else if (fullText.includes("maintenance tickets") || fullText.includes("maintenance") || fullText.includes("repair")) {
+      actions.push({
+        href: `/dashboard/maintenance`,
+        label: "Open Maintenance Requests",
+        description: "Jump directly to your Maintenance Requests workspace.",
+        Icon: Wrench,
+        color: "bg-orange-50",
+        textColor: "text-orange-600",
+      });
+    } else if (fullText.includes("property tours") || fullText.includes("tour")) {
+      actions.push({
+        href: `/dashboard/tours`,
+        label: "Open Property Tours",
+        description: "Jump directly to your Showing Tours schedule.",
+        Icon: Calendar,
+        color: "bg-sky-50",
+        textColor: "text-sky-600",
+      });
+    } else if (fullText.includes("inspections")) {
+      actions.push({
+        href: `/dashboard/inspections`,
+        label: "Open Inspections & Turnovers",
+        description: "Jump directly to your Turnovers & Inspections workspace.",
+        Icon: CheckCircle2,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      });
+    } else if (fullText.includes("inspector & team management") || fullText.includes("team")) {
+      actions.push({
+        href: `/dashboard/team`,
+        label: "Open Team & Inspectors",
+        description: "Jump directly to your Team & Inspector directory.",
+        Icon: Users,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    } else if (fullText.includes("rent payments") || fullText.includes("rent") || fullText.includes("payment")) {
+      actions.push({
+        href: isTenant ? `/dashboard/payments/pay-rent` : `/dashboard/accounting/transactions`,
+        label: isTenant ? "Pay Rent Online" : "Open Payment Transactions",
+        description: isTenant ? "Pay outstanding rent invoices via credit card or Stripe." : "Jump directly to your Payment Transactions history.",
+        Icon: CreditCard,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      });
+    } else if (fullText.includes("invoice management") || fullText.includes("invoice")) {
+      actions.push({
+        href: `/dashboard/accounting/invoices`,
+        label: "Open Invoice Management",
+        description: "Jump directly to your Invoice Ledger.",
+        Icon: CreditCard,
+        color: "bg-green-50",
+        textColor: "text-green-600",
+      });
+    } else if (fullText.includes("transaction history") || fullText.includes("transaction")) {
+      actions.push({
+        href: `/dashboard/accounting/transactions`,
+        label: "Open Transactions History",
+        description: "Jump directly to your Transactions Ledger.",
+        Icon: FileText,
+        color: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      });
+    } else if (fullText.includes("wallet & bank management") || fullText.includes("wallet")) {
+      actions.push({
+        href: `/dashboard/accounting/wallet`,
+        label: "Open Wallet & Payouts",
+        description: "Jump directly to your Owner Wallet.",
+        Icon: CreditCard,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    } else if (fullText.includes("accounting & reports") || fullText.includes("accounting")) {
+      actions.push({
+        href: `/dashboard/accounting/overview`,
+        label: "Open Financial Overview",
+        description: "Jump directly to your Financial Overview.",
+        Icon: CreditCard,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    } else if (fullText.includes("document storage") || fullText.includes("document")) {
+      actions.push({
+        href: `/dashboard/leases/documents`,
+        label: "Open Document Vault",
+        description: "Jump directly to your Document Storage Vault.",
+        Icon: FileText,
+        color: "bg-indigo-50",
+        textColor: "text-indigo-600",
+      });
+    } else if (fullText.includes("portfolio analytics") || fullText.includes("analytics")) {
+      actions.push({
+        href: `/dashboard/analytics`,
+        label: "Open Portfolio Analytics",
+        description: "Jump directly to your Portfolio Analytics workspace.",
+        Icon: CreditCard,
+        color: "bg-purple-50",
+        textColor: "text-purple-600",
+      });
+    }
+
+    // 2. Secondary Billing / Admin Action
     if (isAdmin) {
       actions.push({
         href: `/dashboard/admin/subscriptions`,
@@ -364,9 +502,18 @@ function resolveNavActions(notification: any, userRole: string): NavAction[] {
     } else if (userRole === "OWNER") {
       actions.push({
         href: `/dashboard/owner/billing`,
-        label: "Update Payment Details & Billing",
-        description: "Go to your billing overview to update cards, reactivate subscription plans, or review invoices.",
+        label: "Subscription & Feature Access",
+        description: "Go to your billing overview to update cards, check plan limits, and review active module grants.",
         Icon: CreditCard,
+        color: "bg-blue-50",
+        textColor: "text-blue-600",
+      });
+    } else {
+      actions.push({
+        href: `/dashboard`,
+        label: "View Account Overview",
+        description: "Return to your dashboard to view active tools and permissions.",
+        Icon: Home,
         color: "bg-blue-50",
         textColor: "text-blue-600",
       });
@@ -414,16 +561,59 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
   }
 
   let overrideDetail: any = null;
-  if (notification.title.includes("Feature Restricted") || notification.title.includes("Feature Access")) {
-    // Extract feature key from message if possible (e.g. 'Your access to the "view_documents" feature')
-    const match = notification.message.match(/"([^"]+)"/);
-    const featureKey = match ? match[1] : null;
+  const lowerTitle = notification.title.toLowerCase();
+  const lowerMessage = notification.message.toLowerCase();
 
-    if (featureKey) {
-      overrideDetail = await db.userAccessOverride.findFirst({
-        where: { userId, feature: featureKey },
+  if (
+    lowerTitle.includes("restricted") ||
+    lowerTitle.includes("access") ||
+    lowerTitle.includes("granted") ||
+    lowerTitle.includes("revoked") ||
+    lowerTitle.includes("feature") ||
+    lowerTitle.includes("module") ||
+    lowerMessage.includes("restricted your access") ||
+    lowerMessage.includes("granted you access")
+  ) {
+    // Extract feature/module name from message (e.g. 'Admin has restricted your access to "Document Storage".')
+    const match = notification.message.match(/"([^"]+)"/);
+    const targetLabel = match ? match[1] : null;
+
+    if (targetLabel) {
+      // 1. Try ownerModuleGrant (matching label or key in GATABLE_MODULES)
+      const matchedModule = GATABLE_MODULES.find(
+        (m: any) => m.label.toLowerCase() === targetLabel.toLowerCase() || m.key.toLowerCase() === targetLabel.toLowerCase()
+      );
+      const moduleKey = matchedModule ? matchedModule.key : targetLabel;
+
+      const moduleGrant = await db.ownerModuleGrant.findFirst({
+        where: { userId, module: moduleKey },
         orderBy: { createdAt: "desc" }
       });
+
+      if (moduleGrant) {
+        overrideDetail = {
+          overrideType: moduleGrant.overrideType,
+          reason: moduleGrant.reason,
+          expiresAt: moduleGrant.expiresAt,
+          isModuleGrant: true,
+          label: matchedModule?.label || targetLabel
+        };
+      } else {
+        // 2. Try userAccessOverride
+        const userOverride = await db.userAccessOverride.findFirst({
+          where: { userId, feature: targetLabel },
+          orderBy: { createdAt: "desc" }
+        });
+        if (userOverride) {
+          overrideDetail = {
+            overrideType: userOverride.overrideType,
+            reason: userOverride.reason,
+            expiresAt: userOverride.expiresAt,
+            isModuleGrant: false,
+            label: targetLabel
+          };
+        }
+      }
     }
   }
 

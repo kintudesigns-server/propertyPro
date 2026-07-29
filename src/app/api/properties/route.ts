@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { notifyMany } from "@/lib/notify";
 import { getEffectiveSubscriptionRules } from "@/lib/subscription-rules";
+import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -18,6 +19,11 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
+    if (role === "OWNER") {
+      const guard = await checkModuleAccess(userId, "properties");
+      if (!guard.allowed) return moduleLockedResponse(guard);
+    }
+
     if (id) {
       const property = await prisma.property.findUnique({
         where: { id },
@@ -96,6 +102,11 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = (session.user as any).id;
+
+  if (userRole === "OWNER") {
+    const guard = await checkModuleAccess(userId, "properties");
+    if (!guard.allowed) return moduleLockedResponse(guard);
+  }
 
   try {
     const owner = await prisma.user.findUnique({
