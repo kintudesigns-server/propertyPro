@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 export default function MaintenancePage() {
   const { data: session } = useSession();
@@ -35,6 +36,12 @@ export default function MaintenancePage() {
   
   // View Toggle
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, priorityFilter, categoryFilter, dateFilter, viewMode]);
 
   // Modals state
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -488,7 +495,10 @@ export default function MaintenancePage() {
                 ) : filteredRequests.length === 0 ? (
                   <tr><td colSpan={6} className="px-4 py-12 text-center text-[#6E6E73] font-medium">No maintenance requests found.</td></tr>
                 ) : (
-                  filteredRequests.map((req) => (
+                  (() => {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const paginated = filteredRequests.slice(start, start + itemsPerPage);
+                    return paginated.map((req) => (
                     <tr key={req.id} className="hover:bg-[#F2F2F7] transition-colors group">
                       <td className="px-4 py-4">
                         <div className="flex flex-col space-y-1">
@@ -584,7 +594,8 @@ export default function MaintenancePage() {
                         </DropdownMenu>
                       </td>
                     </tr>
-                  ))
+                  ));
+                })()
                 )}
               </tbody>
             </table>
@@ -596,7 +607,10 @@ export default function MaintenancePage() {
             ) : filteredRequests.length === 0 ? (
               <div className="col-span-full py-12 text-center text-[#6E6E73] font-medium">No maintenance requests found.</div>
             ) : (
-              filteredRequests.map((req) => (
+              (() => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginated = filteredRequests.slice(start, start + itemsPerPage);
+                return paginated.map((req) => (
                 <Card key={req.id} className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
                   <div className="p-5 border-b border-[#F1F5F9] flex justify-between items-start gap-4">
                     <div className="flex flex-col space-y-1 w-full overflow-hidden">
@@ -807,10 +821,20 @@ export default function MaintenancePage() {
                     </div>
                   </div>
                 </Card>
-              ))
+              ));
+              })()
             )}
           </div>
         )}
+
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredRequests.length / itemsPerPage) || 1}
+          totalItems={filteredRequests.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="requests"
+        />
       </div>
 
       {/* Assign Modal */}

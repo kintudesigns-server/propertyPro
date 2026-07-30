@@ -6,6 +6,8 @@ interface AuditLogEntry {
   action: string;       // CREATED | UPDATED | DELETED | STATUS_CHANGED | SIGNED | ACTIVATED | TERMINATED
   actorId?: string | null;   // userId who performed the action (null = system/cron)
   actorRole?: string | null; // OWNER | TENANT | SUPERADMIN | SYSTEM
+  ipAddress?: string | null;
+  userAgent?: string | null;
   oldValue?: Record<string, any> | null;
   newValue?: Record<string, any> | null;
   note?: string;
@@ -24,6 +26,8 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
         action: entry.action,
         actorId: entry.actorId ?? null,
         actorRole: entry.actorRole ?? null,
+        ipAddress: entry.ipAddress ?? null,
+        userAgent: entry.userAgent ?? null,
         oldValue: entry.oldValue ?? undefined,
         newValue: entry.newValue ?? undefined,
         note: entry.note ?? null,

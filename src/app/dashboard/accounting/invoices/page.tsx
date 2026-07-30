@@ -15,8 +15,12 @@ import { useRouter } from "next/navigation";
 import { generateSingleInvoicePDF } from "@/lib/pdfGenerator";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 export default function InvoicesPage() {
+  const featureAccess = useFeatureAccess("view_invoices");
   const { data: session } = useSession();
   const router = useRouter();
   const role = (session?.user as any)?.role;
@@ -30,6 +34,12 @@ export default function InvoicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, typeFilter]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
@@ -218,8 +228,21 @@ export default function InvoicesPage() {
   };
 
 
+  const isTenantBlocked = isTenant && !featureAccess.allowed;
+
+
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+    <div className="relative">
+      {isTenantBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="Rent Invoices & Receipts"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
         <div>
           <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">Invoices</h1>
@@ -353,100 +376,119 @@ export default function InvoicesPage() {
                   <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#6E6E73] font-bold">No invoices found.</TableCell>
                 </TableRow>
               ) : (
-                filteredInvoices.map((inv) => (
-                  <TableRow key={inv.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
-                    <TableCell className="font-semibold text-[#1D1D1F]">
-                      INV-{inv.id.substring(0, 6).toUpperCase()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-bold text-[#1D1D1F]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
-                      <div className="text-sm font-semibold text-[#6E6E73]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
-                    </TableCell>
-                    <TableCell>
-                      {getTypeBadge(inv.invoiceType)}
-                    </TableCell>
-                    <TableCell className="font-semibold text-[#6E6E73]">
-                      {new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                    </TableCell>
-                    <TableCell className="font-semibold text-[#6E6E73]">
-                      {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                    </TableCell>
-                    <TableCell className="font-black text-[#1D1D1F]">
-                      ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </TableCell>
-                    {!isTenant && (
-                      <TableCell className="font-bold text-green-600">
-                        {inv.netToOwner 
-                          ? `$${Number(inv.netToOwner).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-                          : "-"}
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      {getStatusBadge(inv.status)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] inline-flex items-center justify-center rounded-lg transition-colors">
-                          <MoreVertical className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setSelectedInvoice(inv);
-                              setIsDetailModalOpen(true);
-                            }} 
-                            className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
-                          >
-                            <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                          </DropdownMenuItem>
+                (() => {
+                  const start = (currentPage - 1) * itemsPerPage;
+                  const paginated = filteredInvoices.slice(start, start + itemsPerPage);
+                  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage) || 1;
 
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              generateSingleInvoicePDF(inv);
-                              toast.success("Invoice PDF download initiated");
-                            }} 
-                            className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
-                          >
-                            <Download className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download PDF
-                          </DropdownMenuItem>
-                          
-                          {isTenant ? (
-                            (inv.status === "UNPAID" || inv.status === "OVERDUE") && (
-                              <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-semibold text-[#007AFF] rounded-lg">
-                                <Receipt className="mr-2 h-4 w-4 text-[#94A3B8]" /> Pay Invoice
-                              </DropdownMenuItem>
-                            )
-                          ) : (
-                            <>
-                              {inv.status !== "PAID" && (
-                                <DropdownMenuItem onClick={() => handleSendReminder(inv)} className="cursor-pointer font-semibold text-[#CA8A04] rounded-lg">
-                                  <Bell className="mr-2 h-4 w-4 text-[#94A3B8]" /> Send Reminder
-                                </DropdownMenuItem>
-                              )}
-                              {inv.status !== "PAID" && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "PAID")} className="cursor-pointer font-semibold text-[#16A34A] rounded-lg">
-                                  <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
-                                </DropdownMenuItem>
-                              )}
-                              {inv.status !== "OVERDUE" && inv.status !== "PAID" && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "OVERDUE")} className="cursor-pointer font-semibold text-[#DC2626] rounded-lg">
-                                  <AlertCircle className="mr-2 h-4 w-4" /> Mark Overdue
-                                </DropdownMenuItem>
-                              )}
-                              
-                              <DropdownMenuItem onClick={() => handleDelete(inv.id)} className="cursor-pointer font-semibold text-red-500 rounded-lg hover:text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete Invoice
-                              </DropdownMenuItem>
-                            </>
+                  return (
+                    <>
+                      {paginated.map((inv) => (
+                        <TableRow key={inv.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
+                          <TableCell className="font-semibold text-[#1D1D1F]">
+                            INV-{inv.id.substring(0, 6).toUpperCase()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-bold text-[#1D1D1F]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
+                            <div className="text-sm font-semibold text-[#6E6E73]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
+                          </TableCell>
+                          <TableCell>
+                            {getTypeBadge(inv.invoiceType)}
+                          </TableCell>
+                          <TableCell className="font-semibold text-[#6E6E73]">
+                            {new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </TableCell>
+                          <TableCell className="font-semibold text-[#6E6E73]">
+                            {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </TableCell>
+                          <TableCell className="font-black text-[#1D1D1F]">
+                            ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </TableCell>
+                          {!isTenant && (
+                            <TableCell className="font-bold text-green-600">
+                              {inv.netToOwner 
+                                ? `$${Number(inv.netToOwner).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                                : "-"}
+                            </TableCell>
                           )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                          <TableCell>
+                            {getStatusBadge(inv.status)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] inline-flex items-center justify-center rounded-lg transition-colors">
+                                <MoreVertical className="h-4 w-4" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    setSelectedInvoice(inv);
+                                    setIsDetailModalOpen(true);
+                                  }} 
+                                  className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
+                                >
+                                  <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    generateSingleInvoicePDF(inv);
+                                    toast.success("Invoice PDF download initiated");
+                                  }} 
+                                  className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg"
+                                >
+                                  <Download className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download PDF
+                                </DropdownMenuItem>
+                                
+                                {isTenant ? (
+                                  (inv.status === "UNPAID" || inv.status === "OVERDUE") && (
+                                    <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-semibold text-[#007AFF] rounded-lg">
+                                      <Receipt className="mr-2 h-4 w-4 text-[#94A3B8]" /> Pay Invoice
+                                    </DropdownMenuItem>
+                                  )
+                                ) : (
+                                  <>
+                                    {inv.status !== "PAID" && (
+                                      <DropdownMenuItem onClick={() => handleSendReminder(inv)} className="cursor-pointer font-semibold text-[#CA8A04] rounded-lg">
+                                        <Bell className="mr-2 h-4 w-4 text-[#94A3B8]" /> Send Reminder
+                                      </DropdownMenuItem>
+                                    )}
+                                    {inv.status !== "PAID" && (
+                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "PAID")} className="cursor-pointer font-semibold text-[#16A34A] rounded-lg">
+                                        <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                      </DropdownMenuItem>
+                                    )}
+                                    {inv.status !== "OVERDUE" && inv.status !== "PAID" && (
+                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "OVERDUE")} className="cursor-pointer font-semibold text-[#DC2626] rounded-lg">
+                                        <AlertCircle className="mr-2 h-4 w-4" /> Mark Overdue
+                                      </DropdownMenuItem>
+                                    )}
+                                    
+                                    <DropdownMenuItem onClick={() => handleDelete(inv.id)} className="cursor-pointer font-semibold text-red-500 rounded-lg hover:text-red-600 focus:text-red-600 focus:bg-red-50 mt-1">
+                                      <Trash2 className="mr-2 h-4 w-4" /> Delete Invoice
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </>
+                  );
+                })()
               )}
             </TableBody>
           </Table>
+
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={Math.ceil(filteredInvoices.length / itemsPerPage) || 1}
+            totalItems={filteredInvoices.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            itemLabel="invoices"
+          />
         </CardContent>
       </Card>
 
@@ -695,6 +737,8 @@ export default function InvoicesPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+    </div>
     </div>
   );
 }

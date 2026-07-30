@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, RefreshCw, MapPin, Building, BedDouble, Bath, Maximize, LayoutGrid, List, AlignJustify, MoreVertical, Eye, Edit, Trash2, Home, DollarSign, Activity, Square, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 export default function AvailableUnitsPage() {
   const router = useRouter();
@@ -18,6 +19,12 @@ export default function AvailableUnitsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, viewMode]);
 
   const fetchUnits = async () => {
     setLoading(true);
@@ -210,161 +217,180 @@ export default function AvailableUnitsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUnits.map((u) => (
-                  <TableRow key={u.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/80 transition-colors">
-                    <TableCell className="pl-6">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-slate-200 overflow-hidden shrink-0">
-                          {u.images && u.images.length > 0 ? (
-                             <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover" />
-                          ) : (
-                             <div className="h-full w-full bg-[#E5E5EA] flex items-center justify-center">
-                               <Home className="h-5 w-5 text-[#94A3B8]" />
-                             </div>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-extrabold text-[#1D1D1F] text-sm">{u.name}</p>
-                          <p className="text-xs text-[#6E6E73] font-medium mt-0.5">{u.type || "Apartment"} • Floor {u.floor || 1}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#1D1D1F] text-sm">{u.property?.name}</span>
-                        <span className="text-[11px] text-[#6E6E73]">{u.property?.type}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="flex items-center gap-1 font-semibold text-[#1D1D1F] text-sm">
-                          <MapPin className="h-3 w-3 text-[#94A3B8]" />
-                          {u.property?.city}, {u.property?.country}
-                        </span>
-                        <span className="text-[11px] text-[#6E6E73] ml-4 mt-0.5">{u.property?.address}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-3 text-xs text-[#1D1D1F] font-bold">
-                          <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.rooms}</span>
-                          <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.bathrooms || 1}</span>
-                        </div>
-                        <span className="text-[11px] text-[#6E6E73] font-medium">{u.sqFootage} sq ft</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-extrabold text-[#1D1D1F] text-sm">${Number(u.rentAmount).toFixed(2)}</span>
-                        <span className="text-[11px] text-[#6E6E73] mt-0.5">/month</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
-                          <MoreVertical className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                            <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                            <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredUnits.length === 0 && !loading && (
+                {filteredUnits.length === 0 && !loading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-10 text-[#6E6E73]">
                       No available units found.
                     </TableCell>
                   </TableRow>
+                ) : (
+                  (() => {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const paginated = filteredUnits.slice(start, start + itemsPerPage);
+                    return paginated.map((u) => (
+                      <TableRow key={u.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/80 transition-colors">
+                        <TableCell className="pl-6">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-slate-200 overflow-hidden shrink-0">
+                              {u.images && u.images.length > 0 ? (
+                                 <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover" />
+                              ) : (
+                                 <div className="h-full w-full bg-[#E5E5EA] flex items-center justify-center">
+                                   <Home className="h-5 w-5 text-[#94A3B8]" />
+                                 </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-extrabold text-[#1D1D1F] text-sm">{u.name}</p>
+                              <p className="text-xs text-[#6E6E73] font-medium mt-0.5">{u.type || "Apartment"} • Floor {u.floor || 1}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#1D1D1F] text-sm">{u.property?.name}</span>
+                            <span className="text-[11px] text-[#6E6E73]">{u.property?.type}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="flex items-center gap-1 font-semibold text-[#1D1D1F] text-sm">
+                              <MapPin className="h-3 w-3 text-[#94A3B8]" />
+                              {u.property?.city}, {u.property?.country}
+                            </span>
+                            <span className="text-[11px] text-[#6E6E73] ml-4 mt-0.5">{u.property?.address}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-3 text-xs text-[#1D1D1F] font-bold">
+                              <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.rooms}</span>
+                              <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.bathrooms || 1}</span>
+                            </div>
+                            <span className="text-[11px] text-[#6E6E73] font-medium">{u.sqFootage} sq ft</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-[#1D1D1F] text-sm">${Number(u.rentAmount).toFixed(2)}</span>
+                            <span className="text-[11px] text-[#6E6E73] mt-0.5">/month</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
+                              <MoreVertical className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
+                                <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
+                                <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ));
+                  })()
                 )}
               </TableBody>
             </Table>
           </div>
         ) : (
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredUnits.map((u) => (
-              <div key={u.id} className="border border-[#E5E5EA] bg-white rounded-[20px] overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
-                <div className="relative h-[200px] bg-[#F2F2F7] overflow-hidden">
-                  {u.images && u.images.length > 0 ? (
-                    <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[#94A3B8]">
-                      <Home className="h-10 w-10 opacity-50" />
-                    </div>
-                  )}
-                  
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Available</Badge>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/90 text-[#475569] hover:bg-white border-0 shadow-sm rounded-full px-3 py-1 font-bold text-xs backdrop-blur-md flex items-center gap-1.5">
-                      <Building className="h-3.5 w-3.5" />
-                      {u.type || "Apartment"}
-                    </Badge>
-                  </div>
-                  
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                    <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
-                      <Edit className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-extrabold text-[#1D1D1F] text-lg leading-tight">Unit {u.name}</h3>
-                  <p className="text-sm text-[#6E6E73] font-medium mt-1 truncate">{u.property?.name}</p>
-                  
-                  <div className="flex items-center gap-1.5 text-sm text-[#6E6E73] mt-3 font-medium">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{u.property?.city}, {u.property?.country}</span>
-                  </div>
-                  
-                  <div className="mt-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-[14px] p-3 flex flex-col gap-2">
-                    <div className="flex items-center gap-4 text-[#1D1D1F] font-bold text-sm">
-                      <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-[#94A3B8]" /> {u.rooms} Beds</span>
-                      <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-[#94A3B8]" /> {u.bathrooms || 1} Baths</span>
-                    </div>
-                    <span className="text-xs text-[#6E6E73] font-medium">Size: {u.sqFootage} sq ft</span>
-                  </div>
-                  
-                  <div className="mt-5 pt-4 border-t border-[#E5E5EA] flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <p className="font-extrabold text-[#1D1D1F] text-base">${Number(u.rentAmount).toFixed(2)} <span className="text-xs text-[#6E6E73] font-medium">/month</span></p>
-                      <p className="text-[11px] font-bold text-[#16A34A] mt-0.5">Vacant Unit</p>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
-                        <MoreVertical className="h-5 w-5" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                          <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                          <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filteredUnits.length === 0 && !loading && (
+            {filteredUnits.length === 0 && !loading ? (
               <div className="col-span-full text-center py-10 text-[#6E6E73]">
                 No available units found.
               </div>
+            ) : (
+              (() => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginated = filteredUnits.slice(start, start + itemsPerPage);
+                return paginated.map((u) => (
+                  <div key={u.id} className="border border-[#E5E5EA] bg-white rounded-[20px] overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
+                    <div className="relative h-[200px] bg-[#F2F2F7] overflow-hidden">
+                      {u.images && u.images.length > 0 ? (
+                        <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-[#94A3B8]">
+                          <Home className="h-10 w-10 opacity-50" />
+                        </div>
+                      )}
+                      
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Available</Badge>
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-white/90 text-[#475569] hover:bg-white border-0 shadow-sm rounded-full px-3 py-1 font-bold text-xs backdrop-blur-md flex items-center gap-1.5">
+                          <Building className="h-3.5 w-3.5" />
+                          {u.type || "Apartment"}
+                        </Badge>
+                      </div>
+                      
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                        <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                          <Edit className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="font-extrabold text-[#1D1D1F] text-lg leading-tight">Unit {u.name}</h3>
+                      <p className="text-sm text-[#6E6E73] font-medium mt-1 truncate">{u.property?.name}</p>
+                      
+                      <div className="flex items-center gap-1.5 text-sm text-[#6E6E73] mt-3 font-medium">
+                        <MapPin className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{u.property?.city}, {u.property?.country}</span>
+                      </div>
+                      
+                      <div className="mt-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-[14px] p-3 flex flex-col gap-2">
+                        <div className="flex items-center gap-4 text-[#1D1D1F] font-bold text-sm">
+                          <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-[#94A3B8]" /> {u.rooms} Beds</span>
+                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-[#94A3B8]" /> {u.bathrooms || 1} Baths</span>
+                        </div>
+                        <span className="text-xs text-[#6E6E73] font-medium">Size: {u.sqFootage} sq ft</span>
+                      </div>
+                      
+                      <div className="mt-5 pt-4 border-t border-[#E5E5EA] flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <p className="font-extrabold text-[#1D1D1F] text-base">${Number(u.rentAmount).toFixed(2)} <span className="text-xs text-[#6E6E73] font-medium">/month</span></p>
+                          <p className="text-[11px] font-bold text-[#16A34A] mt-0.5">Vacant Unit</p>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
+                            <MoreVertical className="h-5 w-5" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
+                              <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
+                              <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                ));
+              })()
             )}
           </div>
         )}
+
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredUnits.length / itemsPerPage) || 1}
+          totalItems={filteredUnits.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="available units"
+        />
       </div>
     </div>
   );

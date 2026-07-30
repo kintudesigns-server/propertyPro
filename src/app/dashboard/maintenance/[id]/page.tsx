@@ -10,8 +10,11 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { DispatchVendorModal } from "@/components/maintenance/DispatchVendorModal";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function MaintenanceDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const featureAccess = useFeatureAccess("maintenance_detail");
   const router = useRouter();
   const { id } = React.use(params);
   const { data: session } = useSession();
@@ -263,10 +266,22 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
     return list;
   };
 
+  const isBlocked = !featureAccess.allowed;
+
   const timelineEvents = getTimelineEvents();
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pt-6 pb-20 px-4 sm:px-6">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="Maintenance Ticket Details"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="max-w-5xl mx-auto space-y-6 pt-6 pb-20 px-4 sm:px-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
@@ -1796,6 +1811,8 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
         </div>
       )}
+    </div>
+    </div>
     </div>
   );
 }

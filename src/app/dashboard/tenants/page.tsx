@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 export default function TenantsPage() {
   const router = useRouter();
@@ -29,6 +30,12 @@ export default function TenantsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, viewMode]);
   const [properties, setProperties] = useState<any[]>([]);
   const [checkingProperties, setCheckingProperties] = useState(true);
 
@@ -246,59 +253,127 @@ export default function TenantsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTenants.map((t) => {
+                {filteredTenants.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-10 text-[#6E6E73]">
+                      No tenants found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  (() => {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const paginated = filteredTenants.slice(start, start + itemsPerPage);
+                    return paginated.map((t) => {
+                      const hasActiveLease = t.leases?.some((l:any) => l.status === "ACTIVE");
+                      const badgeConfig = hasActiveLease || t.tenantStatus === "Active" 
+                        ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
+                        : t.tenantStatus === "Approved"
+                        ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
+                        : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
+
+                      return (
+                        <TableRow key={t.id} className="border-b border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              {t.avatar ? (
+                                <img
+                                  src={t.avatar}
+                                  alt={t.name || "Tenant Avatar"}
+                                  className="h-10 w-10 rounded-full object-cover shrink-0 border border-slate-200"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-bold text-lg shrink-0">
+                                  {t.name ? t.name.charAt(0).toUpperCase() : "U"}
+                                </div>
+                              )}
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-[#1D1D1F] truncate">{t.name}</span>
+                                <span className="text-xs text-[#6E6E73] truncate">{t.email}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${badgeConfig.bg} ${badgeConfig.text} border-0 rounded-lg px-2.5 py-1 font-bold shadow-sm whitespace-nowrap`}>
+                              {badgeConfig.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-semibold text-[#1D1D1F]">{t.phone || "-"}</div>
+                            <div className="text-xs text-[#6E6E73] mt-0.5 truncate">{t.email}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-semibold text-[#1D1D1F] truncate max-w-[150px]" title={t.position || t.employmentStatus}>
+                              {t.employmentStatus === "EMPLOYED" 
+                                ? (t.position || "Employed") 
+                                : t.employmentStatus 
+                                  ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') 
+                                  : "-"}
+                            </div>
+                            <div className="text-xs text-[#6E6E73] mt-0.5 truncate max-w-[150px]" title={`${t.employer || ''} ${t.annualIncome ? `$${t.annualIncome}/yr` : ''}`}>
+                              {t.employer ? t.employer : "-"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
+                                <MoreVertical className="h-4 w-4" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1">
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
+                                  <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
+                                  <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Tenant
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
+                                  <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Change Status
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => { if (!hasActiveLease) handleDelete(t.id) }} 
+                                  disabled={hasActiveLease}
+                                  className={`cursor-pointer font-semibold rounded-lg ${hasActiveLease ? 'text-gray-400 opacity-50' : 'text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50'}`}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" /> Delete Tenant
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })()
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* CARDS VIEW */}
+        {!loading && viewMode === "cards" && (
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-[#F2F2F7]/50">
+            {filteredTenants.length === 0 ? (
+              <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-white">
+                <Users className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-[#1D1D1F]">No Tenants Found</h3>
+                <p className="text-sm text-[#6E6E73] mt-1">Try adjusting your search or add a new tenant.</p>
+              </div>
+            ) : (
+              (() => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginated = filteredTenants.slice(start, start + itemsPerPage);
+                return paginated.map((t) => {
                   const hasActiveLease = t.leases?.some((l:any) => l.status === "ACTIVE");
                   const badgeConfig = hasActiveLease || t.tenantStatus === "Active" 
-                    ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
-                    : t.tenantStatus === "Approved"
-                    ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
-                    : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
-
+                        ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
+                        : t.tenantStatus === "Approved"
+                        ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
+                        : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
+                  
                   return (
-                    <TableRow key={t.id} className="border-b border-[#E5E5EA] hover:bg-[#F2F2F7]/50 transition-colors">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {t.avatar ? (
-                            <img
-                              src={t.avatar}
-                              alt={t.name || "Tenant Avatar"}
-                              className="h-10 w-10 rounded-full object-cover shrink-0 border border-slate-200"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-bold text-lg shrink-0">
-                              {t.name ? t.name.charAt(0).toUpperCase() : "U"}
-                            </div>
-                          )}
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-[#1D1D1F] truncate">{t.name}</span>
-                            <span className="text-xs text-[#6E6E73] truncate">{t.email}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={`${badgeConfig.bg} ${badgeConfig.text} border-0 rounded-lg px-2.5 py-1 font-bold shadow-sm whitespace-nowrap`}>
-                          {badgeConfig.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-semibold text-[#1D1D1F]">{t.phone || "-"}</div>
-                        <div className="text-xs text-[#6E6E73] mt-0.5 truncate">{t.email}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-semibold text-[#1D1D1F] truncate max-w-[150px]" title={t.position || t.employmentStatus}>
-                          {t.employmentStatus === "EMPLOYED" 
-                            ? (t.position || "Employed") 
-                            : t.employmentStatus 
-                              ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') 
-                              : "-"}
-                        </div>
-                        <div className="text-xs text-[#6E6E73] mt-0.5 truncate max-w-[150px]" title={`${t.employer || ''} ${t.annualIncome ? `$${t.annualIncome}/yr` : ''}`}>
-                          {t.employer ? t.employer : "-"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
+                    <div key={t.id} className="bg-white border border-[#E5E5EA] rounded-[20px] p-5 hover:shadow-lg transition-shadow relative group flex flex-col">
+                      <div className="absolute top-4 right-4">
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreVertical className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1">
@@ -320,103 +395,54 @@ export default function TenantsPage() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {filteredTenants.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10 text-[#6E6E73]">
-                      No tenants found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-
-        {/* CARDS VIEW */}
-        {!loading && viewMode === "cards" && (
-          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-[#F2F2F7]/50">
-            {filteredTenants.map((t) => {
-              const hasActiveLease = t.leases?.some((l:any) => l.status === "ACTIVE");
-              const badgeConfig = hasActiveLease || t.tenantStatus === "Active" 
-                    ? { bg: "bg-[#DCFCE7]", text: "text-[#16A34A]", label: "Active" }
-                    : t.tenantStatus === "Approved"
-                    ? { bg: "bg-[#EFF6FF]", text: "text-[#007AFF]", label: "Approved" }
-                    : { bg: "bg-[#FEF9C3]", text: "text-[#CA8A04]", label: t.tenantStatus || "Pending Review" };
-              
-              return (
-                <div key={t.id} className="bg-white border border-[#E5E5EA] rounded-[20px] p-5 hover:shadow-lg transition-shadow relative group flex flex-col">
-                  <div className="absolute top-4 right-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreVertical className="h-4 w-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
-                          <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tenants/${t.id}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
-                          <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Tenant
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openStatusModal(t)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg">
-                          <RefreshCw className="mr-2 h-4 w-4 text-[#94A3B8]" /> Change Status
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => { if (!hasActiveLease) handleDelete(t.id) }} 
-                          disabled={hasActiveLease}
-                          className={`cursor-pointer font-semibold rounded-lg ${hasActiveLease ? 'text-gray-400 opacity-50' : 'text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50'}`}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete Tenant
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className="flex flex-col items-center text-center mt-2 mb-4">
-                    {t.avatar ? (
-                      <img
-                        src={t.avatar}
-                        alt={t.name || "Tenant Avatar"}
-                        className="h-16 w-16 rounded-full object-cover mb-3 ring-4 ring-[#EFF6FF]/50 border border-slate-200"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
-                        {t.name ? t.name.charAt(0).toUpperCase() : "U"}
                       </div>
-                    )}
-                    <h3 className="font-extrabold text-[#1D1D1F] text-lg truncate w-full">{t.name}</h3>
-                    <p className="text-sm text-[#6E6E73] truncate w-full">{t.email}</p>
-                    <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2 w-full text-center">
-                      <p className="text-xs font-bold text-slate-700 truncate">
-                        {t.employmentStatus === "EMPLOYED" ? t.position || "Employed" : t.employmentStatus ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') : "Employment N/A"}
-                      </p>
-                      <p className="text-[10px] text-[#6E6E73] mt-0.5 truncate">
-                        {t.employer ? t.employer : "No details"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="mt-auto pt-4 border-t border-[#F1F5F9] flex justify-between items-center">
-                    <Badge className={`${badgeConfig.bg} ${badgeConfig.text} border-0`}>
-                      {badgeConfig.label}
-                    </Badge>
-                    <span className="text-xs font-bold text-[#6E6E73]">{t.phone || "-"}</span>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredTenants.length === 0 && (
-              <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-white">
-                <Users className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-[#1D1D1F]">No Tenants Found</h3>
-                <p className="text-sm text-[#6E6E73] mt-1">Try adjusting your search or add a new tenant.</p>
-              </div>
+                      <div className="flex flex-col items-center text-center mt-2 mb-4">
+                        {t.avatar ? (
+                          <img
+                            src={t.avatar}
+                            alt={t.name || "Tenant Avatar"}
+                            className="h-16 w-16 rounded-full object-cover mb-3 ring-4 ring-[#EFF6FF]/50 border border-slate-200"
+                          />
+                        ) : (
+                          <div className="h-16 w-16 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-2xl mb-3 ring-4 ring-[#EFF6FF]/50">
+                            {t.name ? t.name.charAt(0).toUpperCase() : "U"}
+                          </div>
+                        )}
+                        <h3 className="font-extrabold text-[#1D1D1F] text-lg truncate w-full">{t.name}</h3>
+                        <p className="text-sm text-[#6E6E73] truncate w-full">{t.email}</p>
+                        <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2 w-full text-center">
+                          <p className="text-xs font-bold text-slate-700 truncate">
+                            {t.employmentStatus === "EMPLOYED" ? t.position || "Employed" : t.employmentStatus ? t.employmentStatus.charAt(0).toUpperCase() + t.employmentStatus.slice(1).toLowerCase().replace('_', ' ') : "Employment N/A"}
+                          </p>
+                          <p className="text-[10px] text-[#6E6E73] mt-0.5 truncate">
+                            {t.employer ? t.employer : "No details"} {t.annualIncome ? `• $${t.annualIncome.toLocaleString()}/yr` : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto pt-4 border-t border-[#F1F5F9] flex justify-between items-center">
+                        <Badge className={`${badgeConfig.bg} ${badgeConfig.text} border-0`}>
+                          {badgeConfig.label}
+                        </Badge>
+                        <span className="text-xs font-bold text-[#6E6E73]">{t.phone || "-"}</span>
+                      </div>
+                    </div>
+                  );
+                });
+              })()
             )}
           </div>
         )}
+
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredTenants.length / itemsPerPage) || 1}
+          totalItems={filteredTenants.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="tenants"
+        />
       </Card>
 
       {/* Change Status Modal */}

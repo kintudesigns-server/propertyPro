@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PRIORITY_CFG: Record<string, { label: string; dot: string; text: string; bg: string; border: string; sort: number }> = {
@@ -193,19 +193,7 @@ export default function InspectorActiveTasksPage() {
     );
   }
 
-  if (!featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="view_assignments"
-        featureLabel={featureAccess.featureLabel || "View Assigned Jobs"}
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      />
-    );
-  }
+  const isBlocked = !featureAccess.allowed;
 
   if (loading || status === "loading") {
     return (
@@ -217,7 +205,17 @@ export default function InspectorActiveTasksPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "View Assigned Jobs"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
 
       {/* ── HEADER ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -647,6 +645,8 @@ export default function InspectorActiveTasksPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+    </div>
     </div>
   );
 }

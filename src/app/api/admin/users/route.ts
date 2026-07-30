@@ -76,10 +76,13 @@ export async function GET(req: NextRequest) {
         tenantStatus: true,
         accountStatus: true,
         subscriptionStatus: true,
+        subscriptionOverride: true,
         avatar: true,
         pricingTier: {
           select: {
+            id: true,
             name: true,
+            price: true,
             maxUnits: true
           }
         }

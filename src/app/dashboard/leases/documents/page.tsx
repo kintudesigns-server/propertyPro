@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
@@ -225,7 +225,7 @@ export default function TenantDocumentsPage() {
 
 
 
-  // Tenant feature-level access guard
+  // Tenant feature-level access guard — loading state only (no early return when blocked)
   if (!isOwner && featureAccess.loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
@@ -235,19 +235,7 @@ export default function TenantDocumentsPage() {
     );
   }
 
-  if (!isOwner && !featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="view_documents"
-        featureLabel={featureAccess.featureLabel || "Document Vault"}
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      />
-    );
-  }
+  const isTenantBlocked = !isOwner && !featureAccess.allowed;
 
   if (status === "loading" || (loading && documents.length === 0)) {
     return (
@@ -311,7 +299,17 @@ export default function TenantDocumentsPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 md:px-0">
+    <div className="relative">
+      {isTenantBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Document Vault & Disclosures"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70 overflow-hidden" : ""}>
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 md:px-0">
       {/* Header Panel */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
@@ -947,6 +945,8 @@ export default function TenantDocumentsPage() {
           </div>
         </div>
       )}
+    </div>
+    </div>
     </div>
   );
 }

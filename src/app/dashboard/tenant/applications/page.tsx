@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { ClipboardList, Clock, CheckCircle2, XCircle, ArrowRight, Home } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle2, XCircle, ArrowRight, Home, Search } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function TenantApplicationsPage() {
   const featureAccess = useFeatureAccess("tenant_applications");
@@ -32,25 +32,7 @@ export default function TenantApplicationsPage() {
     }
   }, [session]);
 
-  if (!featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="tenant_applications"
-        featureLabel="My Rental Applications"
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      >
-        <div className="w-full max-w-5xl mx-auto space-y-6 pb-20 opacity-50 pointer-events-none">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-900">My Rental Applications</h1>
-          </div>
-        </div>
-      </FeatureBlockedBanner>
-    );
-  }
+  const isBlocked = !featureAccess.allowed;
 
   if (loading) {
     return (
@@ -61,16 +43,26 @@ export default function TenantApplicationsPage() {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto w-full min-h-screen">
-      <div className="mb-10">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
-          <div className="p-3 bg-indigo-100 rounded-xl">
-            <ClipboardList className="h-7 w-7 text-indigo-600" />
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="My Rental Applications"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+        <div className="p-6 md:p-10 max-w-6xl mx-auto w-full min-h-screen">
+          <div className="mb-10">
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+              <div className="p-3 bg-indigo-100 rounded-xl">
+                <ClipboardList className="h-7 w-7 text-indigo-600" />
+              </div>
+              My Applications
+            </h1>
+            <p className="text-[#6E6E73] mt-2 text-sm font-medium">Track the status of your rental applications in real-time.</p>
           </div>
-          My Applications
-        </h1>
-        <p className="text-[#6E6E73] mt-2 text-sm font-medium">Track the status of your rental applications in real-time.</p>
-      </div>
 
       {applications.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
@@ -93,16 +85,9 @@ export default function TenantApplicationsPage() {
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
-  );
-}
-
-function Search({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
   );
 }
 

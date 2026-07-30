@@ -37,6 +37,7 @@ import { NotificationDropdown } from "@/components/notifications/NotificationDro
 import { MessageBadge } from "@/components/notifications/MessageBadge";
 import { toast } from "sonner";
 import { ModuleAccessProvider, useModuleAccessContext } from "@/contexts/ModuleAccessContext";
+import { useBlockedFeatures } from "@/hooks/useBlockedFeatures";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -69,6 +70,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const isTenant = role === "TENANT";
 
   const isAllowed = (key: string) => (isOwner ? moduleAccess.isAllowed(key) : true);
+  const { blockedFeatures } = useBlockedFeatures();
+  const isFeatureLocked = (featureKey: string) => blockedFeatures.has(featureKey);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -272,7 +275,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        My Leases
+                        <span className="flex-1">My Leases</span>
+                        {isFeatureLocked("view_lease") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/leases/documents"
@@ -283,7 +287,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Documents
+                        <span className="flex-1">Documents</span>
+                        {isFeatureLocked("view_documents") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                     </div>
                   )}
@@ -322,7 +327,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Submit Request
+                        <span className="flex-1">Submit Request</span>
+                        {isFeatureLocked("submit_maintenance") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/maintenance/my-requests"
@@ -333,7 +339,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        My Requests
+                        <span className="flex-1">My Requests</span>
+                        {isFeatureLocked("view_maintenance") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                     </div>
                   )}
@@ -378,7 +385,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Pay Rent
+                        <span className="flex-1">Pay Rent</span>
+                        {isFeatureLocked("make_payments") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/payments/add-card"
@@ -389,7 +397,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Add Card
+                        <span className="flex-1">Add Card</span>
+                        {isFeatureLocked("add_card") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/accounting/transactions"
@@ -400,7 +409,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Transactions
+                        <span className="flex-1">Transactions</span>
+                        {isFeatureLocked("view_transactions") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/accounting/invoices"
@@ -411,7 +421,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Invoices
+                        <span className="flex-1">Invoices</span>
+                        {isFeatureLocked("view_invoices") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                     </div>
                   )}
@@ -432,7 +443,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <ClipboardList className="h-5 w-5" />
-                  {sidebarOpen && <span>My Applications</span>}
+                  {sidebarOpen && <span className="flex-1">My Applications</span>}
+                  {sidebarOpen && isFeatureLocked("tenant_applications") && <Lock className="h-3.5 w-3.5 text-red-400 shrink-0" />}
                 </Link>
 
                 <Link
@@ -444,7 +456,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <Calendar className="h-5 w-5" />
-                  {sidebarOpen && <span>My Showing Tours</span>}
+                  {sidebarOpen && <span className="flex-1">My Showing Tours</span>}
+                  {sidebarOpen && isFeatureLocked("tenant_tours") && <Lock className="h-3.5 w-3.5 text-red-400 shrink-0" />}
                 </Link>
                 
                 <Link
@@ -494,7 +507,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Inbox Messages
+                        <span className="flex-1">Inbox Messages</span>
+                        {isFeatureLocked("message_owner") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                       <Link
                         href="/dashboard/notifications"
@@ -505,7 +519,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        System Notifications
+                        <span className="flex-1">System Notifications</span>
                       </Link>
                       <Link
                         href="/dashboard/calendar"
@@ -516,7 +530,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Calendar
+                        <span className="flex-1">Calendar</span>
+                        {isFeatureLocked("view_calendar") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                       </Link>
                     </div>
                   )}
@@ -607,6 +622,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     SYSTEM
                   </span>
                 )}
+
+                <Link
+                  href="/dashboard/messages"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive("/dashboard/messages")
+                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  }`}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  {sidebarOpen && <span>Inbox Messages</span>}
+                </Link>
 
                 <Link
                   href="/dashboard/calendar"
@@ -1298,7 +1325,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Inbox Messages
+                        <span className="flex-1">Inbox Messages</span>
+                        {isOwner && (!isAllowed("messages") || isFeatureLocked("message_owner")) && (
+                          <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                        )}
                       </Link>
                       <Link
                         href="/dashboard/notifications"
@@ -1309,7 +1339,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        System Notifications
+                        <span className="flex-1">System Notifications</span>
                       </Link>
                       <Link
                         href="/dashboard/calendar"
@@ -1320,7 +1350,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }`}
                       >
                         <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                        Calendar
+                        <span className="flex-1">Calendar</span>
+                        {isOwner && (!isAllowed("calendar") || isFeatureLocked("view_calendar")) && (
+                          <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                        )}
                       </Link>
                     </div>
                   )}
@@ -1509,7 +1542,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Topbar */}
-        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA] flex items-center justify-between px-4 md:px-8 shrink-0 z-[100] sticky top-0">
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA] flex items-center justify-between px-4 md:px-8 shrink-0 z-30 sticky top-0">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger Drawer Trigger */}
             <button

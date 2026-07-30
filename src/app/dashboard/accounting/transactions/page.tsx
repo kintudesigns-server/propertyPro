@@ -36,8 +36,11 @@ import {
 import { toast } from "sonner";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function TransactionsPage() {
+  const featureAccess = useFeatureAccess("view_transactions");
   const { data: session, status } = useSession();
   const router = useRouter();
   const role = (session?.user as any)?.role;
@@ -385,6 +388,9 @@ export default function TransactionsPage() {
     window.print();
   };
 
+  const isTenantBlocked = isTenant && !featureAccess.allowed;
+
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[500px] flex flex-col items-center justify-center gap-4">
@@ -397,7 +403,17 @@ export default function TransactionsPage() {
 
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 sm:px-6">
+    <div className="relative">
+      {isTenantBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="Payment Transactions & Ledger"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 sm:px-6">
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs">
         <div>
@@ -733,20 +749,44 @@ export default function TransactionsPage() {
             </span>{" "}
             of <span className="font-bold text-slate-800">{filteredTransactions.length}</span> transactions
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
               variant="outline"
-              className="h-8 border-[#E2E8F0] text-slate-600 disabled:opacity-50 flex items-center gap-1 text-xs px-3 rounded-lg"
+              className="h-8 border-[#E2E8F0] text-slate-600 hover:bg-slate-50 disabled:opacity-50 flex items-center gap-1 text-xs px-3 rounded-lg font-bold"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Previous
             </Button>
+
+            {/* Numbered Page Buttons */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+              .map((page, idx, arr) => {
+                const prevPage = arr[idx - 1];
+                const showEllipsis = prevPage && page - prevPage > 1;
+                return (
+                  <React.Fragment key={page}>
+                    {showEllipsis && <span className="text-xs font-bold text-slate-400 px-1">...</span>}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-8 min-w-[32px] px-2 rounded-lg text-xs font-black transition-all ${
+                        currentPage === page
+                          ? "bg-[#635BFF] text-white shadow-xs"
+                          : "bg-white border border-[#E2E8F0] text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+
             <Button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               variant="outline"
-              className="h-8 border-[#E2E8F0] text-slate-600 disabled:opacity-50 flex items-center gap-1 text-xs px-3 rounded-lg"
+              className="h-8 border-[#E2E8F0] text-slate-600 hover:bg-slate-50 disabled:opacity-50 flex items-center gap-1 text-xs px-3 rounded-lg font-bold"
             >
               Next <ChevronRight className="h-3.5 w-3.5" />
             </Button>
@@ -756,7 +796,7 @@ export default function TransactionsPage() {
 
       {/* ── RECEIPT / TRANSACTION SLIDE-OVER DETAIL MODAL ── */}
       {selectedTx && (
-        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+        <div className="fixed inset-0 z-[100] overflow-hidden flex justify-end">
           {/* Backdrop overlay */}
           <div
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-200"
@@ -978,6 +1018,8 @@ export default function TransactionsPage() {
           </DialogContent>
         </Dialog>
       )}
+    </div>
+    </div>
     </div>
   );
 }

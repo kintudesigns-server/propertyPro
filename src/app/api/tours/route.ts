@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/email";
 import { notify } from "@/lib/notify";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -60,6 +61,10 @@ export async function GET(req: NextRequest) {
 
       whereClause.property = { ownerId: userId };
     } else if (role === "TENANT") {
+      const featureCheck = await checkUserFeatureAccess(userId, "tenant_tours");
+      if (!featureCheck.allowed) {
+        return NextResponse.json({ error: featureCheck.reason || "Access restricted" }, { status: 403 });
+      }
       whereClause.OR = [
         { tenantEmail: session.user.email || "" },
       ];

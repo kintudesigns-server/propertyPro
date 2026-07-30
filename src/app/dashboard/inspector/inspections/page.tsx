@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function InspectorInspectionsPage() {
   const featureAccess = useFeatureAccess("submit_reports");
@@ -48,19 +48,7 @@ export default function InspectorInspectionsPage() {
     );
   }
 
-  if (!featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="submit_reports"
-        featureLabel={featureAccess.featureLabel || "Submit Inspection Reports"}
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      />
-    );
-  }
+  const isBlocked = !featureAccess.allowed;
 
   if (loading || status === "loading") {
     return (
@@ -140,7 +128,17 @@ export default function InspectorInspectionsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-8 max-w-[1200px] w-full pb-10 pt-4">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Submit Inspection Reports"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="flex flex-col gap-8 max-w-[1200px] w-full pb-10 pt-4">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-[#1D1D1F]">Move-Out Walkthroughs</h1>
         <p className="text-[#6E6E73] font-semibold mt-1">
@@ -346,6 +344,8 @@ export default function InspectorInspectionsPage() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+    </div>
     </div>
   );
 }

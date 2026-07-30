@@ -6,6 +6,7 @@ import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
 import { sanitizeVendor } from "@/lib/sanitization";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 // ─── TENANT PORTAL GUARANTEE (F5) ───────────────────────────────────────────
 // Tenant-facing actions (such as maintenance ticket submissions or rent payments)
@@ -30,6 +31,17 @@ export async function GET(req: NextRequest) {
     if (role === "OWNER") {
       const guard = await checkModuleAccess(userId, "maintenance");
       if (!guard.allowed) return moduleLockedResponse(guard);
+    } else if (role === "TENANT") {
+      const featureKey = id ? "maintenance_detail" : "view_maintenance";
+      const check = await checkUserFeatureAccess(userId, featureKey);
+      if (!check.allowed) {
+        return NextResponse.json({ error: check.reason || "Access restricted" }, { status: 403 });
+      }
+    } else if (role === "INSPECTOR") {
+      const check = await checkUserFeatureAccess(userId, "view_assignments");
+      if (!check.allowed) {
+        return NextResponse.json({ error: check.reason || "Access restricted" }, { status: 403 });
+      }
     }
 
     if (id) {
@@ -161,8 +173,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message || "Failed to fetch maintenance requests" }, { status: 500 });
   }
 }
-
-import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -331,6 +341,19 @@ export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const role = (session.user as any).role;
+  const userId = (session.user as any).id;
+
+  if (role === "INSPECTOR") {
+    const featureCheck = await checkUserFeatureAccess(userId, "submit_reports");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        { error: featureCheck.reason || "Submitting reports is restricted for your account." },
+        { status: 403 }
+      );
+    }
   }
 
   try {

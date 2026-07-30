@@ -88,6 +88,7 @@ model User {
   leases               Lease[]              @relation("TenantLeases")
   maintenanceRequest   MaintenanceRequest[] @relation("TenantRequests")
   assignedInspections  MaintenanceRequest[] @relation("InspectorTasks")
+  auditLogs            AuditLog[]
   payoutRequests       PayoutRequest[]      @relation("OwnerPayouts")
   tenantPayoutRequests PayoutRequest[]      @relation("TenantPayouts")
   sentMessages         Message[]            @relation("SentMessages")
@@ -677,10 +678,14 @@ model AuditLog {
   action       String   // CREATED, UPDATED, DELETED, STATUS_CHANGED, SIGNED, ACTIVATED, TERMINATED
   actorId      String?  // User who performed the action (null = system/cron)
   actorRole    String?  // OWNER, TENANT, SUPERADMIN, SYSTEM
+  ipAddress    String?  // IP address of request
+  userAgent    String?  // Client user-agent string
   oldValue     Json?    // Previous state (key fields only)
   newValue     Json?    // New state (key fields only)
   note         String?  // Human readable summary
   createdAt    DateTime @default(now())
+
+  actor        User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([entityId])
   @@index([actorId])

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function NewMaintenanceRequestPage() {
   const featureAccess = useFeatureAccess("submit_maintenance");
@@ -253,22 +253,20 @@ export default function NewMaintenanceRequestPage() {
     );
   }
 
-  if (isTenant && !featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="submit_maintenance"
-        featureLabel={featureAccess.featureLabel || "Submit Maintenance Requests"}
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      />
-    );
-  }
+  const isTenantBlocked = isTenant && !featureAccess.allowed;
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="relative">
+      {isTenantBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Submit Maintenance Requests"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="w-full max-w-4xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4">
         <Link href={isTenant ? "/dashboard/maintenance/my-requests" : "/dashboard/maintenance"}>
           <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
@@ -738,6 +736,8 @@ export default function NewMaintenanceRequestPage() {
           </Button>
         </div>
       </form>
+    </div>
+    </div>
     </div>
   );
 }

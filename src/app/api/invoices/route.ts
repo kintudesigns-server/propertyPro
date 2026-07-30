@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -31,6 +32,10 @@ export async function GET(req: NextRequest) {
 
       whereClause = { lease: { unit: { property: { ownerId: userId } } } };
     } else if (role === "TENANT") {
+      const featureCheck = await checkUserFeatureAccess(userId, "view_invoices");
+      if (!featureCheck.allowed) {
+        return NextResponse.json({ error: featureCheck.reason || "Access restricted" }, { status: 403 });
+      }
       whereClause = { lease: { tenantId: userId } };
     } else if (role !== "SUPERADMIN") {
       return NextResponse.json([]);

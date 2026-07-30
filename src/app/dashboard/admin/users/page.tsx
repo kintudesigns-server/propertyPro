@@ -51,6 +51,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
@@ -61,6 +62,12 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, statusFilter]);
 
   // Modals & Selected state
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
@@ -304,7 +311,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-[#0F172A]">Users ({totalUsers})</h2>
             <span className="text-xs text-[#64748B] bg-[#F8FAFC] px-2 py-1 rounded-md border border-[#E2E8F0]">
-              Showing {filteredUsers.length} users on page 1 of 1
+              Showing {filteredUsers.length} users total
             </span>
           </div>
 
@@ -372,114 +379,126 @@ export default function AdminUsersPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user, idx) => (
-                  <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-blue-50/50 transition-colors group">
-                    <TableCell className="text-center">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                    </TableCell>
-                    <TableCell className="text-[#64748B] text-sm font-bold">{idx + 1}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.name || "User Avatar"}
-                            className="h-10 w-10 rounded-full object-cover shrink-0 shadow-xs border border-slate-200"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                            {user.name?.charAt(0)?.toUpperCase() || "U"}
+                (() => {
+                  const start = (currentPage - 1) * itemsPerPage;
+                  const paginated = filteredUsers.slice(start, start + itemsPerPage);
+                  return paginated.map((user, idx) => (
+                    <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-blue-50/50 transition-colors group">
+                      <TableCell className="text-center">
+                        <input type="checkbox" className="rounded border-gray-300" />
+                      </TableCell>
+                      <TableCell className="text-[#64748B] text-sm font-bold">{start + idx + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {user.avatar ? (
+                            <img
+                              src={user.avatar}
+                              alt={user.name || "User Avatar"}
+                              className="h-10 w-10 rounded-full object-cover shrink-0 shadow-xs border border-slate-200"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                              {user.name?.charAt(0)?.toUpperCase() || "U"}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-extrabold text-[#0F172A] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
+                            <p className="text-xs font-medium text-[#64748B]">{user.email}</p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-extrabold text-[#0F172A] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
-                          <p className="text-xs font-medium text-[#64748B]">{user.email}</p>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm font-semibold text-[#0F172A]">{formatRole(user.role)}</p>
-                    </TableCell>
-                    <TableCell>
-                      {user.tenantStatus === "Inactive" ? (
-                        <Badge className="bg-[#FEE2E2] text-[#EF4444] border-0 rounded-lg px-2.5 py-1 font-bold">
-                          Inactive
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-[#DCFCE7] text-[#16A34A] border-0 rounded-lg px-2.5 py-1 font-bold">
-                          Active
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm text-[#64748B]">{user.phone || user.email}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm text-[#64748B]">
-                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#E2E8F0] inline-flex items-center justify-center rounded-lg transition-colors outline-none cursor-pointer">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg bg-white"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => handleViewDetails(user.id)}
-                            className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm font-semibold text-[#0F172A]">{formatRole(user.role)}</p>
+                      </TableCell>
+                      <TableCell>
+                        {user.tenantStatus === "Inactive" ? (
+                          <Badge className="bg-[#FEE2E2] text-[#EF4444] border-0 rounded-lg px-2.5 py-1 font-bold">
+                            Inactive
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-[#DCFCE7] text-[#16A34A] border-0 rounded-lg px-2.5 py-1 font-bold">
+                            Active
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm text-[#64748B]">{user.phone || user.email}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm text-[#64748B]">
+                          {new Date(user.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#0F172A] hover:bg-[#E2E8F0] inline-flex items-center justify-center rounded-lg transition-colors outline-none cursor-pointer">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-48 rounded-xl border-[#E2E8F0] p-1 shadow-lg bg-white"
                           >
-                            <Eye className="h-4 w-4 text-[#94A3B8]" /> View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenEdit(user)}
-                            className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
-                          >
-                            <Edit className="h-4 w-4 text-[#94A3B8]" /> Edit User
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleToggleStatus(user)}
-                            className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
-                          >
-                            {user.tenantStatus === "Inactive" ? (
-                              <>
-                                <CheckCircle2 className="h-4 w-4 text-[#16A34A]" /> Activate User
-                              </>
-                            ) : (
-                              <>
-                                <Ban className="h-4 w-4 text-[#94A3B8]" /> Deactivate User
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-[#E2E8F0]" />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="cursor-pointer font-semibold text-red-500 rounded-lg hover:text-red-600 focus:text-red-600 focus:bg-red-50 gap-2"
-                          >
-                            <Trash className="h-4 w-4 text-red-500" /> Delete User
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetails(user.id)}
+                              className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
+                            >
+                              <Eye className="h-4 w-4 text-[#94A3B8]" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleOpenEdit(user)}
+                              className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
+                            >
+                              <Edit className="h-4 w-4 text-[#94A3B8]" /> Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleToggleStatus(user)}
+                              className="cursor-pointer font-semibold text-[#0F172A] rounded-lg gap-2"
+                            >
+                              {user.tenantStatus === "Inactive" ? (
+                                <>
+                                  <CheckCircle2 className="h-4 w-4 text-[#16A34A]" /> Activate User
+                                </>
+                              ) : (
+                                <>
+                                  <Ban className="h-4 w-4 text-[#94A3B8]" /> Deactivate User
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-[#E2E8F0]" />
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="cursor-pointer font-semibold text-red-500 rounded-lg hover:text-red-600 focus:text-red-600 focus:bg-red-50 gap-2"
+                            >
+                              <Trash className="h-4 w-4 text-red-500" /> Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ));
+                })()
               )}
             </TableBody>
           </Table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredUsers.length / itemsPerPage) || 1}
+          totalItems={filteredUsers.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="users"
+        />
       </Card>
 
       {/* Modal 2: Edit User */}

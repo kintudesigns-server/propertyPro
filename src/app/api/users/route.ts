@@ -17,6 +17,47 @@ export async function GET(req: NextRequest) {
   const requesterId = (session.user as any).id;
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role");
+  const targetId = searchParams.get("id");
+
+  if (targetId) {
+    const user = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        avatar: true,
+        approvalThreshold: true,
+        emergencyOverrideLimit: true,
+        assignedInspections: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            priority: true,
+            status: true,
+            createdAt: true,
+            unit: {
+              select: {
+                id: true,
+                name: true,
+                property: { select: { id: true, name: true } },
+              },
+            },
+            tenant: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    return NextResponse.json(user);
+  }
 
   if (!role) {
     const me = await prisma.user.findUnique({
@@ -110,7 +151,21 @@ export async function GET(req: NextRequest) {
 
     const users = await prisma.user.findMany({
       where: whereClause,
-      select: { id: true, name: true, email: true, phone: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+        avatar: true,
+        approvalThreshold: true,
+        emergencyOverrideLimit: true,
+        _count: {
+          select: {
+            assignedInspections: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(users);
@@ -125,37 +180,49 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = (session.user as any).id;
+  const requesterId = (session.user as any).id;
+  const requesterRole = (session.user as any).role;
 
   try {
+    const body = await req.json();
     const { 
-      name, phone, bankName, accountNumber, accountName,
+      id: targetUserId,
+      name, email, phone, bankName, accountNumber, accountName,
       emergencyName, emergencyPhone, emergencyRelationship, dob, 
       employmentStatus, employer, position, avatar,
       approvalThreshold, emergencyOverrideLimit,
       currentPassword, newPassword
-    } = await req.json();
+    } = body;
+
+    const targetId = targetUserId || requesterId;
+
+    if (targetId !== requesterId && requesterRole !== "OWNER" && requesterRole !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     let passwordHash: string | undefined = undefined;
     if (newPassword) {
-      if (!currentPassword) {
-        return NextResponse.json({ error: "Current password is required to set a new password." }, { status: 400 });
-      }
-      const existingUser = await prisma.user.findUnique({ where: { id: userId } });
-      if (!existingUser) {
-        return NextResponse.json({ error: "User not found." }, { status: 404 });
-      }
-      const valid = await bcrypt.compare(currentPassword, existingUser.password);
-      if (!valid) {
-        return NextResponse.json({ error: "Incorrect current password." }, { status: 400 });
+      if (targetId === requesterId) {
+        if (!currentPassword) {
+          return NextResponse.json({ error: "Current password is required to set a new password." }, { status: 400 });
+        }
+        const existingUser = await prisma.user.findUnique({ where: { id: requesterId } });
+        if (!existingUser) {
+          return NextResponse.json({ error: "User not found." }, { status: 404 });
+        }
+        const valid = await bcrypt.compare(currentPassword, existingUser.password);
+        if (!valid) {
+          return NextResponse.json({ error: "Incorrect current password." }, { status: 400 });
+        }
       }
       passwordHash = await bcrypt.hash(newPassword, 10);
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: targetId },
       data: {
         name,
+        ...(email ? { email } : {}),
         phone,
         bankName,
         accountNumber,
@@ -197,7 +264,7 @@ export async function POST(req: NextRequest) {
     });
     const requesterName = requester?.name || "An Owner";
 
-    const { name, email, phone, role, password } = await req.json();
+    const { name, email, phone, role, password, avatar } = await req.json();
 
     if (!name || !email || !role || !password) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -230,6 +297,7 @@ export async function POST(req: NextRequest) {
         phone,
         role,
         password: hashedPassword,
+        ...(avatar ? { avatar } : {}),
         ...(role === "INSPECTOR" && requesterRole === "OWNER" ? { ownerId: requesterId } : {}),
       },
     });

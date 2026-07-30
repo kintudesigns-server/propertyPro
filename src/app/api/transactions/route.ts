@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,10 @@ export async function GET(req: NextRequest) {
     let whereClause: any = {};
 
     if (role === "TENANT") {
+      const featureCheck = await checkUserFeatureAccess(userId, "view_transactions");
+      if (!featureCheck.allowed) {
+        return NextResponse.json({ error: featureCheck.reason || "Access restricted" }, { status: 403 });
+      }
       whereClause.tenantId = userId;
     } else if (role === "OWNER") {
       whereClause.OR = [

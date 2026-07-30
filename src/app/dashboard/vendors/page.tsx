@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Wrench, Mail, Phone, MoreHorizontal, FileText, CheckCircle2, Edit, Trash, Filter } from "lucide-react";
+import { Search, Plus, Wrench, Mail, Phone, MoreHorizontal, FileText, CheckCircle2, Edit, Trash, Filter, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -17,9 +17,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+import { useRouter } from "next/navigation";
 
 export default function VendorsPage() {
+  const router = useRouter();
   const { allowed: moduleAllowed, loading: checkingAccess } = useModuleAccess("vendors");
   const featureAccess = useFeatureAccess("access_vendor_portal");
 
@@ -47,19 +49,7 @@ export default function VendorsPage() {
     );
   }
 
-  if (!featureAccess.allowed) {
-    return (
-      <FeatureBlockedBanner
-        featureKey="access_vendor_portal"
-        featureLabel={featureAccess.featureLabel || "Vendor Portal Access"}
-        reason={featureAccess.reason}
-        adminNote={featureAccess.adminNote}
-        expiresAt={featureAccess.expiresAt}
-        daysRemaining={featureAccess.daysRemaining}
-        blockedAt={featureAccess.blockedAt}
-      />
-    );
-  }
+  const isBlocked = !featureAccess.allowed;
 
   const fetchVendors = async () => {
     setLoading(true);
@@ -157,7 +147,17 @@ export default function VendorsPage() {
   });
 
   return (
-    <div className="p-8 pt-24 md:pt-12 max-w-7xl mx-auto space-y-8 pb-24">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Vendor Portal Access"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="p-8 pt-24 md:pt-12 max-w-7xl mx-auto space-y-8 pb-24">
       {isPaused && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
           <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
@@ -327,9 +327,12 @@ export default function VendorsPage() {
                     <DropdownMenuTrigger className="h-8 w-8 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-lg flex items-center justify-center transition-colors shrink-0 outline-none">
                       <MoreHorizontal className="h-5 w-5" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 rounded-xl p-2">
-                      <DropdownMenuItem onClick={() => { setEditVendor(vendor); setEditOpen(true); }} className="cursor-pointer font-medium text-slate-700 py-2 focus:bg-slate-50 focus:text-slate-900 rounded-lg">
-                        <Edit className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Details
+                    <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5 shadow-lg border-slate-200">
+                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}`)} className="cursor-pointer font-bold text-slate-800 py-2 focus:bg-slate-50 rounded-lg">
+                        <Eye className="h-4 w-4 mr-2 text-amber-600" /> View Vendor Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}/edit`)} className="cursor-pointer font-semibold text-slate-700 py-2 focus:bg-slate-50 rounded-lg">
+                        <Edit className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Vendor Info
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(vendor.id)} className="cursor-pointer font-medium text-red-600 py-2 focus:bg-red-50 focus:text-red-700 rounded-lg">
                         <Trash className="h-4 w-4 mr-2 text-red-500" /> Remove Vendor
@@ -372,6 +375,8 @@ export default function VendorsPage() {
           ))
         )}
       </div>
+    </div>
+    </div>
     </div>
   );
 }

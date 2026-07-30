@@ -135,6 +135,17 @@ export const TENANT_FEATURES: UserFeatureDefinition[] = [
     welfareExempt: false,
     iconName: "MessageSquare",
   },
+
+  // 📅 Calendar Module
+  {
+    key: "view_calendar",
+    label: "Activity Calendar",
+    module: "Calendar",
+    description: "View scheduled tours, lease events, payment due dates, and maintenance appointments.",
+    route: "/dashboard/calendar",
+    welfareExempt: false,
+    iconName: "Calendar",
+  },
 ];
 
 export const INSPECTOR_FEATURES: UserFeatureDefinition[] = [

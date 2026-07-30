@@ -22,7 +22,7 @@ import { NewChatModal } from "@/components/messages/NewChatModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import FeatureBlockedBanner from "@/components/subscription/FeatureBlockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 interface UserInfo {
   id: string;
@@ -366,8 +366,20 @@ export default function MessagesPage() {
     }
   };
 
+  const isBlocked = !featureAccess.allowed && !featureAccess.loading;
+
   return (
-    <div className="flex h-[calc(100vh-80px)] -mx-6 md:-mx-10 border-t border-[#E5E5EA] overflow-hidden bg-[#F2F2F7]">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Inbox Messages"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="flex h-[calc(100vh-80px)] -mx-6 md:-mx-10 border-t border-[#E5E5EA] overflow-hidden bg-[#F2F2F7]">
       {/* Pane 1: Thread/Chats List (Left) */}
       <div className="w-80 border-r border-[#E5E5EA] bg-white flex flex-col shrink-0">
         {/* Header */}
@@ -729,6 +741,8 @@ export default function MessagesPage() {
         onSelectContact={handleStartNewChat}
         activeContactIds={allThreads.map((t) => t.contact.id)}
       />
+    </div>
+    </div>
     </div>
   );
 }

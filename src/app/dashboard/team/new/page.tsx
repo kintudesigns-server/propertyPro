@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, ShieldCheck, User, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, Mail, Phone, ShieldCheck, User, AlertTriangle, ArrowUpRight, Upload, Loader2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,17 +15,55 @@ import { useSession } from "next-auth/react";
 
 export default function AddTeamMember() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: session } = useSession();
   const isOwner = (session?.user as any)?.role === "OWNER";
   const { allowed: teamAllowed, loading: teamLoading } = useModuleAccess("team_management");
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     role: "INSPECTOR",
+    avatar: "",
   });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image size must be under 10MB");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData((prev) => ({ ...prev, avatar: data.url }));
+        toast.success("Profile photo uploaded successfully!");
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Upload error", error);
+      toast.error("Error uploading image");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const [isPausedAccount, setIsPausedAccount] = useState(false);
   const [pausedPlanName, setPausedPlanName] = useState<string | null>(null);
@@ -168,6 +206,81 @@ export default function AddTeamMember() {
                   className="h-12 bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] rounded-xl shadow-sm font-medium text-[#1D1D1F]" 
                   required 
                 />
+              </div>
+
+              {/* Profile Photo File Upload */}
+              <div className="space-y-3 p-5 bg-[#F2F2F7]/60 rounded-2xl border border-[#E5E5EA]">
+                <Label className="text-[13px] font-bold text-[#1D1D1F] uppercase tracking-wide block">
+                  Profile Photo (Optional)
+                </Label>
+
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/jpeg,image/png,image/webp" 
+                  onChange={handleFileUpload}
+                />
+
+                <div className="flex items-center gap-5">
+                  <div 
+                    onClick={() => !uploadingAvatar && !isLimitReached && fileInputRef.current?.click()}
+                    className="h-20 w-20 rounded-2xl bg-white border-2 border-dashed border-[#CBD5E1] flex flex-col items-center justify-center cursor-pointer hover:bg-[#F8FAFC] hover:border-[#007AFF] transition-all relative group overflow-hidden shadow-2xs shrink-0"
+                  >
+                    {uploadingAvatar ? (
+                      <div className="flex flex-col items-center justify-center space-y-1">
+                        <Loader2 className="h-5 w-5 animate-spin text-[#007AFF]" />
+                        <span className="text-[9px] font-bold text-[#007AFF]">Uploading</span>
+                      </div>
+                    ) : formData.avatar ? (
+                      <>
+                        <img src={formData.avatar} alt="Avatar Preview" className="h-full w-full object-cover" />
+                        <div className="absolute inset-0 bg-[#1D1D1F]/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                          <Upload className="h-4 w-4 mb-0.5" />
+                          <span className="text-[9px] font-bold">Change</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-5 w-5 text-[#8E8E93] group-hover:text-[#007AFF] mb-1 transition-colors" />
+                        <span className="text-[10px] font-bold text-[#6E6E73]">Upload</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#1D1D1F]">Upload Inspector Photo</h4>
+                      <p className="text-[11px] text-[#6E6E73] mt-0.5 font-medium">Supports JPG, PNG, or WEBP (Max 10MB)</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingAvatar || isLimitReached}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-9 border-[#E5E5EA] bg-white font-bold rounded-xl text-[#1D1D1F] text-xs hover:bg-[#F5F5F7] shadow-2xs"
+                      >
+                        {uploadingAvatar ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Upload className="h-3.5 w-3.5 mr-1.5 text-[#007AFF]" />}
+                        {formData.avatar ? "Change Photo" : "Choose Image File"}
+                      </Button>
+
+                      {formData.avatar && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setFormData({ ...formData, avatar: "" })}
+                          className="h-9 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
+                        >
+                          <X className="h-3.5 w-3.5 mr-1" /> Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2.5">

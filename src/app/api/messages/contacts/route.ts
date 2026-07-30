@@ -134,6 +134,12 @@ export async function GET(req: NextRequest) {
     // 2. Tenants of units they have requests for
     // 3. Super admins
     else if (role === Role.INSPECTOR) {
+      const inspectorUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { ownerId: true }
+      });
+      const directOwnerId = inspectorUser?.ownerId;
+
       const requests = await prisma.maintenanceRequest.findMany({
         where: {
           inspectorId: userId
@@ -150,7 +156,10 @@ export async function GET(req: NextRequest) {
           }
         }
       });
-      const ownerIds = Array.from(new Set(requests.map(r => r.unit?.property?.ownerId).filter(Boolean))) as string[];
+      const ownerIds = Array.from(new Set([
+        ...(directOwnerId ? [directOwnerId] : []),
+        ...requests.map(r => r.unit?.property?.ownerId).filter(Boolean)
+      ])) as string[];
       const tenantIds = Array.from(new Set(requests.map(r => r.tenantId).filter(Boolean))) as string[];
 
       const users = await prisma.user.findMany({

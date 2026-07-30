@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 interface PayoutRecord {
   id: string;
@@ -68,6 +71,12 @@ export default function WalletPage() {
   const [userProfileLoading, setUserProfileLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "COMPLETED" | "REJECTED">("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
   const [isPaused, setIsPaused] = useState(false);
   const [blockPayouts, setBlockPayouts] = useState(false);
   const [gracePeriodEnd, setGracePeriodEnd] = useState<string | null>(null);
@@ -367,101 +376,101 @@ export default function WalletPage() {
             </div>
 
             <div className="divide-y divide-slate-50">
-              {filteredPayouts.map((p, i) => {
-                const cfg = STATUS_CONFIG[p.status];
-                const days = ageDays(p.createdAt);
-                return (
-                  <div key={p.id} className={`border-l-4 ${cfg.stripe} hover:bg-[#F5F5F7]/50 transition-colors`}>
-                    <div className="grid grid-cols-12 items-center px-6 py-4 gap-2">
-                      {/* # */}
-                      <div className="col-span-1">
-                        <span className="text-[11px] font-bold text-[#8E8E93]">#{payouts.length - i}</span>
-                      </div>
+              {(() => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginated = filteredPayouts.slice(start, start + itemsPerPage);
+                return paginated.map((p, i) => {
+                  const cfg = STATUS_CONFIG[p.status];
+                  const days = ageDays(p.createdAt);
+                  return (
+                    <div key={p.id} className={`border-l-4 ${cfg.stripe} hover:bg-[#F5F5F7]/50 transition-colors`}>
+                      <div className="grid grid-cols-12 items-center px-6 py-4 gap-2">
+                        {/* # */}
+                        <div className="col-span-1">
+                          <span className="text-[11px] font-bold text-[#8E8E93]">#{payouts.length - (start + i)}</span>
+                        </div>
 
-                      {/* Date */}
-                      <div className="col-span-2">
-                        <p className="text-sm font-bold text-slate-800">
-                          {new Date(p.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                        </p>
-                        <p className={`text-[10px] font-semibold mt-0.5 ${cfg.text}`}>
-                          {p.status === "PENDING" && (days === 0 ? "Today" : `${days}d ago`)}
-                          {p.status === "COMPLETED" && p.disbursedAt && `Paid ${new Date(p.disbursedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
-                          {p.status === "REJECTED" && "Action needed"}
-                        </p>
-                      </div>
+                        {/* Date */}
+                        <div className="col-span-2">
+                          <p className="text-sm font-bold text-slate-800">
+                            {new Date(p.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                          <p className={`text-[10px] font-semibold mt-0.5 ${cfg.text}`}>
+                            {p.status === "PENDING" && (days === 0 ? "Today" : `${days}d ago`)}
+                            {p.status === "COMPLETED" && p.disbursedAt && `Paid ${new Date(p.disbursedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
+                            {p.status === "REJECTED" && "Action needed"}
+                          </p>
+                        </div>
 
-                      {/* Bank */}
-                      <div className="col-span-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`h-8 w-8 ${cfg.bg} border ${cfg.border} rounded-lg flex items-center justify-center shrink-0`}>
-                            <Building className={`h-3.5 w-3.5 ${cfg.text}`} />
+                        {/* Bank */}
+                        <div className="col-span-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-8 w-8 ${cfg.bg} border ${cfg.border} rounded-lg flex items-center justify-center shrink-0`}>
+                              <Building className={`h-3.5 w-3.5 ${cfg.text}`} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-900 truncate">{p.bankName}</p>
+                              <p className="text-[10px] text-[#8E8E93] font-mono">{maskAccount(p.accountNumber)}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">{p.bankName}</p>
-                            <p className="text-[10px] text-[#8E8E93] font-mono">{maskAccount(p.accountNumber)}</p>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="col-span-2 text-right">
+                          <p className="text-sm font-black text-slate-900">${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                          {p.proofUrl && (
+                            <a href={p.proofUrl} target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:underline mt-0.5">
+                              <ExternalLink className="h-2.5 w-2.5" /> Receipt
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Status badge */}
+                        <div className="col-span-2 flex flex-col items-center gap-1">
+                          <div className={`inline-flex items-center gap-1.5 ${cfg.bg} border ${cfg.border} rounded-full px-3 py-1`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot} ${p.status === "PENDING" ? "animate-pulse" : ""}`} />
+                            <span className={`text-[10px] font-black ${cfg.text}`}>{cfg.label}</span>
                           </div>
+                          {p.status === "PENDING" && <span className="text-[9px] text-amber-600 font-semibold">2–3 biz days</span>}
+                        </div>
+
+                        {/* Ref number */}
+                        <div className="col-span-2 text-right">
+                          {p.refNumber ? (
+                            <button type="button"
+                              onClick={() => { navigator.clipboard.writeText(p.refNumber!); toast.success("Reference copied!"); }}
+                              className="inline-flex items-center gap-1 text-[10px] font-mono text-[#6E6E73] hover:text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 hover:bg-white transition-all">
+                              {p.refNumber.length > 10 ? p.refNumber.slice(0, 10) + "…" : p.refNumber}
+                              <Copy className="h-2.5 w-2.5 text-[#8E8E93]" />
+                            </button>
+                          ) : <span className="text-[11px] text-slate-300">—</span>}
                         </div>
                       </div>
 
-                      {/* Amount */}
-                      <div className="col-span-2 text-right">
-                        <p className="text-sm font-black text-slate-900">${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                        {p.proofUrl && (
-                          <a href={p.proofUrl} target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:underline mt-0.5">
-                            <ExternalLink className="h-2.5 w-2.5" /> Receipt
-                          </a>
-                        )}
-                      </div>
-
-                      {/* Status badge */}
-                      <div className="col-span-2 flex flex-col items-center gap-1">
-                        <div className={`inline-flex items-center gap-1.5 ${cfg.bg} border ${cfg.border} rounded-full px-3 py-1`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot} ${p.status === "PENDING" ? "animate-pulse" : ""}`} />
-                          <span className={`text-[10px] font-black ${cfg.text}`}>{cfg.label}</span>
+                      {/* Rejection reason inline */}
+                      {p.status === "REJECTED" && p.rejectionReason && (
+                        <div className="mx-6 mb-3 flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
+                          <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-red-600 font-semibold leading-snug">{p.rejectionReason}</p>
                         </div>
-                        {p.status === "PENDING" && <span className="text-[9px] text-amber-600 font-semibold">2–3 biz days</span>}
-                      </div>
-
-                      {/* Ref number */}
-                      <div className="col-span-2 text-right">
-                        {p.refNumber ? (
-                          <button type="button"
-                            onClick={() => { navigator.clipboard.writeText(p.refNumber!); toast.success("Reference copied!"); }}
-                            className="inline-flex items-center gap-1 text-[10px] font-mono text-[#6E6E73] hover:text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 hover:bg-white transition-all">
-                            {p.refNumber.length > 10 ? p.refNumber.slice(0, 10) + "…" : p.refNumber}
-                            <Copy className="h-2.5 w-2.5 text-[#8E8E93]" />
-                          </button>
-                        ) : <span className="text-[11px] text-slate-300">—</span>}
-                      </div>
+                      )}
                     </div>
-
-                    {/* Rejection reason inline */}
-                    {p.status === "REJECTED" && p.rejectionReason && (
-                      <div className="mx-6 mb-3 flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
-                        <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-red-600 font-semibold leading-snug">{p.rejectionReason}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </>
         )}
 
-        {/* Footer */}
-        {!loading && payouts.length > 0 && (
-          <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <p className="text-xs text-[#8E8E93] font-semibold">
-              Showing {filteredPayouts.length} of {payouts.length} requests
-            </p>
-            <button onClick={() => setPanelOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
-              <Plus className="h-3.5 w-3.5" /> New withdrawal
-            </button>
-          </div>
-        )}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredPayouts.length / itemsPerPage) || 1}
+          totalItems={filteredPayouts.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="requests"
+        />
       </div>
 
       {/* SLIDE-OUT WITHDRAWAL PANEL */}

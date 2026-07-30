@@ -155,15 +155,25 @@ export default function TenantDashboard() {
         toursRes.json(),
       ]);
 
-      setLeases(leasesData);
-      setInvoices(invoicesData);
-      setMaintenance(maintData);
-      setDocuments(docsData);
-      setTransactions(txsData);
-      setMessages(msgsData);
-      setTours(toursData);
+      const cleanLeases = Array.isArray(leasesData) ? leasesData : Array.isArray(leasesData?.leases) ? leasesData.leases : [];
+      const cleanInvoices = Array.isArray(invoicesData) ? invoicesData : Array.isArray(invoicesData?.invoices) ? invoicesData.invoices : [];
+      const cleanMaint = Array.isArray(maintData) ? maintData : Array.isArray(maintData?.maintenance) ? maintData.maintenance : [];
+      const cleanDocs = Array.isArray(docsData) ? docsData : Array.isArray(docsData?.documents) ? docsData.documents : [];
+      const cleanTxs = Array.isArray(txsData) ? txsData : Array.isArray(txsData?.transactions) ? txsData.transactions : [];
+      const cleanMsgs = Array.isArray(msgsData) ? msgsData : Array.isArray(msgsData?.messages) ? msgsData.messages : [];
+      const cleanTours = Array.isArray(toursData) ? toursData : Array.isArray(toursData?.tours) ? toursData.tours : [];
 
-      const allContacts = [...ownersData, ...inspectorsData];
+      setLeases(cleanLeases);
+      setInvoices(cleanInvoices);
+      setMaintenance(cleanMaint);
+      setDocuments(cleanDocs);
+      setTransactions(cleanTxs);
+      setMessages(cleanMsgs);
+      setTours(cleanTours);
+
+      const safeOwners = Array.isArray(ownersData) ? ownersData : [];
+      const safeInspectors = Array.isArray(inspectorsData) ? inspectorsData : [];
+      const allContacts = [...safeOwners, ...safeInspectors];
       setContacts(allContacts);
       if (allContacts.length > 0 && !selectedContact) {
         setSelectedContact(allContacts[0]);
@@ -202,9 +212,10 @@ export default function TenantDashboard() {
     }
   }, [status]);
 
-  const activeLease = leases.find((l) => l.status === "ACTIVE" || l.status === "NOTICE_GIVEN");
-  const activeLeases = leases.filter((l) => l.status === "ACTIVE" || l.status === "NOTICE_GIVEN");
-  const pendingLease = leases.find((l) => l.status === "PENDING_SIGNATURE");
+  const safeLeasesList = Array.isArray(leases) ? leases : [];
+  const activeLease = safeLeasesList.find((l) => l?.status === "ACTIVE" || l?.status === "NOTICE_GIVEN");
+  const activeLeases = safeLeasesList.filter((l) => l?.status === "ACTIVE" || l?.status === "NOTICE_GIVEN");
+  const pendingLease = safeLeasesList.find((l) => l?.status === "PENDING_SIGNATURE");
 
   // Auto-select first lease unit when leases load
   React.useEffect(() => {
@@ -475,16 +486,20 @@ export default function TenantDashboard() {
     return Math.round(((now - start) / (end - start)) * 100);
   };
 
-  const unpaidInvoices = invoices.filter((i) => i.status === "UNPAID" || i.status === "OVERDUE");
-  const totalUnpaid = unpaidInvoices.reduce((acc, curr) => acc + Number(curr.amount), 0);
-  const openRequestsCount = maintenance.filter((m) => m.status !== "RESOLVED" && m.status !== "CLOSED").length;
+  const safeLeases = Array.isArray(leases) ? leases : [];
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+  const safeMaintenance = Array.isArray(maintenance) ? maintenance : [];
+
+  const unpaidInvoices = safeInvoices.filter((i) => i?.status === "UNPAID" || i?.status === "OVERDUE");
+  const totalUnpaid = unpaidInvoices.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+  const openRequestsCount = safeMaintenance.filter((m) => m?.status !== "RESOLVED" && m?.status !== "CLOSED").length;
   
-  const pendingLeaseUnpaidDepositInvoice = pendingLease && invoices.find(
+  const pendingLeaseUnpaidDepositInvoice = pendingLease && safeInvoices.find(
     (inv: any) =>
-      inv.leaseId === pendingLease.id &&
+      inv?.leaseId === pendingLease.id &&
       pendingLease.securityDeposit &&
-      Number(inv.amount) === Number(pendingLease.securityDeposit) &&
-      inv.status === "UNPAID"
+      Number(inv?.amount) === Number(pendingLease.securityDeposit) &&
+      inv?.status === "UNPAID"
   );
 
   return (

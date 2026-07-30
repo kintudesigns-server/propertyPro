@@ -15,8 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Wrench, Plus, Loader2, RefreshCw, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function MyRequestsPage() {
+  const featureAccess = useFeatureAccess("view_maintenance");
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -100,6 +103,8 @@ export default function MyRequestsPage() {
     fetchMaintenance();
   }, [status, router]);
 
+  const isTenantBlocked = !featureAccess.allowed && !featureAccess.loading;
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
@@ -114,7 +119,17 @@ export default function MyRequestsPage() {
     .filter(m => maintFilterStatus === "ALL" || m.status === maintFilterStatus);
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+    <div className="relative">
+      {isTenantBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="My Maintenance Requests"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
         <div>
@@ -338,6 +353,8 @@ export default function MyRequestsPage() {
         confirmVariant="destructive"
         onConfirm={() => { if (cancelRequestId) handleCancelRequest(cancelRequestId); }}
       />
+    </div>
+    </div>
     </div>
   );
 }

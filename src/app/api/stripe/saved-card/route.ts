@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import { checkUserFeatureAccess } from "@/lib/user-access-guard";
 
 // GET: Fetch the saved card for the current user
 export async function GET() {
@@ -10,7 +11,15 @@ export async function GET() {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId = (session.user as any).id;
+  const role = (session.user as any).role;
   if (!userId) return NextResponse.json({ error: "Session expired. Please sign in again." }, { status: 401 });
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "add_card");
+    if (!featureCheck.allowed) {
+      return NextResponse.json({ error: featureCheck.reason || "Access restricted" }, { status: 403 });
+    }
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -31,7 +40,15 @@ export async function POST(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId = (session.user as any).id;
+  const role = (session.user as any).role;
   if (!userId) return NextResponse.json({ error: "Session expired. Please sign out and sign in again." }, { status: 401 });
+
+  if (role === "TENANT") {
+    const featureCheck = await checkUserFeatureAccess(userId, "add_card");
+    if (!featureCheck.allowed) {
+      return NextResponse.json({ error: featureCheck.reason || "Access restricted" }, { status: 403 });
+    }
+  }
 
   const userEmail = session.user.email!;
   const userName = session.user.name || userEmail;

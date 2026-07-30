@@ -4,6 +4,51 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sanitizeVendor } from "@/lib/sanitization";
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+  if (role !== "OWNER" && role !== "SUPERADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  try {
+    const vendor = await prisma.externalVendor.findUnique({
+      where: { id },
+      include: {
+        maintenanceRequests: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            priority: true,
+            status: true,
+            createdAt: true,
+            unit: {
+              select: {
+                id: true,
+                name: true,
+                property: { select: { id: true, name: true } }
+              }
+            },
+            tenant: { select: { id: true, name: true } }
+          },
+          orderBy: { createdAt: "desc" }
+        }
+      }
+    });
+
+    if (!vendor || (role === "OWNER" && vendor.ownerId !== userId)) {
+      return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
+    }
+
+    return NextResponse.json(sanitizeVendor(vendor));
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);

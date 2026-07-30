@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   PENDING:      { label: "Pending",      color: "text-amber-700",  bg: "bg-amber-50 border-amber-200" },
@@ -29,6 +30,12 @@ export default function AdminOwnerApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
   const [selectedApp, setSelectedApp] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -235,49 +242,62 @@ export default function AdminOwnerApplicationsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((app) => {
-                  const cfg = statusConfig[app.status] || statusConfig.PENDING;
-                  return (
-                    <TableRow key={app.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]">
-                      <TableCell className="font-bold text-[#1D1D1F] pl-6 sm:pl-8 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg shrink-0">
-                            {app.name.charAt(0).toUpperCase()}
+                {(() => {
+                  const start = (currentPage - 1) * itemsPerPage;
+                  const paginated = filtered.slice(start, start + itemsPerPage);
+                  return paginated.map((app) => {
+                    const cfg = statusConfig[app.status] || statusConfig.PENDING;
+                    return (
+                      <TableRow key={app.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]">
+                        <TableCell className="font-bold text-[#1D1D1F] pl-6 sm:pl-8 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg shrink-0">
+                              {app.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 text-sm">{app.name}</p>
+                              <p className="text-[#6E6E73] text-xs font-semibold">{app.email}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-bold text-slate-900 text-sm">{app.name}</p>
-                            <p className="text-[#6E6E73] text-xs font-semibold">{app.email}</p>
+                        </TableCell>
+                        <TableCell className="font-bold text-[#1D1D1F] py-4">{app.entityType}</TableCell>
+                        <TableCell className="font-bold text-[#1D1D1F] py-4">{app.portfolioSize}</TableCell>
+                        <TableCell className="font-semibold text-[#6E6E73] py-4">
+                          {new Date(app.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2">
+                            {app.status === "PENDING" && <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>}
+                            <Badge className={`${cfg.bg} ${cfg.color} border text-xs font-extrabold px-2.5 py-1 rounded-lg`}>
+                              {cfg.label}
+                            </Badge>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-bold text-[#1D1D1F] py-4">{app.entityType}</TableCell>
-                      <TableCell className="font-bold text-[#1D1D1F] py-4">{app.portfolioSize}</TableCell>
-                      <TableCell className="font-semibold text-[#6E6E73] py-4">
-                        {new Date(app.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex items-center gap-2">
-                          {app.status === "PENDING" && <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>}
-                          <Badge className={`${cfg.bg} ${cfg.color} border text-xs font-extrabold px-2.5 py-1 rounded-lg`}>
-                            {cfg.label}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right pr-6 sm:pr-8 py-4">
-                        <Button 
-                          size="sm" 
-                          onClick={() => { setSelectedApp(app); setAdminNotes(app.adminNotes || ""); }} 
-                          className="rounded-xl gap-2 font-bold bg-slate-900 hover:bg-slate-800 text-white px-4 h-9 shadow-sm"
-                        >
-                          <Eye className="h-3.5 w-3.5" /> Review
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        </TableCell>
+                        <TableCell className="text-right pr-6 sm:pr-8 py-4">
+                          <Button 
+                            size="sm" 
+                            onClick={() => { setSelectedApp(app); setAdminNotes(app.adminNotes || ""); }} 
+                            className="rounded-xl gap-2 font-bold bg-slate-900 hover:bg-slate-800 text-white px-4 h-9 shadow-sm"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> Review
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  });
+                })()}
               </TableBody>
             </Table>
           )}
+
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={Math.ceil(filtered.length / itemsPerPage) || 1}
+            totalItems={filtered.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            itemLabel="applications"
+          />
         </CardContent>
       </Card>
 

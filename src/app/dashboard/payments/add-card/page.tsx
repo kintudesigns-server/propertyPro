@@ -25,6 +25,8 @@ import {
 import { toast } from "sonner";
 
 import { getStripeClient } from "@/lib/stripe";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 const stripePromise = getStripeClient();
 
@@ -168,6 +170,7 @@ function SetupForm({
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AddCardPage() {
+  const featureAccess = useFeatureAccess("add_card");
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -248,6 +251,8 @@ export default function AddCardPage() {
     }
   };
 
+  const isBlocked = !featureAccess.allowed;
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
@@ -258,7 +263,17 @@ export default function AddCardPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto pt-6 pb-24 px-4 space-y-8">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="Payment Method Storage & Cards"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="w-full max-w-2xl mx-auto pt-6 pb-24 px-4 space-y-8">
 
       {/* ── HEADER ── */}
       <div>
@@ -405,6 +420,8 @@ export default function AddCardPage() {
         </p>
       </div>
 
+    </div>
+    </div>
     </div>
   );
 }

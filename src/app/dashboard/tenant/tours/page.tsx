@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 interface Tour {
   id: string;
@@ -118,6 +120,7 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export default function TenantToursPage() {
+  const featureAccess = useFeatureAccess("tenant_tours");
   const { data: session } = useSession();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
@@ -302,9 +305,21 @@ export default function TenantToursPage() {
     return matchesTab && matchesQuery;
   });
 
+  const isBlocked = !featureAccess.allowed;
+
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel="Showing Tours & Visits Schedule"
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative">
+        <div className="max-w-5xl mx-auto space-y-6">
         
         {/* ── Page Header ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1053,6 +1068,8 @@ export default function TenantToursPage() {
         </Dialog>
 
       </div>
+    </div>
+    </div>
     </div>
   );
 }

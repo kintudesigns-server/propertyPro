@@ -16,6 +16,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useSession } from "next-auth/react";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 export default function LeasesDashboard({ 
   initialFilter = "ALL",
@@ -36,6 +38,12 @@ export default function LeasesDashboard({
   const [statusFilter, setStatusFilter] = useState(initialFilter);
   const [sortOrder, setSortOrder] = useState("ACTION_REQUIRED");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list"); // Default to list for replica
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, viewMode]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -422,8 +430,14 @@ export default function LeasesDashboard({
                 {/* Header: Property & Status */}
                 <div className="flex justify-between items-start w-full">
                   <div className="flex gap-3 items-start max-w-[70%]">
-                    <div className="h-10 w-10 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl flex items-center justify-center text-[#007AFF] shrink-0 mt-0.5">
-                      <Home className="h-5 w-5" />
+                    <div className="h-10 w-10 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl flex items-center justify-center text-[#007AFF] shrink-0 mt-0.5 overflow-hidden">
+                      {l.unit?.images && l.unit.images.length > 0 ? (
+                        <img src={l.unit.images[0]} alt={l.unit.name} className="h-full w-full object-cover" />
+                      ) : l.unit?.property?.images && l.unit.property.images.length > 0 ? (
+                        <img src={l.unit.property.images[0]} alt={l.unit.property.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Home className="h-5 w-5" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-bold text-[#1D1D1F] text-base truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
@@ -474,9 +488,17 @@ export default function LeasesDashboard({
                   <div>
                     <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Tenant</p>
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[9px] font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
-                        {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
-                      </div>
+                      {l.tenant?.avatar ? (
+                        <img
+                          src={l.tenant.avatar}
+                          alt={l.tenant.name || "Tenant"}
+                          className="h-6 w-6 rounded-full object-cover shrink-0 border border-slate-200"
+                        />
+                      ) : (
+                        <div className="h-6 w-6 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[9px] font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
+                          {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
+                        </div>
+                      )}
                       <p className="text-[13px] font-bold text-[#1D1D1F] truncate">{l.tenant?.name || l.tenant?.email}</p>
                     </div>
                   </div>
@@ -544,116 +566,162 @@ export default function LeasesDashboard({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredLeases.map((l) => {
-                    const daysLeft = getDaysLeft(l.endDate);
-                    let daysBadge = null;
-                    if (l.status === "ACTIVE") {
-                      if (daysLeft <= 0) {
+                  {(() => {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const paginated = filteredLeases.slice(start, start + itemsPerPage);
+                    return paginated.map((l) => {
+                      const daysLeft = getDaysLeft(l.endDate);
+                      let daysBadge = null;
+                      if (l.status === "ACTIVE") {
+                        if (daysLeft <= 0) {
+                          daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
+                        } else if (daysLeft <= 15) {
+                          daysBadge = <span className="text-[#EF4444] font-black text-sm">{daysLeft} days</span>;
+                        } else if (daysLeft <= 60) {
+                          daysBadge = <span className="text-[#F59E0B] font-medium text-sm">{daysLeft} days</span>;
+                        } else {
+                          daysBadge = <span className="text-[#10B981] font-medium text-sm">{daysLeft} days</span>;
+                        }
+                      } else if (l.status === "EXPIRED") {
                         daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
-                      } else if (daysLeft <= 15) {
-                        daysBadge = <span className="text-[#EF4444] font-black text-sm">{daysLeft} days</span>;
-                      } else if (daysLeft <= 60) {
-                        daysBadge = <span className="text-[#F59E0B] font-medium text-sm">{daysLeft} days</span>;
                       } else {
-                        daysBadge = <span className="text-[#10B981] font-medium text-sm">{daysLeft} days</span>;
+                        daysBadge = <span className="text-[#94A3B8] font-medium text-sm">-</span>;
                       }
-                    } else if (l.status === "EXPIRED") {
-                      daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
-                    } else {
-                      daysBadge = <span className="text-[#94A3B8] font-medium text-sm">-</span>;
-                    }
 
-                    return (
-                    <TableRow key={l.id} className="border-b border-[#E5E5EA]/50 hover:bg-[#F2F2F7]/50 transition-colors">
-                      <TableCell className="py-4 pl-6">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5">
-                            <Home className="h-4 w-4 text-[#94A3B8]" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-medium text-[#1D1D1F]">{l.unit?.property?.name || "Property Not Available"}</span>
-                              {l.unit?.name && (
-                                <span className="bg-[#EFF6FF] text-[#007AFF] text-xs font-bold px-2 py-0.5 rounded-md">
-                                  Unit {l.unit.name}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-[#6E6E73]">
-                              {l.unit?.property?.address ? `${l.unit.property.address}, ${l.unit.property.city || ''}` : "Address Not Available"}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-xs font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
-                            {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
-                          </div>
-                          <div>
-                            <div className="font-medium text-[#1D1D1F] text-sm">{l.tenant?.name || "Unknown Tenant"}</div>
-                            <div className="text-xs text-[#6E6E73]">{l.tenant?.email || "No email"}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className={`inline-flex items-center px-2.5 py-1 rounded-full border border-transparent ${getStatusBgColor(l)}`}>
-                          {getStatusBadge(l)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className="font-bold text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-                        <div className="text-xs text-[#6E6E73]">per month</div>
-                      </TableCell>
-                      <TableCell className="py-4 font-medium text-[#1D1D1F]">
-                        {l.startDate ? new Date(l.startDate).toLocaleDateString() : "N/A"}
-                      </TableCell>
-                      <TableCell className="py-4 font-medium text-[#1D1D1F]">
-                        {l.endDate ? new Date(l.endDate).toLocaleDateString() : "N/A"}
-                      </TableCell>
-                      <TableCell className="py-4">
-                        {daysBadge}
-                      </TableCell>
-                      <TableCell className="py-4 text-right pr-6">
-                        <div className="flex justify-end items-center gap-2">
-                          {getQuickAction(l)}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#6E6E73] transition-colors focus:outline-none border border-transparent hover:border-[#E5E5EA]">
-                              <MoreVertical className="h-4 w-4" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
-                              </DropdownMenuItem>
-                              {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
-                                <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                  <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
-                                </DropdownMenuItem>
+                      return (
+                      <TableRow key={l.id} className="border-b border-[#E5E5EA]/50 hover:bg-[#F2F2F7]/50 transition-colors">
+                        <TableCell className="py-4 pl-6">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-[#E5E5EA]">
+                              {l.unit?.images && l.unit.images.length > 0 ? (
+                                <img src={l.unit.images[0]} alt={l.unit.name} className="h-full w-full object-cover" />
+                              ) : l.unit?.property?.images && l.unit.property.images.length > 0 ? (
+                                <img src={l.unit.property.images[0]} alt={l.unit.property.name} className="h-full w-full object-cover" />
                               ) : (
-                                <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                  <XCircle className="mr-2 h-4 w-4" /> Delete Lease
-                                </DropdownMenuItem>
+                                <div className="h-full w-full bg-[#F2F2F7] flex items-center justify-center text-[#94A3B8]">
+                                  <Home className="h-5 w-5" />
+                                </div>
                               )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )})}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="font-bold text-[#1D1D1F] text-sm">{l.unit?.property?.name || "Property Not Available"}</span>
+                                {l.unit?.name && (
+                                  <span className="bg-[#EFF6FF] text-[#007AFF] text-xs font-bold px-2 py-0.5 rounded-md">
+                                    Unit {l.unit.name}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-[#6E6E73]">
+                                {l.unit?.property?.address ? `${l.unit.property.address}, ${l.unit.property.city || ''}` : "Address Not Available"}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            {l.tenant?.avatar ? (
+                              <img
+                                src={l.tenant.avatar}
+                                alt={l.tenant.name || "Tenant"}
+                                className="h-9 w-9 rounded-full object-cover shrink-0 border border-slate-200 shadow-sm"
+                              />
+                            ) : (
+                              <div className="h-9 w-9 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center text-xs font-bold shrink-0 border border-blue-100 shadow-sm">
+                                {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-bold text-[#1D1D1F] text-sm">{l.tenant?.name || "Unknown Tenant"}</div>
+                              <div className="text-xs text-[#6E6E73]">{l.tenant?.email || "No email"}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className={`inline-flex items-center px-2.5 py-1 rounded-full border border-transparent ${getStatusBgColor(l)}`}>
+                            {getStatusBadge(l)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="font-bold text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                          <div className="text-xs text-[#6E6E73]">per month</div>
+                        </TableCell>
+                        <TableCell className="py-4 font-medium text-[#1D1D1F]">
+                          {l.startDate ? new Date(l.startDate).toLocaleDateString() : "N/A"}
+                        </TableCell>
+                        <TableCell className="py-4 font-medium text-[#1D1D1F]">
+                          {l.endDate ? new Date(l.endDate).toLocaleDateString() : "N/A"}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          {daysBadge}
+                        </TableCell>
+                        <TableCell className="py-4 text-right pr-6">
+                          <div className="flex justify-end items-center">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#6E6E73] transition-colors focus:outline-none border border-transparent hover:border-[#E5E5EA]">
+                                <MoreVertical className="h-4 w-4" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-52 rounded-xl border-[#E5E5EA] p-1.5 shadow-xl">
+                                {l.status === "NOTICE_GIVEN" && (
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-bold text-[#EF4444] bg-red-50 hover:bg-red-100 rounded-lg py-2 mb-1">
+                                    <ShieldAlert className="mr-2 h-4 w-4 text-[#EF4444]" /> Process Move-Out
+                                  </DropdownMenuItem>
+                                )}
+                                {l.status === "PENDING_SIGNATURE" && (
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-[#D97706] bg-amber-50 hover:bg-amber-100 rounded-lg py-2 mb-1">
+                                    <Clock className="mr-2 h-4 w-4 text-[#D97706]" /> View & Resend
+                                  </DropdownMenuItem>
+                                )}
+                                {l.status === "ACTIVE" && getDaysLeft(l.endDate) <= 60 && (
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-[#007AFF] bg-blue-50 hover:bg-blue-100 rounded-lg py-2 mb-1">
+                                    <FileText className="mr-2 h-4 w-4 text-[#007AFF]" /> Offer Renewal
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
+                                  <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
+                                  <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
+                                  <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
+                                </DropdownMenuItem>
+                                {l.status !== "NOTICE_GIVEN" && (
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
+                                    <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
+                                  </DropdownMenuItem>
+                                )}
+                                {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
+                                  <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                    <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
+                                    <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  });
+                })()}
                 </TableBody>
               </Table>
             </div>
           </div>
         )}
+
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredLeases.length / itemsPerPage) || 1}
+          totalItems={filteredLeases.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="leases"
+        />
       </Card>
     </div>
   );
