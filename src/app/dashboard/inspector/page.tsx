@@ -38,10 +38,16 @@ function formatTime(d: Date | null) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+
 export default function InspectorOverviewPage() {
   const { data: session, status } = useSession();
   const userId = (session?.user as any)?.id;
   const userName = (session?.user as any)?.name?.split(" ")[0] || "Inspector";
+
+  const featureAccess = useFeatureAccess("view_inspector_dashboard");
+  const isBlocked = !featureAccess.loading && !featureAccess.allowed;
 
   const [requests, setRequests] = useState<any[]>([]);
   const [walkthroughs, setWalkthroughs] = useState<any[]>([]);
@@ -132,7 +138,16 @@ export default function InspectorOverviewPage() {
   const EMERGENCY_count = maintenanceItems.filter(t => t.priority === "EMERGENCY").length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 space-y-8">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Inspector Dashboard Overview"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={`max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 space-y-8 ${isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}`}>
 
       {/* ── iOS 18 HERO HEADER BANNER ── */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -405,11 +420,9 @@ export default function InspectorOverviewPage() {
               </Link>
             ))}
           </div>
-
         </div>
-
       </div>
-
     </div>
-  );
+  </div>
+);
 }

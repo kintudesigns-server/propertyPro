@@ -18,6 +18,8 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PRIORITY_CFG: Record<string, { label: string; dot: string; text: string; bg: string; border: string }> = {
@@ -38,6 +40,7 @@ function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: 
 }
 
 export default function InspectorHistoryPage() {
+  const featureAccess = useFeatureAccess("view_history");
   const { status } = useSession();
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
@@ -137,6 +140,17 @@ export default function InspectorHistoryPage() {
       });
   }, [completedTasks, statusFilter, search, sortField, sortDir]);
 
+  if (featureAccess.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <p className="text-[#8E8E93] font-extrabold text-xs tracking-wider uppercase">Verifying access permissions...</p>
+      </div>
+    );
+  }
+
+  const isBlocked = !featureAccess.allowed;
+
   if (loading || status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -147,7 +161,17 @@ export default function InspectorHistoryPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
+    <div className="relative">
+      {isBlocked && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Closed Diagnostics History"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
+      <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
       
       {/* ── HEADER ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -367,6 +391,8 @@ export default function InspectorHistoryPage() {
           </div>
         </div>
       )}
+      </div>
+      </div>
     </div>
   );
 }

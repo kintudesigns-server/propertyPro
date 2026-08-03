@@ -205,10 +205,10 @@ export function AdminHero({
                 scale: { duration: 0.4, delay: 0.3 },
                 y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
               }}
-              whileHover={{ scale: 1.06, borderColor: "#007AFF" }}
+              whileHover={{ scale: 1.06 }}
               className="flex flex-col items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-3.5 py-2.5 min-w-[76px] cursor-pointer shadow-md transition-all group"
             >
-              <div className="p-1 rounded-xl bg-blue-50 text-[#007AFF] group-hover:bg-[#007AFF] group-hover:text-white transition-colors">
+              <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <Users className="h-3.5 w-3.5" />
               </div>
               <span className="text-[#1D1D1F] font-black text-lg leading-none">{totalUsers}</span>
@@ -224,10 +224,10 @@ export function AdminHero({
                 scale: { duration: 0.4, delay: 0.45 },
                 y: { duration: 3.2, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
               }}
-              whileHover={{ scale: 1.06, borderColor: "#34C759" }}
+              whileHover={{ scale: 1.06 }}
               className="flex flex-col items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-3.5 py-2.5 min-w-[76px] cursor-pointer shadow-md transition-all group"
             >
-              <div className="p-1 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <Building className="h-3.5 w-3.5" />
               </div>
               <span className="text-[#1D1D1F] font-black text-lg leading-none">{propertiesCount}</span>
@@ -243,10 +243,10 @@ export function AdminHero({
                 scale: { duration: 0.4, delay: 0.6 },
                 y: { duration: 4.0, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
               }}
-              whileHover={{ scale: 1.06, borderColor: "#FF9500" }}
+              whileHover={{ scale: 1.06 }}
               className="flex flex-col items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-3.5 py-2.5 min-w-[76px] cursor-pointer shadow-md transition-all group"
             >
-              <div className="p-1 rounded-xl bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+              <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <CreditCard className="h-3.5 w-3.5" />
               </div>
               <span className="text-[#1D1D1F] font-black text-lg leading-none">{activeSubscribersCount}</span>
@@ -254,24 +254,24 @@ export function AdminHero({
             </motion.div>
           </div>
 
-          {/* Action Buttons Row (Neatly aligned under stat cards) */}
+          {/* Action Buttons Row */}
           <div className="flex items-center gap-2">
             <Button
               onClick={onRefresh}
               variant="outline"
               size="icon"
-              className="h-9 w-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 shadow-xs transition-all hover:scale-105 active:scale-95 shrink-0"
+              className="h-9 w-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 shadow-2xs transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
               title="Sync live system data"
             >
-              <RefreshCw className="h-3.5 w-3.5 text-[#007AFF]" />
+              <RefreshCw className="h-3.5 w-3.5 text-slate-600" />
             </Button>
 
             <Link href="/dashboard/admin/owner-applications">
-              <Button variant="outline" className="h-9 px-3 rounded-xl border-amber-300 text-amber-900 bg-amber-50 hover:bg-amber-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs">
-                <UserPlus className="h-3.5 w-3.5 text-amber-600" />
+              <Button variant="outline" className="h-9 px-3 rounded-xl border-slate-200/90 text-slate-700 bg-white hover:bg-slate-50 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+                <UserPlus className="h-3.5 w-3.5 text-slate-500" />
                 <span>Applications</span>
                 {pendingPropertiesCount > 0 && (
-                  <Badge className="bg-amber-500 text-white font-black text-[9px] px-1 py-0">
+                  <Badge className="bg-slate-900 text-white font-black text-[9px] px-1 py-0">
                     {pendingPropertiesCount}
                   </Badge>
                 )}
@@ -279,7 +279,7 @@ export function AdminHero({
             </Link>
 
             <Link href="/dashboard/admin/users/new">
-              <Button className="h-9 px-4 bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold rounded-xl shadow-md text-xs flex items-center gap-1.5 transition-all hover:scale-102 active:scale-98">
+              <Button className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl shadow-xs text-xs flex items-center gap-1.5 transition-all hover:scale-102 active:scale-98 cursor-pointer">
                 <UserPlus className="h-3.5 w-3.5" />
                 <span>Add User</span>
               </Button>

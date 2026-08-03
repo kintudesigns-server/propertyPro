@@ -38,9 +38,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: check.reason || "Access restricted" }, { status: 403 });
       }
     } else if (role === "INSPECTOR") {
-      const check = await checkUserFeatureAccess(userId, "view_assignments");
-      if (!check.allowed) {
-        return NextResponse.json({ error: check.reason || "Access restricted" }, { status: 403 });
+      const checkAssignments = await checkUserFeatureAccess(userId, "view_assignments");
+      const checkHistory = await checkUserFeatureAccess(userId, "view_history");
+      if (!checkAssignments.allowed && !checkHistory.allowed) {
+        return NextResponse.json({ error: checkAssignments.reason || checkHistory.reason || "Access restricted" }, { status: 403 });
       }
     }
 

@@ -602,13 +602,6 @@ export default function TransactionsPage() {
           <Table className="w-full table-fixed">
             <TableHeader className="bg-[#F8FAFC]">
               <TableRow className="border-b border-[#E2E8F0]">
-                <TableHead className="w-12 text-center">
-                  <input
-                    type="checkbox"
-                    className="rounded border-slate-300 text-[#635BFF] focus:ring-[#635BFF] cursor-pointer"
-                    readOnly
-                  />
-                </TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[25%]">Transaction</TableHead>
                 <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[25%]">Reference &amp; Channel</TableHead>
                 {!isTenant && <TableHead className="font-bold text-xs uppercase text-[#64748B] py-4 px-6 w-[20%]">Customer</TableHead>}
@@ -619,7 +612,7 @@ export default function TransactionsPage() {
             <TableBody>
               {paginatedTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 5 : 6} className="h-36 text-center text-[#64748B] italic font-semibold">
+                  <TableCell colSpan={isTenant ? 4 : 5} className="h-36 text-center text-[#64748B] italic font-semibold">
                     No transactions match your current filters.
                   </TableCell>
                 </TableRow>
@@ -635,14 +628,6 @@ export default function TransactionsPage() {
                       onClick={() => setSelectedTx(tx)}
                       className="hover:bg-slate-50/60 cursor-pointer border-b border-[#F1F5F9] transition-all"
                     >
-                      {/* Checkbox */}
-                      <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          className="rounded border-slate-300 text-[#635BFF] focus:ring-[#635BFF] cursor-pointer"
-                          readOnly
-                        />
-                      </TableCell>
 
                       {/* Transaction details & Category */}
                       <TableCell className="py-4 px-6 w-[25%]">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
@@ -26,12 +26,31 @@ import {
   Copy,
   X,
   User,
+  Eye,
+  ArrowUpDown,
+  Filter,
+  MoreVertical,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +59,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
 
 interface Tour {
@@ -98,11 +118,13 @@ const STATUS_THEMES = {
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
+      {[1, 2, 3, 4, 5].map((star) => (
         <Star
-          key={i}
+          key={star}
           className={`h-3.5 w-3.5 ${
-            i <= rating ? "text-amber-400 fill-amber-400" : "text-[#EBEBF0]"
+            star <= rating
+              ? "fill-amber-400 text-amber-400"
+              : "fill-slate-200 text-slate-200"
           }`}
         />
       ))}
@@ -110,89 +132,127 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-import { useModuleAccess } from "@/hooks/useModuleAccess";
-import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
-
-export default function ToursDashboard() {
+export default function ShowingToursPage() {
   const { data: session } = useSession();
-  const { allowed, loading: checkingAccess } = useModuleAccess("tours");
-
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
 
-  // Selected tour for Side Drawer
+  // Filters & Sorting & Pagination
+  const [activeTab, setActiveTab] = useState<
+    "ALL" | "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED"
+  >("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [formatFilter, setFormatFilter] = useState<"ALL" | "IN_PERSON" | "VIDEO_CALL">("ALL");
+  const [sortOption, setSortOption] = useState<"NEWEST_REQUESTED" | "OLDEST_REQUESTED" | "SCHEDULED_DATE">("NEWEST_REQUESTED");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Selected tour for detail drawer
   const [detailTour, setDetailTour] = useState<Tour | null>(null);
 
-  // Form inputs for detail drawer
-  const [meetingLinkInput, setMeetingLinkInput] = useState("");
-  const [ownerNotesInput, setOwnerNotesInput] = useState("");
-  const [cancelReasonInput, setCancelReasonInput] = useState("");
-  const [sendApplicationInvite, setSendApplicationInvite] = useState(true);
-  const [prospectNotesInput, setProspectNotesInput] = useState("");
+  // Action states inside detail drawer
   const [actionLoading, setActionLoading] = useState(false);
+  const [cancelReasonInput, setCancelReasonInput] = useState("");
+  const [meetingLinkInput, setMeetingLinkInput] = useState("");
+  const [rescheduleDateInput, setRescheduleDateInput] = useState("");
+  const [prospectNotesInput, setProspectNotesInput] = useState("");
+  const [prospectRatingInput, setProspectRatingInput] = useState<number | 0>(0);
+  const [sendApplicationInvite, setSendApplicationInvite] = useState(true);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  // Availability Settings Modal
+  // Availability Settings modal
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [workingHours, setWorkingHours] = useState<any>({
+    MON: { active: true, start: "09:00", end: "17:00" },
+    TUE: { active: true, start: "09:00", end: "17:00" },
+    WED: { active: true, start: "09:00", end: "17:00" },
+    THU: { active: true, start: "09:00", end: "17:00" },
+    FRI: { active: true, start: "09:00", end: "17:00" },
+    SAT: { active: false, start: "10:00", end: "15:00" },
+    SUN: { active: false, start: "10:00", end: "15:00" },
+  });
+  const [savingAvailability, setSavingAvailability] = useState(false);
 
-  async function fetchTours() {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/tours");
-      if (!res.ok) throw new Error("Failed to load tour requests");
-      const data = await res.json();
-      const sorted = (data || []).sort(
-        (a: Tour, b: Tour) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setTours(sorted);
-      if (detailTour) {
-        const updated = sorted.find((t: Tour) => t.id === detailTour.id);
-        if (updated) setDetailTour(updated);
+  // Fetch Availability Hours
+  useEffect(() => {
+    async function fetchAvailability() {
+      try {
+        const res = await fetch("/api/tours/availability");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.workingHours && Object.keys(data.workingHours).length > 0) {
+            setWorkingHours(data.workingHours);
+          }
+        }
+      } catch (err) {
+        // Fallback to default state
       }
-    } catch (err: any) {
-      toast.error(err.message || "Could not load tour schedules");
+    }
+    fetchAvailability();
+  }, []);
+
+  async function handleSaveAvailability() {
+    setSavingAvailability(true);
+    try {
+      const res = await fetch("/api/tours/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workingHours }),
+      });
+      if (res.ok) {
+        toast.success("Availability hours saved successfully.");
+        setAvailabilityOpen(false);
+      } else {
+        toast.error("Failed to save availability hours.");
+      }
+    } catch (err) {
+      toast.error("Error saving availability hours.");
+    } finally {
+      setSavingAvailability(false);
+    }
+  }
+
+  // Fetch Tours
+  async function fetchTours() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/tours");
+      if (res.ok) {
+        const data = await res.json();
+        setTours(data);
+      } else {
+        toast.error("Failed to load tours.");
+      }
+    } catch (err) {
+      toast.error("Error loading tours.");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (allowed) {
-      fetchTours();
-    }
-  }, [allowed]);
+    fetchTours();
+  }, []);
 
-  // Sync inputs when detailTour changes
+  // Reset pagination on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeTab, formatFilter, sortOption]);
+
+  // Sync inputs when detail tour changes
   useEffect(() => {
     if (detailTour) {
-      setOwnerNotesInput(detailTour.ownerNotes || "");
       setMeetingLinkInput(detailTour.meetingLink || "");
-      setCancelReasonInput(detailTour.cancellationReason || "");
-      setSendApplicationInvite(true);
       setProspectNotesInput(detailTour.ownerProspectNotes || "");
+      setProspectRatingInput(detailTour.ownerProspectRating || 0);
+      setRescheduleDateInput(
+        detailTour.scheduledAt ? new Date(detailTour.scheduledAt).toISOString().slice(0, 16) : ""
+      );
     }
   }, [detailTour]);
 
-  // Handle ESC key to close side drawer
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && detailTour) {
-        setDetailTour(null);
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [detailTour]);
-
-
-  // Actions
+  // Handle tour confirmation
   async function handleConfirm(tour: Tour) {
-    if (tour.tourType === "VIDEO_CALL" && !meetingLinkInput.trim()) {
-      toast.error("Please enter a meeting link (Zoom, Google Meet, etc.)");
-      return;
-    }
     setActionLoading(true);
     try {
       const res = await fetch(`/api/tours/${tour.id}`, {
@@ -200,12 +260,12 @@ export default function ToursDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "CONFIRMED",
-          ownerNotes: ownerNotesInput,
-          meetingLink: meetingLinkInput || undefined,
+          meetingLink: meetingLinkInput,
+          rescheduledAt: rescheduleDateInput || undefined,
         }),
       });
       if (res.ok) {
-        toast.success("Tour confirmed! Email & calendar invite sent to prospect.");
+        toast.success("Tour request confirmed & prospect notified via email.");
         setDetailTour(null);
         fetchTours();
       } else {
@@ -213,15 +273,16 @@ export default function ToursDashboard() {
         toast.error(err.error || "Failed to confirm tour");
       }
     } catch (err) {
-      toast.error("Error confirming tour");
+      toast.error("Error updating tour status");
     } finally {
       setActionLoading(false);
     }
   }
 
+  // Handle tour cancellation
   async function handleCancel(tour: Tour) {
     if (!cancelReasonInput.trim()) {
-      toast.error("Please provide a reason for cancellation");
+      toast.error("Please enter a reason for cancellation.");
       return;
     }
     setActionLoading(true);
@@ -235,8 +296,10 @@ export default function ToursDashboard() {
         }),
       });
       if (res.ok) {
-        toast.success("Tour request cancelled. Prospect has been notified.");
+        toast.success("Tour cancelled and prospect notified.");
+        setShowCancelDialog(false);
         setDetailTour(null);
+        setCancelReasonInput("");
         fetchTours();
       } else {
         const err = await res.json();
@@ -249,6 +312,7 @@ export default function ToursDashboard() {
     }
   }
 
+  // Handle tour completion
   async function handleComplete(tour: Tour) {
     setActionLoading(true);
     try {
@@ -259,6 +323,7 @@ export default function ToursDashboard() {
           status: "COMPLETED",
           sendApplicationInvite,
           ownerProspectNotes: prospectNotesInput,
+          ownerProspectRating: prospectRatingInput,
         }),
       });
       if (res.ok) {
@@ -289,34 +354,52 @@ export default function ToursDashboard() {
     CANCELLED: tours.filter((t) => t.status === "CANCELLED").length,
   };
 
-  // Filtered tours
-  const filteredTours = tours.filter((t) => {
-    const matchesTab = activeTab === "ALL" || t.status === activeTab;
-    const q = searchQuery.toLowerCase();
-    const matchesQuery =
-      !q ||
-      t.tenantName.toLowerCase().includes(q) ||
-      t.tenantEmail.toLowerCase().includes(q) ||
-      t.property.name.toLowerCase().includes(q);
-    return matchesTab && matchesQuery;
-  });
+  // Filtered & Sorted tours (Default: Newest Requested First)
+  const filteredTours = useMemo(() => {
+    return tours
+      .filter((t) => {
+        const matchesTab = activeTab === "ALL" || t.status === activeTab;
+        const matchesFormat = formatFilter === "ALL" || t.tourType === formatFilter;
+        const q = searchQuery.toLowerCase();
+        const matchesQuery =
+          !q ||
+          t.tenantName.toLowerCase().includes(q) ||
+          t.tenantEmail.toLowerCase().includes(q) ||
+          t.tenantPhone.toLowerCase().includes(q) ||
+          t.property.name.toLowerCase().includes(q) ||
+          (t.unit?.name && t.unit.name.toLowerCase().includes(q));
+        return matchesTab && matchesFormat && matchesQuery;
+      })
+      .sort((a, b) => {
+        if (sortOption === "NEWEST_REQUESTED") {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        } else if (sortOption === "OLDEST_REQUESTED") {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        } else {
+          return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
+        }
+      });
+  }, [tours, activeTab, formatFilter, searchQuery, sortOption]);
 
-  const emailCounts: Record<string, number> = {};
-  tours.forEach((t) => {
-    emailCounts[t.tenantEmail] = (emailCounts[t.tenantEmail] || 0) + 1;
-  });
+  const emailCounts: Record<string, number> = useMemo(() => {
+    const map: Record<string, number> = {};
+    tours.forEach((t) => {
+      map[t.tenantEmail] = (map[t.tenantEmail] || 0) + 1;
+    });
+    return map;
+  }, [tours]);
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative">
-      <div className="max-w-6xl mx-auto space-y-6">
-        
-        {/* ── Page Header ── */}
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
-              Showings & Tours
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+              Showings &amp; Tours
             </h1>
-            <p className="text-[#6E6E73] text-xs md:text-sm mt-0.5">
+            <p className="text-xs md:text-sm text-slate-500 font-medium mt-0.5">
               Review prospect tour requests, send meeting details, and manage your property showing schedule.
             </p>
           </div>
@@ -324,71 +407,65 @@ export default function ToursDashboard() {
             <Button
               variant="outline"
               onClick={() => setAvailabilityOpen(true)}
-              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#F5F5F7]"
+              className="h-9 px-3 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             >
-              <Settings className="h-3.5 w-3.5 mr-1.5 text-[#6E6E73]" />
+              <Settings className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
               Availability Hours
             </Button>
             <Button
               onClick={fetchTours}
               variant="outline"
-              className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#F5F5F7]"
+              className="h-9 px-3 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             >
               Refresh
             </Button>
           </div>
         </div>
 
-        {/* ── Metric Cards ── */}
+        {/* Sleek White KPI Cards with Border Accents */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             {
               title: "Pending Approval",
               count: counts.PENDING,
-              color: "amber",
               text: "Action required",
-              border: "border-amber-200/60 bg-amber-50/40",
-              badgeColor: "text-amber-700",
+              borderAccent: "border-l-4 border-l-amber-500 bg-white",
+              titleColor: "text-amber-800",
             },
             {
               title: "Confirmed Visits",
               count: counts.CONFIRMED,
-              color: "blue",
               text: "Upcoming tours",
-              border: "border-blue-200/60 bg-blue-50/40",
-              badgeColor: "text-blue-700",
+              borderAccent: "border-l-4 border-l-blue-500 bg-white",
+              titleColor: "text-blue-800",
             },
             {
               title: "Completed",
               count: counts.COMPLETED,
-              color: "emerald",
               text: "Past showings",
-              border: "border-emerald-200/60 bg-emerald-50/40",
-              badgeColor: "text-emerald-700",
+              borderAccent: "border-l-4 border-l-emerald-500 bg-white",
+              titleColor: "text-emerald-800",
             },
             {
               title: "Cancelled",
               count: counts.CANCELLED,
-              color: "slate",
               text: "Inactive requests",
-              border: "border-slate-200/60 bg-slate-100/50",
-              badgeColor: "text-[#6E6E73]",
+              borderAccent: "border-l-4 border-l-slate-400 bg-white",
+              titleColor: "text-slate-600",
             },
           ].map((m) => (
             <Card
               key={m.title}
-              className={`rounded-2xl border shadow-xs transition-all ${m.border}`}
+              className={`rounded-2xl border border-slate-200 shadow-xs transition-all ${m.borderAccent}`}
             >
               <CardContent className="p-4">
-                <p
-                  className={`text-[10px] font-extrabold uppercase tracking-wider ${m.badgeColor}`}
-                >
+                <p className={`text-[10px] font-extrabold uppercase tracking-wider ${m.titleColor}`}>
                   {m.title}
                 </p>
                 <p className="text-2xl font-black text-slate-900 mt-1">
                   {m.count}
                 </p>
-                <p className="text-[11px] text-[#6E6E73] font-medium mt-0.5">
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                   {m.text}
                 </p>
               </CardContent>
@@ -396,285 +473,337 @@ export default function ToursDashboard() {
           ))}
         </div>
 
-        {/* ── Search & Tab Navigation ── */}
-        <div className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs space-y-3 md:space-y-0 md:flex md:items-center md:justify-between gap-4">
-          {/* Status Tabs */}
-          <div className="flex bg-slate-100 p-1 rounded-xl gap-1 overflow-x-auto">
-            {(
-              [
-                { key: "ALL", label: "All Showings" },
-                { key: "PENDING", label: "Pending" },
-                { key: "CONFIRMED", label: "Confirmed" },
-                { key: "COMPLETED", label: "Completed" },
-                { key: "CANCELLED", label: "Cancelled" },
-              ] as const
-            ).map((tab) => {
-              const active = activeTab === tab.key;
-              const count = counts[tab.key];
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                    active
-                      ? "bg-white text-slate-900 shadow-xs"
-                      : "text-[#6E6E73] hover:text-slate-800"
-                  }`}
-                >
-                  {tab.label}
-                  {count > 0 && (
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+        {/* Filter & Control Bar (Clean 2-row layout) */}
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/40 space-y-3">
+            
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Status Segment Filter Tabs */}
+              <div className="flex bg-slate-200/70 p-1 rounded-xl gap-1 overflow-x-auto">
+                {(
+                  [
+                    { key: "ALL", label: "All Showings" },
+                    { key: "PENDING", label: "Pending" },
+                    { key: "CONFIRMED", label: "Confirmed" },
+                    { key: "COMPLETED", label: "Completed" },
+                    { key: "CANCELLED", label: "Cancelled" },
+                  ] as const
+                ).map((tab) => {
+                  const active = activeTab === tab.key;
+                  const count = counts[tab.key];
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                         active
-                          ? "bg-slate-100 text-slate-700"
-                          : "bg-slate-200/70 text-[#6E6E73]"
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                      {tab.label}
+                      {count > 0 && (
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                            active
+                              ? "bg-slate-100 text-slate-700"
+                              : "bg-slate-300/70 text-slate-700"
+                          }`}
+                        >
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Search Input */}
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#8E8E93]" />
-            <Input
-              placeholder="Search prospect or property..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-xs rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
-            />
-          </div>
-        </div>
-
-        {/* ── Main Tour Cards List ── */}
-        {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-[#8E8E93] text-xs font-semibold">
-            Loading tour requests...
-          </div>
-        ) : filteredTours.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
-            <CalendarIcon className="h-10 w-10 text-slate-300 mx-auto" />
-            <p className="text-sm font-bold text-slate-700">No tours match your current filter</p>
-            <p className="text-xs text-[#8E8E93] max-w-sm mx-auto">
-              When prospective renters request to view your properties, their booking slots will appear right here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredTours.map((tour) => {
-              const tz = getTimezoneForState(tour.property?.state);
-              const { dateStr, timeStr, tzAbbrev } = formatDateTimeInTimezone(
-                tour.scheduledAt,
-                tz
-              );
-
-              // Parse date parts for the left date badge
-              const dateObj = new Date(tour.scheduledAt);
-              const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const monthName = dateObj.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const dayNum = dateObj.getDate();
-
-              const theme = STATUS_THEMES[tour.status];
-              const isMultiBooker = (emailCounts[tour.tenantEmail] || 0) > 1;
-              const isSelected = detailTour?.id === tour.id;
-
-              return (
-                <div
-                  key={tour.id}
-                  onClick={() => setDetailTour(tour)}
-                  className={`bg-white rounded-2xl border shadow-2xs hover:shadow-md transition-all p-4 md:p-5 cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    isSelected
-                      ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20"
-                      : "border-slate-200/80 hover:border-slate-300"
-                  }`}
+              {/* Secondary Controls: Format Filter, Sort Selector, Search Input */}
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={formatFilter}
+                  onChange={(e) => setFormatFilter(e.target.value as any)}
+                  className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
                 >
-                  {/* Left & Middle Block */}
-                  <div className="flex items-start gap-4 min-w-0 flex-1">
-                    
-                    {/* Date Badge Box */}
-                    <div className="w-16 shrink-0 bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-black tracking-wider text-[#8E8E93] uppercase">
-                        {dayName}
-                      </span>
-                      <span className="text-lg font-black text-slate-900 leading-tight">
-                        {dayNum}
-                      </span>
-                      <span className="text-[9px] font-bold text-[#6E6E73] uppercase">
-                        {monthName}
-                      </span>
-                    </div>
+                  <option value="ALL">All Formats</option>
+                  <option value="IN_PERSON">In-Person</option>
+                  <option value="VIDEO_CALL">Video Call</option>
+                </select>
 
-                    {/* Content Section */}
-                    <div className="min-w-0 flex-1 space-y-1">
-                      
-                      {/* Name & Badges */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-slate-900 text-sm md:text-base group-hover:text-blue-600 transition-colors">
-                          {tour.tenantName}
-                        </h3>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value as any)}
+                  className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                >
+                  <option value="NEWEST_REQUESTED">⚡ Newest First</option>
+                  <option value="OLDEST_REQUESTED">Oldest First</option>
+                  <option value="SCHEDULED_DATE">Upcoming Scheduled Date</option>
+                </select>
 
-                        {tour.verifiedEmail && (
-                          <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-full text-[10px] font-bold px-2 py-0">
-                            <ShieldCheck className="h-3 w-3 mr-0.5 text-blue-600" />
-                            Verified
-                          </Badge>
-                        )}
-
-                        {isMultiBooker && (
-                          <Badge className="bg-amber-50 text-amber-800 border-amber-200 rounded-full text-[10px] font-bold px-2 py-0">
-                            <ShieldAlert className="h-3 w-3 mr-0.5 text-amber-600" />
-                            Multi-Request
-                          </Badge>
-                        )}
-
-                        {tour.rescheduledAt && (
-                          <Badge className="bg-purple-50 text-purple-700 border-purple-200 rounded-full text-[10px] font-bold px-2 py-0">
-                            <RotateCcw className="h-3 w-3 mr-0.5 text-purple-600" />
-                            Rescheduled
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Property & Time Details */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#6E6E73]">
-                        <span className="flex items-center gap-1 font-semibold text-slate-800">
-                          <Building2 className="h-3.5 w-3.5 text-[#8E8E93]" />
-                          {tour.property.name}
-                          {tour.unit && (
-                            <span className="text-[#6E6E73] font-normal">
-                              · Unit {tour.unit.name}
-                            </span>
-                          )}
-                        </span>
-
-                        <span className="flex items-center gap-1 text-[#6E6E73]">
-                          <Clock className="h-3.5 w-3.5 text-[#8E8E93]" />
-                          {timeStr} <span className="text-[10px] font-bold text-[#8E8E93]">{tzAbbrev}</span>
-                        </span>
-
-                        <span className="flex items-center gap-1 font-semibold text-[#6E6E73]">
-                          {tour.tourType === "VIDEO_CALL" ? (
-                            <span className="flex items-center gap-1 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md text-[11px]">
-                              <Video className="h-3 w-3" /> Virtual Video Call
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-[#6E6E73] bg-slate-100 px-2 py-0.5 rounded-md text-[11px]">
-                              <MapPin className="h-3 w-3 text-[#8E8E93]" /> In-Person Visit
-                            </span>
-                          )}
-                        </span>
-                      </div>
-
-                      {/* Tenant Message */}
-                      {tour.tenantMessage && (
-                        <p className="text-xs text-[#6E6E73] italic truncate max-w-xl bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-1">
-                          "{tour.tenantMessage}"
-                        </p>
-                      )}
-
-                      {/* Cancellation Reason Preview */}
-                      {tour.status === "CANCELLED" && tour.cancellationReason && (
-                        <p className="text-xs text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 mt-1 flex items-center gap-1">
-                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                          <span className="truncate">{tour.cancellationReason}</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right Actions & Status Block */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                    
-                    {/* Status Badge */}
-                    <Badge className={`rounded-full text-xs font-bold px-3 py-1 border ${theme.badge}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${theme.dot}`} />
-                      {theme.label}
-                    </Badge>
-
-                    {/* Contextual Action Button */}
-                    <div>
-                      {tour.status === "PENDING" && (
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDetailTour(tour);
-                          }}
-                          className="h-8 px-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-2xs"
-                        >
-                          Review Request
-                        </Button>
-                      )}
-
-                      {tour.status === "CONFIRMED" && (
-                        <div className="flex items-center gap-1.5">
-                          {tour.meetingLink && tour.tourType === "VIDEO_CALL" && (
-                            <a
-                              href={tour.meetingLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="h-8 px-2.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl flex items-center gap-1 transition-colors"
-                            >
-                              <Video className="h-3.5 w-3.5" /> Join
-                            </a>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDetailTour(tour);
-                            }}
-                            className="h-8 px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl"
-                          >
-                            Manage
-                          </Button>
-                        </div>
-                      )}
-
-                      {tour.status === "COMPLETED" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDetailTour(tour);
-                          }}
-                          className="h-8 px-3 text-xs font-semibold text-[#6E6E73] hover:text-[#1D1D1F] rounded-xl"
-                        >
-                          Details & Rating
-                        </Button>
-                      )}
-
-                      {tour.status === "CANCELLED" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDetailTour(tour);
-                          }}
-                          className="h-8 px-2 text-xs font-semibold text-[#8E8E93] hover:text-[#6E6E73] rounded-xl"
-                        >
-                          View Details
-                        </Button>
-                      )}
-                    </div>
-
-                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#6E6E73] transition-colors hidden md:block" />
-                  </div>
+                <div className="relative w-full sm:w-52">
+                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Input
+                    placeholder="Search prospect, property..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-9 text-xs rounded-xl bg-white border-slate-200 focus:bg-white font-medium"
+                  />
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            </div>
 
-        {/* ── SLIDE-OVER SIDE DRAWER FOR TOUR DETAILS ── */}
+          </div>
+
+          {/* Consolidated 5-Column High-Density Table Ledger */}
+          <CardContent className="p-0 overflow-x-auto">
+            {loading ? (
+              <div className="p-12 text-center text-slate-400 font-bold text-xs">
+                Loading showing requests...
+              </div>
+            ) : filteredTours.length === 0 ? (
+              <div className="p-16 text-center space-y-3">
+                <CalendarIcon className="h-10 w-10 text-slate-300 mx-auto" />
+                <p className="text-sm font-bold text-slate-700">No tour requests found</p>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  When prospective renters schedule property visits, their booking requests will appear here.
+                </p>
+              </div>
+            ) : (
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow className="border-slate-200 bg-slate-50/60 hover:bg-transparent">
+                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider pl-6 py-3.5 w-[30%]">
+                      Prospect Details
+                    </TableHead>
+                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[22%]">
+                      Property &amp; Unit
+                    </TableHead>
+                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[24%]">
+                      Showing Time &amp; Request Date
+                    </TableHead>
+                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[14%]">
+                      Format &amp; Status
+                    </TableHead>
+                    <TableHead className="text-right text-slate-500 font-extrabold text-[10px] uppercase tracking-wider pr-6 py-3.5 w-[10%]">
+                      Action
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const paginated = filteredTours.slice(start, start + itemsPerPage);
+                    return paginated.map((tour) => {
+                      const tz = getTimezoneForState(tour.property?.state);
+                      const { dateStr, timeStr, tzAbbrev } = formatDateTimeInTimezone(
+                        tour.scheduledAt,
+                        tz
+                      );
+                      const theme = STATUS_THEMES[tour.status];
+                      const isMultiBooker = (emailCounts[tour.tenantEmail] || 0) > 1;
+                      const isSelected = detailTour?.id === tour.id;
+
+                      const createdDate = new Date(tour.createdAt);
+                      const daysAgo = Math.floor(
+                        (Date.now() - createdDate.getTime()) / (1000 * 3600 * 24)
+                      );
+
+                      // Fix duplicate "Unit Unit X" string bug
+                      const formattedUnitName = tour.unit?.name
+                        ? tour.unit.name.toLowerCase().startsWith("unit")
+                          ? tour.unit.name
+                          : `Unit ${tour.unit.name}`
+                        : null;
+
+                      return (
+                        <TableRow
+                          key={tour.id}
+                          onClick={() => setDetailTour(tour)}
+                          className={`border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors ${
+                            isSelected ? "bg-blue-50/40" : ""
+                          }`}
+                        >
+                          {/* 1. Prospect Details */}
+                          <TableCell className="font-bold text-slate-900 pl-6 py-3.5">
+                            <div className="flex items-start gap-3">
+                              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 font-black text-sm flex items-center justify-center shrink-0 mt-0.5">
+                                {tour.tenantName.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-slate-900 text-sm hover:text-blue-600 transition-colors">
+                                    {tour.tenantName}
+                                  </span>
+                                  {tour.verifiedEmail && (
+                                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] font-bold px-1.5 py-0 rounded-full">
+                                      <ShieldCheck className="h-2.5 w-2.5 mr-0.5 text-blue-600" /> Verified
+                                    </Badge>
+                                  )}
+                                  {isMultiBooker && (
+                                    <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[9px] font-bold px-1.5 py-0 rounded-full">
+                                      <ShieldAlert className="h-2.5 w-2.5 mr-0.5 text-amber-600" /> Multi
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs font-semibold text-slate-500 truncate mt-0.5">
+                                  {tour.tenantEmail}
+                                </p>
+                                <p className="text-[11px] font-medium text-slate-400 mt-0.5">
+                                  {tour.tenantPhone}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          {/* 2. Property & Unit */}
+                          <TableCell className="py-3.5">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+                              <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                              <span className="truncate">{tour.property.name}</span>
+                            </div>
+                            <p className="text-[11px] font-medium text-slate-500 pl-5 mt-0.5">
+                              {formattedUnitName || tour.property.address}
+                            </p>
+                          </TableCell>
+
+                          {/* 3. Showing Time & Request Date (Combined Column!) */}
+                          <TableCell className="py-3.5">
+                            <p className="font-bold text-slate-900 text-xs">{dateStr}</p>
+                            <p className="text-xs font-semibold text-slate-600 flex items-center gap-1 mt-0.5">
+                              <Clock className="h-3 w-3 text-slate-400" />
+                              {timeStr} <span className="text-[10px] font-extrabold text-slate-400">{tzAbbrev}</span>
+                            </p>
+                            <p className="text-[10px] font-semibold text-slate-400 mt-1">
+                              Requested {createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} ({daysAgo === 0 ? "Today" : `${daysAgo}d ago`})
+                            </p>
+                          </TableCell>
+
+                          {/* 4. Format & Status (Stacked Badges) */}
+                          <TableCell className="py-3.5">
+                            <div className="space-y-1.5">
+                              <div>
+                                {tour.tourType === "VIDEO_CALL" ? (
+                                  <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[11px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
+                                    <Video className="h-3 w-3" /> Video Call
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
+                                    <MapPin className="h-3 w-3 text-slate-400" /> In-Person
+                                  </Badge>
+                                )}
+                              </div>
+                              <Badge className={`${theme.badge} border text-[11px] font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
+                                {theme.label}
+                              </Badge>
+                            </div>
+                          </TableCell>
+
+                          {/* 5. 3-Dot Action Dropdown Menu */}
+                          <TableCell className="text-right pr-6 py-3.5" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center rounded-xl transition-colors cursor-pointer outline-none">
+                                <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">Open action menu</span>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-slate-200 p-1.5 shadow-xl bg-white space-y-0.5">
+                                {tour.status === "PENDING" && (
+                                  <DropdownMenuItem
+                                    onClick={() => setDetailTour(tour)}
+                                    className="cursor-pointer font-bold text-slate-900 py-2 px-3 rounded-xl focus:bg-slate-100 flex items-center gap-2"
+                                  >
+                                    <Eye className="h-4 w-4 text-blue-600" />
+                                    Review Request
+                                  </DropdownMenuItem>
+                                )}
+
+                                {tour.status === "CONFIRMED" && (
+                                  <>
+                                    <DropdownMenuItem
+                                      onClick={() => setDetailTour(tour)}
+                                      className="cursor-pointer font-bold text-slate-900 py-2 px-3 rounded-xl focus:bg-slate-100 flex items-center gap-2"
+                                    >
+                                      <Eye className="h-4 w-4 text-slate-600" />
+                                      Manage Showing
+                                    </DropdownMenuItem>
+                                    {tour.meetingLink && tour.tourType === "VIDEO_CALL" && (
+                                      <DropdownMenuItem
+                                        onClick={() => window.open(tour.meetingLink!, "_blank")}
+                                        className="cursor-pointer font-bold text-purple-700 py-2 px-3 rounded-xl focus:bg-purple-50 flex items-center gap-2"
+                                      >
+                                        <Video className="h-4 w-4 text-purple-600" />
+                                        Join Video Call
+                                      </DropdownMenuItem>
+                                    )}
+                                  </>
+                                )}
+
+                                {(tour.status === "COMPLETED" || tour.status === "CANCELLED") && (
+                                  <DropdownMenuItem
+                                    onClick={() => setDetailTour(tour)}
+                                    className="cursor-pointer font-bold text-slate-900 py-2 px-3 rounded-xl focus:bg-slate-100 flex items-center gap-2"
+                                  >
+                                    <Eye className="h-4 w-4 text-slate-600" />
+                                    View Details &amp; Feedback
+                                  </DropdownMenuItem>
+                                )}
+
+                                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+
+                                <DropdownMenuItem
+                                  onClick={() => window.open(`mailto:${tour.tenantEmail}`)}
+                                  className="cursor-pointer font-semibold text-slate-700 py-1.5 px-3 rounded-xl focus:bg-slate-50 flex items-center gap-2 text-xs"
+                                >
+                                  <Mail className="h-3.5 w-3.5 text-slate-400" />
+                                  Email Prospect
+                                </DropdownMenuItem>
+
+                                {tour.tenantPhone && (
+                                  <DropdownMenuItem
+                                    onClick={() => window.open(`tel:${tour.tenantPhone}`)}
+                                    className="cursor-pointer font-semibold text-slate-700 py-1.5 px-3 rounded-xl focus:bg-slate-50 flex items-center gap-2 text-xs"
+                                  >
+                                    <Phone className="h-3.5 w-3.5 text-slate-400" />
+                                    Call Prospect
+                                  </DropdownMenuItem>
+                                )}
+
+                                {tour.meetingLink && (
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(tour.meetingLink!);
+                                      toast.success("Meeting link copied to clipboard!");
+                                    }}
+                                    className="cursor-pointer font-semibold text-slate-700 py-1.5 px-3 rounded-xl focus:bg-slate-50 flex items-center gap-2 text-xs"
+                                  >
+                                    <Copy className="h-3.5 w-3.5 text-slate-400" />
+                                    Copy Meeting Link
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })()}
+                </TableBody>
+              </Table>
+            )}
+
+            {/* Pagination Bar */}
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredTours.length / itemsPerPage) || 1}
+              totalItems={filteredTours.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              itemLabel="tours"
+            />
+          </CardContent>
+        </Card>
+
+        {/* SLIDE-OVER SIDE DRAWER FOR TOUR DETAILS & ACTIONS */}
         {detailTour && (() => {
           const tz = getTimezoneForState(detailTour.property?.state);
           const { dateStr, timeStr, tzAbbrev } = formatDateTimeInTimezone(
@@ -684,21 +813,19 @@ export default function ToursDashboard() {
 
           return (
             <div className="fixed inset-0 z-50 overflow-hidden">
-              {/* Backdrop */}
               <div
                 onClick={() => setDetailTour(null)}
                 className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
               />
 
               <div className="fixed inset-y-0 right-0 pl-10 max-w-full flex">
-                {/* Slide Drawer Content */}
                 <div className="w-screen max-w-lg bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300">
-                  
+
                   {/* Drawer Header */}
                   <div className="bg-slate-950 text-white p-6 shrink-0 relative">
                     <button
                       onClick={() => setDetailTour(null)}
-                      className="absolute top-5 right-5 text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+                      className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -715,293 +842,160 @@ export default function ToursDashboard() {
 
                       <div>
                         <h2 className="text-xl font-black text-white">{detailTour.tenantName}</h2>
-                        <div className="flex items-center gap-3 text-xs text-[#8E8E93] mt-1">
-                          <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{detailTour.tenantEmail}</span>
-                          <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{detailTour.tenantPhone}</span>
+                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3.5 w-3.5" />
+                            {detailTour.tenantEmail}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Phone className="h-3.5 w-3.5" />
+                            {detailTour.tenantPhone}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Drawer Body (Scrollable) */}
+                  {/* Drawer Body */}
                   <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    
-                    {/* Schedule & Property */}
+
+                    {/* Schedule & Property Cards */}
                     <div className="grid grid-cols-2 gap-3">
-                      
-                      {/* Schedule Box */}
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Schedule</p>
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Schedule</p>
                         <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5">
-                          <CalendarIcon className="h-3.5 w-3.5 text-[#6E6E73]" />
+                          <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
                           {dateStr}
                         </p>
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-[#6E6E73]" />
-                          {timeStr} <span className="text-[#8E8E93] text-[10px]">{tzAbbrev}</span>
+                          <Clock className="h-3.5 w-3.5 text-slate-500" />
+                          {timeStr} <span className="text-slate-400 text-[10px]">{tzAbbrev}</span>
                         </p>
                       </div>
 
-                      {/* Property Box */}
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Property</p>
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Property</p>
                         <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5 truncate">
-                          <Building2 className="h-3.5 w-3.5 text-[#6E6E73] shrink-0" />
+                          <Building2 className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                           <span className="truncate">{detailTour.property.name}</span>
                         </p>
-                        <p className="text-xs text-[#6E6E73] truncate pl-5">
-                          {detailTour.unit ? `Unit ${detailTour.unit.name}` : detailTour.property.address}
+                        <p className="text-xs font-semibold text-slate-600 truncate">
+                          {detailTour.unit ? `Unit ${detailTour.unit.name.replace(/^unit\s+/i, "")}` : detailTour.property.address}
                         </p>
                       </div>
                     </div>
 
-                    {/* Format Type */}
-                    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <p className="text-[10px] font-black uppercase text-[#8E8E93] tracking-wider">Showing Format</p>
-                        <p className="text-xs font-bold text-slate-900">
-                          {detailTour.tourType === "VIDEO_CALL" ? "Virtual Video Walkthrough" : "In-Person Property Visit"}
-                        </p>
-                      </div>
-                      <Badge className="bg-white border-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1">
-                        {detailTour.tourType === "VIDEO_CALL" ? <Video className="h-3.5 w-3.5 mr-1 text-purple-600" /> : <MapPin className="h-3.5 w-3.5 mr-1 text-[#6E6E73]" />}
-                        {detailTour.tourType === "VIDEO_CALL" ? "Video Call" : "In-Person"}
-                      </Badge>
-                    </div>
-
-                    {/* Tenant Request Message */}
-                    {detailTour.tenantMessage && (
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
-                          Prospect Request Note
-                        </Label>
-                        <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 text-xs text-slate-800 italic leading-relaxed">
-                          "{detailTour.tenantMessage}"
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Virtual Meeting Link */}
-                    {detailTour.meetingLink && (
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
-                          Virtual Tour Meeting Link
-                        </Label>
-                        <div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-2xl p-3">
-                          <a
-                            href={detailTour.meetingLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs font-bold text-purple-700 hover:underline flex items-center gap-1.5 truncate"
-                          >
-                            <Video className="h-4 w-4 shrink-0" />
-                            <span className="truncate">{detailTour.meetingLink}</span>
-                          </a>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              navigator.clipboard.writeText(detailTour.meetingLink || "");
-                              toast.success("Meeting link copied!");
-                            }}
-                            className="h-7 px-2 text-purple-700 hover:bg-purple-100 rounded-lg text-xs"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Completed Tour Ratings & Feedback */}
-                    {detailTour.status === "COMPLETED" && (
-                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-[#8E8E93]">
-                          Prospect Tour Feedback
-                        </p>
-                        
-                        {detailTour.feedbackRating ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-700">Prospect Tour Rating:</span>
-                            <StarRating rating={detailTour.feedbackRating} />
-                            <span className="text-xs font-bold text-slate-900">({detailTour.feedbackRating}/5)</span>
-                          </div>
+                    {/* Format Badge */}
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Tour Format</p>
+                      <div className="pt-1">
+                        {detailTour.tourType === "VIDEO_CALL" ? (
+                          <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-xs font-bold px-3 py-1 rounded-xl">
+                            <Video className="h-3.5 w-3.5 mr-1.5" /> Virtual Video Call
+                          </Badge>
                         ) : (
-                          <p className="text-xs text-[#6E6E73] font-medium italic">
-                            ⏳ Awaiting prospect feedback rating...
-                          </p>
+                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-xs font-bold px-3 py-1 rounded-xl">
+                            <MapPin className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> In-Person Visit
+                          </Badge>
                         )}
+                      </div>
+                    </div>
 
-                        {detailTour.feedbackComments && (
-                          <p className="text-xs text-slate-700 bg-amber-50/80 p-3 rounded-xl border border-amber-200">
-                            <span className="font-bold text-amber-900">Prospect Comments:</span> "{detailTour.feedbackComments}"
-                          </p>
-                        )}
-
-                        {detailTour.ownerProspectNotes && (
-                          <p className="text-xs text-[#6E6E73] bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="font-bold text-slate-800">Private Owner Notes:</span> {detailTour.ownerProspectNotes}
-                          </p>
-                        )}
+                    {/* Prospect Message */}
+                    {detailTour.tenantMessage && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Prospect Note</p>
+                        <p className="text-xs font-medium text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/80 italic">
+                          "{detailTour.tenantMessage}"
+                        </p>
                       </div>
                     )}
 
-                    {/* Decline / Cancel Reason preview */}
-                    {detailTour.status === "CANCELLED" && detailTour.cancellationReason && (
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-wider text-rose-500">
-                          Cancellation Reason
-                        </Label>
-                        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-800 font-medium">
-                          {detailTour.cancellationReason}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* ── Interactive Setup Forms (Inside Drawer Body) ── */}
+                    {/* Actions Panel */}
                     {detailTour.status === "PENDING" && (
-                      <div className="space-y-4 pt-4 border-t border-slate-200">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                          Confirm Tour Details
-                        </h4>
-
+                      <div className="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3">
+                        <p className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Confirm Showing Request
+                        </p>
                         {detailTour.tourType === "VIDEO_CALL" && (
-                          <div className="space-y-1.5">
-                            <Label className="text-xs font-bold text-slate-700">
-                              Video Call Meeting Link <span className="text-rose-500">*</span>
-                            </Label>
+                          <div className="space-y-1">
+                            <Label className="text-[11px] font-bold text-slate-700">Video Call Link (Google Meet / Zoom)</Label>
                             <Input
-                              placeholder="https://meet.google.com/xyz-abc or Zoom link"
+                              placeholder="https://meet.google.com/xyz-abc"
                               value={meetingLinkInput}
                               onChange={(e) => setMeetingLinkInput(e.target.value)}
-                              className="bg-slate-50 border-slate-200 rounded-xl h-10 text-xs"
+                              className="h-9 text-xs rounded-xl bg-white"
                             />
                           </div>
                         )}
-
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-bold text-slate-700">
-                            {detailTour.tourType === "VIDEO_CALL"
-                              ? "Virtual Tour Instructions / Agenda (Emailed to Prospect)"
-                              : "Entry & Parking Instructions (Emailed to Prospect)"}
-                          </Label>
-                          <textarea
-                            placeholder={
-                              detailTour.tourType === "VIDEO_CALL"
-                                ? "e.g. Please join the link 5 mins early. Prepare any questions about floor plans or lease terms."
-                                : "e.g. Dial #402 at front gate. Park in guest bay B."
-                            }
-                            value={ownerNotesInput}
-                            onChange={(e) => setOwnerNotesInput(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                          />
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            onClick={() => handleConfirm(detailTour)}
+                            disabled={actionLoading}
+                            className="flex-1 h-9 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+                          >
+                            Confirm Tour &amp; Email Prospect
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCancelDialog(true)}
+                            className="h-9 text-xs font-bold text-rose-600 border-rose-200 hover:bg-rose-50 rounded-xl"
+                          >
+                            Reject
+                          </Button>
                         </div>
                       </div>
                     )}
 
                     {detailTour.status === "CONFIRMED" && (
-                      <div className="space-y-4 pt-4 border-t border-slate-200">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                          Complete Showing & Next Steps
-                        </h4>
+                      <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-4 space-y-3">
+                        <p className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                          <Clock className="h-4 w-4 text-blue-600" /> Complete or Manage Visit
+                        </p>
 
-                        <label className="flex items-start gap-3 bg-blue-50/80 border border-blue-200/80 p-3.5 rounded-2xl cursor-pointer hover:bg-blue-50 transition-colors">
+                        <div className="flex items-center gap-2">
                           <input
                             type="checkbox"
+                            id="inviteCheck"
                             checked={sendApplicationInvite}
                             onChange={(e) => setSendApplicationInvite(e.target.checked)}
-                            className="mt-0.5 h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
+                            className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4"
                           />
-                          <div>
-                            <span className="text-xs font-bold text-blue-950 block">
-                              Invite Prospect to Submit Rental Application
-                            </span>
-                            <span className="text-[11px] text-blue-700/90 font-medium leading-normal block mt-0.5">
-                              Automatically notifies {detailTour.tenantName} to submit a rental application for {detailTour.property.name}.
-                            </span>
-                          </div>
-                        </label>
+                          <label htmlFor="inviteCheck" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Send rental application invite link via email
+                          </label>
+                        </div>
 
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-bold text-slate-700">
-                            Private Owner Notes (Optional)
-                          </Label>
-                          <textarea
-                            placeholder="e.g. Prospect interested in Aug 1st move-in date."
-                            value={prospectNotesInput}
-                            onChange={(e) => setProspectNotesInput(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium h-16 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                          />
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            onClick={() => handleComplete(detailTour)}
+                            disabled={actionLoading}
+                            className="flex-1 h-9 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+                          >
+                            Mark Completed
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCancelDialog(true)}
+                            className="h-9 text-xs font-bold text-rose-600 border-rose-200 hover:bg-rose-50 rounded-xl"
+                          >
+                            Cancel
+                          </Button>
                         </div>
                       </div>
                     )}
 
-                    {/* Cancellation Reason input field */}
-                    {(detailTour.status === "PENDING" || detailTour.status === "CONFIRMED") && (
-                      <div className="space-y-1.5 pt-4 border-t border-slate-200">
-                        <Label className="text-xs font-bold text-slate-700">
-                          Decline / Cancellation Reason (If declining)
-                        </Label>
-                        <Input
-                          placeholder="e.g. Unit has been leased / Owner unavailable"
-                          value={cancelReasonInput}
-                          onChange={(e) => setCancelReasonInput(e.target.value)}
-                          className="bg-slate-50 border-slate-200 rounded-xl h-9 text-xs"
-                        />
+                    {/* Feedback Rating if Completed */}
+                    {detailTour.status === "COMPLETED" && detailTour.feedbackRating && (
+                      <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 space-y-2">
+                        <p className="text-xs font-bold text-amber-900">Prospect Tour Feedback</p>
+                        <StarRating rating={detailTour.feedbackRating} />
+                        {detailTour.feedbackComments && (
+                          <p className="text-xs text-slate-700 italic">"{detailTour.feedbackComments}"</p>
+                        )}
                       </div>
                     )}
-                  </div>
 
-                  {/* Drawer Footer Actions */}
-                  <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 shrink-0 flex items-center justify-between gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={() => setDetailTour(null)}
-                      className="h-9 text-xs font-bold rounded-xl text-[#6E6E73]"
-                    >
-                      Close
-                    </Button>
-
-                    <div className="flex items-center gap-2">
-                      {detailTour.status === "PENDING" && (
-                        <>
-                          <Button
-                            variant="outline"
-                            disabled={actionLoading || !cancelReasonInput.trim()}
-                            onClick={() => handleCancel(detailTour)}
-                            className="h-9 text-xs font-bold rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50"
-                          >
-                            Decline Request
-                          </Button>
-                          <Button
-                            disabled={actionLoading}
-                            onClick={() => handleConfirm(detailTour)}
-                            className="h-9 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white"
-                          >
-                            Confirm & Send Email
-                          </Button>
-                        </>
-                      )}
-
-                      {detailTour.status === "CONFIRMED" && (
-                        <>
-                          <Button
-                            variant="outline"
-                            disabled={actionLoading || !cancelReasonInput.trim()}
-                            onClick={() => handleCancel(detailTour)}
-                            className="h-9 text-xs font-bold rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50"
-                          >
-                            Cancel Tour
-                          </Button>
-                          <Button
-                            disabled={actionLoading}
-                            onClick={() => handleComplete(detailTour)}
-                            className="h-9 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
-                          >
-                            Mark as Completed
-                          </Button>
-                        </>
-                      )}
-                    </div>
                   </div>
 
                 </div>
@@ -1010,41 +1004,123 @@ export default function ToursDashboard() {
           );
         })()}
 
-        {/* ── Availability Hours Info Modal ── */}
-        <Dialog open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
-          <DialogContent className="bg-white rounded-3xl max-w-md p-6 border border-slate-200">
+        {/* Cancellation Reason Modal */}
+        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent className="sm:max-w-md rounded-3xl p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-extrabold text-slate-900">
-                Owner Showing Availability
-              </DialogTitle>
-              <DialogDescription className="text-xs text-[#6E6E73]">
-                Your available tour slots are automatically enforced when prospective tenants request showings on your property listings.
+              <DialogTitle className="text-lg font-bold text-slate-900">Cancel Tour Request</DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Please provide a cancellation reason. An email notification will be sent to the prospect.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-3 py-3">
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-slate-700 font-bold border-b border-slate-200/60 pb-2">
-                  <span>Standard Hours</span>
-                  <span className="text-blue-600">Mon - Fri: 9:00 AM - 6:00 PM</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-700 font-bold border-b border-slate-200/60 pb-2">
-                  <span>Weekend Hours</span>
-                  <span className="text-blue-600">Saturday: 10:00 AM - 2:00 PM</span>
-                </div>
-                <div className="flex items-center justify-between text-[#6E6E73] font-semibold">
-                  <span>Timezone</span>
-                  <span className="font-mono text-[11px]">America/Los_Angeles (PDT)</span>
-                </div>
-              </div>
+            <div className="space-y-3 py-2">
+              <Label className="text-xs font-bold text-slate-700">Reason for cancellation *</Label>
+              <Input
+                placeholder="e.g. Unit currently under unexpected maintenance..."
+                value={cancelReasonInput}
+                onChange={(e) => setCancelReasonInput(e.target.value)}
+                className="text-xs rounded-xl"
+              />
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelDialog(false)}
+                className="rounded-xl text-xs font-bold"
+              >
+                Keep Request
+              </Button>
+              <Button
+                onClick={() => detailTour && handleCancel(detailTour)}
+                disabled={actionLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold"
+              >
+                Confirm Cancellation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Availability Settings Dialog */}
+        <Dialog open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
+          <DialogContent className="sm:max-w-lg rounded-3xl p-6 space-y-4">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-slate-900">Configure Showing Availability</DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Set active days and working hours for prospective renters booking showing slots.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+              {Object.keys(workingHours).map((day) => {
+                const config = workingHours[day];
+                return (
+                  <div key={day} className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={config.active}
+                        onChange={(e) =>
+                          setWorkingHours({
+                            ...workingHours,
+                            [day]: { ...config, active: e.target.checked },
+                          })
+                        }
+                        className="rounded text-blue-600 h-4 w-4"
+                      />
+                      <span className="text-xs font-extrabold text-slate-800 w-12">{day}</span>
+                    </div>
+
+                    {config.active ? (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={config.start}
+                          onChange={(e) =>
+                            setWorkingHours({
+                              ...workingHours,
+                              [day]: { ...config, start: e.target.value },
+                            })
+                          }
+                          className="h-8 text-xs w-24 rounded-lg bg-white"
+                        />
+                        <span className="text-xs font-bold text-slate-400">to</span>
+                        <Input
+                          type="time"
+                          value={config.end}
+                          onChange={(e) =>
+                            setWorkingHours({
+                              ...workingHours,
+                              [day]: { ...config, end: e.target.value },
+                            })
+                          }
+                          className="h-8 text-xs w-24 rounded-lg bg-white"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xs font-bold text-slate-400 italic">Off</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <DialogFooter>
               <Button
+                variant="outline"
                 onClick={() => setAvailabilityOpen(false)}
-                className="w-full h-9 rounded-xl font-bold bg-[#007AFF] text-white text-xs"
+                className="rounded-xl text-xs font-bold"
               >
-                Got It
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveAvailability}
+                disabled={savingAvailability}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+              >
+                Save Availability
               </Button>
             </DialogFooter>
           </DialogContent>

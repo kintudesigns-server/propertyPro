@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, CheckCircle2, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound, AlertCircle } from "lucide-react";
+import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, CheckCircle2, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound, AlertCircle, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import { generateLeasePDF } from "@/lib/pdfGenerator";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -1083,7 +1084,8 @@ export default function LeaseDetailsPage() {
 
       {/* Overview Tab Content */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {isOwner && lease.moveOutStatus !== "NONE" && (
@@ -1150,98 +1152,195 @@ export default function LeaseDetailsPage() {
               </Card>
             )}
 
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 mb-6">
-                <Building className="h-5 w-5 text-[#007AFF]" /> Property Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Property</p>
-                  <p className="text-base font-bold text-[#1D1D1F]">{lease.unit?.property?.name || "Unknown Property"}</p>
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-[#6E6E73] mt-1.5">
-                    <MapPin className="h-4 w-4" />
-                    {lease.unit?.property?.address}, {lease.unit?.property?.city}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Unit</p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 bg-[#F2F2F7] rounded-xl border border-[#E5E5EA] flex items-center justify-center font-black text-[#1D1D1F] text-sm text-center p-1">
-                      {lease.unit?.name ? lease.unit.name.replace(/Unit\s+/i, '').replace(/\s*\(.*?\)/, '') : "-"}
+            {/* ─── PROPERTY HERO BANNER WITH LIGHT WHITE GLASS EFFECT ─── */}
+            {(() => {
+              const coverImg =
+                lease.unit?.property?.coverPhoto ||
+                (lease.unit?.property?.images && lease.unit.property.images.length > 0
+                  ? lease.unit.property.images[0]
+                  : null);
+
+              return (
+                <div className="relative rounded-[28px] overflow-hidden shadow-sm border border-slate-200/80 bg-white text-slate-900 min-h-[220px] flex flex-col justify-between p-6 sm:p-7">
+                  {/* Background Cover Image with Light Gradient White Overlay */}
+                  {coverImg ? (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+                      style={{ backgroundImage: `url(${coverImg})` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/60 backdrop-blur-[2px]" />
                     </div>
-                    <div>
-                      <p className="text-base font-bold text-[#1D1D1F]">
-                        {lease.unit?.name?.toLowerCase().includes('unit') ? lease.unit.name : `Unit ${lease.unit?.name || ""}`}
-                      </p>
-                      <div className="flex items-center flex-wrap gap-2 mt-1">
-                        <span className="text-[11px] font-bold text-[#6E6E73] bg-[#F1F5F9] px-2 py-0.5 rounded-md">{lease.unit?.rooms || 0} Bed</span>
-                        <span className="text-[11px] font-bold text-[#6E6E73] bg-[#F1F5F9] px-2 py-0.5 rounded-md">{lease.unit?.bathrooms || 0} Bath</span>
-                        <span className="text-[11px] font-bold text-[#6E6E73] bg-[#F1F5F9] px-2 py-0.5 rounded-md">{lease.unit?.sqFootage || 0} SqFt</span>
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50/50">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(99,102,241,0.08),transparent_60%)]" />
+                    </div>
+                  )}
+
+                  {/* Foreground Content */}
+                  <div className="relative z-10 flex flex-col justify-between h-full space-y-5">
+                    {/* Top Header Row */}
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase bg-slate-900 text-white shadow-xs">
+                        <Building className="h-3.5 w-3.5 text-indigo-400" />
+                        Property Information
+                      </span>
+
+                      {lease.unit?.property?.id && (
+                        <Link href={`/listings?search=${encodeURIComponent(lease.unit.property.name || "")}`} target="_blank">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white/90 hover:bg-white border-slate-200/90 shadow-xs rounded-xl transition-all"
+                          >
+                            <ArrowUpRight className="h-3.5 w-3.5 mr-1 text-slate-500" /> View Listing Details
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Main Content Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-end">
+                      {/* Property Title & Address (Left 7 Cols) */}
+                      <div className="lg:col-span-7 space-y-2">
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                          {lease.unit?.property?.name || "Unknown Property"}
+                        </h1>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600">
+                          <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
+                          <span>
+                            {lease.unit?.property?.address}
+                            {lease.unit?.property?.city ? `, ${lease.unit.property.city}` : ""}
+                            {lease.unit?.property?.state ? `, ${lease.unit.property.state}` : ""}
+                            {lease.unit?.property?.zip ? ` ${lease.unit.property.zip}` : ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Unit Specs Card Badge (Right 5 Cols) */}
+                      <div className="lg:col-span-5 bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-md rounded-2xl p-4 space-y-3 shrink-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 truncate">
+                            Leased Unit Details
+                          </span>
+                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full shrink-0">
+                            Assigned Unit
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                            {lease.unit?.name ? lease.unit.name.replace(/Unit\s+/i, '').replace(/\s*\(.*?\)/, '') : "-"}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-black text-slate-900 truncate">
+                              {lease.unit?.name?.toLowerCase().includes('unit') ? lease.unit.name : `Unit ${lease.unit?.name || ""}`}
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate">{lease.unit?.type || "Residential Unit"}</p>
+                          </div>
+                        </div>
+
+                        {/* 3 Specs Pills in a clean, non-overflowing grid */}
+                        <div className="grid grid-cols-3 gap-1.5 pt-1 text-center">
+                          <div className="bg-slate-100/90 border border-slate-200 px-1.5 py-1 rounded-xl text-[11px] font-extrabold text-slate-700 truncate">
+                            {lease.unit?.rooms ?? 0} Bed
+                          </div>
+                          <div className="bg-slate-100/90 border border-slate-200 px-1.5 py-1 rounded-xl text-[11px] font-extrabold text-slate-700 truncate">
+                            {lease.unit?.bathrooms ?? 0} Bath
+                          </div>
+                          <div className="bg-slate-100/90 border border-slate-200 px-1.5 py-1 rounded-xl text-[11px] font-extrabold text-slate-700 truncate">
+                            {lease.unit?.sqFootage ?? 0} SqFt
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Card>
+              );
+            })()}
 
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 mb-6">
-                <User className="h-5 w-5 text-[#007AFF]" /> Tenant Information
-              </h2>
-              <div className="flex flex-col md:flex-row items-start gap-6">
-                <div className="h-20 w-20 rounded-[20px] bg-[#E5E5EA] border-4 border-white shadow-sm flex items-center justify-center text-2xl font-black text-[#6E6E73] shrink-0">
-                  {lease.tenant?.name ? lease.tenant.name.substring(0,2).toUpperCase() : "U"}
+            {/* ─── TENANT INFORMATION CARD ─── */}
+            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2">
+                  <User className="h-5 w-5 text-[#007AFF]" /> Tenant Information
+                </h2>
+                <span className="inline-flex items-center gap-1 bg-blue-50 text-[#007AFF] border border-blue-200/80 text-[11px] font-extrabold px-3 py-1 rounded-full">
+                  <CheckCircle2 className="h-3 w-3 text-[#007AFF]" /> Primary Tenant
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 bg-slate-50/70 p-4 rounded-2xl border border-slate-100">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md flex items-center justify-center text-xl font-black shrink-0">
+                  {lease.tenant?.name ? lease.tenant.name.substring(0, 2).toUpperCase() : "U"}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 w-full text-xs font-semibold">
                   <div>
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Full Name</p>
-                    <p className="text-base font-bold text-[#1D1D1F]">{lease.tenant?.name || "Unknown Tenant"}</p>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Full Name</p>
+                    <p className="text-sm font-extrabold text-slate-900">{lease.tenant?.name || "Unknown Tenant"}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Role</p>
-                    <span className="inline-flex bg-[#EFF6FF] text-[#007AFF] text-xs font-bold px-2.5 py-1 rounded-md">Primary Tenant</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Email</p>
-                    <p className="text-sm font-bold text-[#1D1D1F] flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-[#94A3B8]" /> {lease.tenant?.email || "N/A"}
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Contact Status</p>
+                    <p className="text-xs font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Active Renter
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Phone</p>
-                    <p className="text-sm font-bold text-[#1D1D1F] flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-[#94A3B8]" /> {lease.tenant?.phone || "N/A"}
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Email Address</p>
+                    <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
+                      <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {lease.tenant?.email || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Phone Number</p>
+                    <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
+                      <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {lease.tenant?.phone || "N/A"}
                     </p>
                   </div>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 mb-6">
-                <FileText className="h-5 w-5 text-[#007AFF]" /> Lease Terms & Rules
+            {/* ─── LEASE TERMS & RULES CARD ─── */}
+            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-5">
+              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 pb-3 border-b border-slate-100">
+                <FileText className="h-5 w-5 text-[#007AFF]" /> Lease Terms &amp; Rules
               </h2>
               <div className="space-y-4">
-                <div className="bg-[#F2F2F7] rounded-xl p-4 border border-[#E5E5EA]">
-                  <h3 className="font-bold text-[#1D1D1F] text-sm mb-1">Standard Residential Agreement</h3>
-                  <p className="text-sm text-[#6E6E73] leading-relaxed">This lease is a standard fixed-term residential agreement. Rent is due on the 1st of every month. A late fee will be applied on the 5th day of the month if rent is not received in full.</p>
+                <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80">
+                  <h3 className="font-extrabold text-slate-900 text-xs mb-1">Standard Residential Agreement</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    This lease is a standard fixed-term residential agreement. Rent is due on the 1st of every month. A late fee will be applied on the 5th day of the month if rent is not received in full.
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white border border-[#E5E5EA] p-3 rounded-xl text-center">
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase">Pets Allowed</p>
-                    <p className="text-sm font-black text-[#1D1D1F] mt-1">No</p>
+
+                {/* 4 Interactive Visual Rule Badges */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl text-center space-y-1">
+                    <p className="text-[10px] font-extrabold text-rose-800 uppercase tracking-wider">Pets Allowed</p>
+                    <p className="text-xs font-black text-rose-700 flex items-center justify-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-rose-600" /> No Pets
+                    </p>
                   </div>
-                  <div className="bg-white border border-[#E5E5EA] p-3 rounded-xl text-center">
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase">Smoking</p>
-                    <p className="text-sm font-black text-[#1D1D1F] mt-1">No</p>
+
+                  <div className="bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl text-center space-y-1">
+                    <p className="text-[10px] font-extrabold text-rose-800 uppercase tracking-wider">Smoking</p>
+                    <p className="text-xs font-black text-rose-700 flex items-center justify-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-rose-600" /> Strictly No
+                    </p>
                   </div>
-                  <div className="bg-white border border-[#E5E5EA] p-3 rounded-xl text-center">
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase">Subletting</p>
-                    <p className="text-sm font-black text-[#1D1D1F] mt-1">With Approval</p>
+
+                  <div className="bg-amber-50/70 border border-amber-200/80 p-3 rounded-2xl text-center space-y-1">
+                    <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">Subletting</p>
+                    <p className="text-xs font-black text-amber-800 flex items-center justify-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5 text-amber-600" /> With Approval
+                    </p>
                   </div>
-                  <div className="bg-white border border-[#E5E5EA] p-3 rounded-xl text-center">
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase">Insurance</p>
-                    <p className="text-sm font-black text-[#1D1D1F] mt-1">Required</p>
+
+                  <div className="bg-emerald-50/70 border border-emerald-200/80 p-3 rounded-2xl text-center space-y-1">
+                    <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">Insurance</p>
+                    <p className="text-xs font-black text-emerald-800 flex items-center justify-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Required
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1250,30 +1349,31 @@ export default function LeaseDetailsPage() {
 
           {/* Right Column */}
           <div className="space-y-6">
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 mb-6">
+            {/* ─── LEASE SUMMARY CARD ─── */}
+            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-5">
+              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 pb-3 border-b border-slate-100">
                 <Calendar className="h-5 w-5 text-[#F59E0B]" /> Lease Summary
               </h2>
-              <div className="space-y-5">
-                <div className="flex justify-between items-center pb-4 border-b border-[#F1F5F9]">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                   <div>
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Start Date</p>
-                    <p className="font-bold text-[#1D1D1F]">{lease.startDate ? new Date(lease.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Start Date</p>
+                    <p className="font-extrabold text-slate-900 text-xs">{lease.startDate ? new Date(lease.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1">End Date</p>
-                    <p className="font-bold text-[#1D1D1F]">{lease.endDate ? new Date(lease.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">End Date</p>
+                    <p className="font-extrabold text-slate-900 text-xs">{lease.endDate ? new Date(lease.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
                   </div>
                 </div>
                 
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-[#1D1D1F] mb-2">
-                    <span>Duration Progress</span>
-                    <span>{calculateProgress()}%</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-extrabold text-slate-900">
+                    <span>Lease Term Progress</span>
+                    <span className="text-amber-600">{calculateProgress()}%</span>
                   </div>
-                  <div className="relative h-2.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                  <div className="relative h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div 
-                      className="absolute top-0 left-0 h-full bg-[#F59E0B] rounded-full transition-all duration-1000"
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-1000"
                       style={{ width: `${calculateProgress()}%` }}
                     />
                   </div>
@@ -1410,31 +1510,31 @@ export default function LeaseDetailsPage() {
               </Card>
             )}
 
-
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 mb-6">
-                <DollarSign className="h-5 w-5 text-[#10B981]" /> Financial Terms
+            {/* ─── FINANCIAL TERMS CARD ─── */}
+            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-4">
+              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 pb-3 border-b border-slate-100">
+                <DollarSign className="h-5 w-5 text-emerald-600" /> Financial Terms
               </h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                  <span className="font-bold text-[#6E6E73] text-sm">Monthly Rent</span>
-                  <span className="text-base font-black text-[#1D1D1F]">${Number(lease.monthlyRent || 0).toLocaleString()}</span>
+              <div className="space-y-3.5 text-xs font-semibold text-slate-600">
+                <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+                  <span className="text-slate-500">Monthly Rent</span>
+                  <span className="text-sm font-black text-slate-900">${Number(lease.monthlyRent || 0).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                  <span className="font-bold text-[#6E6E73] text-sm">Security Deposit</span>
-                  <span className="text-base font-black text-[#1D1D1F]">${Number(lease.securityDeposit || 0).toLocaleString()}</span>
+                <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+                  <span className="text-slate-500">Security Deposit</span>
+                  <span className="text-sm font-black text-slate-900">${Number(lease.securityDeposit || 0).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                  <span className="font-bold text-[#6E6E73] text-sm">Rent Due On</span>
-                  <span className="text-base font-black text-[#1D1D1F]">Day {lease.rentDueDay || 1}</span>
+                <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+                  <span className="text-slate-500">Rent Due On</span>
+                  <span className="font-extrabold text-slate-900">Day {lease.rentDueDay || 1}</span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
-                  <span className="font-bold text-[#6E6E73] text-sm">Grace Period</span>
-                  <span className="text-base font-black text-[#1D1D1F]">{lease.gracePeriodDays || 5} Days</span>
+                <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+                  <span className="text-slate-500">Grace Period</span>
+                  <span className="font-extrabold text-slate-900">{lease.gracePeriodDays || 5} Days</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-[#6E6E73] text-sm">Late Fee</span>
-                  <span className="text-base font-black text-[#1D1D1F]">
+                  <span className="text-slate-500">Late Fee</span>
+                  <span className="font-extrabold text-slate-900">
                     {lease.lateFeeAmount ? (
                       lease.lateFeeType === "PERCENTAGE" 
                         ? `${lease.lateFeeAmount}%` 
@@ -1445,52 +1545,70 @@ export default function LeaseDetailsPage() {
               </div>
             </Card>
 
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-5">
-              <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2 pb-3 border-b border-[#F1F5F9]">
-                <ShieldAlert className="h-5 w-5 text-indigo-500" /> Security Deposit Ledger
-              </h2>
+          </div>
+        </div>
 
-              {/* ── SECTION 1: Deposit Collection ── */}
-              <div className="space-y-2">
-                <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Deposit Collection</p>
-                <div className="space-y-1.5 text-xs font-semibold text-slate-600">
-                  <div className="flex justify-between items-center">
-                    <span>Required Amount:</span>
-                    <span className="font-extrabold text-slate-900">${Number(lease.securityDeposit || 0).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Paid:</span>
-                    {(lease as any).depositPaidAt ? (
-                      <span className="font-extrabold text-emerald-700 flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        ${Number((lease as any).depositPaidAmount || lease.securityDeposit || 0).toFixed(2)}
-                        <span className="text-[10px] text-[#8E8E93] font-normal ml-1">
-                          {new Date((lease as any).depositPaidAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
+        {/* Security Deposit Ledger — Full Width Card */}
+        <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] p-6 space-y-6 mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#F1F5F9] gap-3">
+            <h2 className="text-lg font-bold text-[#1D1D1F] flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-indigo-500" /> Security Deposit Ledger
+            </h2>
+            {!isTenant && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 text-xs font-bold border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl shrink-0"
+                onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
+              >
+                <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" /> Process Move-Out &amp; Refund
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* ── SECTION 1: Deposit Collection ── */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3">
+              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Deposit Collection</p>
+              <div className="space-y-2 text-xs font-semibold text-slate-600">
+                <div className="flex justify-between items-center">
+                  <span>Required Amount:</span>
+                  <span className="font-extrabold text-slate-900">${Number(lease.securityDeposit || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Paid:</span>
+                  {(lease as any).depositPaidAt ? (
+                    <span className="font-extrabold text-emerald-700 flex items-center gap-1">
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      ${Number((lease as any).depositPaidAmount || lease.securityDeposit || 0).toFixed(2)}
+                      <span className="text-[10px] text-[#8E8E93] font-normal ml-1">
+                        {new Date((lease as any).depositPaidAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                       </span>
-                    ) : (
-                      <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> Awaiting Payment
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Status:</span>
-                    {(() => {
-                      const status = lease.depositStatus || "HELD";
-                      const payout = lease.payoutRequests?.[0];
-                      if (status === "HELD") return <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded border border-indigo-200">Held in Escrow</span>;
-                      if (status === "PENDING_ADMIN_PAYOUT" || payout?.status === "PENDING") return <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-200 animate-pulse">Pending Disbursement</span>;
-                      if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || payout?.status === "COMPLETED") return <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">Refunded</span>;
-                      if (status === "FULLY_DEDUCTED") return <span className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded border border-red-200">Fully Forfeited</span>;
-                      return <span className="px-2 py-0.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded border border-slate-200">{status}</span>;
-                    })()}
-                  </div>
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> Awaiting Payment
+                    </span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Status:</span>
+                  {(() => {
+                    const status = lease.depositStatus || "HELD";
+                    const payout = lease.payoutRequests?.[0];
+                    if (status === "HELD") return <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded border border-indigo-200">Held in Escrow</span>;
+                    if (status === "PENDING_ADMIN_PAYOUT" || payout?.status === "PENDING") return <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-200 animate-pulse">Pending Disbursement</span>;
+                    if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || payout?.status === "COMPLETED") return <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">Refunded</span>;
+                    if (status === "FULLY_DEDUCTED") return <span className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded border border-red-200">Fully Forfeited</span>;
+                    return <span className="px-2 py-0.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded border border-slate-200">{status}</span>;
+                  })()}
                 </div>
               </div>
+            </div>
 
-              {/* ── SECTION 2: Mid-Tenancy Deductions ── */}
-              <div className="space-y-2 pt-3 border-t border-slate-100">
+            {/* ── SECTION 2: Mid-Tenancy Deductions ── */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3 flex flex-col justify-between">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Mid-Tenancy Deductions</p>
                   {(lease as any).depositDeductions?.length > 0 && (
@@ -1502,13 +1620,12 @@ export default function LeaseDetailsPage() {
                 {(lease as any).depositDeductions?.length > 0 ? (
                   <div className="space-y-2">
                     {(lease as any).depositDeductions.map((d: any) => {
-                      // Extract maintenance ticket ID from reference like DEPOSIT_DEDUCT_xxxxxx
                       const ticketRef = d.reference?.replace("DEPOSIT_DEDUCT_", "") || "";
                       return (
-                        <div key={d.id} className="bg-red-50/60 border border-red-100 rounded-lg p-2.5 space-y-1">
+                        <div key={d.id} className="bg-red-50/60 border border-red-100 rounded-lg p-2 space-y-1">
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="text-slate-600 font-semibold">
-                              {new Date(d.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} — Maintenance (Tenant Fault)
+                            <span className="text-slate-600 font-semibold truncate max-w-[140px]">
+                              {new Date(d.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} — Maint.
                             </span>
                             <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
                           </div>
@@ -1518,7 +1635,7 @@ export default function LeaseDetailsPage() {
                               href={isTenant ? "/dashboard/maintenance/my-requests" : `/dashboard/maintenance?search=${ticketRef}`}
                               className="text-indigo-600 hover:underline font-bold"
                             >
-                              View Ticket →
+                              View →
                             </Link>
                           </div>
                         </div>
@@ -1528,138 +1645,220 @@ export default function LeaseDetailsPage() {
                 ) : (
                   <p className="text-[11px] text-[#8E8E93] italic">No deductions during tenancy.</p>
                 )}
+              </div>
 
-                {/* Current Balance */}
-                <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-xs font-bold">
-                  <span className="text-[#3C3C43]">Current Balance:</span>
-                  <span className={`text-base font-black ${Number((lease as any).depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                    ${Number((lease as any).depositBalance || 0).toFixed(2)}
-                  </span>
+              {/* Current Balance */}
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-bold mt-2">
+                <span className="text-[#3C3C43]">Current Balance:</span>
+                <span className={`text-sm font-black ${Number((lease as any).depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                  ${Number((lease as any).depositBalance || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* ── SECTION 3: Move-Out Deductions ── */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3">
+              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Move-Out Deductions</p>
+              {Array.isArray(lease.deductions) && lease.deductions.length > 0 ? (
+                <div className="space-y-1.5">
+                  {lease.deductions.map((d: any, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center bg-red-50/50 p-2 rounded-lg border border-red-100/50 text-[11px]">
+                      <span className="text-red-950 font-bold truncate max-w-[130px]">
+                        {d.description}
+                        {d.photoUrl && (
+                          <a href={d.photoUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-indigo-600 hover:underline">(Proof)</a>
+                        )}
+                      </span>
+                      <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <p className="text-[11px] text-[#8E8E93] italic">
+                  {lease.moveOutStatus === "NONE" ? "None logged — completed at move-out." : "No move-out deductions recorded."}
+                </p>
+              )}
+            </div>
 
-              {/* ── SECTION 3: Move-Out Deductions ── */}
-              <div className="space-y-2 pt-3 border-t border-slate-100">
-                <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Move-Out Deductions</p>
-                {Array.isArray(lease.deductions) && lease.deductions.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {lease.deductions.map((d: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-center bg-red-50/50 p-2 rounded-lg border border-red-100/50 text-[11px]">
-                        <span className="text-red-950 font-bold">
-                          {d.description}
-                          {d.photoUrl && (
-                            <a href={d.photoUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-indigo-600 hover:underline">(Proof)</a>
-                          )}
-                        </span>
-                        <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-[#8E8E93] italic">
-                    {lease.moveOutStatus === "NONE" ? "None logged — completed at move-out inspection." : "No move-out deductions recorded."}
-                  </p>
-                )}
-              </div>
+            {/* ── SECTION 4: Deposit Summary ── */}
+            {(() => {
+              const original = Number(lease.securityDeposit || 0);
+              const midDeductions = (lease as any).depositDeductions?.reduce((s: number, d: any) => s + Number(d.amount), 0) || 0;
+              const moveOutDeductions = Array.isArray(lease.deductions) ? lease.deductions.reduce((s: number, d: any) => s + Number(d.amount), 0) : 0;
+              const estimatedRefund = Math.max(0, original - midDeductions - moveOutDeductions);
+              const isFinalised = ["REFUNDED", "PARTIALLY_REFUNDED", "FULLY_DEDUCTED"].includes(lease.depositStatus || "");
 
-              {/* ── SECTION 4: Deposit Summary ── */}
-              {(() => {
-                const original = Number(lease.securityDeposit || 0);
-                const midDeductions = (lease as any).depositDeductions?.reduce((s: number, d: any) => s + Number(d.amount), 0) || 0;
-                const moveOutDeductions = Array.isArray(lease.deductions) ? lease.deductions.reduce((s: number, d: any) => s + Number(d.amount), 0) : 0;
-                const estimatedRefund = Math.max(0, original - midDeductions - moveOutDeductions);
-                const isFinalised = ["REFUNDED", "PARTIALLY_REFUNDED", "FULLY_DEDUCTED"].includes(lease.depositStatus || "");
-
-                return (
-                  <div className="space-y-1.5 pt-3 border-t border-slate-100">
+              return (
+                <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
                     <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Deposit Summary</p>
-                    <div className="space-y-1 text-[11px] font-semibold text-slate-600">
+                    <div className="space-y-1.5 text-[11px] font-semibold text-slate-600">
                       <div className="flex justify-between"><span>Original Deposit:</span><span className="font-extrabold text-slate-900">${original.toFixed(2)}</span></div>
-                      {midDeductions > 0 && <div className="flex justify-between"><span>Mid-Tenancy Deductions:</span><span className="font-extrabold text-red-600">-${midDeductions.toFixed(2)}</span></div>}
+                      {midDeductions > 0 && <div className="flex justify-between"><span>Mid Deductions:</span><span className="font-extrabold text-red-600">-${midDeductions.toFixed(2)}</span></div>}
                       {moveOutDeductions > 0 && <div className="flex justify-between"><span>Move-Out Deductions:</span><span className="font-extrabold text-red-600">-${moveOutDeductions.toFixed(2)}</span></div>}
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-sm">
-                      <span className="font-bold text-slate-900">{isFinalised ? "Final Refund:" : "Estimated Refund:"}</span>
-                      <span className="text-base font-black text-emerald-600">${estimatedRefund.toFixed(2)}</span>
-                    </div>
                   </div>
-                );
-              })()}
-
-              {/* Payout Disbursement Details */}
-              {(() => {
-                const payout = lease.payoutRequests?.[0];
-                if (!payout) return null;
-                return (
-                  <div className="pt-3 border-t border-slate-100 space-y-3">
-                    <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Refund Disbursement Details</p>
-                    <div className="space-y-1.5 text-[11px] font-semibold text-slate-600">
-                      <div className="flex justify-between"><span>Payout Method:</span><span className="font-bold text-slate-900">{payout.bankName}</span></div>
-                      <div className="flex justify-between"><span>Recipient Account:</span><span className="font-bold text-slate-900">{payout.accountName} (***{payout.accountNumber?.slice(-4) || "N/A"})</span></div>
-                      {payout.disbursedAt && <div className="flex justify-between"><span>Disbursed Date:</span><span className="font-bold text-slate-900">{new Date(payout.disbursedAt).toLocaleDateString()}</span></div>}
-                      {lease.refundRef && <div className="flex justify-between"><span>Reference / Check #:</span><span className="font-bold text-slate-900">{lease.refundRef}</span></div>}
-                    </div>
-                    {payout.status === "COMPLETED" && payout.proofUrl && (
-                      <Button variant="outline" size="sm" className="w-full text-[11px] h-8 font-bold border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg" onClick={() => window.open(payout.proofUrl, "_blank")}>
-                        <FileText className="h-3.5 w-3.5 mr-1.5" /> View Admin Payout Proof
-                      </Button>
-                    )}
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-bold mt-2">
+                    <span className="text-slate-900">{isFinalised ? "Final Refund:" : "Est. Refund:"}</span>
+                    <span className="text-sm font-black text-emerald-600">${estimatedRefund.toFixed(2)}</span>
                   </div>
-                );
-              })()}
-
-              {/* Process Move-Out button — owner only */}
-              {!isTenant && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full h-9 text-xs font-bold border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl mt-1"
-                  onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
-                >
-                  <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" /> Process Move-Out &amp; Refund
-                </Button>
-              )}
-            </Card>
-
+                </div>
+              );
+            })()}
           </div>
+
+          {/* Payout Disbursement Details */}
+          {(() => {
+            const payout = lease.payoutRequests?.[0];
+            if (!payout) return null;
+            return (
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Refund Disbursement Details</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-[11px] font-semibold text-slate-600 bg-indigo-50/30 p-3.5 rounded-xl border border-indigo-100/60">
+                  <div><span className="text-slate-400 block text-[10px] font-bold uppercase">Payout Method</span><span className="font-bold text-slate-900">{payout.bankName}</span></div>
+                  <div><span className="text-slate-400 block text-[10px] font-bold uppercase">Recipient Account</span><span className="font-bold text-slate-900">{payout.accountName} (***{payout.accountNumber?.slice(-4) || "N/A"})</span></div>
+                  {payout.disbursedAt && <div><span className="text-slate-400 block text-[10px] font-bold uppercase">Disbursed Date</span><span className="font-bold text-slate-900">{new Date(payout.disbursedAt).toLocaleDateString()}</span></div>}
+                  {lease.refundRef && <div><span className="text-slate-400 block text-[10px] font-bold uppercase">Reference / Check #</span><span className="font-bold text-slate-900">{lease.refundRef}</span></div>}
+                </div>
+                {payout.status === "COMPLETED" && payout.proofUrl && (
+                  <Button variant="outline" size="sm" className="w-full text-[11px] h-8 font-bold border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg" onClick={() => window.open(payout.proofUrl, "_blank")}>
+                    <FileText className="h-3.5 w-3.5 mr-1.5" /> View Admin Payout Proof
+                  </Button>
+                )}
+              </div>
+            );
+          })()}
+        </Card>
         </div>
       )}
 
       {/* Payments Tab Content */}
       {activeTab === 'payments' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-5 rounded-[20px] shadow-sm border-[#E5E5EA]">
-              <p className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Total Paid</p>
-              <p className="text-2xl font-black text-[#1D1D1F]">${amountPaid.toLocaleString()}</p>
-            </Card>
-            <Card className="p-5 rounded-[20px] shadow-sm border-[#E5E5EA]">
-              <p className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Upcoming Due</p>
-              <p className="text-2xl font-black text-[#1D1D1F]">${upcomingDue.toLocaleString()}</p>
-            </Card>
-            <Card className="p-5 rounded-[20px] shadow-sm border-[#E5E5EA]">
-              <p className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Overdue</p>
-              <p className="text-2xl font-black text-[#EF4444]">${overdue.toLocaleString()}</p>
-            </Card>
-            <Card className="p-5 rounded-[20px] shadow-sm border-[#E5E5EA]">
-              <p className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Total Lease Value</p>
-              <p className="text-2xl font-black text-[#1D1D1F]">${totalLeaseValue.toLocaleString()}</p>
-            </Card>
+          {/* 4 Premium SaaS Animated KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Total Paid */}
+            <motion.div
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="relative overflow-hidden bg-gradient-to-br from-white via-white to-emerald-50/30 p-5 rounded-[24px] border border-slate-200/80 shadow-sm border-l-4 border-l-emerald-500 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Paid</span>
+                <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shadow-xs">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                </div>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">${amountPaid.toLocaleString()}</p>
+                <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-1">
+                  <TrendingUp className="h-3 w-3" /> Settled Payments
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 2: Upcoming Due */}
+            <motion.div
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="relative overflow-hidden bg-gradient-to-br from-white via-white to-cyan-50/30 p-5 rounded-[24px] border border-slate-200/80 shadow-sm border-l-4 border-l-cyan-500 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Upcoming Due</span>
+                <div className="h-8 w-8 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-200/60 flex items-center justify-center shadow-xs">
+                  <Clock className="h-4 w-4 text-cyan-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">${upcomingDue.toLocaleString()}</p>
+                <p className="text-[11px] font-bold text-cyan-700 flex items-center gap-1 mt-1">
+                  Scheduled Next Cycle
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 3: Overdue */}
+            <motion.div
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`relative overflow-hidden bg-gradient-to-br from-white via-white to-rose-50/30 p-5 rounded-[24px] border border-slate-200/80 shadow-sm border-l-4 space-y-3 ${
+                overdue > 0 ? "border-l-rose-500 shadow-rose-100/50" : "border-l-slate-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Overdue</span>
+                <div className={`h-8 w-8 rounded-xl flex items-center justify-center shadow-xs border ${
+                  overdue > 0 ? "bg-rose-50 text-rose-600 border-rose-200/60" : "bg-slate-50 text-slate-400 border-slate-200"
+                }`}>
+                  <AlertCircle className="h-4 w-4" />
+                </div>
+              </div>
+              <div>
+                <p className={`text-2xl font-black tracking-tight ${overdue > 0 ? "text-rose-600" : "text-slate-900"}`}>
+                  ${overdue.toLocaleString()}
+                </p>
+                <p className={`text-[11px] font-bold flex items-center gap-1 mt-1 ${overdue > 0 ? "text-rose-600" : "text-slate-400"}`}>
+                  {overdue > 0 ? "Immediate Attention Required" : "No Overdue Balances"}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 4: Total Lease Value */}
+            <motion.div
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="relative overflow-hidden bg-gradient-to-br from-white via-white to-purple-50/30 p-5 rounded-[24px] border border-slate-200/80 shadow-sm border-l-4 border-l-purple-500 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Lease Value</span>
+                <div className="h-8 w-8 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center shadow-xs">
+                  <DollarSign className="h-4 w-4 text-purple-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">${totalLeaseValue.toLocaleString()}</p>
+                <p className="text-[11px] font-bold text-purple-700 flex items-center gap-1 mt-1">
+                  Full Contract Value
+                </p>
+              </div>
+            </motion.div>
           </div>
 
-          <Card className="p-6 rounded-[24px] shadow-sm border-[#E5E5EA]">
-            <div className="flex justify-between items-end mb-4">
+          {/* Glowing Neon Framer Motion Progress Bar */}
+          <Card className="p-6 rounded-[24px] shadow-sm border-[#E5E5EA] bg-gradient-to-br from-white via-white to-emerald-50/20 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="font-bold text-[#1D1D1F] text-lg">Payment Progress</h3>
-                <p className="text-sm font-medium text-[#6E6E73]">Amount paid against total expected lease value</p>
+                <h3 className="font-bold text-[#1D1D1F] text-lg flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-emerald-500" /> Payment Progress
+                </h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">Amount paid against total expected lease value</p>
               </div>
-              <p className="font-black text-[#10B981] text-lg">{paymentProgress}% Paid</p>
+
+              {/* Glowing Neon Percentage Badge */}
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                {paymentProgress}% Paid
+              </motion.div>
             </div>
-            <div className="relative h-4 bg-[#F1F5F9] rounded-full overflow-hidden">
-              <div 
-                className="absolute top-0 left-0 h-full bg-[#10B981] rounded-full transition-all duration-1000"
-                style={{ width: `${paymentProgress}%` }}
-              />
+
+            {/* Neon Glowing Framer Motion Bar */}
+            <div className="relative h-5 bg-slate-100 rounded-full p-1 border border-slate-200/80 shadow-inner overflow-hidden">
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: `${paymentProgress}%` }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="relative h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 shadow-[0_0_18px_rgba(16,185,129,0.6)] overflow-hidden"
+              >
+                {/* Shimmer animation overlay */}
+                <motion.div
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "linear" }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent w-1/2"
+                />
+              </motion.div>
             </div>
           </Card>
 

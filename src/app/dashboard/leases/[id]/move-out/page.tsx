@@ -16,6 +16,8 @@ import { generateDispositionPDF } from "@/lib/pdfGenerator";
 import { UnmaskAccountNumber } from "@/components/UnmaskAccountNumber";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BypassConfirmationModal } from "@/components/modals/BypassConfirmationModal";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 const DEDUCTION_CATEGORIES = [
   { value: "DAMAGE", label: "Property Damage" },
@@ -34,9 +36,12 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function FinalStatementPage() {
+  const featureAccess = useFeatureAccess("request_move_out");
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  const isTenant = (session?.user as any)?.role === "TENANT";
 
   const steps = [
     { label: "Request", desc: "Notice Given" },
@@ -269,7 +274,15 @@ export default function FinalStatementPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 relative">
+      {isTenant && !featureAccess.allowed && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "Request Move-Out / Departure"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
       <div className="flex items-center gap-4 mb-2">
         <Link href={`/dashboard/leases/${id}`}>
           <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-slate-200">

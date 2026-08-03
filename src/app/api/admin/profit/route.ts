@@ -102,22 +102,82 @@ export async function GET(req: NextRequest) {
       return {
         id: owner.id,
         owner: owner.name || owner.email,
+        email: owner.email,
         tier: owner.pricingTier?.name || "Unknown",
         monthlyPrice: isTrialing ? 0 : Number(owner.pricingTier?.price || 0),
         status: owner.subscriptionStatus,
-        joinedAt: owner.createdAt
+        joinedAt: owner.createdAt,
+        gracePeriodEnd: owner.gracePeriodEnd,
+        cardBrand: owner.cardBrand,
+        cardLast4: owner.cardLast4,
       };
     });
+
+    // Fetch Subscription History Ledger
+    const rawHistory = await prisma.subscriptionHistory.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            cardBrand: true,
+            cardLast4: true
+          }
+        }
+      }
+    });
+
+    const subscriptionLedger = rawHistory.map(item => ({
+      id: item.id,
+      userId: item.userId,
+      owner: item.user?.name || item.user?.email || "Unknown User",
+      email: item.user?.email || "",
+      cardBrand: item.user?.cardBrand || null,
+      cardLast4: item.user?.cardLast4 || null,
+      fromTierName: item.fromTierName,
+      toTierName: item.toTierName || "Unknown Plan",
+      event: item.event,
+      amountPaid: item.amountPaid,
+      stripeInvoiceId: item.stripeInvoiceId,
+      createdAt: item.createdAt,
+    }));
+
+    // Calculate At-Risk MRR (Past_Due or Paused owners)
+    const atRiskOwners = await prisma.user.findMany({
+      where: {
+        role: "OWNER",
+        subscriptionStatus: { in: ["Past_Due", "Paused", "Past Due", "PAST_DUE"] },
+        pricingTier: { isNot: null }
+      },
+      include: { pricingTier: true }
+    });
+
+    const atRiskMRR = atRiskOwners.reduce((sum, owner) => {
+      return sum + Number(owner.pricingTier?.price || 0);
+    }, 0);
+
+    // Calculate ARPU (Average Revenue Per User)
+    const paidSubscribersCount = activeSubscribers.filter(
+      owner => !["trialing", "Trialing", "TRIALING"].includes(owner.subscriptionStatus || "")
+    ).length;
+    const arpu = paidSubscribersCount > 0 ? subscriptionMRR / paidSubscribersCount : 0;
+    const arr = subscriptionMRR * 12;
 
     const netVolume = Math.max(0, Number(totalVolume._sum.amount || 0) - Number(totalRefunds._sum.amount || 0));
 
     return NextResponse.json({
       totalCommissionProfit: totalProfit,
       subscriptionMRR,
+      arr,
+      arpu,
+      atRiskMRR,
       totalProfit: totalProfit + subscriptionMRR,
       totalVolumeProcessed: netVolume + totalProfit, // gross volume net of refunds
       detailedProfits,
-      detailedSubscriptions
+      detailedSubscriptions,
+      subscriptionLedger
     });
 
   } catch (error: any) {

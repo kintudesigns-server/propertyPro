@@ -228,56 +228,62 @@ export function DashboardHero({
             <div className="hidden sm:flex items-end gap-3 mr-2">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: [0, -7, 0] }}
+                animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
                 transition={{
                   opacity: { duration: 0.4, delay: 0.3 },
                   scale: { duration: 0.4, delay: 0.3 },
-                  y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: "#007AFF" }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[80px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
               >
-                <div className="p-1.5 rounded-xl bg-blue-50 text-[#007AFF] group-hover:bg-[#007AFF] group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                   <Home className="h-4 w-4" />
                 </div>
-                <span className="text-[#1D1D1F] font-black text-lg leading-none">{tenantStats.leaseStatus}</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Lease</span>
+                <span className="text-slate-900 font-extrabold text-base leading-none">{tenantStats.leaseStatus}</span>
+                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Lease</span>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: [0, -5, 0] }}
+                animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
                 transition={{
                   opacity: { duration: 0.4, delay: 0.45 },
                   scale: { duration: 0.4, delay: 0.45 },
-                  y: { duration: 3.2, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 3.8, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: tenantStats.hasUnpaid ? "#FF3B30" : "#34C759" }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[80px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
               >
-                <div className={`p-1.5 rounded-xl ${tenantStats.hasUnpaid ? "bg-red-50 text-red-600 group-hover:bg-red-600" : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600"} group-hover:text-white transition-colors`}>
+                <div className={`p-2 rounded-xl transition-colors ${
+                  tenantStats.hasUnpaid 
+                    ? "bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white" 
+                    : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
+                }`}>
                   <Wallet className="h-4 w-4" />
                 </div>
-                <span className={`font-black text-lg leading-none ${tenantStats.hasUnpaid ? "text-red-600" : "text-[#1D1D1F]"}`}>{tenantStats.balanceDue}</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Balance</span>
+                <span className={`font-extrabold text-base leading-none ${tenantStats.hasUnpaid ? "text-rose-600" : "text-slate-900"}`}>
+                  {tenantStats.balanceDue}
+                </span>
+                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Balance</span>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: [0, -9, 0] }}
+                animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
                 transition={{
                   opacity: { duration: 0.4, delay: 0.6 },
                   scale: { duration: 0.4, delay: 0.6 },
-                  y: { duration: 4.0, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 4.2, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: "#FF9500" }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[80px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
               >
-                <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                   <Calendar className="h-4 w-4" />
                 </div>
-                <span className="text-[#1D1D1F] font-black text-lg leading-none">{tenantStats.nextRentDue}</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Rent Due</span>
+                <span className="text-slate-900 font-extrabold text-base leading-none">{tenantStats.nextRentDue}</span>
+                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Rent Due</span>
               </motion.div>
             </div>
           )}
@@ -296,7 +302,7 @@ export function DashboardHero({
                 whileHover={{ scale: 1.06, borderColor: "#007AFF" }}
                 className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
               >
-                <div className="p-1.5 rounded-xl bg-blue-50 text-[#007AFF] group-hover:bg-[#007AFF] group-hover:text-white transition-colors">
+                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                   <Building className="h-4 w-4" />
                 </div>
                 <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.totalProperties}</span>
@@ -311,10 +317,10 @@ export function DashboardHero({
                   scale: { duration: 0.4, delay: 0.45 },
                   y: { duration: 3.2, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: "#34C759" }}
+                whileHover={{ scale: 1.06 }}
                 className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
               >
-                <div className="p-1.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                   <Users className="h-4 w-4" />
                 </div>
                 <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.activeTenantsCount}</span>
@@ -329,10 +335,10 @@ export function DashboardHero({
                   scale: { duration: 0.4, delay: 0.6 },
                   y: { duration: 4.0, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: "#FF9500" }}
+                whileHover={{ scale: 1.06 }}
                 className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
               >
-                <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                   <Home className="h-4 w-4" />
                 </div>
                 <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.occupancyRate}%</span>
@@ -361,7 +367,7 @@ export function DashboardHero({
 
             <Button
               onClick={onViewFinancials}
-              className="bg-[#007AFF] hover:bg-blue-600 text-white border-0 rounded-xl font-extrabold flex items-center justify-center gap-2 h-[42px] px-5 shadow-sm transition-transform hover:scale-[1.02] active:scale-95 text-xs whitespace-nowrap"
+              className="bg-[#1D1D1F] hover:bg-black text-white border-0 rounded-xl font-extrabold flex items-center justify-center gap-2 h-[42px] px-5 shadow-sm transition-transform hover:scale-[1.02] active:scale-95 text-xs whitespace-nowrap cursor-pointer"
             >
               {role === "TENANT" ? (
                 <>

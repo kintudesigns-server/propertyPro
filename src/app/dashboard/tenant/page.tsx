@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import SecuritySettings from "@/components/settings/SecuritySettings";
+import { motion } from "framer-motion";
 
 export default function TenantDashboard() {
   const { data: session, status } = useSession();
@@ -603,40 +604,69 @@ export default function TenantDashboard() {
 
             {/* Hero Residence Card */}
             {activeLease ? (
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#1D1D1F] text-white border-none shadow-lg rounded-3xl overflow-hidden p-6 sm:p-8 relative">
-                <div className="absolute right-0 top-0 h-full w-1/3 bg-radial-gradient from-white/5 to-transparent pointer-events-none" />
+              <Card className="bg-slate-900 text-white border-none shadow-xl rounded-3xl overflow-hidden p-6 sm:p-8 relative group">
+                {/* Property / Unit Background Image - Bright, Vibrant Photo */}
+                <img
+                  src={
+                    activeLease.unit?.images?.[0] ||
+                    activeLease.unit?.property?.images?.[0] ||
+                    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
+                  }
+                  alt={activeLease.unit?.property?.name || "Your Residence"}
+                  className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                />
+
+                {/* Glowing White & Luminous Soft Ambient Flares */}
+                <div className="absolute -top-20 -right-20 w-96 h-96 bg-white/40 rounded-full blur-3xl pointer-events-none animate-pulse duration-[5000ms]" />
+                <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-cyan-100/30 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-white/20 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Luminous White Radial Light Sheen & Soft Readability Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-white/10 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/40 via-white/10 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-[0.5px] pointer-events-none" />
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="bg-[#496E5C] text-emerald-100 text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full">
+                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 backdrop-blur-md text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.25)]">
                         Your Residence
                       </span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{activeLease.unit.name}</h2>
-                    <p className="text-slate-300 text-sm font-semibold flex items-center gap-1.5">
-                      <Home className="h-4 w-4 text-[#496E5C]" />
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-md">{activeLease.unit.name}</h2>
+                    <p className="text-slate-200 text-sm font-semibold flex items-center gap-1.5 drop-shadow-xs">
+                      <Home className="h-4 w-4 text-emerald-400" />
                       {activeLease.unit.property.name} &bull; {activeLease.unit.property.address || "Verified Location"}
                     </p>
                   </div>
                   <div className="flex flex-row md:flex-col items-baseline md:items-end gap-3 shrink-0">
                     <div>
-                      <p className="text-[#8E8E93] text-[10px] font-bold uppercase tracking-wider text-left md:text-right">Monthly Rent</p>
-                      <p className="text-2xl sm:text-3xl font-black text-emerald-400">${Number(activeLease.monthlyRent).toLocaleString()}</p>
+                      <p className="text-slate-300 text-[10px] font-bold uppercase tracking-wider text-left md:text-right drop-shadow-xs">Monthly Rent</p>
+                      <p className="text-2xl sm:text-3xl font-black text-emerald-400 drop-shadow-md">${Number(activeLease.monthlyRent).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Lease Period progress line */}
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <div className="flex justify-between items-center text-xs text-[#8E8E93] mb-2">
-                    <span>Lease Term: {new Date(activeLease.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(activeLease.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
-                    <span className="font-extrabold text-emerald-400">{getLeaseProgress(activeLease)}% Complete</span>
+                <div className="mt-8 pt-6 border-t border-white/15 relative z-10">
+                  <div className="flex justify-between items-center text-xs text-slate-200 mb-2.5 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span>Lease Term: {new Date(activeLease.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(activeLease.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                    </span>
+                    <span className="font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-full text-[11px] backdrop-blur-md shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                      {getLeaseProgress(activeLease)}% Complete
+                    </span>
                   </div>
-                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
-                      style={{ width: `${getLeaseProgress(activeLease)}%` }} 
-                    />
+                  <div className="w-full h-3 bg-slate-900/90 rounded-full overflow-hidden p-0.5 border border-white/15 relative shadow-inner">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${getLeaseProgress(activeLease)}%` }}
+                      transition={{ duration: 1.6, ease: "easeOut" }}
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 relative shadow-[0_0_15px_rgba(52,211,153,0.85)]"
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-[0_0_12px_#34d399] animate-ping opacity-75" />
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 bg-emerald-100 rounded-full shadow-[0_0_10px_#10b981]" />
+                    </motion.div>
                   </div>
                 </div>
               </Card>

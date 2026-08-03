@@ -692,6 +692,8 @@ model AuditLog {
   @@index([createdAt])
 }
 
+
+
 enum TourType {
   IN_PERSON
   VIDEO_CALL

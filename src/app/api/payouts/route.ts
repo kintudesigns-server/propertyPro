@@ -36,16 +36,20 @@ export async function GET(req: NextRequest) {
   const toDate       = searchParams.get("to");                    // ISO date string
   const searchTerm   = searchParams.get("search") || "";
   const exportCsv    = searchParams.get("export") === "csv";
+  const slaHours     = Math.max(1, parseInt(searchParams.get("slaHours") || "48", 10));
 
   try {
     const baseWhere: any = {};
 
+    const userRole = (session.user as any).role;
+    const isAdmin = userRole === "SUPERADMIN" || userRole === "ADMIN";
+
     // Role-level scoping
-    if (role === "OWNER") {
+    if (userRole === "OWNER") {
       baseWhere.ownerId = userId;
-    } else if (role === "TENANT") {
+    } else if (userRole === "TENANT") {
       baseWhere.tenantId = userId;
-    } else if (role !== "SUPERADMIN") {
+    } else if (!isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -108,7 +112,7 @@ export async function GET(req: NextRequest) {
     };
 
     // CSV Export — return all matching records streamed as CSV
-    if (exportCsv && role === "SUPERADMIN") {
+    if (exportCsv && isAdmin) {
       const allPayouts = await prisma.payoutRequest.findMany({
         where: searchWhere,
         include,
@@ -146,55 +150,102 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Count for pagination
-    const totalCount = await prisma.payoutRequest.count({ where: searchWhere });
+    // Execute queries in parallel — 3 lightweight calls maximum to eliminate DB connection pool exhaustion
+    const statWhere: any = isAdmin ? {} : userRole === "OWNER" ? { ownerId: userId } : { tenantId: userId };
+    const slaThreshold = new Date(Date.now() - slaHours * 3600 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000);
 
-    // Paginated query
-    const payouts = await prisma.payoutRequest.findMany({
-      where: searchWhere,
-      include,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    });
-
-    // Summary stats (always from unfiltered owner scope for accurate totals)
-    const statWhere: any = role === "SUPERADMIN" ? {} : role === "OWNER" ? { ownerId: userId } : { tenantId: userId };
-    const [pendingCount, completedAgg, rejectedAgg, processedCount] = await Promise.all([
-      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING" } }),
-      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "COMPLETED" }, _sum: { amount: true }, _count: true }),
-      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "REJECTED" }, _sum: { amount: true } }),
-      prisma.payoutRequest.count({ where: { ...statWhere, status: { not: "PENDING" } } }),
+    const [totalCount, payouts, allStatsRecords] = await Promise.all([
+      prisma.payoutRequest.count({ where: searchWhere }),
+      prisma.payoutRequest.findMany({
+        where: searchWhere,
+        include,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.payoutRequest.findMany({
+        where: statWhere,
+        select: {
+          id: true,
+          status: true,
+          amount: true,
+          createdAt: true,
+          disbursedAt: true,
+          ownerId: true,
+          tenantId: true,
+        },
+      }),
     ]);
 
-    // Avg processing time (createdAt → disbursedAt) for completed payouts
-    const completedWithDates = await prisma.payoutRequest.findMany({
-      where: { ...statWhere, status: "COMPLETED", disbursedAt: { not: null } },
-      select: { createdAt: true, disbursedAt: true },
-    });
-    let avgProcessingHours = 0;
-    if (completedWithDates.length > 0) {
-      const totalMs = completedWithDates.reduce((acc: number, p: any) => {
-        return acc + (new Date(p.disbursedAt).getTime() - new Date(p.createdAt).getTime());
-      }, 0);
-      avgProcessingHours = Math.round(totalMs / completedWithDates.length / (1000 * 60 * 60));
+    // Calculate all stats in-memory
+    let pendingCount = 0;
+    let pendingAmountAtRisk = 0;
+    let pendingOwnerCount = 0;
+    let pendingTenantCount = 0;
+    let settledVolume = 0;
+    let rejectedVolume = 0;
+    let processedCount = 0;
+    let overdueCount = 0;
+    let recentCompletedCount = 0;
+    let recentProcessedCount = 0;
+    let ownerCount = 0;
+    let tenantCount = 0;
+
+    let totalValidMs = 0;
+    let validCount = 0;
+
+    for (const p of allStatsRecords) {
+      const amt = Number(p.amount || 0);
+      const isPending = p.status === "PENDING";
+      const isCompleted = p.status === "COMPLETED";
+      const isRejected = p.status === "REJECTED";
+      const isOwnerPayout = !!p.ownerId && !p.tenantId;
+      const isTenantPayout = !!p.tenantId;
+
+      if (isOwnerPayout) ownerCount++;
+      if (isTenantPayout) tenantCount++;
+
+      if (isPending) {
+        pendingCount++;
+        pendingAmountAtRisk += amt;
+        if (isOwnerPayout) pendingOwnerCount++;
+        if (isTenantPayout) pendingTenantCount++;
+        if (new Date(p.createdAt) < slaThreshold) overdueCount++;
+      } else {
+        processedCount++;
+      }
+
+      if (isCompleted) settledVolume += amt;
+      if (isRejected) rejectedVolume += amt;
+
+      const pDate = new Date(p.createdAt);
+      if (pDate >= thirtyDaysAgo) {
+        if (isCompleted) recentCompletedCount++;
+        if (isCompleted || isRejected) recentProcessedCount++;
+      }
+
+      if (isCompleted && p.disbursedAt) {
+        const delta = new Date(p.disbursedAt).getTime() - pDate.getTime();
+        if (delta > 0) {
+          totalValidMs += delta;
+          validCount++;
+        }
+      }
     }
 
-    // Pending breakdown (owner vs tenant) for stats
-    const [pendingOwnerCount, pendingTenantCount, pendingAmountAgg] = await Promise.all([
-      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING", tenantId: null, ownerId: { not: null } } }),
-      prisma.payoutRequest.count({ where: { ...statWhere, status: "PENDING", tenantId: { not: null } } }),
-      prisma.payoutRequest.aggregate({ where: { ...statWhere, status: "PENDING" }, _sum: { amount: true } }),
-    ]);
+    const approvalRate = recentProcessedCount > 0
+      ? Math.round((recentCompletedCount / recentProcessedCount) * 100)
+      : 100;
 
-    // Mask account numbers for ALL ROLES via DB-level obfuscation,
-    // Since the actual DB record is AES encrypted, we just return a masked string here.
+    const avgProcessingHours = validCount > 0
+      ? Math.round(totalValidMs / validCount / (1000 * 60 * 60))
+      : 0;
+
+    // Mask account numbers for ALL ROLES via DB-level obfuscation
     const maskedPayouts = payouts.map((p: any) => {
-      // If it's a tenant refund via STRIPE, it's not encrypted bank data, but token.
       if (p.bankName === "STRIPE") return p;
       if (p.accountNumber) {
-         // Since it is an encrypted string in the DB (like hex string), we can't do slice(-4) on the raw number.
-         // We'll just display a standard mask.
          return { ...p, accountNumber: "••••••••" };
       }
       return p;
@@ -210,16 +261,22 @@ export async function GET(req: NextRequest) {
       },
       stats: {
         pendingCount,
-        pendingAmountAtRisk: Number(pendingAmountAgg._sum.amount || 0),
+        pendingAmountAtRisk,
         pendingOwnerCount,
         pendingTenantCount,
-        settledVolume: Number(completedAgg._sum.amount || 0),
-        rejectedVolume: Number(rejectedAgg._sum.amount || 0),
+        settledVolume,
+        rejectedVolume,
         processedCount,
         avgProcessingHours,
+        overdueCount,
+        approvalRate,
+        ownerCount,
+        tenantCount,
       },
     });
+
   } catch (error: any) {
+    console.error("[GET /api/payouts Error]:", error);
     return NextResponse.json({ error: error.message || "Failed to fetch payouts" }, { status: 500 });
   }
 }
@@ -402,7 +459,8 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "SUPERADMIN") {
+  const role = (session?.user as any)?.role;
+  if (!session?.user || (role !== "SUPERADMIN" && role !== "ADMIN")) {
     return NextResponse.json({ error: "Access denied. Admins only." }, { status: 403 });
   }
 

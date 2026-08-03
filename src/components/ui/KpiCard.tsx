@@ -28,51 +28,60 @@ export interface KpiCardProps {
   badgeText?: string;
 }
 
-const variantStyles: Record<KpiCardVariant, { bg: string; text: string; iconBg: string }> = {
+const variantStyles: Record<KpiCardVariant, { bg: string; text: string; iconBg: string; dot: string }> = {
   blue: {
-    bg: "bg-[#007AFF]/10",
-    text: "text-[#007AFF]",
-    iconBg: "bg-[#007AFF]/15 text-[#007AFF]",
+    bg: "bg-blue-50 text-blue-700 border-blue-200/60",
+    text: "text-blue-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-blue-500",
   },
   green: {
-    bg: "bg-[#34C759]/10",
-    text: "text-[#34C759]",
-    iconBg: "bg-[#34C759]/15 text-[#34C759]",
+    bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+    text: "text-emerald-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-emerald-500",
   },
   emerald: {
-    bg: "bg-emerald-500/10",
+    bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
     text: "text-emerald-600",
-    iconBg: "bg-emerald-500/15 text-emerald-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-emerald-500",
   },
   orange: {
-    bg: "bg-[#FF9500]/10",
-    text: "text-[#FF9500]",
-    iconBg: "bg-[#FF9500]/15 text-[#FF9500]",
+    bg: "bg-amber-50 text-amber-700 border-amber-200/60",
+    text: "text-amber-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-amber-500",
   },
   amber: {
-    bg: "bg-amber-500/10",
+    bg: "bg-amber-50 text-amber-700 border-amber-200/60",
     text: "text-amber-600",
-    iconBg: "bg-amber-500/15 text-amber-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-amber-500",
   },
   purple: {
-    bg: "bg-[#AF52DE]/10",
-    text: "text-[#AF52DE]",
-    iconBg: "bg-[#AF52DE]/15 text-[#AF52DE]",
+    bg: "bg-purple-50 text-purple-700 border-purple-200/60",
+    text: "text-purple-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-purple-500",
   },
   indigo: {
-    bg: "bg-indigo-500/10",
+    bg: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
     text: "text-indigo-600",
-    iconBg: "bg-indigo-500/15 text-indigo-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-indigo-500",
   },
   red: {
-    bg: "bg-[#FF3B30]/10",
-    text: "text-[#FF3B30]",
-    iconBg: "bg-[#FF3B30]/15 text-[#FF3B30]",
+    bg: "bg-rose-50 text-rose-700 border-rose-200/60",
+    text: "text-rose-600",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-rose-500",
   },
   slate: {
-    bg: "bg-slate-500/10",
+    bg: "bg-slate-100 text-slate-700 border-slate-200",
     text: "text-slate-700",
-    iconBg: "bg-slate-500/15 text-slate-700",
+    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    dot: "bg-slate-500",
   },
 };
 
@@ -98,43 +107,46 @@ export function KpiCard({
     <div
       onClick={onClick}
       className={`
-        bg-white border rounded-2xl p-4 shadow-xs transition-all duration-200 relative overflow-hidden group
+        bg-white border rounded-[20px] p-4.5 shadow-xs transition-all duration-200 relative overflow-hidden group flex flex-col justify-between
         ${onClick || href ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md" : ""}
         ${
           active
-            ? "border-[#007AFF] ring-2 ring-[#007AFF]/20 bg-[#F5F5F7]"
-            : "border-[#E5E5EA] hover:border-[#D1D1D6]"
+            ? "border-[#007AFF] ring-2 ring-[#007AFF]/20 bg-blue-50/40 shadow-sm"
+            : "border-slate-200/80 hover:border-slate-300"
         }
         ${className}
       `}
     >
-      <div className="flex justify-between items-start mb-2 gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-[#6E6E73] leading-tight line-clamp-2 min-h-[28px] flex-1">
+      <div className="flex justify-between items-start mb-3 gap-2">
+        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 truncate flex-1">
           {title}
         </span>
         {Icon && (
-          <div className={`p-2 rounded-xl shrink-0 transition-transform group-hover:scale-105 ${styles.iconBg}`}>
+          <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 shadow-2xs ${styles.iconBg}`}>
             <Icon className="h-4 w-4" />
           </div>
         )}
       </div>
 
-      <div className="flex items-baseline justify-between gap-2 min-w-0">
-        <p className={`${valueFontSize} font-bold tracking-tight text-[#1D1D1F] truncate`} title={valueStr}>
-          {value}
-        </p>
-        {badgeText && (
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${styles.bg} ${styles.text}`}>
-            {badgeText}
-          </span>
+      <div className="space-y-1.5">
+        <div className="flex items-baseline justify-between gap-2 min-w-0">
+          <p className={`${valueFontSize} font-black tracking-tight text-slate-900 leading-none truncate`} title={valueStr}>
+            {value}
+          </p>
+          {badgeText && (
+            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border shrink-0 ${styles.bg}`}>
+              {badgeText}
+            </span>
+          )}
+        </div>
+
+        {subtext && (
+          <div className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5 truncate pt-0.5">
+            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${styles.dot}`} />
+            <span className="truncate">{subtext}</span>
+          </div>
         )}
       </div>
-
-      {subtext && (
-        <div className="mt-2 text-xs font-medium text-[#8E8E93] flex items-center gap-1 truncate">
-          {subtext}
-        </div>
-      )}
     </div>
   );
 

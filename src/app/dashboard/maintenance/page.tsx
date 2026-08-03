@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { KpiCard } from "@/components/ui/KpiCard";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from "@/components/ui/dropdown-menu";
-import { Wrench, Search, Clock, Calendar, CheckCircle2, MoreHorizontal, Eye, Edit, UserPlus, XCircle, LayoutList, LayoutGrid, Check, CheckCircle, HelpCircle, Send, MessageSquare, Activity } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Wrench, Search, Clock, Calendar, CheckCircle2, MoreHorizontal, Eye, Edit, UserPlus, XCircle, LayoutList, LayoutGrid, Check, CheckCircle, HelpCircle, Send, MessageSquare, Activity, Plus, ShieldCheck, AlertTriangle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -35,7 +34,7 @@ export default function MaintenancePage() {
   const [dateFilter, setDateFilter] = useState("ALL");
   
   // View Toggle
-  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -98,39 +97,34 @@ export default function MaintenancePage() {
   };
 
   const handleAssignSubmit = async () => {
-    if (!selectedInspectorId || !selectedReqForAssign) return;
+    if (!selectedReqForAssign) return;
     try {
       const res = await fetch("/api/maintenance", {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id: selectedReqForAssign.id, 
-          inspectorId: selectedInspectorId === "none" ? null : selectedInspectorId 
-        })
+        body: JSON.stringify({
+          id: selectedReqForAssign.id,
+          inspectorId: selectedInspectorId === "none" ? null : selectedInspectorId,
+          status: selectedInspectorId === "none" ? "SUBMITTED" : "ASSIGNED",
+        }),
       });
+
       if (res.ok) {
-        toast.success("Inspector assigned successfully");
+        toast.success("Inspector assignment updated");
         setAssignModalOpen(false);
         fetchData();
       } else {
-        toast.error("Failed to assign inspector");
+        toast.error("Failed to update assignment");
       }
     } catch (err) {
-      toast.error("An error occurred");
+      toast.error("Error updating assignment");
     }
   };
 
-  const openAssignModal = (req: any) => {
-    setSelectedReqForAssign(req);
-    setSelectedInspectorId(req.inspectorId || "");
-    setAssignModalMode("select");
-    setNewInspector({ name: "", email: "", phone: "", password: "TempPassword@123" });
-    setAssignModalOpen(true);
-  };
-
   const handleCreateInspector = async () => {
-    if (!newInspector.name || !newInspector.email || !newInspector.password) {
-      return toast.error("Name, email and password are required");
+    if (!newInspector.name || !newInspector.email) {
+      toast.error("Name and Email are required");
+      return;
     }
     setInspectorSubmitting(true);
     try {
@@ -139,26 +133,83 @@ export default function MaintenancePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newInspector,
-          role: "INSPECTOR"
+          role: "INSPECTOR",
         }),
       });
-      const data = await res.json();
+
       if (res.ok) {
+        const createdUser = await res.json();
         toast.success("Inspector created successfully!");
+        setInspectors(prev => [...prev, createdUser]);
+        setSelectedInspectorId(createdUser.id);
         setAssignModalMode("select");
-        if (data.user) {
-          setInspectors(prev => [...prev, data.user]);
-          setSelectedInspectorId(data.user.id);
-        }
-        await fetchData();
+        setNewInspector({ name: "", email: "", phone: "", password: "TempPassword@123" });
       } else {
-        toast.error(data.error || "Failed to create inspector");
+        const err = await res.json();
+        toast.error(err.error || "Failed to create inspector");
       }
     } catch (err) {
-      toast.error("An unexpected error occurred");
+      toast.error("Error creating inspector");
     } finally {
       setInspectorSubmitting(false);
     }
+  };
+
+  const handleDispatchSubmit = async () => {
+    if (!selectedReqForDispatch || !selectedVendorId) {
+      toast.error("Please select a vendor");
+      return;
+    }
+    try {
+      const res = await fetch("/api/maintenance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedReqForDispatch.id,
+          externalVendorId: selectedVendorId,
+          status: "ASSIGNED",
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Vendor dispatched successfully!");
+        setDispatchModalOpen(false);
+        fetchData();
+      } else {
+        toast.error("Failed to dispatch vendor");
+      }
+    } catch (err) {
+      toast.error("Error dispatching vendor");
+    }
+  };
+
+  const handleQuickStatusChange = async (reqId: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/maintenance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: reqId,
+          status: newStatus,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success(`Status updated to ${newStatus.toLowerCase().replace(/_/g, ' ')}`);
+        fetchData();
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (err) {
+      toast.error("Error updating status");
+    }
+  };
+
+  const openAssignModal = (req: any) => {
+    setSelectedReqForAssign(req);
+    setSelectedInspectorId(req.inspectorId || "none");
+    setAssignModalMode("select");
+    setAssignModalOpen(true);
   };
 
   const openDispatchModal = (req: any) => {
@@ -167,73 +218,47 @@ export default function MaintenancePage() {
     setDispatchModalOpen(true);
   };
 
-  const handleDispatchSubmit = async () => {
-    if (!selectedVendorId || !selectedReqForDispatch) return;
-    try {
-      const res = await fetch("/api/maintenance", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedReqForDispatch.id,
-          externalVendorId: selectedVendorId,
-          status: "ASSIGNED",
-          action: "DISPATCH_VENDOR"
-        })
-      });
-      if (res.ok) {
-        toast.success("Vendor dispatched successfully! They have been notified.");
-        setDispatchModalOpen(false);
-        fetchData();
-      } else {
-        toast.error("Failed to dispatch vendor");
-      }
-    } catch (err) {
-      toast.error("An error occurred");
-    }
-  };
-
-  const handleQuickStatusChange = async (id: string, newStatus: string) => {
-    try {
-      const res = await fetch("/api/maintenance", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
-      });
-      if (!res.ok) throw new Error("Failed to update status");
-      toast.success(`Status updated successfully`);
-      fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred");
-    }
-  };
-
+  // Filter logic
   const filteredRequests = requests.filter(req => {
-    const matchesSearch = req.title.toLowerCase().includes(search.toLowerCase()) || 
-                          req.unit.name.toLowerCase().includes(search.toLowerCase()) ||
-                          req.tenant?.name?.toLowerCase().includes(search.toLowerCase()) ||
-                          req.unit.property.name.toLowerCase().includes(search.toLowerCase());
-    
+    const q = search.toLowerCase();
+    const matchesSearch = !q || 
+      req.title?.toLowerCase().includes(q) ||
+      req.description?.toLowerCase().includes(q) ||
+      req.category?.toLowerCase().includes(q) ||
+      req.unit?.property?.name?.toLowerCase().includes(q) ||
+      req.unit?.name?.toLowerCase().includes(q) ||
+      req.tenant?.name?.toLowerCase().includes(q);
+
     const matchesStatus = statusFilter === "ALL" || 
-                          (statusFilter === "UNASSIGNED" ? (!req.inspector && !req.externalVendor) : req.status === statusFilter);
+      (statusFilter === "UNASSIGNED" ? (!req.inspector && !req.externalVendor) : req.status === statusFilter);
     const matchesPriority = priorityFilter === "ALL" || req.priority === priorityFilter;
     const matchesCategory = categoryFilter === "ALL" || req.category === categoryFilter;
-    
-    // Simple date filtering placeholder
+
     let matchesDate = true;
-    if (dateFilter === "TODAY") {
-      matchesDate = new Date(req.createdAt).toDateString() === new Date().toDateString();
+    if (dateFilter !== "ALL" && req.createdAt) {
+      const reqDate = new Date(req.createdAt);
+      const now = new Date();
+      if (dateFilter === "TODAY") {
+        matchesDate = reqDate.toDateString() === now.toDateString();
+      } else if (dateFilter === "WEEK") {
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        matchesDate = reqDate >= oneWeekAgo;
+      } else if (dateFilter === "MONTH") {
+        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        matchesDate = reqDate >= oneMonthAgo;
+      }
     }
-    
+
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesDate;
   });
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "EMERGENCY": return "bg-red-50 text-red-600 border-red-200";
-      case "HIGH": return "bg-orange-50 text-orange-600 border-orange-200";
-      case "MEDIUM": return "bg-blue-50 text-blue-600 border-blue-200";
-      case "LOW": return "bg-green-50 text-green-600 border-green-200";
-      default: return "bg-gray-50 text-gray-600 border-gray-200";
+      case "EMERGENCY": return "bg-rose-50 text-rose-700 border-rose-200 font-extrabold";
+      case "HIGH": return "bg-amber-50 text-amber-700 border-amber-200 font-bold";
+      case "MEDIUM": return "bg-blue-50 text-blue-700 border-blue-200 font-bold";
+      case "LOW": return "bg-slate-100 text-slate-700 border-slate-200 font-bold";
+      default: return "bg-slate-100 text-slate-700 border-slate-200 font-bold";
     }
   };
 
@@ -241,78 +266,77 @@ export default function MaintenancePage() {
     switch (status) {
       case "SUBMITTED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 whitespace-nowrap">
-            <Clock className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+            <Clock className="h-3.5 w-3.5 text-blue-600" />
             Submitted
           </span>
         );
       case "ASSIGNED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-600 border border-purple-200 whitespace-nowrap">
-            <UserPlus className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
+            <UserPlus className="h-3.5 w-3.5 text-purple-600" />
             Assigned
           </span>
         );
       case "DIAGNOSIS_SCHEDULED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 whitespace-nowrap">
-            <Calendar className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 whitespace-nowrap">
+            <Calendar className="h-3.5 w-3.5 text-sky-600" />
             Diagnosis Scheduled
           </span>
         );
       case "DIAGNOSIS_COMPLETE": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200 whitespace-nowrap">
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5 text-teal-600" />
             Diagnosis Complete
           </span>
         );
       case "APPROVED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-750 border border-indigo-200 whitespace-nowrap">
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             Approved
           </span>
         );
       case "REPAIR_SCHEDULED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-750 border border-purple-200 whitespace-nowrap">
-            <Calendar className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
+            <Calendar className="h-3.5 w-3.5 text-purple-600" />
             Repair Scheduled
           </span>
         );
       case "AWAITING_APPROVAL": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
-            <Clock className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+            <Clock className="h-3.5 w-3.5 text-amber-600" />
             Awaiting Approval
           </span>
         );
       case "PENDING_TENANT_CONFIRMATION": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
-            <HelpCircle className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+            <HelpCircle className="h-3.5 w-3.5 text-blue-600" />
             Pending Confirmation
           </span>
         );
       case "RESOLVED": 
-
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200 whitespace-nowrap">
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             Resolved
           </span>
         );
       case "CLOSED": 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200 whitespace-nowrap">
-            <CheckCircle className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+            <CheckCircle className="h-3.5 w-3.5 text-slate-500" />
             Closed
           </span>
         );
       default: 
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200 whitespace-nowrap capitalize">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap capitalize">
             <HelpCircle className="h-3.5 w-3.5" />
             {status.toLowerCase().replace(/_/g, ' ')}
           </span>
@@ -325,617 +349,615 @@ export default function MaintenancePage() {
   const awaitingCount = requests.filter(r => r.status === "AWAITING_APPROVAL").length;
   const activeCount = requests.filter(r => r.status === "ASSIGNED" || r.status === "PENDING_TENANT_CONFIRMATION").length;
 
+  if (!moduleAllowed && !moduleLoading) {
+    return <ModuleLockedBanner module="maintenance" />;
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-20 relative">
+    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 space-y-6">
       
-      {/* Overview Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          title="Total Tickets"
-          value={totalCount}
-          icon={Wrench}
-          variant="blue"
-          active={statusFilter === "ALL"}
-          onClick={() => setStatusFilter("ALL")}
-        />
-        <KpiCard
-          title="Needs Assignment"
-          value={unassignedCount}
-          subtext={unassignedCount > 0 ? "Requires action" : "All assigned"}
-          icon={UserPlus}
-          variant="orange"
-          active={statusFilter === "UNASSIGNED"}
-          onClick={() => setStatusFilter("UNASSIGNED")}
-        />
-        <KpiCard
-          title="Awaiting Approval"
-          value={awaitingCount}
-          subtext="Estimates pending"
-          icon={Clock}
-          variant="amber"
-          active={statusFilter === "AWAITING_APPROVAL"}
-          onClick={() => setStatusFilter("AWAITING_APPROVAL")}
-        />
-        <KpiCard
-          title="Active Repairs"
-          value={activeCount}
-          subtext="In progress"
-          icon={CheckCircle2}
-          variant="green"
-          active={statusFilter === "ASSIGNED"}
-          onClick={() => setStatusFilter("ASSIGNED")}
-        />
+      {/* Page Header & Primary Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
+            <span className="text-slate-900 font-bold">Maintenance &amp; Work Orders</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Maintenance Command Center
+          </h1>
+          <p className="text-xs md:text-sm text-slate-500 font-medium mt-0.5">
+            Track emergency repairs, dispatch certified inspectors, and manage vendor estimates.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/maintenance/new">
+            <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl shadow-xs text-xs gap-2">
+              <Plus className="h-4 w-4" /> Log Maintenance Ticket
+            </Button>
+          </Link>
+        </div>
       </div>
-      
-      {/* Exact Header matching screenshot */}
-      <div className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+      {/* Sleek KPI Summary Strip (Platform Design System) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Card 
+          onClick={() => setStatusFilter("ALL")}
+          className={`rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-blue-500 bg-white cursor-pointer transition-all ${statusFilter === "ALL" ? "ring-2 ring-blue-400" : "hover:border-slate-300"}`}
+        >
+          <CardContent className="p-4">
+            <p className="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Total Tickets</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{totalCount}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">All Maintenance Requests</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          onClick={() => setStatusFilter("UNASSIGNED")}
+          className={`rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-amber-500 bg-white cursor-pointer transition-all ${statusFilter === "UNASSIGNED" ? "ring-2 ring-amber-400" : "hover:border-slate-300"}`}
+        >
+          <CardContent className="p-4">
+            <p className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider">Needs Assignment</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{unassignedCount}</p>
+            <p className="text-[11px] text-amber-600 font-bold mt-0.5">{unassignedCount > 0 ? "Requires Dispatch Action" : "All Tickets Assigned"}</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          onClick={() => setStatusFilter("AWAITING_APPROVAL")}
+          className={`rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-purple-500 bg-white cursor-pointer transition-all ${statusFilter === "AWAITING_APPROVAL" ? "ring-2 ring-purple-400" : "hover:border-slate-300"}`}
+        >
+          <CardContent className="p-4">
+            <p className="text-[10px] font-extrabold text-purple-800 uppercase tracking-wider">Awaiting Approval</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{awaitingCount}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Vendor Estimates Pending</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          onClick={() => setStatusFilter("ASSIGNED")}
+          className={`rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-emerald-500 bg-white cursor-pointer transition-all ${statusFilter === "ASSIGNED" ? "ring-2 ring-emerald-400" : "hover:border-slate-300"}`}
+        >
+          <CardContent className="p-4">
+            <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Active Repairs</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{activeCount}</p>
+            <p className="text-[11px] text-emerald-600 font-bold mt-0.5">Work In Progress</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Control Bar & Filter Container */}
+      <Card className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/40 space-y-3">
           
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-              <Wrench className="h-6 w-6 text-blue-500" />
+          <div className="flex flex-col lg:flex-row items-center gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <Input 
+                placeholder="Search issue title, property, unit, or tenant..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9 text-xs bg-white border-slate-200 rounded-xl focus:bg-white font-medium"
+              />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-[#1D1D1F] tracking-tight">Maintenance Requests ({requests.length})</h1>
-              <p className="text-[#6E6E73] text-sm font-medium mt-0.5">A list of all maintenance requests and their current status</p>
+
+            {/* Filter Select Controls with Explicit Placeholders */}
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto">
+              {/* Status Select */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="UNASSIGNED">⚠️ Needs Assignment</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="ASSIGNED">Assigned</option>
+                <option value="AWAITING_APPROVAL">Awaiting Approval</option>
+                <option value="PENDING_TENANT_CONFIRMATION">Pending Confirmation</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+
+              {/* Priority Select */}
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+              >
+                <option value="ALL">All Priorities</option>
+                <option value="EMERGENCY">Emergency</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+
+              {/* Category Select */}
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+              >
+                <option value="ALL">All Categories</option>
+                <option value="PLUMBING">Plumbing</option>
+                <option value="ELECTRICAL">Electrical</option>
+                <option value="HVAC">HVAC</option>
+                <option value="APPLIANCES">Appliances</option>
+                <option value="FLOORING">Flooring</option>
+                <option value="PAINTING">Painting</option>
+                <option value="ROOFING">Roofing</option>
+                <option value="GENERAL_REPAIR">General Repair</option>
+                <option value="OTHER">Other</option>
+              </select>
+
+              {/* Date Select */}
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+              >
+                <option value="ALL">All Time</option>
+                <option value="TODAY">Today</option>
+                <option value="WEEK">This Week</option>
+                <option value="MONTH">This Month</option>
+              </select>
+
+              {/* View Switcher Toggle */}
+              <div className="flex bg-slate-200/70 p-1 rounded-xl gap-1 shrink-0 ml-auto lg:ml-0">
+                <button 
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-900"}`}
+                  title="Table View"
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-900"}`}
+                  title="Card Grid View"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </div>
+
             </div>
           </div>
 
-          <div className="flex items-center bg-[#F1F5F9] rounded-lg p-1">
-            <button 
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md flex items-center justify-center transition-all ${viewMode === "list" ? "bg-blue-600 text-white shadow-sm" : "text-[#6E6E73] hover:text-[#1D1D1F]"}`}
-            >
-              <LayoutList className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md flex items-center justify-center transition-all ${viewMode === "grid" ? "bg-blue-600 text-white shadow-sm" : "text-[#6E6E73] hover:text-[#1D1D1F]"}`}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-          </div>
-          
         </div>
 
-        {/* Filter Bar exactly like screenshot */}
-        <div className="mt-6 flex flex-col lg:flex-row items-center gap-3">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-            <Input 
-              placeholder="Search by title, description, category..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-10 rounded-lg bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-medium text-sm shadow-sm w-full"
-            />
-          </div>
-          <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 w-full lg:w-auto">
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-              <SelectTrigger className="h-10 rounded-lg bg-white border-[#E5E5EA] font-medium text-[#1D1D1F] w-full lg:w-[140px] shadow-sm focus:ring-[#007AFF]">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg">
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="UNASSIGNED">⚠️ Needs Assignment</SelectItem>
-                <SelectItem value="SUBMITTED">Submitted</SelectItem>
-                <SelectItem value="ASSIGNED">Assigned</SelectItem>
-                <SelectItem value="AWAITING_APPROVAL">Awaiting Approval</SelectItem>
-                <SelectItem value="PENDING_TENANT_CONFIRMATION">Pending Confirmation</SelectItem>
-                <SelectItem value="RESOLVED">Resolved</SelectItem>
-                <SelectItem value="CLOSED">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v || "ALL")}>
-              <SelectTrigger className="h-10 rounded-lg bg-white border-[#E5E5EA] font-medium text-[#1D1D1F] w-full lg:w-[140px] shadow-sm focus:ring-[#007AFF]">
-                <SelectValue placeholder="All Priorities" />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg">
-                <SelectItem value="ALL">All Priorities</SelectItem>
-                <SelectItem value="EMERGENCY">Emergency</SelectItem>
-                <SelectItem value="HIGH">High</SelectItem>
-                <SelectItem value="MEDIUM">Medium</SelectItem>
-                <SelectItem value="LOW">Low</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v || "ALL")}>
-              <SelectTrigger className="h-10 rounded-lg bg-white border-[#E5E5EA] font-medium text-[#1D1D1F] w-full lg:w-[150px] shadow-sm focus:ring-[#007AFF]">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg">
-                <SelectItem value="ALL">All Categories</SelectItem>
-                <SelectItem value="PLUMBING">Plumbing</SelectItem>
-                <SelectItem value="ELECTRICAL">Electrical</SelectItem>
-                <SelectItem value="HVAC">HVAC</SelectItem>
-                <SelectItem value="APPLIANCES">Appliances</SelectItem>
-                <SelectItem value="FLOORING">Flooring</SelectItem>
-                <SelectItem value="PAINTING">Painting</SelectItem>
-                <SelectItem value="ROOFING">Roofing</SelectItem>
-                <SelectItem value="LANDSCAPING">Landscaping</SelectItem>
-                <SelectItem value="CLEANING">Cleaning</SelectItem>
-                <SelectItem value="PEST_CONTROL">Pest Control</SelectItem>
-                <SelectItem value="SECURITY">Security</SelectItem>
-                <SelectItem value="GENERAL_REPAIR">General Repair</SelectItem>
-                <SelectItem value="EMERGENCY">Emergency</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={dateFilter} onValueChange={(v) => setDateFilter(v || "ALL")}>
-              <SelectTrigger className="h-10 rounded-lg bg-white border-[#E5E5EA] font-medium text-[#1D1D1F] w-full lg:w-[130px] shadow-sm focus:ring-[#007AFF]">
-                <SelectValue placeholder="All Dates" />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg">
-                <SelectItem value="ALL">All Dates</SelectItem>
-                <SelectItem value="TODAY">Today</SelectItem>
-                <SelectItem value="WEEK">This Week</SelectItem>
-                <SelectItem value="MONTH">This Month</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
+        {/* LIST TABLE VIEW */}
         {viewMode === "list" ? (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="text-[#6E6E73] text-[13px] font-semibold border-y border-[#E5E5EA]">
-                <tr>
-                  <th className="px-4 py-4 font-semibold">Property</th>
-                  <th className="px-4 py-4 font-semibold">Priority</th>
-                  <th className="px-4 py-4 font-semibold">Status</th>
-                  <th className="px-4 py-4 font-semibold">Assigned To</th>
-                  <th className="px-4 py-4 font-semibold">Created</th>
-                  <th className="px-4 py-4 font-semibold text-right">Actions</th>
+          <CardContent className="p-0 overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/60 border-b border-slate-200">
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Issue &amp; Category</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Property &amp; Unit</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Priority &amp; Status</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Assigned Dispatch</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Requested Date</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5EA]">
+              <tbody className="divide-y divide-slate-100">
                 {loading ? (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-[#6E6E73] font-medium">Loading requests...</td></tr>
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-xs font-bold text-slate-400">
+                      Loading maintenance tickets...
+                    </td>
+                  </tr>
                 ) : filteredRequests.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-[#6E6E73] font-medium">No maintenance requests found.</td></tr>
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center text-slate-400">
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <Wrench className="h-8 w-8 text-slate-300 mx-auto" />
+                        <p className="text-sm font-bold text-slate-700">No requests found</p>
+                        <p className="text-xs text-slate-400">Try adjusting your filters or log a new ticket.</p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : (
                   (() => {
                     const start = (currentPage - 1) * itemsPerPage;
                     const paginated = filteredRequests.slice(start, start + itemsPerPage);
                     return paginated.map((req) => (
-                    <tr key={req.id} className="hover:bg-[#F2F2F7] transition-colors group">
-                      <td className="px-4 py-4">
-                        <div className="flex flex-col space-y-1">
-                          <span className="font-semibold text-[#1D1D1F] text-[15px]">{req.unit.property.name || req.tenant?.name || "Property Name"}</span>
-                          <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px]">
-                            {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`} (apartment)
-                          </Link>
-                          <span className="text-[#6E6E73] text-xs">
-                            {req.unit.property.city || "City"}, {req.unit.property.state || "State"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(req.priority)} capitalize`}>
-                          {req.priority.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        {getStatusBadge(req.status)}
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex flex-col gap-1">
-                          {req.inspector && (
-                            <span className="text-xs font-medium text-[#1D1D1F] flex items-center gap-1">
-                              🕵️ {req.inspector.name} <span className="text-[10px] text-[#8E8E93] font-bold">(Inspector)</span>
+                      <tr key={req.id} className="hover:bg-slate-50/80 transition-colors group">
+                        
+                        {/* 1. Issue & Category */}
+                        <td className="py-3.5 px-6">
+                          <div className="space-y-1">
+                            <Link 
+                              href={`/dashboard/maintenance/${req.id}`}
+                              className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors block line-clamp-1"
+                            >
+                              {req.title}
+                            </Link>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
+                              {req.category?.replace(/_/g, ' ') || "General"}
                             </span>
-                          )}
-                          {req.externalVendor && (
-                            <span className="text-xs font-medium text-blue-600 flex items-center gap-1">
-                              <Wrench className="h-3 w-3" /> {req.externalVendor.name} <span className="text-[10px] text-blue-400 font-bold">(Vendor)</span>
+                          </div>
+                        </td>
+
+                        {/* 2. Property & Unit */}
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-3">
+                            {req.unit?.property?.images?.[0] ? (
+                              <img
+                                src={req.unit.property.images[0]}
+                                alt={req.unit.property.name}
+                                className="h-9 w-9 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                              />
+                            ) : (
+                              <div className="h-9 w-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold">
+                                <Building2 className="h-4 w-4 text-blue-500" />
+                              </div>
+                            )}
+                            <div className="space-y-0.5">
+                              <span className="font-bold text-xs text-slate-900 block">
+                                {req.unit?.property?.name || "Property"}
+                              </span>
+                              <span className="text-[11px] font-bold text-blue-600 block">
+                                {req.unit?.name?.includes("Unit") ? req.unit.name : `Unit ${req.unit?.name || 'A'}`}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* 3. Priority & Status */}
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${getPriorityColor(req.priority)} capitalize`}>
+                              {req.priority.toLowerCase()}
                             </span>
-                          )}
-                          {!req.inspector && !req.externalVendor && (
+                            {getStatusBadge(req.status)}
+                          </div>
+                        </td>
+
+                        {/* 4. Assigned Dispatch */}
+                        <td className="py-3.5 px-6">
+                          {req.inspector ? (
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <UserPlus className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                              <span>{req.inspector.name}</span>
+                              <span className="text-[10px] text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.2 rounded font-bold">Inspector</span>
+                            </div>
+                          ) : req.externalVendor ? (
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <Wrench className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                              <span>{req.externalVendor.name}</span>
+                              <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded font-bold">Vendor</span>
+                            </div>
+                          ) : (
                             <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                 Unassigned
                               </span>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
-                                className="h-6 px-1.5 text-xs font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg shadow-none border-none"
+                              <button
+                                onClick={(e) => { e.stopPropagation(); openAssignModal(req); }}
+                                className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
                               >
-                                Assign
-                              </Button>
+                                + Assign
+                              </button>
                             </div>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-1.5 text-[#6E6E73] font-medium text-[13px]">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(req.createdAt), "MMM d, yyyy, hh:mm a")}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] rounded-lg outline-none focus:ring-2 focus:ring-[#007AFF]">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-[#E5E5EA] p-1.5 z-50">
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                              <Eye className="h-4 w-4 text-[#6E6E73]" />
-                              View Details
-                            </DropdownMenuItem>
-                            {req.status === "AWAITING_APPROVAL" && (
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-bold text-amber-600 p-2 rounded-lg hover:bg-amber-50 focus:bg-amber-50">
-                                ⚡ Review &amp; Approve
+                        </td>
+
+                        {/* 5. Requested Date */}
+                        <td className="py-3.5 px-6">
+                          <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                            {req.createdAt ? format(new Date(req.createdAt), "MMM d, yyyy") : "N/A"}
+                          </span>
+                        </td>
+
+                        {/* 6. Action Column */}
+                        <td className="py-3.5 px-6 text-right" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-8 w-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 inline-flex items-center justify-center transition-colors border border-slate-200">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 bg-white rounded-xl shadow-lg border-slate-200 p-1">
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/dashboard/maintenance/${req.id}`)}
+                                className="text-xs font-bold text-slate-900 hover:bg-slate-50 rounded-lg cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-2 text-blue-600" />
+                                View Ticket
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                              <Edit className="h-4 w-4 text-[#6E6E73]" />
-                              Edit Request
-                            </DropdownMenuItem>
-                            {!req.externalVendorId && (
-                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9]">
-                                <UserPlus className="h-4 w-4 text-[#6E6E73]" />
-                                {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
+
+                              {req.status === "AWAITING_APPROVAL" && (
+                                <DropdownMenuItem 
+                                  onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
+                                  className="text-xs font-bold text-amber-600 hover:bg-amber-50 rounded-lg cursor-pointer"
+                                >
+                                  ⚡ Review Estimate
+                                </DropdownMenuItem>
+                              )}
+
+                              {!req.externalVendorId && (
+                                <DropdownMenuItem 
+                                  onClick={() => openAssignModal(req)} 
+                                  className="text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+                                >
+                                  <UserPlus className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                                  {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
+                                </DropdownMenuItem>
+                              )}
+
+                              {req.status === "SUBMITTED" && (
+                                <DropdownMenuItem 
+                                  onClick={() => openDispatchModal(req)} 
+                                  className="text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
+                                >
+                                  <Send className="h-3.5 w-3.5 mr-2" />
+                                  Dispatch Vendor
+                                </DropdownMenuItem>
+                              )}
+
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)}
+                                className="text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+                              >
+                                <Edit className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                                Edit Ticket
                               </DropdownMenuItem>
-                            )}
-                            {req.status === "SUBMITTED" && (
-                              <DropdownMenuItem onClick={() => openDispatchModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
-                                <Send className="h-4 w-4" />
-                                Dispatch Vendor
+
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleCancelRequest(req.id)}
+                                className="text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
+                              >
+                                <XCircle className="h-3.5 w-3.5 mr-2" />
+                                Cancel Ticket
                               </DropdownMenuItem>
-                            )}
-                            <div className="h-px bg-[#E5E5EA] my-1" />
-                            <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
-                              <XCircle className="h-4 w-4" />
-                              Cancel Request
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ));
-                })()
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+
+                      </tr>
+                    ));
+                  })()
                 )}
               </tbody>
             </table>
-          </div>
+
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredRequests.length / itemsPerPage) || 1}
+              totalItems={filteredRequests.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              itemLabel="requests"
+            />
+          </CardContent>
         ) : (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              <div className="col-span-full py-12 text-center text-[#6E6E73] font-medium">Loading requests...</div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-[#6E6E73] font-medium">No maintenance requests found.</div>
-            ) : (
-              (() => {
-                const start = (currentPage - 1) * itemsPerPage;
-                const paginated = filteredRequests.slice(start, start + itemsPerPage);
-                return paginated.map((req) => (
-                <Card key={req.id} className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
-                  <div className="p-5 border-b border-[#F1F5F9] flex justify-between items-start gap-4">
-                    <div className="flex flex-col space-y-1 w-full overflow-hidden">
-                      <h3 className="font-bold text-[#1D1D1F] text-lg leading-tight truncate">{req.title}</h3>
-                      <Link href={`/dashboard/properties/${req.unit.property.id}/units/${req.unit.id}`} className="text-blue-500 hover:underline font-medium text-[13px] truncate block w-full">
-                        {req.unit.property.name} - {req.unit.name.includes("Unit") ? req.unit.name : `Unit ${req.unit.name}`}
-                      </Link>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="h-8 w-8 shrink-0 inline-flex items-center justify-center text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F1F5F9] rounded-lg outline-none focus:ring-2 focus:ring-[#007AFF]">
-                        <MoreHorizontal className="h-5 w-5" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl shadow-lg border-[#E5E5EA] p-1.5 z-50 relative">
-                        {/* 1. Dispatch Vendor & Assignments (Only if not closed) */}
-                        {req.status !== "CLOSED" && req.status !== "RESOLVED" && (
-                          <>
-                            {req.status === "AWAITING_APPROVAL" && (
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-bold text-amber-600 p-2 rounded-lg hover:bg-amber-50 focus:bg-amber-50">
-                                ⚡ Review &amp; Approve
-                              </DropdownMenuItem>
+          /* CARD GRID VIEW */
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {loading ? (
+                <div className="col-span-full py-12 text-center text-xs font-bold text-slate-400">Loading requests...</div>
+              ) : filteredRequests.length === 0 ? (
+                <div className="col-span-full py-16 text-center text-slate-400">
+                  <Wrench className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-700">No requests found</p>
+                </div>
+              ) : (
+                (() => {
+                  const start = (currentPage - 1) * itemsPerPage;
+                  const paginated = filteredRequests.slice(start, start + itemsPerPage);
+                  return paginated.map((req) => (
+                    <Card key={req.id} className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden hover:shadow-md transition-all">
+                      
+                      {/* Card Header */}
+                      <div className="p-4 border-b border-slate-100 space-y-2">
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {req.unit?.property?.images?.[0] ? (
+                              <img
+                                src={req.unit.property.images[0]}
+                                alt={req.unit.property.name}
+                                className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold">
+                                <Building2 className="h-5 w-5 text-blue-500" />
+                              </div>
                             )}
-                            <DropdownMenuItem onClick={() => openDispatchModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-blue-600 p-2 rounded-lg hover:bg-blue-50 focus:bg-blue-50 focus:text-blue-700">
-                              <Send className="h-4 w-4" /> Dispatch Vendor
-                            </DropdownMenuItem>
-                            {!req.externalVendorId && (
-                              <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                                <UserPlus className="h-4 w-4 text-[#6E6E73]" /> {req.inspector ? "Reassign Inspector" : "Assign Inspector"}
-                              </DropdownMenuItem>
-                            )}
-                            <div className="h-px bg-[#E5E5EA] my-1" />
-                          </>
-                        )}
-
-                        {/* 2. Quick Status Updates */}
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                            <Activity className="h-4 w-4 text-[#6E6E73]" /> Change Status
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent className="w-40 bg-white rounded-xl shadow-lg border-[#E5E5EA] p-1.5 z-50">
-                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "ASSIGNED")} className="cursor-pointer text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">Mark Assigned</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "AWAITING_APPROVAL")} className="cursor-pointer text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">Mark Awaiting</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleQuickStatusChange(req.id, "RESOLVED")} className="cursor-pointer text-sm font-medium text-green-700 p-2 rounded-lg hover:bg-green-50 focus:bg-green-50 focus:text-green-800">Mark Resolved</DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                          <Edit className="h-4 w-4 text-[#6E6E73]" /> Edit Request
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem onClick={() => { window.location.href = `mailto:${req.tenant?.email || ''}?subject=Regarding Maintenance Ticket: ${req.title}`; }} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-[#F1F5F9] focus:bg-[#F1F5F9]">
-                          <MessageSquare className="h-4 w-4 text-[#6E6E73]" /> Contact Tenant
-                        </DropdownMenuItem>
-
-                        {/* 3. Destructive Action */}
-                        {req.status !== "CLOSED" && req.status !== "RESOLVED" && (
-                          <>
-                            <div className="h-px bg-[#E5E5EA] my-1" />
-                            <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
-                              <XCircle className="h-4 w-4" /> Cancel Request
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(req.priority)} capitalize`}>
-                        {req.priority.toLowerCase()}
-                      </span>
-                      {getStatusBadge(req.status)}
-                    </div>
-                    
-                    <div className="space-y-3 pt-2">
-                      {req.inspector && (
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                            <UserPlus className="h-4 w-4 text-[#6E6E73]" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Inspector</p>
-                            <p className="font-semibold text-[#1D1D1F] text-sm">{req.inspector.name}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {req.externalVendor && (
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                            <Wrench className="h-4 w-4 text-blue-500" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Vendor</p>
-                            <p className="font-semibold text-blue-600 text-sm flex items-center gap-1.5">{req.externalVendor.name}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {!req.inspector && !req.externalVendor && (
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                            <UserPlus className="h-4 w-4 text-[#6E6E73]" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Assignment</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
-                                Needs Assignment
+                            <div className="min-w-0">
+                              <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
+                                {req.category?.replace(/_/g, ' ') || "General"}
                               </span>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
-                                className="h-6 px-2 text-[11px] font-bold text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg shadow-none border-none"
-                              >
-                                Assign
-                              </Button>
+                              <h3 className="font-bold text-slate-900 text-sm leading-snug truncate">{req.title}</h3>
+                              <p className="text-[11px] font-semibold text-slate-500 truncate">
+                                {req.unit?.property?.name} &bull; <span className="text-blue-600 font-bold">{req.unit?.name}</span>
+                              </p>
                             </div>
                           </div>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 inline-flex items-center justify-center transition-colors border border-slate-200 shrink-0">
+                              <MoreHorizontal className="h-3.5 w-3.5" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 bg-white rounded-xl shadow-lg border-slate-200 p-1">
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/dashboard/maintenance/${req.id}`)}
+                                className="text-xs font-bold text-slate-900 hover:bg-slate-50 rounded-lg cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-2 text-blue-600" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openAssignModal(req)}
+                                className="text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+                              >
+                                <UserPlus className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                                Assign Inspector
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openDispatchModal(req)}
+                                className="text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
+                              >
+                                <Send className="h-3.5 w-3.5 mr-2" />
+                                Dispatch Vendor
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleCancelRequest(req.id)}
+                                className="text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
+                              >
+                                <XCircle className="h-3.5 w-3.5 mr-2" />
+                                Cancel Ticket
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                      )}
-                      
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                          <Calendar className="h-4 w-4 text-[#6E6E73]" />
+
+                        <p className="text-xs font-semibold text-slate-500">
+                          {req.unit?.property?.name} &bull; <span className="text-blue-600 font-bold">{req.unit?.name}</span>
+                        </p>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${getPriorityColor(req.priority)} capitalize`}>
+                            {req.priority.toLowerCase()}
+                          </span>
+                          {getStatusBadge(req.status)}
                         </div>
-                        <div>
-                          <p className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Created</p>
-                          <p className="font-semibold text-[#1D1D1F] text-sm">{format(new Date(req.createdAt), "MMM d, yyyy")}</p>
+
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                          <span>Assignee:</span>
+                          <span className="font-bold text-slate-800">
+                            {req.inspector?.name || req.externalVendor?.name || "Unassigned"}
+                          </span>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="pt-4 mt-2 border-t border-[#F1F5F9]">
-                      {req.status === "SUBMITTED" ? (
-                        <div className="flex gap-2 w-full">
-                          <Button 
-                            onClick={(e) => { e.stopPropagation(); openAssignModal(req); }} 
-                            variant="outline" 
-                            className="flex-1 text-slate-700 border-slate-200 hover:bg-[#F5F5F7] font-bold rounded-xl text-xs h-10 shadow-none text-center"
-                          >
-                            Assign Inspector
-                          </Button>
-                          <Button 
-                            onClick={(e) => { e.stopPropagation(); openDispatchModal(req); }} 
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
-                          >
-                            Dispatch Vendor
-                          </Button>
-                        </div>
-                      ) : req.status === "DIAGNOSIS_COMPLETE" ? (
-                        <div className="flex gap-2 w-full">
-                          <Button 
-                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
-                            variant="outline" 
-                            className="flex-1 text-[#6E6E73] border-slate-200 hover:bg-[#F5F5F7] font-bold rounded-xl text-xs h-10 shadow-none text-center"
-                          >
-                            View Diagnosis
-                          </Button>
-                          <Button 
-                            onClick={(e) => { e.stopPropagation(); openDispatchModal(req); }} 
-                            className="flex-1 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
-                          >
-                            Dispatch Vendor
-                          </Button>
-                        </div>
-                      ) : req.status === "AWAITING_APPROVAL" ? (
-                        <Button 
-                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
-                          className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none animate-pulse text-center"
+
+                      {/* Card Footer */}
+                      <div className="p-3 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-slate-400">
+                          {req.createdAt ? format(new Date(req.createdAt), "MMM d, yyyy") : ""}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)}
+                          className="h-7 px-3 text-xs font-bold border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs gap-1"
                         >
-                          ⚡ Review &amp; Approve Estimate
+                          <Eye className="h-3 w-3" /> View Ticket
                         </Button>
-                      ) : req.status === "RESOLVED" ? (
-                        <Button 
-                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs h-10 shadow-none border-none text-center"
-                        >
-                          💳 Settle &amp; Close Ticket
-                        </Button>
-                      ) : (req.status === "ASSIGNED" || req.status === "DIAGNOSIS_SCHEDULED") && !req.externalVendor ? (
-                        <div className="flex gap-2 w-full">
-                          <Button 
-                            onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
-                            variant="outline" 
-                            className="flex-1 text-[#6E6E73] border-slate-200 hover:bg-[#F5F5F7] font-bold rounded-xl text-xs h-10 shadow-none text-center"
-                          >
-                            View Details
-                          </Button>
-                          <Button 
-                            disabled 
-                            className="flex-1 bg-slate-100 text-[#8E8E93] font-bold rounded-xl text-xs h-10 shadow-none cursor-not-allowed text-center"
-                          >
-                            Awaiting Diagnosis...
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button 
-                          onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} 
-                          variant="outline" 
-                          className="w-full text-[#6E6E73] border-slate-200 hover:bg-[#F5F5F7] font-bold rounded-xl text-xs h-10 shadow-none text-center"
-                        >
-                          {req.status === "CLOSED" ? "View History" : "Track Progress..."}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ));
-              })()
-            )}
+                      </div>
+
+                    </Card>
+                  ));
+                })()
+              )}
+            </div>
+
+            <div className="mt-4">
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={Math.ceil(filteredRequests.length / itemsPerPage) || 1}
+                totalItems={filteredRequests.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                itemLabel="requests"
+              />
+            </div>
           </div>
         )}
-
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredRequests.length / itemsPerPage) || 1}
-          totalItems={filteredRequests.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          itemLabel="requests"
-        />
-      </div>
+      </Card>
 
       {/* Assign Modal */}
       {assignModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-[#E5E5EA] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {assignModalMode === "select" ? (
               <>
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-xl font-bold text-[#1D1D1F]">Assign Inspector</h2>
+                    <h2 className="text-xl font-bold text-slate-900">Assign Inspector</h2>
                     <button 
                       onClick={() => setAssignModalMode("create")} 
-                      className="text-xs font-bold text-[#007AFF] hover:underline"
+                      className="text-xs font-bold text-blue-600 hover:underline"
                     >
                       + New Inspector
                     </button>
                   </div>
-                  <p className="text-sm font-medium text-[#6E6E73] mb-6">Select an inspector to handle this maintenance request.</p>
+                  <p className="text-xs font-medium text-slate-500 mb-6">Select an inspector to handle this maintenance request.</p>
                   
                   <div className="space-y-2">
-                    <label className="text-[13px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Inspector</label>
-                    <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
-                      <SelectTrigger className="w-full h-12 bg-white border-[#E5E5EA] rounded-xl focus:ring-[#007AFF] font-medium text-[#1D1D1F] shadow-sm">
-                        <SelectValue placeholder="Select an inspector" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E5E5EA]">
-                        <SelectItem value="none">Leave unassigned</SelectItem>
-                        {ownerId && (
-                          <SelectItem value={ownerId}>Assign to Me (Self)</SelectItem>
-                        )}
-                        {inspectors.map((ins) => (
-                          <SelectItem key={ins.id} value={ins.id}>{ins.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Inspector</label>
+                    <select
+                      value={selectedInspectorId}
+                      onChange={(e) => setSelectedInspectorId(e.target.value)}
+                      className="w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                    >
+                      <option value="none">Leave unassigned</option>
+                      {ownerId && (
+                        <option value={ownerId}>Assign to Me (Self)</option>
+                      )}
+                      {inspectors.map((ins) => (
+                        <option key={ins.id} value={ins.id}>{ins.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-                <div className="p-4 bg-[#F2F2F7] border-t border-[#E5E5EA] flex justify-end gap-3">
-                  <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#6E6E73] hover:text-[#1D1D1F]">Cancel</Button>
-                  <Button onClick={handleAssignSubmit} className="rounded-xl font-semibold bg-[#007AFF] hover:bg-[#0062CC] text-white">Confirm Assignment</Button>
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+                  <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-xs text-slate-600">Cancel</Button>
+                  <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800">Confirm Assignment</Button>
                 </div>
               </>
             ) : (
               <>
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-xl font-bold text-[#1D1D1F]">Add New Inspector</h2>
+                    <h2 className="text-xl font-bold text-slate-900">Add New Inspector</h2>
                     <button 
                       onClick={() => setAssignModalMode("select")} 
-                      className="text-xs font-bold text-[#007AFF] hover:underline"
+                      className="text-xs font-bold text-blue-600 hover:underline"
                     >
                       Back to Select
                     </button>
                   </div>
-                  <p className="text-sm font-medium text-[#6E6E73] mb-6">Add a new inspector to your team directory.</p>
+                  <p className="text-xs font-medium text-slate-500 mb-6">Add a new inspector to your team directory.</p>
                   
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-bold text-[#1D1D1F] uppercase">Full Name *</label>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">Full Name *</label>
                       <Input 
                         value={newInspector.name} 
                         onChange={e => setNewInspector({...newInspector, name: e.target.value})} 
                         placeholder="e.g. Jake Inspector" 
-                        className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA] text-sm focus:ring-[#007AFF]" 
+                        className="h-9 rounded-xl bg-slate-50 border-slate-200 text-xs" 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-bold text-[#1D1D1F] uppercase">Email Address *</label>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">Email Address *</label>
                       <Input 
                         type="email" 
                         value={newInspector.email} 
                         onChange={e => setNewInspector({...newInspector, email: e.target.value})} 
                         placeholder="jake@example.com" 
-                        className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA] text-sm focus:ring-[#007AFF]" 
+                        className="h-9 rounded-xl bg-slate-50 border-slate-200 text-xs" 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-bold text-[#1D1D1F] uppercase">Phone Number</label>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">Phone Number</label>
                       <Input 
                         value={newInspector.phone} 
                         onChange={e => setNewInspector({...newInspector, phone: e.target.value})} 
                         placeholder="+1 (555) 123-4567" 
-                        className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA] text-sm focus:ring-[#007AFF]" 
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-bold text-[#1D1D1F] uppercase">Temporary Password *</label>
-                      <Input 
-                        type="password" 
-                        value={newInspector.password} 
-                        onChange={e => setNewInspector({...newInspector, password: e.target.value})} 
-                        placeholder="Initial password" 
-                        className="h-11 rounded-xl bg-slate-50 border-[#E5E5EA] text-sm focus:ring-[#007AFF]" 
+                        className="h-9 rounded-xl bg-slate-50 border-slate-200 text-xs" 
                       />
                     </div>
                   </div>
                 </div>
-                <div className="p-4 bg-[#F2F2F7] border-t border-[#E5E5EA] flex justify-end gap-3">
-                  <Button variant="ghost" onClick={() => setAssignModalMode("select")} className="rounded-xl font-semibold text-[#6E6E73] hover:text-[#1D1D1F]">Cancel</Button>
-                  <Button onClick={handleCreateInspector} disabled={inspectorSubmitting} className="rounded-xl font-semibold bg-[#007AFF] hover:bg-[#0062CC] text-white">Save Inspector</Button>
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+                  <Button variant="ghost" onClick={() => setAssignModalMode("select")} className="rounded-xl font-semibold text-xs text-slate-600">Cancel</Button>
+                  <Button onClick={handleCreateInspector} disabled={inspectorSubmitting} className="rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800">Save Inspector</Button>
                 </div>
               </>
             )}
@@ -946,37 +968,33 @@ export default function MaintenancePage() {
       {/* Dispatch Vendor Modal */}
       {dispatchModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-[#E5E5EA] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#1D1D1F] mb-1">Dispatch External Vendor</h2>
-              <p className="text-sm font-medium text-[#6E6E73] mb-6">Select an external vendor to assign to this maintenance request.</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-1">Dispatch External Vendor</h2>
+              <p className="text-xs font-medium text-slate-500 mb-6">Select an external vendor to assign to this maintenance request.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Vendor</label>
-                <Select value={selectedVendorId} onValueChange={(v) => setSelectedVendorId(v || "")}>
-                  <SelectTrigger className="w-full h-12 bg-white border-[#E5E5EA] rounded-xl focus:ring-[#007AFF] font-medium text-[#1D1D1F] shadow-sm">
-                    <SelectValue placeholder="Select a vendor" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-[#E5E5EA]">
-                    {vendors.length === 0 ? (
-                      <SelectItem value="none" disabled>No vendors available. Create one in Inspectors &amp; Vendors.</SelectItem>
-                    ) : (
-                      vendors.map((vendor) => (
-                        <SelectItem key={vendor.id} value={vendor.id}>
-                          {vendor.name} ({vendor.specialty})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-[#6E6E73] font-medium mt-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Vendor</label>
+                <select
+                  value={selectedVendorId}
+                  onChange={(e) => setSelectedVendorId(e.target.value)}
+                  className="w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                >
+                  <option value="">Select a vendor</option>
+                  {vendors.map((vendor) => (
+                    <option key={vendor.id} value={vendor.id}>
+                      {vendor.name} ({vendor.specialty})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-400 font-medium mt-2">
                   This vendor will automatically receive an email with a secure Magic Link to manage this job.
                 </p>
               </div>
             </div>
-            <div className="p-4 bg-[#F2F2F7] border-t border-[#E5E5EA] flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setDispatchModalOpen(false)} className="rounded-xl font-semibold text-[#6E6E73] hover:text-[#1D1D1F]">Cancel</Button>
-              <Button onClick={handleDispatchSubmit} className="rounded-xl font-semibold bg-[#007AFF] hover:bg-[#0062CC] text-white">Confirm Dispatch</Button>
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setDispatchModalOpen(false)} className="rounded-xl font-semibold text-xs text-slate-600">Cancel</Button>
+              <Button onClick={handleDispatchSubmit} className="rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800">Confirm Dispatch</Button>
             </div>
           </div>
         </div>

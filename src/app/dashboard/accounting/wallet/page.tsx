@@ -9,7 +9,15 @@ import {
   XCircle, AlertTriangle, ArrowDownRight, RefreshCw, Info,
   TrendingUp, Percent, ExternalLink, Copy, ArrowRight,
   ShieldCheck, Banknote, CircleDollarSign, ChevronRight, X, Plus, ArrowUpRight, Lock, ShieldAlert,
+  Eye, MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
@@ -364,103 +372,131 @@ export default function WalletPage() {
             </p>
           </div>
         ) : (
-          <>
-            {/* Column headers */}
-            <div className="hidden sm:grid grid-cols-12 px-6 py-2.5 bg-slate-50/80 border-b border-slate-100 text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">
-              <div className="col-span-1">#</div>
-              <div className="col-span-2">Date</div>
-              <div className="col-span-3">Destination Bank</div>
-              <div className="col-span-2 text-right">Amount</div>
-              <div className="col-span-2 text-center">Status</div>
-              <div className="col-span-2 text-right">Reference</div>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/60 border-b border-slate-200">
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Payout ID &amp; Date</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Destination Bank</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Withdrawal Amount</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Disbursal Status</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Transaction Reference</th>
+                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {(() => {
+                  const start = (currentPage - 1) * itemsPerPage;
+                  const paginated = filteredPayouts.slice(start, start + itemsPerPage);
+                  return paginated.map((p, i) => {
+                    const cfg = STATUS_CONFIG[p.status];
+                    const days = ageDays(p.createdAt);
+                    const formattedDate = new Date(p.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                    
+                    return (
+                      <tr 
+                        key={p.id} 
+                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                        onClick={() => router.push(`/dashboard/accounting/wallet/payouts/${p.id}`)}
+                      >
+                        {/* 1. Payout ID & Date */}
+                        <td className="py-3.5 px-6">
+                          <div className="space-y-0.5">
+                            <span className="font-extrabold text-xs text-slate-900 group-hover:text-blue-600 transition-colors block">
+                              PO-#{payouts.length - (start + i)}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-500 block">
+                              {formattedDate}
+                            </span>
+                          </div>
+                        </td>
 
-            <div className="divide-y divide-slate-50">
-              {(() => {
-                const start = (currentPage - 1) * itemsPerPage;
-                const paginated = filteredPayouts.slice(start, start + itemsPerPage);
-                return paginated.map((p, i) => {
-                  const cfg = STATUS_CONFIG[p.status];
-                  const days = ageDays(p.createdAt);
-                  return (
-                    <div key={p.id} className={`border-l-4 ${cfg.stripe} hover:bg-[#F5F5F7]/50 transition-colors`}>
-                      <div className="grid grid-cols-12 items-center px-6 py-4 gap-2">
-                        {/* # */}
-                        <div className="col-span-1">
-                          <span className="text-[11px] font-bold text-[#8E8E93]">#{payouts.length - (start + i)}</span>
-                        </div>
-
-                        {/* Date */}
-                        <div className="col-span-2">
-                          <p className="text-sm font-bold text-slate-800">
-                            {new Date(p.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                          </p>
-                          <p className={`text-[10px] font-semibold mt-0.5 ${cfg.text}`}>
-                            {p.status === "PENDING" && (days === 0 ? "Today" : `${days}d ago`)}
-                            {p.status === "COMPLETED" && p.disbursedAt && `Paid ${new Date(p.disbursedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
-                            {p.status === "REJECTED" && "Action needed"}
-                          </p>
-                        </div>
-
-                        {/* Bank */}
-                        <div className="col-span-3">
-                          <div className="flex items-center gap-2">
-                            <div className={`h-8 w-8 ${cfg.bg} border ${cfg.border} rounded-lg flex items-center justify-center shrink-0`}>
-                              <Building className={`h-3.5 w-3.5 ${cfg.text}`} />
+                        {/* 2. Destination Bank */}
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-2.5">
+                            <div className="h-8 w-8 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shrink-0">
+                              <Building className="h-3.5 w-3.5 text-slate-600" />
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-900 truncate">{p.bankName}</p>
-                              <p className="text-[10px] text-[#8E8E93] font-mono">{maskAccount(p.accountNumber)}</p>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900">{p.bankName}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">{maskAccount(p.accountNumber)}</p>
                             </div>
                           </div>
-                        </div>
+                        </td>
 
-                        {/* Amount */}
-                        <div className="col-span-2 text-right">
-                          <p className="text-sm font-black text-slate-900">${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                          {p.proofUrl && (
-                            <a href={p.proofUrl} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:underline mt-0.5">
-                              <ExternalLink className="h-2.5 w-2.5" /> Receipt
-                            </a>
-                          )}
-                        </div>
+                        {/* 3. Withdrawal Amount */}
+                        <td className="py-3.5 px-6">
+                          <span className="font-black text-sm text-slate-900">
+                            ${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
+                        </td>
 
-                        {/* Status badge */}
-                        <div className="col-span-2 flex flex-col items-center gap-1">
-                          <div className={`inline-flex items-center gap-1.5 ${cfg.bg} border ${cfg.border} rounded-full px-3 py-1`}>
+                        {/* 4. Disbursal Status */}
+                        <td className="py-3.5 px-6">
+                          <div className={`inline-flex items-center gap-1.5 ${cfg.bg} border ${cfg.border} rounded-lg px-2.5 py-0.5`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot} ${p.status === "PENDING" ? "animate-pulse" : ""}`} />
-                            <span className={`text-[10px] font-black ${cfg.text}`}>{cfg.label}</span>
+                            <span className={`text-[11px] font-bold ${cfg.text}`}>{cfg.label}</span>
                           </div>
-                          {p.status === "PENDING" && <span className="text-[9px] text-amber-600 font-semibold">2–3 biz days</span>}
-                        </div>
+                        </td>
 
-                        {/* Ref number */}
-                        <div className="col-span-2 text-right">
+                        {/* 5. Reference */}
+                        <td className="py-3.5 px-6" onClick={(e) => e.stopPropagation()}>
                           {p.refNumber ? (
-                            <button type="button"
-                              onClick={() => { navigator.clipboard.writeText(p.refNumber!); toast.success("Reference copied!"); }}
-                              className="inline-flex items-center gap-1 text-[10px] font-mono text-[#6E6E73] hover:text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 hover:bg-white transition-all">
-                              {p.refNumber.length > 10 ? p.refNumber.slice(0, 10) + "…" : p.refNumber}
-                              <Copy className="h-2.5 w-2.5 text-[#8E8E93]" />
+                            <button 
+                              type="button"
+                              onClick={() => { navigator.clipboard.writeText(p.refNumber!); toast.success("Reference code copied!"); }}
+                              className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-600 hover:text-slate-900 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-white transition-all"
+                            >
+                              {p.refNumber.length > 12 ? p.refNumber.slice(0, 12) + "…" : p.refNumber}
+                              <Copy className="h-3 w-3 text-slate-400" />
                             </button>
-                          ) : <span className="text-[11px] text-slate-300">—</span>}
-                        </div>
-                      </div>
+                          ) : (
+                            <span className="text-xs text-slate-300 font-mono">—</span>
+                          )}
+                        </td>
 
-                      {/* Rejection reason inline */}
-                      {p.status === "REJECTED" && p.rejectionReason && (
-                        <div className="mx-6 mb-3 flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
-                          <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-red-600 font-semibold leading-snug">{p.rejectionReason}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </>
+                        {/* 6. Action Column */}
+                        <td className="py-3.5 px-6 text-right" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="h-8 w-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 inline-flex items-center justify-center transition-colors border border-slate-200">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 bg-white rounded-xl shadow-lg border-slate-200 p-1">
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/dashboard/accounting/wallet/payouts/${p.id}`)}
+                                className="text-xs font-bold text-slate-900 hover:bg-slate-50 rounded-lg cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-2 text-blue-600" />
+                                View Payout Details
+                              </DropdownMenuItem>
+                              {p.refNumber && (
+                                <DropdownMenuItem
+                                  onClick={() => { navigator.clipboard.writeText(p.refNumber!); toast.success("Reference copied!"); }}
+                                  className="text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+                                >
+                                  <Copy className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                                  Copy Reference Code
+                                </DropdownMenuItem>
+                              )}
+                              {p.proofUrl && (
+                                <DropdownMenuItem
+                                  onClick={() => window.open(p.proofUrl, "_blank")}
+                                  className="text-xs font-semibold text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                                  Download Receipt
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
+              </tbody>
+            </table>
+          </div>
         )}
 
         <PaginationBar

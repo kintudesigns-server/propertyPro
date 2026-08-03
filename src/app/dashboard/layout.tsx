@@ -228,7 +228,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isTenantTabActive("overview")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -251,7 +251,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                       (isTenantTabActive("my-leases") || isTenantTabActive("documents")) && !leasesOpen
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -270,7 +270,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/leases/my-leases"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("my-leases")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -282,7 +282,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/leases/documents"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("documents")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -303,7 +303,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                       (isTenantTabActive("submit-request") || isTenantTabActive("my-requests")) && !maintenanceOpen
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -322,7 +322,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/maintenance/new"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("submit-request")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -334,7 +334,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/maintenance/my-requests"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("my-requests")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -361,7 +361,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                       (isTenantTabActive("pay-rent") || isTenantTabActive("add-card") || isTenantTabActive("transactions") || isTenantTabActive("invoices")) && !financialsOpen
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -380,7 +380,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/payments/pay-rent"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("pay-rent")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -392,7 +392,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/payments/add-card"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("add-card")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -404,7 +404,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/accounting/transactions"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("transactions")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -416,7 +416,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/accounting/invoices"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           isTenantTabActive("invoices")
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -438,7 +438,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/tenant/applications"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     pathname === "/dashboard/tenant/applications"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -451,7 +451,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/tenant/tours"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     pathname === "/dashboard/tenant/tours"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -483,7 +483,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                       (isTenantTabActive("messages") || pathname === "/dashboard/calendar" || pathname === "/dashboard/notifications") && !activityOpen
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -502,7 +502,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/messages"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/messages"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -514,7 +514,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/notifications"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/notifications"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -525,7 +525,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/calendar"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/calendar"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -547,7 +547,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/tenant?tab=settings"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isTenantTabActive("settings")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -561,17 +561,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/inspector"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     pathname === "/dashboard/inspector"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <LayoutDashboard className="h-5 w-5" />
-                  {sidebarOpen && <span>Dashboard Overview</span>}
+                  {sidebarOpen && <span className="flex-1">Dashboard Overview</span>}
+                  {sidebarOpen && isFeatureLocked("view_inspector_dashboard") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 {sidebarOpen && (
                   <span className="px-3 pt-6 pb-2 text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-widest">
-                    DIAGNOSTICS & REPAIRS
+                    DIAGNOSTICS &amp; REPAIRS
                   </span>
                 )}
 
@@ -579,24 +580,26 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/inspector/active"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/inspector/active")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <Wrench className="h-5 w-5" />
-                  {sidebarOpen && <span>Assigned Repairs</span>}
+                  {sidebarOpen && <span className="flex-1">Assigned Repairs</span>}
+                  {sidebarOpen && isFeatureLocked("view_assignments") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 <Link
                   href="/dashboard/inspector/history"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/inspector/history")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <FileText className="h-5 w-5" />
-                  {sidebarOpen && <span>Closed Diagnostics</span>}
+                  {sidebarOpen && <span className="flex-1">Closed Diagnostics</span>}
+                  {sidebarOpen && isFeatureLocked("view_history") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 {sidebarOpen && (
@@ -609,12 +612,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/inspector/inspections"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/inspector/inspections")
-                      ? "bg-[#EEF2FF] text-[#4F46E5]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <ClipboardList className="h-5 w-5" />
-                  {sidebarOpen && <span>Move-Out Walkthroughs</span>}
+                  {sidebarOpen && <span className="flex-1">Move-Out Walkthroughs</span>}
+                  {sidebarOpen && isFeatureLocked("submit_reports") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 {sidebarOpen && (
@@ -627,31 +631,33 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/messages"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/messages")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <MessageSquare className="h-5 w-5" />
-                  {sidebarOpen && <span>Inbox Messages</span>}
+                  {sidebarOpen && <span className="flex-1">Inbox Messages</span>}
+                  {sidebarOpen && isFeatureLocked("message_owner") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 <Link
                   href="/dashboard/calendar"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/calendar")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
                   <Calendar className="h-5 w-5" />
-                  {sidebarOpen && <span>Calendar</span>}
+                  {sidebarOpen && <span className="flex-1">Calendar</span>}
+                  {sidebarOpen && isFeatureLocked("view_calendar") && <Lock className="h-3 w-3 ml-1 text-red-400 shrink-0" />}
                 </Link>
 
                 <Link
                   href="/dashboard/notifications"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/notifications")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -665,7 +671,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     pathname === "/dashboard"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -685,7 +691,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -696,7 +702,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/audit-logs"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/audit-logs"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -714,18 +720,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/profit"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/profit"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                      {sidebarOpen && <span className="text-green-700">Platform Profit</span>}
+                      <DollarSign className="h-5 w-5" />
+                      {sidebarOpen && <span>Platform Profit</span>}
                     </Link>
                     <Link
                       href="/dashboard/admin/payouts"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/payouts"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -743,7 +749,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/owner-applications"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/owner-applications"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -754,7 +760,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/properties"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/properties"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -772,7 +778,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/settings/pricing"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/settings/pricing"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -783,7 +789,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/subscriptions"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/subscriptions"
-                          ? "bg-[#FEF2F2] text-[#EF4444]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -799,7 +805,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         }}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                           pathname.startsWith("/dashboard/admin/users") && !adminOpen
-                            ? "bg-[#FEF2F2] text-[#EF4444]"
+                            ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                             : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                         }`}
                       >
@@ -818,7 +824,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             href="/dashboard/admin/users"
                             className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                               pathname === "/dashboard/admin/users"
-                                ? "bg-[#FEF2F2] text-[#EF4444]"
+                                ? "bg-slate-100 text-slate-900 font-extrabold"
                                 : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                             }`}
                           >
@@ -829,7 +835,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             href="/dashboard/admin/users/new"
                             className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                               pathname === "/dashboard/admin/users/new"
-                                ? "bg-[#FEF2F2] text-[#EF4444]"
+                                ? "bg-slate-100 text-slate-900 font-extrabold"
                                 : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                             }`}
                           >
@@ -869,7 +875,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         isActive("/dashboard/properties") && !propertiesOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -892,7 +898,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/properties"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/properties"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -903,7 +909,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/properties/new"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/properties/new"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -914,7 +920,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/properties/available"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/properties/available"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -925,7 +931,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/properties/units"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/properties/units"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -951,7 +957,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         isActive("/dashboard/tenants") && !tenantsOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -974,7 +980,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/tenants"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/tenants"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -985,7 +991,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/tenants/new"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/tenants/new"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -996,7 +1002,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/tenants/applications"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/tenants/applications"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1007,8 +1013,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     )}
                   </div>
                 )}
-
-
 
                 {/* Leases Accordion */}
                 {isOwnerOrAdmin && (
@@ -1024,7 +1028,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         isActive("/dashboard/leases") && !leasesOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1047,7 +1051,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/leases"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/leases"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1058,7 +1062,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/leases/new"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/leases/new"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1069,7 +1073,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/leases/active"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/leases/active"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1080,7 +1084,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/leases/expiring"
                           className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/leases/expiring"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1113,7 +1117,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         isActive("/dashboard/tours") && !toursOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1136,7 +1140,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/tours"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/tours"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1162,7 +1166,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         (isActive("/dashboard/inspections") || isActive("/dashboard/team")) && !inspectionsOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1185,7 +1189,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/inspections"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/inspections"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1196,7 +1200,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/team"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/team"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1222,7 +1226,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                         isActive("/dashboard/maintenance") && !maintenanceOpen
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1245,7 +1249,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/maintenance"
                           className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/maintenance"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1256,7 +1260,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/maintenance/my-inspections"
                           className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/maintenance/my-inspections"
-                              ? "bg-[#EFF6FF] text-[#3B82F6]"
+                              ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1269,7 +1273,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           href="/dashboard/maintenance/emergency"
                           className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/maintenance/emergency"
-                              ? "bg-[#FEF2F2] text-[#EF4444]"
+                              ? "bg-rose-50 text-rose-700 font-extrabold border border-rose-200/80"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
@@ -1301,7 +1305,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
                       (pathname === "/dashboard/messages" || pathname === "/dashboard/calendar" || pathname === "/dashboard/notifications") && !activityOpen
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -1320,7 +1324,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/messages"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/messages"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -1334,7 +1338,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/notifications"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/notifications"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -1345,7 +1349,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/dashboard/calendar"
                         className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                           pathname === "/dashboard/calendar"
-                            ? "bg-[#EFF6FF] text-[#3B82F6]"
+                            ? "bg-slate-100 text-slate-900 font-extrabold"
                             : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                         }`}
                       >
@@ -1371,7 +1375,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/analytics"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         isActive("/dashboard/analytics")
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1386,7 +1390,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/accounting/overview"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         isActive("/dashboard/accounting/overview")
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
@@ -1401,12 +1405,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/accounting/wallet"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         isActive("/dashboard/accounting/wallet")
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
                       <DollarSign className="h-5 w-5" />
-                      {sidebarOpen && <span className="flex-1">Wallet & Payouts</span>}
+                      {sidebarOpen && <span className="flex-1">Wallet &amp; Payouts</span>}
                       {sidebarOpen && isOwner && !isAllowed("wallet") && (
                         <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
                       )}
@@ -1418,7 +1422,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     href="/dashboard/accounting/transactions"
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                       isActive("/dashboard/accounting/transactions")
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
@@ -1434,7 +1438,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard/accounting/invoices"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive("/dashboard/accounting/invoices")
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -1455,7 +1459,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href={isAdmin ? "/dashboard/admin/settings/profile" : "/dashboard/settings"}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     pathname === "/dashboard/settings" || pathname === "/dashboard/admin/settings/profile"
-                      ? "bg-[#EFF6FF] text-[#3B82F6]"
+                      ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
                 >
@@ -1468,12 +1472,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     href="/dashboard/owner/billing"
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                       pathname === "/dashboard/owner/billing"
-                        ? "bg-[#EFF6FF] text-[#3B82F6]"
+                        ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                         : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     }`}
                   >
                     <CreditCard className="h-5 w-5" />
-                    {sidebarOpen && <span>Billing & Subscription</span>}
+                    {sidebarOpen && <span>Billing &amp; Subscription</span>}
                   </Link>
                 )}
 
@@ -1483,24 +1487,24 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       href="/dashboard/admin/settings/pricing"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/settings/pricing"
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
                       <Tag className="h-5 w-5" />
-                      {sidebarOpen && <span>Pricing Tiers & Plans</span>}
+                      {sidebarOpen && <span>Pricing Tiers &amp; Plans</span>}
                     </Link>
 
                     <Link
                       href="/dashboard/admin/settings/financials"
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         pathname === "/dashboard/admin/settings/financials"
-                          ? "bg-[#EFF6FF] text-[#3B82F6]"
+                          ? "bg-slate-100/90 text-slate-900 font-black border border-slate-200/80 shadow-2xs relative overflow-hidden before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1.5 before:bg-slate-900 before:rounded-r-full"
                           : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                       }`}
                     >
                       <ShieldCheck className="h-5 w-5" />
-                      {sidebarOpen && <span>Financials & Operations</span>}
+                      {sidebarOpen && <span>Financials &amp; Operations</span>}
                     </Link>
                   </>
                 )}

@@ -53,7 +53,14 @@ export async function POST(
       }, { status: 400 });
     }
 
-    const expiryDate = expiresAt ? new Date(expiresAt) : null;
+    let expiryDate: Date | null = null;
+    if (expiresAt) {
+      if (typeof expiresAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(expiresAt.trim())) {
+        expiryDate = new Date(`${expiresAt.trim()}T23:59:59.999Z`);
+      } else {
+        expiryDate = new Date(expiresAt);
+      }
+    }
 
     // If DEFAULT action requested, revoke existing overrides and return success
     if (overrideType === "DEFAULT") {

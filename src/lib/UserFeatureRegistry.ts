@@ -149,6 +149,18 @@ export const TENANT_FEATURES: UserFeatureDefinition[] = [
 ];
 
 export const INSPECTOR_FEATURES: UserFeatureDefinition[] = [
+  // 🏠 Dashboard Module
+  {
+    key: "view_inspector_dashboard",
+    label: "Inspector Dashboard Overview",
+    module: "Dashboard",
+    description: "Access the inspector home dashboard with task summaries and active assignment counts.",
+    route: "/dashboard/inspector",
+    welfareExempt: true,
+    iconName: "LayoutDashboard",
+  },
+
+  // 🔧 Diagnostics & Repairs Module
   {
     key: "view_assignments",
     label: "View Assigned Jobs",
@@ -168,6 +180,17 @@ export const INSPECTOR_FEATURES: UserFeatureDefinition[] = [
     iconName: "Building2",
   },
   {
+    key: "view_history",
+    label: "Closed Diagnostics History",
+    module: "Diagnostics & Repairs",
+    description: "Review completed and closed repair work order history and resolution logs.",
+    route: "/dashboard/inspector/history",
+    welfareExempt: false,
+    iconName: "Archive",
+  },
+
+  // 📋 Move-Out Walkthroughs Module
+  {
     key: "submit_reports",
     label: "Submit Inspection Reports",
     module: "Move-Out Walkthroughs",
@@ -176,14 +199,25 @@ export const INSPECTOR_FEATURES: UserFeatureDefinition[] = [
     welfareExempt: false,
     iconName: "FileCheck",
   },
+
+  // 💬 System & Communication Module
   {
-    key: "access_vendor_portal",
-    label: "Vendor Portal Access",
-    module: "Vendor Network",
-    description: "Collaborate with external contractors and material vendors.",
-    route: "/dashboard/inspector/vendors",
+    key: "message_owner",
+    label: "Inbox Messages & Chat",
+    module: "System & Communication",
+    description: "Real-time chat and communication with property owners and managers.",
+    route: "/dashboard/messages",
     welfareExempt: false,
-    iconName: "Truck",
+    iconName: "MessageSquare",
+  },
+  {
+    key: "view_calendar",
+    label: "Activity Calendar",
+    module: "System & Communication",
+    description: "View scheduled inspections, appointments, and task deadlines.",
+    route: "/dashboard/calendar",
+    welfareExempt: false,
+    iconName: "Calendar",
   },
 ];
 

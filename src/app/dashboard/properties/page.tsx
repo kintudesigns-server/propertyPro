@@ -206,8 +206,7 @@ export default function PropertiesPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-[#E2E8F0] hover:bg-transparent">
-                  <TableHead className="w-12 text-center"></TableHead>
-                  <TableHead className="text-[#64748B] font-bold text-xs uppercase tracking-wider py-4">Property</TableHead>
+                  <TableHead className="text-[#64748B] font-bold text-xs uppercase tracking-wider py-4 px-6">Property</TableHead>
                   <TableHead className="text-[#64748B] font-bold text-xs uppercase tracking-wider">Status</TableHead>
                   <TableHead className="text-[#64748B] font-bold text-xs uppercase tracking-wider">Location</TableHead>
                   <TableHead className="text-[#64748B] font-bold text-xs uppercase tracking-wider">Units</TableHead>
@@ -218,7 +217,7 @@ export default function PropertiesPage() {
               <TableBody>
                 {filteredProperties.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-[#64748B]">
+                    <TableCell colSpan={6} className="text-center py-10 text-[#64748B]">
                       No properties found.
                     </TableCell>
                   </TableRow>
@@ -242,10 +241,7 @@ export default function PropertiesPage() {
 
                       return (
                         <TableRow key={p.id} className="border-[#E2E8F0] hover:bg-[#F8FAFC]/80 transition-colors group">
-                          <TableCell className="text-center py-4">
-                            <input type="checkbox" className="rounded text-[#3B82F6] border-[#CBD5E1] focus:ring-[#3B82F6] w-4 h-4 cursor-pointer" />
-                          </TableCell>
-                          <TableCell>
+                          <TableCell className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div className="h-12 w-12 rounded-xl bg-slate-200 overflow-hidden shrink-0">
                                 {p.coverPhoto ? (

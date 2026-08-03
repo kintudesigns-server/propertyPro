@@ -9,7 +9,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const session = await getServerSession(authOptions);
   
   // High friction: ONLY Superadmins can unmask account numbers.
-  if (!session?.user || (session.user as any).role !== "SUPERADMIN") {
+  const role = (session?.user as any)?.role;
+  if (!session?.user || (role !== "SUPERADMIN" && role !== "ADMIN")) {
     return NextResponse.json({ error: "Access denied. Admins only." }, { status: 403 });
   }
 

@@ -285,6 +285,18 @@ export async function POST(req: NextRequest) {
                   stripeInvoiceId: invoice.id,
                 }
               });
+            } else if (invoice.billing_reason === "subscription_cycle") {
+              const tier = tierId ? await prisma.pricingTier.findUnique({ where: { id: tierId } }) : null;
+              await prisma.subscriptionHistory.create({
+                data: {
+                  userId: u.id,
+                  toTierId: tierId,
+                  toTierName: tier?.name || "Unknown Plan",
+                  event: "RENEWAL",
+                  amountPaid: invoice.amount_paid ? invoice.amount_paid / 100 : null,
+                  stripeInvoiceId: invoice.id,
+                }
+              });
             }
           }
         }

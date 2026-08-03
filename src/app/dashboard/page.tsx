@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Building,
@@ -306,9 +307,9 @@ export default function DashboardPage() {
             ? `Your $${Number(inv.amount).toLocaleString()} rent is ${Math.abs(daysLeft)} day${Math.abs(daysLeft) !== 1 ? "s" : ""} overdue.`
             : `Your $${Number(inv.amount).toLocaleString()} rent is due in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}.`,
         badgeText: isOverdue ? "Overdue" : "Payment Due",
-        badgeColor: isOverdue ? "bg-red-100 text-red-700 border-red-200" : "bg-amber-100 text-amber-700 border-amber-200",
-        icon: <DollarSign className="h-4 w-4 text-red-600" />,
-        iconBg: "bg-red-50 border border-red-100",
+        badgeColor: isOverdue ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-slate-100 text-slate-700 border-slate-200",
+        icon: <DollarSign className={`h-4 w-4 ${isOverdue ? "text-rose-600" : "text-slate-700"}`} />,
+        iconBg: isOverdue ? "bg-rose-50 border border-rose-100" : "bg-slate-100 border border-slate-200",
         urgent: true,
         action: () => router.push("/dashboard/payments/pay-rent"),
         actionLabel: "Pay Now →",
@@ -325,12 +326,12 @@ export default function DashboardPage() {
         description: statusLabel[m.status]?.text || m.status.replace(/_/g, " "),
         badgeText: isPendingConfirm ? "Action Required" : isEmergency ? "Emergency" : m.priority.charAt(0) + m.priority.slice(1).toLowerCase(),
         badgeColor: isPendingConfirm
-          ? "bg-rose-100 text-rose-700 border-rose-200"
+          ? "bg-rose-50 text-rose-700 border-rose-200"
           : isEmergency
-            ? "bg-red-100 text-red-700 border-red-200"
-            : "bg-amber-50 text-amber-700 border-amber-200",
-        icon: <Wrench className={`h-4 w-4 ${isPendingConfirm ? "text-rose-600" : "text-amber-600"}`} />,
-        iconBg: isPendingConfirm ? "bg-rose-50 border border-rose-100" : "bg-amber-50 border border-amber-100",
+            ? "bg-rose-50 text-rose-700 border-rose-200"
+            : "bg-slate-100 text-slate-700 border-slate-200",
+        icon: <Wrench className={`h-4 w-4 ${isPendingConfirm || isEmergency ? "text-rose-600" : "text-slate-700"}`} />,
+        iconBg: isPendingConfirm || isEmergency ? "bg-rose-50 border border-rose-100" : "bg-slate-100 border border-slate-200",
         urgent: isPendingConfirm,
         action: isPendingConfirm ? () => router.push(`/dashboard/maintenance/${m.id}`) : undefined,
         actionLabel: isPendingConfirm ? "Confirm Repair →" : undefined,
@@ -344,9 +345,9 @@ export default function DashboardPage() {
         date: new Date(d.uploadedAt),
         description: `New document added to your lease • ${d.category}`,
         badgeText: "Document",
-        badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
-        icon: <FileText className="h-4 w-4 text-blue-600" />,
-        iconBg: "bg-blue-50 border border-blue-100",
+        badgeColor: "bg-slate-100 text-slate-700 border-slate-200",
+        icon: <FileText className="h-4 w-4 text-slate-700" />,
+        iconBg: "bg-slate-100 border border-slate-200",
       });
     });
 
@@ -507,7 +508,7 @@ export default function DashboardPage() {
             value={activeLeasesCount > 0 ? "Active" : "No Lease"}
             subtext={activeLeasesCount > 0 ? `${leases.length} total lease${leases.length !== 1 ? "s" : ""}` : "Browse listings"}
             icon={Home}
-            variant="indigo"
+            variant="slate"
             onClick={() => router.push("/dashboard/leases/my-leases")}
           />
           <KpiCard
@@ -523,7 +524,7 @@ export default function DashboardPage() {
             value={openRequestsCount}
             subtext={openRequestsCount > 0 ? `${openRequestsCount} open request${openRequestsCount !== 1 ? "s" : ""}` : "No open requests"}
             icon={Wrench}
-            variant="amber"
+            variant="slate"
             onClick={() => router.push("/dashboard/maintenance/my-requests")}
           />
           <KpiCard
@@ -531,7 +532,7 @@ export default function DashboardPage() {
             value={totalMessagesCount}
             subtext={totalMessagesCount > 0 ? `${totalMessagesCount} message${totalMessagesCount !== 1 ? "s" : ""}` : "No messages"}
             icon={Bell}
-            variant="purple"
+            variant="slate"
             onClick={() => router.push("/dashboard/messages")}
           />
         </div>
@@ -543,46 +544,77 @@ export default function DashboardPage() {
           <div className="lg:col-span-3 space-y-5">
 
             {/* Lease Details */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Your Home</p>
-                    <h2 className="text-xl font-black text-white">{selectedLease?.unit?.property?.name || "No Active Lease"}</h2>
-                    {selectedLease && (
-                      <p className="text-slate-400 text-xs font-medium mt-1 flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3" />
-                        {selectedLease.unit?.property?.address}, {selectedLease.unit?.property?.city}, {selectedLease.unit?.property?.state}
-                      </p>
-                    )}
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden group">
+              {(() => {
+                const propertyImg =
+                  selectedLease?.unit?.images?.[0] ||
+                  selectedLease?.unit?.property?.images?.[0] ||
+                  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80";
+
+                return (
+                  <div className="relative p-6 sm:p-8 min-h-[185px] flex flex-col justify-between overflow-hidden bg-slate-900 text-white">
+                    {/* Property / Unit Background Image - Bright, Vibrant Photo */}
+                    <img
+                      src={propertyImg}
+                      alt={selectedLease?.unit?.property?.name || "Your Home"}
+                      className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                    />
+                    
+                    {/* Glowing White & Luminous Soft Ambient Flares */}
+                    <div className="absolute -top-20 -right-20 w-96 h-96 bg-white/40 rounded-full blur-3xl pointer-events-none animate-pulse duration-[5000ms]" />
+                    <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-cyan-100/30 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-white/20 rounded-full blur-3xl pointer-events-none" />
+
+                    {/* Luminous White Radial Light Sheen & Soft Readability Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-white/10 pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/40 via-white/10 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[0.5px] pointer-events-none" />
+
+                    <div className="relative z-10 flex items-start justify-between gap-4">
+                      <div>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 backdrop-blur-md mb-2.5 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                          <Home className="h-3 w-3 text-emerald-400" />
+                          Your Home
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+                          {selectedLease?.unit?.property?.name || "No Active Lease"}
+                        </h2>
+                        {selectedLease && (
+                          <p className="text-slate-100 text-xs font-bold mt-1.5 flex items-center gap-1.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
+                            <MapPin className="h-3.5 w-3.5 text-cyan-300 shrink-0" />
+                            {selectedLease.unit?.property?.address}, {selectedLease.unit?.property?.city}, {selectedLease.unit?.property?.state}
+                          </p>
+                        )}
+                      </div>
+                      {selectedLease && (
+                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.35)] ${
+                          selectedLease.status === "ACTIVE"
+                            ? "bg-emerald-500/25 text-emerald-300 border border-emerald-400/50"
+                            : "bg-amber-500/25 text-amber-300 border border-amber-400/50"
+                        }`}>
+                          {selectedLease.status === "ACTIVE" ? "Active" : selectedLease.status.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {selectedLease && (
-                    <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest ${
-                      selectedLease.status === "ACTIVE"
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                    }`}>
-                      {selectedLease.status === "ACTIVE" ? "Active" : selectedLease.status.replace(/_/g, " ")}
-                    </span>
-                  )}
-                </div>
-              </div>
+                );
+              })()}
 
               {selectedLease ? (
-                <div className="p-6 space-y-5">
-                  {/* Key lease data */}
+                <div className="p-6 space-y-5 bg-white">
+                  {/* Cohesive Metric Data Cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70">
                       <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Monthly Rent</p>
-                      <p className="text-xl font-black text-indigo-600">
+                      <p className="text-xl font-black text-slate-900">
                         ${Number(selectedLease.monthlyRent).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </p>
                     </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70">
                       <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Unit</p>
                       <p className="text-xl font-black text-slate-900">{selectedLease.unit?.name || "—"}</p>
                     </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 col-span-2 sm:col-span-1">
+                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70 col-span-2 sm:col-span-1">
                       <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
                         {daysUntilLeaseEnd !== null && daysUntilLeaseEnd > 0 ? `Expires in ${daysUntilLeaseEnd}d` : "Lease Period"}
                       </p>
@@ -593,25 +625,39 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Lease progress bar */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs font-bold text-slate-500">Lease Progress</p>
-                      <p className="text-xs font-black text-slate-700">{leaseProgress}% complete</p>
+                  {/* Framer Motion Animated Lease Progress Bar with Neon Color & Glow */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-black text-slate-700 tracking-tight flex items-center gap-1.5">
+                        <span>Lease Progress</span>
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      </p>
+                      <span className="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                        {leaseProgress}% complete
+                      </span>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
-                        style={{ width: `${leaseProgress}%` }}
-                      />
+
+                    {/* Outer Track with subtle border & shadow */}
+                    <div className="w-full h-3 bg-slate-100/90 rounded-full p-0.5 border border-slate-200/80 relative overflow-hidden shadow-inner">
+                      {/* Animated Neon Gradient Fill */}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${leaseProgress}%` }}
+                        transition={{ duration: 1.6, ease: "easeOut" }}
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 relative shadow-[0_0_15px_rgba(52,211,153,0.85)]"
+                      >
+                        {/* Glowing tip light pulsing bead */}
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-[0_0_12px_#34d399] animate-ping opacity-75" />
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 bg-emerald-100 rounded-full shadow-[0_0_10px_#10b981]" />
+                      </motion.div>
                     </div>
                   </div>
 
-                  {/* Pay rent CTA if due */}
+                  {/* Pay rent CTA if due - Sleek dark slate button matching the card header frame */}
                   {unpaidInvoices.length > 0 && (
                     <Button
                       onClick={() => router.push("/dashboard/payments/pay-rent")}
-                      className="w-full bg-[#007AFF] hover:bg-blue-600 text-white font-extrabold rounded-2xl h-12 text-sm shadow-md transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl h-11 text-sm shadow-sm transition-all border border-slate-800 flex items-center justify-center gap-2 mt-2"
                     >
                       <CreditCard className="h-4 w-4" />
                       Pay Rent — ${unpaidInvoices.reduce((s, i) => s + Number(i.amount), 0).toLocaleString()} Due
@@ -628,112 +674,119 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Quick Actions List — Standardized SaaS Design */}
-            <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl p-5">
-              <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] flex items-center gap-2 mb-3 pb-3 border-b border-[#F2F2F7]">
-                <Activity className="h-4 w-4 text-[#007AFF]" />
-                Quick Actions
-              </h2>
+            {/* Recent Activity Card in Left Column */}
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-amber-500" />
+                    Recent Activity
+                  </h2>
+                  <p className="text-xs font-medium text-slate-400 mt-0.5">Updates on your account</p>
+                </div>
+                {activities.filter(a => a.urgent).length > 0 && (
+                  <span className="h-5 w-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                    {activities.filter(a => a.urgent).length}
+                  </span>
+                )}
+              </div>
+
+              <div className="divide-y divide-slate-100 px-2 py-1 max-h-[380px] overflow-y-auto">
+                {latestActivities.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                    <div className="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
+                      <Bell className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-500">All caught up!</p>
+                    <p className="text-xs text-slate-400 mt-1">No recent activity to show.</p>
+                  </div>
+                ) : (
+                  latestActivities.map((act) => (
+                    <div key={act.id} className="px-4 py-3.5 transition-all hover:bg-slate-50/80 group rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                          {act.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <p className="text-xs font-extrabold text-slate-900 truncate">{act.title}</p>
+                            <span className="text-[10px] text-slate-400 font-semibold shrink-0">
+                              {act.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </span>
+                          </div>
+                          <p className="text-xs font-medium text-slate-500 leading-relaxed">{act.description}</p>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${act.badgeColor} uppercase tracking-wider`}>
+                              {act.badgeText}
+                            </span>
+                            {act.action && act.actionLabel && (
+                              <button
+                                onClick={act.action}
+                                className="text-[11px] font-black text-[#007AFF] hover:underline transition-colors cursor-pointer"
+                              >
+                                {act.actionLabel}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {activities.length > 6 && (
+                <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 text-center">
+                  <button
+                    onClick={() => router.push("/dashboard/activity-logs")}
+                    className="text-xs font-bold text-[#007AFF] hover:underline transition-colors py-1 cursor-pointer"
+                  >
+                    View all activity →
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT — Quick Actions (2 cols) */}
+          <div className="lg:col-span-2">
+            <Card className="bg-white border border-slate-200/80 shadow-sm rounded-3xl p-6">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                <div>
+                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-[#007AFF]" />
+                    Quick Actions
+                  </h2>
+                  <p className="text-xs font-medium text-slate-400 mt-0.5">Frequent tenant tasks</p>
+                </div>
+              </div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
-                  { label: "File a Repair Request", desc: "Report maintenance issue", icon: Wrench, color: "bg-amber-50 text-amber-600 border-amber-100", route: "/dashboard/maintenance/new" },
-                  { label: "Pay Rent Online", desc: "View & pay invoices", icon: Wallet, color: unpaidInvoices.length > 0 ? "bg-red-50 text-red-600 border-red-100" : "bg-emerald-50 text-emerald-600 border-emerald-100", route: "/dashboard/payments/pay-rent" },
-                  { label: "View Lease Docs", desc: "Access signed agreements", icon: FileText, color: "bg-blue-50 text-blue-600 border-blue-100", route: "/dashboard/leases/my-leases" },
-                  { label: "Track Maintenance", desc: "Check repair status", icon: Settings, color: "bg-purple-50 text-purple-600 border-purple-100", route: "/dashboard/maintenance/my-requests" },
+                  { label: "File a Repair Request", desc: "Report maintenance issue", icon: Wrench, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/maintenance/new" },
+                  { label: "Pay Rent Online", desc: "View & pay invoices", icon: Wallet, color: unpaidInvoices.length > 0 ? "bg-rose-50 text-rose-600 border-rose-200/80" : "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/payments/pay-rent" },
+                  { label: "View Lease Docs", desc: "Access signed agreements", icon: FileText, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/leases/my-leases" },
+                  { label: "Track Maintenance", desc: "Check repair status", icon: Settings, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/maintenance/my-requests" },
                 ].map((qa) => (
                   <button
                     key={qa.label}
                     onClick={() => router.push(qa.route)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl border border-[#E5E5EA] bg-white hover:bg-[#F9F9FB] hover:border-[#D1D1D6] transition-all cursor-pointer group text-left"
+                    className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50/80 hover:border-slate-300 transition-all cursor-pointer group text-left shadow-2xs"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`p-2 rounded-xl border shrink-0 ${qa.color}`}>
-                        <qa.icon className="h-4 w-4" />
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={`p-2.5 rounded-xl border shrink-0 ${qa.color} group-hover:bg-slate-900 group-hover:text-white transition-colors`}>
+                        <qa.icon className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#1D1D1F] truncate group-hover:text-[#007AFF] transition-colors">{qa.label}</p>
-                        <p className="text-[11px] font-medium text-[#8E8E93] truncate">{qa.desc}</p>
+                        <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#007AFF] transition-colors">{qa.label}</p>
+                        <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{qa.desc}</p>
                       </div>
                     </div>
-                    <ChevronRight size={14} className="text-[#C7C7CC] group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />
+                    <ChevronRight size={16} className="text-slate-400 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
                   </button>
                 ))}
               </div>
             </Card>
-          </div>
-
-          {/* RIGHT — Activity Feed (2 cols) */}
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <Bell className="h-4 w-4 text-amber-500" />
-                  Recent Activity
-                </h2>
-                <p className="text-xs font-medium text-slate-400 mt-0.5">Updates on your account</p>
-              </div>
-              {activities.filter(a => a.urgent).length > 0 && (
-                <span className="h-5 w-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
-                  {activities.filter(a => a.urgent).length}
-                </span>
-              )}
-            </div>
-
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-50 px-2 py-1">
-              {latestActivities.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
-                    <Bell className="h-5 w-5 text-slate-400" />
-                  </div>
-                  <p className="text-sm font-bold text-slate-500">All caught up!</p>
-                  <p className="text-xs text-slate-400 mt-1">No recent activity to show.</p>
-                </div>
-              ) : (
-                latestActivities.map((act) => (
-                  <div key={act.id} className={`px-4 py-4 transition-all hover:bg-slate-50/80 group ${act.urgent ? "bg-rose-50/30 hover:bg-rose-50/50" : ""}`}>
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-xl ${act.iconBg} flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform`}>
-                        {act.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                          <p className="text-sm font-bold text-slate-800 truncate">{act.title}</p>
-                          <span className="text-[10px] text-slate-400 font-semibold shrink-0">
-                            {act.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </span>
-                        </div>
-                        <p className="text-xs font-medium text-slate-500 leading-relaxed">{act.description}</p>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${act.badgeColor} uppercase tracking-wider`}>
-                            {act.badgeText}
-                          </span>
-                          {act.action && act.actionLabel && (
-                            <button
-                              onClick={act.action}
-                              className="text-[11px] font-black text-indigo-600 hover:text-indigo-800 transition-colors"
-                            >
-                              {act.actionLabel}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {activities.length > 6 && (
-              <div className="p-4 border-t border-slate-100">
-                <button
-                  onClick={() => router.push("/dashboard/activity-logs")}
-                  className="w-full text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors text-center py-1"
-                >
-                  View all activity →
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -1178,10 +1231,10 @@ export default function DashboardPage() {
             
             <div className="space-y-2">
               {[
-                { label: "Add New Property", desc: "Create unit listing", icon: Building, color: "bg-blue-50 text-blue-600 border-blue-100", route: "/dashboard/properties/new" },
-                { label: "Invite Tenant", desc: "Send onboarding link", icon: Users, color: "bg-purple-50 text-purple-600 border-purple-100", route: "/dashboard/tenants/new" },
-                { label: "Payout Wallet", desc: "Manage disbursals", icon: Wallet, color: "bg-amber-50 text-amber-600 border-amber-100", route: "/dashboard/accounting/wallet" },
-                { label: "Stripe Billing", desc: "Plan & subscription", icon: Settings, color: "bg-emerald-50 text-emerald-600 border-emerald-100", route: "/dashboard/owner/billing" },
+                { label: "Add New Property", desc: "Create unit listing", icon: Building, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/properties/new" },
+                { label: "Invite Tenant", desc: "Send onboarding link", icon: Users, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/tenants/new" },
+                { label: "Payout Wallet", desc: "Manage disbursals", icon: Wallet, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/accounting/wallet" },
+                { label: "Stripe Billing", desc: "Plan & subscription", icon: Settings, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/owner/billing" },
               ].map((qa) => (
                 <button
                   key={qa.label}
@@ -1189,7 +1242,7 @@ export default function DashboardPage() {
                   className="w-full flex items-center justify-between p-3 rounded-xl border border-[#E5E5EA] bg-white hover:bg-[#F9F9FB] hover:border-[#D1D1D6] transition-all cursor-pointer group text-left"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-xl border shrink-0 ${qa.color}`}>
+                    <div className={`p-2 rounded-xl border shrink-0 ${qa.color} group-hover:bg-slate-900 group-hover:text-white transition-colors`}>
                       <qa.icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">

@@ -53,10 +53,6 @@ export async function checkUserFeatureAccess(
     };
   }
 
-  // 1.5 Welfare & Statutory Rights bypass: Cannot be blocked by admin override
-  if (matchedFeature?.welfareExempt) {
-    return { allowed: true, source: "default", featureLabel };
-  }
 
   // 2. Check for active BLOCK overrides
   const blockOverride = user.userAccessOverrides.find(o => o.overrideType === "BLOCK");

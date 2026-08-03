@@ -86,6 +86,7 @@ export default function UserProfilePage() {
   const [featureExpiresAt, setFeatureExpiresAt] = useState("");
   const [expiryOption, setExpiryOption] = useState<"permanent" | "1d" | "7d" | "30d" | "custom_days" | "custom_date">("permanent");
   const [customDaysInput, setCustomDaysInput] = useState<string>("7");
+  const [welfareConfirmModal, setWelfareConfirmModal] = useState<{ feature: any; newState: "DEFAULT" | "GRANT" | "BLOCK" } | null>(null);
 
   // Fetch overrides on mount or tab change
   useEffect(() => {
@@ -2223,13 +2224,19 @@ export default function UserProfilePage() {
                               } else {
                                 const d = new Date();
                                 d.setDate(d.getDate() + opt.days);
-                                setFeatureExpiresAt(d.toISOString().split("T")[0]);
+                                const year = d.getFullYear();
+                                const month = String(d.getMonth() + 1).padStart(2, "0");
+                                const day = String(d.getDate()).padStart(2, "0");
+                                setFeatureExpiresAt(`${year}-${month}-${day}`);
                               }
                             } else if (opt.id === "custom_days") {
                               const num = parseInt(customDaysInput) || 7;
                               const d = new Date();
                               d.setDate(d.getDate() + num);
-                              setFeatureExpiresAt(d.toISOString().split("T")[0]);
+                              const year = d.getFullYear();
+                              const month = String(d.getMonth() + 1).padStart(2, "0");
+                              const day = String(d.getDate()).padStart(2, "0");
+                              setFeatureExpiresAt(`${year}-${month}-${day}`);
                             }
                           }}
                           className={`text-xs px-3 h-9 rounded-xl font-extrabold transition-all border ${
@@ -2260,7 +2267,10 @@ export default function UserProfilePage() {
                           if (num > 0) {
                             const d = new Date();
                             d.setDate(d.getDate() + num);
-                            setFeatureExpiresAt(d.toISOString().split("T")[0]);
+                            const year = d.getFullYear();
+                            const month = String(d.getMonth() + 1).padStart(2, "0");
+                            const day = String(d.getDate()).padStart(2, "0");
+                            setFeatureExpiresAt(`${year}-${month}-${day}`);
                           } else {
                             setFeatureExpiresAt("");
                           }
@@ -2296,9 +2306,222 @@ export default function UserProfilePage() {
             ) : (
               <div className="space-y-8">
                 {(() => {
-                  const allFeatures = user.role === "TENANT" ? TENANT_FEATURES : INSPECTOR_FEATURES;
+                  const rawFeatures = user.role === "TENANT" ? TENANT_FEATURES : INSPECTOR_FEATURES;
+                  // Filter out un-implemented routes like vendor portal
+                  const allFeatures = rawFeatures.filter((f: any) => f.key !== "access_vendor_portal");
                   const protectedFeatures = allFeatures.filter((f: any) => f.welfareExempt);
                   const configurableFeatures = allFeatures.filter((f: any) => !f.welfareExempt);
+
+                  const executeStateChange = async (f: any, newState: "DEFAULT" | "GRANT" | "BLOCK", skipWelfareCheck = false) => {
+                    const activeOverride = userAccessOverrides.find((o: any) => o.feature === f.key && !o.isRevoked);
+                    const isExpired = activeOverride?.expiresAt ? new Date(activeOverride.expiresAt) <= new Date() : false;
+                    const currentState = (activeOverride && !isExpired) ? activeOverride.overrideType : "DEFAULT";
+                    if (newState === currentState) return;
+
+                    if (newState === "BLOCK" && f.welfareExempt && !skipWelfareCheck) {
+                      setWelfareConfirmModal({ feature: f, newState });
+                      return;
+                    }
+
+                    const effectiveReason =
+                      featureReason.trim().length >= 10
+                        ? featureReason.trim()
+                        : `Administrative ${newState.toLowerCase()} override for feature ${f.label} enforced by SuperAdmin.`;
+
+                    setSaving(true);
+                    try {
+                      const res = await fetch(`/api/admin/users/${params.id}/access-overrides`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          feature: f.key,
+                          overrideType: newState,
+                          reason: newState === "DEFAULT" ? "Reset to role default" : effectiveReason,
+                          expiresAt: newState === "DEFAULT" ? null : (featureExpiresAt || null),
+                        }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error);
+
+                      toast.success(
+                        newState === "DEFAULT"
+                          ? `Restored ${f.label} to Default Role Access.`
+                          : newState === "GRANT"
+                          ? `Force Allowed ${f.label} access.`
+                          : `Force Blocked ${f.label} access.`
+                      );
+
+                      const refreshRes = await fetch(`/api/admin/users/${params.id}/access-overrides`);
+                      const updated = await refreshRes.json();
+                      if (!updated.error) setUserAccessOverrides(updated);
+                    } catch (err: any) {
+                      toast.error(`Action failed: ${err.message}`);
+                    } finally {
+                      setSaving(false);
+                    }
+                  };
+
+                  const renderFeatureCard = (f: any, isStatutorySection: boolean) => {
+                    const activeOverride = userAccessOverrides.find((o: any) => o.feature === f.key && !o.isRevoked);
+                    const isExpired = activeOverride?.expiresAt ? new Date(activeOverride.expiresAt) <= new Date() : false;
+                    const currentState = (activeOverride && !isExpired) ? activeOverride.overrideType : "DEFAULT";
+
+                    return (
+                      <div
+                        key={f.key}
+                        className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between space-y-4 ${
+                          currentState === "BLOCK"
+                            ? "bg-white border-rose-200 shadow-2xs ring-1 ring-rose-100"
+                            : currentState === "GRANT"
+                            ? "bg-white border-emerald-200 shadow-2xs ring-1 ring-emerald-100"
+                            : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          {/* Top Header */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className={`p-2 rounded-xl shrink-0 shadow-2xs mt-0.5 ${
+                                currentState === "BLOCK"
+                                  ? "bg-rose-600 text-white"
+                                  : currentState === "GRANT"
+                                  ? "bg-emerald-600 text-white"
+                                  : isStatutorySection
+                                  ? "bg-emerald-900 text-white"
+                                  : "bg-slate-900 text-white"
+                              }`}>
+                                {currentState === "BLOCK" ? <Ban className="h-4 w-4" /> : currentState === "GRANT" ? <CheckCircle2 className="h-4 w-4" /> : isStatutorySection ? <ShieldCheck className="h-4 w-4 text-emerald-400" /> : <Key className="h-4 w-4" />}
+                              </div>
+                              <div className="min-w-0 space-y-1">
+                                <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
+                                <code className="inline-block text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                  {f.key}
+                                </code>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          {f.description && (
+                            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                              {f.description}
+                            </p>
+                          )}
+
+                          {/* 3-State Segmented Pill Control Buttons */}
+                          <div className="pt-2">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                Access Override Control:
+                              </p>
+                              {isStatutorySection && (
+                                <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                  Statutory Right
+                                </span>
+                              )}
+                            </div>
+                            <div className="bg-slate-100/90 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => executeStateChange(f, "DEFAULT")}
+                                className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                                  currentState === "DEFAULT"
+                                    ? "bg-white text-slate-900 shadow-2xs"
+                                    : "text-slate-500 hover:text-slate-800"
+                                }`}
+                              >
+                                Default
+                              </button>
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => executeStateChange(f, "GRANT")}
+                                className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                                  currentState === "GRANT"
+                                    ? "bg-emerald-600 text-white shadow-2xs"
+                                    : "text-slate-500 hover:text-emerald-700"
+                                }`}
+                                title="Force Allow capability for user"
+                              >
+                                Force Allow
+                              </button>
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => executeStateChange(f, "BLOCK")}
+                                className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                                  currentState === "BLOCK"
+                                    ? "bg-rose-600 text-white shadow-2xs"
+                                    : "text-slate-500 hover:text-rose-700"
+                                }`}
+                                title="Force Block capability for user"
+                              >
+                                Force Block
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Status Badges & Expiration Pill */}
+                          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                            {currentState === "BLOCK" ? (
+                              <>
+                                <Badge className="bg-rose-50 text-rose-800 border border-rose-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-rose-600 animate-pulse" /> Restricted
+                                </Badge>
+                                {activeOverride?.expiresAt ? (
+                                  <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                    <Clock className="h-3 w-3 text-slate-500" />
+                                    Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                    Permanent Block
+                                  </Badge>
+                                )}
+                              </>
+                            ) : currentState === "GRANT" ? (
+                              <>
+                                <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Administrative Grant
+                                </Badge>
+                                {activeOverride?.expiresAt && (
+                                  <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                    <Clock className="h-3 w-3 text-slate-500" />
+                                    Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
+                                  </Badge>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <Badge className="bg-slate-100 text-slate-600 border border-slate-200/80 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                  Default Role Access
+                                </Badge>
+                                {isExpired && (
+                                  <Badge className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                    <Clock className="h-3 w-3 text-amber-600" />
+                                    Expired on {new Date(activeOverride!.expiresAt!).toLocaleDateString()}
+                                  </Badge>
+                                )}
+                              </>
+                            )}
+                          </div>
+
+                          {activeOverride?.reason && (
+                            <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-600 font-medium leading-relaxed mt-2">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="font-extrabold text-slate-800 text-[10px] uppercase tracking-wider">Reason Note:</span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  {new Date(activeOverride.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              "{activeOverride.reason}"
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  };
 
                   return (
                     <>
@@ -2312,7 +2535,7 @@ export default function UserProfilePage() {
                               </div>
                               <div>
                                 <h4 className="text-sm font-black text-slate-900 tracking-tight">Welfare & Statutory Rights</h4>
-                                <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities protected under statutory compliance.</p>
+                                <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities. Administrative overrides require confirmation.</p>
                               </div>
                             </div>
                             <Badge className="bg-slate-100 text-slate-800 border border-slate-200 font-extrabold text-[11px] px-3 py-1 rounded-xl">
@@ -2321,41 +2544,7 @@ export default function UserProfilePage() {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {protectedFeatures.map((f: any) => (
-                              <div
-                                key={f.key}
-                                className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
-                              >
-                                <div className="space-y-3">
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-start gap-3 min-w-0">
-                                      <div className="p-2 rounded-xl bg-slate-100 text-slate-800 shrink-0 mt-0.5 border border-slate-200">
-                                        <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                                      </div>
-                                      <div className="min-w-0 space-y-1">
-                                        <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
-                                        <code className="inline-block text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                          {f.key}
-                                        </code>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {f.description && (
-                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                                      {f.description}
-                                    </p>
-                                  )}
-
-                                  <div className="pt-1">
-                                    <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs w-fit">
-                                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                                      Statutory Welfare Protection (Active)
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                            {protectedFeatures.map((f: any) => renderFeatureCard(f, true))}
                           </div>
                         </div>
                       )}
@@ -2378,185 +2567,78 @@ export default function UserProfilePage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {configurableFeatures.map((f: any) => {
-                            const activeOverride = userAccessOverrides.find((o: any) => o.feature === f.key && !o.isRevoked);
-                            const currentState = activeOverride ? activeOverride.overrideType : "DEFAULT"; // "GRANT" | "BLOCK" | "DEFAULT"
-
-                            const handleStateChange = async (newState: "DEFAULT" | "GRANT" | "BLOCK") => {
-                              if (newState === currentState) return;
-                              if (newState !== "DEFAULT" && featureReason.trim().length < 10) {
-                                toast.error("Please enter an audit log reason of at least 10 characters in the authorization panel above.");
-                                return;
-                              }
-
-                              setSaving(true);
-                              try {
-                                const res = await fetch(`/api/admin/users/${params.id}/access-overrides`, {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    feature: f.key,
-                                    overrideType: newState,
-                                    reason: newState === "DEFAULT" ? "Reset to role default" : featureReason,
-                                    expiresAt: newState === "DEFAULT" ? null : (featureExpiresAt || null),
-                                  }),
-                                });
-                                const data = await res.json();
-                                if (!res.ok) throw new Error(data.error);
-
-                                toast.success(
-                                  newState === "DEFAULT"
-                                    ? `Restored ${f.label} to Default Role Access.`
-                                    : newState === "GRANT"
-                                    ? `Force Allowed ${f.label} access.`
-                                    : `Force Blocked ${f.label} access.`
-                                );
-
-                                const refreshRes = await fetch(`/api/admin/users/${params.id}/access-overrides`);
-                                const updated = await refreshRes.json();
-                                if (!updated.error) setUserAccessOverrides(updated);
-                              } catch (err: any) {
-                                toast.error(`Action failed: ${err.message}`);
-                              } finally {
-                                setSaving(false);
-                              }
-                            };
-
-                            return (
-                              <div
-                                key={f.key}
-                                className={`relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between space-y-4 ${
-                                  currentState === "BLOCK"
-                                    ? "bg-white border-rose-200 shadow-2xs ring-1 ring-rose-100"
-                                    : currentState === "GRANT"
-                                    ? "bg-white border-emerald-200 shadow-2xs ring-1 ring-emerald-100"
-                                    : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-slate-300"
-                                }`}
-                              >
-                                <div className="space-y-3">
-                                  {/* Top Header */}
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-start gap-3 min-w-0">
-                                      <div className={`p-2 rounded-xl shrink-0 shadow-2xs mt-0.5 ${
-                                        currentState === "BLOCK"
-                                          ? "bg-rose-600 text-white"
-                                          : currentState === "GRANT"
-                                          ? "bg-emerald-600 text-white"
-                                          : "bg-slate-900 text-white"
-                                      }`}>
-                                        {currentState === "BLOCK" ? <Ban className="h-4 w-4" /> : currentState === "GRANT" ? <CheckCircle2 className="h-4 w-4" /> : <Key className="h-4 w-4" />}
-                                      </div>
-                                      <div className="min-w-0 space-y-1">
-                                        <p className="font-extrabold text-sm text-slate-900 tracking-tight leading-snug">{f.label}</p>
-                                        <code className="inline-block text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                          {f.key}
-                                        </code>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Description */}
-                                  {f.description && (
-                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                                      {f.description}
-                                    </p>
-                                  )}
-
-                                  {/* 3-State Segmented Pill Control Buttons */}
-                                  <div className="pt-2">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
-                                      Access Override Control:
-                                    </p>
-                                    <div className="bg-slate-100/90 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
-                                      <button
-                                        type="button"
-                                        disabled={saving}
-                                        onClick={() => handleStateChange("DEFAULT")}
-                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
-                                          currentState === "DEFAULT"
-                                            ? "bg-white text-slate-900 shadow-2xs"
-                                            : "text-slate-500 hover:text-slate-800"
-                                        }`}
-                                      >
-                                        Default
-                                      </button>
-                                      <button
-                                        type="button"
-                                        disabled={saving || (currentState !== "GRANT" && featureReason.trim().length < 10)}
-                                        onClick={() => handleStateChange("GRANT")}
-                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
-                                          currentState === "GRANT"
-                                            ? "bg-emerald-600 text-white shadow-2xs"
-                                            : "text-slate-500 hover:text-emerald-700"
-                                        } ${(currentState !== "GRANT" && featureReason.trim().length < 10) ? "opacity-50" : ""}`}
-                                        title={featureReason.trim().length < 10 ? "Enter 10+ char reason above to grant" : "Force Allow capability"}
-                                      >
-                                        Force Allow
-                                      </button>
-                                      <button
-                                        type="button"
-                                        disabled={saving || (currentState !== "BLOCK" && featureReason.trim().length < 10)}
-                                        onClick={() => handleStateChange("BLOCK")}
-                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-extrabold transition-all ${
-                                          currentState === "BLOCK"
-                                            ? "bg-rose-600 text-white shadow-2xs"
-                                            : "text-slate-500 hover:text-rose-700"
-                                        } ${(currentState !== "BLOCK" && featureReason.trim().length < 10) ? "opacity-50" : ""}`}
-                                        title={featureReason.trim().length < 10 ? "Enter 10+ char reason above to block" : "Force Block capability"}
-                                      >
-                                        Force Block
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* Status Badges & Expiration Pill */}
-                                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                    {currentState === "BLOCK" ? (
-                                      <>
-                                        <Badge className="bg-rose-50 text-rose-800 border border-rose-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-                                          <span className="h-1.5 w-1.5 rounded-full bg-rose-600 animate-pulse" /> Restricted
-                                        </Badge>
-                                        {activeOverride?.expiresAt && (
-                                          <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                            <Clock className="h-3 w-3 text-slate-500" />
-                                            Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
-                                          </Badge>
-                                        )}
-                                      </>
-                                    ) : currentState === "GRANT" ? (
-                                      <>
-                                        <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-                                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Administrative Grant
-                                        </Badge>
-                                        {activeOverride?.expiresAt && (
-                                          <Badge className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                            <Clock className="h-3 w-3 text-slate-500" />
-                                            Until {new Date(activeOverride.expiresAt).toLocaleDateString()}
-                                          </Badge>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <Badge className="bg-slate-100 text-slate-600 border border-slate-200/80 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-                                        Default Role Access
-                                      </Badge>
-                                    )}
-                                  </div>
-
-                                  {activeOverride?.reason && (
-                                    <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs text-slate-600 font-medium leading-relaxed mt-2">
-                                      <span className="font-extrabold text-slate-800 block mb-0.5 text-[10px] uppercase tracking-wider">Reason Note:</span>
-                                      "{activeOverride.reason}"
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
+                          {configurableFeatures.map((f: any) => renderFeatureCard(f, false))}
                         </div>
                       </div>
                     </>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* Statutory Welfare Confirmation Modal */}
+            {welfareConfirmModal && (
+              <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+                  <div className="flex items-center gap-3 text-amber-600">
+                    <div className="p-2 bg-amber-50 rounded-xl border border-amber-200">
+                      <AlertTriangle className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">Restrict Statutory Right?</h3>
+                      <p className="text-xs text-amber-700 font-extrabold">Welfare Protection Warning</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    You are attempting to force block <strong className="text-slate-900">{welfareConfirmModal.feature.label}</strong>. This feature is designated as a Statutory Welfare Right. Restricting core rights may impact statutory user protections.
+                  </p>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 font-mono">
+                    Feature key: {welfareConfirmModal.feature.key}
+                  </div>
+                  <div className="flex gap-2 justify-end pt-2">
+                    <Button variant="outline" onClick={() => setWelfareConfirmModal(null)} className="rounded-xl font-bold text-xs">
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        const target = welfareConfirmModal;
+                        setWelfareConfirmModal(null);
+                        setSaving(true);
+                        const effectiveReason =
+                          featureReason.trim().length >= 10
+                            ? featureReason.trim()
+                            : `Administrative statutory block override for feature ${target.feature.label} enforced by SuperAdmin.`;
+                        try {
+                          const res = await fetch(`/api/admin/users/${params.id}/access-overrides`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              feature: target.feature.key,
+                              overrideType: target.newState,
+                              reason: effectiveReason,
+                              expiresAt: featureExpiresAt || null,
+                            }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error);
+
+                          toast.success(`Force Blocked statutory feature "${target.feature.label}".`);
+
+                          const refreshRes = await fetch(`/api/admin/users/${params.id}/access-overrides`);
+                          const updated = await refreshRes.json();
+                          if (!updated.error) setUserAccessOverrides(updated);
+                        } catch (err: any) {
+                          toast.error(`Action failed: ${err.message}`);
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      className="bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl"
+                    >
+                      Confirm Force Block
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

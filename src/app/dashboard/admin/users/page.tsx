@@ -357,9 +357,6 @@ export default function AdminUsersPage() {
           <Table>
             <TableHeader className="bg-[#F8FAFC]">
               <TableRow className="border-[#E2E8F0] hover:bg-transparent">
-                <TableHead className="w-12 text-center text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                </TableHead>
                 <TableHead className="w-12 text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">#</TableHead>
                 <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">User</TableHead>
                 <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">Role</TableHead>
@@ -374,7 +371,7 @@ export default function AdminUsersPage() {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center text-[#64748B]">
+                  <TableCell colSpan={7} className="h-32 text-center text-[#64748B]">
                     No users found matching your search.
                   </TableCell>
                 </TableRow>
@@ -384,9 +381,6 @@ export default function AdminUsersPage() {
                   const paginated = filteredUsers.slice(start, start + itemsPerPage);
                   return paginated.map((user, idx) => (
                     <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-blue-50/50 transition-colors group">
-                      <TableCell className="text-center">
-                        <input type="checkbox" className="rounded border-gray-300" />
-                      </TableCell>
                       <TableCell className="text-[#64748B] text-sm font-bold">{start + idx + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">

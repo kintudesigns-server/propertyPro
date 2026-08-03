@@ -42,8 +42,11 @@ import {
 import { toast } from "sonner";
 import { LeaseActionsMenu } from "@/components/tenant/LeaseActionsMenu";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 
 export default function MyLeasesPage() {
+  const featureAccess = useFeatureAccess("view_lease");
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -231,17 +234,6 @@ export default function MyLeasesPage() {
     }
   };
 
-  if (status === "loading" || loading) {
-    return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#007AFF]" />
-        <p className="text-[#8E8E93] font-extrabold text-sm uppercase tracking-wider">
-          Syncing lease registry...
-        </p>
-      </div>
-    );
-  }
-
   const pendingLease = leases.find((l) => l.status === "PENDING_SIGNATURE");
   const pendingRenewal = leases.find((l) => l.renewalStatus === "PENDING_DECISION");
 
@@ -313,7 +305,15 @@ export default function MyLeasesPage() {
   );
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 relative">
+      {!featureAccess.allowed && (
+        <FeatureBlockedOverlay
+          featureLabel={featureAccess.featureLabel || "View Active Lease Terms"}
+          reason={featureAccess.reason}
+          adminNote={featureAccess.adminNote}
+          expiresAt={featureAccess.expiresAt}
+        />
+      )}
 
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
