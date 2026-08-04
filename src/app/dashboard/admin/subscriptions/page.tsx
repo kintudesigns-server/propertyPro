@@ -58,11 +58,11 @@ export default async function AdminSubscriptionsPage() {
   const serializedSettings = JSON.parse(JSON.stringify(platformSettings));
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
+    <div className="max-w-6xl mx-auto space-y-6 pt-6 pb-20 px-4 sm:px-6 font-sans">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Owner Subscriptions</h1>
-          <p className="text-[#6E6E73] text-base mt-0.5">Overview and management panel for property owners and subscription lifecycles.</p>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Owner Subscriptions</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Overview and management panel for property owners and subscription lifecycles.</p>
         </div>
       </div>
 

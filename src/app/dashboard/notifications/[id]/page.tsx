@@ -620,18 +620,18 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
   const navActions = resolveNavActions(notification, userRole);
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-6">
+    <div className="max-w-5xl mx-auto flex flex-col gap-6 font-sans">
       {/* Back + Title */}
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/notifications"
-          className="p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-colors shadow-sm"
+          className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-extrabold text-[#1D1D1F] tracking-tight">Notification Details</h1>
-          <p className="text-sm text-[#6E6E73] font-medium mt-0.5">View alert contents, metadata, and related actions</p>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Notification Details</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">View alert contents, metadata, and related actions</p>
         </div>
       </div>
 
@@ -639,38 +639,38 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
         {/* ── Left: main content ── */}
         <div className="flex-1 flex flex-col gap-5">
           {/* Hero card */}
-          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
-            <div className="p-8 flex flex-col items-center text-center border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-              <div className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-[#E5E5EA]">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="p-8 flex flex-col items-center text-center border-b border-slate-100 bg-slate-50/50">
+              <div className="mb-4 p-3.5 bg-white rounded-2xl shadow-2xs border border-slate-200/80">
                 {getIconForType(notification.type, notification.priority)}
               </div>
               <div className="flex flex-wrap justify-center gap-2 mb-3">
                 {getPriorityBadge(notification.priority)}
-                <span className="px-2.5 py-1 text-xs font-bold rounded bg-slate-100 text-slate-600 border border-slate-200">
+                <span className="px-2.5 py-1 text-[10px] font-black rounded-md bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider shadow-2xs">
                   {notification.type} ALERT
                 </span>
               </div>
-              <h2 className="text-2xl font-extrabold text-[#1D1D1F] max-w-2xl">{notification.title}</h2>
+              <h2 className="text-xl font-black text-slate-900 max-w-2xl tracking-tight">{notification.title}</h2>
             </div>
-            <div className="p-8 space-y-6">
+            <div className="p-6 md:p-8 space-y-6">
               <div>
-                <h3 className="text-xs font-extrabold text-[#94A3B8] uppercase tracking-wider mb-3">Message Content</h3>
-                <div className="bg-slate-50 p-6 rounded-xl border border-[#E5E5EA]">
-                  <p className="whitespace-pre-wrap leading-relaxed text-base text-[#1D1D1F]">{notification.message}</p>
+                <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Message Content</h3>
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                  <p className="whitespace-pre-wrap leading-relaxed text-sm text-slate-900 font-semibold">{notification.message}</p>
                 </div>
               </div>
 
               {/* Rich Block Policy Card for Feature Restrictions */}
               {overrideDetail && (
-                <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-6 space-y-4">
+                <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-5 space-y-4 shadow-2xs">
                   <div className="flex items-center justify-between border-b border-purple-200/60 pb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">
                         <AlertCircle className="h-4 w-4" />
                       </div>
-                      <h4 className="text-xs font-black text-purple-950 uppercase tracking-wider">Administrative Authorization Policy Record</h4>
+                      <h4 className="text-[10px] font-black text-purple-950 uppercase tracking-wider">Administrative Authorization Policy Record</h4>
                     </div>
-                    <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                    <span className="text-[9px] font-black px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 border border-purple-200 uppercase tracking-wider shadow-2xs">
                       {overrideDetail.overrideType === "BLOCK" ? "🔒 Active Block" : "🔑 Granted Access"}
                     </span>
                   </div>
@@ -678,14 +678,14 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <span className="text-[10px] font-black text-purple-800/80 uppercase tracking-wider block">Admin Audit Reason Note</span>
-                      <p className="text-xs font-bold text-purple-950 bg-white p-3 rounded-xl border border-purple-200/60 italic">
+                      <p className="text-xs font-semibold text-purple-950 bg-white p-3 rounded-xl border border-purple-200/60 italic shadow-2xs">
                         "{overrideDetail.reason}"
                       </p>
                     </div>
 
                     <div className="space-y-1">
                       <span className="text-[10px] font-black text-purple-800/80 uppercase tracking-wider block">Restriction Timeline</span>
-                      <div className="bg-white p-3 rounded-xl border border-purple-200/60 space-y-1">
+                      <div className="bg-white p-3 rounded-xl border border-purple-200/60 space-y-1 shadow-2xs">
                         <p className="text-xs font-bold text-purple-950">
                           {overrideDetail.expiresAt
                             ? `Auto-restores on ${new Date(overrideDetail.expiresAt).toLocaleDateString()}`
@@ -706,26 +706,26 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
 
           {/* ── Smart Navigation Actions ── */}
           {navActions.length > 0 && (
-            <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#E5E5EA] bg-[#F2F2F7]">
-                <h3 className="font-extrabold text-[#1D1D1F] text-sm">Related Actions</h3>
-                <p className="text-xs text-[#6E6E73] mt-0.5 font-medium">Jump directly to the page related to this notification</p>
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="font-black text-slate-900 text-sm tracking-tight">Related Actions</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">Jump directly to the page related to this notification</p>
               </div>
               <div className="p-5 flex flex-col gap-3">
                 {navActions.map((action, i) => (
                   <Link
                     key={i}
                     href={action.href}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-[#E5E5EA] hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
+                    className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/80 transition-all group shadow-2xs"
                   >
-                    <div className={`h-11 w-11 rounded-xl ${action.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
-                      <action.Icon className={`h-5 w-5 ${action.textColor}`} />
+                    <div className={`h-10 w-10 rounded-xl ${action.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-2xs`}>
+                      <action.Icon className={`h-4 w-4 ${action.textColor}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm ${action.textColor} group-hover:underline`}>{action.label}</p>
-                      <p className="text-xs text-[#6E6E73] mt-0.5 leading-relaxed">{action.description}</p>
+                      <p className={`font-black text-xs text-slate-900 group-hover:underline`}>{action.label}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed font-semibold">{action.description}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-[#94A3B8] shrink-0 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                    <ArrowRight className="h-4 w-4 text-slate-400 shrink-0 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
                   </Link>
                 ))}
               </div>
@@ -736,48 +736,48 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
         {/* ── Right sidebar ── */}
         <div className="w-full lg:w-80 flex flex-col gap-5 shrink-0">
           {/* Overview card */}
-          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-[#E5E5EA] bg-[#F2F2F7]">
-              <h3 className="font-bold text-[#1D1D1F] text-sm">Overview</h3>
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="font-black text-slate-900 text-xs uppercase tracking-wider">Overview</h3>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-5 space-y-4">
               {/* Status */}
               <div>
-                <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                   <CheckCheck className="h-3.5 w-3.5" /> Status
                 </span>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${notification.isRead ? "bg-slate-100 text-slate-600" : "bg-blue-50 text-blue-600"}`}>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${notification.isRead ? "bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs" : "bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"}`}>
                   {notification.isRead ? "Read" : "Unread"}
                 </span>
               </div>
 
-              <div className="h-px bg-[#E5E5EA]" />
+              <div className="h-px bg-slate-100" />
 
               {/* Date */}
               <div>
-                <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                   <Calendar className="h-3.5 w-3.5" /> Date Received
                 </span>
-                <p className="text-sm font-semibold text-[#1D1D1F]">{formatDate(notification.createdAt)}</p>
+                <p className="text-xs font-black text-slate-900">{formatDate(notification.createdAt)}</p>
               </div>
 
               {/* Time */}
               <div>
-                <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                   <Clock className="h-3.5 w-3.5" /> Time
                 </span>
-                <p className="text-sm font-semibold text-[#1D1D1F]">{formatTime(notification.createdAt)}</p>
+                <p className="text-xs font-black text-slate-900">{formatTime(notification.createdAt)}</p>
               </div>
 
               {/* Raw entity ID */}
               {notification.relatedEntityId && (
                 <>
-                  <div className="h-px bg-[#E5E5EA]" />
+                  <div className="h-px bg-slate-100" />
                   <div>
-                    <span className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                       <FileText className="h-3.5 w-3.5" /> Entity ID
                     </span>
-                    <p className="text-[11px] font-mono text-[#6E6E73] bg-slate-50 border border-slate-200 p-2 rounded-lg break-all">
+                    <p className="text-[10px] font-mono text-slate-600 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl break-all shadow-2xs">
                       {notification.relatedEntityId}
                     </p>
                   </div>
@@ -787,8 +787,8 @@ export default async function NotificationDetailsPage({ params }: { params: Prom
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-sm overflow-hidden p-5">
-            <h3 className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-4">Quick Actions</h3>
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden p-5">
+            <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h3>
             <NotificationActions id={notification.id} isRead={notification.isRead} />
           </div>
         </div>

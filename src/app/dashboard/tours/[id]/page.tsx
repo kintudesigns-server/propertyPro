@@ -225,7 +225,7 @@ export default function TourDetailPage() {
         <h3 className="text-lg font-bold text-slate-800">Tour Request Not Found</h3>
         <p className="text-sm text-[#6E6E73]">The showing request could not be loaded or has been deleted.</p>
         <Link href="/dashboard/tours">
-          <Button className="bg-[#007AFF] text-white rounded-xl">Go Back</Button>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold">Go Back</Button>
         </Link>
       </div>
     );

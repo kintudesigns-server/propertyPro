@@ -318,20 +318,19 @@ export default function AdminPayoutsPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pt-6 pb-24 px-2 sm:px-6">
-
+    <div className="max-w-7xl mx-auto space-y-6 pt-6 pb-24 px-4 sm:px-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-red-50 rounded-xl">
-            <Shield className="h-8 w-8 text-red-500" />
+          <div className="p-3 bg-slate-100 border border-slate-200 rounded-2xl shrink-0 shadow-2xs">
+            <Shield className="h-6 w-6 text-slate-900" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Payouts Control Ledger</h1>
-            <p className="text-[#6E6E73] text-sm mt-0.5">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">Payouts Control Ledger</h1>
+            <p className="text-xs text-slate-500 font-semibold mt-0.5">
               {stats ? (
                 stats.overdueCount > 0 ? (
-                  <span className="text-red-600 font-semibold">{stats.pendingCount} pending · {stats.overdueCount} past {slaHours}h SLA</span>
+                  <span className="text-rose-600 font-black">{stats.pendingCount} pending · {stats.overdueCount} past {slaHours}h SLA</span>
                 ) : (
                   <span>{stats.pendingCount} pending · All within {slaHours}h SLA target</span>
                 )
@@ -343,13 +342,13 @@ export default function AdminPayoutsPage() {
         </div>
         <div className="flex items-center gap-2">
           {/* SLA Target Selector */}
-          <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs">
-            <Clock className="h-4 w-4 text-[#6E6E73]" />
-            <span className="text-xs font-bold text-[#6E6E73]">SLA:</span>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 h-9 rounded-xl shadow-2xs">
+            <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-xs font-extrabold text-slate-500">SLA:</span>
             <select
               value={slaHours}
               onChange={(e) => setSlaHours(Number(e.target.value))}
-              className="text-xs font-bold text-[#1D1D1F] bg-transparent focus:outline-none cursor-pointer"
+              className="text-xs font-black text-slate-900 bg-transparent focus:outline-none cursor-pointer"
             >
               <option value={12}>12 Hours</option>
               <option value={24}>24 Hours (1 Day)</option>
@@ -363,96 +362,94 @@ export default function AdminPayoutsPage() {
             variant="outline"
             size="sm"
             onClick={handleExport}
-            className="gap-2 border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl"
+            className="h-9 gap-2 border-slate-200 text-slate-900 hover:bg-slate-50 font-black text-xs rounded-xl shadow-2xs cursor-pointer bg-white"
           >
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-3.5 w-3.5 text-slate-700" /> Export CSV
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => fetchPayouts(pagination.page)}
-            className="text-[#6E6E73] hover:bg-slate-100 rounded-xl"
+            className="h-9 w-9 text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer"
           >
-            <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
 
       {/* Stats Row */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 font-sans">
           {/* Pending */}
-          <div className="bg-white border-[#E5E5EA] border-l-4 border-l-amber-500 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 border-l-4 border-l-amber-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-widest">Pending</p>
-              <p className="text-xl font-black text-[#1D1D1F] mt-0.5">{stats.pendingCount}</p>
-              <p className="text-[10px] text-amber-600 font-semibold mt-0.5">
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Pending</p>
+              <p className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.pendingCount}</p>
+              <p className="text-[10px] text-amber-700 font-extrabold mt-1">
                 ${stats.pendingAmountAtRisk.toLocaleString(undefined, { minimumFractionDigits: 2 })} at risk
               </p>
             </div>
-            <Wallet className="h-5 w-5 text-amber-400 shrink-0" />
+            <Wallet className="h-5 w-5 text-amber-500 shrink-0" />
           </div>
 
           {/* Settled */}
-          <div className="bg-white border-[#E5E5EA] border-l-4 border-l-emerald-500 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 border-l-4 border-l-emerald-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-widest">Settled</p>
-              <p className="text-xl font-black text-emerald-700 mt-0.5">
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Settled</p>
+              <p className="text-2xl font-black text-emerald-800 mt-1 tracking-tight">
                 ${stats.settledVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">Total disbursed</p>
+              <p className="text-[10px] text-emerald-700 font-semibold mt-1">Total disbursed</p>
             </div>
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
           </div>
 
           {/* Rejected */}
-          <div className="bg-white border-[#E5E5EA] border-l-4 border-l-red-500 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 border-l-4 border-l-rose-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-widest">Rejected</p>
-              <p className="text-xl font-black text-red-600 mt-0.5">
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rejected</p>
+              <p className="text-2xl font-black text-rose-600 mt-1 tracking-tight">
                 ${stats.rejectedVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-[10px] text-red-500 font-semibold mt-0.5">Volume reversed</p>
+              <p className="text-[10px] text-rose-600 font-semibold mt-1">Volume reversed</p>
             </div>
-            <XCircle className="h-5 w-5 text-red-400 shrink-0" />
+            <XCircle className="h-5 w-5 text-rose-500 shrink-0" />
           </div>
 
           {/* Avg Processing */}
-          <div className="bg-white border-[#E5E5EA] border-l-4 border-l-violet-500 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 border-l-4 border-l-violet-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-widest">Avg Time</p>
-              <p className="text-xl font-black text-[#1D1D1F] mt-0.5">
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Time</p>
+              <p className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
                 {stats.avgProcessingHours < 48 ? `${stats.avgProcessingHours}h` : `${Math.round(stats.avgProcessingHours / 24)}d`}
               </p>
-              <p className="text-[10px] text-[#94A3B8] font-semibold mt-0.5">Avg to disburse</p>
+              <p className="text-[10px] text-slate-500 font-semibold mt-1">Avg to disburse</p>
             </div>
-            <Timer className="h-5 w-5 text-violet-400 shrink-0" />
+            <Timer className="h-5 w-5 text-violet-500 shrink-0" />
           </div>
 
           {/* 30-Day Approval Rate */}
-          <div className="bg-white border-[#E5E5EA] border-l-4 border-l-blue-500 shadow-sm rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 border-l-4 border-l-blue-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-widest">30-Day Approval</p>
-              <p className="text-xl font-black text-blue-700 mt-0.5">{stats.approvalRate}%</p>
-              <p className="text-[10px] text-blue-600 font-semibold mt-0.5">Rolling operational score</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">30-Day Approval</p>
+              <p className="text-2xl font-black text-blue-700 mt-1 tracking-tight">{stats.approvalRate}%</p>
+              <p className="text-[10px] text-blue-600 font-semibold mt-1">Rolling operational score</p>
             </div>
-            <Activity className="h-5 w-5 text-blue-400 shrink-0" />
+            <Activity className="h-5 w-5 text-blue-500 shrink-0" />
           </div>
-
         </div>
       )}
 
       {/* SLA Breach Warning Banner */}
       {stats && stats.overdueCount > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center justify-between animate-in fade-in">
+        <div className="bg-rose-50/80 border border-rose-200/80 rounded-3xl p-5 flex items-center justify-between shadow-2xs font-sans">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+            <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800">
+              <p className="text-xs font-black text-rose-950">
                 {stats.overdueCount} payout{stats.overdueCount > 1 ? "s exceed" : " exceeds"} the target {slaHours}h SLA
               </p>
-              <p className="text-xs text-red-600">
+              <p className="text-xs text-rose-900 font-semibold mt-0.5">
                 Prioritize pending disbursements marked as overdue below.
               </p>
             </div>
@@ -460,7 +457,7 @@ export default function AdminPayoutsPage() {
           <Button
             size="sm"
             onClick={() => { setStatusFilter("PENDING"); setActiveTab("ALL"); }}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg"
+            className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer border-none"
           >
             Filter Overdue
           </Button>
@@ -468,33 +465,33 @@ export default function AdminPayoutsPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shadow-2xs font-sans w-fit">
         <button
           onClick={() => { setActiveTab("ALL"); }}
-          className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === "ALL"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-[#6E6E73] hover:text-slate-700"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "text-slate-600 hover:text-slate-900 font-extrabold"
           }`}
         >
           All Payouts ({pagination.totalCount})
         </button>
         <button
           onClick={() => { setActiveTab("OWNER"); }}
-          className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === "OWNER"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-[#6E6E73] hover:text-slate-700"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "text-slate-600 hover:text-slate-900 font-extrabold"
           }`}
         >
           Owner Withdrawals ({stats?.ownerCount || 0})
         </button>
         <button
           onClick={() => { setActiveTab("TENANT"); }}
-          className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === "TENANT"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-[#6E6E73] hover:text-slate-700"
+              ? "bg-slate-900 text-white shadow-2xs"
+              : "text-slate-600 hover:text-slate-900 font-extrabold"
           }`}
         >
           Tenant Refunds ({stats?.tenantCount || 0})
@@ -502,15 +499,15 @@ export default function AdminPayoutsPage() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-wrap gap-3 items-center font-sans">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <Input
             placeholder="Name, email or bank..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 h-9 rounded-xl bg-white border-slate-200 text-slate-800 font-semibold text-sm shadow-sm"
+            className="pl-9 h-9 rounded-xl bg-slate-50 border-slate-200/80 text-slate-900 font-semibold text-xs shadow-2xs focus-visible:ring-slate-900/10"
           />
         </div>
 
@@ -518,7 +515,7 @@ export default function AdminPayoutsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold px-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+          className="h-9 rounded-xl border border-slate-200/80 bg-slate-50 text-slate-900 text-xs font-extrabold px-3 shadow-2xs focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer"
         >
           <option value="ALL">All Statuses</option>
           <option value="PENDING">Pending</option>
@@ -532,29 +529,29 @@ export default function AdminPayoutsPage() {
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="h-9 rounded-xl border-slate-200 bg-white text-slate-700 text-sm font-semibold w-36 shadow-sm"
+            className="h-9 rounded-xl border-slate-200/80 bg-slate-50 text-slate-900 font-extrabold text-xs w-36 shadow-2xs cursor-pointer"
           />
-          <span className="text-[#8E8E93] text-sm">→</span>
+          <span className="text-slate-400 text-xs font-extrabold">→</span>
           <Input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="h-9 rounded-xl border-slate-200 bg-white text-slate-700 text-sm font-semibold w-36 shadow-sm"
+            className="h-9 rounded-xl border-slate-200/80 bg-slate-50 text-slate-900 font-extrabold text-xs w-36 shadow-2xs cursor-pointer"
           />
           {(fromDate || toDate) && (
-            <button onClick={() => { setFromDate(""); setToDate(""); }} className="text-[#8E8E93] hover:text-[#6E6E73]">
+            <button onClick={() => { setFromDate(""); setToDate(""); }} className="text-slate-400 hover:text-slate-600 cursor-pointer">
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
 
-        <span className="text-xs text-[#8E8E93] font-semibold ml-auto">
+        <span className="text-xs text-slate-500 font-extrabold ml-auto">
           {pagination.totalCount} result{pagination.totalCount !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Main Table */}
-      <Card className="bg-white border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+      <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
         <CardContent className="p-0">
 
           {loading ? (

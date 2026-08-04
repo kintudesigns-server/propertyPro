@@ -340,7 +340,7 @@ export default function EditTenantPage() {
           <Link href="/dashboard/tenants">
             <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#1D1D1F] border-[#E5E5EA] shadow-sm hover:bg-[#F2F2F7]">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={loading} className="bg-[#007AFF] hover:bg-[#0062CC] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
+          <Button type="submit" disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>

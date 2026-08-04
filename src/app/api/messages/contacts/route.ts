@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         where: {
           id: { not: userId }
         },
-        select: { id: true, name: true, email: true, role: true }
+        select: { id: true, name: true, email: true, role: true, avatar: true }
       });
       contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
           ],
           id: { not: userId }
         },
-        select: { id: true, name: true, email: true, role: true }
+        select: { id: true, name: true, email: true, role: true, avatar: true }
       });
       contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }
@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
           ],
           id: { not: userId }
         },
-        select: { id: true, name: true, email: true, role: true }
+        select: { id: true, name: true, email: true, role: true, avatar: true }
       });
 
       contacts = await Promise.all(
@@ -171,7 +171,7 @@ export async function GET(req: NextRequest) {
           ],
           id: { not: userId }
         },
-        select: { id: true, name: true, email: true, role: true }
+        select: { id: true, name: true, email: true, role: true, avatar: true }
       });
       contacts = users.map(u => ({ ...u, hasMessagingAccess: true, messagingChannel: "LIVE_CHAT" }));
     }

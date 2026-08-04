@@ -15,8 +15,6 @@ import { MoreVertical, Eye, FileDown, ShieldAlert } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSession } from "next-auth/react";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
-import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
-import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { KpiCard } from "@/components/ui/KpiCard";
 
@@ -38,7 +36,7 @@ export default function LeasesDashboard({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(initialFilter);
   const [sortOrder, setSortOrder] = useState("ACTION_REQUIRED");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list"); // Default to list for replica
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -53,12 +51,11 @@ export default function LeasesDashboard({
       if (res.ok) {
         setLeases(await res.json());
       } else {
-        // Teaser sample leases when module is locked / 403
         setLeases([
-          { id: "LEASE-2026-01", status: "ACTIVE", rentAmount: 2450, startDate: "2026-01-01", endDate: "2026-12-31", tenant: { name: "John Doe", email: "john@example.com" }, unit: { unitNumber: "4B", property: { name: "Sunset Heights Apartments" } } },
-          { id: "LEASE-2026-02", status: "ACTIVE", rentAmount: 1850, startDate: "2026-02-01", endDate: "2027-01-31", tenant: { name: "Alice Smith", email: "alice@example.com" }, unit: { unitNumber: "Suite 12", property: { name: "Oakridge Commercial Hub" } } },
-          { id: "LEASE-2026-03", status: "NOTICE_GIVEN", rentAmount: 1650, startDate: "2025-08-01", endDate: "2026-08-31", tenant: { name: "Robert Taylor", email: "robert@example.com" }, unit: { unitNumber: "Apt 2A", property: { name: "Maplewood Terrace" } } },
-          { id: "LEASE-2026-04", status: "EXPIRED", rentAmount: 2100, startDate: "2025-06-01", endDate: "2026-05-31", tenant: { name: "Emily Davis", email: "emily@example.com" }, unit: { unitNumber: "Unit 101", property: { name: "Highland Residences" } } },
+          { id: "LEASE-2026-01", status: "ACTIVE", monthlyRent: 2450, startDate: "2026-01-01", endDate: "2026-12-31", tenant: { name: "John Doe", email: "john@example.com" }, unit: { name: "4B", property: { name: "Sunset Heights Apartments" } } },
+          { id: "LEASE-2026-02", status: "ACTIVE", monthlyRent: 1850, startDate: "2026-02-01", endDate: "2027-01-31", tenant: { name: "Alice Smith", email: "alice@example.com" }, unit: { name: "Suite 12", property: { name: "Oakridge Commercial Hub" } } },
+          { id: "LEASE-2026-03", status: "NOTICE_GIVEN", monthlyRent: 1650, startDate: "2025-08-01", endDate: "2026-08-31", tenant: { name: "Robert Taylor", email: "robert@example.com" }, unit: { name: "Apt 2A", property: { name: "Maplewood Terrace" } } },
+          { id: "LEASE-2026-04", status: "EXPIRED", monthlyRent: 2100, startDate: "2025-06-01", endDate: "2026-05-31", tenant: { name: "Emily Davis", email: "emily@example.com" }, unit: { name: "Unit 101", property: { name: "Highland Residences" } } },
         ]);
       }
     } catch (err) {
@@ -72,7 +69,6 @@ export default function LeasesDashboard({
     fetchData();
   }, []);
 
-  // Stats calculation
   const totalCount = leases.length;
   const actionNeededCount = leases.filter(l => l.status === "NOTICE_GIVEN" || l.status === "PENDING_SIGNATURE").length;
   const activeCount = leases.filter(l => l.status === "ACTIVE").length;
@@ -93,7 +89,6 @@ export default function LeasesDashboard({
     return diffDays <= 60 && diffDays > 0;
   }).length;
 
-  // Filter & Sort
   const filteredLeases = leases.filter(l => {
     const searchString = `${l.id} ${l.tenant?.name} ${l.unit?.property?.name}`.toLowerCase();
     if (searchTerm && !searchString.includes(searchTerm.toLowerCase())) return false;
@@ -150,20 +145,20 @@ export default function LeasesDashboard({
   const getStatusBadge = (l: any) => {
     if (l.status === "SIGNED") {
       if (hasUnpaidDeposit(l)) {
-        return <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600"><AlertTriangle className="h-3 w-3" /> Deposit Pending</span>;
+        return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-amber-800"><AlertTriangle className="h-3 w-3" /> Deposit Pending</span>;
       }
-      return <span className="flex items-center gap-1 text-[11px] font-bold text-indigo-600"><Home className="h-3 w-3" /> Awaiting Move-in</span>;
+      return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-indigo-700"><Home className="h-3 w-3" /> Awaiting Move-in</span>;
     }
     if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) {
-      return <span className="flex items-center gap-1 text-[11px] font-bold text-blue-600"><Clock className="h-3 w-3" /> Awaiting Deposit</span>;
+      return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-slate-800"><Clock className="h-3 w-3" /> Awaiting Deposit</span>;
     }
     switch (l.status) {
-      case "ACTIVE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#10B981]"><CheckCircle className="h-3 w-3" /> Active</span>;
-      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#F59E0B]"><Clock className="h-3 w-3" /> Pending</span>;
-      case "DRAFT": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#6E6E73]"><FileText className="h-3 w-3" /> Draft</span>;
-      case "TERMINATED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Terminated</span>;
-      case "EXPIRED": return <span className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444]"><XCircle className="h-3 w-3" /> Expired</span>;
-      default: return <span className="flex items-center gap-1 text-[11px] font-bold text-gray-500">{l.status}</span>;
+      case "ACTIVE": return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-emerald-700"><CheckCircle className="h-3 w-3" /> Active</span>;
+      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-amber-800"><Clock className="h-3 w-3" /> Pending</span>;
+      case "DRAFT": return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-slate-700"><FileText className="h-3 w-3" /> Draft</span>;
+      case "TERMINATED": return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-rose-700"><XCircle className="h-3 w-3" /> Terminated</span>;
+      case "EXPIRED": return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-rose-700"><XCircle className="h-3 w-3" /> Expired</span>;
+      default: return <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-slate-700">{l.status}</span>;
     }
   };
 
@@ -201,21 +196,21 @@ export default function LeasesDashboard({
   const getQuickAction = (l: any) => {
     if (l.status === "NOTICE_GIVEN") {
       return (
-        <Button onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-bold h-8 text-xs px-3 shadow-none border border-red-200 w-full md:w-auto">
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold h-8 text-xs px-3 shadow-none border border-rose-200 w-full md:w-auto">
           Process Move-Out
         </Button>
       );
     }
     if (l.status === "PENDING_SIGNATURE") {
       return (
-        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 font-bold h-8 text-xs px-3 shadow-none border border-amber-200 w-full md:w-auto">
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-amber-50 text-amber-800 hover:bg-amber-100 font-bold h-8 text-xs px-3 shadow-none border border-amber-200 w-full md:w-auto">
           View & Resend
         </Button>
       );
     }
     if (l.status === "ACTIVE" && getDaysLeft(l.endDate) <= 60) {
       return (
-        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold h-8 text-xs px-3 shadow-none border border-blue-200 w-full md:w-auto">
+        <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="bg-slate-100 text-slate-800 hover:bg-slate-200 font-bold h-8 text-xs px-3 shadow-none border border-slate-200 w-full md:w-auto">
           Offer Renewal
         </Button>
       );
@@ -223,30 +218,31 @@ export default function LeasesDashboard({
     return null;
   };
 
-  const getStatusBgColor = (l: any) => {
+  const getStatusBadgeClass = (l: any) => {
     if (l.status === "SIGNED") {
-      return hasUnpaidDeposit(l) ? "bg-amber-50" : "bg-indigo-50";
+      return hasUnpaidDeposit(l) ? "bg-amber-50 border-amber-200" : "bg-indigo-50 border-indigo-200";
     }
-    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-blue-50";
+    if (l.status === "ACTIVE" && hasUnpaidDeposit(l)) return "bg-slate-100 border-slate-200";
     switch (l.status) {
-      case "ACTIVE": return "bg-[#DCFCE7]";
-      case "PENDING_SIGNATURE": return "bg-[#FEF3C7]";
-      case "DRAFT": return "bg-[#F1F5F9]";
-      case "TERMINATED": return "bg-[#FEE2E2]";
-      case "EXPIRED": return "bg-[#FEE2E2]";
-      default: return "bg-gray-100";
+      case "ACTIVE": return "bg-emerald-50 border-emerald-200";
+      case "PENDING_SIGNATURE": return "bg-amber-50 border-amber-200";
+      case "DRAFT": return "bg-slate-100 border-slate-200";
+      case "TERMINATED": return "bg-rose-50 border-rose-200";
+      case "EXPIRED": return "bg-rose-50 border-rose-200";
+      default: return "bg-slate-100 border-slate-200";
     }
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-2 sm:px-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-[28px] font-black text-[#1D1D1F] tracking-tight">Leases</h1>
-          <p className="text-[#6E6E73] text-sm font-medium mt-0.5">Manage your property leases and agreements</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Leases</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your property leases and agreements</p>
         </div>
         <Link href="/dashboard/leases/new">
-          <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-10 px-5 text-sm font-bold flex items-center gap-2">
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-black flex items-center gap-2 cursor-pointer">
             <Plus className="h-4 w-4" /> Create Lease
           </Button>
         </Link>
@@ -285,7 +281,7 @@ export default function LeasesDashboard({
             count: activeCount,
             subtext: "Currently active",
             icon: CheckCircle,
-            variant: "green",
+            variant: "emerald",
           },
           {
             key: "EXPIRED",
@@ -318,16 +314,16 @@ export default function LeasesDashboard({
       </div>
 
       {/* Main Container */}
-      <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-[24px] overflow-hidden p-6">
+      <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 bg-[#EFF6FF] text-[#007AFF] rounded-xl flex items-center justify-center shrink-0">
-            <FileText className="h-5 w-5" />
+          <div className="h-9 w-9 bg-slate-100 text-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/80">
+            <FileText className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-[#1D1D1F] leading-tight">
+            <h2 className="text-base font-extrabold text-slate-900 leading-tight">
               {title || (initialFilter === "ACTIVE" ? "Active Leases" : initialFilter === "EXPIRING" ? "Expiring Leases" : "All Leases")}
             </h2>
-            <p className="text-xs text-[#6E6E73] font-medium">
+            <p className="text-xs text-slate-500 font-semibold mt-0.5">
               {subtitle || (initialFilter === "ACTIVE" ? "Manage your currently active leases and track revenue" : initialFilter === "EXPIRING" ? "Leases expiring within the next 30 days" : "Manage and view all your property leases")}
             </p>
           </div>
@@ -336,21 +332,21 @@ export default function LeasesDashboard({
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input 
-              placeholder="Search leases..." 
+              placeholder="Search leases by tenant or property..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] w-full text-sm font-medium shadow-sm"
+              className="pl-10 h-10 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 w-full text-xs font-semibold text-slate-900 shadow-xs"
             />
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-              <SelectTrigger className="w-full md:w-[140px] h-11 rounded-xl bg-white border-[#E5E5EA] text-sm font-semibold shadow-sm focus:ring-[#007AFF]">
+              <SelectTrigger className="w-full md:w-[140px] h-10 rounded-xl bg-white border-slate-200 text-xs font-semibold text-slate-900 shadow-xs">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
+              <SelectContent className="rounded-2xl border-slate-200 shadow-lg">
                 <SelectItem value="ALL">All Status</SelectItem>
                 <SelectItem value="DRAFT">Draft</SelectItem>
                 <SelectItem value="PENDING_SIGNATURE">Pending</SelectItem>
@@ -361,10 +357,10 @@ export default function LeasesDashboard({
             </Select>
 
             <Select value={sortOrder} onValueChange={(v) => setSortOrder(v || "NEWEST")}>
-              <SelectTrigger className="w-full md:w-[170px] h-11 rounded-xl bg-white border-[#E5E5EA] text-sm font-semibold shadow-sm focus:ring-[#007AFF]">
+              <SelectTrigger className="w-full md:w-[170px] h-10 rounded-xl bg-white border-slate-200 text-xs font-semibold text-slate-900 shadow-xs">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
+              <SelectContent className="rounded-2xl border-slate-200 shadow-lg">
                 <SelectItem value="NEWEST">Newest First</SelectItem>
                 <SelectItem value="OLDEST">Oldest First</SelectItem>
                 <SelectItem value="START_DESC">Start Date (Latest)</SelectItem>
@@ -374,16 +370,18 @@ export default function LeasesDashboard({
               </SelectContent>
             </Select>
 
-            <div className="flex bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl p-1 shrink-0 h-11 items-center">
+            <div className="flex bg-slate-100 border border-slate-200/80 rounded-xl p-1 shrink-0 h-10 items-center">
               <button 
                 onClick={() => setViewMode('grid')} 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#007AFF] text-white shadow-sm' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}`}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-900'}`}
+                title="Grid View"
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
               <button 
                 onClick={() => setViewMode('list')} 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#007AFF] text-white shadow-sm' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}`}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-900'}`}
+                title="List View"
               >
                 <List className="h-4 w-4" />
               </button>
@@ -393,14 +391,14 @@ export default function LeasesDashboard({
 
         {/* Content */}
         {loading ? (
-          <div className="py-20 text-center text-[#6E6E73] font-bold text-sm">Loading leases...</div>
+          <div className="py-20 text-center text-slate-500 font-bold text-xs">Loading leases...</div>
         ) : filteredLeases.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center">
-            <div className="h-16 w-16 bg-[#F2F2F7] rounded-full flex items-center justify-center mb-4 border border-[#E5E5EA]">
-              <FileText className="h-6 w-6 text-[#94A3B8]" />
+            <div className="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-3 border border-slate-200">
+              <FileText className="h-6 w-6 text-slate-400" />
             </div>
-            <h3 className="text-lg font-bold text-[#1D1D1F]">No leases found</h3>
-            <p className="text-sm text-[#6E6E73] mt-1 max-w-sm">There are no leases matching your current search or filter criteria.</p>
+            <h3 className="text-base font-extrabold text-slate-900">No leases found</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm font-medium">There are no leases matching your current search or filter criteria.</p>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -409,25 +407,25 @@ export default function LeasesDashboard({
               let daysBadge = null;
               if (l.status === "ACTIVE") {
                 if (daysLeft <= 30) {
-                  daysBadge = <span className="px-2 py-1 bg-[#FEE2E2] text-[#EF4444] rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">{daysLeft} days remaining</span>;
+                  daysBadge = <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-extrabold uppercase shadow-2xs whitespace-nowrap">{daysLeft} days remaining</span>;
                 } else {
-                  daysBadge = <span className="px-2 py-1 bg-[#DCFCE7] text-[#10B981] rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">{daysLeft} days remaining</span>;
+                  daysBadge = <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-extrabold uppercase shadow-2xs whitespace-nowrap">{daysLeft} days remaining</span>;
                 }
               } else if (l.status === "EXPIRED") {
-                daysBadge = <span className="px-2 py-1 bg-[#FEE2E2] text-[#EF4444] rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">Expired</span>;
+                daysBadge = <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-extrabold uppercase shadow-2xs whitespace-nowrap">Expired</span>;
               } else if (l.status === "SIGNED" && l.startDate) {
                 const startDiff = Math.ceil((new Date(l.startDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 if (startDiff > 0) {
-                  daysBadge = <span className="px-2 py-1 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-[11px] font-bold shadow-sm whitespace-nowrap">Move-in: {startDiff}d</span>;
+                  daysBadge = <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-extrabold uppercase shadow-2xs whitespace-nowrap">Move-in: {startDiff}d</span>;
                 }
               }
               
               return (
-              <Card key={l.id} className="bg-white border-[#E5E5EA] rounded-[20px] shadow-sm hover:shadow-md transition-shadow relative p-5 flex flex-col group">
+              <Card key={l.id} className="bg-white border-slate-200 rounded-3xl shadow-xs hover:shadow-md transition-all relative p-5 flex flex-col group">
                 {/* Header: Property & Status */}
                 <div className="flex justify-between items-start w-full">
                   <div className="flex gap-3 items-start max-w-[70%]">
-                    <div className="h-10 w-10 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl flex items-center justify-center text-[#007AFF] shrink-0 mt-0.5 overflow-hidden">
+                    <div className="h-10 w-10 bg-slate-100 border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-800 shrink-0 mt-0.5 overflow-hidden">
                       {l.unit?.images && l.unit.images.length > 0 ? (
                         <img src={l.unit.images[0]} alt={l.unit.name} className="h-full w-full object-cover" />
                       ) : l.unit?.property?.images && l.unit.property.images.length > 0 ? (
@@ -437,42 +435,42 @@ export default function LeasesDashboard({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-[#1D1D1F] text-base truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
+                      <h3 className="font-extrabold text-slate-900 text-sm truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] font-bold text-[#007AFF] bg-[#EFF6FF] px-2 py-0.5 rounded-md truncate">Unit {l.unit?.name || ""}</span>
-                        <span className="text-[12px] text-[#6E6E73] font-medium truncate">{l.unit?.property?.city || ""}</span>
+                        <span className="text-[10px] font-extrabold uppercase text-slate-800 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md truncate">Unit {l.unit?.name || ""}</span>
+                        <span className="text-xs text-slate-500 font-medium truncate">{l.unit?.property?.city || ""}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className={`px-2 py-1 rounded-md ${getStatusBgColor(l)} border border-transparent`}>
+                    <div className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-extrabold uppercase shadow-2xs ${getStatusBadgeClass(l)}`}>
                       {getStatusBadge(l)}
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="h-7 w-7 rounded-lg hover:bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] transition-colors focus:outline-none opacity-0 group-hover:opacity-100 border border-transparent hover:border-[#E5E5EA]">
+                      <DropdownMenuTrigger className="h-7 w-7 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors focus:outline-none opacity-0 group-hover:opacity-100 cursor-pointer">
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E5E5EA] p-1 shadow-lg">
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                          <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                      <DropdownMenuContent align="end" className="w-48 rounded-2xl border-slate-200 p-1.5 shadow-xl">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                          <Eye className="mr-2 h-4 w-4 text-slate-500" /> View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                          <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                          <FileText className="mr-2 h-4 w-4 text-slate-500" /> View Invoice
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                          <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
+                        <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                          <FileDown className="mr-2 h-4 w-4 text-slate-500" /> Download Invoice
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                          <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                          <ShieldAlert className="mr-2 h-4 w-4 text-amber-500" /> Process Move-Out
                         </DropdownMenuItem>
                         {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
-                          <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                            <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                          <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-bold text-xs text-rose-600 rounded-xl py-2">
+                            <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Terminate Lease
                           </DropdownMenuItem>
                         ) : (
-                          <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                            <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                          <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-bold text-xs text-rose-600 rounded-xl py-2">
+                            <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Delete Lease
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -481,9 +479,9 @@ export default function LeasesDashboard({
                 </div>
 
                 {/* Tenant & Financial Row */}
-                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-[#F1F5F9]">
+                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
                   <div>
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">Tenant</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tenant</p>
                     <div className="flex items-center gap-2">
                       {l.tenant?.avatar ? (
                         <img
@@ -492,16 +490,16 @@ export default function LeasesDashboard({
                           className="h-6 w-6 rounded-full object-cover shrink-0 border border-slate-200"
                         />
                       ) : (
-                        <div className="h-6 w-6 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[9px] font-black text-[#6E6E73] shrink-0 border border-white shadow-sm">
+                        <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[9px] font-black text-slate-800 shrink-0 border border-slate-200">
                           {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
                         </div>
                       )}
-                      <p className="text-[13px] font-bold text-[#1D1D1F] truncate">{l.tenant?.name || l.tenant?.email}</p>
+                      <p className="text-xs font-extrabold text-slate-900 truncate">{l.tenant?.name || l.tenant?.email}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5 text-right">Rent / Month</p>
-                    <p className="text-[16px] font-black text-[#1D1D1F] text-right leading-none">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 text-right">Rent / Month</p>
+                    <p className="text-sm font-black text-slate-900 text-right leading-none">
                       ${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}
                     </p>
                   </div>
@@ -510,36 +508,23 @@ export default function LeasesDashboard({
                 {/* Timeline & Badges */}
                 <div className="mt-4 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-[#94A3B8]" />
-                    <span className="text-[12px] font-semibold text-[#6E6E73]">
+                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-600">
                       {l.startDate ? new Date(l.startDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : "N/A"} - {l.endDate ? new Date(l.endDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : "N/A"}
                     </span>
                   </div>
                   {daysBadge}
                 </div>
 
-                {/* Specs */}
-                <div className="flex gap-2 mt-4 pt-4 border-t border-[#F1F5F9]">
-                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
-                    {l.unit?.rooms || 0} Bed
-                  </span>
-                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
-                    {l.unit?.bathrooms || 0} Bath
-                  </span>
-                  <span className="px-2 py-1 bg-[#F2F2F7] text-[#6E6E73] text-[11px] font-bold rounded-md border border-[#E5E5EA]">
-                    {l.unit?.sqFootage || 0} Sq Ft
-                  </span>
-                </div>
-
                 {/* Quick Actions */}
-                <div className="mt-4 pt-4 border-t border-[#F1F5F9] flex flex-col gap-2">
+                <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
                   {getQuickAction(l)}
                   <div className="flex gap-2 w-full">
-                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm">
-                      <Eye className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Details
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}`)} variant="outline" className="flex-1 rounded-xl h-8 text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50 shadow-xs">
+                      <Eye className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Details
                     </Button>
-                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-lg h-9 text-xs font-bold text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm">
-                      <FileText className="h-3.5 w-3.5 mr-2 text-[#94A3B8]" /> Invoice
+                    <Button onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} variant="outline" className="flex-1 rounded-xl h-8 text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50 shadow-xs">
+                      <FileText className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Invoice
                     </Button>
                   </div>
                 </div>
@@ -547,19 +532,19 @@ export default function LeasesDashboard({
             )})}
           </div>
         ) : (
-          <div className="bg-white border border-[#E5E5EA] rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-[#E5E5EA] bg-white hover:bg-white">
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4 pl-6">Property & Unit</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Tenant</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Status</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Rent Amount</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Start Date</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">End Date</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4">Days Remaining</TableHead>
-                    <TableHead className="text-xs font-semibold text-[#6E6E73] tracking-wider uppercase whitespace-nowrap py-4 text-right pr-6">Actions</TableHead>
+                  <TableRow className="border-b border-slate-200/80 bg-slate-50/70 hover:bg-slate-50/70">
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5 pl-6">Property & Unit</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">Tenant</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">Status</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">Rent Amount</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">Start Date</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">End Date</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5">Days Remaining</TableHead>
+                    <TableHead className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap py-3.5 text-right pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -571,130 +556,130 @@ export default function LeasesDashboard({
                       let daysBadge = null;
                       if (l.status === "ACTIVE") {
                         if (daysLeft <= 0) {
-                          daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
+                          daysBadge = <span className="text-rose-600 font-bold text-xs">Expired</span>;
                         } else if (daysLeft <= 15) {
-                          daysBadge = <span className="text-[#EF4444] font-black text-sm">{daysLeft} days</span>;
+                          daysBadge = <span className="text-rose-600 font-black text-xs">{daysLeft} days</span>;
                         } else if (daysLeft <= 60) {
-                          daysBadge = <span className="text-[#F59E0B] font-medium text-sm">{daysLeft} days</span>;
+                          daysBadge = <span className="text-amber-700 font-bold text-xs">{daysLeft} days</span>;
                         } else {
-                          daysBadge = <span className="text-[#10B981] font-medium text-sm">{daysLeft} days</span>;
+                          daysBadge = <span className="text-emerald-700 font-bold text-xs">{daysLeft} days</span>;
                         }
                       } else if (l.status === "EXPIRED") {
-                        daysBadge = <span className="text-[#EF4444] font-medium text-sm">Expired</span>;
+                        daysBadge = <span className="text-rose-600 font-bold text-xs">Expired</span>;
                       } else {
-                        daysBadge = <span className="text-[#94A3B8] font-medium text-sm">-</span>;
+                        daysBadge = <span className="text-slate-400 font-bold text-xs">-</span>;
                       }
 
                       return (
-                      <TableRow key={l.id} className="border-b border-[#E5E5EA]/50 hover:bg-[#F2F2F7]/50 transition-colors">
-                        <TableCell className="py-4 pl-6">
+                      <TableRow key={l.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                        <TableCell className="py-3.5 pl-6">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-[#E5E5EA]">
+                            <div className="h-9 w-9 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/80">
                               {l.unit?.images && l.unit.images.length > 0 ? (
                                 <img src={l.unit.images[0]} alt={l.unit.name} className="h-full w-full object-cover" />
                               ) : l.unit?.property?.images && l.unit.property.images.length > 0 ? (
                                 <img src={l.unit.property.images[0]} alt={l.unit.property.name} className="h-full w-full object-cover" />
                               ) : (
-                                <div className="h-full w-full bg-[#F2F2F7] flex items-center justify-center text-[#94A3B8]">
-                                  <Home className="h-5 w-5" />
+                                <div className="h-full w-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                  <Home className="h-4 w-4" />
                                 </div>
                               )}
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-bold text-[#1D1D1F] text-sm">{l.unit?.property?.name || "Property Not Available"}</span>
+                                <span className="font-extrabold text-slate-900 text-xs">{l.unit?.property?.name || "Property Not Available"}</span>
                                 {l.unit?.name && (
-                                  <span className="bg-[#EFF6FF] text-[#007AFF] text-xs font-bold px-2 py-0.5 rounded-md">
+                                  <span className="bg-slate-100 text-slate-800 text-[10px] font-extrabold uppercase border border-slate-200 px-2 py-0.5 rounded-md">
                                     Unit {l.unit.name}
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-[#6E6E73]">
+                              <div className="text-[11px] text-slate-500 font-medium">
                                 {l.unit?.property?.address ? `${l.unit.property.address}, ${l.unit.property.city || ''}` : "Address Not Available"}
                               </div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-4">
-                          <div className="flex items-center gap-3">
+                        <TableCell className="py-3.5">
+                          <div className="flex items-center gap-2.5">
                             {l.tenant?.avatar ? (
                               <img
                                 src={l.tenant.avatar}
                                 alt={l.tenant.name || "Tenant"}
-                                className="h-9 w-9 rounded-full object-cover shrink-0 border border-slate-200 shadow-sm"
+                                className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-2xs"
                               />
                             ) : (
-                              <div className="h-9 w-9 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center text-xs font-bold shrink-0 border border-blue-100 shadow-sm">
+                              <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center text-xs font-black shrink-0 border border-slate-200">
                                 {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
                               </div>
                             )}
                             <div>
-                              <div className="font-bold text-[#1D1D1F] text-sm">{l.tenant?.name || "Unknown Tenant"}</div>
-                              <div className="text-xs text-[#6E6E73]">{l.tenant?.email || "No email"}</div>
+                              <div className="font-extrabold text-slate-900 text-xs">{l.tenant?.name || "Unknown Tenant"}</div>
+                              <div className="text-[11px] text-slate-500 font-medium">{l.tenant?.email || "No email"}</div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-4">
-                          <div className={`inline-flex items-center px-2.5 py-1 rounded-full border border-transparent ${getStatusBgColor(l)}`}>
+                        <TableCell className="py-3.5">
+                          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-lg border text-[10px] font-extrabold uppercase shadow-2xs ${getStatusBadgeClass(l)}`}>
                             {getStatusBadge(l)}
                           </div>
                         </TableCell>
-                        <TableCell className="py-4">
-                          <div className="font-bold text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-                          <div className="text-xs text-[#6E6E73]">per month</div>
+                        <TableCell className="py-3.5">
+                          <div className="font-extrabold text-slate-900 text-xs">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                          <div className="text-[10px] text-slate-500 font-semibold">per month</div>
                         </TableCell>
-                        <TableCell className="py-4 font-medium text-[#1D1D1F]">
+                        <TableCell className="py-3.5 font-semibold text-slate-700 text-xs">
                           {l.startDate ? new Date(l.startDate).toLocaleDateString() : "N/A"}
                         </TableCell>
-                        <TableCell className="py-4 font-medium text-[#1D1D1F]">
+                        <TableCell className="py-3.5 font-semibold text-slate-700 text-xs">
                           {l.endDate ? new Date(l.endDate).toLocaleDateString() : "N/A"}
                         </TableCell>
-                        <TableCell className="py-4">
+                        <TableCell className="py-3.5">
                           {daysBadge}
                         </TableCell>
-                        <TableCell className="py-4 text-right pr-6">
+                        <TableCell className="py-3.5 text-right pr-6">
                           <div className="flex justify-end items-center">
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#6E6E73] transition-colors focus:outline-none border border-transparent hover:border-[#E5E5EA]">
+                              <DropdownMenuTrigger className="h-8 w-8 rounded-xl hover:bg-slate-100 inline-flex items-center justify-center text-slate-400 transition-colors focus:outline-none cursor-pointer">
                                 <MoreVertical className="h-4 w-4" />
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-52 rounded-xl border-[#E5E5EA] p-1.5 shadow-xl">
+                              <DropdownMenuContent align="end" className="w-52 rounded-2xl border-slate-200 p-1.5 shadow-xl">
                                 {l.status === "NOTICE_GIVEN" && (
-                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-bold text-[#EF4444] bg-red-50 hover:bg-red-100 rounded-lg py-2 mb-1">
-                                    <ShieldAlert className="mr-2 h-4 w-4 text-[#EF4444]" /> Process Move-Out
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-bold text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl py-2 mb-1">
+                                    <ShieldAlert className="mr-2 h-4 w-4 text-rose-600" /> Process Move-Out
                                   </DropdownMenuItem>
                                 )}
                                 {l.status === "PENDING_SIGNATURE" && (
-                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-[#D97706] bg-amber-50 hover:bg-amber-100 rounded-lg py-2 mb-1">
-                                    <Clock className="mr-2 h-4 w-4 text-[#D97706]" /> View & Resend
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-xs text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-xl py-2 mb-1">
+                                    <Clock className="mr-2 h-4 w-4 text-amber-600" /> View & Resend
                                   </DropdownMenuItem>
                                 )}
                                 {l.status === "ACTIVE" && getDaysLeft(l.endDate) <= 60 && (
-                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-[#007AFF] bg-blue-50 hover:bg-blue-100 rounded-lg py-2 mb-1">
-                                    <FileText className="mr-2 h-4 w-4 text-[#007AFF]" /> Offer Renewal
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-xs text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl py-2 mb-1">
+                                    <FileText className="mr-2 h-4 w-4 text-slate-700" /> Offer Renewal
                                   </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                  <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                                  <Eye className="mr-2 h-4 w-4 text-slate-500" /> View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                  <FileText className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Invoice
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/invoice`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                                  <FileText className="mr-2 h-4 w-4 text-slate-500" /> View Invoice
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                  <FileDown className="mr-2 h-4 w-4 text-[#94A3B8]" /> Download Invoice
+                                <DropdownMenuItem onClick={() => generateInvoicePDF(l)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                                  <FileDown className="mr-2 h-4 w-4 text-slate-500" /> Download Invoice
                                 </DropdownMenuItem>
                                 {l.status !== "NOTICE_GIVEN" && (
-                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-semibold text-[#1D1D1F] rounded-lg py-2">
-                                    <ShieldAlert className="mr-2 h-4 w-4 text-[#F59E0B]" /> Process Move-Out
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/leases/${l.id}/move-out`)} className="cursor-pointer font-bold text-xs text-slate-800 rounded-xl py-2">
+                                    <ShieldAlert className="mr-2 h-4 w-4 text-amber-500" /> Process Move-Out
                                   </DropdownMenuItem>
                                 )}
                                 {l.status === "ACTIVE" || l.status === "PENDING_SIGNATURE" ? (
-                                  <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                    <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
+                                  <DropdownMenuItem onClick={() => handleTerminateLease(l.id)} className="cursor-pointer font-bold text-xs text-rose-600 rounded-xl py-2">
+                                    <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Terminate Lease
                                   </DropdownMenuItem>
                                 ) : (
-                                  <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-semibold text-[#EF4444] rounded-lg py-2 focus:text-[#EF4444] focus:bg-[#FEE2E2]">
-                                    <XCircle className="mr-2 h-4 w-4" /> Delete Lease
+                                  <DropdownMenuItem onClick={() => handleDeleteLease(l.id)} className="cursor-pointer font-bold text-xs text-rose-600 rounded-xl py-2">
+                                    <XCircle className="mr-2 h-4 w-4 text-rose-600" /> Delete Lease
                                   </DropdownMenuItem>
                                 )}
                               </DropdownMenuContent>

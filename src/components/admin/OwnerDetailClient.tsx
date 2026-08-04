@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -549,22 +550,22 @@ export default function OwnerDetailClient({
   const hasActiveOverride = owner.subscriptionOverride && 
     (!owner.subscriptionOverride.expiresAt || new Date(owner.subscriptionOverride.expiresAt) > new Date());
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
 
       {/* iOS-Style Breadcrumbs and Header */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 font-sans">
         {/* Breadcrumb Trail */}
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">
-          <Link href="/dashboard/admin" className="hover:text-[#1D1D1F] transition-colors">Admin</Link>
+        <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+          <Link href="/dashboard/admin" className="hover:text-slate-900 transition-colors">Admin</Link>
           <span>/</span>
-          <Link href="/dashboard/admin/subscriptions" className="hover:text-[#1D1D1F] transition-colors">Subscriptions</Link>
+          <Link href="/dashboard/admin/subscriptions" className="hover:text-slate-900 transition-colors">Subscriptions</Link>
           <span>/</span>
-          <span className="text-[#1D1D1F]">{owner.name || "Owner Details"}</span>
+          <span className="text-slate-900 font-black">{owner.name || "Owner Details"}</span>
         </div>
 
         <button 
           onClick={() => router.push("/dashboard/admin/subscriptions")}
-          className="flex items-center gap-1.5 text-xs font-bold text-[#6E6E73] hover:text-[#1D1D1F] transition-colors w-fit mt-1"
+          className="flex items-center gap-1.5 text-xs font-black text-slate-700 hover:text-slate-900 transition-colors w-fit mt-1 cursor-pointer"
         >
           <ChevronLeft size={14} /> Back to Subscriptions
         </button>
@@ -572,10 +573,10 @@ export default function OwnerDetailClient({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-2">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-3xl font-black tracking-tight text-[#1D1D1F]">{owner.name || "Owner Management"}</h1>
-              {hasActiveOverride && <Badge className="bg-purple-50 text-purple-700 border border-purple-100 font-bold text-xs px-2 py-0.5 rounded-lg shadow-none">⚙ Policy Override Active</Badge>}
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">{owner.name || "Owner Management"}</h1>
+              {hasActiveOverride && <Badge className="bg-purple-50 text-purple-700 border border-purple-200 font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">⚙ Policy Override Active</Badge>}
             </div>
-            <p className="text-[#6E6E73] text-sm mt-0.5">{owner.email} · Registered {new Date(owner.createdAt).toLocaleDateString()}</p>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">{owner.email} · Registered {new Date(owner.createdAt).toLocaleDateString()}</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -583,17 +584,17 @@ export default function OwnerDetailClient({
               variant="outline"
               disabled={syncing || !owner.stripeSubscriptionId}
               onClick={handleSyncStripe}
-              className="border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl flex items-center gap-1.5 font-bold text-xs h-10 px-4"
+              className="border-slate-200 text-slate-900 bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-black text-xs h-9 px-4 shadow-2xs cursor-pointer"
             >
-              <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+              <RefreshCw size={14} className={syncing ? "animate-spin text-slate-500" : "text-slate-500"} />
               {syncing ? "Syncing..." : "Sync Stripe Status"}
             </Button>
             <Button 
               variant="outline"
               onClick={() => window.location.href = `mailto:${owner.email}`}
-              className="border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl flex items-center gap-1.5 font-bold text-xs h-10 px-4"
+              className="border-slate-200 text-slate-900 bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-black text-xs h-9 px-4 shadow-2xs cursor-pointer"
             >
-              <Mail size={14} />
+              <Mail size={14} className="text-slate-500" />
               Email Owner
             </Button>
           </div>
@@ -601,7 +602,7 @@ export default function OwnerDetailClient({
       </div>
 
       {/* Tab Switcher */}
-      <div className="flex border-b border-[#E5E5EA] gap-6">
+      <div className="flex border-b border-slate-200 gap-6 font-sans">
         {[
           { key: 'overview', label: 'Overview', icon: User },
           { key: 'modules', label: 'Module Access', icon: Layers },
@@ -613,14 +614,14 @@ export default function OwnerDetailClient({
             <button
               key={tab.key}
               type="button"
-              className={`py-3 px-1 text-sm font-bold border-b-2 transition-all flex items-center gap-2 -mb-[2px] ${
+              className={`py-3 px-1 text-xs font-black border-b-2 transition-all flex items-center gap-2 -mb-[2px] cursor-pointer ${
                 activeTab === tab.key 
-                  ? 'border-blue-600 text-blue-600' 
-                  : 'border-transparent text-[#6E6E73] hover:text-[#1D1D1F]'
+                  ? 'border-slate-900 text-slate-900' 
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
               onClick={() => setActiveTab(tab.key as any)}
             >
-              <Icon size={16} />
+              <Icon size={15} />
               {tab.label}
             </button>
           );
@@ -631,23 +632,23 @@ export default function OwnerDetailClient({
       <div>
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
             {/* Column 1: Details */}
-            <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl md:col-span-2">
+            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl md:col-span-2 font-sans">
               <CardContent className="p-6 space-y-6">
                 <div>
-                  <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#F2F2F7] pb-3 mb-4">Account Portfolio & Billing Details</h3>
+                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 mb-4">Account Portfolio &amp; Billing Details</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block">Billing Status</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Billing Status</span>
                       <div className="flex items-center gap-2">
-                        <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
+                        <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
                           owner.subscriptionStatus === 'Active' || owner.subscriptionStatus === 'Active (Canceling)' ? 'bg-emerald-500' :
                           owner.subscriptionStatus === 'Past_Due' ? 'bg-orange-500' :
                           owner.subscriptionStatus === 'Paused' ? 'bg-amber-500' :
                           'bg-slate-400'
                         }`} />
-                        <Badge className={`border-0 font-extrabold text-xs px-2.5 py-0.5 rounded-lg shadow-none ${
+                        <Badge className={`border-0 font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-2xs ${
                           owner.subscriptionStatus === 'Active' || owner.subscriptionStatus === 'Active (Canceling)' ? 'bg-emerald-50 text-emerald-700' :
                           owner.subscriptionStatus === 'Past_Due' ? 'bg-orange-50 text-orange-700' :
                           owner.subscriptionStatus === 'Paused' ? 'bg-amber-50 text-amber-700' :
@@ -659,48 +660,54 @@ export default function OwnerDetailClient({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block">Subscribed Tier</span>
-                      <p className="text-sm font-extrabold text-[#1D1D1F]">
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Subscribed Tier</span>
+                      <p className="text-sm font-black text-slate-900">
                         {owner.pricingTier ? owner.pricingTier.name : "No Subscribed Plan"}
                         {owner.pricingTier && <span className="font-semibold text-slate-400 ml-1.5">(${owner.pricingTier.price}/mo)</span>}
                       </p>
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block">Portfolio Unit Utilization</span>
-                      <p className={`text-sm font-extrabold ${isOverLimit ? "text-rose-600" : "text-[#1D1D1F]"}`}>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Portfolio Unit Utilization</span>
+                      <p className={`text-sm font-black ${isOverLimit ? "text-rose-600" : "text-slate-900"}`}>
                         {owner.ownedProperties?.length || 0} properties / {totalUnits} unit{totalUnits === 1 ? "" : "s"} occupied
                         {owner.pricingTier && <span className="font-semibold text-slate-400 ml-1.5">({owner.pricingTier.maxUnits} units max)</span>}
                       </p>
-                      <div className="w-full bg-[#E5E5EA] h-2 rounded-full overflow-hidden mt-1.5 max-w-sm">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-500 ${isOverLimit ? "bg-rose-500" : "bg-blue-600"}`}
-                          style={{ width: `${Math.min(100, (totalUnits / (owner.pricingTier?.maxUnits || 2)) * 100)}%` }}
+                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-1.5 max-w-sm border border-slate-200/80 p-0.5 shadow-2xs">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (totalUnits / (owner.pricingTier?.maxUnits || 2)) * 100)}%` }}
+                          transition={{ duration: 1.2, ease: "easeOut" }}
+                          className={`h-full rounded-full ${
+                            isOverLimit 
+                              ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" 
+                              : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)]"
+                          }`}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider block">Contact Phone</span>
-                      <p className="text-sm font-semibold text-[#1D1D1F]">{owner.phone || "No phone added"}</p>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Contact Phone</span>
+                      <p className="text-sm font-extrabold text-slate-900">{owner.phone || "No phone added"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-[#F2F2F7]">
-                  <h3 className="text-sm font-bold text-[#1D1D1F] mb-4">Stripe Gateway IDs</h3>
+                <div className="pt-6 border-t border-slate-100">
+                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-4">Stripe Gateway IDs</h3>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center bg-[#F9F9FB] px-3.5 py-2.5 rounded-xl border border-[#E5E5EA] text-xs">
-                      <span className="font-bold text-[#6E6E73] flex items-center gap-1"><CreditCard size={14} /> Stripe Customer ID</span>
+                    <div className="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-xs shadow-2xs">
+                      <span className="font-extrabold text-slate-600 flex items-center gap-1.5"><CreditCard size={14} className="text-slate-400" /> Stripe Customer ID</span>
                       {owner.stripeCustomerId ? (
-                        <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#1D1D1F]">
+                        <div className="flex items-center gap-1.5 font-mono text-xs font-black text-slate-900">
                           <span>{owner.stripeCustomerId}</span>
                           <button 
                             onClick={() => {
                               navigator.clipboard.writeText(owner.stripeCustomerId);
                               showToast("Customer ID copied!", "success");
                             }} 
-                            className="text-[#8E8E93] hover:text-[#1D1D1F] p-0.5 rounded hover:bg-[#E5E5EA] transition-colors"
+                            className="text-slate-400 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
                           >
                             <Copy size={12} />
                           </button>
@@ -710,17 +717,17 @@ export default function OwnerDetailClient({
                       )}
                     </div>
                     
-                    <div className="flex justify-between items-center bg-[#F9F9FB] px-3.5 py-2.5 rounded-xl border border-[#E5E5EA] text-xs">
-                      <span className="font-bold text-[#6E6E73] flex items-center gap-1"><Settings2 size={14} /> Stripe Subscription ID</span>
+                    <div className="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-xs shadow-2xs">
+                      <span className="font-extrabold text-slate-600 flex items-center gap-1.5"><Settings2 size={14} className="text-slate-400" /> Stripe Subscription ID</span>
                       {owner.stripeSubscriptionId ? (
-                        <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#1D1D1F]">
+                        <div className="flex items-center gap-1.5 font-mono text-xs font-black text-slate-900">
                           <span>{owner.stripeSubscriptionId}</span>
                           <button 
                             onClick={() => {
                               navigator.clipboard.writeText(owner.stripeSubscriptionId);
                               showToast("Subscription ID copied!", "success");
                             }} 
-                            className="text-[#8E8E93] hover:text-[#1D1D1F] p-0.5 rounded hover:bg-[#E5E5EA] transition-colors"
+                            className="text-slate-400 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
                           >
                             <Copy size={12} />
                           </button>
@@ -734,7 +741,7 @@ export default function OwnerDetailClient({
                       <Button 
                         variant="outline" 
                         onClick={() => window.open(`https://dashboard.stripe.com/customers/${owner.stripeCustomerId}`, '_blank')}
-                        className="w-full text-xs font-bold border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] h-10 rounded-xl mt-2 flex items-center justify-center gap-1.5 bg-white transition-all hover:border-[#1D1D1F]"
+                        className="w-full text-xs font-black border-slate-200 text-slate-900 hover:bg-slate-50 h-9 rounded-xl mt-2 flex items-center justify-center gap-1.5 bg-white transition-all shadow-2xs cursor-pointer"
                       >
                         <ExternalLink size={13} className="text-emerald-600" />
                         Open Stripe Customer Profile
@@ -746,43 +753,43 @@ export default function OwnerDetailClient({
             </Card>
 
             {/* Column 2: Status Indicator Panel */}
-            <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl flex flex-col justify-between">
+            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl flex flex-col justify-between font-sans">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider block">Gating Status</h3>
+                <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Gating Status</h3>
                 
                 {owner.subscriptionStatus === 'Paused' ? (
-                  <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center space-y-2">
-                    <Pause className="h-8 w-8 text-amber-500 mx-auto" />
-                    <h4 className="text-sm font-extrabold text-amber-800">Portfolio Suspended</h4>
-                    <p className="text-xs text-amber-700 leading-normal font-medium">New properties, units, tenants, vendors, and application processing are soft-locked.</p>
+                  <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-center space-y-2 shadow-2xs">
+                    <Pause className="h-7 w-7 text-amber-600 mx-auto" />
+                    <h4 className="text-sm font-black text-amber-900">Portfolio Suspended</h4>
+                    <p className="text-xs text-amber-700 leading-normal font-semibold">New properties, units, tenants, vendors, and application processing are soft-locked.</p>
                   </div>
                 ) : owner.subscriptionStatus === 'Past_Due' ? (
-                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 text-center space-y-2">
-                    <AlertTriangle className="h-8 w-8 text-orange-500 mx-auto" />
-                    <h4 className="text-sm font-extrabold text-orange-800">In Grace Period</h4>
-                    <p className="text-xs text-orange-700 leading-normal font-medium">Under grace due to billing failures. Default policies lock operations on grace expiry.</p>
+                  <div className="bg-orange-50 border border-orange-200/80 rounded-2xl p-4 text-center space-y-2 shadow-2xs">
+                    <AlertTriangle className="h-7 w-7 text-orange-600 mx-auto" />
+                    <h4 className="text-sm font-black text-orange-900">In Grace Period</h4>
+                    <p className="text-xs text-orange-700 leading-normal font-semibold">Under grace due to billing failures. Default policies lock operations on grace expiry.</p>
                   </div>
                 ) : (
-                  <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center space-y-2">
-                    <ShieldCheck className="h-8 w-8 text-emerald-500 mx-auto" />
-                    <h4 className="text-sm font-extrabold text-emerald-800">Portfolio Active</h4>
-                    <p className="text-xs text-emerald-700 leading-normal font-medium">All subscription billing items are verified and running normally.</p>
+                  <div className="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-4 text-center space-y-2 shadow-2xs">
+                    <ShieldCheck className="h-7 w-7 text-emerald-600 mx-auto" />
+                    <h4 className="text-sm font-black text-emerald-900">Portfolio Active</h4>
+                    <p className="text-xs text-emerald-700 leading-normal font-semibold">All subscription billing items are verified and running normally.</p>
                   </div>
                 )}
 
                 {owner.subscriptionOverride && (
-                  <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 text-xs space-y-2 text-purple-900 font-bold">
+                  <div className="bg-purple-50 border border-purple-200/80 rounded-2xl p-4 text-xs space-y-2 text-purple-900 font-extrabold shadow-2xs">
                     <div className="flex items-center gap-1.5"><Settings2 size={14} className="text-purple-600" /> Active Policy Exception</div>
-                    <div className="space-y-1 font-semibold text-[#6E6E73] text-[11px] leading-relaxed">
-                      <p>• Payout Block: <span className="font-extrabold text-slate-800">{owner.subscriptionOverride.blockPayouts === true ? "Forced Block" : owner.subscriptionOverride.blockPayouts === false ? "Forced Allow" : "Default"}</span></p>
-                      <p>• Portfolio Limit: <span className="font-extrabold text-slate-800">{owner.subscriptionOverride.blockNewUnits === true ? "Forced Block" : owner.subscriptionOverride.blockNewUnits === false ? "Forced Allow" : "Default"}</span></p>
-                      {owner.subscriptionOverride.expiresAt && <p>• Expiration: <span className="font-extrabold text-purple-700">{timeUntil(owner.subscriptionOverride.expiresAt)}</span></p>}
+                    <div className="space-y-1 font-semibold text-slate-600 text-[11px] leading-relaxed">
+                      <p>• Payout Block: <span className="font-black text-slate-900">{owner.subscriptionOverride.blockPayouts === true ? "Forced Block" : owner.subscriptionOverride.blockPayouts === false ? "Forced Allow" : "Default"}</span></p>
+                      <p>• Portfolio Limit: <span className="font-black text-slate-900">{owner.subscriptionOverride.blockNewUnits === true ? "Forced Block" : owner.subscriptionOverride.blockNewUnits === false ? "Forced Allow" : "Default"}</span></p>
+                      {owner.subscriptionOverride.expiresAt && <p>• Expiration: <span className="font-black text-purple-700">{timeUntil(owner.subscriptionOverride.expiresAt)}</span></p>}
                     </div>
                   </div>
                 )}
 
                 {owner.accessGrantedByAdmin && owner.accessGrantedExpiresAt && (
-                  <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-xs space-y-1.5 text-indigo-900 font-bold">
+                  <div className="bg-indigo-50 border border-indigo-200/80 rounded-2xl p-4 text-xs space-y-1.5 text-indigo-900 font-extrabold shadow-2xs">
                     <div className="flex items-center gap-1.5"><Play size={14} className="text-indigo-600" /> Temp Admin Comp Access</div>
                     <p className="text-xs font-semibold text-indigo-700">Expires: {timeUntil(owner.accessGrantedExpiresAt)}</p>
                   </div>
@@ -794,12 +801,12 @@ export default function OwnerDetailClient({
 
         {/* MODULE ACCESS CONTROLS TAB */}
         {activeTab === 'modules' && (
-          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl font-sans">
             <CardContent className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h3 className="text-sm font-bold text-[#1D1D1F]">Feature Access Manager</h3>
-                  <p className="text-[#6E6E73] text-xs mt-0.5">Control which platform features this owner can access, regardless of their subscription plan.</p>
+                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Feature Access Manager</h3>
+                  <p className="text-slate-500 text-xs mt-0.5 font-semibold">Control which platform features this owner can access, regardless of their subscription plan.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -817,7 +824,7 @@ export default function OwnerDetailClient({
                         onConfirm: (reason) => handleGrantAllModules(reason)
                       });
                     }}
-                    className="border-[#E5E5EA] hover:border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl font-bold text-xs h-9"
+                    className="border-slate-200 hover:border-emerald-300 text-emerald-700 hover:bg-emerald-50 bg-white rounded-xl font-black text-xs h-9 shadow-2xs cursor-pointer"
                   >
                     Grant All Modules
                   </Button>
@@ -835,7 +842,7 @@ export default function OwnerDetailClient({
                         onConfirm: handleClearAllGrants
                       });
                     }}
-                    className="border-[#E5E5EA] hover:border-rose-200 text-rose-700 hover:bg-rose-50 rounded-xl font-bold text-xs h-9"
+                    className="border-slate-200 hover:border-rose-300 text-rose-700 hover:bg-rose-50 bg-white rounded-xl font-black text-xs h-9 shadow-2xs cursor-pointer"
                   >
                     Clear Override Grants
                   </Button>
@@ -1214,37 +1221,37 @@ export default function OwnerDetailClient({
               <div className="space-y-5">
 
                 {/* ─── Account Status Controls ─── */}
-                <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl overflow-hidden">
+                <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
                   {/* Card Header */}
-                  <div className="px-5 pt-5 pb-3 border-b border-[#F2F2F7]">
-                    <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">Account Status Controls</h3>
-                    <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">Grant temporary access or extend billing grace outside Stripe.</p>
+                  <div className="px-5 pt-5 pb-3 border-b border-slate-100">
+                    <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Account Status Controls</h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5 font-semibold">Grant temporary access or extend billing grace outside Stripe.</p>
                   </div>
 
                   <div className="p-5 space-y-4">
                     {/* Complimentary Access Block */}
-                    <div className="rounded-xl border border-[#E5E5EA] overflow-hidden">
-                      <div className="bg-emerald-50/60 px-4 py-2.5 flex items-center gap-2 border-b border-emerald-100">
-                        <ShieldCheck size={13} className="text-emerald-600 shrink-0" />
-                        <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">Complimentary Access</span>
+                    <div className="rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
+                      <div className="bg-emerald-50/80 px-4 py-2.5 flex items-center gap-2 border-b border-emerald-200/80">
+                        <ShieldCheck size={14} className="text-emerald-700 shrink-0" />
+                        <span className="text-[10px] font-black text-emerald-900 uppercase tracking-wider">Complimentary Access</span>
                       </div>
-                      <div className="px-4 py-3.5 space-y-3">
-                        <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                      <div className="px-4 py-3.5 space-y-3 bg-white">
+                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                           Bypass billing restrictions for a set number of days. The owner retains full feature access as if actively subscribed.
                         </p>
                         {/* Duration Selector */}
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider block">Duration</span>
+                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Duration</span>
                           <div className="grid grid-cols-4 gap-1.5">
                             {["7", "14", "30"].map(days => (
                               <button
                                 key={days}
                                 type="button"
                                 onClick={() => { setManualGrantDays(days); setCustomGrantSelected(false); }}
-                                className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                className={`py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                                   manualGrantDays === days && !customGrantSelected
-                                    ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
-                                    : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-emerald-300 hover:text-emerald-700"
+                                    ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
                                 }`}
                               >
                                 {days}d
@@ -1253,10 +1260,10 @@ export default function OwnerDetailClient({
                             <button
                               type="button"
                               onClick={() => setCustomGrantSelected(true)}
-                              className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                              className={`py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                                 customGrantSelected
-                                  ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
-                                  : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-emerald-300 hover:text-emerald-700"
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
                               }`}
                             >
                               Custom
@@ -1269,9 +1276,9 @@ export default function OwnerDetailClient({
                                 value={manualGrantDays}
                                 onChange={(e) => setManualGrantDays(e.target.value)}
                                 placeholder="e.g. 45"
-                                className="h-8 text-xs font-bold text-center border-[#E5E5EA] rounded-lg focus:border-emerald-400 flex-1"
+                                className="h-9 text-xs font-black text-center border-slate-200 rounded-xl focus:border-slate-900 bg-slate-50 flex-1 shadow-2xs"
                               />
-                              <span className="text-[11px] font-bold text-[#6E6E73] whitespace-nowrap">days</span>
+                              <span className="text-xs font-extrabold text-slate-400 whitespace-nowrap">days</span>
                             </div>
                           )}
                         </div>
@@ -1288,37 +1295,37 @@ export default function OwnerDetailClient({
                               onConfirm: (reason) => handleManualAction("restore_access", { grantDays: parseInt(manualGrantDays) || 30 }, reason)
                             });
                           }}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1"
+                          className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1 cursor-pointer border-none shadow-xs"
                         >
-                          <ShieldCheck size={13} />
+                          <ShieldCheck size={14} />
                           Grant {manualGrantDays}d Access
                         </Button>
                       </div>
                     </div>
 
                     {/* Grace Period Extension Block */}
-                    <div className="rounded-xl border border-[#E5E5EA] overflow-hidden">
-                      <div className="bg-amber-50/60 px-4 py-2.5 flex items-center gap-2 border-b border-amber-100">
-                        <Clock size={13} className="text-amber-600 shrink-0" />
-                        <span className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">Extend Grace Period</span>
+                    <div className="rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
+                      <div className="bg-amber-50/80 px-4 py-2.5 flex items-center gap-2 border-b border-amber-200/80">
+                        <Clock size={14} className="text-amber-700 shrink-0" />
+                        <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Extend Grace Period</span>
                       </div>
-                      <div className="px-4 py-3.5 space-y-3">
-                        <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                      <div className="px-4 py-3.5 space-y-3 bg-white">
+                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                           Push out the billing delinquency deadline. The account won&apos;t lock during the extension window.
                         </p>
                         {/* Duration Selector */}
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider block">Extension</span>
+                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Extension</span>
                           <div className="grid grid-cols-4 gap-1.5">
                             {["3", "7", "14"].map(days => (
                               <button
                                 key={days}
                                 type="button"
                                 onClick={() => { setManualGraceDays(days); setCustomGraceSelected(false); }}
-                                className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                                className={`py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                                   manualGraceDays === days && !customGraceSelected
-                                    ? "bg-amber-500 border-amber-500 text-white shadow-xs"
-                                    : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-amber-300 hover:text-amber-700"
+                                    ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
                                 }`}
                               >
                                 {days}d
@@ -1327,10 +1334,10 @@ export default function OwnerDetailClient({
                             <button
                               type="button"
                               onClick={() => setCustomGraceSelected(true)}
-                              className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                              className={`py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                                 customGraceSelected
-                                  ? "bg-amber-500 border-amber-500 text-white shadow-xs"
-                                  : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:border-amber-300 hover:text-amber-700"
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
                               }`}
                             >
                               Custom
@@ -1343,9 +1350,9 @@ export default function OwnerDetailClient({
                                 value={manualGraceDays}
                                 onChange={(e) => setManualGraceDays(e.target.value)}
                                 placeholder="e.g. 10"
-                                className="h-8 text-xs font-bold text-center border-[#E5E5EA] rounded-lg focus:border-amber-400 flex-1"
+                                className="h-9 text-xs font-black text-center border-slate-200 rounded-xl focus:border-slate-900 bg-slate-50 flex-1 shadow-2xs"
                               />
-                              <span className="text-[11px] font-bold text-[#6E6E73] whitespace-nowrap">days</span>
+                              <span className="text-xs font-extrabold text-slate-400 whitespace-nowrap">days</span>
                             </div>
                           )}
                         </div>
@@ -1362,9 +1369,9 @@ export default function OwnerDetailClient({
                               onConfirm: (reason) => handleManualAction("extend_grace", { graceDays: parseInt(manualGraceDays) || 7 }, reason)
                             });
                           }}
-                          className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1"
+                          className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 mt-1 cursor-pointer border-none shadow-xs"
                         >
-                          <Clock size={13} />
+                          <Clock size={14} />
                           Extend by {manualGraceDays}d
                         </Button>
                       </div>
@@ -1373,14 +1380,14 @@ export default function OwnerDetailClient({
                 </Card>
 
                 {/* ─── Save Matrix Configurations ─── */}
-                <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-2xl overflow-hidden">
-                  <div className="px-5 pt-5 pb-3 border-b border-[#F2F2F7] flex items-center justify-between">
+                <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
+                  <div className="px-5 pt-5 pb-3 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">Save Matrix Configurations</h3>
-                      <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">Review pending changes before committing overrides.</p>
+                      <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Save Matrix Configurations</h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5 font-semibold">Review pending changes before committing overrides.</p>
                     </div>
                     {getChangedPoliciesPreview().length > 0 && (
-                      <span className="text-[10px] font-extrabold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                      <span className="text-[9px] font-black uppercase tracking-wider bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md border border-purple-200/60 shadow-2xs">
                         {getChangedPoliciesPreview().length} change{getChangedPoliciesPreview().length > 1 ? "s" : ""}
                       </span>
                     )}
@@ -1389,28 +1396,28 @@ export default function OwnerDetailClient({
                   <div className="p-5 space-y-4">
                     {/* Live Diff Preview */}
                     {getChangedPoliciesPreview().length > 0 ? (
-                      <div className="bg-purple-50 border border-purple-100 rounded-xl p-3.5 space-y-2">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
-                          <Settings2 size={11} />
+                      <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-3.5 space-y-2 shadow-2xs">
+                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-purple-800 flex items-center gap-1.5">
+                          <Settings2 size={12} />
                           Pending Changes
                         </div>
                         <div className="space-y-2 max-h-[160px] overflow-y-auto">
                           {getChangedPoliciesPreview().map((change: { label: string; from: string; to: string }, idx: number) => (
-                            <div key={idx} className="bg-white border border-purple-100 rounded-lg px-3 py-2 space-y-1">
-                              <div className="text-[11px] font-bold text-slate-700">{change.label}</div>
+                            <div key={idx} className="bg-white border border-purple-200/60 rounded-xl px-3 py-2 space-y-1 shadow-2xs">
+                              <div className="text-xs font-extrabold text-slate-900">{change.label}</div>
                               <div className="flex items-center gap-1.5 text-[10px] font-semibold">
                                 <span className="text-slate-400 line-through">{change.from}</span>
                                 <span className="text-purple-400">→</span>
-                                <span className="text-purple-800 font-extrabold">{change.to}</span>
+                                <span className="text-purple-800 font-black">{change.to}</span>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-[#F9F9FB] border border-dashed border-[#E5E5EA] rounded-xl p-4 text-center">
-                        <div className="text-[11px] font-bold text-[#8E8E93]">No unsaved changes</div>
-                        <div className="text-[10px] text-[#C7C7CC] mt-0.5">Modify policy toggles above to see a diff preview.</div>
+                      <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4 text-center">
+                        <div className="text-xs font-extrabold text-slate-500">No unsaved changes</div>
+                        <div className="text-[10px] text-slate-400 font-semibold mt-0.5">Modify policy toggles above to see a diff preview.</div>
                       </div>
                     )}
 
@@ -1428,9 +1435,9 @@ export default function OwnerDetailClient({
                             onConfirm: (reason) => handleSaveOverride(reason)
                           });
                         }}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-40"
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black h-9 text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer border-none shadow-xs"
                       >
-                        <Settings2 size={13} />
+                        <Settings2 size={14} />
                         {actionLoading ? "Applying Changes..." : "Apply Exceptions Matrix"}
                       </Button>
 
@@ -1447,7 +1454,7 @@ export default function OwnerDetailClient({
                               onConfirm: confirmClearOverride
                             });
                           }}
-                          className="w-full border border-[#E5E5EA] text-[#6E6E73] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 rounded-xl font-bold h-9 text-xs bg-white transition-all"
+                          className="w-full border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 rounded-xl font-black h-9 text-xs bg-white transition-all shadow-2xs cursor-pointer"
                         >
                           Clear Active Exceptions
                         </Button>
@@ -1457,31 +1464,31 @@ export default function OwnerDetailClient({
                 </Card>
 
                 {/* ─── Danger Zone ─── */}
-                <div className="rounded-2xl border border-red-200 bg-white overflow-hidden">
+                <div className="rounded-3xl border border-rose-200 bg-white overflow-hidden shadow-xs font-sans">
                   {/* Red header stripe */}
-                  <div className="bg-red-50 px-5 py-3 border-b border-red-200 flex items-center gap-2">
-                    <AlertTriangle size={14} className="text-red-600 shrink-0" />
+                  <div className="bg-rose-50 px-5 py-3 border-b border-rose-200 flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-rose-600 shrink-0" />
                     <div>
-                      <h4 className="text-xs font-extrabold text-red-800 uppercase tracking-wider">Danger Zone</h4>
-                      <p className="text-[10px] text-red-600 font-semibold">Irreversible administrative actions</p>
+                      <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider">Danger Zone</h4>
+                      <p className="text-[10px] text-rose-600 font-semibold">Irreversible administrative actions</p>
                     </div>
                   </div>
 
                   <div className="px-5 py-4 space-y-3">
-                    <p className="text-[11px] text-[#6E6E73] font-medium leading-relaxed">
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                       Manually pausing or resuming this account bypasses Stripe billing. Every action is permanently recorded in the audit log.
                     </p>
 
                     {/* Active Status Pill */}
-                    <div className="flex items-center gap-2 py-2 px-3 bg-[#F9F9FB] rounded-lg border border-[#E5E5EA]">
+                    <div className="flex items-center gap-2 py-2 px-3 bg-slate-50 rounded-xl border border-slate-200/80 shadow-2xs">
                       <div className={`w-2 h-2 rounded-full shrink-0 ${
                         owner.subscriptionStatus === "Paused" ? "bg-amber-500 animate-pulse" :
                         owner.subscriptionStatus === "Past_Due" ? "bg-orange-500 animate-pulse" :
                         "bg-emerald-500"
                       }`} />
                       <div>
-                        <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Current Status: </span>
-                        <span className="text-[11px] font-extrabold text-[#1D1D1F]">
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Current Status: </span>
+                        <span className="text-xs font-black text-slate-900">
                           {owner.subscriptionStatus === "Paused" ? "Suspended" :
                            owner.subscriptionStatus === "Past_Due" ? "Past Due / Grace" :
                            owner.subscriptionStatus === "Active" ? "Active & Healthy" :
@@ -1504,9 +1511,9 @@ export default function OwnerDetailClient({
                             onConfirm: (reason) => handleManualAction("manual_resume", {}, reason)
                           });
                         }}
-                        className="w-full bg-[#007AFF] hover:bg-[#0066D9] text-white rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all"
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black h-9 text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none"
                       >
-                        <Play size={13} />
+                        <Play size={14} />
                         Force Resume Account
                       </Button>
                     ) : (
@@ -1523,9 +1530,9 @@ export default function OwnerDetailClient({
                             onConfirm: (reason) => handleManualAction("manual_pause", {}, reason)
                           });
                         }}
-                        className="w-full border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 rounded-xl font-bold h-9 text-xs flex items-center justify-center gap-1.5 transition-all"
+                        className="w-full border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl font-black h-9 text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                       >
-                        <Pause size={13} />
+                        <Pause size={14} />
                         Force Suspend Account
                       </Button>
                     )}
@@ -1539,19 +1546,19 @@ export default function OwnerDetailClient({
 
         {/* ACTIVITY LOG TAB */}
         {activeTab === 'activity' && (
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             {/* Header controls bar */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 border border-[#E5E5EA] rounded-2xl shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 border border-slate-200 rounded-3xl shadow-xs font-sans">
               <div className="flex flex-wrap items-center gap-2">
                 {(["ALL", "ACCESS", "BILLING", "SECURITY", "SYSTEM"] as const).map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setCategoryFilter(cat)}
-                    className={`text-[10px] font-extrabold px-3 py-1.5 rounded-full border transition-all ${
+                    className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
                       categoryFilter === cat
-                        ? "bg-[#1D1D1F] border-[#1D1D1F] text-white shadow-xs"
-                        : "bg-white text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F2F2F7]"
+                        ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
+                        : "bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
                     {cat === "ALL" ? `All Events (${auditLogs.length})` : cat}
@@ -1562,7 +1569,7 @@ export default function OwnerDetailClient({
                 variant="outline"
                 size="sm"
                 onClick={handleExportCsv}
-                className="border-[#E5E5EA] hover:bg-slate-50 text-[#1D1D1F] rounded-xl font-bold text-xs h-9"
+                className="border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl font-black text-xs h-9 bg-white shadow-2xs cursor-pointer"
               >
                 Export Audit Trail (CSV)
               </Button>

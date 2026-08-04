@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import { motion } from "framer-motion";
+import { getUserAvatar } from "@/lib/avatar";
 
 export default function TenantDashboard() {
   const { data: session, status } = useSession();
@@ -100,7 +101,13 @@ export default function TenantDashboard() {
       const data = await res.json();
       if (res.ok && data.url) {
         setProfileAvatar(data.url);
-        toast.success("Photo uploaded successfully.");
+        await fetch("/api/users", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatar: data.url }),
+        });
+        toast.success("Profile photo uploaded and saved successfully.");
+        fetchData();
       } else {
         toast.error(data.error || "Failed to upload photo");
       }
@@ -108,6 +115,21 @@ export default function TenantDashboard() {
       toast.error("An error occurred during upload.");
     } finally {
       setAvatarUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setProfileAvatar("");
+    try {
+      await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: "" }),
+      });
+      toast.success("Profile photo removed.");
+      fetchData();
+    } catch {
+      toast.error("Failed to remove photo.");
     }
   };
 
@@ -128,7 +150,10 @@ export default function TenantDashboard() {
     if (status === "unauthenticated") {
       router.push("/auth/login");
     }
-  }, [status, router]);
+    if (activeTab === "settings") {
+      router.replace("/dashboard/settings");
+    }
+  }, [status, activeTab, router]);
 
   const fetchData = async () => {
     try {
@@ -184,6 +209,7 @@ export default function TenantDashboard() {
       if (profileRes.ok) {
         const profileData = await profileRes.json();
         setProfileName(profileData.name || "");
+        setProfileAvatar(profileData.avatar || profileData.image || "");
         setProfilePhone(profileData.phone || "");
         setProfileDob(profileData.dob || "");
         setProfileEmploymentStatus(profileData.employmentStatus || "EMPLOYED");
@@ -604,7 +630,7 @@ export default function TenantDashboard() {
 
             {/* Hero Residence Card */}
             {activeLease ? (
-              <Card className="bg-slate-900 text-white border-none shadow-xl rounded-3xl overflow-hidden p-6 sm:p-8 relative group">
+              <Card className="bg-slate-900 text-white border border-slate-800 shadow-xl rounded-3xl overflow-hidden p-6 sm:p-8 relative group font-sans">
                 {/* Property / Unit Background Image - Bright, Vibrant Photo */}
                 <img
                   src={
@@ -629,19 +655,19 @@ export default function TenantDashboard() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 backdrop-blur-md text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-                        Your Residence
+                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 backdrop-blur-md text-[10px] font-black tracking-wider uppercase px-3 py-1 rounded-md shadow-2xs">
+                        YOUR RESIDENCE
                       </span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-md">{activeLease.unit.name}</h2>
-                    <p className="text-slate-200 text-sm font-semibold flex items-center gap-1.5 drop-shadow-xs">
+                    <p className="text-slate-200 text-xs font-bold flex items-center gap-1.5 drop-shadow-xs">
                       <Home className="h-4 w-4 text-emerald-400" />
                       {activeLease.unit.property.name} &bull; {activeLease.unit.property.address || "Verified Location"}
                     </p>
                   </div>
                   <div className="flex flex-row md:flex-col items-baseline md:items-end gap-3 shrink-0">
                     <div>
-                      <p className="text-slate-300 text-[10px] font-bold uppercase tracking-wider text-left md:text-right drop-shadow-xs">Monthly Rent</p>
+                      <p className="text-slate-300 text-[10px] font-black uppercase tracking-wider text-left md:text-right drop-shadow-xs">Monthly Rent</p>
                       <p className="text-2xl sm:text-3xl font-black text-emerald-400 drop-shadow-md">${Number(activeLease.monthlyRent).toLocaleString()}</p>
                     </div>
                   </div>
@@ -650,10 +676,10 @@ export default function TenantDashboard() {
                 {/* Lease Period progress line */}
                 <div className="mt-8 pt-6 border-t border-white/15 relative z-10">
                   <div className="flex justify-between items-center text-xs text-slate-200 mb-2.5 font-semibold">
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 font-bold">
                       <span>Lease Term: {new Date(activeLease.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(activeLease.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                     </span>
-                    <span className="font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-full text-[11px] backdrop-blur-md shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                    <span className="font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-md text-[10px] backdrop-blur-md shadow-2xs">
                       {getLeaseProgress(activeLease)}% Complete
                     </span>
                   </div>
@@ -671,17 +697,17 @@ export default function TenantDashboard() {
                 </div>
               </Card>
             ) : (
-              <Card className="bg-white border border-[#E5E5EA] shadow-sm rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
-                <div className="h-16 w-16 bg-slate-50 text-[#8E8E93] rounded-full flex items-center justify-center">
+              <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto space-y-4 font-sans">
+                <div className="h-16 w-16 bg-slate-100 text-slate-800 rounded-2xl flex items-center justify-center border border-slate-200/80 shadow-2xs">
                   <Home className="h-8 w-8" />
                 </div>
-                <h3 className="text-lg font-black text-slate-950">No Active Lease Agreement</h3>
-                <p className="text-sm text-[#6E6E73]">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">No Active Lease Agreement</h3>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                   You are not currently registered to any active property leases. If you have recently applied, check your application status.
                 </p>
                 <Button 
                   onClick={() => router.push("/dashboard/tenant/applications")}
-                  className="bg-[#496E5C] hover:bg-[#3D5C4D] text-white font-bold h-11 px-6 rounded-xl shadow-xs transition-colors"
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-10 px-6 rounded-xl shadow-xs transition-all border-none cursor-pointer"
                 >
                   Check Application Status
                 </Button>
@@ -690,22 +716,22 @@ export default function TenantDashboard() {
 
             {/* Action Status Cards */}
             {activeLease && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
                 {/* 🔴 Rent Status Card */}
-                <Card className={`border rounded-2xl p-5 shadow-xs bg-white ${
-                  totalUnpaid > 0 ? "border-red-200" : "border-emerald-100"
+                <Card className={`border rounded-3xl p-6 shadow-xs bg-white ${
+                  totalUnpaid > 0 ? "border-rose-200" : "border-slate-200"
                 }`}>
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Rent Balance</span>
-                      <h3 className={`text-2xl font-black ${totalUnpaid > 0 ? "text-red-600" : "text-emerald-700"}`}>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rent Balance</span>
+                      <h3 className={`text-2xl font-black tracking-tight ${totalUnpaid > 0 ? "text-rose-600" : "text-emerald-600"}`}>
                         {totalUnpaid > 0 ? `$${totalUnpaid.toLocaleString()}` : "Fully Paid"}
                       </h3>
-                      <p className="text-xs text-[#6E6E73]">
+                      <p className="text-xs font-semibold text-slate-500">
                         {totalUnpaid > 0 ? "Outstanding balance due" : "No outstanding invoices"}
                       </p>
                     </div>
-                    <div className={`p-2.5 rounded-xl shrink-0 ${totalUnpaid > 0 ? "bg-red-50 text-red-500" : "bg-emerald-50 text-emerald-600"}`}>
+                    <div className={`p-3 rounded-2xl shrink-0 shadow-2xs border ${totalUnpaid > 0 ? "bg-rose-50 text-rose-600 border-rose-200/80" : "bg-emerald-50 text-emerald-600 border-emerald-200/80"}`}>
                       <DollarSign className="h-5 w-5" />
                     </div>
                   </div>
@@ -713,33 +739,33 @@ export default function TenantDashboard() {
                     <div className="mt-4">
                       <Button 
                         onClick={() => handlePayInvoice(unpaidInvoices[0]?.id)}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-10 rounded-xl text-xs transition-colors"
+                        className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black h-10 rounded-xl text-xs transition-all shadow-xs border-none cursor-pointer"
                       >
                         Pay Rent Now
                       </Button>
                     </div>
                   ) : (
                     <div className="mt-4">
-                      <div className="w-full bg-emerald-50 text-emerald-700 text-center py-2 font-bold rounded-xl text-xs border border-emerald-100">
-                        ✓ Account Up-to-Date
+                      <div className="w-full bg-emerald-50 text-emerald-800 text-center py-2 font-black rounded-xl text-xs border border-emerald-200 shadow-2xs">
+                        &check; Account Up-to-Date
                       </div>
                     </div>
                   )}
                 </Card>
 
                 {/* 🟡 Maintenance Tickets Card */}
-                <Card className="border border-[#E5E5EA] rounded-2xl p-5 shadow-xs bg-white">
+                <Card className="border border-slate-200 rounded-3xl p-6 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Maintenance</span>
-                      <h3 className="text-2xl font-black text-slate-800">
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Maintenance</span>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                         {openRequestsCount} Open
                       </h3>
-                      <p className="text-xs text-[#6E6E73]">
+                      <p className="text-xs font-semibold text-slate-500">
                         {openRequestsCount > 0 ? "Active repair requests" : "No pending repairs"}
                       </p>
                     </div>
-                    <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+                    <div className="p-3 bg-amber-50 text-amber-600 border border-amber-200/80 rounded-2xl shrink-0 shadow-2xs">
                       <Wrench className="h-5 w-5" />
                     </div>
                   </div>
@@ -747,13 +773,13 @@ export default function TenantDashboard() {
                     <Button 
                       onClick={() => setActiveTab("submit-request")}
                       variant="outline"
-                      className="flex-1 border-[#E5E5EA] text-slate-700 font-bold h-10 rounded-xl text-xs"
+                      className="flex-1 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-black h-10 rounded-xl text-xs shadow-2xs cursor-pointer"
                     >
                       New Request
                     </Button>
                     <Button 
                       onClick={() => setActiveTab("my-requests")}
-                      className="flex-1 bg-slate-800 hover:bg-[#007AFF] text-white font-bold h-10 rounded-xl text-xs"
+                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-black h-10 rounded-xl text-xs shadow-xs border-none cursor-pointer"
                     >
                       View All
                     </Button>
@@ -761,27 +787,27 @@ export default function TenantDashboard() {
                 </Card>
 
                 {/* 🔵 Lease Expiry Card */}
-                <Card className="border border-[#E5E5EA] rounded-2xl p-5 shadow-xs bg-white">
+                <Card className="border border-slate-200 rounded-3xl p-6 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Contract Window</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Contract Window</span>
                       {(() => {
                         const expiry = new Date(activeLease.endDate).getTime();
                         const diff = expiry - Date.now();
                         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
                         return (
                           <>
-                            <h3 className={`text-2xl font-black ${days < 30 ? "text-amber-600" : "text-[#1D1D1F]"}`}>
+                            <h3 className={`text-2xl font-black tracking-tight ${days < 30 ? "text-amber-600" : "text-slate-900"}`}>
                               {days > 0 ? `${days} Days` : "Expired"}
                             </h3>
-                            <p className="text-xs text-[#6E6E73]">
+                            <p className="text-xs font-semibold text-slate-500">
                               Remaining in term
                             </p>
                           </>
                         );
                       })()}
                     </div>
-                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                    <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shrink-0 shadow-2xs">
                       <Calendar className="h-5 w-5" />
                     </div>
                   </div>
@@ -789,7 +815,7 @@ export default function TenantDashboard() {
                     <Button 
                       onClick={() => router.push(`/dashboard/leases/${activeLease.id}`)}
                       variant="outline"
-                      className="w-full border-[#E5E5EA] text-slate-700 font-bold h-10 rounded-xl text-xs hover:bg-[#F5F5F7]"
+                      className="w-full bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-black h-10 rounded-xl text-xs shadow-2xs cursor-pointer"
                     >
                       View Agreement Detail
                     </Button>
@@ -799,40 +825,40 @@ export default function TenantDashboard() {
             )}
 
             {/* Split Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 font-sans">
               
               {/* Activity Feed Column */}
               <div className="lg:col-span-2 space-y-6">
-                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-xs p-6">
-                  <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-                    <h2 className="text-base font-extrabold text-[#1D1D1F]">Recent Activity & Updates</h2>
-                    <span className="text-xs text-[#6E6E73]">Real-time tenant actions and platform updates</span>
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8">
+                  <div className="pb-4 border-b border-slate-100 mb-6">
+                    <h2 className="text-lg font-black text-slate-900 tracking-tight">Recent Activity &amp; Updates</h2>
+                    <span className="text-xs font-semibold text-slate-500">Real-time tenant actions and platform updates</span>
                   </div>
 
                   <div className="space-y-6">
                     {/* Action Required Sub-Section */}
                     {unpaidInvoices.length > 0 && (
                       <div className="space-y-3">
-                        <h3 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                        <h3 className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" />
                           Action Required
                         </h3>
                         <div className="space-y-3">
                           {unpaidInvoices.map((inv) => (
-                            <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-red-50/40 border border-red-100 rounded-2xl">
+                            <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-rose-50/50 border border-rose-200 rounded-2xl shadow-2xs">
                               <div className="flex gap-3 items-start">
-                                <div className="p-2 bg-red-100 text-red-600 rounded-xl shrink-0 mt-0.5">
+                                <div className="p-2.5 bg-rose-100 text-rose-600 rounded-xl shrink-0 mt-0.5">
                                   <DollarSign className="h-4.5 w-4.5" />
                                 </div>
-                                <div className="space-y-1">
-                                  <h4 className="text-xs font-extrabold text-red-950">Pending Rent Invoice</h4>
-                                  <p className="text-xs text-red-700">Rent of <strong className="font-extrabold">${Number(inv.amount).toLocaleString()}</strong> is outstanding.</p>
-                                  <p className="text-[10px] text-red-500 font-semibold">Due Date: {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                                <div className="space-y-0.5">
+                                  <h4 className="text-xs font-black text-rose-950">Pending Rent Invoice</h4>
+                                  <p className="text-xs text-rose-800 font-semibold">Rent of <strong className="font-black">${Number(inv.amount).toLocaleString()}</strong> is outstanding.</p>
+                                  <p className="text-[10px] text-rose-600 font-bold">Due Date: {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
                                 </div>
                               </div>
                               <Button
                                 onClick={() => handlePayInvoice(inv.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white font-bold h-9 px-4 rounded-xl text-xs shrink-0"
+                                className="bg-rose-600 hover:bg-rose-700 text-white font-black h-9 px-5 rounded-xl text-xs shrink-0 shadow-xs border-none cursor-pointer"
                               >
                                 Pay Now
                               </Button>
@@ -844,33 +870,33 @@ export default function TenantDashboard() {
 
                     {/* Recent Updates Sub-Section */}
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">
+                      <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                         Recent Updates
                       </h3>
                       
                       {maintenance.length === 0 && documents.length === 0 && unpaidInvoices.length === 0 ? (
-                        <div className="text-center py-10 border border-dashed border-[#E5E5EA] rounded-2xl">
-                          <p className="text-xs text-[#6E6E73] italic">No recent updates found.</p>
+                        <div className="text-center py-10 border border-dashed border-slate-200 rounded-2xl">
+                          <p className="text-xs text-slate-400 font-semibold italic">No recent updates found.</p>
                         </div>
                       ) : (
                         <div className="space-y-3">
                           {maintenance.slice(0, 3).map((m) => (
-                            <div key={m.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E5E5EA] rounded-2xl hover:border-slate-300 transition-colors">
+                            <div key={m.id} className="flex items-start justify-between gap-4 p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl hover:border-slate-300 transition-colors shadow-2xs">
                               <div className="flex gap-3 items-start">
-                                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl shrink-0 mt-0.5">
+                                <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shrink-0 mt-0.5 border border-amber-200/60">
                                   <Wrench className="h-4.5 w-4.5" />
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-xs font-extrabold text-slate-900">{m.title}</h4>
-                                  <p className="text-[11px] text-[#6E6E73]">Category: {m.category} &bull; Priority: {m.priority}</p>
-                                  <p className="text-[10px] text-[#8E8E93]">Created: {new Date(m.createdAt || Date.now()).toLocaleDateString()}</p>
+                                  <h4 className="text-xs font-black text-slate-900">{m.title}</h4>
+                                  <p className="text-[11px] text-slate-500 font-semibold">Category: {m.category} &bull; Priority: {m.priority}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold">Created: {new Date(m.createdAt || Date.now()).toLocaleDateString()}</p>
                                 </div>
                               </div>
                               <Badge className={
-                                m.status === "OPEN" ? "bg-blue-50 text-blue-700 border border-blue-100" :
-                                m.status === "ASSIGNED" ? "bg-purple-50 text-purple-700 border border-purple-100" :
-                                m.status === "IN_PROGRESS" ? "bg-amber-50 text-amber-700 border border-amber-100" :
-                                "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                m.status === "OPEN" ? "bg-blue-50 text-blue-800 border border-blue-200 rounded-md font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5" :
+                                m.status === "ASSIGNED" ? "bg-purple-50 text-purple-800 border border-purple-200 rounded-md font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5" :
+                                m.status === "IN_PROGRESS" ? "bg-amber-50 text-amber-800 border border-amber-200 rounded-md font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5" :
+                                "bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5"
                               }>
                                 {m.status.replace(/_/g, " ")}
                               </Badge>
@@ -878,22 +904,22 @@ export default function TenantDashboard() {
                           ))}
 
                           {documents.slice(0, 2).map((d) => (
-                            <div key={d.id} className="flex items-start justify-between gap-4 p-3.5 bg-slate-50/50 border border-[#E5E5EA] rounded-2xl hover:border-slate-300 transition-colors">
+                            <div key={d.id} className="flex items-start justify-between gap-4 p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl hover:border-slate-300 transition-colors shadow-2xs">
                               <div className="flex gap-3 items-start">
-                                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0 mt-0.5">
+                                <div className="p-2.5 bg-slate-200/80 text-slate-900 rounded-xl shrink-0 mt-0.5">
                                   <FileText className="h-4.5 w-4.5" />
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-xs font-extrabold text-slate-900">{d.name}</h4>
-                                  <p className="text-[11px] text-[#6E6E73]">Legal Vault &bull; Category: {d.category}</p>
-                                  <p className="text-[10px] text-[#8E8E93]">Uploaded: {new Date(d.uploadedAt).toLocaleDateString()}</p>
+                                  <h4 className="text-xs font-black text-slate-900">{d.name}</h4>
+                                  <p className="text-[11px] text-slate-500 font-semibold">Legal Vault &bull; Category: {d.category}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold">Uploaded: {new Date(d.uploadedAt).toLocaleDateString()}</p>
                                 </div>
                               </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => window.open(d.url, "_blank")}
-                                className="h-8 text-xs font-bold text-[#496E5C] hover:bg-[#496E5C]/5 rounded-lg"
+                                className="h-8 text-xs font-black text-slate-900 hover:bg-slate-200 rounded-lg cursor-pointer"
                               >
                                 View
                               </Button>
@@ -908,40 +934,50 @@ export default function TenantDashboard() {
 
               {/* Support & Contacts Column */}
               <div className="lg:col-span-1 space-y-6">
-                <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-xs p-6">
-                  <div className="pb-4 border-b border-[#F1F5F9] mb-4">
-                    <h2 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
-                      <UserCheck className="h-4.5 w-4.5 text-[#496E5C]" />
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8">
+                  <div className="pb-4 border-b border-slate-100 mb-4">
+                    <h2 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <UserCheck className="h-5 w-5 text-slate-900" />
                       Support Contacts
                     </h2>
-                    <span className="text-xs text-[#6E6E73]">Reach out directly via secure chat</span>
+                    <span className="text-xs font-semibold text-slate-500">Reach out directly via secure chat</span>
                   </div>
 
                   <div className="space-y-4">
                     {contacts.length === 0 ? (
-                      <p className="text-xs text-[#6E6E73] italic text-center py-4">No support contacts loaded.</p>
+                      <p className="text-xs text-slate-400 font-semibold italic text-center py-4">No support contacts loaded.</p>
                     ) : (
                       contacts.map((c) => (
-                        <div key={c.id} className="p-3.5 bg-slate-50 border border-[#E5E5EA] rounded-2xl space-y-3 hover:border-slate-300 transition-colors">
+                        <div key={c.id} className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3 hover:border-slate-300 transition-colors shadow-2xs">
                           <div className="flex gap-3 items-center">
-                            <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-extrabold shrink-0">
-                              {c.name ? c.name.charAt(0).toUpperCase() : "?"}
-                            </div>
+                            {c.avatar || c.image ? (
+                              <img
+                                src={c.avatar || c.image}
+                                alt={c.name}
+                                className="h-10 w-10 rounded-full object-cover border border-slate-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                                {c.name ? c.name.charAt(0).toUpperCase() : "?"}
+                              </div>
+                            )}
                             <div className="min-w-0">
-                              <h4 className="text-xs font-extrabold text-[#1D1D1F] truncate">{c.name}</h4>
-                              <p className="text-[10px] text-[#6E6E73] font-bold uppercase tracking-wider">{c.role}</p>
+                              <h4 className="text-xs font-black text-slate-900 truncate">{c.name}</h4>
+                              <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-slate-200/70 text-slate-800">
+                                {c.role}
+                              </span>
                             </div>
                           </div>
-                          <div className="text-[11px] text-[#6E6E73] space-y-1">
-                            <p className="truncate flex items-center gap-1"><Mail className="h-3 w-3 text-[#8E8E93]" /> {c.email}</p>
-                            {c.phone && <p className="truncate flex items-center gap-1"><Phone className="h-3 w-3 text-[#8E8E93]" /> {c.phone}</p>}
+                          <div className="text-[11px] text-slate-500 font-semibold space-y-1">
+                            <p className="truncate flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" /> {c.email}</p>
+                            {c.phone && <p className="truncate flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" /> {c.phone}</p>}
                           </div>
                           <Button
                             onClick={() => {
                               setSelectedContact(c);
                               setActiveTab("messages");
                             }}
-                            className="w-full bg-[#496E5C] hover:bg-[#3D5C4D] text-white font-bold h-9 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black h-9 rounded-xl text-xs transition-all shadow-xs border-none cursor-pointer flex items-center justify-center gap-1.5"
                           >
                             <Send className="h-3.5 w-3.5" /> Message {c.role === "OWNER" ? "Owner" : "Inspector"}
                           </Button>
@@ -1867,22 +1903,27 @@ export default function TenantDashboard() {
 
         {/* -------------------- SETTINGS TAB -------------------- */}
         {activeTab === "settings" && (
-          <div className="space-y-6 outline-none pt-4 pb-12">
-            <div className="flex justify-between items-center mb-2">
-              <div>
-                <h2 className="text-2xl font-black text-[#111111]">Account Settings</h2>
-                <p className="text-sm text-[#7F817F] mt-0.5">Manage your preferences and profile</p>
+          <div className="space-y-6 outline-none pt-4 pb-12 font-sans max-w-4xl mx-auto w-full">
+            <div className="flex justify-between items-center mb-2 font-sans">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h2>
+                  <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your preferences and profile</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-6 border-b border-[#E5E5EA] mb-6">
+            <div className="flex items-center space-x-6 border-b border-slate-200 mb-6 font-sans">
               <button
                 type="button"
                 onClick={() => setActiveSettingsTab("profile")}
-                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                className={`pb-4 text-xs font-black border-b-2 transition-colors cursor-pointer ${
                   activeSettingsTab === "profile" 
                     ? "border-slate-900 text-slate-900" 
-                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
                 Profile Settings
@@ -1890,29 +1931,29 @@ export default function TenantDashboard() {
               <button
                 type="button"
                 onClick={() => setActiveSettingsTab("security")}
-                className={`pb-4 text-sm font-bold border-b-2 transition-colors ${
+                className={`pb-4 text-xs font-black border-b-2 transition-colors cursor-pointer ${
                   activeSettingsTab === "security" 
                     ? "border-slate-900 text-slate-900" 
-                    : "border-transparent text-[#6E6E73] hover:text-slate-700 hover:border-slate-300"
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                 }`}
               >
-                Security & Password
+                Security &amp; Password
               </button>
             </div>
 
             {activeSettingsTab === "profile" && (
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
+              <form onSubmit={handleUpdateProfile} className="space-y-6 font-sans w-full">
                 
-                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Personal Information</h3>
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-8 max-w-4xl mx-auto w-full font-sans">
+                  <h3 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 mb-6 tracking-tight">Personal Information</h3>
                   
                   <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 mb-6 border-b border-slate-100">
-                    <div className="h-24 w-24 shrink-0 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center relative">
-                      {profileAvatar ? (
-                        <img src={profileAvatar} alt="Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        <User className="h-10 w-10 text-[#8E8E93]" />
-                      )}
+                    <div className="h-24 w-24 shrink-0 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center relative shadow-xs">
+                      <img 
+                        src={getUserAvatar({ id: (session?.user as any)?.id, name: profileName || session?.user?.name, avatar: profileAvatar })} 
+                        alt="Avatar" 
+                        className="h-full w-full object-cover" 
+                      />
                       {avatarUploading && (
                         <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                           <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
@@ -1922,7 +1963,7 @@ export default function TenantDashboard() {
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <div className="relative inline-block">
-                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-bold rounded-lg border-slate-300">
+                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-black rounded-xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer">
                             Change Photo
                           </Button>
                           <input 
@@ -1932,60 +1973,60 @@ export default function TenantDashboard() {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
                         </div>
-                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => setProfileAvatar("")}>
+                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-black text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer" onClick={handleRemoveAvatar}>
                           Remove
                         </Button>
                       </div>
-                      <p className="text-xs text-[#6E6E73]">JPG, PNG or GIF. Max size 5MB.</p>
+                      <p className="text-xs text-slate-500 font-medium">JPG, PNG or GIF. Max size 5MB.</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="profName" className="text-sm font-bold text-slate-700">Full Name</Label>
+                      <Label htmlFor="profName" className="text-xs font-black uppercase tracking-wider text-slate-500">Full Name</Label>
                       <Input 
                         id="profName"
                         placeholder="Your Name"
                         value={profileName}
                         onChange={(e) => setProfileName(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                     
                     <div className="space-y-1.5">
-                      <Label htmlFor="profPhone" className="text-sm font-bold text-slate-700">Phone Number</Label>
+                      <Label htmlFor="profPhone" className="text-xs font-black uppercase tracking-wider text-slate-500">Phone Number</Label>
                       <Input 
                         id="profPhone"
                         type="tel"
                         placeholder="+1 555-0000"
                         value={profilePhone}
                         onChange={(e) => setProfilePhone(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                     
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-bold text-slate-700">Email Address</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Email Address</Label>
                       <div className="relative">
                         <Input 
                           disabled
                           value={session?.user?.email || ""}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11 text-[#6E6E73] pl-10 cursor-not-allowed"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-500 pl-10 cursor-not-allowed"
                         />
-                        <Shield className="h-4 w-4 text-[#8E8E93] absolute left-3.5 top-3.5" />
+                        <Shield className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
                       </div>
                     </div>
                   </div>
                 </Card>
 
-                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Employment Status</h3>
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-8 max-w-4xl mx-auto w-full font-sans">
+                  <h3 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 mb-6 tracking-tight">Employment Status</h3>
                   
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-bold text-slate-700">Current Status</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Current Status</Label>
                       <Select value={profileEmploymentStatus} onValueChange={(val) => setProfileEmploymentStatus(val || "EMPLOYED")}>
-                        <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-xl h-11">
+                        <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-xl h-11 text-xs font-semibold text-slate-900">
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-white rounded-xl">
@@ -2001,103 +2042,103 @@ export default function TenantDashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5">
-                        <Label className="text-sm font-bold text-slate-700">Employer / School / Income Source</Label>
+                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Employer / School / Income Source</Label>
                         <Input 
                           placeholder="e.g. Company Name, University, Savings"
                           value={profileEmployer}
                           onChange={(e) => setProfileEmployer(e.target.value)}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-sm font-bold text-slate-700">Job Title / Support Type</Label>
+                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Job Title / Support Type</Label>
                         <Input 
                           placeholder="e.g. Software Engineer, Scholarship"
                           value={profilePosition}
                           onChange={(e) => setProfilePosition(e.target.value)}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                         />
                       </div>
                     </div>
                   </div>
                 </Card>
 
-                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Emergency Contact</h3>
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-8 max-w-4xl mx-auto w-full font-sans">
+                  <h3 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 mb-6 tracking-tight">Emergency Contact</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-bold text-slate-700">Contact Name</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Contact Name</Label>
                       <Input 
                         placeholder="Jane Doe"
                         value={emergencyName}
                         onChange={(e) => setEmergencyName(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-bold text-slate-700">Relationship</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Relationship</Label>
                       <Input 
                         placeholder="e.g. Parent, Sibling"
                         value={emergencyRelationship}
                         onChange={(e) => setEmergencyRelationship(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
-                      <Label className="text-sm font-bold text-slate-700">Phone Number</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Phone Number</Label>
                       <Input 
                         type="tel"
                         placeholder="Emergency Phone"
                         value={emergencyPhone}
                         onChange={(e) => setEmergencyPhone(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                   </div>
                 </Card>
 
-                <Card className="bg-white border-0 rounded-3xl shadow-sm p-8 max-w-3xl">
-                  <h3 className="text-lg font-bold text-[#111111] border-b border-slate-100 pb-2 mb-6">Bank Payout Details</h3>
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-8 max-w-4xl mx-auto w-full font-sans">
+                  <h3 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 mb-6 tracking-tight">Bank Payout Details</h3>
                   
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm font-bold text-slate-700">Bank Name</Label>
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Bank Name</Label>
                       <Input 
                         placeholder="e.g. Chase Bank"
                         value={bankName}
                         onChange={(e) => setBankName(e.target.value)}
-                        className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                        className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-sm font-bold text-slate-700">Account Name</Label>
+                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Account Name</Label>
                         <Input 
                           placeholder="John Doe"
                           value={accountName}
                           onChange={(e) => setAccountName(e.target.value)}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-sm font-bold text-slate-700">Account / IBAN Number</Label>
+                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Account / IBAN Number</Label>
                         <Input 
                           placeholder="**** **** **** 1234"
                           value={accountNumber}
                           onChange={(e) => setAccountNumber(e.target.value)}
-                          className="bg-slate-50 border-slate-200 rounded-xl text-sm h-11"
+                          className="bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold h-11 text-slate-900 focus:bg-white"
                         />
                       </div>
                     </div>
                   </div>
                 </Card>
 
-                <div className="pt-2 max-w-3xl flex justify-end">
+                <div className="pt-2 max-w-4xl mx-auto w-full flex justify-end">
                   <Button 
                     type="submit" 
                     disabled={profileSubmitting}
-                    className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 px-10 rounded-xl shadow-sm transition-colors"
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-11 px-8 rounded-xl shadow-xs border-none cursor-pointer"
                   >
                     {profileSubmitting ? (
                       <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>
@@ -2110,7 +2151,7 @@ export default function TenantDashboard() {
             )}
 
             {activeSettingsTab === "security" && (
-              <div className="mt-2">
+              <div className="mt-2 max-w-4xl mx-auto w-full">
                 <SecuritySettings />
               </div>
             )}

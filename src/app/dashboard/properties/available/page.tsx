@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, RefreshCw, MapPin, Building, BedDouble, Bath, Maximize, LayoutGrid, List, AlignJustify, MoreVertical, Eye, Edit, Trash2, Home, DollarSign, Activity, Square, Plus } from "lucide-react";
+import { Search, RefreshCw, MapPin, Building, BedDouble, Bath, Maximize, LayoutGrid, List, AlignJustify, MoreVertical, Eye, Edit, Trash2, Home, DollarSign, Activity, Square, Plus, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 
@@ -32,7 +32,6 @@ export default function AvailableUnitsPage() {
       const res = await fetch("/api/units");
       if (res.ok) {
         const data = await res.json();
-        // Only keep vacant units
         setUnits(data.filter((u: any) => u.status === "VACANT"));
       } else {
         toast.error("Failed to fetch units");
@@ -53,7 +52,6 @@ export default function AvailableUnitsPage() {
     u.property?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Stats calculation
   const totalAvailable = units.length;
   
   let totalRent = 0;
@@ -93,25 +91,25 @@ export default function AvailableUnitsPage() {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-3xl font-bold text-[#1D1D1F]">Available Units</h1>
-          <p className="text-[#6E6E73] mt-1">Individual units currently available for rent</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Available Units</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Individual units currently available for rent</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
-            variant="outline"
             onClick={fetchUnits}
             disabled={loading}
-            className="bg-white border border-[#E5E5EA] shadow-sm text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl flex items-center gap-2 font-semibold h-11 px-5"
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-black rounded-xl text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Link href="/dashboard/properties/new">
-            <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl flex items-center gap-2 font-semibold h-11 px-5">
-              <Plus className="h-5 w-5" />
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
               Add Property
             </Button>
           </Link>
@@ -119,107 +117,108 @@ export default function AvailableUnitsPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
           title="Available Units" 
           value={totalAvailable} 
           subtext={`Across ${new Set(units.map(u => u.propertyId)).size} properties`} 
           Icon={Home} 
-          iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" 
+          iconBg="bg-emerald-50" iconColor="text-emerald-700" 
         />
         <StatCard 
           title="Average Rent" 
           value={`$${avgRent.toFixed(2)}`} 
           subtext={totalAvailable > 0 ? `Range: $${minRent} - $${maxRent}` : "No data"} 
           Icon={DollarSign} 
-          iconBg="bg-[#DCFCE7]" iconColor="text-[#22C55E]" 
+          iconBg="bg-emerald-50" iconColor="text-emerald-700" 
         />
         <StatCard 
           title="Most Common Type" 
           value={mostCommonType} 
           subtext={totalAvailable > 0 ? `${highestTypeCount} units available` : "No data"} 
           Icon={Building} 
-          iconBg="bg-[#E0F2FE]" iconColor="text-[#0EA5E9]" 
+          iconBg="bg-slate-100" iconColor="text-slate-700" 
         />
         <StatCard 
           title="Average Size" 
           value={`${avgSqft.toFixed(0)} ft²`} 
           subtext={totalAvailable > 0 ? `Range: ${minSqft} - ${maxSqft} ft²` : "No data"} 
           Icon={Square} 
-          iconBg="bg-[#F0FDF4]" iconColor="text-[#4ADE80]" 
+          iconBg="bg-emerald-50" iconColor="text-emerald-700" 
         />
       </div>
 
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-sm overflow-hidden mt-8">
-        {/* Table Header */}
-        <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* Table & Directory Card */}
+      <div className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+        {/* Card Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#DCFCE7] text-[#22C55E] rounded-xl border border-[#bbf7d0]">
-              <CheckCircleIcon className="h-5 w-5" />
+            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xs">
+              <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="font-bold text-[#1D1D1F] text-lg">Available Units</h2>
-              <p className="text-xs text-[#6E6E73]">Individual units currently available for rent</p>
+              <h2 className="font-black text-slate-900 text-base tracking-tight">Available Units</h2>
+              <p className="text-xs text-slate-500 font-semibold">Individual units currently available for rent</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 bg-white border border-[#E5E5EA] rounded-xl p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
             <button 
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-[#007AFF] text-white shadow-sm" : "text-[#94A3B8] hover:text-[#1D1D1F]"}`}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === "grid" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
             >
-              <LayoutGrid className="h-4 w-4" />
+              <LayoutGrid className="h-3.5 w-3.5" />
             </button>
             <button 
               onClick={() => setViewMode("table")}
-              className={`p-2 rounded-lg transition-colors ${viewMode === "table" ? "bg-[#007AFF] text-white shadow-sm" : "text-[#94A3B8] hover:text-[#1D1D1F]"}`}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === "table" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
         {/* Filters Row */}
-        <div className="p-5 border-b border-[#E5E5EA] flex flex-col md:flex-row gap-4">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search available units..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 bg-[#F2F2F7] border-[#E5E5EA] rounded-xl focus-visible:ring-[#007AFF]"
+              className="pl-10 h-10 bg-white border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder-slate-400 focus-visible:ring-slate-400 shadow-2xs"
             />
           </div>
-          <select className="h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none cursor-pointer min-w-[120px]">
+          <select className="h-10 bg-white border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer min-w-[120px]">
             <option>All Types</option>
           </select>
-          <select className="h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none cursor-pointer min-w-[120px]">
+          <select className="h-10 bg-white border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer min-w-[120px]">
             <option>Any Beds</option>
           </select>
-          <select className="h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none cursor-pointer min-w-[120px]">
+          <select className="h-10 bg-white border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer min-w-[120px]">
             <option>Any Baths</option>
           </select>
-          <select className="h-11 bg-white border border-[#E5E5EA] rounded-xl px-4 text-sm text-[#1D1D1F] outline-none cursor-pointer min-w-[120px]">
+          <select className="h-10 bg-white border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer min-w-[120px]">
             <option>All Units</option>
           </select>
         </div>
 
         {viewMode === "table" ? (
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-[#E5E5EA] hover:bg-transparent">
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider py-4 pl-6">Unit</TableHead>
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider">Property</TableHead>
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider">Location</TableHead>
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider">Details</TableHead>
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider">Rent</TableHead>
-                  <TableHead className="text-[#6E6E73] font-bold text-xs uppercase tracking-wider">Actions</TableHead>
+            <Table className="w-full">
+              <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
+                <TableRow>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Unit</TableHead>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Property</TableHead>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Location</TableHead>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Details</TableHead>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Rent</TableHead>
+                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="divide-y divide-slate-100">
                 {filteredUnits.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-10 text-[#6E6E73]">
+                    <TableCell colSpan={6} className="text-center py-10 text-slate-500 font-extrabold text-xs">
                       No available units found.
                     </TableCell>
                   </TableRow>
@@ -228,65 +227,65 @@ export default function AvailableUnitsPage() {
                     const start = (currentPage - 1) * itemsPerPage;
                     const paginated = filteredUnits.slice(start, start + itemsPerPage);
                     return paginated.map((u) => (
-                      <TableRow key={u.id} className="border-[#E5E5EA] hover:bg-[#F2F2F7]/80 transition-colors">
-                        <TableCell className="pl-6">
+                      <TableRow key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                        <TableCell className="py-4 px-6">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-slate-200 overflow-hidden shrink-0">
+                            <div className="h-10 w-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                               {u.images && u.images.length > 0 ? (
                                  <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover" />
                               ) : (
-                                 <div className="h-full w-full bg-[#E5E5EA] flex items-center justify-center">
-                                   <Home className="h-5 w-5 text-[#94A3B8]" />
+                                 <div className="h-full w-full bg-slate-100 flex items-center justify-center">
+                                   <Home className="h-4 w-4 text-slate-400" />
                                  </div>
                               )}
                             </div>
                             <div>
-                              <p className="font-extrabold text-[#1D1D1F] text-sm">{u.name}</p>
-                              <p className="text-xs text-[#6E6E73] font-medium mt-0.5">{u.type || "Apartment"} • Floor {u.floor || 1}</p>
+                              <p className="font-black text-slate-900 text-xs">{u.name}</p>
+                              <p className="text-[11px] text-slate-500 font-semibold mt-0.5">{u.type || "Apartment"} • Floor {u.floor || 1}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 px-6">
                           <div className="flex flex-col">
-                            <span className="font-bold text-[#1D1D1F] text-sm">{u.property?.name}</span>
-                            <span className="text-[11px] text-[#6E6E73]">{u.property?.type}</span>
+                            <span className="font-extrabold text-slate-900 text-xs">{u.property?.name}</span>
+                            <span className="text-[10px] text-slate-500 font-semibold">{u.property?.type}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 px-6">
                           <div className="flex flex-col">
-                            <span className="flex items-center gap-1 font-semibold text-[#1D1D1F] text-sm">
-                              <MapPin className="h-3 w-3 text-[#94A3B8]" />
+                            <span className="flex items-center gap-1 font-semibold text-slate-900 text-xs">
+                              <MapPin className="h-3.5 w-3.5 text-slate-400" />
                               {u.property?.city}, {u.property?.country}
                             </span>
-                            <span className="text-[11px] text-[#6E6E73] ml-4 mt-0.5">{u.property?.address}</span>
+                            <span className="text-[10px] text-slate-500 font-semibold ml-4.5">{u.property?.address}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-3 text-xs text-[#1D1D1F] font-bold">
-                              <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.rooms}</span>
-                              <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-[#94A3B8]" /> {u.bathrooms || 1}</span>
+                        <TableCell className="py-4 px-6">
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-3 text-xs text-slate-900 font-extrabold">
+                              <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5 text-slate-400" /> {u.rooms}</span>
+                              <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-slate-400" /> {u.bathrooms || 1}</span>
                             </div>
-                            <span className="text-[11px] text-[#6E6E73] font-medium">{u.sqFootage} sq ft</span>
+                            <span className="text-[10px] text-slate-500 font-semibold">{u.sqFootage} sq ft</span>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 px-6">
                           <div className="flex flex-col">
-                            <span className="font-extrabold text-[#1D1D1F] text-sm">${Number(u.rentAmount).toFixed(2)}</span>
-                            <span className="text-[11px] text-[#6E6E73] mt-0.5">/month</span>
+                            <span className="font-black text-slate-900 text-xs">${Number(u.rentAmount).toFixed(2)}</span>
+                            <span className="text-[10px] text-slate-500 font-semibold">/month</span>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 px-6">
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
+                            <DropdownMenuTrigger className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center rounded-lg cursor-pointer">
                               <MoreVertical className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                                <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
+                            <DropdownMenuContent align="end" className="w-40 rounded-2xl border-slate-200 p-1 shadow-xl font-sans">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl">
+                                <Eye className="mr-2 h-4 w-4 text-slate-400" /> View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                                <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl">
+                                <Edit className="mr-2 h-4 w-4 text-slate-400" /> Edit Unit
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -299,9 +298,9 @@ export default function AvailableUnitsPage() {
             </Table>
           </div>
         ) : (
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredUnits.length === 0 && !loading ? (
-              <div className="col-span-full text-center py-10 text-[#6E6E73]">
+              <div className="col-span-full text-center py-10 text-slate-500 font-extrabold text-xs">
                 No available units found.
               </div>
             ) : (
@@ -309,71 +308,45 @@ export default function AvailableUnitsPage() {
                 const start = (currentPage - 1) * itemsPerPage;
                 const paginated = filteredUnits.slice(start, start + itemsPerPage);
                 return paginated.map((u) => (
-                  <div key={u.id} className="border border-[#E5E5EA] bg-white rounded-[20px] overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
-                    <div className="relative h-[200px] bg-[#F2F2F7] overflow-hidden">
+                  <div key={u.id} className="border border-slate-200 bg-white rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 group flex flex-col">
+                    <div className="relative h-[180px] bg-slate-100 overflow-hidden">
                       {u.images && u.images.length > 0 ? (
                         <img src={u.images[0]} alt={u.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-[#94A3B8]">
-                          <Home className="h-10 w-10 opacity-50" />
+                        <div className="h-full w-full flex items-center justify-center text-slate-400">
+                          <Home className="h-8 w-8 opacity-50" />
                         </div>
                       )}
                       
-                      <div className="absolute top-4 left-4">
-                        <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-full px-3 py-1 font-bold text-xs shadow-sm">Available</Badge>
+                      <div className="absolute top-3 left-3">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
                       </div>
-                      <div className="absolute top-4 right-4">
-                        <Badge className="bg-white/90 text-[#475569] hover:bg-white border-0 shadow-sm rounded-full px-3 py-1 font-bold text-xs backdrop-blur-md flex items-center gap-1.5">
-                          <Building className="h-3.5 w-3.5" />
+                      <div className="absolute top-3 right-3">
+                        <span className="bg-white/90 text-slate-700 border border-slate-200/80 shadow-2xs rounded-md px-2.5 py-0.5 font-black text-[10px] uppercase tracking-wider backdrop-blur-md flex items-center gap-1">
+                          <Building className="h-3 w-3" />
                           {u.type || "Apartment"}
-                        </Badge>
-                      </div>
-                      
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                        <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
-                          <Eye className="h-5 w-5" />
-                        </button>
-                        <button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="w-10 h-10 bg-white text-[#1D1D1F] rounded-2xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
-                          <Edit className="h-5 w-5" />
-                        </button>
+                        </span>
                       </div>
                     </div>
                     
-                    <div className="p-5 flex-1 flex flex-col">
-                      <h3 className="font-extrabold text-[#1D1D1F] text-lg leading-tight">Unit {u.name}</h3>
-                      <p className="text-sm text-[#6E6E73] font-medium mt-1 truncate">{u.property?.name}</p>
-                      
-                      <div className="flex items-center gap-1.5 text-sm text-[#6E6E73] mt-3 font-medium">
-                        <MapPin className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{u.property?.city}, {u.property?.country}</span>
-                      </div>
-                      
-                      <div className="mt-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-[14px] p-3 flex flex-col gap-2">
-                        <div className="flex items-center gap-4 text-[#1D1D1F] font-bold text-sm">
-                          <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-[#94A3B8]" /> {u.rooms} Beds</span>
-                          <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-[#94A3B8]" /> {u.bathrooms || 1} Baths</span>
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-black text-slate-900 text-base tracking-tight">Unit {u.name}</h3>
+                        <p className="text-xs text-slate-500 font-semibold mt-0.5 truncate">{u.property?.name}</p>
+                        
+                        <div className="flex items-center gap-1 text-xs text-slate-500 font-semibold mt-2.5">
+                          <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{u.property?.city}, {u.property?.country}</span>
                         </div>
-                        <span className="text-xs text-[#6E6E73] font-medium">Size: {u.sqFootage} sq ft</span>
                       </div>
-                      
-                      <div className="mt-5 pt-4 border-t border-[#E5E5EA] flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <p className="font-extrabold text-[#1D1D1F] text-base">${Number(u.rentAmount).toFixed(2)} <span className="text-xs text-[#6E6E73] font-medium">/month</span></p>
-                          <p className="text-[11px] font-bold text-[#16A34A] mt-0.5">Vacant Unit</p>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div>
+                          <p className="font-black text-slate-900 text-sm">${Number(u.rentAmount).toFixed(2)} <span className="text-[10px] text-slate-500 font-semibold">/mo</span></p>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] inline-flex items-center justify-center rounded-lg">
-                            <MoreVertical className="h-5 w-5" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 rounded-xl border-[#E5E5EA]">
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                              <Eye className="mr-2 h-4 w-4 text-[#94A3B8]" /> View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/properties/${u.propertyId}/edit`)} className="cursor-pointer font-semibold text-[#1D1D1F]">
-                              <Edit className="mr-2 h-4 w-4 text-[#94A3B8]" /> Edit Unit
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="h-8 px-3 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs hover:bg-slate-800 cursor-pointer">
+                          Details
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -398,27 +371,17 @@ export default function AvailableUnitsPage() {
 
 function StatCard({ title, value, subtext, Icon, iconBg, iconColor }: any) {
   return (
-    <Card className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-      <CardContent className="p-5 flex flex-col justify-between h-full">
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-sm font-extrabold text-[#1D1D1F] leading-tight pr-4">{title}</p>
-          <div className={`p-2 rounded-full ${iconBg} ${iconColor} shrink-0`}>
-            <Icon className="h-5 w-5" />
-          </div>
+    <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 flex flex-col justify-between">
+      <div className="flex justify-between items-start mb-3">
+        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{title}</p>
+        <div className={`p-2 rounded-xl ${iconBg} ${iconColor} border border-emerald-200/50 shrink-0 shadow-2xs`}>
+          <Icon className="h-4 w-4" />
         </div>
-        <div>
-          <h3 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{value}</h3>
-          <p className="text-[11px] text-[#6E6E73] mt-1.5 font-semibold uppercase">{subtext}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CheckCircleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
+      </div>
+      <div>
+        <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
+        <p className="text-[10px] text-slate-500 font-semibold uppercase mt-1">{subtext}</p>
+      </div>
+    </div>
   );
 }

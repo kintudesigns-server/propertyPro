@@ -180,7 +180,7 @@ export default function VendorsPage() {
         <div className="flex flex-col items-end gap-1">
           <Link href="/dashboard/vendors/new">
             <Button
-              className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm border-none"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm border-none"
             >
               <Plus className="h-5 w-5" />
               <span>Add New Vendor</span>
@@ -255,7 +255,7 @@ export default function VendorsPage() {
             <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
               Cancel
             </Button>
-            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-[#007AFF] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm">
+            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl px-8 shadow-sm">
               Update Vendor
             </Button>
           </div>

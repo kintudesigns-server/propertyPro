@@ -316,35 +316,35 @@ export default function MyLeasesPage() {
       )}
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="bg-[#EFF6FF] text-[#007AFF] p-3 rounded-2xl flex items-center justify-center">
-            <FileText className="h-6 w-6" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 font-sans">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+            <FileText className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">My Leases</h1>
-            <p className="text-[#6E6E73] text-sm mt-0.5">View and manage your lease agreements</p>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Leases</h1>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">View and manage your lease agreements</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Grid / List toggle */}
-          <div className="flex items-center bg-white border border-[#E5E5EA] rounded-xl p-1 shadow-sm">
+          <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition-all ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-[#007AFF] text-white shadow-sm"
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7]"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "text-slate-500 hover:bg-white hover:text-slate-900"
               }`}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-lg transition-all ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "list"
-                  ? "bg-[#007AFF] text-white shadow-sm"
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7]"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "text-slate-500 hover:bg-white hover:text-slate-900"
               }`}
             >
               <List className="h-4 w-4" />
@@ -353,39 +353,39 @@ export default function MyLeasesPage() {
           <Button
             onClick={fetchLeases}
             variant="outline"
-            className="bg-white border border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl font-semibold flex items-center gap-2 h-10 px-4 shadow-sm"
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-black text-xs flex items-center gap-2 h-9 px-4 shadow-2xs cursor-pointer"
           >
-            <RefreshCw className="h-4 w-4" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
         </div>
       </div>
 
       {/* ── Pending Lease Alert ── */}
       {pendingLease && (
-        <Card className={`rounded-3xl shadow-xs border overflow-hidden p-6 md:p-8 relative ${
+        <Card className={`rounded-3xl shadow-xs border overflow-hidden p-6 md:p-8 relative font-sans ${
           pendingLeaseUnpaidDepositInvoice
-            ? "bg-red-50/70 border-red-100 text-red-950"
-            : "bg-amber-50/70 border-amber-100 text-amber-950"
+            ? "bg-rose-50/80 border-rose-200 text-rose-950"
+            : "bg-amber-50/80 border-amber-200 text-amber-950"
         }`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full ${
+                <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md ${
                   pendingLeaseUnpaidDepositInvoice
-                    ? "bg-red-100 text-red-700"
-                    : "bg-amber-100 text-amber-700"
+                    ? "bg-rose-100 text-rose-800 border border-rose-200"
+                    : "bg-amber-100 text-amber-800 border border-amber-200"
                 }`}>
                   Action Required
                 </span>
               </div>
               <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
-                <ShieldAlert className={`h-5 w-5 ${pendingLeaseUnpaidDepositInvoice ? 'text-red-500' : 'text-amber-500'}`} />
+                <ShieldAlert className={`h-5 w-5 ${pendingLeaseUnpaidDepositInvoice ? 'text-rose-600' : 'text-amber-600'}`} />
                 {pendingLeaseUnpaidDepositInvoice
                   ? "Pay Security Deposit to Complete Lease"
                   : "Review & Sign Lease Agreement"
                 }
               </h2>
-              <p className={`text-sm font-semibold max-w-2xl ${pendingLeaseUnpaidDepositInvoice ? 'text-red-700' : 'text-amber-700'}`}>
+              <p className={`text-xs font-semibold max-w-2xl leading-relaxed ${pendingLeaseUnpaidDepositInvoice ? 'text-rose-800' : 'text-amber-800'}`}>
                 {pendingLeaseUnpaidDepositInvoice
                   ? `Your lease for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} is approved. Please pay the security deposit of $${Number(pendingLease.securityDeposit).toLocaleString()} to finalize your lease agreement.`
                   : `You have a pending lease contract for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} awaiting your signature.`
@@ -402,9 +402,9 @@ export default function MyLeasesPage() {
                     router.push(`/dashboard/leases/${pendingLease.id}`);
                   }
                 }}
-                className={`w-full sm:w-auto font-bold h-11 px-6 rounded-xl shadow-xs transition-all ${
+                className={`w-full sm:w-auto font-black text-xs h-10 px-6 rounded-xl shadow-xs transition-all border-none cursor-pointer ${
                   pendingLeaseUnpaidDepositInvoice
-                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    ? "bg-rose-600 hover:bg-rose-700 text-white"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
@@ -413,9 +413,9 @@ export default function MyLeasesPage() {
               <Button
                 onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
                 variant="outline"
-                className={`w-full sm:w-auto font-bold h-11 px-6 rounded-xl bg-white border shadow-xs transition-all ${
+                className={`w-full sm:w-auto font-black text-xs h-10 px-6 rounded-xl bg-white border shadow-2xs transition-all cursor-pointer ${
                   pendingLeaseUnpaidDepositInvoice
-                    ? "border-red-200 text-red-900 hover:bg-red-50"
+                    ? "border-rose-200 text-rose-900 hover:bg-rose-50"
                     : "border-amber-200 text-amber-900 hover:bg-amber-50"
                 }`}
               >
@@ -428,34 +428,34 @@ export default function MyLeasesPage() {
 
       {/* ── Pending Renewal Alert ── */}
       {pendingRenewal && (
-        <Card className="bg-purple-50/70 border border-purple-100 rounded-3xl shadow-xs p-6 md:p-8 relative">
+        <Card className="bg-slate-900 text-white border border-slate-800 rounded-3xl shadow-xs p-6 md:p-8 relative font-sans">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="bg-purple-100 text-purple-700 text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full">
-                  Renewal Available
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md shadow-2xs">
+                  RENEWAL AVAILABLE
                 </span>
               </div>
-              <h2 className="text-xl font-black tracking-tight flex items-center gap-2 text-purple-950">
-                <ShieldAlert className="h-5 w-5 text-purple-500" />
+              <h2 className="text-xl font-black tracking-tight flex items-center gap-2 text-white">
+                <ShieldAlert className="h-5 w-5 text-emerald-400" />
                 Lease Renewal Offer
               </h2>
-              <p className="text-sm font-semibold text-purple-700 max-w-2xl">
-                Your lease for Unit {pendingRenewal.unit?.name} at {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal with a proposed rent of <strong className="text-purple-900">${Number(pendingRenewal.monthlyRent).toLocaleString()}/month</strong>.
+              <p className="text-xs font-semibold text-slate-300 max-w-2xl leading-relaxed">
+                Your lease for Unit {pendingRenewal.unit?.name} at {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal with a proposed rent of <strong className="text-emerald-400 font-black">${Number(pendingRenewal.monthlyRent).toLocaleString()}/month</strong>.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
               <Button
                 onClick={() => handleAcceptRenewal(pendingRenewal.id)}
-                className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold h-11 px-6 rounded-xl shadow-xs transition-all"
+                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs h-10 px-6 rounded-xl shadow-xs transition-all border-none cursor-pointer"
               >
-                Accept & Renew
+                Accept &amp; Renew
               </Button>
               <Button
                 onClick={() => setDeclineRenewalLeaseId(pendingRenewal.id)}
                 variant="outline"
-                className="w-full sm:w-auto border-purple-200 text-purple-900 hover:bg-purple-50 bg-white font-bold h-11 px-6 rounded-xl shadow-xs transition-all"
+                className="w-full sm:w-auto border border-white/20 text-white hover:bg-white/10 bg-white/5 font-black text-xs h-10 px-6 rounded-xl shadow-2xs transition-all cursor-pointer"
               >
                 Decline (Move Out)
               </Button>
@@ -465,60 +465,60 @@ export default function MyLeasesPage() {
       )}
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans">
         {/* Total Leases */}
-        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Total Leases</p>
-              <h3 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{leases.length}</h3>
-              <p className="text-[11px] font-semibold text-[#8E8E93]">Registry count</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Leases</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{leases.length}</h3>
+              <p className="text-[11px] font-semibold text-slate-500">Registry count</p>
             </div>
-            <div className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl">
+            <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
               <Home className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Active Leases */}
-        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Active Leases</p>
-              <h3 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{activeCount}</h3>
-              <p className="text-[11px] font-semibold text-emerald-500 font-extrabold">Currently active</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Active Leases</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{activeCount}</h3>
+              <p className="text-[11px] font-black text-emerald-600">Currently active</p>
             </div>
-            <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-200/80 rounded-2xl shadow-2xs">
               <FileText className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Expiring Soon */}
-        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Expiring Soon</p>
-              <h3 className={`text-3xl font-black tracking-tight ${expiringCount > 0 ? "text-rose-600" : "text-[#1D1D1F]"}`}>{expiringCount}</h3>
-              <p className="text-[11px] font-semibold text-rose-500">Within 60 days</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Expiring Soon</p>
+              <h3 className={`text-3xl font-black tracking-tight ${expiringCount > 0 ? "text-rose-600" : "text-slate-900"}`}>{expiringCount}</h3>
+              <p className="text-[11px] font-semibold text-rose-600">Within 60 days</p>
             </div>
-            <div className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl">
+            <div className="p-3 bg-rose-50 text-rose-600 border border-rose-200/80 rounded-2xl shadow-2xs">
               <Calendar className="h-5 w-5" />
             </div>
           </div>
         </Card>
 
         {/* Total Monthly Rent */}
-        <Card className="bg-white border-0 ring-1 ring-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1 transition-all duration-300 hover:shadow-md">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider">Monthly Commitment</p>
-              <h3 className="text-2xl font-black text-[#1D1D1F] tracking-tight">
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Commitment</p>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                 ${totalRent.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </h3>
-              <p className="text-[11px] font-semibold text-[#8E8E93]">Total rent obligation</p>
+              <p className="text-[11px] font-semibold text-slate-500">Total rent obligation</p>
             </div>
-            <div className="p-3.5 bg-slate-100 text-slate-700 rounded-2xl">
+            <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
@@ -526,26 +526,26 @@ export default function MyLeasesPage() {
       </div>
 
       {/* ── Leases Panel (full-width) ── */}
-      <Card className="bg-white border border-[#E5E5EA] rounded-2xl shadow-sm overflow-hidden">
+      <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden font-sans">
         {/* Card header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#F1F5F9]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="bg-[#EFF6FF] text-[#007AFF] p-2 rounded-xl">
+            <div className="bg-slate-900 text-white p-2 rounded-xl shadow-2xs">
               <FileText className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-[#1D1D1F]">Leases</h2>
-              <p className="text-xs text-[#6E6E73]">Manage your property leases and agreements</p>
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">Leases</h2>
+              <p className="text-xs font-semibold text-slate-500">Manage your property leases and agreements</p>
             </div>
           </div>
-          {/* Duplicate view toggle inside card header — matches reference */}
-          <div className="flex items-center bg-slate-100 border border-[#E5E5EA] rounded-xl p-1">
+          {/* Duplicate view toggle inside card header */}
+          <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-[#007AFF] text-white shadow-sm"
-                  : "text-[#6E6E73] hover:bg-white"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "text-slate-500 hover:bg-white hover:text-slate-900"
               }`}
             >
               <LayoutGrid className="h-3.5 w-3.5" />

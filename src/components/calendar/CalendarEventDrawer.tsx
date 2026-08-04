@@ -17,12 +17,10 @@ import {
   ArrowRight,
   DollarSign,
   AlertTriangle,
-  CheckCircle2,
   Mail,
   Phone,
   Video,
   MapPin,
-  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/app/api/calendar/events/route";
@@ -51,7 +49,7 @@ export function CalendarEventDrawer({
       case "PAYMENT":
         return {
           label: "Rent & Payment",
-          headerBg: "bg-emerald-500/10 text-emerald-900 border-emerald-200/80",
+          headerBg: "bg-emerald-50 text-emerald-950 border-b border-emerald-200/80",
           pillBg: "bg-emerald-100 text-emerald-800 border-emerald-300",
           icon: CreditCard,
           primaryActionLabel: userRole === "TENANT" ? "Pay Rent Now" : "View Accounting Ledger",
@@ -60,7 +58,7 @@ export function CalendarEventDrawer({
       case "MAINTENANCE":
         return {
           label: "Repair & Maintenance",
-          headerBg: "bg-amber-500/10 text-amber-900 border-amber-200/80",
+          headerBg: "bg-amber-50 text-amber-950 border-b border-amber-200/80",
           pillBg: "bg-amber-100 text-amber-900 border-amber-300",
           icon: Wrench,
           primaryActionLabel: userRole === "INSPECTOR" ? "Start Repair Diagnosis" : "View Maintenance Request",
@@ -71,7 +69,7 @@ export function CalendarEventDrawer({
       case "INSPECTION":
         return {
           label: event.metadata?.walkthroughType === "PRELIMINARY" ? "Move-In Inspection" : "Move-Out Walkthrough",
-          headerBg: "bg-purple-500/10 text-purple-900 border-purple-200/80",
+          headerBg: "bg-purple-50 text-purple-950 border-b border-purple-200/80",
           pillBg: "bg-purple-100 text-purple-900 border-purple-300",
           icon: ClipboardCheck,
           primaryActionLabel: userRole === "INSPECTOR" ? "Conduct Walkthrough" : "View Inspection Details",
@@ -82,7 +80,7 @@ export function CalendarEventDrawer({
       case "LEASE":
         return {
           label: "Lease Expiration",
-          headerBg: "bg-rose-500/10 text-rose-900 border-rose-200/80",
+          headerBg: "bg-rose-50 text-rose-950 border-b border-rose-200/80",
           pillBg: "bg-rose-100 text-rose-900 border-rose-300",
           icon: FileText,
           primaryActionLabel: userRole === "OWNER" ? "Offer Lease Renewal" : "View Lease Agreement",
@@ -91,8 +89,8 @@ export function CalendarEventDrawer({
       case "TOUR":
         return {
           label: "Prospect Property Tour",
-          headerBg: "bg-sky-500/10 text-sky-900 border-sky-200/80",
-          pillBg: "bg-sky-100 text-sky-900 border-sky-300",
+          headerBg: "bg-blue-50 text-blue-950 border-b border-blue-200/80",
+          pillBg: "bg-blue-100 text-blue-900 border-blue-300",
           icon: Eye,
           primaryActionLabel: "Manage Showing Tours",
           primaryActionHref: "/dashboard/tours",
@@ -100,7 +98,7 @@ export function CalendarEventDrawer({
       default:
         return {
           label: "Scheduled Activity",
-          headerBg: "bg-slate-100 text-slate-900 border-slate-200",
+          headerBg: "bg-slate-50 text-slate-900 border-b border-slate-200",
           pillBg: "bg-slate-200 text-slate-800 border-slate-300",
           icon: CalendarIcon,
           primaryActionLabel: "View Details",
@@ -113,19 +111,19 @@ export function CalendarEventDrawer({
   const CategoryIcon = theme.icon;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-hidden bg-slate-950/50 backdrop-blur-sm flex justify-end transition-all animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-300 font-sans">
+    <div className="fixed inset-0 z-[100] overflow-hidden bg-slate-950/50 backdrop-blur-xs flex justify-end transition-all animate-in fade-in duration-200 font-sans">
+      <div className="w-full max-w-lg sm:max-w-xl bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-300">
         
         {/* ── HEADER ── */}
-        <div className={`p-6 border-b ${theme.headerBg} space-y-4`}>
+        <div className={`p-6 sm:p-7 ${theme.headerBg} space-y-4`}>
           <div className="flex items-center justify-between">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wide border ${theme.pillBg}`}>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider border ${theme.pillBg}`}>
               <CategoryIcon className="h-3.5 w-3.5" />
               {theme.label}
             </span>
             <button
               onClick={onClose}
-              className="h-9 w-9 rounded-full bg-white/80 hover:bg-white text-slate-700 shadow-xs flex items-center justify-center transition-all cursor-pointer"
+              className="h-9 w-9 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-2xs flex items-center justify-center transition-all cursor-pointer border border-slate-200/80"
               title="Close Preview"
             >
               <X className="h-4 w-4" />
@@ -133,8 +131,8 @@ export function CalendarEventDrawer({
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-snug">{event.title}</h2>
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-600 mt-2">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">{event.title}</h2>
+            <div className="flex items-center gap-2 text-xs font-extrabold text-slate-600 mt-2">
               <Clock className="h-3.5 w-3.5 text-slate-500" />
               <span>{format(eventDate, "EEEE, MMMM d, yyyy")}</span>
               <span>&bull;</span>
@@ -144,15 +142,15 @@ export function CalendarEventDrawer({
         </div>
 
         {/* ── CONTENT BODY ── */}
-        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+        <div className="p-6 sm:p-7 space-y-4 flex-1 overflow-y-auto">
           
           {/* Overdue Payment Alert Banner */}
           {event.type === "PAYMENT" && isOverdue && (
-            <div className="p-4 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-3 text-red-900">
-              <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="p-4 bg-rose-50 rounded-2xl border border-rose-200 flex items-start gap-3 text-rose-900 shadow-2xs">
+              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-black uppercase tracking-wider text-red-800">Payment Overdue</p>
-                <p className="text-xs font-medium text-red-700 mt-0.5">
+                <p className="text-xs font-black uppercase tracking-wider text-rose-800">Payment Overdue</p>
+                <p className="text-xs font-semibold text-rose-700 mt-0.5">
                   This payment was due on {format(eventDate, "MMM d, yyyy")}. Please settle immediately to avoid late fee penalties.
                 </p>
               </div>
@@ -161,14 +159,14 @@ export function CalendarEventDrawer({
 
           {/* Lease Expiration Countdown Badge */}
           {event.type === "LEASE" && daysUntilLeaseEnd !== null && (
-            <div className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
+            <div className={`p-4 rounded-2xl border flex items-center justify-between gap-3 shadow-2xs ${
               daysUntilLeaseEnd <= 30
                 ? "bg-rose-50 border-rose-200 text-rose-900"
                 : "bg-slate-50 border-slate-200 text-slate-900"
             }`}>
               <div className="flex items-center gap-2.5">
                 <Clock className="h-5 w-5 text-rose-600" />
-                <span className="text-xs font-bold">Expiration Countdown</span>
+                <span className="text-xs font-extrabold">Expiration Countdown</span>
               </div>
               <span className="px-3 py-1 bg-white rounded-xl border border-rose-200 text-xs font-black text-rose-700 shadow-2xs">
                 {daysUntilLeaseEnd < 0 ? "Expired" : `${daysUntilLeaseEnd} Days Left`}
@@ -178,13 +176,13 @@ export function CalendarEventDrawer({
 
           {/* Property & Unit Card */}
           {event.metadata?.propertyName && (
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center gap-3.5">
-              <div className="h-11 w-11 bg-white rounded-xl border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0 shadow-xs">
-                <Building className="h-5 w-5 text-[#007AFF]" />
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center gap-3.5 shadow-2xs">
+              <div className="h-11 w-11 bg-white rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 shrink-0 shadow-2xs">
+                <Building className="h-5 w-5 text-slate-900" />
               </div>
               <div>
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Property &amp; Unit</p>
-                <p className="text-sm font-bold text-slate-900">
+                <p className="text-sm font-black text-slate-900">
                   {event.metadata.propertyName}
                   {event.metadata.unitNumber ? ` \u2022 Unit ${event.metadata.unitNumber}` : ""}
                 </p>
@@ -194,24 +192,24 @@ export function CalendarEventDrawer({
 
           {/* Tenant Name Card */}
           {event.metadata?.tenantName && (
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center gap-3.5">
-              <div className="h-11 w-11 bg-white rounded-xl border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0 shadow-xs">
-                <User className="h-5 w-5 text-indigo-600" />
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center gap-3.5 shadow-2xs">
+              <div className="h-11 w-11 bg-white rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 shrink-0 shadow-2xs">
+                <User className="h-5 w-5 text-slate-900" />
               </div>
               <div>
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
                   {event.type === "TOUR" ? "Prospect Name" : "Tenant"}
                 </p>
-                <p className="text-sm font-bold text-slate-900">{event.metadata.tenantName}</p>
+                <p className="text-sm font-black text-slate-900">{event.metadata.tenantName}</p>
               </div>
             </div>
           )}
 
           {/* Prospect Contact Details (For TOUR Events - Owner & Admin Scope) */}
           {event.type === "TOUR" && (userRole === "OWNER" || userRole === "SUPERADMIN") && (
-            <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200/80 space-y-3">
+            <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-200 space-y-3 shadow-2xs">
               <p className="text-[10px] font-extrabold text-blue-900 uppercase tracking-widest flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5 text-[#007AFF]" />
+                <Eye className="h-3.5 w-3.5 text-blue-700" />
                 Prospect Contact Information
               </p>
               <div className="space-y-2 text-xs font-semibold text-slate-800">
@@ -220,7 +218,7 @@ export function CalendarEventDrawer({
                     <span className="text-slate-500 flex items-center gap-1.5">
                       <Mail className="h-3.5 w-3.5 text-blue-600" /> Email:
                     </span>
-                    <a href={`mailto:${event.metadata.tenantEmail}`} className="font-bold text-[#007AFF] hover:underline">
+                    <a href={`mailto:${event.metadata.tenantEmail}`} className="font-extrabold text-slate-900 hover:underline">
                       {event.metadata.tenantEmail}
                     </a>
                   </div>
@@ -230,7 +228,7 @@ export function CalendarEventDrawer({
                     <span className="text-slate-500 flex items-center gap-1.5">
                       <Phone className="h-3.5 w-3.5 text-blue-600" /> Phone:
                     </span>
-                    <a href={`tel:${event.metadata.tenantPhone}`} className="font-bold text-[#007AFF] hover:underline">
+                    <a href={`tel:${event.metadata.tenantPhone}`} className="font-extrabold text-slate-900 hover:underline">
                       {event.metadata.tenantPhone}
                     </a>
                   </div>
@@ -251,9 +249,9 @@ export function CalendarEventDrawer({
 
           {/* Amount Card for Payment events */}
           {event.metadata?.amount && (
-            <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3">
+            <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3 shadow-2xs">
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 bg-emerald-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                <div className="h-11 w-11 bg-emerald-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
                   <DollarSign className="h-6 w-6" />
                 </div>
                 <div>
@@ -263,7 +261,7 @@ export function CalendarEventDrawer({
               </div>
 
               {event.metadata?.status && (
-                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black uppercase tracking-wider border border-emerald-300">
+                <span className="px-2.5 py-1 bg-white text-emerald-800 rounded-lg text-xs font-black uppercase tracking-wider border border-emerald-300 shadow-2xs">
                   {event.metadata.status}
                 </span>
               )}
@@ -272,11 +270,11 @@ export function CalendarEventDrawer({
 
           {/* Priority Chip */}
           {event.priority && (
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-600">
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between text-xs font-extrabold text-slate-600 shadow-2xs">
               <span>Priority Status</span>
               <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
-                event.priority === "EMERGENCY" ? "bg-red-50 text-red-700 border-red-200" :
-                event.priority === "HIGH" ? "bg-orange-50 text-orange-700 border-orange-200" :
+                event.priority === "EMERGENCY" ? "bg-rose-50 text-rose-700 border-rose-200" :
+                event.priority === "HIGH" ? "bg-amber-50 text-amber-800 border-amber-200" :
                 "bg-slate-100 text-slate-700 border-slate-200"
               }`}>
                 {event.priority}
@@ -286,9 +284,9 @@ export function CalendarEventDrawer({
         </div>
 
         {/* ── FOOTER ACTIONS ── */}
-        <div className="p-6 bg-slate-50/80 border-t border-slate-200/80 space-y-2.5">
+        <div className="p-6 sm:p-7 bg-slate-50/80 border-t border-slate-200 space-y-2.5">
           <Link href={theme.primaryActionHref} onClick={onClose} className="block">
-            <Button className="w-full h-12 bg-[#1D1D1F] hover:bg-[#007AFF] text-white font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
+            <Button className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer">
               {theme.primaryActionLabel}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -297,7 +295,7 @@ export function CalendarEventDrawer({
           {/* Additional Contact Quick Action for Prospect Tours */}
           {event.type === "TOUR" && event.metadata?.tenantPhone && (
             <a href={`tel:${event.metadata.tenantPhone}`} className="block">
-              <Button type="button" variant="outline" className="w-full h-10 border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs rounded-xl flex items-center justify-center gap-2">
+              <Button type="button" variant="outline" className="w-full h-10 border border-slate-200 text-slate-900 hover:bg-slate-100 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
                 <Phone className="h-3.5 w-3.5 text-emerald-600" />
                 Call Prospect ({event.metadata.tenantPhone})
               </Button>
@@ -308,7 +306,7 @@ export function CalendarEventDrawer({
             type="button"
             variant="ghost"
             onClick={onClose}
-            className="w-full h-10 border border-slate-200/80 text-slate-600 hover:bg-slate-200/70 font-bold text-xs rounded-xl"
+            className="w-full h-10 border border-slate-200 text-slate-700 hover:bg-slate-100 font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer"
           >
             Close Preview
           </Button>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -178,6 +179,11 @@ export default function DashboardPage() {
       return;
     }
 
+    if (role === "INSPECTOR") {
+      router.replace("/dashboard/inspector");
+      return;
+    }
+
     if (isTenant) {
       fetchTenantData();
     } else {
@@ -223,7 +229,7 @@ export default function DashboardPage() {
   if (status === "loading" || (isTenant ? tenantLoading : statsLoading)) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#3B82F6]" />
+        <Loader2 className="h-10 w-10 animate-spin text-slate-400" />
         <p className="text-slate-400 font-extrabold text-sm uppercase tracking-wider">Loading Dashboard...</p>
       </div>
     );
@@ -879,6 +885,14 @@ export default function DashboardPage() {
         statsLoading={statsLoading}
         onRefresh={fetchLandlordStats}
         onViewFinancials={() => router.push("/dashboard/accounting/invoices")}
+      />
+
+      <OnboardingChecklist
+        userId={(session?.user as any)?.id}
+        hasProperty={(stats?.totalProperties || 0) > 0}
+        hasUnit={(stats?.totalUnits || 0) > 0}
+        hasTenant={(stats?.activeTenantsCount || 0) > 0}
+        hasPayment={(stats?.monthlyRevenue || 0) > 0}
       />
 
       {/* Setup Checklist if no properties */}

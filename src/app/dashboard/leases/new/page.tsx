@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Building, User, Calendar, DollarSign, Loader2, Home, Settings, AlertCircle, FileText, CheckCircle2, Mail, Clock, ShieldCheck, ChevronRight } from "lucide-react";
+import { ArrowLeft, Building, Home, Settings, AlertCircle, FileText, Mail, Clock, ShieldCheck, ChevronRight, Calendar, DollarSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -153,7 +153,7 @@ export default function CreateLeasePage() {
         .then((res) => res.json())
         .then((data) => {
           if (data && Array.isArray(data.units)) {
-            setUnits(data.units); // Store all units to resolve names properly
+            setUnits(data.units);
             if (formData.unitId || paramUnitId) {
               const targetId = formData.unitId || paramUnitId;
               const matchedUnit = data.units.find((u: any) => u.id === targetId);
@@ -200,7 +200,7 @@ export default function CreateLeasePage() {
     if (isNaN(start.getTime())) return;
     const end = new Date(start);
     end.setMonth(start.getMonth() + months);
-    end.setDate(end.getDate() - 1); // standard cycle adjustment
+    end.setDate(end.getDate() - 1);
 
     const yyyy = end.getFullYear();
     const mm = String(end.getMonth() + 1).padStart(2, "0");
@@ -293,43 +293,43 @@ export default function CreateLeasePage() {
   const firstPaymentAmount = (proratedInfo?.amount || 0) + securityDepositVal;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
+    <div className="max-w-7xl mx-auto space-y-8 pt-4 pb-20 px-2 sm:px-6 font-sans">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/leases">
-            <Button variant="outline" className="h-11 w-11 p-0 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-slate-200 text-slate-700 bg-white hover:bg-slate-100">
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               Create Lease Agreement
             </h1>
-            <p className="text-[#6E6E73] text-base mt-0.5">Configure billing rules, dates, and tenant onboarding.</p>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">Configure billing rules, dates, and tenant onboarding.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2.5 px-4 py-2 bg-[#EFF6FF] rounded-xl border border-[#BFDBFE] text-[#1E3A8A] font-bold text-sm shadow-xs">
-          <ShieldCheck className="h-4.5 w-4.5 text-[#007AFF]" />
+        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 rounded-xl border border-slate-200 text-slate-800 font-bold text-xs shadow-2xs">
+          <ShieldCheck className="h-4 w-4 text-slate-700" />
           <span>Draft Mode</span>
         </div>
       </div>
 
       {hasLoaded && approvedProperties.length === 0 && (
-        <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-6 bg-amber-50 border border-amber-200 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-3 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+            <div className="p-3 bg-amber-100 text-amber-900 rounded-2xl shrink-0">
               <AlertCircle className="h-6 w-6" />
             </div>
             <div>
               <h3 className="font-extrabold text-amber-950 text-base">Property Approval Required</h3>
-              <p className="text-amber-800 text-sm mt-0.5 font-semibold">
+              <p className="text-amber-800 text-xs mt-0.5 font-semibold leading-relaxed">
                 You do not have any properties approved by administrative review. Leases can only be created for properties that have been approved.
               </p>
             </div>
           </div>
           <Link href="/dashboard/properties">
-            <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-11 shrink-0 shadow-sm border-0">
+            <Button type="button" className="bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-10 shrink-0 border-0 text-xs">
               View Properties
             </Button>
           </Link>
@@ -350,30 +350,30 @@ export default function CreateLeasePage() {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Property & Tenant */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
                 <Building className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Property & Tenant Allocation</h2>
+              <h2 className="text-base font-extrabold text-slate-900">Property & Tenant Allocation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Property <span className="text-[#EF4444]">*</span></Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Property <span className="text-rose-500">*</span></Label>
                   <Select value={selectedProperty} onValueChange={(v) => { setSelectedProperty(v || ""); setFormData({ ...formData, unitId: "" }); setSelectedUnitDetails(null); }} disabled={properties.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs transition-colors pl-10 relative">
-                      <Building className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <SelectTrigger className="w-full h-11 rounded-xl bg-white border-slate-200 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-semibold text-slate-900 shadow-xs transition-colors pl-10 relative">
+                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       <SelectValue placeholder={properties.length === 0 && hasLoaded ? "No properties found" : "Select a property"}>
                         {selectedProperty ? (properties.find(p => p.id === selectedProperty)?.name || selectedProperty) : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-xl p-1">
+                    <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1">
                       {properties.map((p) => {
                         const isApproved = p.approvalStatus === "APPROVED";
                         return (
-                          <SelectItem key={p.id} value={p.id} disabled={!isApproved} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700">
-                            {p.name} {!isApproved ? <span className="text-rose-500 font-semibold ml-1 text-xs">(Unapproved)</span> : ""}
+                          <SelectItem key={p.id} value={p.id} disabled={!isApproved} className="rounded-xl py-2 cursor-pointer font-semibold text-slate-800">
+                            {p.name} {!isApproved ? <span className="text-rose-500 font-bold ml-1 text-xs">(Unapproved)</span> : ""}
                           </SelectItem>
                         );
                       })}
@@ -382,20 +382,20 @@ export default function CreateLeasePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Available Unit <span className="text-[#EF4444]">*</span></Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Available Unit <span className="text-rose-500">*</span></Label>
                   <Select value={formData.unitId} onValueChange={(v) => handleUnitSelect(v || "")} disabled={!selectedProperty || units.length === 0} required>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs transition-colors pl-10 relative">
-                      <Home className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <SelectTrigger className="w-full h-11 rounded-xl bg-white border-slate-200 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-semibold text-slate-900 shadow-xs transition-colors pl-10 relative">
+                      <Home className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       <SelectValue placeholder={!selectedProperty ? "Select property first" : units.length === 0 ? "No units found" : "Select unit"}>
                         {formData.unitId ? (units.find(u => u.id === formData.unitId)?.name || formData.unitId) : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-xl p-1">
+                    <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1">
                       {units.map((u) => {
                         const isAvailable = u.status === "VACANT" || u.status === "AVAILABLE" || u.id === paramUnitId || u.id === formData.unitId;
                         return (
-                          <SelectItem key={u.id} value={u.id} disabled={!isAvailable} className="rounded-lg py-2 cursor-pointer font-medium text-slate-700">
-                            {u.name} <span className="text-[#8E8E93] ml-1">(${u.rentAmount || 0}/mo)</span> {!isAvailable ? <span className="text-rose-500 font-semibold ml-1 text-xs">- Occupied</span> : ""}
+                          <SelectItem key={u.id} value={u.id} disabled={!isAvailable} className="rounded-xl py-2 cursor-pointer font-semibold text-slate-800">
+                            {u.name} <span className="text-slate-500 ml-1">(${u.rentAmount || 0}/mo)</span> {!isAvailable ? <span className="text-rose-500 font-bold ml-1 text-xs">- Occupied</span> : ""}
                           </SelectItem>
                         );
                       })}
@@ -405,65 +405,65 @@ export default function CreateLeasePage() {
               </div>
 
               <div className="space-y-2 pt-2">
-                <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Tenant Email <span className="text-[#EF4444]">*</span></Label>
+                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tenant Email <span className="text-rose-500">*</span></Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
                   <Input
                     type="email"
                     required
                     placeholder="tenant@example.com"
                     value={formData.tenantEmail}
                     onChange={(e) => setFormData({ ...formData, tenantEmail: e.target.value })}
-                    className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
+                    className="pl-11 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                   />
                 </div>
-                <p className="text-xs text-[#6E6E73] font-medium">An invite will be automatically dispatched to this email to sign the digital agreement.</p>
+                <p className="text-xs text-slate-500 font-medium">An invite will be automatically dispatched to this email to sign the digital agreement.</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Lease Dates */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
                 <Calendar className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Lease Duration Rules</h2>
+              <h2 className="text-base font-extrabold text-slate-900">Lease Duration Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Start Date <span className="text-[#EF4444]">*</span></Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Date <span className="text-rose-500">*</span></Label>
                   <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                       type="date"
                       required
                       value={formData.startDate}
                       onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                      className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
+                      className="pl-11 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">End Date <span className="text-[#EF4444]">*</span></Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Date <span className="text-rose-500">*</span></Label>
                     {formData.startDate && (
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => handleQuickDuration(6)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">6m</button>
-                        <button type="button" onClick={() => handleQuickDuration(12)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">1yr</button>
-                        <button type="button" onClick={() => handleQuickDuration(24)} className="text-[10px] font-extrabold text-[#007AFF] hover:underline bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#BFDBFE]">2yr</button>
+                      <div className="flex gap-1.5">
+                        <button type="button" onClick={() => handleQuickDuration(6)} className="text-[10px] font-extrabold text-slate-800 hover:bg-slate-200 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 cursor-pointer">6m</button>
+                        <button type="button" onClick={() => handleQuickDuration(12)} className="text-[10px] font-extrabold text-slate-800 hover:bg-slate-200 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 cursor-pointer">1yr</button>
+                        <button type="button" onClick={() => handleQuickDuration(24)} className="text-[10px] font-extrabold text-slate-800 hover:bg-slate-200 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 cursor-pointer">2yr</button>
                       </div>
                     )}
                   </div>
                   <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                       type="date"
                       required
                       value={formData.endDate}
                       onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                      className="pl-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
+                      className="pl-11 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                     />
                   </div>
                 </div>
@@ -472,19 +472,19 @@ export default function CreateLeasePage() {
           </Card>
 
           {/* Financial Terms */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
                 <DollarSign className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Financial Billing Rules</h2>
+              <h2 className="text-base font-extrabold text-slate-900">Financial Billing Rules</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Monthly Rent <span className="text-[#EF4444]">*</span></Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Monthly Rent <span className="text-rose-500">*</span></Label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</div>
                     <Input
                       type="number"
                       step="0.01"
@@ -492,41 +492,41 @@ export default function CreateLeasePage() {
                       placeholder="0.00"
                       value={formData.monthlyRent}
                       onChange={(e) => setFormData({ ...formData, monthlyRent: e.target.value })}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-black text-[#1D1D1F] shadow-xs"
+                      className="pl-8 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-extrabold text-slate-900 shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Security Deposit</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Security Deposit</Label>
                     {Number(formData.monthlyRent) > 0 && (
                       <div className="flex gap-1.5">
-                        <button type="button" onClick={() => handleQuickDeposit(1)} className="text-[10px] font-extrabold text-[#10B981] hover:underline bg-[#E6F4EA] px-1 py-0.5 rounded border border-[#A3E4D7]">1x</button>
-                        <button type="button" onClick={() => handleQuickDeposit(1.5)} className="text-[10px] font-extrabold text-[#10B981] hover:underline bg-[#E6F4EA] px-1 py-0.5 rounded border border-[#A3E4D7]">1.5x</button>
+                        <button type="button" onClick={() => handleQuickDeposit(1)} className="text-[10px] font-extrabold text-slate-800 hover:bg-slate-200 bg-slate-100 px-1.5 py-0.5 rounded-lg border border-slate-200 cursor-pointer">1x</button>
+                        <button type="button" onClick={() => handleQuickDeposit(1.5)} className="text-[10px] font-extrabold text-slate-800 hover:bg-slate-200 bg-slate-100 px-1.5 py-0.5 rounded-lg border border-slate-200 cursor-pointer">1.5x</button>
                       </div>
                     )}
                   </div>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</div>
                     <Input
                       type="number"
                       step="0.01"
                       placeholder="0.00"
                       value={formData.securityDeposit}
                       onChange={(e) => setFormData({ ...formData, securityDeposit: e.target.value })}
-                      className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-bold text-[#1D1D1F] shadow-xs"
+                      className="pl-8 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-bold text-slate-900 shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Rent Due Day</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rent Due Day</Label>
                   <Select value={formData.rentDueDay} onValueChange={(v) => setFormData({ ...formData, rentDueDay: v || "1" })}>
-                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs">
+                    <SelectTrigger className="w-full h-11 rounded-xl bg-white border-slate-200 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-semibold text-slate-900 shadow-xs">
                       <SelectValue placeholder="Select day" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg max-h-[200px]">
+                    <SelectContent className="rounded-2xl border-slate-200 shadow-lg max-h-[200px]">
                       {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                         <SelectItem key={day} value={day.toString()}>
                           {day}
@@ -539,14 +539,14 @@ export default function CreateLeasePage() {
               </div>
 
               {/* Late Fees */}
-              <div className="pt-6 border-t border-[#F1F5F9] space-y-5">
-                <h3 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
-                  <Clock className="h-4.5 w-4.5 text-amber-500" /> Late Fee Configuration
+              <div className="pt-6 border-t border-slate-100 space-y-5">
+                <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-slate-700" /> Late Fee Configuration
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Grace Period</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Grace Period</Label>
                     <div className="relative">
                       <Input
                         type="number"
@@ -554,35 +554,35 @@ export default function CreateLeasePage() {
                         placeholder="5"
                         value={formData.gracePeriodDays}
                         onChange={(e) => setFormData({ ...formData, gracePeriodDays: e.target.value })}
-                        className="pr-12 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs"
+                        className="pr-12 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">Days</div>
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Days</div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Fee Value</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fee Value</Label>
                     <div className="relative">
-                      {formData.lateFeeType === "FIXED" && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>}
+                      {formData.lateFeeType === "FIXED" && <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</div>}
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
                         value={formData.lateFeeAmount}
                         onChange={(e) => setFormData({ ...formData, lateFeeAmount: e.target.value })}
-                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs`}
+                        className={`${formData.lateFeeType === "FIXED" ? "pl-8" : "pr-8"} h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs`}
                       />
-                      {formData.lateFeeType === "PERCENTAGE" && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-xs">%</div>}
+                      {formData.lateFeeType === "PERCENTAGE" && <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">%</div>}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Late Fee Type</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Late Fee Type</Label>
                     <Select value={formData.lateFeeType} onValueChange={(v) => setFormData({ ...formData, lateFeeType: v || "FIXED" })}>
-                      <SelectTrigger className="w-full h-12 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F] shadow-xs">
+                      <SelectTrigger className="w-full h-11 rounded-xl bg-white border-slate-200 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-semibold text-slate-900 shadow-xs">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
+                      <SelectContent className="rounded-2xl border-slate-200 shadow-lg">
                         <SelectItem value="FIXED">Fixed Amount</SelectItem>
                         <SelectItem value="PERCENTAGE">% of Monthly Rent</SelectItem>
                       </SelectContent>
@@ -594,14 +594,14 @@ export default function CreateLeasePage() {
           </Card>
 
           {/* Early Termination Policy Section */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:border-[#CBD5E1] transition-colors">
-            <div className="bg-[#F2F2F7] px-6 py-4 border-b border-[#E5E5EA] flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
                 <AlertCircle className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-[#1D1D1F] tracking-tight">Termination & Notice Policy</h2>
-                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Define notice periods, penalties and prorated refund rules if tenant breaks lease</p>
+                <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Termination & Notice Policy</h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Define notice periods, penalties and prorated refund rules if tenant breaks lease</p>
               </div>
             </div>
             
@@ -609,23 +609,23 @@ export default function CreateLeasePage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Early Termination Fee</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Early Termination Fee</Label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">$</div>
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</div>
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
                         value={formData.earlyTerminationFee}
                         onChange={(e) => setFormData({ ...formData, earlyTerminationFee: e.target.value })}
-                        className="pl-8 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-red-500 font-semibold text-[#1D1D1F] shadow-xs"
+                        className="pl-8 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                       />
                     </div>
-                    <p className="text-[10px] text-[#6E6E73] font-medium">Penalty tenant pays to break lease early.</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Penalty tenant pays to break lease early.</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide">Move-Out Notice Period</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Move-Out Notice Period</Label>
                     <div className="relative">
                       <Input
                         type="number"
@@ -633,22 +633,22 @@ export default function CreateLeasePage() {
                         placeholder="30"
                         value={formData.moveOutNoticeDays}
                         onChange={(e) => setFormData({ ...formData, moveOutNoticeDays: e.target.value })}
-                        className="pr-16 pl-4 h-12 rounded-xl bg-white border-[#E5E5EA] focus-visible:ring-red-500 font-semibold text-[#1D1D1F] shadow-xs"
+                        className="pr-16 pl-4 h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 font-semibold text-slate-900 shadow-xs"
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] font-bold text-sm">Days</div>
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Days</div>
                     </div>
-                    <p className="text-[10px] text-[#6E6E73] font-medium">Required notice before moving out.</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Required notice before moving out.</p>
                   </div>
 
                   <div className="space-y-3 flex flex-col justify-center pt-2 md:col-span-2">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-bold text-[#475569] uppercase tracking-wide cursor-pointer">Allow Prorated Refund?</Label>
+                      <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider cursor-pointer">Allow Prorated Refund?</Label>
                       <Switch
                         checked={formData.isProratedRefundAllowed}
                         onCheckedChange={(checked) => setFormData({ ...formData, isProratedRefundAllowed: checked })}
                       />
                     </div>
-                    <p className="text-[10px] text-[#6E6E73] font-medium leading-relaxed">
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
                       If turned on, tenant receives a refund for unused days if they move out mid-month. If turned off, prepaid rent is forfeited.
                     </p>
                   </div>
@@ -660,113 +660,122 @@ export default function CreateLeasePage() {
 
         {/* Sidebar Summary & Preview Column */}
         <div className="space-y-8">
-          {/* Summary Panel */}
-          <Card className="bg-gradient-to-br from-[#1D1D1F] to-[#1E293B] border-none shadow-xl rounded-2xl overflow-hidden text-white transition-all duration-300">
-            <CardContent className="p-6">
-              {formData.unitId ? (
-                <div className="space-y-6">
-                  {/* Property & Unit Headings */}
-                  <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                    <div className="h-11 w-11 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                      <Home className="h-5.5 w-5.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Leasing Location</p>
-                      <h3 className="text-base font-black tracking-tight truncate">{selectedUnitDetails?.name || "Selected Unit"}</h3>
-                      <p className="text-xs text-[#94A3B8] truncate">{selectedPropertyDetails?.name || ""}</p>
-                    </div>
+          {/* Summary Panel with Property Image Background Header */}
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden transition-all duration-300">
+            {formData.unitId ? (
+              <div>
+                {/* Property Cover Image Header */}
+                <div className="relative h-44 w-full bg-slate-900 overflow-hidden">
+                  <img
+                    src={selectedPropertyDetails?.coverPhoto || selectedUnitDetails?.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80'}
+                    alt={selectedPropertyDetails?.name || "Property"}
+                    className="w-full h-full object-cover opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                  <div className="absolute bottom-4 left-5 right-5 text-white">
+                    <span className="bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider text-white border border-white/20">
+                      {selectedUnitDetails?.name || "Selected Unit"}
+                    </span>
+                    <h3 className="text-lg font-black tracking-tight text-white mt-1.5 truncate">
+                      {selectedPropertyDetails?.name || "Property"}
+                    </h3>
+                    <p className="text-xs text-slate-300 font-medium truncate">{selectedPropertyDetails?.address || ""}</p>
                   </div>
+                </div>
 
-                  {/* Property Details Grid */}
+                <CardContent className="p-6 space-y-6">
+                  {/* Layout & Sqft Grid */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Layout</p>
-                      <p className="text-sm font-black">{selectedUnitDetails?.rooms || 0} Bed / {selectedUnitDetails?.bathrooms || 0} Bath</p>
+                    <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Layout</p>
+                      <p className="text-xs font-black text-slate-900">{selectedUnitDetails?.rooms || 0} Bed / {selectedUnitDetails?.bathrooms || 0} Bath</p>
                     </div>
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1">Area Size</p>
-                      <p className="text-sm font-black">{selectedUnitDetails?.sqFootage ? `${selectedUnitDetails.sqFootage} sqft` : "N/A"}</p>
+                    <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Area Size</p>
+                      <p className="text-xs font-black text-slate-900">{selectedUnitDetails?.sqFootage ? `${selectedUnitDetails.sqFootage} sqft` : "N/A"}</p>
                     </div>
                   </div>
 
                   {/* Lease Timeline Dates */}
                   {formData.startDate && formData.endDate && (
-                    <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-2">
-                      <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Timeline & Duration</p>
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Timeline & Duration</p>
                       <div className="flex justify-between items-center text-xs">
                         <div>
-                          <p className="font-semibold text-white">{new Date(formData.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
-                          <p className="text-[9px] text-[#94A3B8] uppercase">Move-In</p>
+                          <p className="font-extrabold text-slate-900">{new Date(formData.startDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                          <p className="text-[9px] text-slate-400 uppercase font-semibold">Move-In</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-[#6E6E73]" />
+                        <ChevronRight className="h-4 w-4 text-slate-400" />
                         <div className="text-right">
-                          <p className="font-semibold text-white">{new Date(formData.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
-                          <p className="text-[9px] text-[#94A3B8] uppercase">Move-Out</p>
+                          <p className="font-extrabold text-slate-900">{new Date(formData.endDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                          <p className="text-[9px] text-slate-400 uppercase font-semibold">Move-Out</p>
                         </div>
                       </div>
                       {durationInfo && (
-                        <div className="text-center pt-2 border-t border-white/5">
-                          <p className="text-xs font-extrabold text-[#007AFF]">{durationInfo.months} Months ({durationInfo.days} days)</p>
+                        <div className="text-center pt-2 border-t border-slate-200/80">
+                          <p className="text-xs font-extrabold text-slate-900">{durationInfo.months} Months ({durationInfo.days} days)</p>
                         </div>
                       )}
                     </div>
                   )}
 
                   {/* Move-in Cost Estimation */}
-                  <div className="pt-2 space-y-3">
-                    <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Estimated Move-In Costs</p>
-                    <div className="space-y-2 bg-white/5 p-4 rounded-xl border border-white/5 text-sm">
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estimated Move-In Costs</p>
+                    <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-[#94A3B8] font-semibold">Monthly Rent Rate</span>
-                        <span className="font-bold text-white">${Number(formData.monthlyRent || 0).toFixed(2)}</span>
+                        <span className="text-slate-500 font-semibold">Monthly Rent Rate</span>
+                        <span className="font-bold text-slate-900">${Number(formData.monthlyRent || 0).toFixed(2)}</span>
                       </div>
                       
                       {proratedInfo?.isProrated && (
-                        <div className="flex justify-between text-xs text-[#60A5FA]">
-                          <span className="font-semibold">Prorated First Month ({proratedInfo.daysLived} days of {proratedInfo.monthName})</span>
+                        <div className="flex justify-between text-xs text-slate-700">
+                          <span className="font-semibold">Prorated First Month ({proratedInfo.daysLived} days)</span>
                           <span className="font-bold">${proratedInfo.amount.toFixed(2)}</span>
                         </div>
                       )}
 
                       <div className="flex justify-between">
-                        <span className="text-[#94A3B8] font-semibold">Security Deposit</span>
-                        <span className="font-bold text-white">${securityDepositVal.toFixed(2)}</span>
+                        <span className="text-slate-500 font-semibold">Security Deposit</span>
+                        <span className="font-bold text-slate-900">${securityDepositVal.toFixed(2)}</span>
                       </div>
                       
-                      <div className="border-t border-white/10 pt-2.5 mt-2 flex justify-between items-baseline">
-                        <span className="text-white font-extrabold">Due at Move-In</span>
-                        <span className="text-lg font-black text-green-400">${firstPaymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      <div className="border-t border-slate-200/80 pt-2.5 mt-2 flex justify-between items-baseline">
+                        <span className="text-slate-900 font-extrabold">Due at Move-In</span>
+                        <span className="text-base font-black text-emerald-700">${firstPaymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="py-12 flex flex-col items-center justify-center text-center text-[#94A3B8]">
-                  <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                    <Building className="h-8 w-8 text-white/20" />
+                </CardContent>
+              </div>
+            ) : (
+              <CardContent className="p-8">
+                <div className="py-8 flex flex-col items-center justify-center text-center text-slate-400">
+                  <div className="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-3 border border-slate-200">
+                    <Building className="h-7 w-7 text-slate-400" />
                   </div>
-                  <h3 className="font-bold text-white mb-1">No Unit Selected</h3>
-                  <p className="text-sm font-medium px-4">Select property and unit on the left to preview lease terms and prorated costs.</p>
+                  <h3 className="font-bold text-slate-900 text-sm mb-1">No Unit Selected</h3>
+                  <p className="text-xs font-medium px-4 text-slate-500 leading-relaxed">Select property and unit on the left to preview lease terms and prorated costs with image backdrop.</p>
                 </div>
-              )}
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           {/* Automation settings */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#F1F5F9] bg-[#F2F2F7]/50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#F2F2F7] flex items-center justify-center text-[#6E6E73]">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
                 <Settings className="h-4.5 w-4.5" />
               </div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Invoice Automation</h2>
+              <h2 className="text-base font-extrabold text-slate-900">Invoice Automation</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#007AFF]" /> Auto-Generate Invoices
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <FileText className="h-3.5 w-3.5 text-slate-700" /> Auto-Generate Invoices
                   </h4>
-                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Generate monthly invoices automatically.</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Generate monthly invoices automatically.</p>
                 </div>
                 <Switch
                   checked={formData.autoGenerateInvoices}
@@ -774,12 +783,12 @@ export default function CreateLeasePage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
+              <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
                 <div>
-                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[#10B981]" /> Auto-Email Invoices
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-slate-700" /> Auto-Email Invoices
                   </h4>
-                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Send invoices directly to tenant's email address.</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Send invoices directly to tenant's email address.</p>
                 </div>
                 <Switch
                   checked={formData.autoEmailInvoices}
@@ -787,19 +796,19 @@ export default function CreateLeasePage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-4 border-t border-[#F1F5F9]">
+              <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
                 <div>
-                  <h4 className="font-bold text-[#1D1D1F] text-sm flex items-center gap-2">
-                    <Calendar className="h-4.5 w-4.5 text-orange-500" /> Renewal Notice Window
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-slate-700" /> Renewal Notice Window
                   </h4>
-                  <p className="text-xs text-[#6E6E73] font-medium mt-0.5">Days prior to end date to alert renewal.</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Days prior to end date to alert renewal.</p>
                 </div>
                 <div className="w-36">
                   <Select value={formData.renewalNoticeDays} onValueChange={(v) => setFormData({ ...formData, renewalNoticeDays: v || "7" })}>
-                    <SelectTrigger className="w-full h-10 rounded-xl bg-slate-50 border-[#E5E5EA] focus:bg-white focus:ring-[#007AFF] font-bold text-[#1D1D1F] shadow-xs">
+                    <SelectTrigger className="w-full h-10 rounded-xl bg-white border-slate-200 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-bold text-slate-900 shadow-xs">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-[#E5E5EA] shadow-lg">
+                    <SelectContent className="rounded-2xl border-slate-200 shadow-lg">
                       <SelectItem value="7" disabled={durationInfo ? durationInfo.days <= 7 : false}>1 Week Before</SelectItem>
                       <SelectItem value="15" disabled={durationInfo ? durationInfo.days <= 15 : false}>15 Days Before</SelectItem>
                       <SelectItem value="30" disabled={durationInfo ? durationInfo.days <= 30 : false}>1 Month Before</SelectItem>
@@ -812,12 +821,12 @@ export default function CreateLeasePage() {
 
           {/* Submit Actions */}
           <div className="flex flex-col gap-3 pt-2">
-            <Button type="submit" disabled={loading || approvedProperties.length === 0} className="w-full h-14 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold text-base shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed">
-              {loading && <Loader2 className="h-5 w-5 animate-spin" />}
+            <Button type="submit" disabled={loading || approvedProperties.length === 0} className="w-full h-12 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? "Registering Lease..." : "Create Lease Agreement"}
             </Button>
             <Link href="/dashboard/leases">
-              <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] font-bold hover:bg-[#F2F2F7]">
+              <Button type="button" variant="outline" className="w-full h-11 rounded-xl border-slate-200 text-slate-700 hover:text-slate-900 font-bold bg-white hover:bg-slate-50 text-xs">
                 Cancel
               </Button>
             </Link>

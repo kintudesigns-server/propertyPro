@@ -13,10 +13,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const { id: leaseId } = await params;
-  const { actualMoveOutDate } = await req.json();
 
-  if (!actualMoveOutDate) {
-    return NextResponse.json({ error: "Actual move-out date is required." }, { status: 400 });
+  let bodyActualDate: string | undefined;
+  try {
+    const body = await req.json();
+    bodyActualDate = body?.actualMoveOutDate;
+  } catch {
+    // Empty body is acceptable
   }
 
   try {
@@ -29,16 +32,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Lease not found or access denied" }, { status: 404 });
     }
 
-    if (lease.moveOutStatus !== "MOVE_OUT_REQUESTED") {
-      return NextResponse.json({ error: "Key return can only be confirmed after a move-out notice has been submitted." }, { status: 400 });
+    if (lease.moveOutStatus === "NONE" || lease.status === "TERMINATED") {
+      return NextResponse.json({ error: "No active move-out request found for this lease." }, { status: 400 });
     }
 
-    const moveOutDateObj = new Date(actualMoveOutDate);
+    // Determine actual move-out date
+    const moveOutDateObj = bodyActualDate
+      ? new Date(bodyActualDate)
+      : lease.moveOutDate
+      ? new Date(lease.moveOutDate)
+      : new Date();
+
     const depositReturnDays = lease.depositReturnDays || 21;
 
     // Compute the legal deposit return deadline
     const depositDueBy = new Date(moveOutDateObj);
     depositDueBy.setDate(depositDueBy.getDate() + depositReturnDays);
+
+    // Only update moveOutStatus if it is currently in early phase
+    const shouldUpdateStatus = ["MOVE_OUT_REQUESTED", "INSPECTION_SCHEDULED"].includes(lease.moveOutStatus);
+    const newMoveOutStatus = shouldUpdateStatus ? "KEYS_RETURNED" : lease.moveOutStatus;
 
     const updatedLease = await prisma.lease.update({
       where: { id: leaseId },
@@ -46,19 +59,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         actualMoveOutDate: moveOutDateObj,
         keyReturnConfirmedAt: new Date(),
         depositDueBy,
-        moveOutStatus: "KEYS_RETURNED",
+        moveOutStatus: newMoveOutStatus,
       },
     });
 
     // Notify tenant — the deposit clock has started
-    await notify({
-      userId: lease.tenantId,
-      title: "Key Return Confirmed",
-      message: `Your key return for ${lease.unit?.property?.name} — ${lease.unit?.name} has been confirmed. Your move-out date is recorded as ${moveOutDateObj.toLocaleDateString()}. You can expect your deposit disposition within ${depositReturnDays} days (by ${depositDueBy.toLocaleDateString()}).`,
-      type: "LEASE",
-      priority: "HIGH",
-      relatedEntityId: lease.id,
-    });
+    if (lease.tenantId) {
+      await notify({
+        userId: lease.tenantId,
+        title: "Key Return Confirmed",
+        message: `Your key return for ${lease.unit?.property?.name} — ${lease.unit?.name} has been confirmed. Your move-out date is recorded as ${moveOutDateObj.toLocaleDateString()}. You can expect your deposit disposition within ${depositReturnDays} days (by ${depositDueBy.toLocaleDateString()}).`,
+        type: "LEASE",
+        priority: "HIGH",
+        relatedEntityId: lease.id,
+      });
+    }
 
     return NextResponse.json(updatedLease);
   } catch (error: any) {

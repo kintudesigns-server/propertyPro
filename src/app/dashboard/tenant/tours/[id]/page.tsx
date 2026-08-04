@@ -346,14 +346,14 @@ export default function TenantTourDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           {/* ── CLEAN LIGHT NEON STEPPER (WHITE / LIGHT SLATE THEME) ── */}
-          <div className="space-y-4 bg-slate-50/80 p-6 md:p-7 rounded-[24px] border border-slate-200/80 shadow-2xs relative overflow-hidden">
+          <div className="space-y-4 bg-slate-50/80 p-6 md:p-7 rounded-[24px] border border-slate-200/80 shadow-2xs relative overflow-hidden font-sans">
             
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-[#007AFF]" />
+                <Sparkles className="h-3.5 w-3.5 text-slate-900" />
                 Showing Request Timeline
               </span>
-              <span className="text-xs font-mono font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
+              <span className="text-xs font-mono font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full shadow-2xs">
                 {tour.status === "CANCELLED" ? "Request Terminated" : `${Math.round(progressPercent)}% Completed`}
               </span>
             </div>
@@ -367,18 +367,18 @@ export default function TenantTourDetailPage({ params }: { params: Promise<{ id:
                 className={`h-full rounded-full relative ${
                   tour.status === "CANCELLED"
                     ? "bg-gradient-to-r from-rose-500 to-rose-600 shadow-xs"
-                    : "bg-gradient-to-r from-[#007AFF] via-teal-400 to-emerald-400 shadow-sm"
+                    : "bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_12px_rgba(52,211,153,0.6)]"
                 }`}
               >
                 {/* Glowing Lead Pulse Dot */}
                 {tour.status !== "CANCELLED" && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-white rounded-full shadow-[0_0_8px_#3b82f6] animate-ping opacity-90" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-emerald-200 rounded-full shadow-[0_0_8px_#34d399] animate-ping opacity-90" />
                 )}
               </motion.div>
             </div>
 
             {/* Step Nodes Grid — Light Theme */}
-            <div className="grid grid-cols-4 gap-2 pt-2">
+            <div className="grid grid-cols-4 gap-2 pt-2 font-sans">
               {[
                 { title: "Requested", sub: "Request Sent" },
                 { title: "Owner Review", sub: "Manager Verifying" },
@@ -402,7 +402,7 @@ export default function TenantTourDetailPage({ params }: { params: Promise<{ id:
                         tour.status === "CANCELLED"
                           ? "bg-rose-100 text-rose-600 border border-rose-200"
                           : isCurrent
-                          ? "bg-[#007AFF] text-white ring-4 ring-blue-100 shadow-md scale-110"
+                          ? "bg-slate-900 text-white ring-4 ring-slate-200 shadow-md scale-110"
                           : isPast
                           ? "bg-emerald-500 text-white shadow-xs"
                           : "bg-white text-slate-400 border border-slate-200 shadow-2xs"
@@ -412,7 +412,7 @@ export default function TenantTourDetailPage({ params }: { params: Promise<{ id:
                     </div>
 
                     <div>
-                      <p className={`text-xs font-black tracking-tight ${isCurrent ? "text-[#007AFF]" : isPast ? "text-slate-900" : "text-slate-400"}`}>
+                      <p className={`text-xs font-black tracking-tight ${isCurrent ? "text-slate-900" : isPast ? "text-slate-900" : "text-slate-400"}`}>
                         {step.title}
                       </p>
                       <p className="text-[10px] font-semibold text-slate-400 hidden sm:block">
@@ -577,8 +577,8 @@ export default function TenantTourDetailPage({ params }: { params: Promise<{ id:
             <div className="flex items-center gap-2.5">
               {(tour.status === "CONFIRMED" || tour.status === "COMPLETED") && (
                 <Link href={`/listings?applyUnitId=${tour.unit?.id || ""}`}>
-                  <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-extrabold text-xs rounded-xl h-11 px-6 shadow-xs transition-all flex items-center gap-2">
-                    Apply for Unit <ArrowRight className="h-4 w-4" />
+                  <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl h-11 px-6 shadow-xs border-none cursor-pointer flex items-center gap-2">
+                    Apply for Unit <ArrowRight className="h-4 w-4 text-white" />
                   </Button>
                 </Link>
               )}

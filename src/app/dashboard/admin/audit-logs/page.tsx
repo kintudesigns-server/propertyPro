@@ -207,15 +207,15 @@ export default function AuditLogsPage() {
   const getActionCount = (key: string) => actionCounts[key] || 0;
 
   return (
-    <div className="flex-1 space-y-8 p-8 pt-6">
+    <div className="flex-1 space-y-6 p-6 md:p-8 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            <ShieldAlert className="h-8 w-8 text-rose-600 animate-pulse" />
+          <h1 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
+            <ShieldAlert className="h-6 w-6 text-rose-600 animate-pulse" />
             System Audit Trails
-          </h2>
-          <p className="text-[#6E6E73] text-sm mt-1">
+          </h1>
+          <p className="text-slate-500 text-xs font-semibold mt-0.5">
             Enterprise security compliance, authentication tracking, financial mutations, and system event governance.
           </p>
         </div>
@@ -226,9 +226,9 @@ export default function AuditLogsPage() {
             disabled={exporting || loading}
             variant="outline"
             size="sm"
-            className="h-10 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-bold bg-white"
+            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-black text-xs bg-white shadow-2xs cursor-pointer"
           >
-            <Download className={`h-4 w-4 text-emerald-600 ${exporting ? "animate-bounce" : ""}`} />
+            <Download className={`h-3.5 w-3.5 text-emerald-600 ${exporting ? "animate-bounce" : ""}`} />
             {exporting ? "Exporting..." : "Export CSV"}
           </Button>
 
@@ -236,90 +236,90 @@ export default function AuditLogsPage() {
             onClick={fetchLogs}
             variant="outline"
             size="sm"
-            className="h-10 border-slate-200 text-[#6E6E73] rounded-xl flex items-center gap-2 font-bold bg-white"
+            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-black text-xs bg-white shadow-2xs cursor-pointer"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${loading ? "animate-spin" : ""}`} />
             Refresh Trails
           </Button>
         </div>
       </div>
 
       {/* KPI Metrics Summary Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl">
-          <CardContent className="p-4 flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-sans">
+        <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-extrabold tracking-wider uppercase text-[#8E8E93]">Total Logs Filtered</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{pagination.total}</h3>
+              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Total Logs Filtered</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{pagination.total}</h3>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <Activity className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200/80 flex items-center justify-center font-bold shadow-2xs">
+              <Activity className="h-5 w-5 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-extrabold tracking-wider uppercase text-[#8E8E93]">Failed Logins (24h)</p>
+              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Failed Logins (24h)</p>
               <div className="flex items-center gap-2 mt-1">
-                <h3 className="text-2xl font-black text-slate-900">{stats.failedLogins24h}</h3>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{stats.failedLogins24h}</h3>
                 {stats.failedLogins24h > 0 && (
-                  <Badge className="bg-rose-100 text-rose-700 font-extrabold text-[10px] px-2 py-0.5 rounded-full border-0">
-                    Security Alert
+                  <Badge className="bg-rose-50 text-rose-800 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200 shadow-2xs">
+                    Alert
                   </Badge>
                 )}
               </div>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-              <AlertTriangle className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200/80 flex items-center justify-center font-bold shadow-2xs">
+              <AlertTriangle className="h-5 w-5 text-rose-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-extrabold tracking-wider uppercase text-[#8E8E93]">Today's Activity</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.todayEvents}</h3>
+              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Today's Activity</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.todayEvents}</h3>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center font-bold shadow-2xs">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-extrabold tracking-wider uppercase text-[#8E8E93]">Critical Events</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.criticalEvents}</h3>
+              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Critical Events</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.criticalEvents}</h3>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-              <FileText className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center font-bold shadow-2xs">
+              <FileText className="h-5 w-5 text-amber-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Control and Filter Bar */}
-      <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl">
+      <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl font-sans">
         <CardContent className="p-5 space-y-4">
           {/* Top Row: Search and Filters */}
           <div className="flex flex-wrap gap-3 items-center justify-between">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[260px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search Entity ID, Actor name/email, Action..."
-                className="pl-10 h-10 bg-slate-50 border-slate-200 rounded-xl text-xs font-semibold focus-visible:ring-rose-500/20"
+                className="pl-10 h-9 bg-slate-50 border-slate-200/80 rounded-xl text-xs font-semibold text-slate-900 focus-visible:ring-slate-900/10 shadow-2xs"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -334,14 +334,14 @@ export default function AuditLogsPage() {
                   setEntityType(e.target.value);
                   setPage(1);
                 }}
-                className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 cursor-pointer"
+                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
               >
                 <option value="">All Entity Types ({stats.totalEvents})</option>
-                <option value="AUTH">AUTH (Authentication & Logins)</option>
-                <option value="USER">USER (Account & Roles) ({getCount("USER")})</option>
+                <option value="AUTH">AUTH (Authentication &amp; Logins)</option>
+                <option value="USER">USER (Account &amp; Roles) ({getCount("USER")})</option>
                 <option value="LEASE">LEASE (Lifecycle) ({getCount("LEASE")})</option>
                 <option value="PAYOUT">PAYOUT (Financial Disbursements) ({getCount("PAYOUT")})</option>
-                <option value="INVOICE">INVOICE (Billing & Stripe) ({getCount("INVOICE")})</option>
+                <option value="INVOICE">INVOICE (Billing &amp; Stripe) ({getCount("INVOICE")})</option>
                 <option value="SUBSCRIPTION_GATE">SUBSCRIPTION_GATE (Security Check) ({getCount("SUBSCRIPTION_GATE")})</option>
                 <option value="TOUR">TOUR (Showing Appointments) ({getCount("TOUR")})</option>
                 <option value="PROPERTY">PROPERTY (Real Estate Assets) ({getCount("PROPERTY")})</option>
@@ -354,7 +354,7 @@ export default function AuditLogsPage() {
                   setAction(e.target.value);
                   setPage(1);
                 }}
-                className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 cursor-pointer"
+                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
               >
                 <option value="">All Actions</option>
                 <option value="LOGIN_SUCCESS">Login Success ({getActionCount("LOGIN_SUCCESS")})</option>
@@ -371,7 +371,7 @@ export default function AuditLogsPage() {
               </select>
 
               {/* Date Filters */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 h-10">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 rounded-xl px-3 h-9 shadow-2xs">
                 <Calendar className="h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="date"
@@ -380,9 +380,9 @@ export default function AuditLogsPage() {
                     setStartDate(e.target.value);
                     setPage(1);
                   }}
-                  className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-extrabold text-slate-900 focus:outline-none cursor-pointer"
                 />
-                <span className="text-slate-400 text-xs font-bold">to</span>
+                <span className="text-slate-400 text-xs font-extrabold">to</span>
                 <input
                   type="date"
                   value={endDate}
@@ -390,7 +390,7 @@ export default function AuditLogsPage() {
                     setEndDate(e.target.value);
                     setPage(1);
                   }}
-                  className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-extrabold text-slate-900 focus:outline-none cursor-pointer"
                 />
               </div>
 
@@ -399,7 +399,7 @@ export default function AuditLogsPage() {
                   onClick={handleClearFilters}
                   variant="ghost"
                   size="sm"
-                  className="h-10 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold text-xs rounded-xl flex items-center gap-1"
+                  className="h-9 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-extrabold text-xs rounded-xl flex items-center gap-1 cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                   Clear Filters
@@ -409,21 +409,21 @@ export default function AuditLogsPage() {
           </div>
 
           {/* Bottom Info & Page Size */}
-          <div className="flex items-center justify-between text-xs font-bold text-[#8E8E93] pt-1 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-1 border-t border-slate-100">
             <div>
-              Showing <span className="text-slate-900 font-extrabold">{logs.length}</span> of{" "}
-              <span className="text-slate-900 font-extrabold">{pagination.total}</span> audit records
+              Showing <span className="text-slate-900 font-black">{logs.length}</span> of{" "}
+              <span className="text-slate-900 font-black">{pagination.total}</span> audit records
             </div>
 
             <div className="flex items-center gap-2">
-              <span>Per page:</span>
+              <span className="font-extrabold uppercase text-[10px] text-slate-400 tracking-wider">Per page:</span>
               <select
                 value={limit}
                 onChange={(e) => {
                   setLimit(Number(e.target.value));
                   setPage(1);
                 }}
-                className="bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 px-2 py-1 focus:outline-none"
+                className="bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-black text-slate-900 px-2 py-1 focus:outline-none cursor-pointer shadow-2xs"
               >
                 <option value={15}>15</option>
                 <option value={25}>25</option>
@@ -436,7 +436,7 @@ export default function AuditLogsPage() {
       </Card>
 
       {/* Main Logs Table */}
-      <Card className="border border-slate-100 shadow-xs bg-white rounded-2xl overflow-hidden">
+      <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl overflow-hidden font-sans">
         <CardContent className="p-0">
           {loading ? (
             <div className="py-24 text-center text-[#8E8E93] font-medium flex flex-col items-center justify-center gap-3">

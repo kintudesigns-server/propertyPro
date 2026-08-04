@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertTriangle, Search, Filter, Clock, Flame, UserX, ArrowLeft, MoreHorizontal, Eye, Edit, UserPlus, XCircle } from "lucide-react";
+import { AlertTriangle, Search, Filter, Clock, Flame, UserX, ArrowLeft, MoreHorizontal, Eye, Edit, UserPlus, XCircle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -97,13 +97,38 @@ export default function EmergencyMaintenancePage() {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case "SUBMITTED": return "bg-red-100 text-red-700";
-      case "ASSIGNED": return "bg-orange-100 text-orange-700";
-      case "RESOLVED": return "bg-green-100 text-green-700";
-      case "CLOSED": return "bg-gray-100 text-gray-700";
-      default: return "bg-gray-100 text-gray-700";
+      case "SUBMITTED": 
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+            Submitted
+          </span>
+        );
+      case "ASSIGNED": 
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+            Assigned
+          </span>
+        );
+      case "RESOLVED": 
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+            Resolved
+          </span>
+        );
+      case "CLOSED": 
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-slate-100 text-slate-500 border border-slate-200 shadow-2xs">
+            Closed
+          </span>
+        );
+      default: 
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs">
+            {status}
+          </span>
+        );
     }
   };
 
@@ -122,11 +147,11 @@ export default function EmergencyMaintenancePage() {
   };
 
   const getElapsedColor = (dateString: string, status: string) => {
-    if (status === "RESOLVED" || status === "CLOSED") return "text-[#6E6E73]";
+    if (status === "RESOLVED" || status === "CLOSED") return "text-slate-400";
     const hrs = differenceInHours(new Date(), new Date(dateString));
-    if (hrs > 24) return "text-red-600 font-black";
-    if (hrs > 4) return "text-orange-600 font-bold";
-    return "text-yellow-600 font-bold";
+    if (hrs > 24) return "text-rose-600 font-extrabold";
+    if (hrs > 4) return "text-amber-600 font-bold";
+    return "text-slate-700 font-bold";
   };
 
   const totalEmergencies = requests.length;
@@ -135,192 +160,186 @@ export default function EmergencyMaintenancePage() {
   const unassigned = requests.filter(r => r.status === "SUBMITTED").length;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-20">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/maintenance">
-          <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-[28px] font-black text-red-600 tracking-tight flex items-center gap-2">
-            <AlertTriangle className="h-7 w-7" /> Emergency Response
-          </h1>
-          <p className="text-[#6E6E73] text-sm font-medium mt-0.5">High priority and emergency maintenance tickets requiring immediate action.</p>
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/maintenance">
+            <Button variant="outline" className="h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs cursor-pointer">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-rose-700 tracking-tight flex items-center gap-2">
+              <AlertTriangle className="h-6 w-6 text-rose-600" /> Emergency Response
+            </h1>
+            <p className="text-xs text-slate-500 font-semibold mt-0.5">High priority and emergency maintenance tickets requiring immediate action.</p>
+          </div>
         </div>
       </div>
 
-      {/* Metric Cards - Red Themed */}
+      {/* Metric Cards - Emergency Themed */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 border-none shadow-md rounded-2xl overflow-hidden text-white">
+        <Card className="bg-rose-600 text-white shadow-xs rounded-3xl border-none overflow-hidden">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm">
+            <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-xs">
               <AlertTriangle className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-red-100 uppercase tracking-wide">Total Emergencies</p>
-              <h3 className="text-2xl font-black">{totalEmergencies}</h3>
+              <p className="text-[10px] font-black uppercase tracking-wider text-rose-100">Total Emergencies</p>
+              <h3 className="text-2xl font-black text-white mt-0.5">{totalEmergencies}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-red-200 shadow-sm rounded-2xl overflow-hidden">
+
+        <Card className="bg-white border border-rose-200/80 shadow-xs rounded-3xl overflow-hidden">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-              <Flame className="h-6 w-6 text-red-600" />
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+              <Flame className="h-6 w-6 text-rose-600" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">Critical (Active)</p>
-              <h3 className="text-2xl font-black text-red-600">{critical}</h3>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Critical (Active)</p>
+              <h3 className="text-2xl font-black text-rose-600 mt-0.5">{critical}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-orange-200 shadow-sm rounded-2xl overflow-hidden">
+
+        <Card className="bg-white border border-amber-200/80 shadow-xs rounded-3xl overflow-hidden">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
-              <Clock className="h-6 w-6 text-orange-600" />
+            <div className="h-12 w-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+              <Clock className="h-6 w-6 text-amber-600" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">In Progress</p>
-              <h3 className="text-2xl font-black text-[#1D1D1F]">{active}</h3>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">In Progress</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-0.5">{active}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-red-200 shadow-sm rounded-2xl overflow-hidden relative overflow-visible">
-          {unassigned > 0 && (
-            <span className="absolute -top-2 -right-2 flex h-5 w-5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-[10px] font-bold text-white items-center justify-center">{unassigned}</span>
-            </span>
-          )}
+
+        <Card className="bg-white border border-rose-200/80 shadow-xs rounded-3xl overflow-hidden relative">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-              <UserX className="h-6 w-6 text-red-500" />
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+              <UserX className="h-6 w-6 text-rose-600" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-[#6E6E73] uppercase tracking-wide">Unassigned</p>
-              <h3 className="text-2xl font-black text-[#1D1D1F]">{unassigned}</h3>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Unassigned</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-0.5">{unassigned}</h3>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content Area */}
-      <Card className="bg-white border-red-200 shadow-sm rounded-[24px] overflow-hidden ring-1 ring-red-100">
-        <div className="p-4 border-b border-red-100 bg-red-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input 
               placeholder="Search emergency tickets..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-11 rounded-xl bg-white border-red-200 focus-visible:ring-red-400 font-medium text-sm shadow-sm"
+              className="pl-10 h-10 rounded-xl bg-white border-slate-200 text-xs font-semibold shadow-xs"
             />
           </div>
-          <div className="flex items-center gap-3">
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-              <SelectTrigger className="h-11 rounded-xl bg-white border-red-200 font-semibold text-[#1D1D1F] min-w-[140px] shadow-sm focus:ring-red-400 w-full">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-red-200">
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="SUBMITTED">Submitted</SelectItem>
-                <SelectItem value="ASSIGNED">Assigned</SelectItem>
-                <SelectItem value="RESOLVED">Resolved</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="h-11 rounded-xl border-red-200 text-red-600 hover:text-red-700 hover:bg-red-50 font-semibold px-4 shadow-sm flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              More Filters
-            </Button>
+          <div className="flex items-center gap-2">
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="SUBMITTED">Submitted</option>
+              <option value="ASSIGNED">Assigned</option>
+              <option value="RESOLVED">Resolved</option>
+            </select>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-red-50 text-red-800 text-[12px] font-bold uppercase tracking-wider border-b border-red-100">
-              <tr>
-                <th className="px-6 py-4">Emergency Request</th>
-                <th className="px-6 py-4">Property / Unit</th>
-                <th className="px-6 py-4">Tenant</th>
-                <th className="px-6 py-4">Elapsed Time</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Assigned To</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+          <table className="w-full text-left text-xs border-collapse whitespace-nowrap">
+            <thead>
+              <tr className="border-b border-rose-100 bg-rose-50/50 text-rose-800 text-[10px] font-extrabold uppercase tracking-wider">
+                <th className="px-6 py-3.5">Emergency Request</th>
+                <th className="px-6 py-3.5">Property / Unit</th>
+                <th className="px-6 py-3.5">Tenant</th>
+                <th className="px-6 py-3.5">Elapsed Time</th>
+                <th className="px-6 py-3.5">Status</th>
+                <th className="px-6 py-3.5">Assigned To</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-red-50">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-12 text-center text-[#6E6E73] font-medium">Loading emergency requests...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400 font-extrabold text-xs">Loading emergency requests...</td></tr>
               ) : filteredRequests.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-12 text-center text-green-600 font-bold">🎉 No emergency maintenance requests found!</td></tr>
+                <tr><td colSpan={7} className="px-6 py-16 text-center text-emerald-600 font-extrabold text-sm">🎉 No emergency maintenance requests found!</td></tr>
               ) : (
                 filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-red-50/50 transition-colors group">
-                    <td className="px-6 py-4">
+                  <tr key={req.id} className="hover:bg-rose-50/30 transition-colors group border-b border-slate-100">
+                    <td className="px-6 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                          <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <div className="h-9 w-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0">
+                          <AlertTriangle className="h-4 w-4 text-rose-600" />
                         </div>
                         <div>
-                          <p className="font-bold text-[#1D1D1F]">{req.title}</p>
-                          <p className="text-xs text-[#6E6E73] font-medium">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
+                          <p className="font-extrabold text-slate-900 text-xs">{req.title}</p>
+                          <p className="text-[11px] text-slate-500 font-semibold">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-[#1D1D1F]">{req.unit.property.name}</p>
-                      <p className="text-xs text-[#6E6E73] font-medium">Unit: {req.unit.name}</p>
+                    <td className="px-6 py-3.5">
+                      <p className="font-extrabold text-slate-900 text-xs">{req.unit.property.name}</p>
+                      <p className="text-[11px] text-slate-500 font-semibold">Unit: {req.unit.name}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-[#1D1D1F]">{req.tenant.name}</p>
-                      <p className="text-xs text-red-600 font-bold">{req.tenant.phone || req.tenant.email}</p>
+                    <td className="px-6 py-3.5">
+                      <p className="font-extrabold text-slate-900 text-xs">{req.tenant.name}</p>
+                      <p className="text-[11px] text-rose-600 font-bold">{req.tenant.phone || req.tenant.email}</p>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3.5">
                       <div className="flex items-center gap-1.5">
-                        <Clock className={`h-4 w-4 ${getElapsedColor(req.createdAt, req.status)}`} />
-                        <span className={`text-sm ${getElapsedColor(req.createdAt, req.status)}`}>
+                        <Clock className={`h-3.5 w-3.5 ${getElapsedColor(req.createdAt, req.status)}`} />
+                        <span className={`text-xs ${getElapsedColor(req.createdAt, req.status)}`}>
                           {req.status === "RESOLVED" || req.status === "CLOSED" ? "Resolved" : calculateElapsed(req.createdAt)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(req.status)}`}>
-                        {req.status}
-                      </span>
+                    <td className="px-6 py-3.5">
+                      {getStatusBadge(req.status)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3.5">
                       {req.inspector ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold text-red-700">
+                          <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-800">
                             {req.inspector.name?.charAt(0)}
                           </div>
-                          <span className="font-semibold text-[#1D1D1F]">{req.inspector.name}</span>
+                          <span className="font-extrabold text-slate-900 text-xs">{req.inspector.name}</span>
                         </div>
                       ) : (
-                        <span className="text-red-500 font-bold text-xs">Action Required</span>
+                        <span className="text-rose-600 font-black text-xs uppercase tracking-wider">Action Required</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-3.5 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-[#6E6E73] hover:text-red-600 hover:bg-red-100 rounded-lg outline-none focus:ring-2 focus:ring-red-400">
+                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200/80 outline-none cursor-pointer">
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-white rounded-xl shadow-lg border-red-200 p-1">
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-red-50">
-                            <Eye className="h-4 w-4 text-[#6E6E73]" />
+                        <DropdownMenuContent align="end" className="w-48 bg-white rounded-2xl shadow-xl border-slate-200 p-1.5">
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer font-bold text-xs text-slate-900 py-2 rounded-xl">
+                            <Eye className="h-3.5 w-3.5 mr-2 text-slate-500" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-[#1D1D1F] p-2 rounded-lg hover:bg-red-50">
-                            <Edit className="h-4 w-4 text-[#6E6E73]" />
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer font-bold text-xs text-slate-900 py-2 rounded-xl">
+                            <Edit className="h-3.5 w-3.5 mr-2 text-slate-500" />
                             Edit Request
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50">
-                            <UserPlus className="h-4 w-4" />
+                          <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer font-bold text-xs text-rose-600 py-2 rounded-xl">
+                            <UserPlus className="h-3.5 w-3.5 mr-2" />
                             Assign Inspector
                           </DropdownMenuItem>
-                          <div className="h-px bg-red-100 my-1" />
-                          <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer flex items-center gap-2 text-sm font-medium text-red-600 p-2 rounded-lg hover:bg-red-50 focus:bg-red-50 focus:text-red-700">
-                            <XCircle className="h-4 w-4" />
+                          <div className="h-px bg-slate-100 my-1" />
+                          <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer font-bold text-xs text-rose-600 py-2 rounded-xl">
+                            <XCircle className="h-3.5 w-3.5 mr-2" />
                             Cancel Request
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -336,30 +355,30 @@ export default function EmergencyMaintenancePage() {
 
       {/* Assign Modal */}
       {assignModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-red-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-[#1D1D1F] mb-1">Assign Inspector</h2>
-              <p className="text-sm font-medium text-[#6E6E73] mb-6">Select a team member to handle this emergency.</p>
+              <h2 className="text-base font-extrabold text-slate-900 mb-1">Assign Inspector</h2>
+              <p className="text-xs font-medium text-slate-500 mb-6">Select a team member to handle this emergency.</p>
               
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#1D1D1F] uppercase tracking-wide">Inspector</label>
-                <Select value={selectedInspectorId} onValueChange={(v) => setSelectedInspectorId(v || "")}>
-                  <SelectTrigger className="w-full h-12 bg-white border-red-200 rounded-xl focus:ring-red-500 font-medium text-[#1D1D1F] shadow-sm">
-                    <SelectValue placeholder="Select an inspector" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-red-200">
-                    <SelectItem value="none">Leave unassigned</SelectItem>
-                    {inspectors.map((ins) => (
-                      <SelectItem key={ins.id} value={ins.id}>{ins.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inspector</label>
+                <select
+                  value={selectedInspectorId}
+                  onChange={(e) => setSelectedInspectorId(e.target.value)}
+                  className="w-full h-11 bg-white border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-xs cursor-pointer"
+                >
+                  <option value="">Select an inspector</option>
+                  <option value="none">Leave unassigned</option>
+                  {inspectors.map((ins) => (
+                    <option key={ins.id} value={ins.id}>{ins.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
-            <div className="p-4 bg-red-50/50 border-t border-red-100 flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-semibold text-[#6E6E73] hover:text-[#1D1D1F]">Cancel</Button>
-              <Button onClick={handleAssignSubmit} className="rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm">Confirm Assignment</Button>
+            <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 h-9 px-4">Cancel</Button>
+              <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white h-9 px-5 shadow-xs">Confirm Assignment</Button>
             </div>
           </div>
         </div>

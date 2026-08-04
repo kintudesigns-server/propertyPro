@@ -66,10 +66,10 @@ export async function GET(req: NextRequest) {
           where: whereClause,
           include: {
             sender: {
-              select: { id: true, name: true, email: true, role: true }
+              select: { id: true, name: true, email: true, role: true, avatar: true }
             },
             receiver: {
-              select: { id: true, name: true, email: true, role: true }
+              select: { id: true, name: true, email: true, role: true, avatar: true }
             }
           },
           orderBy: { createdAt: "asc" },
@@ -94,10 +94,10 @@ export async function GET(req: NextRequest) {
       where: whereClause,
       include: {
         sender: {
-          select: { id: true, name: true, email: true, role: true }
+          select: { id: true, name: true, email: true, role: true, avatar: true }
         },
         receiver: {
-          select: { id: true, name: true, email: true, role: true }
+          select: { id: true, name: true, email: true, role: true, avatar: true }
         }
       },
       orderBy: { createdAt: "asc" }

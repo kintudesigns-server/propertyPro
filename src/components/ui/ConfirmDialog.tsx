@@ -1,6 +1,14 @@
 "use client";
+
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {
@@ -9,8 +17,11 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
-  confirmVariant?: "destructive" | "default";
-  onConfirm: () => void | Promise<void>;
+  cancelLabel?: string;
+  variant?: "destructive" | "default" | string;
+  confirmVariant?: "destructive" | "default" | string;
+  onConfirm: () => void;
+  loading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -19,42 +30,45 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = "Confirm",
-  confirmVariant = "destructive",
-  onConfirm
+  cancelLabel = "Cancel",
+  variant,
+  confirmVariant,
+  onConfirm,
+  loading = false,
 }: ConfirmDialogProps) {
+  const activeVariant = confirmVariant || variant || "destructive";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white text-slate-800 rounded-3xl max-w-sm p-6 border-0">
+      <DialogContent className="sm:max-w-[400px] rounded-2xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black text-slate-900">{title}</DialogTitle>
-          <DialogDescription className="text-sm font-semibold text-[#6E6E73] mt-1 leading-relaxed">
+          <DialogTitle className="text-lg font-bold text-slate-900">{title}</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-2">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex gap-3 mt-5">
+        <DialogFooter className="flex gap-2 sm:gap-0 mt-4">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 border border-slate-200 hover:bg-[#F5F5F7] rounded-xl h-11 text-xs font-bold text-[#6E6E73]"
+            className="rounded-xl font-bold border-slate-200"
           >
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             type="button"
-            onClick={async () => {
-              await onConfirm();
-              onOpenChange(false);
-            }}
-            className={`flex-1 rounded-xl h-11 text-xs font-bold text-white shadow-sm transition-colors ${
-              confirmVariant === "destructive"
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            disabled={loading}
+            onClick={onConfirm}
+            className={
+              activeVariant === "destructive"
+                ? "bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl"
+                : "bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl"
+            }
           >
-            {confirmLabel}
+            {loading ? "Processing..." : confirmLabel}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

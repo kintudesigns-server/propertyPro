@@ -42,9 +42,9 @@ const ROLES = [
     title: "Tenant / Resident",
     subtitle: "Resident portal, digital lease & online rent payments",
     icon: User,
-    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
-    activeBorder: "border-blue-600 ring-2 ring-blue-600/15 bg-blue-50/20",
-    iconBg: "bg-blue-100 text-blue-600",
+    badgeColor: "bg-slate-100 text-slate-700 border-slate-200",
+    activeBorder: "border-2 border-slate-900 shadow-xs bg-slate-50/50",
+    iconBg: "bg-blue-50 text-blue-600 border border-blue-200/80 shadow-2xs",
   },
   {
     id: "OWNER",
@@ -52,8 +52,8 @@ const ROLES = [
     subtitle: "Landlord dashboard, listing management & payout ledgers",
     icon: Building,
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    activeBorder: "border-emerald-600 ring-2 ring-emerald-600/15 bg-emerald-50/20",
-    iconBg: "bg-emerald-100 text-emerald-600",
+    activeBorder: "border-2 border-slate-900 shadow-xs bg-slate-50/50",
+    iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-200/80 shadow-2xs",
   },
   {
     id: "INSPECTOR",
@@ -61,8 +61,8 @@ const ROLES = [
     subtitle: "Walkthrough inspections, itemized damages & sign-offs",
     icon: Wrench,
     badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
-    activeBorder: "border-purple-600 ring-2 ring-purple-600/15 bg-purple-50/20",
-    iconBg: "bg-purple-100 text-purple-600",
+    activeBorder: "border-2 border-slate-900 shadow-xs bg-slate-50/50",
+    iconBg: "bg-purple-50 text-purple-600 border border-purple-200/80 shadow-2xs",
   },
   {
     id: "SUPERADMIN",
@@ -70,8 +70,8 @@ const ROLES = [
     subtitle: "Unrestricted root access, platform settings & audit logs",
     icon: ShieldAlert,
     badgeColor: "bg-rose-50 text-rose-700 border-rose-200 font-extrabold",
-    activeBorder: "border-rose-600 ring-2 ring-rose-600/15 bg-rose-50/20",
-    iconBg: "bg-rose-100 text-rose-600",
+    activeBorder: "border-2 border-slate-900 shadow-xs bg-slate-50/50",
+    iconBg: "bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs",
   }
 ];
 
@@ -313,64 +313,64 @@ export default function AddNewUserPage() {
   const selectedRoleObj = ROLES.find(r => r.id === formData.role);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pt-4 pb-28 px-4 sm:px-8">
+    <div className="max-w-6xl mx-auto space-y-6 pt-4 pb-28 px-4 sm:px-8 font-sans">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-[#E5E5EA] shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs font-sans">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <Link 
               href="/dashboard/admin/users" 
-              className="text-[#007AFF] hover:text-[#0056B3] transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
+              className="text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-1.5 text-xs font-black uppercase tracking-wider"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Users Directory
             </Link>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1D1D1F] tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             Add New User Account
           </h1>
-          <p className="text-[#6E6E73] text-sm mt-0.5 font-medium">
-            Register a new platform member and configure their account role & access permissions.
+          <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-semibold">
+            Register a new platform member and configure their account role &amp; access permissions.
           </p>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
+        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 font-sans">
           <Button 
             variant="outline" 
-            className="border-[#E5E5EA] text-[#1D1D1F] font-bold h-11 px-5 rounded-xl hover:bg-[#F5F5F7]"
+            className="border-slate-200 text-slate-900 font-black text-xs h-9 px-4 rounded-xl hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
             onClick={() => router.push("/dashboard/admin/users")}
           >
             Cancel
           </Button>
           <Button 
-            className="bg-[#1D1D1F] hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 h-11 px-7 shadow-sm transition-all"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 h-9 px-5 shadow-xs transition-all cursor-pointer border-none"
             onClick={handleSubmit}
             disabled={loading || uploadingAvatar || emailStatus === "TAKEN"}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />} 
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} 
             Create Account
           </Button>
         </div>
       </div>
 
       {/* Main Grid: Form Left (2 cols), Sidebar Right (1 col) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 font-sans">
         
         {/* LEFT COLUMN: Main Form Sections */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6">
           
           {/* Section 1: Role Selection Cards */}
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-extrabold text-[#1D1D1F] flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-[#007AFF]" /> 1. Account Role & Access Level
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-slate-700" /> 1. Account Role &amp; Access Level
                 </h3>
-                <p className="text-xs text-[#6E6E73] font-medium mt-0.5">
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">
                   Select the system role to assign default permissions and feature access.
                 </p>
               </div>
-              <span className="text-xs font-bold text-[#007AFF] bg-[#007AFF]/10 px-2.5 py-1 rounded-full">
+              <span className="text-[9px] font-black text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                 Required *
               </span>
             </div>
@@ -383,24 +383,24 @@ export default function AddNewUserPage() {
                   <div
                     key={r.id}
                     onClick={() => setFormData(prev => ({ ...prev, role: r.id }))}
-                    className={`p-4 rounded-2xl border bg-white cursor-pointer transition-all relative flex flex-col justify-between ${
-                      isSelected ? r.activeBorder : "border-[#E5E5EA] hover:border-slate-300 hover:shadow-xs"
+                    className={`p-5 rounded-3xl border bg-white cursor-pointer transition-all relative flex flex-col justify-between ${
+                      isSelected ? r.activeBorder : "border-slate-200 hover:border-slate-400 hover:shadow-md"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${r.iconBg} shrink-0`}>
-                          <IconComp className="h-5 w-5" />
+                        <div className={`p-2.5 rounded-2xl ${r.iconBg} shrink-0`}>
+                          <IconComp className="h-4 w-4" />
                         </div>
                         <div>
-                          <h4 className="font-extrabold text-[#1D1D1F] text-sm">
+                          <h4 className="font-black text-slate-900 text-sm">
                             {r.title}
                           </h4>
                         </div>
                       </div>
                       
                       {isSelected ? (
-                        <span className="h-5 w-5 rounded-full bg-[#007AFF] text-white flex items-center justify-center shrink-0">
+                        <span className="h-5 w-5 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
                           <Check className="h-3 w-3 stroke-[3]" />
                         </span>
                       ) : (
@@ -408,7 +408,7 @@ export default function AddNewUserPage() {
                       )}
                     </div>
 
-                    <p className="text-xs text-[#6E6E73] font-medium mt-3 leading-relaxed">
+                    <p className="text-xs text-slate-500 font-semibold mt-3 leading-relaxed">
                       {r.subtitle}
                     </p>
                   </div>
@@ -418,13 +418,13 @@ export default function AddNewUserPage() {
 
             {/* SUPERADMIN WARNING BANNER */}
             {formData.role === "SUPERADMIN" && (
-              <div className="bg-rose-50/80 border border-rose-200 p-4 rounded-2xl flex items-start gap-3 animate-in fade-in duration-200">
+              <div className="bg-rose-50/80 border border-rose-200 p-4 rounded-2xl flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs font-sans">
                 <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-black text-rose-950 uppercase tracking-wider">
+                  <h4 className="text-[10px] font-black text-rose-950 uppercase tracking-wider">
                     High Privilege Administrator Role
                   </h4>
-                  <p className="text-xs font-medium text-rose-700 mt-0.5 leading-relaxed">
+                  <p className="text-xs font-semibold text-rose-700 mt-0.5 leading-relaxed">
                     Assigning <strong>SuperAdmin</strong> role grants full root permissions across PropertyPro. This user will have unrestricted access to manage users, override ledgers, and modify platform settings.
                   </p>
                 </div>
@@ -433,62 +433,62 @@ export default function AddNewUserPage() {
           </div>
 
           {/* Section 2: Personal Details */}
-          <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-3">
-                <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
-                  <User className="h-4 w-4 text-[#007AFF]" /> 2. Personal Information
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <User className="h-4 w-4 text-slate-700" /> 2. Personal Information
                 </h3>
-                <span className="text-xs text-[#6E6E73] font-medium">Step 2 of 4</span>
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Step 2 of 4</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 
                 {/* First Name */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-[#1D1D1F]">First Name *</Label>
+                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">First Name *</Label>
                   <Input 
                     name="firstName"
                     placeholder="e.g. Sarah"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="bg-white border-[#E5E5EA] focus-visible:ring-2 focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF] rounded-xl h-11 text-xs font-semibold text-[#1D1D1F]"
+                    className="bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-slate-900/10 focus-visible:border-slate-900 rounded-xl h-9 text-xs font-semibold text-slate-900 shadow-2xs"
                   />
                 </div>
 
                 {/* Last Name */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-[#1D1D1F]">Last Name</Label>
+                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Last Name</Label>
                   <Input 
                     name="lastName"
                     placeholder="e.g. Jenkins"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="bg-white border-[#E5E5EA] focus-visible:ring-2 focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF] rounded-xl h-11 text-xs font-semibold text-[#1D1D1F]"
+                    className="bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-slate-900/10 focus-visible:border-slate-900 rounded-xl h-9 text-xs font-semibold text-slate-900 shadow-2xs"
                   />
                 </div>
 
                 {/* Email Address with Real-time Check */}
                 <div className="space-y-1.5 sm:col-span-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs font-bold text-[#1D1D1F]">Email Address *</Label>
+                    <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Email Address *</Label>
                     {checkingEmail && (
-                      <span className="text-[11px] text-[#007AFF] font-bold flex items-center gap-1">
+                      <span className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wider flex items-center gap-1">
                         <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
                       </span>
                     )}
                     {!checkingEmail && emailStatus === "AVAILABLE" && (
-                      <span className="text-[11px] text-emerald-600 font-extrabold flex items-center gap-1">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Email available
+                      <span className="text-[10px] text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Email available
                       </span>
                     )}
                     {!checkingEmail && emailStatus === "TAKEN" && (
-                      <span className="text-[11px] text-rose-600 font-extrabold flex items-center gap-1">
+                      <span className="text-[10px] text-rose-600 font-extrabold uppercase tracking-wider flex items-center gap-1">
                         <XCircle className="h-3.5 w-3.5" /> Email already registered in system
                       </span>
                     )}
                     {!checkingEmail && emailStatus === "INVALID" && (
-                      <span className="text-[11px] text-amber-600 font-extrabold">
+                      <span className="text-[10px] text-amber-600 font-extrabold uppercase tracking-wider">
                         Invalid email format
                       </span>
                     )}
@@ -501,10 +501,10 @@ export default function AddNewUserPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       onBlur={handleEmailBlur}
-                      className={`bg-white border-[#E5E5EA] focus-visible:ring-2 rounded-xl h-11 text-xs font-semibold text-[#1D1D1F] ${
+                      className={`bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-2 rounded-xl h-9 text-xs font-semibold text-slate-900 shadow-2xs ${
                         emailStatus === "TAKEN" ? "border-rose-300 bg-rose-50/30 focus-visible:ring-rose-500/20 focus-visible:border-rose-500" :
                         emailStatus === "AVAILABLE" ? "border-emerald-300 bg-emerald-50/20 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500" :
-                        "focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF]"
+                        "focus-visible:ring-slate-900/10 focus-visible:border-slate-900"
                       }`}
                     />
                   </div>
@@ -512,14 +512,14 @@ export default function AddNewUserPage() {
 
                 {/* Phone Number */}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs font-bold text-[#1D1D1F]">Phone Number (Optional)</Label>
+                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Phone Number (Optional)</Label>
                   <Input 
                     type="tel"
                     name="phone"
                     placeholder="+1 (555) 234-5678"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="bg-white border-[#E5E5EA] focus-visible:ring-2 focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF] rounded-xl h-11 text-xs font-semibold text-[#1D1D1F]"
+                    className="bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-slate-900/10 focus-visible:border-slate-900 rounded-xl h-9 text-xs font-semibold text-slate-900 shadow-2xs"
                   />
                 </div>
 
@@ -528,22 +528,22 @@ export default function AddNewUserPage() {
           </Card>
 
           {/* Section 3: Password & Authentication Credentials */}
-          <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#F0F0F0] pb-3">
-                <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
-                  <KeyRound className="h-4 w-4 text-emerald-600" /> 3. Security & Credentials
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <KeyRound className="h-4 w-4 text-emerald-600" /> 3. Security &amp; Credentials
                 </h3>
 
                 {/* Mode Selector Tabs */}
-                <div className="flex bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] text-xs font-bold self-start sm:self-auto">
+                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-extrabold self-start sm:self-auto font-sans">
                   <button
                     type="button"
                     onClick={() => setPasswordMode("EMAIL_LINK")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                       passwordMode === "EMAIL_LINK" 
-                        ? "bg-white text-[#007AFF] shadow-xs font-extrabold" 
-                        : "text-[#6E6E73] hover:text-[#1D1D1F]"
+                        ? "bg-white text-slate-900 shadow-2xs font-black" 
+                        : "text-slate-500 hover:text-slate-900 font-bold"
                     }`}
                   >
                     Email Setup Link (Recommended)
@@ -551,10 +551,10 @@ export default function AddNewUserPage() {
                   <button
                     type="button"
                     onClick={() => setPasswordMode("MANUAL")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                       passwordMode === "MANUAL" 
-                        ? "bg-white text-[#007AFF] shadow-xs font-extrabold" 
-                        : "text-[#6E6E73] hover:text-[#1D1D1F]"
+                        ? "bg-white text-slate-900 shadow-2xs font-black" 
+                        : "text-slate-500 hover:text-slate-900 font-bold"
                     }`}
                   >
                     Set Password Manually
@@ -563,29 +563,29 @@ export default function AddNewUserPage() {
               </div>
 
               {passwordMode === "EMAIL_LINK" ? (
-                <div className="bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-[#007AFF] shrink-0 mt-0.5" />
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-start gap-3 shadow-2xs font-sans">
+                  <Mail className="h-4 w-4 text-slate-700 shrink-0 mt-0.5" />
                   <div className="space-y-1">
-                    <h4 className="text-xs font-black text-blue-950 uppercase tracking-wider">
+                    <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-wider">
                       Automated Email Setup Link
                     </h4>
-                    <p className="text-xs font-medium text-blue-800 leading-relaxed">
+                    <p className="text-xs font-semibold text-slate-500 leading-relaxed">
                       A secure password setup invitation will be automatically dispatched to <strong>{formData.email || "the user's email address"}</strong>. The user will establish their initial password during first-time login.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-5 animate-in fade-in duration-200">
+                <div className="space-y-5 animate-in fade-in duration-200 font-sans">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[#6E6E73]">Manual Password Configuration</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Manual Password Configuration</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={handleGeneratePassword}
-                      className="text-xs font-bold text-[#007AFF] hover:text-[#0056B3] hover:bg-blue-50 h-8 rounded-lg flex items-center gap-1.5"
+                      className="text-xs font-black text-slate-900 hover:bg-slate-100 h-8 rounded-lg flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Sparkles className="h-3.5 w-3.5" /> Generate Random Password
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Generate Random Password
                     </Button>
                   </div>
 
@@ -593,7 +593,7 @@ export default function AddNewUserPage() {
                     
                     {/* Password Input */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-[#1D1D1F]">Initial Password *</Label>
+                      <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Initial Password *</Label>
                       <div className="relative">
                         <Input 
                           type={showPassword ? "text" : "password"}
@@ -601,12 +601,12 @@ export default function AddNewUserPage() {
                           placeholder="Enter secure password"
                           value={formData.password}
                           onChange={handleInputChange}
-                          className="bg-white border-[#E5E5EA] focus-visible:ring-2 focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF] rounded-xl h-11 text-xs font-semibold pr-10"
+                          className="bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-slate-900/10 focus-visible:border-slate-900 rounded-xl h-9 text-xs font-semibold pr-10 shadow-2xs text-slate-900"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-[#8E8E93] hover:text-[#6E6E73]"
+                          className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer"
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -615,7 +615,7 @@ export default function AddNewUserPage() {
 
                     {/* Confirm Password Input */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-[#1D1D1F]">Confirm Password *</Label>
+                      <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Confirm Password *</Label>
                       <div className="relative">
                         <Input 
                           type={showConfirmPassword ? "text" : "password"}
@@ -623,12 +623,12 @@ export default function AddNewUserPage() {
                           placeholder="Re-enter password"
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
-                          className="bg-white border-[#E5E5EA] focus-visible:ring-2 focus-visible:ring-[#007AFF]/20 focus-visible:border-[#007AFF] rounded-xl h-11 text-xs font-semibold pr-10"
+                          className="bg-slate-50 border-slate-200/80 focus-visible:bg-white focus-visible:ring-slate-900/10 focus-visible:border-slate-900 rounded-xl h-9 text-xs font-semibold pr-10 shadow-2xs text-slate-900"
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-3 text-[#8E8E93] hover:text-[#6E6E73]"
+                          className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer"
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -639,10 +639,10 @@ export default function AddNewUserPage() {
 
                   {/* Password Strength Indicator */}
                   {formData.password && (
-                    <div className="space-y-2 bg-[#F5F5F7] p-3.5 rounded-xl border border-[#E5E5EA]">
+                    <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs font-sans">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-bold text-[#6E6E73]">Password Strength</span>
-                        <span className={`font-bold px-2 py-0.5 rounded-md text-[11px] border ${passwordStrength.color}`}>
+                        <span className="font-extrabold text-slate-500 uppercase text-[10px]">Password Strength</span>
+                        <span className={`font-black px-2 py-0.5 rounded-md text-[9px] uppercase border ${passwordStrength.color}`}>
                           {passwordStrength.label}
                         </span>
                       </div>
@@ -660,9 +660,9 @@ export default function AddNewUserPage() {
           </Card>
 
           {/* Section 4: Internal Admin Notes */}
-          <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-4">
-              <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2 border-b border-[#F0F0F0] pb-3">
+              <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
                 <FileText className="h-4 w-4 text-purple-600" /> 4. Internal Admin Notes (Optional)
               </h3>
               <textarea
@@ -671,9 +671,9 @@ export default function AddNewUserPage() {
                 placeholder="e.g. Created manually per phone request from On-Site Property Manager..."
                 value={formData.notes}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-[#E5E5EA] rounded-xl p-3 text-xs font-semibold text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF] transition-all resize-none"
+                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:border-slate-900 shadow-2xs transition-all resize-none font-sans"
               />
-              <p className="text-[11px] text-[#8E8E93] font-medium">
+              <p className="text-[11px] text-slate-400 font-semibold">
                 Internal reference notes are restricted exclusively to platform administrators in audit records.
               </p>
             </CardContent>
@@ -682,10 +682,10 @@ export default function AddNewUserPage() {
         </div>
 
         {/* RIGHT COLUMN: Sidebar (Avatar, Controls & Creation Summary) */}
-        <div className="space-y-6">
+        <div className="space-y-6 font-sans">
           
           {/* Avatar Upload Card */}
-          <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 flex flex-col items-center text-center">
               <input 
                 type="file" 
@@ -697,37 +697,37 @@ export default function AddNewUserPage() {
               
               <div 
                 onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-                className="h-28 w-28 rounded-full bg-[#F5F5F7] border-2 border-dashed border-[#E5E5EA] flex flex-col items-center justify-center mb-4 cursor-pointer hover:bg-[#EBEBEB] hover:border-slate-400 transition-all relative group overflow-hidden shadow-inner shrink-0"
+                className="h-28 w-28 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center mb-4 cursor-pointer hover:bg-slate-200/60 hover:border-slate-400 transition-all relative group overflow-hidden shadow-inner shrink-0"
               >
                 {uploadingAvatar ? (
                   <div className="flex flex-col items-center justify-center space-y-1">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#007AFF]" />
-                    <span className="text-[10px] font-bold text-[#007AFF]">Uploading...</span>
+                    <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
+                    <span className="text-[10px] font-black text-slate-900">Uploading...</span>
                   </div>
                 ) : avatarUrl ? (
                   <>
                     <img src={avatarUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 bg-[#1D1D1F]/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                    <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
                       <Upload className="h-5 w-5 mb-1" />
-                      <span className="text-[10px] font-bold">Change Photo</span>
+                      <span className="text-[10px] font-black">Change Photo</span>
                     </div>
                   </>
                 ) : (
                   <>
-                    <Upload className="h-6 w-6 text-[#8E8E93] group-hover:text-[#1D1D1F] mb-1 transition-colors" />
-                    <span className="text-[11px] font-bold text-[#6E6E73]">Upload Photo</span>
+                    <Upload className="h-5 w-5 text-slate-400 group-hover:text-slate-900 mb-1 transition-colors" />
+                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Upload Photo</span>
                   </>
                 )}
               </div>
 
-              <h3 className="font-extrabold text-[#1D1D1F] text-sm">Profile Avatar</h3>
-              <p className="text-xs text-[#8E8E93] mt-0.5 mb-4 font-medium">Supports JPG, PNG, or WEBP up to 10MB</p>
+              <h3 className="font-black text-slate-900 text-sm">Profile Avatar</h3>
+              <p className="text-xs text-slate-500 mt-0.5 mb-4 font-semibold">Supports JPG, PNG, or WEBP up to 10MB</p>
               
               {avatarUrl ? (
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5"
+                  className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                   onClick={() => setAvatarUrl("")}
                 >
                   <X className="h-3.5 w-3.5" /> Remove Photo
@@ -737,7 +737,7 @@ export default function AddNewUserPage() {
                   variant="outline" 
                   size="sm"
                   disabled={uploadingAvatar}
-                  className="w-full border-[#E5E5EA] font-bold rounded-xl text-[#1D1D1F] text-xs hover:bg-[#F5F5F7]"
+                  className="w-full border-slate-200 font-black rounded-xl text-slate-900 text-xs hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Select Photo File
@@ -747,24 +747,24 @@ export default function AddNewUserPage() {
           </Card>
 
           {/* Account Status & Welcome Email Settings */}
-          <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden">
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-5">
-              <h3 className="font-extrabold text-[#1D1D1F] text-sm border-b border-[#F0F0F0] pb-3 flex items-center gap-2">
-                <UserCheck className="h-4 w-4 text-[#007AFF]" /> Account Configurations
+              <h3 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-slate-700" /> Account Configurations
               </h3>
 
               {/* Active Account Switch */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-[#1D1D1F] text-xs">Active Status</h4>
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                    <h4 className="font-extrabold text-slate-900 text-xs">Active Status</h4>
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                       formData.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
                     }`}>
                       {formData.isActive ? "ACTIVE" : "SUSPENDED"}
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#6E6E73] font-medium leading-normal">
+                  <p className="text-[11px] text-slate-500 font-semibold leading-normal">
                     {formData.isActive ? "User can log in immediately after registration." : "Account created in suspended state."}
                   </p>
                 </div>
@@ -774,15 +774,15 @@ export default function AddNewUserPage() {
                 />
               </div>
 
-              <div className="h-px w-full bg-[#F0F0F0]" />
+              <div className="h-px w-full bg-slate-100" />
 
               {/* Welcome Email Switch */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
-                  <h4 className="font-bold text-[#1D1D1F] text-xs flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5 text-[#007AFF]" /> Welcome Email
+                  <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-slate-700" /> Welcome Email
                   </h4>
-                  <p className="text-[11px] text-[#6E6E73] font-medium leading-normal">
+                  <p className="text-[11px] text-slate-500 font-semibold leading-normal">
                     Dispatches onboarding email with login link.
                   </p>
                 </div>
@@ -796,27 +796,27 @@ export default function AddNewUserPage() {
           </Card>
 
           {/* Quick Summary Preview Box — Clean Modern SaaS Styling */}
-          <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden p-5 space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#F0F0F0]">
-              <Sparkles className="h-4 w-4 text-[#007AFF]" />
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#6E6E73]">Creation Summary</p>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden p-5 space-y-4 font-sans">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Creation Summary</p>
             </div>
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[#6E6E73]">Target Role</span>
-                <span className="font-bold text-[#1D1D1F]">{selectedRoleObj?.title}</span>
+                <span className="font-semibold text-slate-500">Target Role</span>
+                <span className="font-black text-slate-900">{selectedRoleObj?.title}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[#6E6E73]">Status</span>
-                <span className={`font-extrabold px-2.5 py-0.5 rounded-full text-[10px] uppercase border ${
+                <span className="font-semibold text-slate-500">Status</span>
+                <span className={`font-black px-2 py-0.5 rounded-md text-[9px] uppercase border ${
                   formData.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
                 }`}>
                   {formData.isActive ? "Active" : "Suspended"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[#6E6E73]">Password Mode</span>
-                <span className="font-bold text-[#007AFF]">
+                <span className="font-semibold text-slate-500">Password Mode</span>
+                <span className="font-black text-slate-900">
                   {passwordMode === "EMAIL_LINK" ? "Email Setup Link" : "Manual Password"}
                 </span>
               </div>

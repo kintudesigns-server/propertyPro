@@ -41,7 +41,7 @@ export default function UnitDetailsPage() {
   }, [unitId, id, router]);
 
   if (loading) {
-    return <div className="p-10 text-center font-bold text-[#6E6E73]">Loading Unit Details...</div>;
+    return <div className="p-10 text-center font-extrabold text-xs text-slate-500 font-sans">Loading Unit Details...</div>;
   }
   if (!unit) return null;
 
@@ -49,51 +49,51 @@ export default function UnitDetailsPage() {
   const activeLease = unit.leases?.find((l: any) => l.status === "ACTIVE");
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
-        <div className="flex flex-col gap-2">
-          <Link href={`/dashboard/properties/${id}`} className="text-sm font-bold text-[#6E6E73] hover:text-[#007AFF] flex items-center gap-2 mb-2 transition-colors w-fit">
-            <ArrowLeft className="h-4 w-4" /> Back to Property
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="flex flex-col gap-1.5">
+          <Link href={`/dashboard/properties/${id}`} className="text-xs font-extrabold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors w-fit">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Property
           </Link>
-          <div className="flex items-center gap-4 flex-wrap">
-            <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{unit.name}</h1>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{unit.name}</h1>
+            <div className="flex items-center gap-1.5">
               {unit.status === "VACANT" ? (
-                <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">Available</Badge>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
               ) : unit.status === "OCCUPIED" ? (
-                <Badge className="bg-[#EFF6FF] text-[#007AFF] hover:bg-[#EFF6FF] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">Occupied</Badge>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">Occupied</span>
               ) : (
-                <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] border-0 rounded-lg px-3 py-1 font-bold shadow-sm">{unit.status}</Badge>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{unit.status}</span>
               )}
-              <Badge className="bg-[#F2F2F7] text-[#475569] border border-[#E5E5EA] rounded-lg px-3 py-1 font-bold shadow-sm flex items-center gap-1.5">
-                <Home className="h-3.5 w-3.5" /> {unit.type || "Apartment"}
-              </Badge>
+              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-black text-[10px] uppercase tracking-wider shadow-2xs flex items-center gap-1">
+                <Home className="h-3 w-3" /> {unit.type || "Apartment"}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#6E6E73]">
-            <Building className="h-4 w-4" /> Belongs to <Link href={`/dashboard/properties/${id}`} className="text-[#007AFF] hover:underline">{property.name}</Link>
+          <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+            <Building className="h-3.5 w-3.5 text-slate-400" /> Belongs to <Link href={`/dashboard/properties/${id}`} className="text-slate-900 font-extrabold hover:underline">{property.name}</Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-          <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#F2F2F7] shadow-sm rounded-xl h-11 font-bold px-6">
-            <Edit className="h-4 w-4 mr-2" /> Edit Unit
+        <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+          <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
+            <Edit className="h-3.5 w-3.5 mr-1.5" /> Edit Unit
           </Button>
         </div>
       </div>
 
-      {/* Custom Horizontal Tabs */}
-      <div className="flex items-center gap-2 bg-[#F2F2F7] p-1.5 rounded-[16px] border border-[#E5E5EA] overflow-x-auto no-scrollbar shadow-sm">
+      {/* Horizontal Tabs Navigation */}
+      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shadow-2xs w-fit overflow-x-auto no-scrollbar">
         {["overview", "lease", "images", "amenities"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap capitalize ${
+            className={`px-5 py-2 rounded-xl font-extrabold text-xs transition-all capitalize cursor-pointer ${
               activeTab === tab 
-                ? "bg-gradient-to-b from-[#007AFF] to-[#0062CC] text-white shadow-md shadow-blue-500/20" 
-                : "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white"
+                ? "bg-slate-900 text-white shadow-2xs" 
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             {tab === "lease" ? "Lease & Tenant" : tab}
@@ -116,34 +116,34 @@ export default function UnitDetailsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Unit Info Card */}
-              <Card className="col-span-1 lg:col-span-2 bg-white border-[#E5E5EA] rounded-2xl shadow-sm">
-                <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-                  <h2 className="font-bold text-[#1D1D1F] text-lg">Unit Specifications</h2>
+              <Card className="col-span-1 lg:col-span-2 bg-white border border-slate-200 rounded-3xl shadow-xs">
+                <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+                  <h2 className="font-black text-slate-900 text-base tracking-tight">Unit Specifications</h2>
                 </div>
                 <CardContent className="p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="text-sm font-bold text-[#6E6E73]">Unit Name/Number</div>
-                        <div className="font-semibold text-[#1D1D1F]">{unit.name}</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                        <div className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Unit Name/Number</div>
+                        <div className="font-black text-slate-900 text-xs">{unit.name}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="text-sm font-bold text-[#6E6E73]">Unit Type</div>
-                        <div className="font-semibold text-[#1D1D1F]">{unit.type || "Apartment"}</div>
+                      <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                        <div className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Unit Type</div>
+                        <div className="font-black text-slate-900 text-xs">{unit.type || "Apartment"}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="text-sm font-bold text-[#6E6E73]">Floor Level</div>
-                        <div className="font-semibold text-[#1D1D1F]">{unit.floor || "1"}</div>
+                      <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                        <div className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Floor Level</div>
+                        <div className="font-black text-slate-900 text-xs">{unit.floor || "1"}</div>
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="text-sm font-bold text-[#6E6E73]">Deposit Required</div>
-                        <div className="font-semibold text-[#1D1D1F]">${Number(unit.depositAmt).toFixed(2)}</div>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                        <div className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Deposit Required</div>
+                        <div className="font-black text-slate-900 text-xs">${Number(unit.depositAmt).toFixed(2)}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="text-sm font-bold text-[#6E6E73]">Current Status</div>
-                        <div className="font-semibold text-[#1D1D1F]">{unit.status}</div>
+                      <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                        <div className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Current Status</div>
+                        <div className="font-black text-slate-900 text-xs">{unit.status}</div>
                       </div>
                     </div>
                   </div>
@@ -152,17 +152,17 @@ export default function UnitDetailsPage() {
 
               {/* Quick Status / Parent Property Card */}
               <div className="col-span-1 space-y-6">
-                <Card className="bg-white border-[#E5E5EA] rounded-2xl shadow-sm">
-                  <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-                    <h2 className="font-bold text-[#1D1D1F] text-base flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-[#007AFF]" /> Parent Property
+                <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <h2 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight">
+                      <MapPin className="h-4 w-4 text-slate-700" /> Parent Property
                     </h2>
                   </div>
                   <CardContent className="p-5">
-                    <h3 className="font-extrabold text-[#1D1D1F] text-lg mb-2">{property.name}</h3>
-                    <p className="text-sm text-[#475569] mb-4">{property.address}, {property.city}, {property.country}</p>
+                    <h3 className="font-black text-slate-900 text-base mb-1 tracking-tight">{property.name}</h3>
+                    <p className="text-xs font-semibold text-slate-500 mb-4">{property.address}, {property.city}, {property.country}</p>
                     <Link href={`/dashboard/properties/${id}`}>
-                      <Button variant="outline" className="w-full font-bold border-[#E5E5EA]">View Property</Button>
+                      <Button className="w-full font-black text-xs h-9 bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 rounded-xl shadow-2xs cursor-pointer">View Property</Button>
                     </Link>
                   </CardContent>
                 </Card>
@@ -175,43 +175,43 @@ export default function UnitDetailsPage() {
         {activeTab === "lease" && (
           <div className="space-y-6">
             {activeLease ? (
-              <Card className="bg-white border-[#E5E5EA] rounded-2xl shadow-sm">
-                <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex justify-between items-center">
+              <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs">
+                <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                   <div>
-                    <h2 className="font-bold text-[#1D1D1F] text-lg flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-[#007AFF]" /> Active Lease Information
+                    <h2 className="font-black text-slate-900 text-base tracking-tight flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-slate-700" /> Active Lease Information
                     </h2>
                   </div>
-                  <Badge className="bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0">Active</Badge>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Active</span>
                 </div>
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                      <h3 className="text-sm font-black text-[#94A3B8] uppercase tracking-wider mb-4">Tenant Details</h3>
-                      <div className="flex items-center gap-4 border-b border-[#F1F5F9] pb-4">
-                        <div className="w-12 h-12 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-xl">
+                      <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Tenant Details</h3>
+                      <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-center font-black text-base shadow-2xs">
                           {activeLease.tenant?.name?.charAt(0) || "T"}
                         </div>
                         <div>
-                          <p className="font-bold text-[#1D1D1F]">{activeLease.tenant?.name}</p>
-                          <p className="text-sm text-[#6E6E73]">{activeLease.tenant?.email}</p>
+                          <p className="font-black text-slate-900 text-xs">{activeLease.tenant?.name}</p>
+                          <p className="text-xs text-slate-500 font-semibold">{activeLease.tenant?.email}</p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-sm font-black text-[#94A3B8] uppercase tracking-wider mb-4">Lease Terms</h3>
+                      <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Lease Terms</h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-xs font-bold text-[#6E6E73]">Start Date</p>
-                          <p className="font-semibold text-[#1D1D1F]">{new Date(activeLease.startDate).toLocaleDateString()}</p>
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Start Date</p>
+                          <p className="font-black text-slate-900 text-xs mt-0.5">{new Date(activeLease.startDate).toLocaleDateString()}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[#6E6E73]">End Date</p>
-                          <p className="font-semibold text-[#1D1D1F]">{new Date(activeLease.endDate).toLocaleDateString()}</p>
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">End Date</p>
+                          <p className="font-black text-slate-900 text-xs mt-0.5">{new Date(activeLease.endDate).toLocaleDateString()}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[#6E6E73]">Rent Amount</p>
-                          <p className="font-semibold text-[#1D1D1F]">${Number(activeLease.rentAmount).toFixed(2)}/mo</p>
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rent Amount</p>
+                          <p className="font-black text-slate-900 text-xs mt-0.5">${Number(activeLease.rentAmount).toFixed(2)}/mo</p>
                         </div>
                       </div>
                     </div>
@@ -219,13 +219,13 @@ export default function UnitDetailsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="py-20 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
-                <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm mb-4">
-                  <Key className="h-10 w-10 text-[#CBD5E1]" />
+              <div className="py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+                <div className="w-16 h-16 bg-white border border-slate-200 rounded-full mx-auto flex items-center justify-center shadow-2xs mb-3">
+                  <Key className="h-8 w-8 text-slate-400" />
                 </div>
-                <h3 className="text-xl font-black text-[#1D1D1F]">No Active Lease</h3>
-                <p className="text-[#6E6E73] mt-2 max-w-sm mx-auto font-medium">This unit is currently vacant. There are no active leases or tenants assigned to it.</p>
-                <Button className="mt-6 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-xl h-11 px-6">
+                <h3 className="text-base font-black text-slate-900">No Active Lease</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-1 max-w-sm mx-auto">This unit is currently vacant. There are no active leases or tenants assigned to it.</p>
+                <Button className="mt-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl h-9 px-4 shadow-xs cursor-pointer">
                   Create Lease
                 </Button>
               </div>
@@ -238,10 +238,10 @@ export default function UnitDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-[#1D1D1F]">Unit Images</h2>
-                <p className="text-sm font-medium text-[#6E6E73]">Showing {unit.images?.length || 0} images for this unit.</p>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Unit Images</h2>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">Showing {unit.images?.length || 0} images for this unit.</p>
               </div>
-              <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-sm rounded-xl h-11 font-bold px-6">
+              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs rounded-xl h-9 px-4 cursor-pointer">
                 Add Image
               </Button>
             </div>
@@ -249,15 +249,15 @@ export default function UnitDetailsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {unit.images?.length > 0 ? (
                 unit.images.map((img: string, i: number) => (
-                  <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-[#E5E5EA]">
+                  <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden relative group border border-slate-200 shadow-2xs">
                     <img src={img} alt={`Unit image ${i}`} className="w-full h-full object-cover" />
                   </div>
                 ))
               ) : (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
-                  <UploadCloud className="h-12 w-12 text-[#94A3B8] mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-[#1D1D1F]">No Images</h3>
-                  <p className="text-sm text-[#6E6E73] mt-1">Upload interior photos for this specific unit.</p>
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+                  <UploadCloud className="h-10 w-10 text-slate-400 mx-auto mb-2" />
+                  <h3 className="text-base font-black text-slate-900">No Images</h3>
+                  <p className="text-xs text-slate-500 font-semibold mt-0.5">Upload interior photos for this specific unit.</p>
                 </div>
               )}
             </div>
@@ -269,27 +269,25 @@ export default function UnitDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-[#1D1D1F]">Unit Amenities</h2>
-                <p className="text-sm font-medium text-[#6E6E73]">Features available inside this specific unit.</p>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Unit Amenities</h2>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">Features available inside this specific unit.</p>
               </div>
             </div>
             
             {unit.amenities && unit.amenities.length > 0 ? (
-              <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm flex flex-wrap gap-3">
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-wrap gap-2.5">
                 {unit.amenities.map((amenity: string, i: number) => (
-                  <div key={i} className="flex items-center gap-2 px-4 py-2 bg-[#F2F2F7] text-[#1D1D1F] text-sm font-extrabold rounded-xl border border-[#E5E5EA]">
-                    <CheckCircle2 className="h-4 w-4 text-[#007AFF]" />
+                  <div key={i} className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 text-slate-900 text-xs font-extrabold rounded-xl border border-slate-200 shadow-2xs">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     {amenity}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-20 text-center border-2 border-dashed border-[#E5E5EA] rounded-2xl bg-[#F2F2F7]">
-                <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm mb-4">
-                  <CheckCircle2 className="h-10 w-10 text-[#CBD5E1]" />
-                </div>
-                <h3 className="text-xl font-black text-[#1D1D1F]">No Amenities Listed</h3>
-                <p className="text-[#6E6E73] mt-2 max-w-sm mx-auto font-medium">No amenities have been specific for this unit. Edit the unit to add them.</p>
+              <div className="py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+                <CheckCircle2 className="h-10 w-10 text-slate-400 mx-auto mb-2" />
+                <h3 className="text-base font-black text-slate-900">No Amenities Listed</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">No amenities have been specified for this unit yet.</p>
               </div>
             )}
           </div>
@@ -301,19 +299,17 @@ export default function UnitDetailsPage() {
 
 function SpecCard({ title, value, subtext, Icon }: any) {
   return (
-    <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
-      <CardContent className="p-5 flex flex-col justify-between h-full">
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider pr-4">{title}</p>
-          <div className="p-2.5 bg-[#F2F2F7] text-[#007AFF] rounded-xl shrink-0">
-            <Icon className="h-5 w-5" />
-          </div>
+    <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 flex flex-col justify-between h-full">
+      <div className="flex justify-between items-start mb-3">
+        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pr-4">{title}</p>
+        <div className="p-2.5 bg-slate-100 text-slate-800 border border-slate-200/80 rounded-2xl shrink-0">
+          <Icon className="h-4 w-4" />
         </div>
-        <div>
-          <p className="font-extrabold text-[#1D1D1F] text-2xl leading-tight truncate">{value}</p>
-          {subtext && <p className="text-xs text-[#6E6E73] mt-1 font-medium">{subtext}</p>}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div>
+        <p className="font-black text-slate-900 text-2xl leading-tight truncate">{value}</p>
+        {subtext && <p className="text-[10px] text-slate-500 font-semibold uppercase mt-0.5">{subtext}</p>}
+      </div>
+    </div>
   );
 }

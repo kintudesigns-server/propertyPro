@@ -157,16 +157,16 @@ export default function LandingPage() {
           <div className="flex items-center justify-between">
             {/* Brand */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-9 w-9 rounded-xl bg-[#007AFF] flex items-center justify-center shadow-lg shadow-[#007AFF]/30 group-hover:scale-105 transition-transform">
+              <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 transition-transform">
                 <Building2 className="h-5 w-5 text-white" />
               </div>
-              <span className={`text-xl font-semibold tracking-tight transition-colors ${scrolled ? "text-[#1D1D1F]" : "text-white"}`}>
-                Property<span className={scrolled ? "text-[#007AFF]" : "text-white/80"}>Pro</span>
+              <span className={`text-xl font-semibold tracking-tight transition-colors ${scrolled ? "text-slate-900" : "text-white"}`}>
+                Property<span className={scrolled ? "text-slate-700" : "text-white/80"}>Pro</span>
               </span>
             </Link>
 
             {/* Desktop nav pill */}
-            <nav className={`hidden md:flex items-center gap-0.5 p-1 rounded-full border transition-all ${scrolled ? "bg-[#F5F5F7] border-[#E5E5EA]" : "bg-white/10 border-white/20"}`}>
+            <nav className={`hidden md:flex items-center gap-0.5 p-1 rounded-full border transition-all ${scrolled ? "bg-slate-100 border-slate-200" : "bg-white/10 border-white/20"}`}>
               {["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"].map((item) => {
                 const [label, href] = item.split("|");
                 return (
@@ -175,7 +175,7 @@ export default function LandingPage() {
                     href={href}
                     className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${
                       scrolled
-                        ? "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white"
+                        ? "text-slate-500 hover:text-slate-900 hover:bg-white"
                         : "text-white/70 hover:text-white hover:bg-white/15"
                     }`}
                   >
@@ -190,13 +190,13 @@ export default function LandingPage() {
               <Link href="/auth/login">
                 <Button
                   variant="ghost"
-                  className={`h-9 px-4 text-xs font-medium rounded-xl transition-all ${scrolled ? "text-[#1D1D1F] hover:bg-black/5" : "text-white hover:bg-white/15"}`}
+                  className={`h-9 px-4 text-xs font-medium rounded-xl transition-all ${scrolled ? "text-slate-900 hover:bg-black/5" : "text-white hover:bg-white/15"}`}
                 >
                   Sign In
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button className="h-9 px-4 text-xs font-semibold rounded-xl bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/25 transition-all hover:scale-[1.02]">
+                <Button className="h-9 px-4 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02]">
                   Dashboard
                 </Button>
               </Link>
@@ -204,7 +204,7 @@ export default function LandingPage() {
 
             {/* Mobile toggle */}
             <button
-              className={`md:hidden p-2 rounded-xl transition-all ${scrolled ? "text-[#1D1D1F] hover:bg-black/5" : "text-white hover:bg-white/15"}`}
+              className={`md:hidden p-2 rounded-xl transition-all ${scrolled ? "text-slate-900 hover:bg-black/5" : "text-white hover:bg-white/15"}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -224,7 +224,7 @@ export default function LandingPage() {
                   key={label}
                   href={href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between text-sm font-semibold text-[#1D1D1F] py-3 px-3 rounded-xl hover:bg-[#F5F5F7]"
+                  className="flex items-center justify-between text-sm font-semibold text-slate-900 py-3 px-3 rounded-xl hover:bg-slate-50"
                 >
                   {label} <ChevronRight className="h-4 w-4 text-slate-400" />
                 </a>
@@ -235,7 +235,7 @@ export default function LandingPage() {
                 <Button variant="outline" className="w-full h-11 rounded-xl font-semibold">Sign In</Button>
               </Link>
               <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full h-11 rounded-xl font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/20">Dashboard</Button>
+                <Button className="w-full h-11 rounded-xl font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10">Dashboard</Button>
               </Link>
             </div>
           </div>

@@ -75,88 +75,95 @@ export default function VendorDetailsPage({
   const completedTasks = assignedTasks.filter((t: any) => t.status === "COMPLETED" || t.status === "RESOLVED");
 
   return (
-    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 pb-28">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 pb-28 font-sans">
       {/* ─── BREADCRUMB & HEADER ACTIONS ─── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2">
-            <Link href="/dashboard/team" className="hover:text-amber-600 transition-colors flex items-center gap-1">
+            <Link href="/dashboard/team" className="hover:text-slate-900 transition-colors flex items-center gap-1 font-bold">
               <ArrowLeft className="h-3.5 w-3.5" /> Inspectors &amp; Vendors
             </Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-slate-800 font-bold">Vendor Profile</span>
+            <ChevronRight className="h-3 w-3 text-slate-300" />
+            <span className="text-slate-900 font-bold">Vendor Profile</span>
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
             {vendor.name}
           </h1>
-          <p className="text-slate-500 text-sm font-medium mt-0.5">
-            External Trade Specialist &bull; Vendor ID: {vendor.id.substring(0, 8)}
+          <p className="text-slate-500 text-xs font-semibold mt-0.5">
+            External Trade Specialist &bull; Vendor ID: <span className="font-mono text-slate-700 font-bold">{vendor.id.substring(0, 8)}</span>
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <Link href={`/dashboard/vendors/${id}/edit`}>
             <Button
-              className="h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 rounded-2xl shadow-sm hover:shadow-md transition-all text-sm gap-2 border-none"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer gap-2 border-none"
             >
-              <Edit className="h-4 w-4" /> Edit Vendor Info
+              <Edit className="h-3.5 w-3.5" /> Edit Vendor Info
             </Button>
           </Link>
           <Button
-            variant="outline"
             onClick={() => window.open(`mailto:${vendor.email}`)}
-            className="h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold px-5 rounded-2xl text-sm gap-2"
+            className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-black rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
           >
-            <Mail className="h-4 w-4" /> Contact Vendor
+            <Mail className="h-3.5 w-3.5 text-slate-600" /> Contact Vendor
           </Button>
           {vendor.phone && (
             <Button
-              variant="outline"
               onClick={() => (window.location.href = `tel:${vendor.phone}`)}
-              className="h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold px-5 rounded-2xl text-sm gap-2"
+              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-black rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
             >
-              <Phone className="h-4 w-4" /> Call Phone
+              <Phone className="h-3.5 w-3.5 text-slate-600" /> Call Phone
             </Button>
           )}
         </div>
       </div>
 
       {/* ─── VENDOR HERO PROFILE CARD ─── */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6 font-sans">
         <div className="flex items-center gap-5">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-2xl flex items-center justify-center shadow-md shrink-0">
-            {vendor.name.charAt(0).toUpperCase()}
+          <div className="relative shrink-0">
+            <img
+              src={
+                vendor.avatar ||
+                vendor.image ||
+                "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80"
+              }
+              alt={vendor.name}
+              className="h-20 w-20 rounded-2xl object-cover border-2 border-white shadow-md"
+            />
+            <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Vendor Active" />
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-lg text-xs font-extrabold">
-                <Briefcase className="h-3.5 w-3.5 text-amber-600" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                <Briefcase className="h-3 w-3 text-amber-600" />
                 {vendor.specialty || "Trade Specialist"}
               </span>
 
               {vendor.w9OnFile ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> W-9 Verified
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                  <CheckCircle2 className="h-3 w-3" /> W-9 Verified
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold">
-                  <AlertTriangle className="h-3.5 w-3.5" /> W-9 Missing
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                  <AlertTriangle className="h-3 w-3" /> W-9 Missing
                 </span>
               )}
 
               {vendor.insuranceOnFile ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Insured Active
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                  <ShieldCheck className="h-3 w-3" /> Insured Active
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold">
-                  <AlertTriangle className="h-3.5 w-3.5" /> Insurance Missing
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                  <AlertTriangle className="h-3 w-3" /> Insurance Missing
                 </span>
               )}
             </div>
 
-            <h2 className="text-xl font-bold text-slate-900">{vendor.name}</h2>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{vendor.name}</h2>
 
             <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 flex-wrap">
               <span className="flex items-center gap-1.5">
@@ -172,55 +179,55 @@ export default function VendorDetailsPage({
         </div>
 
         {/* Call-Out Fee Pill */}
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 w-full md:w-auto shrink-0 flex items-center gap-6">
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 w-full md:w-auto shrink-0 flex items-center gap-6 shadow-2xs font-sans">
           <div>
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Base Call-Out Fee</p>
-            <p className="text-2xl font-black text-slate-900">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</p>
           </div>
         </div>
       </div>
 
       {/* ─── SUMMARY KPI METRICS GRID ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-            <Wrench className="h-6 w-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 shrink-0 border border-slate-200/60 shadow-2xs">
+            <Wrench className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Work Orders</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{assignedTasks.length}</h3>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Work Orders</p>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{assignedTasks.length}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-            <DollarSign className="h-6 w-6" />
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-200/60 shadow-2xs">
+            <DollarSign className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Call-Out Fee</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</h3>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Call-Out Fee</p>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-            <FileText className="h-6 w-6" />
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-700 shrink-0 border border-slate-200/60 shadow-2xs">
+            <FileText className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">W-9 Tax Form</p>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">W-9 Tax Form</p>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
               {vendor.w9OnFile ? <span className="text-emerald-600">On File</span> : <span className="text-rose-600">Missing</span>}
             </h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-            <ShieldCheck className="h-6 w-6" />
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-2xs">
+            <ShieldCheck className="h-5 w-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Liability Insurance</p>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Liability Insurance</p>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
               {vendor.insuranceOnFile ? <span className="text-emerald-600">Verified Active</span> : <span className="text-rose-600">Missing</span>}
             </h3>
           </div>
@@ -228,36 +235,36 @@ export default function VendorDetailsPage({
       </div>
 
       {/* ─── ASSIGNED MAINTENANCE WORK ORDERS TABLE ─── */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden space-y-4">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-4 font-sans">
         <div className="p-6 pb-2 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-black text-slate-900 tracking-tight">Assigned Contractor Work Orders</h3>
-            <p className="text-xs font-semibold text-slate-400 mt-0.5">Maintenance repair jobs assigned to {vendor.name}.</p>
+            <p className="text-xs font-semibold text-slate-500 mt-0.5">Maintenance repair jobs assigned to {vendor.name}.</p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80">
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Ticket Title &amp; Category</th>
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Property &amp; Unit</th>
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Priority</th>
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Date Created</th>
-                <th className="py-4 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest text-right">Action</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200">
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Ticket Title &amp; Category</th>
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Property &amp; Unit</th>
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Priority</th>
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Date Created</th>
+                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {assignedTasks.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center text-slate-400">
-                    <div className="max-w-xs mx-auto space-y-2">
-                      <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                    <div className="max-w-xs mx-auto space-y-3">
+                      <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400 border border-slate-200/60 shadow-2xs">
                         <Wrench className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-bold text-slate-700">No work orders assigned yet</p>
-                      <p className="text-xs text-slate-400">Work orders assigned to this trade contractor will appear here.</p>
+                      <p className="text-sm font-black text-slate-900">No work orders assigned yet</p>
+                      <p className="text-xs font-semibold text-slate-500">Work orders assigned to this trade contractor will appear here.</p>
                     </div>
                   </td>
                 </tr>
@@ -266,14 +273,14 @@ export default function VendorDetailsPage({
                   <tr key={ticket.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-4 px-6">
                       <div>
-                        <span className="font-bold text-sm text-slate-900 block">{ticket.title}</span>
-                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{ticket.category || "General Repair"}</span>
+                        <span className="font-black text-sm text-slate-900 block">{ticket.title}</span>
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{ticket.category || "General Repair"}</span>
                       </div>
                     </td>
 
                     <td className="py-4 px-6">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                        <span className="text-xs font-black text-slate-900 flex items-center gap-1">
                           <Building className="h-3.5 w-3.5 text-slate-400" />
                           {ticket.unit?.property?.name || "Property"}
                         </span>
@@ -287,14 +294,14 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
                           ticket.priority === "EMERGENCY"
-                            ? "bg-red-50 text-red-700 border border-red-200"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200/80"
                             : ticket.priority === "HIGH"
-                            ? "bg-orange-50 text-orange-700 border border-orange-200"
+                            ? "bg-orange-50 text-orange-700 border border-orange-200/80"
                             : ticket.priority === "MEDIUM"
-                            ? "bg-amber-50 text-amber-700 border border-amber-200"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                            ? "bg-amber-50 text-amber-700 border border-amber-200/80"
+                            : "bg-slate-100 text-slate-700 border border-slate-200"
                         }`}
                       >
                         {ticket.priority}
@@ -303,12 +310,12 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
                           ticket.status === "COMPLETED" || ticket.status === "RESOLVED"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
                             : ticket.status === "IN_PROGRESS"
-                            ? "bg-blue-50 text-blue-700 border border-blue-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                            ? "bg-blue-50 text-blue-700 border border-blue-200/80"
+                            : "bg-amber-50 text-amber-700 border border-amber-200/80"
                         }`}
                       >
                         {ticket.status}
@@ -321,7 +328,7 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6 text-right">
                       <Link href={`/dashboard/maintenance/${ticket.id}`}>
-                        <Button variant="ghost" className="h-8 px-3 text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg">
+                        <Button className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-8 px-3 transition-all cursor-pointer">
                           View Ticket <ArrowRight className="h-3.5 w-3.5 ml-1" />
                         </Button>
                       </Link>

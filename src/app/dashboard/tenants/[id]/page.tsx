@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, User, PhoneCall, Briefcase, FileText, CheckCircle2, XCircle, Trash2, Edit, Calendar } from "lucide-react";
+import { ArrowLeft, User, PhoneCall, Briefcase, FileText, CheckCircle2, XCircle, Trash2, Edit, Calendar, Mail, Phone, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -57,48 +57,55 @@ export default function TenantDetailsPage() {
   };
 
   if (loading) {
-    return <div className="p-10 text-center font-bold text-[#6E6E73]">Loading Tenant Details...</div>;
+    return <div className="p-10 text-center font-extrabold text-xs text-slate-500 font-sans">Loading Tenant Details...</div>;
   }
   if (!tenant) return null;
 
   const isActive = tenant.leases?.some((l: any) => l.status === "ACTIVE");
   const activeLease = tenant.leases?.find((l: any) => l.status === "ACTIVE");
   const allInvoices = tenant.leases?.flatMap((l: any) => l.invoices) || [];
+  const profilePic = tenant.user?.image || tenant.image || tenant.avatar;
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
-        <div className="flex flex-col gap-2">
-          <Link href="/dashboard/tenants" className="text-sm font-bold text-[#6E6E73] hover:text-[#007AFF] flex items-center gap-2 mb-2 transition-colors w-fit">
-            <ArrowLeft className="h-4 w-4" /> Back to Tenants
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="flex flex-col gap-1.5">
+          <Link href="/dashboard/tenants" className="text-xs font-extrabold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors w-fit">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Tenants
           </Link>
-          <div className="flex items-center gap-4 flex-wrap">
-            <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">{tenant.name}</h1>
-            <div className="flex items-center gap-2">
-              <Badge className={isActive || tenant.tenantStatus === "Active" ? "bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7] border-0 rounded-lg px-3 py-1 font-bold shadow-sm" : tenant.tenantStatus === "Approved" ? "bg-[#EFF6FF] text-[#007AFF] hover:bg-[#EFF6FF] border-0 rounded-lg px-3 py-1 font-bold shadow-sm" : "bg-[#FEF9C3] text-[#CA8A04] hover:bg-[#FEF9C3] border-0 rounded-lg px-3 py-1 font-bold shadow-sm"}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{tenant.name}</h1>
+            <div className="flex items-center gap-1.5">
+              <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs ${
+                isActive || tenant.tenantStatus === "Active" 
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200" 
+                  : tenant.tenantStatus === "Approved" 
+                  ? "bg-slate-100 text-slate-800 border border-slate-200" 
+                  : "bg-amber-50 text-amber-800 border border-amber-200"
+              }`}>
                 {isActive ? "Active" : tenant.tenantStatus || "Pending Review"}
-              </Badge>
-              <Badge className="bg-[#F2F2F7] text-[#475569] border border-[#E5E5EA] rounded-lg px-3 py-1 font-bold shadow-sm">
+              </span>
+              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-black text-[10px] uppercase tracking-wider shadow-2xs">
                 Tenant since {new Date(tenant.createdAt).toLocaleDateString()}
-              </Badge>
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+        <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
           <Link href={`/dashboard/tenants/${tenant.id}/edit`} className="flex-1 md:flex-none">
-            <Button variant="outline" className="w-full border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] shadow-sm rounded-xl h-11 font-bold px-6">
-              <Edit className="h-4 w-4 mr-2" /> Edit Tenant
+            <Button variant="outline" className="w-full border-slate-200 text-slate-900 hover:bg-slate-50 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
+              <Edit className="h-3.5 w-3.5 mr-1.5" /> Edit Tenant
             </Button>
           </Link>
           <Button 
             disabled={isActive}
             onClick={handleDelete}
-            className={`flex-1 md:flex-none bg-white border shadow-sm rounded-xl h-11 font-bold px-6 ${isActive ? 'text-gray-400 border-gray-200 opacity-50 cursor-not-allowed' : 'text-red-500 border-red-200 hover:bg-red-50'}`}
+            className={`flex-1 md:flex-none bg-white border shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer ${isActive ? 'text-slate-400 border-slate-200 opacity-50 cursor-not-allowed' : 'text-rose-600 border-rose-200 hover:bg-rose-50'}`}
           >
-            <Trash2 className="h-4 w-4 mr-2" /> Delete
+            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete
           </Button>
         </div>
       </div>
@@ -110,78 +117,90 @@ export default function TenantDetailsPage() {
         <div className="col-span-1 lg:col-span-2 space-y-6">
           
           {/* Personal Information */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center gap-2">
-              <User className="h-5 w-5 text-[#007AFF]" />
-              <h2 className="font-bold text-[#1D1D1F] text-lg">Personal Information</h2>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <User className="h-4 w-4 text-slate-700" />
+              <h2 className="font-black text-slate-900 text-base tracking-tight">Personal Information</h2>
             </div>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-8 items-start mb-8">
-                <div className="h-24 w-24 rounded-full bg-[#EFF6FF] text-[#007AFF] flex items-center justify-center font-black text-4xl ring-4 ring-[#EFF6FF]/50 shrink-0">
-                  {tenant.name ? tenant.name.charAt(0).toUpperCase() : "U"}
-                </div>
+            <CardContent className="p-6 space-y-6">
+              {/* Profile Card Header */}
+              <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center p-4 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-2xs">
+                {profilePic ? (
+                  <img 
+                    src={profilePic} 
+                    alt={tenant.name} 
+                    className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-2xs shrink-0" 
+                  />
+                ) : (
+                  <div className="h-20 w-20 rounded-2xl bg-slate-900 text-white border-2 border-slate-200 flex items-center justify-center font-black text-2xl shadow-2xs shrink-0">
+                    {tenant.name ? tenant.name.charAt(0).toUpperCase() : "U"}
+                  </div>
+                )}
                 <div>
-                  <h3 className="font-extrabold text-[#1D1D1F] text-2xl">{tenant.name}</h3>
-                  <p className="text-sm font-semibold text-[#6E6E73] mt-1">Tenant ID: {tenant.id.substring(0, 8).toUpperCase()}</p>
+                  <h3 className="font-black text-slate-900 text-xl tracking-tight">{tenant.name}</h3>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Tenant ID: <span className="font-mono font-bold text-slate-900">{tenant.id.substring(0, 8).toUpperCase()}</span></p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">First Name</div>
-                  <div className="font-semibold text-[#1D1D1F]">{tenant.name.split(" ")[0] || tenant.name}</div>
+              {/* Spacious Key-Value Field Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">First Name</p>
+                  <p className="font-black text-slate-900 text-xs">{tenant.name.split(" ")[0] || tenant.name}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">Last Name</div>
-                  <div className="font-semibold text-[#1D1D1F]">{tenant.name.split(" ").slice(1).join(" ") || "-"}</div>
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Last Name</p>
+                  <p className="font-black text-slate-900 text-xs">{tenant.name.split(" ").slice(1).join(" ") || "-"}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">Email</div>
-                  <div className="font-semibold text-[#1D1D1F] truncate" title={tenant.email}>{tenant.email}</div>
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Email Address</p>
+                  <p className="font-black text-slate-900 text-xs truncate" title={tenant.email}>{tenant.email}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">Phone</div>
-                  <div className="font-semibold text-[#1D1D1F]">{tenant.phone || "Not provided"}</div>
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Phone Number</p>
+                  <p className="font-black text-slate-900 text-xs">{tenant.phone || "Not provided"}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">Date of Birth</div>
-                  <div className="font-semibold text-[#1D1D1F]">{tenant.dob || "-"}</div>
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Date of Birth</p>
+                  <p className="font-black text-slate-900 text-xs">{tenant.dob || "-"}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-b border-[#F1F5F9] pb-4">
-                  <div className="text-sm font-bold text-[#6E6E73]">Credit Score</div>
-                  <div className="font-semibold text-[#1D1D1F]">{tenant.creditScore || "-"}</div>
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Credit Score</p>
+                  <p className="font-black text-slate-900 text-xs">{tenant.creditScore || "-"}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Invoice History */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[#007AFF]" />
-              <h2 className="font-bold text-[#1D1D1F] text-lg">Invoice History</h2>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-slate-700" />
+              <h2 className="font-black text-slate-900 text-base tracking-tight">Invoice History</h2>
             </div>
             <CardContent className="p-0">
               {allInvoices.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-[#E5E5EA] bg-[#F2F2F7]">
-                      <TableHead className="font-bold text-[#6E6E73]">Invoice ID</TableHead>
-                      <TableHead className="font-bold text-[#6E6E73]">Amount</TableHead>
-                      <TableHead className="font-bold text-[#6E6E73]">Due Date</TableHead>
-                      <TableHead className="font-bold text-[#6E6E73]">Status</TableHead>
+                <Table className="w-full">
+                  <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
+                    <TableRow>
+                      <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Invoice ID</TableHead>
+                      <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Amount</TableHead>
+                      <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Due Date</TableHead>
+                      <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Status</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody className="divide-y divide-slate-100">
                     {allInvoices.map((inv: any) => (
-                      <TableRow key={inv.id} className="border-b border-[#E5E5EA]">
-                        <TableCell className="font-semibold">{inv.id.substring(0,8)}</TableCell>
-                        <TableCell className="font-bold">${Number(inv.amount).toFixed(2)}</TableCell>
-                        <TableCell>{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Badge className={inv.status === "PAID" ? "bg-[#DCFCE7] text-[#16A34A]" : "bg-[#FEE2E2] text-[#EF4444]"}>
+                      <TableRow key={inv.id} className="hover:bg-slate-50/50 transition-colors">
+                        <TableCell className="py-4 px-6 font-mono text-xs text-slate-900 font-bold">{inv.id.substring(0,8)}</TableCell>
+                        <TableCell className="py-4 px-6 font-black text-slate-900 text-xs">${Number(inv.amount).toFixed(2)}</TableCell>
+                        <TableCell className="py-4 px-6 font-semibold text-slate-600 text-xs">{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
+                        <TableCell className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs ${
+                            inv.status === "PAID" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-rose-50 text-rose-800 border border-rose-200"
+                          }`}>
                             {inv.status}
-                          </Badge>
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -189,9 +208,9 @@ export default function TenantDetailsPage() {
                 </Table>
               ) : (
                 <div className="py-16 text-center">
-                  <FileText className="h-10 w-10 text-[#CBD5E1] mx-auto mb-3" />
-                  <p className="font-semibold text-[#1D1D1F]">No Invoices Found</p>
-                  <p className="text-sm text-[#6E6E73] mt-1">This tenant currently has no billing history.</p>
+                  <FileText className="h-10 w-10 text-slate-400 mx-auto mb-2" />
+                  <p className="font-black text-slate-900 text-base">No Invoices Found</p>
+                  <p className="text-xs text-slate-500 font-semibold mt-0.5">This tenant currently has no billing history.</p>
                 </div>
               )}
             </CardContent>
@@ -202,24 +221,30 @@ export default function TenantDetailsPage() {
         <div className="col-span-1 space-y-6">
           
           {/* Tenant Status Management */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center justify-between">
-              <h2 className="font-bold text-[#1D1D1F] text-base">Tenant Status</h2>
-              <Badge className={isActive || tenant.tenantStatus === "Active" ? "bg-[#DCFCE7] text-[#16A34A] border-0" : tenant.tenantStatus === "Approved" ? "bg-[#EFF6FF] text-[#007AFF] border-0" : "bg-[#FEF9C3] text-[#CA8A04] border-0"}>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <h2 className="font-black text-slate-900 text-sm tracking-tight">Tenant Status</h2>
+              <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs ${
+                isActive || tenant.tenantStatus === "Active" 
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200" 
+                  : tenant.tenantStatus === "Approved" 
+                  ? "bg-slate-100 text-slate-800 border border-slate-200" 
+                  : "bg-amber-50 text-amber-800 border border-amber-200"
+              }`}>
                 {isActive ? "Active" : tenant.tenantStatus || "Pending Review"}
-              </Badge>
+              </span>
             </div>
-            <CardContent className="p-5 space-y-4">
-              <div className="flex justify-between items-center text-sm border-b border-[#F1F5F9] pb-3">
-                <span className="font-bold text-[#6E6E73]">Last Updated</span>
-                <span className="font-semibold text-[#1D1D1F]">{new Date(tenant.updatedAt).toLocaleDateString()}</span>
+            <CardContent className="p-5 space-y-3">
+              <div className="flex justify-between items-center text-xs border-b border-slate-100 pb-3">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Last Updated</span>
+                <span className="font-black text-slate-900">{new Date(tenant.updatedAt).toLocaleDateString()}</span>
               </div>
-              <div className="pt-2 flex flex-col gap-3">
-                <Button className="w-full bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-xl h-11">
+              <div className="pt-2 flex flex-col gap-2">
+                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl h-9 shadow-xs cursor-pointer">
                   Change Status
                 </Button>
                 {isActive && (
-                  <Button variant="outline" className="w-full text-[#EF4444] border-red-200 hover:bg-red-50 font-bold rounded-xl h-11">
+                  <Button variant="outline" className="w-full text-rose-600 border-rose-200 hover:bg-rose-50 font-black text-xs rounded-xl h-9 shadow-2xs cursor-pointer">
                     Terminate Lease
                   </Button>
                 )}
@@ -229,70 +254,70 @@ export default function TenantDetailsPage() {
 
           {/* Move Dates */}
           {isActive && activeLease && (
-            <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-[#007AFF]" />
-                <h2 className="font-bold text-[#1D1D1F] text-base">Lease Details</h2>
+            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-slate-700" />
+                <h2 className="font-black text-slate-900 text-sm tracking-tight">Lease Details</h2>
               </div>
-              <CardContent className="p-5 space-y-4">
-                <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                  <span className="text-sm font-bold text-[#6E6E73]">Move-in Date</span>
-                  <span className="font-semibold text-[#1D1D1F]">{new Date(activeLease.startDate).toLocaleDateString()}</span>
+              <CardContent className="p-5 space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Move-in Date</span>
+                  <span className="font-black text-slate-900 text-xs">{new Date(activeLease.startDate).toLocaleDateString()}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                  <span className="text-sm font-bold text-[#6E6E73]">Unit</span>
-                  <Link href={`/dashboard/properties/${activeLease.unit.propertyId}/units/${activeLease.unitId}`} className="font-semibold text-[#007AFF] hover:underline">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Unit</span>
+                  <Link href={`/dashboard/properties/${activeLease.unit.propertyId}/units/${activeLease.unitId}`} className="font-black text-slate-900 text-xs hover:underline">
                     {activeLease.unit.name}
                   </Link>
                 </div>
-                <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                  <span className="text-sm font-bold text-[#6E6E73]">Rent</span>
-                  <span className="font-semibold text-[#1D1D1F]">${Number(activeLease.monthlyRent).toFixed(2)}/mo</span>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rent</span>
+                  <span className="font-black text-slate-900 text-xs">${Number(activeLease.monthlyRent).toFixed(2)}/mo</span>
                 </div>
               </CardContent>
             </Card>
           )}
 
           {/* Employment Information */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-[#007AFF]" />
-              <h2 className="font-bold text-[#1D1D1F] text-base">Employment Information</h2>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-slate-700" />
+              <h2 className="font-black text-slate-900 text-sm tracking-tight">Employment Information</h2>
             </div>
-            <CardContent className="p-5 space-y-4">
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Employer</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.employer || "-"}</span>
+            <CardContent className="p-5 space-y-3">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Employer</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.employer || "-"}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Job Title</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.position || "-"}</span>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Job Title</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.position || "-"}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Annual Income</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.annualIncome ? `$${Number(tenant.annualIncome).toLocaleString()}` : "-"}</span>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Annual Income</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.annualIncome ? `$${Number(tenant.annualIncome).toLocaleString()}` : "-"}</span>
               </div>
             </CardContent>
           </Card>
 
           {/* Emergency Contact */}
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex items-center gap-2">
-              <PhoneCall className="h-4 w-4 text-[#007AFF]" />
-              <h2 className="font-bold text-[#1D1D1F] text-base">Emergency Contact</h2>
+          <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <PhoneCall className="h-4 w-4 text-slate-700" />
+              <h2 className="font-black text-slate-900 text-sm tracking-tight">Emergency Contact</h2>
             </div>
-            <CardContent className="p-5 space-y-4">
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Name</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.emergencyName || "-"}</span>
+            <CardContent className="p-5 space-y-3">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Name</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.emergencyName || "-"}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Relationship</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.emergencyRelationship || "-"}</span>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Relationship</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.emergencyRelationship || "-"}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-[#F1F5F9] pb-3">
-                <span className="text-sm font-bold text-[#6E6E73]">Phone</span>
-                <span className="font-semibold text-[#1D1D1F]">{tenant.emergencyPhone || "-"}</span>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Phone</span>
+                <span className="font-black text-slate-900 text-xs">{tenant.emergencyPhone || "-"}</span>
               </div>
             </CardContent>
           </Card>

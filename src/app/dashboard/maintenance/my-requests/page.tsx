@@ -129,43 +129,48 @@ export default function MyRequestsPage() {
         />
       )}
       <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
-      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20">
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-sm">
-        <div>
-          <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tight">My Requests</h1>
-          <p className="text-[#6E6E73] text-sm mt-1">Track pending tickets, schedule inspection dates, and view histories.</p>
-        </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs font-sans">
         <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+            <Wrench className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Requests</h1>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">Track pending tickets, schedule inspection dates, and view histories.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
           <Button
             onClick={fetchMaintenance}
             variant="outline"
-            className="bg-white border border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-xl font-bold flex items-center gap-2 h-11 px-5 shadow-sm"
+            className="bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl font-black text-xs flex items-center gap-2 h-10 px-4 shadow-2xs cursor-pointer"
           >
-            <RefreshCw className="h-4 w-4" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
           <Button 
             onClick={() => router.push("/dashboard/maintenance/new")} 
-            className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold h-11 px-5 rounded-xl shadow-sm flex items-center gap-2"
+            className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs h-10 px-5 rounded-xl cursor-pointer transition-all flex items-center gap-2"
           >
-            <Plus className="h-5 w-5" /> Submit Request
+            <Plus className="h-4 w-4" /> Submit Request
           </Button>
         </div>
       </div>
 
-      <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[#F1F5F9] mb-6">
+      <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8 font-sans">
+        <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-slate-100 mb-6">
           <div>
-            <h2 className="text-lg font-extrabold text-[#1D1D1F]">Maintenance Log</h2>
-            <span className="text-xs text-[#6E6E73]">All logged repairs and their current statuses</span>
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Maintenance Log</h2>
+            <span className="text-xs font-semibold text-slate-500">All logged repairs and their current statuses</span>
           </div>
 
           <div className="flex gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
             <Select value={maintFilterPriority} onValueChange={(val) => setMaintFilterPriority(val || "ALL")}>
-              <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E5E5EA] rounded-xl">
+              <SelectTrigger className="h-9 text-xs font-extrabold w-32 bg-slate-50 border-slate-200 rounded-xl shadow-2xs">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white rounded-xl border-slate-200">
                 <SelectItem value="ALL">All Priorities</SelectItem>
                 <SelectItem value="LOW">Low</SelectItem>
                 <SelectItem value="MEDIUM">Medium</SelectItem>
@@ -175,10 +180,10 @@ export default function MyRequestsPage() {
             </Select>
 
             <Select value={maintFilterStatus} onValueChange={(val) => setMaintFilterStatus(val || "ALL")}>
-              <SelectTrigger className="h-9 text-xs w-32 bg-slate-50 border-[#E5E5EA] rounded-xl">
+              <SelectTrigger className="h-9 text-xs font-extrabold w-36 bg-slate-50 border-slate-200 rounded-xl shadow-2xs">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white rounded-xl border-slate-200">
                 <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="SUBMITTED">Submitted</SelectItem>
                 <SelectItem value="ASSIGNED">Assigned</SelectItem>
@@ -194,21 +199,21 @@ export default function MyRequestsPage() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Ticket Title</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Priority</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Assigned Inspector</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Schedule</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Filed</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-[#6E6E73] text-right">Actions</TableHead>
+              <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Ticket Title</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Category</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Priority</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Status</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Assigned Inspector</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Schedule</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Date Filed</TableHead>
+                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredMaint.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-[#6E6E73] italic font-semibold">
+                  <TableCell colSpan={7} className="h-32 text-center text-slate-400 italic font-semibold text-xs">
                     No maintenance tickets found.
                   </TableCell>
                 </TableRow>

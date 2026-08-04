@@ -159,19 +159,19 @@ export default function AdminDashboard() {
 
       {/* ── TOP CRITICAL ALERT BANNER (If Action Required) ── */}
       {alertCount > 0 && (
-        <div className="bg-gradient-to-r from-rose-900/90 via-amber-900/80 to-rose-900/90 border border-rose-500/40 rounded-[24px] p-5 sm:p-6 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 text-white shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5 relative z-10">
-            <div className="h-10 w-10 rounded-2xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
-              <ShieldAlert className="h-5 w-5 text-rose-300 animate-pulse" />
+            <div className="h-10 w-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldAlert className="h-5 w-5 text-rose-400" />
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-white text-base tracking-tight">Critical Actions Required ({alertCount})</h3>
-                <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500 text-white uppercase tracking-widest">
+              <div className="flex items-center gap-2.5">
+                <h3 className="font-extrabold text-white text-base tracking-tight">Critical Actions Required ({alertCount})</h3>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase tracking-wider">
                   Immediate Review
                 </span>
               </div>
-              <p className="text-rose-100/80 text-xs max-w-2xl leading-relaxed font-medium">
+              <p className="text-slate-300 text-xs max-w-2xl leading-relaxed font-medium">
                 {pendingPayouts.length > 0 && `• ${pendingPayouts.length} payout request(s) awaiting admin approval. `}
                 {pendingProperties.length > 0 && `• ${pendingProperties.length} property listing(s) pending manual onboarding approval.`}
               </p>
@@ -181,14 +181,14 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 shrink-0 w-full md:w-auto relative z-10">
             {pendingPayouts.length > 0 && (
               <Link href="/dashboard/admin/payouts" className="w-full md:w-auto">
-                <Button className="bg-rose-500 hover:bg-rose-600 text-white font-extrabold h-10 px-4 rounded-xl text-xs w-full md:w-auto shadow-md">
+                <Button className="bg-rose-600 hover:bg-rose-500 text-white font-bold h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
                   Process Payouts ({pendingPayouts.length})
                 </Button>
               </Link>
             )}
             {pendingProperties.length > 0 && (
               <Link href="/dashboard/admin/properties" className="w-full md:w-auto">
-                <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold h-10 px-4 rounded-xl text-xs w-full md:w-auto shadow-md">
+                <Button className="bg-white hover:bg-slate-100 text-slate-900 font-bold h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
                   Review Listings ({pendingProperties.length})
                 </Button>
               </Link>

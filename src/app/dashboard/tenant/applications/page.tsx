@@ -53,28 +53,28 @@ export default function TenantApplicationsPage() {
         />
       )}
       <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
-        <div className="p-6 md:p-10 max-w-6xl mx-auto w-full min-h-screen">
-          <div className="mb-10">
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
-              <div className="p-3 bg-indigo-100 rounded-xl">
-                <ClipboardList className="h-7 w-7 text-indigo-600" />
-              </div>
-              My Applications
-            </h1>
-            <p className="text-[#6E6E73] mt-2 text-sm font-medium">Track the status of your rental applications in real-time.</p>
+        <div className="p-6 md:p-10 max-w-6xl mx-auto w-full min-h-screen font-sans">
+          <div className="mb-8 flex items-center gap-3 font-sans">
+            <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+              <ClipboardList className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Applications</h1>
+              <p className="text-slate-500 text-xs font-semibold mt-0.5">Track the status of your rental applications in real-time.</p>
+            </div>
           </div>
 
       {applications.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
-            <ClipboardList className="h-8 w-8 text-slate-300" />
+        <div className="text-center py-16 px-6 bg-white rounded-3xl border border-slate-200 shadow-xs font-sans">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 border border-slate-200/80 mb-5 text-slate-900 shadow-2xs">
+            <ClipboardList className="h-7 w-7 text-slate-700" />
           </div>
-          <h3 className="text-lg font-black text-slate-900 mb-2">No Applications Found</h3>
-          <p className="text-[#6E6E73] max-w-md mx-auto text-sm leading-relaxed mb-8">
+          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1.5">No Applications Found</h3>
+          <p className="text-slate-500 max-w-md mx-auto text-xs font-semibold leading-relaxed mb-6">
             You haven't submitted any rental applications yet. When you find a property you like, apply to see its status here!
           </p>
-          <Link href="/listings" className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors shadow-sm gap-2">
-            <Search className="h-4 w-4" />
+          <Link href="/listings" className="inline-flex items-center justify-center px-6 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl transition-all cursor-pointer gap-2">
+            <Search className="h-4 w-4 text-emerald-700" />
             Browse Listings
           </Link>
         </div>
@@ -146,14 +146,10 @@ function ApplicationCard({ application }: { application: any }) {
             </div>
             <Link 
               href={`/dashboard/leases/${application.lease.id}`}
-              className={`w-full inline-flex items-center justify-center px-4 py-3.5 text-white font-bold text-sm rounded-xl shadow-md transition-all hover:scale-[1.02] gap-2 ${
-                application.lease.status === "PENDING_SIGNATURE" 
-                  ? "bg-indigo-600 hover:bg-indigo-700" 
-                  : "bg-emerald-600 hover:bg-emerald-700"
-              }`}
+              className="w-full inline-flex items-center justify-center px-4 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl transition-all cursor-pointer gap-2"
             >
               {application.lease.status === "PENDING_SIGNATURE" ? "Review & Sign Lease" : "View Lease Details"}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 text-emerald-700" />
             </Link>
           </div>
         )}

@@ -147,17 +147,17 @@ export default function InspectorOverviewPage() {
           expiresAt={featureAccess.expiresAt}
         />
       )}
-      <div className={`max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 space-y-8 ${isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 space-y-8 font-sans ${isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}`}>
 
-      {/* ── iOS 18 HERO HEADER BANNER ── */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
+      {/* ── HERO HEADER BANNER ── */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 font-sans">
+        <div className="space-y-1.5 font-sans">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200/80 text-blue-700 rounded-lg text-xs font-extrabold">
-              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-black shadow-2xs">
+              <ShieldCheck className="h-3.5 w-3.5 text-white" />
               Field Inspector Hub
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               Available for Dispatch
             </span>
@@ -166,22 +166,22 @@ export default function InspectorOverviewPage() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
             Good {now.getHours() < 12 ? "morning" : now.getHours() < 18 ? "afternoon" : "evening"}, {userName} 👋
           </h1>
-          <p className="text-slate-500 text-sm font-medium">
+          <p className="text-slate-500 text-xs font-semibold">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
             <span className="text-slate-300 mx-2">&bull;</span>
-            <span className="text-slate-700 font-bold">{activeTasks.length} Active Work Orders</span>
+            <span className="text-slate-900 font-extrabold">{activeTasks.length} Active Work Orders</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 font-sans">
           <Link href="/dashboard/messages">
-            <Button variant="outline" className="h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold px-5 rounded-2xl text-sm gap-2">
-              <MessageSquare className="h-4 w-4 text-blue-600" /> Messages
+            <Button variant="outline" className="h-10 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 font-black px-5 rounded-xl text-xs gap-2 shadow-2xs cursor-pointer">
+              <MessageSquare className="h-4 w-4 text-slate-700" /> Messages
             </Button>
           </Link>
           <Link href="/dashboard/inspector/active">
-            <Button className="h-11 bg-slate-900 hover:bg-blue-600 text-white font-bold px-6 rounded-2xl shadow-sm hover:shadow-md transition-all text-sm gap-2 border-none">
-              <Wrench className="h-4 w-4" /> View All Work Orders
+            <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white font-black px-6 rounded-xl shadow-xs text-xs gap-2 border-none cursor-pointer">
+              <Wrench className="h-4 w-4 text-white" /> View All Work Orders
             </Button>
           </Link>
         </div>
@@ -336,9 +336,9 @@ export default function InspectorOverviewPage() {
 
                       <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
                         <Link href={item.link}>
-                          <Button className="h-9 bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs rounded-xl px-4 flex items-center gap-1.5 transition-all">
+                          <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl px-4 flex items-center gap-1.5 border-none cursor-pointer">
                             {sCfg?.next || (item.type === "WALKTHROUGH" ? "Conduct" : "View")}
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            <ArrowRight className="h-3.5 w-3.5 text-white" />
                           </Button>
                         </Link>
                       </div>
@@ -390,8 +390,8 @@ export default function InspectorOverviewPage() {
                       </div>
 
                       <Link href={item.link} className="block">
-                        <Button className="w-full h-8 bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold rounded-xl gap-1">
-                          {sCfg?.next || "View Task"} <ArrowRight className="h-3 w-3" />
+                        <Button className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black rounded-xl gap-1 border-none cursor-pointer">
+                          {sCfg?.next || "View Task"} <ArrowRight className="h-3 w-3 text-white" />
                         </Button>
                       </Link>
                     </div>

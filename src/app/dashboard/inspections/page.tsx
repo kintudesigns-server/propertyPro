@@ -4,16 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ShieldAlert, ArrowRight, User, Home, Calendar, Clock } from "lucide-react";
+import { Search, ShieldAlert, ArrowRight, User, Home, Calendar, Clock, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-import { MoreHorizontal } from "lucide-react";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 type TabState = "AWAITING_INSPECTION" | "READY_FOR_SETTLEMENT" | "COMPLETED";
-
-import { useModuleAccess } from "@/hooks/useModuleAccess";
-import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 
 export default function InspectionsPage() {
   const { allowed, loading: checkingAccess } = useModuleAccess("inspections");
@@ -31,7 +27,6 @@ export default function InspectionsPage() {
       const res = await fetch("/api/leases");
       const data = await res.json();
       if (Array.isArray(data)) {
-        // Filter to only leases in active move-out flow waiting for inspection
         const moveOutLeases = data.filter(lease => 
           lease.status === "NOTICE_GIVEN" || 
           lease.status === "TERMINATED" || 
@@ -59,8 +54,6 @@ export default function InspectionsPage() {
     }
   }, [allowed]);
 
-
-
   const getTabCount = (tab: TabState) => {
     return leases.filter(lease => {
       const status = lease.moveOutStatus;
@@ -80,10 +73,9 @@ export default function InspectionsPage() {
     const isTerminated = lease.status === "TERMINATED";
     if (isTerminated) return "border-l-4 border-l-slate-300";
 
-    // Check if deposit due deadline is close (<= 5 days) or passed
     if (lease.depositDueBy) {
       const daysLeft = Math.ceil((new Date(lease.depositDueBy).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      if (daysLeft <= 5) return "border-l-4 border-l-red-500";
+      if (daysLeft <= 5) return "border-l-4 border-l-rose-500";
     }
 
     const status = lease.moveOutStatus;
@@ -91,7 +83,7 @@ export default function InspectionsPage() {
       return "border-l-4 border-l-amber-500";
     }
     if (status === "INSPECTION_SCHEDULED") {
-      return "border-l-4 border-l-blue-500";
+      return "border-l-4 border-l-slate-900";
     }
     if (["INSPECTION_COMPLETED", "TENANT_ACCEPTED"].includes(status)) {
       return "border-l-4 border-l-emerald-500";
@@ -118,56 +110,56 @@ export default function InspectionsPage() {
     }
     return false;
   }).sort((a, b) => {
-    // Sort by moveOutRequestDate descending (latest requests first)
     const dateA = a.moveOutRequestDate ? new Date(a.moveOutRequestDate).getTime() : 0;
     const dateB = b.moveOutRequestDate ? new Date(b.moveOutRequestDate).getTime() : 0;
     return dateB - dateA;
   });
 
-
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-20 relative">
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <ShieldAlert className="h-6 w-6 text-indigo-500" />
-          Turnovers & Inspections
-        </h1>
-        <p className="text-sm font-semibold text-[#6E6E73] mt-1">
-          Manage all upcoming move-outs and schedule walkthrough inspections across your portfolio.
-        </p>
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      {/* Page Header */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="h-10 w-10 bg-slate-100 text-slate-800 border border-slate-200/80 rounded-xl flex items-center justify-center shrink-0">
+          <ClipboardCheck className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Turnovers & Inspections</h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage all upcoming move-outs and schedule walkthrough inspections across your portfolio.</p>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+      {/* Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs gap-1 w-full sm:w-auto">
           <button
             onClick={() => setActiveTab("AWAITING_INSPECTION")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "AWAITING_INSPECTION" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === "AWAITING_INSPECTION" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
           >
             Awaiting Inspection
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("AWAITING_INSPECTION")}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${activeTab === "AWAITING_INSPECTION" ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-700"}`}>{getTabCount("AWAITING_INSPECTION")}</span>
           </button>
           <button
             onClick={() => setActiveTab("READY_FOR_SETTLEMENT")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "READY_FOR_SETTLEMENT" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === "READY_FOR_SETTLEMENT" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
           >
             Ready for Settlement
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("READY_FOR_SETTLEMENT")}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${activeTab === "READY_FOR_SETTLEMENT" ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-700"}`}>{getTabCount("READY_FOR_SETTLEMENT")}</span>
           </button>
           <button
             onClick={() => setActiveTab("COMPLETED")}
-            className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${activeTab === "COMPLETED" ? "bg-white text-slate-900 shadow-sm" : "text-[#6E6E73] hover:text-slate-700"}`}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === "COMPLETED" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
           >
             Completed
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-[#6E6E73] font-extrabold">{getTabCount("COMPLETED")}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${activeTab === "COMPLETED" ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-700"}`}>{getTabCount("COMPLETED")}</span>
           </button>
         </div>
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input 
             placeholder="Search by property, unit, or tenant..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-11 bg-white border-slate-200 rounded-xl font-medium text-sm"
+            className="pl-10 h-10 bg-white border-slate-200 rounded-xl font-semibold text-xs text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-xs"
           />
         </div>
       </div>
@@ -179,35 +171,35 @@ export default function InspectionsPage() {
           ))}
         </div>
       ) : filteredLeases.length === 0 ? (
-        <Card className="p-12 text-center rounded-3xl shadow-sm border-slate-200 bg-white">
-          <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldAlert className="h-8 w-8 text-slate-300" />
+        <Card className="p-16 text-center rounded-3xl shadow-xs border-slate-200 bg-white">
+          <div className="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-slate-200">
+            <ClipboardCheck className="h-7 w-7 text-slate-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">No active inspections</h3>
-          <p className="text-sm text-[#6E6E73] mt-1 font-medium">There are currently no leases pending a walkthrough inspection.</p>
+          <h3 className="text-base font-extrabold text-slate-900">No active inspections</h3>
+          <p className="text-xs text-slate-500 mt-1 font-medium">There are currently no leases pending a walkthrough inspection in this section.</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredLeases.map((lease) => (
-            <Card key={lease.id} className={`p-0 overflow-hidden rounded-3xl shadow-sm hover:shadow-md transition-all border-slate-200 bg-white flex flex-col ${getBorderColor(lease)}`}>
-              <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
+            <Card key={lease.id} className={`p-0 overflow-hidden rounded-3xl shadow-xs hover:shadow-md transition-all border border-slate-200 bg-white flex flex-col ${getBorderColor(lease)}`}>
+              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <Home className="h-4 w-4 text-indigo-500" />
+                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <Home className="h-4 w-4 text-slate-500" />
                     {lease.unit?.property?.name} • {lease.unit?.name}
                   </h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    <User className="h-4 w-4 text-[#8E8E93]" />
-                    <p className="text-sm font-semibold text-[#6E6E73]">{lease.tenant?.name || "Unknown Tenant"}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <User className="h-3.5 w-3.5 text-slate-400" />
+                    <p className="text-xs font-semibold text-slate-600">{lease.tenant?.name || "Unknown Tenant"}</p>
                   </div>
                 </div>
-                <span className={`px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider ${
-                  lease.moveOutStatus === "INSPECTION_SCHEDULED" ? "bg-blue-100 text-blue-700" :
-                  lease.moveOutStatus === "MOVE_OUT_REQUESTED" ? "bg-amber-100 text-amber-700" :
-                  lease.moveOutStatus === "OWNER_REVIEWING" ? "bg-purple-100 text-purple-700" :
-                  lease.moveOutStatus === "INSPECTION_COMPLETED" ? "bg-emerald-100 text-emerald-700" :
-                  lease.status === "TERMINATED" ? "bg-slate-100 text-slate-700" :
-                  "bg-indigo-100 text-indigo-700"
+                <span className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-lg border shadow-2xs ${
+                  lease.moveOutStatus === "INSPECTION_SCHEDULED" ? "bg-slate-100 text-slate-800 border-slate-200" :
+                  lease.moveOutStatus === "MOVE_OUT_REQUESTED" ? "bg-amber-50 text-amber-800 border-amber-200" :
+                  lease.moveOutStatus === "OWNER_REVIEWING" ? "bg-slate-100 text-slate-800 border-slate-200" :
+                  lease.moveOutStatus === "INSPECTION_COMPLETED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                  lease.status === "TERMINATED" ? "bg-slate-100 text-slate-500 border-slate-200" :
+                  "bg-slate-100 text-slate-800 border-slate-200"
                 }`}>
                   {lease.status === "TERMINATED" ? "Completed" :
                    lease.moveOutStatus === "INSPECTION_SCHEDULED" ? "Scheduled" : 
@@ -218,27 +210,26 @@ export default function InspectionsPage() {
                 </span>
               </div>
               
-              <div className="p-6 flex-1 flex flex-col justify-between gap-6">
+              <div className="p-5 flex-1 flex flex-col justify-between gap-5">
                 <div className="space-y-3">
                   {/* Dynamic Pipeline Info */}
                   {(() => {
-                    // Figure out what step we are at
                     if (lease.preliminaryInspectionStatus === "SCHEDULED") {
                       return (
                         <>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
-                              <Calendar className="h-4 w-4" /> Prelim Date
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-slate-500 flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-slate-400" /> Prelim Date
                             </span>
-                            <span className="font-bold text-slate-900">
+                            <span className="font-extrabold text-slate-900">
                               {lease.preliminaryInspectionDate ? new Date(lease.preliminaryInspectionDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Pending"}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
-                              <User className="h-4 w-4" /> Inspector
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-slate-500 flex items-center gap-1.5">
+                              <User className="h-3.5 w-3.5 text-slate-400" /> Inspector
                             </span>
-                            <span className="font-bold text-indigo-600">
+                            <span className="font-extrabold text-slate-900">
                               {lease.preliminaryInspectorId === "SELF" ? "Me (Self-Inspect)" : lease.preliminaryInspectorId ? inspectors.find(i => i.id === lease.preliminaryInspectorId)?.name || "Assigned" : "Pending Assignment"}
                             </span>
                           </div>
@@ -247,19 +238,19 @@ export default function InspectionsPage() {
                     } else if (lease.moveOutStatus === "INSPECTION_SCHEDULED") {
                       return (
                         <>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
-                              <Calendar className="h-4 w-4" /> Final Date
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-slate-500 flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-slate-400" /> Final Date
                             </span>
-                            <span className="font-bold text-slate-900">
+                            <span className="font-extrabold text-slate-900">
                               {lease.inspectionDate ? new Date(lease.inspectionDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Pending"}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
-                              <User className="h-4 w-4" /> Inspector
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-slate-500 flex items-center gap-1.5">
+                              <User className="h-3.5 w-3.5 text-slate-400" /> Inspector
                             </span>
-                            <span className="font-bold text-indigo-600">
+                            <span className="font-extrabold text-slate-900">
                               {lease.moveOutInspectorId === "SELF" ? "Me (Self-Inspect)" : lease.moveOutInspectorId ? inspectors.find(i => i.id === lease.moveOutInspectorId)?.name || "Assigned" : "Pending Assignment"}
                             </span>
                           </div>
@@ -267,11 +258,11 @@ export default function InspectionsPage() {
                       );
                     } else {
                       return (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-semibold text-[#6E6E73] flex items-center gap-2">
-                            <Calendar className="h-4 w-4" /> Move-Out Date
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-slate-500 flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-slate-400" /> Move-Out Date
                           </span>
-                          <span className="font-bold text-slate-900">
+                          <span className="font-extrabold text-slate-900">
                             {lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "Pending"}
                           </span>
                         </div>
@@ -281,13 +272,13 @@ export default function InspectionsPage() {
 
                   {/* Legal Return Deadline Countdown Badge */}
                   {lease.depositDueBy && lease.status !== "TERMINATED" && (
-                    <div className={`mt-3 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold ${
+                    <div className={`mt-3 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold ${
                       (() => {
                         const daysLeft = Math.ceil((new Date(lease.depositDueBy).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                        return daysLeft <= 5 ? "bg-red-50 text-red-700 border border-red-100" : "bg-amber-50 text-amber-700 border border-amber-100";
+                        return daysLeft <= 5 ? "bg-rose-50 text-rose-700 border border-rose-200/80" : "bg-amber-50 text-amber-900 border border-amber-200/80";
                       })()
                     }`}>
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-4 w-4 shrink-0" />
                       <span>
                         {(() => {
                           const daysLeft = Math.ceil((new Date(lease.depositDueBy).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
@@ -298,10 +289,10 @@ export default function InspectionsPage() {
                   )}
                 </div>
 
-                <div className="mt-auto pt-4">
+                <div className="mt-auto pt-2">
                   <Button 
                     onClick={() => router.push(`/dashboard/leases/${lease.id}`)}
-                    className="w-full bg-slate-900 hover:bg-[#007AFF] text-white font-bold h-11 rounded-xl shadow-none flex items-center justify-center gap-2"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-10 rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                   >
                     Manage Turnover Pipeline <ArrowRight className="h-4 w-4" />
                   </Button>

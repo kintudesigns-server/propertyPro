@@ -746,77 +746,73 @@ export default function ListingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] text-[#1D1D1F] flex flex-col font-sans selection:bg-[#007AFF]/20">
-      
-      {/* iOS Translucent Blurred Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white/75 backdrop-blur-xl border-b border-black/10 px-4 sm:px-8 py-3 flex items-center justify-between transition-all">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 bg-[#007AFF] rounded-2xl flex items-center justify-center shadow-md shadow-[#007AFF]/25 group-hover:scale-105 transition-transform duration-200">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-extrabold tracking-tight text-[#1D1D1F] leading-tight">PropertyPro</span>
-              <span className="text-[10px] text-[#8E8E93] font-medium tracking-wide">Verified Listings</span>
-            </div>
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
 
-        {/* Mobile View Toggle Segmented Control (List / Map) */}
-        <div className="flex lg:hidden items-center bg-[#E5E5EA] p-1 rounded-full text-xs font-semibold">
+      {/* ── Navbar ── */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-8 py-3 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center group-hover:bg-slate-700 transition-colors">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[15px] font-extrabold tracking-tight text-slate-900 leading-tight">PropertyPro</span>
+            <span className="text-[10px] text-slate-400 font-medium">Verified Listings</span>
+          </div>
+        </Link>
+
+        {/* Mobile View Toggle */}
+        <div className="flex lg:hidden items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
           <button
             onClick={() => setViewMode("list")}
-            className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-              viewMode === "list" ? "bg-white text-[#1D1D1F] shadow-sm font-bold" : "text-[#8E8E93]"
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              viewMode === "list" ? "bg-white text-slate-900 shadow-sm font-bold" : "text-slate-400"
             }`}
           >
             <List className="h-3.5 w-3.5" /> List
           </button>
           <button
             onClick={() => setViewMode("map")}
-            className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-              viewMode === "map" ? "bg-white text-[#1D1D1F] shadow-sm font-bold" : "text-[#8E8E93]"
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              viewMode === "map" ? "bg-white text-slate-900 shadow-sm font-bold" : "text-slate-400"
             }`}
           >
             <MapIcon className="h-3.5 w-3.5" /> Map
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link href={session ? "/dashboard" : "/auth/login"}>
-            <Button className="bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold px-4 py-2 rounded-full text-xs transition-all shadow-sm shadow-[#007AFF]/20 active:scale-95">
-              {session ? "Workspace" : "Sign In"}
-            </Button>
-          </Link>
-        </div>
+        <Link href={session ? "/dashboard" : "/auth/login"}>
+          <Button className="bg-slate-900 hover:bg-slate-700 text-white font-semibold px-4 h-9 rounded-xl text-xs transition-all">
+            {session ? "Workspace" : "Sign In"}
+          </Button>
+        </Link>
       </header>
 
-      {/* iOS Search & Segmented Filter Bar */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-1 w-full space-y-3">
-        <div className="bg-white/80 backdrop-blur-md rounded-[20px] p-3.5 border border-black/5 shadow-sm space-y-3">
+      {/* ── Search & Filter Bar ── */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-2 w-full">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
           <div className="flex flex-col md:flex-row items-center gap-3">
-            {/* iOS Pill Search Input */}
+            {/* Search Input */}
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search city, neighborhood, or building..."
                 value={searchCity}
                 onChange={(e) => setSearchCity(e.target.value)}
-                className="w-full pl-10 pr-10 py-2.5 bg-[#F2F2F7] text-[#1D1D1F] placeholder-[#8E8E93] text-xs font-medium rounded-full border-0 focus:ring-2 focus:ring-[#007AFF] transition-all outline-none"
+                className="w-full pl-10 pr-9 py-2.5 bg-slate-50 text-slate-800 placeholder-slate-400 text-sm font-medium rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all outline-none"
               />
               {searchCity && (
                 <button
                   onClick={() => setSearchCity("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8E8E93] hover:text-[#1D1D1F]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
 
-            {/* iOS Segmented Pill Selector for Property Type */}
-            <div className="flex items-center bg-[#F2F2F7] p-1 rounded-full text-xs font-medium shrink-0 w-full md:w-auto overflow-x-auto">
+            {/* Property Type Segmented Control */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold shrink-0 w-full md:w-auto overflow-x-auto gap-0.5">
               {[
                 { id: "all", label: "All Types" },
                 { id: "apartment", label: "Apartments" },
@@ -826,10 +822,10 @@ export default function ListingsPage() {
                 <button
                   key={t.id}
                   onClick={() => setPropertyType(t.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
+                  className={`px-3.5 py-2 rounded-lg text-xs whitespace-nowrap transition-all ${
                     propertyType === t.id
-                      ? "bg-white text-[#007AFF] font-bold shadow-sm"
-                      : "text-[#8E8E93] hover:text-[#1D1D1F]"
+                      ? "bg-white text-slate-900 font-bold shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   {t.label}
@@ -838,14 +834,13 @@ export default function ListingsPage() {
             </div>
           </div>
 
-          {/* Secondary Pill Filters */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-black/5 text-xs text-[#8E8E93]">
+          {/* Secondary Filters Row */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
             <div className="flex flex-wrap items-center gap-2">
-              {/* Bedrooms Pill */}
               <select
                 value={minRooms}
                 onChange={(e) => setMinRooms(e.target.value)}
-                className="bg-[#F2F2F7] border-0 text-[#1D1D1F] text-xs font-medium px-3.5 py-1.5 rounded-full cursor-pointer focus:ring-2 focus:ring-[#007AFF] outline-none"
+                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-slate-400"
               >
                 <option value="all">Bedrooms: Any</option>
                 <option value="1">1+ Bed</option>
@@ -853,23 +848,21 @@ export default function ListingsPage() {
                 <option value="3">3+ Beds</option>
               </select>
 
-              {/* Max Rent Pill */}
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-[#8E8E93] font-medium text-xs">$</span>
+                <span className="absolute left-3 text-slate-400 font-medium text-xs">$</span>
                 <input
                   type="number"
                   placeholder="Max Rent"
                   value={maxRent}
                   onChange={(e) => setMaxRent(e.target.value)}
-                  className="w-28 pl-6 pr-3 py-1.5 bg-[#F2F2F7] text-[#1D1D1F] placeholder-[#8E8E93] text-xs font-medium rounded-full border-0 focus:ring-2 focus:ring-[#007AFF] outline-none"
+                  className="w-28 pl-6 pr-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 text-xs font-medium rounded-lg focus:outline-none focus:border-slate-400"
                 />
               </div>
 
-              {/* Sort By Pill */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#F2F2F7] border-0 text-[#1D1D1F] text-xs font-medium px-3.5 py-1.5 rounded-full cursor-pointer focus:ring-2 focus:ring-[#007AFF] outline-none"
+                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-slate-400"
               >
                 <option value="featured">Featured First</option>
                 <option value="rent_asc">Rent: Low to High</option>
@@ -878,18 +871,12 @@ export default function ListingsPage() {
               </select>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="font-medium text-[#1D1D1F]">{processedUnits.length} units matching</span>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="font-semibold text-slate-500">{processedUnits.length} units matching</span>
               {(searchCity || maxRent || minRooms !== "all" || propertyType !== "all") && (
                 <button
-                  onClick={() => {
-                    setSearchCity("");
-                    setMaxRent("");
-                    setMinRooms("all");
-                    setPropertyType("all");
-                    setSortBy("featured");
-                  }}
-                  className="text-[#007AFF] hover:underline font-medium flex items-center gap-1"
+                  onClick={() => { setSearchCity(""); setMaxRent(""); setMinRooms("all"); setPropertyType("all"); setSortBy("featured"); }}
+                  className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1 border border-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-50 transition-colors"
                 >
                   Clear Filters <X className="h-3 w-3" />
                 </button>
@@ -904,18 +891,18 @@ export default function ListingsPage() {
         
         {/* Left Side: Property Cards Grid */}
         <div className={`lg:w-[55%] space-y-4 flex flex-col ${viewMode === "map" ? "hidden lg:flex" : "flex"}`}>
-          
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="h-80 rounded-[22px] bg-white border border-black/5 animate-pulse shadow-sm" />
+                <div key={n} className="h-80 rounded-2xl bg-white border border-slate-200 animate-pulse shadow-sm" />
               ))}
             </div>
           ) : groupedList.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-[22px] border border-dashed border-black/10 max-w-md mx-auto shadow-sm w-full">
-              <Home className="h-12 w-12 text-[#8E8E93] mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-[#1D1D1F] mb-1">No Properties Found</h3>
-              <p className="text-xs text-[#8E8E93] font-medium px-4">Try adjusting your filters, max rent budget, or search terms.</p>
+            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200 max-w-md mx-auto shadow-sm w-full">
+              <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-base font-bold text-slate-800 mb-1">No Properties Found</h3>
+              <p className="text-sm text-slate-400 font-medium px-4">Try adjusting your filters, max rent budget, or search terms.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -936,10 +923,10 @@ export default function ListingsPage() {
                         window.location.href = `/listings/${unit.id}`;
                       }
                     }}
-                    className={`group relative bg-white rounded-[22px] border transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden cursor-pointer flex flex-col ${
+                    className={`group relative bg-white rounded-2xl border transition-all duration-200 overflow-hidden cursor-pointer flex flex-col ${
                       hoveredPropertyId === group.property.id
-                        ? "border-[#007AFF] shadow-xl shadow-blue-500/10 -translate-y-1"
-                        : "border-black/5 shadow-sm hover:shadow-md"
+                        ? "border-slate-400 shadow-lg -translate-y-0.5"
+                        : "border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300"
                     }`}
                   >
                     {/* Visual Media Cover */}
@@ -999,40 +986,40 @@ export default function ListingsPage() {
                     {/* Card Body */}
                     <div className="p-4 flex-1 flex flex-col justify-between space-y-3 text-left">
                       <div>
-                        <div className="flex items-center gap-1 text-[10px] text-[#007AFF] font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
                           <MapPin className="h-3 w-3" />
                           <span>{group.property.city}, {group.property.country}</span>
                         </div>
-                        <h3 className="text-base font-extrabold text-[#1D1D1F] group-hover:text-[#007AFF] transition-colors line-clamp-1 mt-0.5">
+                        <h3 className="text-[15px] font-extrabold text-slate-900 group-hover:text-slate-700 transition-colors line-clamp-1 mt-1">
                           {group.property.name}
                         </h3>
-                        <p className="text-xs text-[#8E8E93] font-normal truncate mt-0.5">
+                        <p className="text-xs text-slate-400 font-normal truncate mt-0.5">
                           {group.property.address}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-[#8E8E93] border-t border-black/5 pt-3 font-medium">
+                      <div className="flex items-center gap-3 text-xs text-slate-500 border-t border-slate-100 pt-3 font-medium">
                         {group.property.type !== "Commercial" && (
-                          <span className="flex items-center gap-1">
-                            <BedDouble className="h-4 w-4 text-[#007AFF]" />
-                            <strong className="text-[#1D1D1F]">
-                              {isMultiUnit 
-                                ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}-${group.maxBeds}`) 
+                          <span className="flex items-center gap-1.5">
+                            <BedDouble className="h-3.5 w-3.5 text-slate-400" />
+                            <strong className="text-slate-700">
+                              {isMultiUnit
+                                ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}–${group.maxBeds}`)
                                 : unit.rooms}
                             </strong> Beds
                           </span>
                         )}
-                        <span className="flex items-center gap-1">
-                          <Square className="h-4 w-4 text-[#007AFF]" />
-                          <strong className="text-[#1D1D1F]">
-                            {isMultiUnit 
-                              ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}-${group.maxSqft}`)
+                        <span className="flex items-center gap-1.5">
+                          <Square className="h-3.5 w-3.5 text-slate-400" />
+                          <strong className="text-slate-700">
+                            {isMultiUnit
+                              ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}–${group.maxSqft}`)
                               : unit.sqFootage}
                           </strong> sqft
                         </span>
 
                         {isMultiUnit && (
-                          <span className="ml-auto text-[10px] font-bold text-[#007AFF] bg-blue-50 px-2.5 py-0.5 rounded-full">
+                          <span className="ml-auto text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
                             {group.units.length} Floorplans
                           </span>
                         )}
@@ -1047,7 +1034,7 @@ export default function ListingsPage() {
                             window.location.href = `/listings/${unit.id}`;
                           }
                         }}
-                        className="w-full bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold text-xs py-2.5 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-98"
+                        className="w-full bg-slate-900 hover:bg-slate-700 text-white font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
                       >
                         {isMultiUnit ? "Browse Floorplans" : "View Details"}
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -1430,25 +1417,25 @@ export default function ListingsPage() {
         <DialogContent className="bg-white border-0 text-slate-800 !w-screen !h-[100dvh] !max-w-none sm:!max-w-none !rounded-none !p-0 !flex flex-col md:flex-row !top-0 !left-0 !translate-x-0 !translate-y-0 overflow-hidden shadow-none outline-none">
           {submittedAppId ? (
             <div className="flex-1 flex items-center justify-center p-6 bg-slate-50">
-              <div className="bg-white p-10 rounded-3xl border border-slate-100 shadow-xl max-w-md w-full text-center space-y-6">
-                <div className="mx-auto h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-2 shadow-inner">
-                  <CheckCircle2 className="h-10 w-10 text-blue-600 animate-bounce" />
+              <div className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl max-w-md w-full text-center space-y-6 animate-in fade-in zoom-in-95">
+                <div className="mx-auto h-16 w-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100 shadow-xs">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">Application Received!</h3>
-                  <p className="text-sm text-slate-500 font-semibold leading-relaxed">
-                    Your application for <strong>{selectedUnit?.name}</strong> has been securely submitted to the landlord for review.
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Application Received!</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Your application for <strong className="text-slate-900 font-extrabold">{selectedUnit?.property?.name || 'Property'} {selectedUnit?.name ? `(${selectedUnit.name})` : ''}</strong> has been securely submitted to the landlord for review.
                   </p>
                 </div>
 
                 {/* Secure tracking link widget */}
-                <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3 text-left w-full shadow-sm">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl space-y-3 text-left w-full shadow-xs">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     <span>Secure Tracking Link</span>
-                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Encrypted</span>
+                    <span className="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full font-bold text-[9px] uppercase">Encrypted</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white border border-slate-200 p-2.5 rounded-xl shadow-inner">
-                    <span className="text-xs font-semibold text-slate-600 truncate flex-1 pl-1">
+                  <div className="flex items-center gap-2 bg-white border border-slate-200 p-2.5 rounded-xl">
+                    <span className="text-xs font-mono text-slate-700 truncate flex-1 pl-1">
                       {typeof window !== "undefined" ? `${window.location.origin}/listings/apply/track?id=${submittedAppId}` : `http://localhost:3000/listings/apply/track?id=${submittedAppId}`}
                     </span>
                     <button
@@ -1457,7 +1444,7 @@ export default function ListingsPage() {
                         navigator.clipboard.writeText(`${window.location.origin}/listings/apply/track?id=${submittedAppId}`);
                         toast.success("Tracking link copied to clipboard!");
                       }}
-                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 shrink-0 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
+                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 shrink-0 transition-colors cursor-pointer border border-slate-100"
                     >
                       <Share2 className="h-4 w-4" />
                     </button>
@@ -1467,10 +1454,10 @@ export default function ListingsPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 pt-4">
+                <div className="flex flex-col gap-2.5 pt-2">
                   <Link href={`/listings/apply/track?id=${submittedAppId}`} className="w-full">
                     <Button 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs"
                       onClick={() => {
                         setDialogOpen(false);
                         setSubmittedAppId(null);
@@ -1487,7 +1474,7 @@ export default function ListingsPage() {
                       setDialogOpen(false);
                       setSubmittedAppId(null);
                     }}
-                    className="text-slate-500 hover:text-slate-700 font-bold text-sm h-12"
+                    className="text-slate-500 hover:text-slate-900 font-semibold text-xs h-10"
                   >
                     Return to Listings
                   </Button>
@@ -1508,8 +1495,12 @@ export default function ListingsPage() {
                   <div className="mb-12">
                     <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight mb-2">Apply for<br/>{selectedUnit?.property?.name || 'Property'}</h2>
                     <div className="flex items-center gap-2 text-slate-600 font-bold mb-6">
-                      <span className="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-sm">Unit {selectedUnit?.name}</span>
-                      <span className="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-sm text-blue-700">${Number(selectedUnit?.rentAmount || 0).toLocaleString()}/mo</span>
+                      <span className="bg-white px-3 py-1 rounded-full shadow-xs border border-slate-200 text-xs font-bold text-slate-800">
+                        {selectedUnit?.name?.toLowerCase().startsWith("unit") ? selectedUnit.name : `Unit ${selectedUnit?.name || ''}`}
+                      </span>
+                      <span className="bg-white px-3 py-1 rounded-full shadow-xs border border-slate-200 text-xs font-extrabold text-slate-900">
+                        ${Number(selectedUnit?.rentAmount || 0).toLocaleString()}/mo
+                      </span>
                     </div>
                   </div>
 
@@ -1525,13 +1516,13 @@ export default function ListingsPage() {
                       <div key={s.step} className="flex gap-4">
                         <div className="flex flex-col items-center">
                           <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
-                            formStep > s.step ? 'bg-blue-600 text-white shadow-md' :
-                            formStep === s.step ? 'bg-blue-100 text-blue-700 ring-4 ring-blue-50' :
+                            formStep > s.step ? 'bg-slate-900 text-white shadow-xs' :
+                            formStep === s.step ? 'bg-slate-900 text-white ring-4 ring-slate-200' :
                             'bg-white text-slate-400 border border-slate-200'
                           }`}>
                             {formStep > s.step ? <CheckCircle2 className="h-4 w-4" /> : s.step}
                           </div>
-                          {s.step < 5 && <div className={`w-0.5 h-full my-1 rounded-full ${formStep > s.step ? 'bg-blue-600' : 'bg-slate-200'}`}></div>}
+                          {s.step < 5 && <div className={`w-0.5 h-full my-1 rounded-full ${formStep > s.step ? 'bg-slate-900' : 'bg-slate-200'}`}></div>}
                         </div>
                         <div className={`pb-8 ${formStep === s.step ? 'opacity-100' : 'opacity-60'}`}>
                           <h4 className={`text-sm font-extrabold ${formStep === s.step ? 'text-slate-900' : 'text-slate-500'}`}>{s.title}</h4>
@@ -1541,11 +1532,11 @@ export default function ListingsPage() {
                     ))}
                   </div>
 
-                  <div className="mt-auto bg-blue-50 rounded-2xl p-4 border border-blue-100 flex gap-3 items-start">
-                    <Lock className="h-5 w-5 text-blue-600 shrink-0" />
+                  <div className="mt-auto bg-slate-100/80 rounded-2xl p-4 border border-slate-200 flex gap-3 items-start">
+                    <Lock className="h-5 w-5 text-slate-700 shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-blue-900">256-bit Encryption</p>
-                      <p className="text-[10px] font-semibold text-blue-600 mt-0.5">Your sensitive data is encrypted in transit and at rest.</p>
+                      <p className="text-xs font-bold text-slate-900">256-bit Encryption</p>
+                      <p className="text-[10px] font-semibold text-slate-500 mt-0.5">Your sensitive data is encrypted in transit and at rest.</p>
                     </div>
                   </div>
                 </div>
@@ -1562,16 +1553,16 @@ export default function ListingsPage() {
                       <Button variant="ghost" size="icon" onClick={() => setDialogOpen(false)} className="rounded-full bg-slate-50 text-slate-500"><X className="h-5 w-5"/></Button>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest">Step {formStep} of 5</span>
+                      <span className="text-[10px] text-slate-900 font-black uppercase tracking-widest">Step {formStep} of 5</span>
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${(formStep / 5) * 100}%` }} />
+                      <div className="bg-slate-900 h-full transition-all duration-300" style={{ width: `${(formStep / 5) * 100}%` }} />
                     </div>
                   </div>
                   
                   {/* Desktop close button */}
                   <div className="hidden md:flex justify-end mb-8">
-                    <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold text-sm bg-slate-50 hover:bg-slate-100 rounded-full px-4 h-9">
+                    <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-slate-600 hover:text-slate-900 font-bold text-xs bg-slate-100 hover:bg-slate-200 rounded-xl px-4 h-9">
                       Close
                     </Button>
                   </div>
@@ -1722,13 +1713,13 @@ export default function ListingsPage() {
                               setEmployerName("");
                               setJobTitle("");
                             }}
-                            className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all ${employmentStatus === s.id ? 'border-blue-600 bg-blue-50 shadow-sm' : 'border-slate-100 hover:border-blue-200 bg-white'}`}
+                            className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all ${employmentStatus === s.id ? 'border-slate-900 bg-slate-900 text-white shadow-xs' : 'border-slate-100 hover:border-slate-300 bg-white'}`}
                           >
-                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${employmentStatus === s.id ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${employmentStatus === s.id ? 'bg-white/15 text-white' : 'bg-slate-50 text-slate-400'}`}>
                               {s.icon}
                             </div>
-                            <span className={`text-sm font-bold ${employmentStatus === s.id ? 'text-blue-900' : 'text-slate-700'}`}>{s.label}</span>
-                            <span className={`text-xs font-semibold mt-0.5 ${employmentStatus === s.id ? 'text-blue-600' : 'text-slate-400'}`}>{s.desc}</span>
+                            <span className={`text-sm font-bold ${employmentStatus === s.id ? 'text-white' : 'text-slate-700'}`}>{s.label}</span>
+                            <span className={`text-xs font-semibold mt-0.5 ${employmentStatus === s.id ? 'text-slate-300' : 'text-slate-400'}`}>{s.desc}</span>
                           </div>
                         ))}
                       </div>
@@ -2432,7 +2423,7 @@ export default function ListingsPage() {
                         }
                         setFormStep(formStep + 1);
                       }}
-                      className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-xl font-bold shadow-sm hover:shadow-md transition-all shadow-blue-600/20"
+                      className="flex-[2] bg-slate-900 hover:bg-slate-800 text-white h-11 rounded-xl font-bold shadow-xs transition-all"
                     >
                       Continue
                     </Button>

@@ -8,23 +8,13 @@ export function useModuleAccess(moduleKey: string) {
   const [fallbackAllowed, setFallbackAllowed] = useState<boolean>(true);
   const [fallbackLoading, setFallbackLoading] = useState<boolean>(false);
 
-  // If context is available and finished loading
-  if (context && !context.loading && Object.keys(context.modulesAccess).length > 0) {
-    const role = (session?.user as any)?.role;
-    if (role !== "OWNER") {
-      return { allowed: true, loading: false };
-    }
-    const state = context.modulesAccess[moduleKey];
-    return {
-      allowed: state ? state.allowed : true,
-      loading: false,
-      reason: state?.reason,
-      source: state?.source
-    };
-  }
-
-  // Fallback behavior if rendered outside ModuleAccessProvider
+  // Always run hooks in the same order
   useEffect(() => {
+    // If context is available and finished loading, skip fallback fetch
+    if (context && !context.loading && Object.keys(context.modulesAccess).length > 0) {
+      return;
+    }
+
     if (status === "loading") return;
     if (status === "unauthenticated") {
       setFallbackAllowed(false);
@@ -54,7 +44,22 @@ export function useModuleAccess(moduleKey: string) {
       .finally(() => {
         setFallbackLoading(false);
       });
-  }, [moduleKey, status, session]);
+  }, [moduleKey, status, session, context]);
+
+  // If context is available and finished loading, return context state AFTER hooks
+  if (context && !context.loading && Object.keys(context.modulesAccess).length > 0) {
+    const role = (session?.user as any)?.role;
+    if (role !== "OWNER") {
+      return { allowed: true, loading: false };
+    }
+    const state = context.modulesAccess[moduleKey];
+    return {
+      allowed: state ? state.allowed : true,
+      loading: false,
+      reason: state?.reason,
+      source: state?.source
+    };
+  }
 
   return { allowed: fallbackAllowed, loading: fallbackLoading, reason: undefined, source: undefined };
 }

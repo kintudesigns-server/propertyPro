@@ -199,14 +199,14 @@ export default function WalletPage() {
 
 
   return (
-    <div className="max-w-7xl mx-auto pt-6 pb-20 px-4 sm:px-6 space-y-6">
+    <div className="max-w-7xl mx-auto pt-6 pb-28 px-4 sm:px-6 space-y-8 font-sans">
 
       {isPaused && (
-        <div className="bg-[#FFF9E6] border border-[#FFE0A3] rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-4">
+        <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs font-sans">
           <div className="flex items-center gap-3">
             <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-amber-900">
+              <p className="text-xs font-black text-amber-900">
                 Your account is currently paused. Payouts are restricted.
               </p>
               {(() => {
@@ -217,35 +217,35 @@ export default function WalletPage() {
                 const diffTime = archivalDate.getTime() - now.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (diffDays < 0) {
-                  return <p className="text-xs font-semibold text-red-600 mt-0.5">Flagged for manual database archival review due to prolonged inactivity.</p>;
+                  return <p className="text-[11px] font-bold text-rose-600 mt-0.5">Flagged for manual database archival review due to prolonged inactivity.</p>;
                 } else {
-                  return <p className="text-xs font-semibold text-amber-700 mt-0.5">{diffDays} days remaining before database archival review.</p>;
+                  return <p className="text-[11px] font-bold text-amber-700 mt-0.5">{diffDays} days remaining before database archival review.</p>;
                 }
               })()}
             </div>
           </div>
-          <a href="/dashboard/owner/billing" className="inline-flex items-center justify-center font-bold bg-[#B25E00] hover:bg-[#804400] text-white rounded-xl text-xs px-4 py-2 shadow-xs transition-colors shrink-0">
+          <a href="/dashboard/owner/billing" className="inline-flex items-center justify-center font-black bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs px-4 py-2 shadow-xs transition-colors shrink-0">
             Reactivate Subscription
           </a>
         </div>
       )}
 
       {/* PAGE HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Wallet & Payouts</h1>
-          <p className="text-[#6E6E73] text-sm mt-0.5">Manage your rental income and request bank transfers.</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Wallet &amp; Payouts</h1>
+          <p className="text-slate-500 text-xs font-semibold mt-0.5">Manage your rental income, view earnings, and request bank wire transfers.</p>
         </div>
         <button onClick={() => { fetchPayouts(); fetchStats(); toast.success("Refreshed"); }}
-          className="flex items-center gap-2 text-xs font-bold text-[#6E6E73] hover:text-slate-800 border border-slate-200 rounded-xl px-3 py-2 hover:bg-[#F5F5F7] transition-all">
-          <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          className="flex items-center gap-2 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl px-4 h-9 shadow-2xs transition-all cursor-pointer">
+          <RefreshCw className="h-3.5 w-3.5 text-slate-500" /> Refresh
         </button>
       </div>
 
       {/* HERO BALANCE STRIP */}
-      <div className="relative overflow-hidden rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #1D1D1F 0%, #1e3a5f 55%, #1D1D1F 100%)" }}>
-        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 left-1/3 h-32 w-32 rounded-full bg-violet-400/10 blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl text-white shadow-md border border-slate-800 font-sans bg-slate-900">
+        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 left-1/3 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
         <div className="relative z-10 p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
@@ -302,54 +302,54 @@ export default function WalletPage() {
       </div>
 
       {/* KPI STRIP */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
         {[
-          { label: "Gross Income",    value: `$${fmt(stats.grossRevenue)}`,     sub: "Total rent collected",                                                        Icon: TrendingUp,      icolor: "text-violet-600", ibg: "bg-violet-50", vcolor: "text-[#1D1D1F]"   },
+          { label: "Gross Income",    value: `$${fmt(stats.grossRevenue)}`,     sub: "Total rent collected",                                                        Icon: TrendingUp,      icolor: "text-slate-800", ibg: "bg-slate-100", vcolor: "text-slate-900"   },
           { label: "Platform Fees",   value: `-$${fmt(stats.totalPlatformFees)}`, sub: `${feeRate}% commission on gross`,                                           Icon: Percent,         icolor: "text-rose-600",   ibg: "bg-rose-50",   vcolor: "text-rose-600"    },
           { label: "Net Earnings",    value: `$${fmt(stats.totalNetEarnings)}`, sub: "After all fees deducted",                                                     Icon: CircleDollarSign, icolor: "text-emerald-600", ibg: "bg-emerald-50", vcolor: "text-emerald-600" },
           { label: "Total Withdrawn", value: `$${fmt(completedAmount)}`,        sub: `${payouts.filter(p => p.status === "COMPLETED").length} payouts completed`,   Icon: ArrowDownRight,  icolor: "text-blue-600",   ibg: "bg-blue-50",   vcolor: "text-blue-600"    },
         ].map((c) => (
-          <div key={c.label} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <div className={`h-8 w-8 ${c.ibg} rounded-xl flex items-center justify-center shrink-0`}>
+          <div key={c.label} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs font-sans">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className={`h-9 w-9 ${c.ibg} rounded-xl flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs`}>
                 <c.Icon className={`h-4 w-4 ${c.icolor}`} />
               </div>
-              <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">{c.label}</span>
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{c.label}</span>
             </div>
             <p className={`text-2xl font-black ${c.vcolor}`}>{c.value}</p>
-            <p className="text-[11px] text-[#8E8E93] mt-1 font-medium">{c.sub}</p>
+            <p className="text-[11px] text-slate-500 mt-1 font-semibold">{c.sub}</p>
           </div>
         ))}
       </div>
 
       {/* PENDING ALERT */}
       {hasPending && (
-        <div className="relative flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <div className="absolute left-0 top-0 w-1 h-full bg-amber-400 rounded-l-xl" />
+        <div className="relative flex items-start gap-3 bg-amber-50 border border-amber-200/80 rounded-2xl p-4 shadow-2xs font-sans">
+          <div className="absolute left-0 top-0 w-1.5 h-full bg-amber-500 rounded-l-2xl" />
           <Clock className="ml-2 h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-bold text-amber-900">
+            <p className="text-xs font-black text-amber-900">
               {pendingCount === 1 ? `1 withdrawal of $${fmt(pendingAmount)} is being reviewed` : `${pendingCount} withdrawals totalling $${fmt(pendingAmount)} are in review`}
             </p>
-            <p className="text-xs text-amber-700 mt-0.5">Admin typically processes withdrawals within <strong>2–3 business days</strong>.</p>
+            <p className="text-[11px] font-semibold text-amber-700 mt-0.5">Admin typically processes withdrawals within <strong className="font-extrabold text-amber-900">2–3 business days</strong>.</p>
           </div>
         </div>
       )}
 
       {/* PAYOUT HISTORY TABLE */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden font-sans">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-base font-black text-slate-900">Payout History</h2>
-            <p className="text-xs text-[#8E8E93] mt-0.5 font-medium">{payouts.length} total withdrawal requests</p>
+            <h2 className="text-base font-black text-slate-900 tracking-tight">Payout History</h2>
+            <p className="text-xs text-slate-500 mt-0.5 font-semibold">{payouts.length} total withdrawal requests</p>
           </div>
-          <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/60 rounded-xl p-1">
             {TABS.map((tab) => (
               <button key={tab} onClick={() => setStatusFilter(tab)}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${statusFilter === tab ? "bg-white text-slate-900 shadow-xs" : "text-[#6E6E73] hover:text-slate-700"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${statusFilter === tab ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}>
                 {tab === "ALL" ? "All" : tab.charAt(0) + tab.slice(1).toLowerCase()}
-                <span className={`ml-1.5 text-[9px] font-extrabold ${statusFilter === tab ? "text-[#8E8E93]" : "text-[#8E8E93]"}`}>{tabCounts[tab]}</span>
+                <span className={`ml-1.5 text-[9px] font-extrabold ${statusFilter === tab ? "text-slate-500" : "text-slate-400"}`}>{tabCounts[tab]}</span>
               </button>
             ))}
           </div>

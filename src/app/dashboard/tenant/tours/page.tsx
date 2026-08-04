@@ -327,23 +327,28 @@ export default function TenantToursPage() {
         />
       )}
       <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
-      <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative">
+      <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative font-sans">
         <div className="max-w-6xl mx-auto space-y-6">
         
         {/* ── Page Header ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
-              My Showings & Tours
-            </h1>
-            <p className="text-slate-500 text-xs md:text-sm mt-0.5 font-medium">
-              Manage your property walkthrough schedules, virtual links, and feedback history.
-            </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+              <CalendarIcon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                My Showings &amp; Tours
+              </h1>
+              <p className="text-slate-500 text-xs font-semibold mt-0.5">
+                Manage your property walkthrough schedules, virtual links, and feedback history.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/listings">
-              <Button className="h-9 px-4 text-xs font-bold rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white flex items-center gap-1.5 shadow-2xs">
-                Browse Properties <ArrowRight className="h-3.5 w-3.5" />
+              <Button className="h-10 px-5 text-xs font-black rounded-xl bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow-xs border-none cursor-pointer">
+                Browse Properties <ArrowRight className="h-3.5 w-3.5 text-white" />
               </Button>
             </Link>
           </div>
@@ -488,7 +493,7 @@ export default function TenantToursPage() {
                 Schedule your next property walkthrough directly from any property listing!
               </p>
               <Link href="/listings" className="inline-block pt-1">
-                <Button size="sm" className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs rounded-xl px-5 h-10 shadow-xs">
+                <Button size="sm" className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl px-5 h-10 cursor-pointer transition-all">
                   Explore Available Listings
                 </Button>
               </Link>

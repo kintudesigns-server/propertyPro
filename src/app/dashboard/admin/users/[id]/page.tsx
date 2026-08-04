@@ -23,16 +23,16 @@ const ROLE_HERO_SLIDES: Record<string, { src: string; tag: string }[]> = {
   TENANT: [
     { src: "/images/hero/hero_tenant_living.png", tag: "Tenant Resident Portal & Smart Living" },
     { src: "/images/hero/hero_tenant_lease.png", tag: "Digital Lease Contract & Move-In Readiness" },
-    { src: "/images/hero/hero_apartment_exterior.png", tag: "Luxury Multi-Family Residence" },
+    { src: "/images/hero/hero_apartment.png", tag: "Luxury Multi-Family Residence" },
   ],
   OWNER: [
     { src: "/images/hero/hero_owner_portfolio.png", tag: "Landlord Asset Portfolio & Yield Tracking" },
-    { src: "/images/hero/hero_commercial_building.png", tag: "Commercial Real Estate Operations" },
+    { src: "/images/hero/hero_commercial.png", tag: "Commercial Real Estate Operations" },
     { src: "/images/hero/hero_subscription_analytics.png", tag: "Property Rent Roll & Revenue Stream" },
   ],
   INSPECTOR: [
     { src: "/images/hero/hero_inspector_audit.png", tag: "Property Walkthrough & Safety Compliance Audit" },
-    { src: "/images/hero/hero_townhouse_row.png", tag: "Unit Inspection & Maintenance Verification" },
+    { src: "/images/hero/hero_townhouse.png", tag: "Unit Inspection & Maintenance Verification" },
   ],
   SUPERADMIN: [
     { src: "/images/hero/hero_pricing_licensing.png", tag: "Global SaaS Control Center & System Governance" },
@@ -425,51 +425,44 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* 1. HERO BANNER HEADER (FULL WIDTH WITH SEAMLESS ROLE-SPECIFIC MOTION BACKGROUND) */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-[#E5E5EA] shadow-sm w-full p-6 sm:p-8 space-y-6">
+      {/* 1. HERO BANNER HEADER */}
+      <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-xs w-full p-6 sm:p-8 space-y-6 font-sans">
         
-        {/* Role-Specific Seamless Multi-Layer Background Slider — ZERO White Flash */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {heroSlides.map((slide, idx) => (
-            <div
-              key={slide.src}
-              className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out ${
-                idx === heroIndex ? "opacity-75 scale-105" : "opacity-0 scale-100"
-              }`}
-              style={{ backgroundImage: `url("${slide.src}")` }}
+        {/* Role-Specific Vivid Motion Background Slider — High Visibility */}
+        <div className="absolute top-0 right-0 bottom-0 w-full sm:w-3/5 pointer-events-none overflow-hidden rounded-r-3xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={heroIndex}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 0.85, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url("${heroSlides[heroIndex]?.src}")` }}
             />
-          ))}
+          </AnimatePresence>
+          {/* Subtle gradient overlay to keep text highly legible while letting image shine */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-white/40" />
         </div>
-
-        {/* Light Theme Glass & White Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/40 z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-transparent z-10 pointer-events-none" />
-
-        <div
-          className="absolute inset-0 opacity-[0.03] z-10 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(circle, #0F172A 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
 
         {/* Hero Card Content */}
         <div className="relative z-20 space-y-6">
           
           {/* Top Tag & Floating Slide Badge */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[#007AFF] font-extrabold text-[10px] tracking-widest uppercase shadow-2xs">
-              <Sparkles className="h-3 w-3 text-blue-600" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-200/80 text-slate-800 font-black text-[10px] tracking-wider uppercase shadow-2xs">
+              <Sparkles className="h-3 w-3 text-amber-500" />
               {heroSlides[heroIndex]?.tag || `${formatRole(user.role)} Command Hub`}
             </span>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-2 py-1 rounded-full border border-slate-200/60 shadow-2xs">
               {heroSlides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setHeroIndex(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === heroIndex ? "w-6 bg-[#007AFF]" : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === heroIndex ? "w-6 bg-slate-900" : "w-1.5 bg-slate-300 hover:bg-slate-500"
                   }`}
                   aria-label={`Slide ${idx + 1}`}
                 />
@@ -477,21 +470,23 @@ export default function UserProfilePage() {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
-              {/* Avatar with status pulse */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            
+            <div className="flex items-center gap-4">
               <div className="relative shrink-0">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name || "User Avatar"}
-                    className="h-20 w-20 rounded-2xl object-cover shadow-md border-2 border-white"
-                  />
-                ) : (
-                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black text-3xl shadow-md border-2 border-white">
-                    {user.name?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                )}
+                <img
+                  src={
+                    user.avatar ||
+                    user.image ||
+                    (user.role === "TENANT"
+                      ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80"
+                      : user.role === "OWNER"
+                      ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80"
+                      : "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80")
+                  }
+                  alt={user.name || "User Avatar"}
+                  className="h-20 w-20 rounded-2xl object-cover border-2 border-white shadow-md"
+                />
                 <span className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white shadow-xs ${
                   user.accountStatus === "SUSPENDED" ? "bg-rose-500" : "bg-emerald-500"
                 }`} title={user.accountStatus} />
@@ -499,22 +494,22 @@ export default function UserProfilePage() {
 
               <div className="space-y-1.5 min-w-0">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight truncate">{user.name || "Unnamed User"}</h2>
-                  <Badge className="bg-slate-900 text-white font-bold text-[11px] px-2.5 py-0.5 rounded-lg shadow-2xs">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">{user.name || "Unnamed User"}</h2>
+                  <Badge className="bg-slate-900 text-white font-black text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-2xs">
                     {formatRole(user.role)}
                   </Badge>
                   {user.accountStatus === "SUSPENDED" ? (
-                    <Badge className="bg-rose-50 text-rose-700 border-rose-200/80 rounded-lg px-2.5 py-0.5 font-bold text-[11px]">
+                    <Badge className="bg-rose-50 text-rose-700 border-rose-200/80 rounded-md px-2.5 py-0.5 font-black text-[10px] uppercase tracking-wider">
                       Suspended
                     </Badge>
                   ) : (
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/80 rounded-lg px-2.5 py-0.5 font-bold text-[11px]">
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/80 rounded-md px-2.5 py-0.5 font-black text-[10px] uppercase tracking-wider">
                       Active
                     </Badge>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-slate-600 text-xs font-semibold">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-slate-500 text-xs font-semibold">
                   <span className="flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-slate-400" />
                     {user.email}
@@ -537,7 +532,7 @@ export default function UserProfilePage() {
             <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200/80">
               <Link
                 href={`/dashboard/admin/users/${user.id}/edit`}
-                className="inline-flex items-center bg-white hover:bg-slate-50 text-[#1D1D1F] border border-slate-200 shadow-2xs rounded-xl font-bold text-xs h-10 px-4 transition-all"
+                className="inline-flex items-center bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-9 px-4 transition-all cursor-pointer"
               >
                 <PenTool className="h-3.5 w-3.5 mr-2 text-slate-600" />
                 Edit Profile
@@ -546,7 +541,7 @@ export default function UserProfilePage() {
               <Button
                 onClick={handleSendResetLink}
                 disabled={resetLoading}
-                className="bg-white hover:bg-slate-50 text-[#1D1D1F] border border-slate-200 shadow-2xs rounded-xl font-bold text-xs h-10 px-4 transition-all"
+                className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-9 px-4 transition-all cursor-pointer"
               >
                 {resetLoading ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Key className="h-3.5 w-3.5 mr-2 text-slate-600" />}
                 Reset Password
@@ -556,7 +551,7 @@ export default function UserProfilePage() {
                 <Button
                   onClick={handleToggleStatus}
                   disabled={saving}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs h-10 px-4 shadow-2xs transition-all"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer border-none"
                 >
                   <UserCheck className="h-3.5 w-3.5 mr-2" />
                   Activate Account
@@ -565,7 +560,7 @@ export default function UserProfilePage() {
                 <Button
                   onClick={handleToggleStatus}
                   disabled={saving}
-                  className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs h-10 px-4 shadow-2xs transition-all"
+                  className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-black text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer border-none"
                 >
                   <ShieldX className="h-3.5 w-3.5 mr-2" />
                   Suspend Account
@@ -577,21 +572,21 @@ export default function UserProfilePage() {
           {/* Quick inline stats summary bar in hero bottom */}
           {user.role === "OWNER" && ownerStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Properties</p>
-                <p className="text-2xl font-black text-[#1D1D1F] mt-0.5">{ownerStats.totalProperties}</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Properties</p>
+                <p className="text-2xl font-black text-slate-900 mt-0.5">{ownerStats.totalProperties}</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Total Units</p>
-                <p className="text-2xl font-black text-[#1D1D1F] mt-0.5">{ownerStats.totalUnits}</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Total Units</p>
+                <p className="text-2xl font-black text-slate-900 mt-0.5">{ownerStats.totalUnits}</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Occupancy</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Occupancy</p>
                 <p className="text-2xl font-black text-emerald-600 mt-0.5">{ownerStats.occupancyRate}%</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Pending Payouts</p>
-                <p className={`text-2xl font-black mt-0.5 ${ownerStats.pendingPayoutsCount > 0 ? "text-amber-600" : "text-[#1D1D1F]"}`}>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Pending Payouts</p>
+                <p className={`text-2xl font-black mt-0.5 ${ownerStats.pendingPayoutsCount > 0 ? "text-amber-600" : "text-slate-900"}`}>
                   {ownerStats.pendingPayoutsCount}
                 </p>
               </div>
@@ -600,16 +595,16 @@ export default function UserProfilePage() {
 
           {user.role === "TENANT" && tenantStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-3 gap-3.5">
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Active Tickets</p>
-                <p className="text-2xl font-black text-[#1D1D1F] mt-0.5">{tenantStats.activeRequestsCount}</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Active Tickets</p>
+                <p className="text-2xl font-black text-slate-900 mt-0.5">{tenantStats.activeRequestsCount}</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Compliance</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Compliance</p>
                 <p className="text-2xl font-black text-emerald-600 mt-0.5">{tenantStats.complianceRate}%</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Screening</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Screening</p>
                 <p className="text-2xl font-black text-emerald-600 mt-0.5">Passed</p>
               </div>
             </div>
@@ -617,13 +612,13 @@ export default function UserProfilePage() {
 
           {user.role === "INSPECTOR" && inspectorStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-2 gap-3.5">
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Assigned Walkthroughs</p>
-                <p className="text-2xl font-black text-[#1D1D1F] mt-0.5">{inspectorStats.totalWalkthroughs}</p>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Assigned Walkthroughs</p>
+                <p className="text-2xl font-black text-slate-900 mt-0.5">{inspectorStats.totalWalkthroughs}</p>
               </div>
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Pending Tasks</p>
-                <p className={`text-2xl font-black mt-0.5 ${inspectorStats.pendingWalkthroughs > 0 ? "text-amber-600" : "text-[#1D1D1F]"}`}>
+              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Pending Tasks</p>
+                <p className={`text-2xl font-black mt-0.5 ${inspectorStats.pendingWalkthroughs > 0 ? "text-amber-600" : "text-slate-900"}`}>
                   {inspectorStats.pendingWalkthroughs}
                 </p>
               </div>
@@ -633,13 +628,13 @@ export default function UserProfilePage() {
       </div>
 
       {/* 2. FULL WIDTH SEGMENTED TAB SWITCHER */}
-      <div className="w-full bg-white rounded-2xl border border-[#E5E5EA] shadow-xs p-1.5 flex gap-1.5 overflow-x-auto scrollbar-hide">
+      <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-xs p-2 flex gap-1.5 overflow-x-auto scrollbar-hide font-sans">
         <button 
           onClick={() => setActiveTab("overview")}
-          className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "overview" 
-              ? "bg-slate-900 text-white shadow-xs" 
-              : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+              ? "bg-slate-900 text-white shadow-2xs font-black" 
+              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           }`}
         >
           <User className="h-3.5 w-3.5" />
@@ -651,10 +646,10 @@ export default function UserProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab("properties")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "properties" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Building className="h-3.5 w-3.5" />
@@ -662,10 +657,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("tenants")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "tenants" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Users className="h-3.5 w-3.5" />
@@ -673,32 +668,32 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("team")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "team" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Wrench className="h-3.5 w-3.5" />
-              Team & Contractors
+              Team &amp; Contractors
             </button>
             <button 
               onClick={() => setActiveTab("financials")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "financials" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <DollarSign className="h-3.5 w-3.5" />
-              Financials & Payouts
+              Financials &amp; Payouts
             </button>
             <button 
               onClick={() => setActiveTab("billing-history")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "billing-history" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Clock className="h-3.5 w-3.5" />
@@ -712,10 +707,10 @@ export default function UserProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab("leases")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "leases" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <FileText className="h-3.5 w-3.5" />
@@ -723,10 +718,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("ledger")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "ledger" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <CreditCard className="h-3.5 w-3.5" />
@@ -734,10 +729,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("maintenance")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "maintenance" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Wrench className="h-3.5 w-3.5" />
@@ -745,10 +740,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("access-control")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "access-control" 
-                  ? "bg-purple-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white shadow-2xs font-black" 
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <ShieldCheck className="h-3.5 w-3.5" />
@@ -1072,60 +1067,60 @@ export default function UserProfilePage() {
                 {user.role === "OWNER" && (
                   <div className="space-y-8">
                     {/* 1. Quick Admin Action Bar */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-2.5">
-                        <Sparkles className="h-4 w-4 text-blue-600" />
-                        <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Quick Admin Management Hub</h3>
+                    <div className="space-y-3 font-sans">
+                      <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                        <Sparkles className="h-4 w-4 text-amber-500" />
+                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Quick Admin Management Hub</h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/dashboard/admin/subscriptions?search=${encodeURIComponent(user.email || "")}`}
-                          className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs"
+                          className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer"
                         >
-                          <CreditCard className="h-4 w-4" /> Active Subscription
+                          <CreditCard className="h-3.5 w-3.5" /> Active Subscription
                         </Link>
 
                         <button
                           onClick={() => setActiveTab("financials")}
-                          className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
                         >
-                          <DollarSign className="h-3.5 w-3.5" /> Disbursals & Ledger
+                          <DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Disbursals &amp; Ledger
                         </button>
 
                         <button
                           onClick={() => setActiveTab("properties")}
-                          className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
                         >
-                          <Building className="h-3.5 w-3.5" /> Portfolio ({user.ownedProperties?.length || 0})
+                          <Building className="h-3.5 w-3.5 text-slate-700" /> Portfolio ({user.ownedProperties?.length || 0})
                         </button>
 
                         <button
                           onClick={() => setActiveTab("tenants")}
-                          className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs"
+                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
                         >
-                          <Users className="h-3.5 w-3.5" /> Tenants ({ownerStats?.tenants?.length || 0})
+                          <Users className="h-3.5 w-3.5 text-slate-700" /> Tenants ({ownerStats?.tenants?.length || 0})
                         </button>
                       </div>
                     </div>
 
                     {/* 2. Portfolio Revenue & Financial Health Metrics */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-2.5">
+                    <div className="space-y-3 font-sans">
+                      <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                         <TrendingUp className="h-4 w-4 text-emerald-600" />
-                        <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Portfolio Financial Health</h3>
+                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Portfolio Financial Health</h3>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-5 rounded-2xl border border-emerald-100/80 space-y-1">
-                          <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Gross Monthly Rent Roll</p>
-                          <p className="font-black text-2xl text-emerald-950 mt-1">
+                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Gross Monthly Rent Roll</p>
+                          <p className="font-black text-2xl text-emerald-600 tracking-tight mt-1">
                             ${(ownerStats?.tenants?.reduce((sum: number, t: any) => sum + Number(t.monthlyRent || 0), 0) || 0).toLocaleString()}/mo
                           </p>
-                          <p className="text-[10px] font-semibold text-emerald-700">From {ownerStats?.occupiedUnits || 0} active leases</p>
+                          <p className="text-[10px] font-semibold text-slate-500">From {ownerStats?.occupiedUnits || 0} active leases</p>
                         </div>
 
-                        <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-1">
+                        <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-1 shadow-xs">
                           <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Ledger Wallet Balance</p>
-                          <p className="font-black text-2xl text-white mt-1">
+                          <p className="font-black text-2xl text-white tracking-tight mt-1">
                             ${Number(user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
                           <p className="text-[10px] font-semibold text-slate-300">
@@ -1133,9 +1128,9 @@ export default function UserProfilePage() {
                           </p>
                         </div>
 
-                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/60 space-y-1">
-                          <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Portfolio Occupancy</p>
-                          <p className="font-black text-2xl text-slate-900 mt-1">
+                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Portfolio Occupancy</p>
+                          <p className="font-black text-2xl text-slate-900 tracking-tight mt-1">
                             {ownerStats?.occupancyRate || 0}%
                           </p>
                           <p className="text-[10px] font-semibold text-slate-500">
@@ -1146,54 +1141,54 @@ export default function UserProfilePage() {
                     </div>
 
                     {/* 3. Subscription & Invoicing Configuration */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#F2F2F7] pb-2.5">
+                    <div className="space-y-3 font-sans">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-blue-600" />
-                          <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Subscription & Invoicing Configuration</h3>
+                          <CreditCard className="h-4 w-4 text-slate-700" />
+                          <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Subscription &amp; Invoicing Configuration</h3>
                         </div>
                         <Link
                           href={`/dashboard/admin/subscriptions?search=${encodeURIComponent(user.email || "")}`}
-                          className="text-[11px] font-bold text-[#007AFF] hover:underline flex items-center gap-0.5"
+                          className="text-[10px] font-black text-slate-700 hover:text-slate-900 uppercase tracking-wider flex items-center gap-0.5"
                         >
                           Manage Subscriptions <ArrowUpRight className="h-3 w-3" />
                         </Link>
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-blue-100 relative overflow-hidden">
-                          <p className="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Current SaaS Tier</p>
-                          <p className="font-black text-xl text-blue-950 mt-1.5 capitalize truncate">
+                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Current SaaS Tier</p>
+                          <p className="font-black text-xl text-slate-900 mt-1.5 capitalize truncate">
                             {user.pricingTier?.name || "Free / Base Plan"}
                           </p>
-                          <p className="text-[10px] font-bold text-blue-600 mt-1">Active Platform License</p>
+                          <p className="text-[10px] font-semibold text-slate-500 mt-1">Active Platform License</p>
                         </div>
 
-                        <div className="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl space-y-1.5">
-                          <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Billing Status</p>
+                        <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl space-y-1.5 shadow-2xs">
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Billing Status</p>
                           <div className="mt-1">
                             {user.subscriptionStatus === "Active" || user.subscriptionStatus === "active" ? (
-                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold">Active Subscription</Badge>
+                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/80 font-black text-[9px] uppercase tracking-wider">Active Subscription</Badge>
                             ) : user.subscriptionStatus === "Trialing" || user.subscriptionStatus === "trialing" ? (
-                              <Badge className="bg-blue-50 text-blue-700 border-blue-100 font-bold">Trial Period</Badge>
+                              <Badge className="bg-blue-50 text-blue-700 border-blue-200/80 font-black text-[9px] uppercase tracking-wider">Trial Period</Badge>
                             ) : user.subscriptionStatus === "Past_Due" || user.subscriptionStatus === "past_due" ? (
-                              <Badge className="bg-amber-50 text-amber-700 border-amber-100 font-bold">Past Due</Badge>
+                              <Badge className="bg-amber-50 text-amber-700 border-amber-200/80 font-black text-[9px] uppercase tracking-wider">Past Due</Badge>
                             ) : (
-                              <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-bold">Standard Tier</Badge>
+                              <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-black text-[9px] uppercase tracking-wider">Standard Tier</Badge>
                             )}
                           </div>
                         </div>
 
-                        <div className="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl space-y-1">
-                          <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Stripe Identity</p>
+                        <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl space-y-1 shadow-2xs">
+                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Stripe Identity</p>
                           <div className="flex items-center justify-between mt-1">
-                            <p className="font-mono text-xs font-bold text-slate-900 truncate max-w-[140px]" title={user.stripeCustomerId || ""}>
+                            <p className="font-mono text-xs font-black text-slate-900 truncate max-w-[140px]" title={user.stripeCustomerId || ""}>
                               {user.stripeCustomerId || "No Stripe Customer"}
                             </p>
                             {user.stripeCustomerId && (
                               <button
                                 onClick={() => copyToClipboard(user.stripeCustomerId, "Stripe Customer ID")}
-                                className="p-1 hover:bg-slate-200 rounded text-slate-500"
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer"
                               >
                                 <Copy className="h-3.5 w-3.5" />
                               </button>
@@ -1205,15 +1200,15 @@ export default function UserProfilePage() {
 
                     {/* 4. Top Properties Preview Grid */}
                     {user.ownedProperties && user.ownedProperties.length > 0 && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-[#F2F2F7] pb-2.5">
+                      <div className="space-y-3 font-sans">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                           <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-blue-600" />
-                            <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Properties Summary</h3>
+                            <Building className="h-4 w-4 text-slate-700" />
+                            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Properties Summary</h3>
                           </div>
                           <button
                             onClick={() => setActiveTab("properties")}
-                            className="text-[11px] font-bold text-[#007AFF] hover:underline flex items-center gap-0.5"
+                            className="text-[10px] font-black text-slate-700 hover:text-slate-900 uppercase tracking-wider flex items-center gap-0.5 cursor-pointer"
                           >
                             View All ({user.ownedProperties.length}) →
                           </button>
@@ -1229,7 +1224,7 @@ export default function UserProfilePage() {
                               <div
                                 key={prop.id}
                                 onClick={() => router.push(`/dashboard/properties/${prop.id}`)}
-                                className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white hover:border-[#007AFF] transition-all cursor-pointer group shadow-2xs"
+                                className="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:border-slate-400 transition-all cursor-pointer group shadow-2xs"
                               >
                                 <div className="h-24 w-full relative overflow-hidden bg-slate-100">
                                   <img src={cover} alt={prop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -1251,26 +1246,26 @@ export default function UserProfilePage() {
 
                 {/* INSPECTOR OVERVIEW DATA */}
                 {user.role === "INSPECTOR" && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-3">
-                      <UserCheck className="h-4 w-4 text-blue-600" />
-                      <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Assigned Landlord Portfolio</h3>
+                  <div className="space-y-6 font-sans">
+                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                      <UserCheck className="h-4 w-4 text-slate-700" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Assigned Landlord Portfolio</h3>
                     </div>
                     {user.owner ? (
-                      <div className="border border-[#E5E5EA] p-5 rounded-2xl bg-slate-50 flex justify-between items-center">
+                      <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50 flex justify-between items-center shadow-2xs">
                         <div className="space-y-0.5">
-                          <p className="font-black text-[#1D1D1F]">{user.owner.name}</p>
-                          <p className="text-xs font-semibold text-[#6E6E73]">{user.owner.email} • {user.owner.phone || "No Phone"}</p>
+                          <p className="font-black text-slate-900">{user.owner.name}</p>
+                          <p className="text-xs font-semibold text-slate-500">{user.owner.email} • {user.owner.phone || "No Phone"}</p>
                         </div>
                         <Link 
                           href={`/dashboard/admin/users/${user.owner.id}`}
-                          className="text-xs font-bold text-[#007AFF] hover:underline flex items-center gap-1 bg-white border border-[#E5E5EA] rounded-xl px-3.5 py-2 shadow-xs transition-all"
+                          className="text-xs font-black text-slate-900 bg-white border border-slate-200 rounded-xl px-3.5 py-2 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
                         >
                           View Owner Profile <ArrowUpRight className="h-3.5 w-3.5" />
                         </Link>
                       </div>
                     ) : (
-                      <p className="text-xs text-[#8E8E93] font-semibold bg-slate-50 border border-dashed border-[#E5E5EA] rounded-2xl p-6 text-center">
+                      <p className="text-xs text-slate-400 font-semibold bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         This inspector has not been mapped to any landlord portfolio yet.
                       </p>
                     )}
@@ -1294,10 +1289,10 @@ export default function UserProfilePage() {
               <div className="space-y-6">
                 
                 {/* Internal Admin Notes Card */}
-                <div className="bg-slate-50/80 rounded-2xl border border-[#E5E5EA] p-5 space-y-3">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 space-y-3 font-sans">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5 text-blue-500" />
+                    <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5 text-slate-700" />
                       Internal Admin Notes
                     </h3>
                     <span className={`text-[10px] font-bold ${notes.length > 450 ? "text-amber-600" : "text-slate-400"}`}>
@@ -1309,43 +1304,43 @@ export default function UserProfilePage() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value.slice(0, 500))}
                     placeholder="Add confidential admin notes, audit flags, or dispute history..."
-                    className="w-full min-h-[120px] bg-white border border-[#E5E5EA] rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#007AFF] resize-none transition-all shadow-inner"
+                    className="w-full min-h-[120px] bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-slate-900 focus:bg-white resize-none transition-all shadow-2xs text-slate-900 font-sans"
                   />
                   
                   <Button 
                     onClick={handleSaveNotes}
                     disabled={notesSaving}
-                    className="w-full bg-[#1D1D1F] hover:bg-slate-800 text-white rounded-xl font-bold text-xs h-9 shadow-xs transition-all"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 shadow-xs transition-all cursor-pointer border-none"
                   >
                     {notesSaving ? "Saving Notes..." : "Save Admin Notes"}
                   </Button>
                 </div>
 
                 {/* Account Metadata Summary */}
-                <div className="bg-slate-50/80 rounded-2xl border border-[#E5E5EA] p-5 space-y-3.5 text-xs">
-                  <h3 className="text-[10px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Account Metadata</h3>
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 space-y-3.5 text-xs font-sans">
+                  <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Account Metadata</h3>
                   
-                  <div className="space-y-2.5 divide-y divide-slate-200/60">
+                  <div className="space-y-2.5 divide-y divide-slate-100">
                     <div className="flex justify-between pt-1">
-                      <span className="text-[#6E6E73] font-medium">Account ID</span>
-                      <span className="font-mono font-bold text-[#1D1D1F] text-[10px] truncate max-w-[140px]" title={user.id}>{user.id}</span>
+                      <span className="text-slate-500 font-semibold">Account ID</span>
+                      <span className="font-mono font-bold text-slate-900 text-[10px] truncate max-w-[140px]" title={user.id}>{user.id}</span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-[#6E6E73] font-medium">Status</span>
-                      <span className={`font-bold ${user.accountStatus === "SUSPENDED" ? "text-rose-600" : "text-emerald-600"}`}>
+                      <span className="text-slate-500 font-semibold">Status</span>
+                      <span className={`font-black ${user.accountStatus === "SUSPENDED" ? "text-rose-600" : "text-emerald-600"}`}>
                         {user.accountStatus || "ACTIVE"}
                       </span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-[#6E6E73] font-medium">Role</span>
-                      <span className="font-bold text-[#1D1D1F]">{formatRole(user.role)}</span>
+                      <span className="text-slate-500 font-semibold">Role</span>
+                      <span className="font-black text-slate-900">{formatRole(user.role)}</span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-[#6E6E73] font-medium">Created</span>
-                      <span className="font-semibold text-slate-700">{new Date(user.createdAt).toLocaleDateString()}</span>
+                      <span className="text-slate-500 font-semibold">Created</span>
+                      <span className="font-semibold text-slate-900">{new Date(user.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -1360,10 +1355,10 @@ export default function UserProfilePage() {
         {/* PROPERTIES TAB (Owner Cards with Cover Image - FULL WIDTH) */}
         {/* ======================================================== */}
         {activeTab === "properties" && user.role === "OWNER" && (
-          <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <div className="flex justify-between items-center border-b border-[#F2F2F7] pb-3">
-              <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Properties Portfolio</h3>
-              <span className="text-xs font-bold text-[#6E6E73]">{user.ownedProperties?.length || 0} Registered Properties</span>
+          <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200 font-sans">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Properties Portfolio</h3>
+              <span className="text-xs font-semibold text-slate-500">{user.ownedProperties?.length || 0} Registered Properties</span>
             </div>
             
             {user.ownedProperties && user.ownedProperties.length > 0 ? (
@@ -1377,7 +1372,7 @@ export default function UserProfilePage() {
                   return (
                     <div 
                       key={prop.id} 
-                      className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white hover:border-[#007AFF] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                      className="border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-slate-400 hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between shadow-xs font-sans"
                       onClick={() => router.push(`/dashboard/properties/${prop.id}`)}
                     >
                       {/* Property Image Header */}
@@ -1398,22 +1393,25 @@ export default function UserProfilePage() {
                       </div>
 
                       {/* Card Content & Occupancy Progress */}
-                      <div className="p-4 space-y-3">
+                      <div className="p-5 space-y-3.5">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-bold text-[#6E6E73]">Occupancy Status</span>
-                          <span className="font-black text-[#1D1D1F]">{occupiedUnits} of {totalUnits} Units Leased</span>
+                          <span className="font-semibold text-slate-500">Occupancy Status</span>
+                          <span className="font-black text-slate-900">{occupiedUnits} of {totalUnits} Units Leased</span>
                         </div>
 
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div 
-                            className="bg-[#007AFF] h-full rounded-full transition-all duration-700 ease-out" 
-                            style={{ width: `${progressPct}%` }} 
+                        {/* Light Neon Green Framer-Motion Animated Progress Bar */}
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-2xs">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPct}%` }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className="bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)] h-full rounded-full"
                           />
                         </div>
 
-                        <div className="flex justify-between items-center text-[11px] pt-1">
-                          <span className="font-extrabold text-emerald-600">{progressPct}% Occupied</span>
-                          <span className="font-bold text-[#007AFF] group-hover:underline flex items-center gap-0.5">
+                        <div className="flex justify-between items-center text-[11px] pt-0.5">
+                          <span className="font-black text-emerald-600 tracking-tight">{progressPct}% Occupied</span>
+                          <span className="font-black text-slate-900 group-hover:text-slate-700 flex items-center gap-0.5">
                             View Property <ArrowUpRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -1423,9 +1421,9 @@ export default function UserProfilePage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-3xl bg-slate-50/50 space-y-2">
                 <Building className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No properties registered under this owner portfolio.</p>
+                <p className="text-slate-500 text-sm font-semibold">No properties registered under this owner portfolio.</p>
               </div>
             )}
           </div>

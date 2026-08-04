@@ -170,10 +170,10 @@ export default function PricingSettingsPage() {
   }, 0);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-4 sm:px-6">
+    <div className="max-w-7xl mx-auto space-y-6 pt-6 pb-20 px-4 sm:px-6 font-sans">
       
       {/* 1. MATCHING DASHBOARD HERO BANNER WITH MOTION BACKGROUND */}
-      <div className="relative overflow-hidden rounded-3xl bg-white border border-[#E5E5EA] shadow-sm min-h-[220px] w-full">
+      <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-xs min-h-[220px] w-full font-sans">
         {/* Background Image Crossfade Stack */}
         <div className="absolute inset-0 z-0 overflow-hidden bg-slate-100">
           {HERO_SLIDES.map((slide, idx) => {
@@ -219,19 +219,19 @@ export default function PricingSettingsPage() {
             className="space-y-2.5 max-w-2xl"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[#007AFF] shadow-2xs font-extrabold text-[10px] tracking-widest uppercase">
-                <Sparkles className="h-3.5 w-3.5" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-900 shadow-2xs font-black text-[10px] tracking-wider uppercase">
+                <Sparkles className="h-3.5 w-3.5 text-slate-700" />
                 SaaS Subscription Products
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold text-[10px]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-[10px]">
                 {HERO_SLIDES[slideIndex].tag}
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-[#1D1D1F]">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
               Pricing Plans & Tier Licensing
             </h1>
-            <p className="text-slate-600 text-xs md:text-sm font-medium leading-relaxed">
+            <p className="text-slate-500 text-xs md:text-sm font-semibold leading-relaxed">
               Configure landlord subscription products, Stripe price IDs, module access gating lists, and property unit quotas.
             </p>
           </motion.div>
@@ -239,66 +239,66 @@ export default function PricingSettingsPage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/dashboard/admin/subscriptions"
-              className="inline-flex items-center bg-white/90 hover:bg-white text-[#1D1D1F] border border-[#E5E5EA] rounded-xl font-bold text-xs h-10 px-4 transition-all shadow-xs"
+              className="inline-flex items-center bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl font-black text-xs h-9 px-4 transition-all shadow-2xs cursor-pointer"
             >
-              <CreditCard className="h-4 w-4 mr-2 text-slate-600" />
-              Active Subscriptions <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
+              <CreditCard className="h-3.5 w-3.5 mr-2 text-slate-500" />
+              Active Subscriptions <ArrowUpRight className="h-3.5 w-3.5 ml-1 text-slate-400" />
             </Link>
 
             <Button 
               onClick={() => router.push("/dashboard/admin/settings/pricing/new")} 
-              className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl h-10 px-5 shadow-xs font-bold text-xs"
+              className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 px-4 shadow-xs font-black text-xs cursor-pointer border-none"
             >
-              <Plus className="h-4 w-4 mr-2" /> Add New Tier
+              <Plus className="h-3.5 w-3.5 mr-1.5" /> Add New Tier
             </Button>
           </div>
         </div>
       </div>
 
       {/* 2. PRICING STATS OVERVIEW CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 font-sans">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Total SaaS Plans</p>
-              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">{tiers.length} plans</p>
-              <p className="text-[11px] font-semibold text-emerald-600">{activeTiers} active in marketplace</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total SaaS Plans</p>
+              <p className="text-2xl font-black text-slate-900 tracking-tight">{tiers.length} plans</p>
+              <p className="text-[11px] font-bold text-emerald-700">{activeTiers} active in marketplace</p>
             </div>
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-              <Layers className="h-6 w-6" />
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-200/80 shadow-2xs">
+              <Layers className="h-5 w-5 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Plan Subscribers</p>
-              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">{totalSubscribers} owners</p>
-              <p className="text-[11px] font-semibold text-[#6E6E73]">Paying landlord contracts</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Plan Subscribers</p>
+              <p className="text-2xl font-black text-slate-900 tracking-tight">{totalSubscribers} owners</p>
+              <p className="text-[11px] font-semibold text-slate-500">Paying landlord contracts</p>
             </div>
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-              <Users className="h-6 w-6" />
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-200/80 shadow-2xs">
+              <Users className="h-5 w-5 text-emerald-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Est. Monthly MRR Forecast</p>
-              <p className="text-3xl font-black text-[#1D1D1F] tracking-tight">${estimatedMrr.toLocaleString()}/mo</p>
-              <p className="text-[11px] font-semibold text-indigo-600">Stripe recurring forecast</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Est. Monthly MRR Forecast</p>
+              <p className="text-2xl font-black text-slate-900 tracking-tight">${estimatedMrr.toLocaleString()}/mo</p>
+              <p className="text-[11px] font-semibold text-slate-500">Stripe recurring forecast</p>
             </div>
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-              <DollarSign className="h-6 w-6" />
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-200/80 shadow-2xs">
+              <DollarSign className="h-5 w-5 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 3. PRICING TIERS GRID CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
         {tiers.map((tier) => {
           const subCount = tier._count?.users || 0;
           const isUnlimited = tier.maxUnits > 9000;
@@ -307,10 +307,10 @@ export default function PricingSettingsPage() {
           return (
             <Card 
               key={tier.id} 
-              className={`rounded-3xl border flex flex-col justify-between bg-white transition-all duration-300 hover:shadow-md ${
+              className={`rounded-3xl border flex flex-col justify-between bg-white transition-all duration-300 ${
                 tier.isActive 
-                  ? 'border-[#E5E5EA] shadow-2xs hover:border-[#007AFF]' 
-                  : 'border-dashed border-slate-300 opacity-75 bg-slate-50/50'
+                  ? 'border-slate-200 shadow-xs hover:shadow-[0_12px_30px_-5px_rgba(52,211,153,0.35)] hover:-translate-y-1' 
+                  : 'border-dashed border-slate-300 opacity-75 bg-slate-50/50 hover:shadow-[0_12px_30px_-5px_rgba(52,211,153,0.25)] hover:-translate-y-1'
               }`}
             >
               <div className="p-6 space-y-6">
@@ -318,23 +318,23 @@ export default function PricingSettingsPage() {
                 {/* Header Title & Badges */}
                 <div className="flex justify-between items-start gap-3">
                   <div className="space-y-1 min-w-0">
-                    <h3 className="text-xl font-black text-[#1D1D1F] tracking-tight truncate">{tier.name}</h3>
-                    <p className="text-xs text-[#6E6E73] font-medium leading-relaxed line-clamp-2">{tier.description}</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight truncate">{tier.name}</h3>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed line-clamp-2">{tier.description}</p>
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     {tier.isActive ? (
-                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                      <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">
                         Active
                       </Badge>
                     ) : (
-                      <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                      <Badge className="bg-slate-100 text-slate-700 border border-slate-200 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">
                         Draft
                       </Badge>
                     )}
                     
                     {tier.isCustom && (
-                      <Badge className="bg-purple-50 text-purple-700 border border-purple-200/60 font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-none">
+                      <Badge className="bg-purple-50 text-purple-800 border border-purple-200 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">
                         Enterprise
                       </Badge>
                     )}
@@ -342,48 +342,48 @@ export default function PricingSettingsPage() {
                 </div>
 
                 {/* Price Display Box */}
-                <div className="bg-slate-50/80 border border-[#E5E5EA] rounded-2xl p-4 flex justify-between items-baseline">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex justify-between items-baseline shadow-2xs">
                   <div>
-                    <span className="text-3xl font-black text-[#1D1D1F] tracking-tight">
+                    <span className="text-3xl font-black text-slate-900 tracking-tight">
                       {tier.isCustom ? 'Custom' : `$${tier.price}`}
                     </span>
-                    {!tier.isCustom && <span className="text-[#6E6E73] font-bold text-xs"> / month</span>}
+                    {!tier.isCustom && <span className="text-slate-500 font-extrabold text-xs"> / month</span>}
                   </div>
                   
-                  <span className="text-xs font-bold text-[#6E6E73] flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-blue-500" />
+                  <span className="text-xs font-black text-slate-600 flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5 text-slate-400" />
                     {subCount} subscriber{subCount === 1 ? "" : "s"}
                   </span>
                 </div>
 
                 {/* Core Quotas & Boundaries */}
-                <div className="space-y-3 text-xs text-slate-700 font-semibold border-b border-[#F2F2F7] pb-4">
+                <div className="space-y-3 text-xs text-slate-700 font-semibold border-b border-slate-100 pb-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
                       <Building className="h-3.5 w-3.5 text-slate-400" />
                       Portfolio Unit Cap
                     </span>
-                    <span className="text-[#1D1D1F] font-extrabold">
+                    <span className="text-slate-900 font-black">
                       Up to {isUnlimited ? 'Unlimited' : `${tier.maxUnits} units`}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
                       <Wrench className="h-3.5 w-3.5 text-slate-400" />
                       Max Inspectors
                     </span>
-                    <span className="text-[#1D1D1F] font-extrabold">
+                    <span className="text-slate-900 font-black">
                       {tier.maxInspectors ?? 1} inspector accounts
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-[#6E6E73] flex items-center gap-1.5">
+                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-slate-400" />
                       Evaluation Period
                     </span>
-                    <span className="text-[#1D1D1F] font-extrabold">
+                    <span className="text-slate-900 font-black">
                       {isTrialActive ? `${tier.trialDays} days free` : 'No free trial'}
                     </span>
                   </div>
@@ -391,15 +391,15 @@ export default function PricingSettingsPage() {
 
                 {/* Enabled Modules Tags */}
                 <div className="space-y-2">
-                  <span className="text-[10px] font-black text-[#8E8E93] uppercase tracking-wider block">Enabled Modules</span>
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Enabled Modules</span>
                   <div className="flex flex-wrap gap-1.5">
                     {GATABLE_MODULES.filter(m => (tier.modules || []).includes(m.key)).slice(0, 6).map((mod) => (
-                      <Badge key={mod.key} className="bg-slate-100 text-slate-800 border border-slate-200/60 rounded-lg text-[9px] font-extrabold shadow-none px-2.5 py-0.5">
+                      <Badge key={mod.key} className="bg-slate-100 text-slate-800 border border-slate-200/80 rounded-md text-[9px] font-black shadow-2xs px-2 py-0.5">
                         {mod.label}
                       </Badge>
                     ))}
                     {(tier.modules || []).length > 6 && (
-                      <Badge className="bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-[9px] font-extrabold shadow-none px-2.5 py-0.5">
+                      <Badge className="bg-blue-50 text-blue-800 border border-blue-200 rounded-md text-[9px] font-black shadow-2xs px-2 py-0.5">
                         +{(tier.modules || []).length - 6} more
                       </Badge>
                     )}
@@ -412,11 +412,11 @@ export default function PricingSettingsPage() {
               </div>
 
               {/* Card Footer Actions */}
-              <div className="p-6 pt-0 border-t border-[#F2F2F7] mt-2">
+              <div className="p-6 pt-0 border-t border-slate-100 mt-2">
                 <div className="flex items-center gap-2 pt-4">
                   <Button 
                     onClick={() => router.push(`/dashboard/admin/settings/pricing/${tier.id}`)}
-                    className="flex-1 bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl h-10 font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5"
+                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 font-black text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none"
                   >
                     <Edit2 className="h-3.5 w-3.5" /> Edit Plan & Gating
                   </Button>
@@ -425,13 +425,13 @@ export default function PricingSettingsPage() {
                     variant="outline"
                     disabled={duplicatingId === tier.id}
                     onClick={() => handleDuplicate(tier)}
-                    className="rounded-xl h-10 w-10 p-0 border-[#E5E5EA] text-[#1D1D1F] hover:bg-slate-100 shrink-0"
+                    className="rounded-xl h-9 w-9 p-0 border-slate-200 text-slate-900 bg-white hover:bg-slate-50 shrink-0 cursor-pointer shadow-2xs"
                     title="Duplicate pricing plan"
                   >
                     {duplicatingId === tier.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-600" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-3.5 w-3.5" />
                     )}
                   </Button>
 
@@ -439,10 +439,10 @@ export default function PricingSettingsPage() {
                     variant="ghost" 
                     disabled={deletingId === tier.id || subCount > 0}
                     onClick={() => handleDelete(tier.id)}
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-10 w-10 p-0 shrink-0"
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-9 w-9 p-0 shrink-0 cursor-pointer"
                     title={subCount > 0 ? "Cannot delete tier with active subscribers" : "Delete plan"}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>

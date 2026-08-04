@@ -96,13 +96,13 @@ interface Tour {
 const STATUS_THEMES = {
   PENDING: {
     label: "Pending Review",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
+    badge: "bg-amber-50 text-amber-800 border-amber-200",
     dot: "bg-amber-500",
   },
   CONFIRMED: {
     label: "Confirmed",
-    badge: "bg-blue-50 text-blue-700 border-blue-200",
-    dot: "bg-blue-500",
+    badge: "bg-slate-100 text-slate-800 border-slate-200",
+    dot: "bg-slate-800",
   },
   COMPLETED: {
     label: "Completed",
@@ -111,7 +111,7 @@ const STATUS_THEMES = {
   },
   CANCELLED: {
     label: "Cancelled",
-    badge: "bg-slate-100 text-[#6E6E73] border-slate-200",
+    badge: "bg-slate-100 text-slate-500 border-slate-200",
     dot: "bg-slate-400",
   },
 };
@@ -391,167 +391,175 @@ export default function ShowingToursPage() {
   }, [tours]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 relative">
-      <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-              Showings &amp; Tours
-            </h1>
-            <p className="text-xs md:text-sm text-slate-500 font-medium mt-0.5">
-              Review prospect tour requests, send meeting details, and manage your property showing schedule.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setAvailabilityOpen(true)}
-              className="h-9 px-3 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              <Settings className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
-              Availability Hours
-            </Button>
-            <Button
-              onClick={fetchTours}
-              variant="outline"
-              className="h-9 px-3 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              Refresh
-            </Button>
-          </div>
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            Showings &amp; Tours
+          </h1>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            Review prospect tour requests, send meeting details, and manage your property showing schedule.
+          </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setAvailabilityOpen(true)}
+            className="h-9 px-3.5 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer"
+          >
+            <Settings className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
+            Availability Hours
+          </Button>
+          <Button
+            onClick={fetchTours}
+            variant="outline"
+            className="h-9 px-3.5 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer"
+          >
+            Refresh
+          </Button>
+        </div>
+      </div>
 
-        {/* Modern System KPI Metric Filter Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              key: "PENDING",
-              title: "Pending Approval",
-              count: counts.PENDING,
-              subtext: "Action required",
-              icon: AlertTriangle,
-              variant: "amber",
-            },
-            {
-              key: "CONFIRMED",
-              title: "Confirmed Visits",
-              count: counts.CONFIRMED,
-              subtext: "Upcoming tours",
-              icon: CalendarIcon,
-              variant: "blue",
-            },
-            {
-              key: "COMPLETED",
-              title: "Completed",
-              count: counts.COMPLETED,
-              subtext: "Past showings",
-              icon: CheckCircle2,
-              variant: "emerald",
-            },
-            {
-              key: "CANCELLED",
-              title: "Cancelled",
-              count: counts.CANCELLED,
-              subtext: "Inactive requests",
-              icon: XCircle,
-              variant: "slate",
-            },
-          ].map((m) => (
-            <KpiCard
-              key={m.key}
-              title={m.title}
-              value={m.count}
-              subtext={m.subtext}
-              icon={m.icon}
-              variant={m.variant as any}
-              active={activeTab === m.key}
-              onClick={() => setActiveTab((prev) => (prev === m.key ? "ALL" : (m.key as any)))}
+      {/* Modern System KPI Metric Filter Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            key: "PENDING",
+            title: "Pending Approval",
+            count: counts.PENDING,
+            subtext: "Action required",
+            icon: AlertTriangle,
+            variant: "amber",
+          },
+          {
+            key: "CONFIRMED",
+            title: "Confirmed Visits",
+            count: counts.CONFIRMED,
+            subtext: "Upcoming tours",
+            icon: CalendarIcon,
+            variant: "blue",
+          },
+          {
+            key: "COMPLETED",
+            title: "Completed",
+            count: counts.COMPLETED,
+            subtext: "Past showings",
+            icon: CheckCircle2,
+            variant: "emerald",
+          },
+          {
+            key: "CANCELLED",
+            title: "Cancelled",
+            count: counts.CANCELLED,
+            subtext: "Inactive requests",
+            icon: XCircle,
+            variant: "slate",
+          },
+        ].map((m) => (
+          <KpiCard
+            key={m.key}
+            title={m.title}
+            value={m.count}
+            subtext={m.subtext}
+            icon={m.icon}
+            variant={m.variant as any}
+            active={activeTab === m.key}
+            onClick={() => setActiveTab((prev) => (prev === m.key ? "ALL" : (m.key as any)))}
+          />
+        ))}
+      </div>
+
+      {/* Filter & Control Bar */}
+      <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+        {/* Row 1: Section Header & Search */}
+        <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 bg-slate-100 text-slate-800 border border-slate-200/80 rounded-xl flex items-center justify-center shrink-0">
+              <CalendarIcon className="h-4.5 w-4.5 text-slate-800" />
+            </div>
+            <div>
+              <h2 className="font-extrabold text-slate-900 text-base leading-tight">Showing Schedules ({filteredTours.length})</h2>
+              <p className="text-xs text-slate-500 font-semibold mt-0.5">Showing {filteredTours.length} of {tours.length} tour requests</p>
+            </div>
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search prospect, property..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 bg-white border-slate-200 rounded-xl font-semibold text-xs text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-xs"
             />
-          ))}
+          </div>
         </div>
 
-        {/* Filter & Control Bar (Clean 2-row layout) */}
-        <Card className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/40 space-y-3">
-            
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              {/* Status Segment Filter Tabs */}
-              <div className="flex bg-slate-200/70 p-1 rounded-xl gap-1 overflow-x-auto">
-                {(
-                  [
-                    { key: "ALL", label: "All Showings" },
-                    { key: "PENDING", label: "Pending" },
-                    { key: "CONFIRMED", label: "Confirmed" },
-                    { key: "COMPLETED", label: "Completed" },
-                    { key: "CANCELLED", label: "Cancelled" },
-                  ] as const
-                ).map((tab) => {
-                  const active = activeTab === tab.key;
-                  const count = counts[tab.key];
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => setActiveTab(tab.key)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+        {/* Row 2: Status Filter Tabs & Format/Sort Selects */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+          {/* Status Segment Filter Tabs */}
+          <div className="flex flex-wrap items-center bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs gap-1">
+            {(
+              [
+                { key: "ALL", label: "All Showings" },
+                { key: "PENDING", label: "Pending" },
+                { key: "CONFIRMED", label: "Confirmed" },
+                { key: "COMPLETED", label: "Completed" },
+                { key: "CANCELLED", label: "Cancelled" },
+              ] as const
+            ).map((tab) => {
+              const active = activeTab === tab.key;
+              const count = counts[tab.key];
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    active
+                      ? "bg-slate-900 text-white shadow-2xs"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {tab.label}
+                  {count > 0 && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
                         active
-                          ? "bg-white text-slate-900 shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
+                          ? "bg-slate-800 text-white"
+                          : "bg-slate-200 text-slate-700"
                       }`}
                     >
-                      {tab.label}
-                      {count > 0 && (
-                        <span
-                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-                            active
-                              ? "bg-slate-100 text-slate-700"
-                              : "bg-slate-300/70 text-slate-700"
-                          }`}
-                        >
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Secondary Controls: Format Filter, Sort Selector, Search Input */}
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={formatFilter}
-                  onChange={(e) => setFormatFilter(e.target.value as any)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-                >
-                  <option value="ALL">All Formats</option>
-                  <option value="IN_PERSON">In-Person</option>
-                  <option value="VIDEO_CALL">Video Call</option>
-                </select>
-
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value as any)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-                >
-                  <option value="NEWEST_REQUESTED">⚡ Newest First</option>
-                  <option value="OLDEST_REQUESTED">Oldest First</option>
-                  <option value="SCHEDULED_DATE">Upcoming Scheduled Date</option>
-                </select>
-
-                <div className="relative w-full sm:w-52">
-                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                  <Input
-                    placeholder="Search prospect, property..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-9 text-xs rounded-xl bg-white border-slate-200 focus:bg-white font-medium"
-                  />
-                </div>
-              </div>
-            </div>
-
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
+
+          {/* Secondary Controls: Format Filter & Sort Selector */}
+          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+            <select
+              value={formatFilter}
+              onChange={(e) => setFormatFilter(e.target.value as any)}
+              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer flex-1 lg:flex-none"
+            >
+              <option value="ALL">All Formats</option>
+              <option value="IN_PERSON">In-Person</option>
+              <option value="VIDEO_CALL">Video Call</option>
+            </select>
+
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as any)}
+              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer flex-1 lg:flex-none"
+            >
+              <option value="NEWEST_REQUESTED">⚡ Newest First</option>
+              <option value="OLDEST_REQUESTED">Oldest First</option>
+              <option value="SCHEDULED_DATE">Upcoming Scheduled Date</option>
+            </select>
+          </div>
+        </div>
 
           {/* Consolidated 5-Column High-Density Table Ledger */}
           <CardContent className="p-0 overflow-x-auto">
@@ -1126,6 +1134,5 @@ export default function ShowingToursPage() {
         </Dialog>
 
       </div>
-    </div>
   );
 }

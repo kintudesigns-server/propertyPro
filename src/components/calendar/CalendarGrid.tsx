@@ -16,7 +16,6 @@ import {
   isSameDay,
   eachDayOfInterval,
   isToday,
-  addDays,
 } from "date-fns";
 import {
   ChevronLeft,
@@ -27,18 +26,11 @@ import {
   ClipboardCheck,
   Eye,
   Calendar as CalendarIcon,
-  Filter,
-  Grid,
-  List,
-  CalendarDays,
-  ArrowRight,
   Clock,
-  MapPin,
   Building,
-  User,
   CheckCircle2,
-  X,
-  Loader2,
+  ArrowRight,
+  Plus,
 } from "lucide-react";
 import { CalendarEvent } from "@/app/api/calendar/events/route";
 import { CalendarEventDrawer } from "@/components/calendar/CalendarEventDrawer";
@@ -55,6 +47,7 @@ export function CalendarGrid() {
   const userRole = (session?.user as any)?.role || "TENANT";
 
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -100,7 +93,11 @@ export function CalendarGrid() {
     else setCurrentDate(subMonths(currentDate, 1));
   };
 
-  const goToToday = () => setCurrentDate(new Date());
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentDate(today);
+    setSelectedDay(today);
+  };
 
   // Filter events based on activeCategory
   const filteredEvents = events.filter((e) => {
@@ -112,49 +109,45 @@ export function CalendarGrid() {
     return filteredEvents.filter((e) => isSameDay(new Date(e.date), day));
   };
 
+  const selectedDayEvents = getEventsForDay(selectedDay);
+
   const getCategoryStyle = (type: string) => {
     switch (type) {
       case "PAYMENT":
         return {
-          bg: "bg-[#22C55E]/10 hover:bg-[#22C55E]/20 text-[#15803D] border-[#22C55E]/20 border-l-[4px] border-l-[#22C55E]",
-          dot: "bg-[#22C55E]",
-          pill: "bg-[#DCFCE7] text-[#15803D] border-[#BBF7D0]",
-          badge: "bg-[#DCFCE7] text-[#15803D] border-[#BBF7D0]",
+          bg: "bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-200/90",
+          dot: "bg-emerald-500",
+          badge: "bg-emerald-50 text-emerald-800 border-emerald-200",
         };
       case "MAINTENANCE":
         return {
-          bg: "bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#B45309] border-[#F59E0B]/20 border-l-[4px] border-l-[#F59E0B]",
-          dot: "bg-[#F59E0B]",
-          pill: "bg-[#FEF3C7] text-[#B45309] border-[#FDE68A]",
-          badge: "bg-[#FEF3C7] text-[#B45309] border-[#FDE68A]",
+          bg: "bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-200/90",
+          dot: "bg-amber-500",
+          badge: "bg-amber-50 text-amber-900 border-amber-200",
         };
       case "INSPECTION":
         return {
-          bg: "bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#6D28D9] border-[#8B5CF6]/20 border-l-[4px] border-l-[#8B5CF6]",
-          dot: "bg-[#8B5CF6]",
-          pill: "bg-[#EDE9FE] text-[#6D28D9] border-[#DDD6FE]",
-          badge: "bg-[#EDE9FE] text-[#6D28D9] border-[#DDD6FE]",
+          bg: "bg-purple-50 hover:bg-purple-100 text-purple-950 border-purple-200/90",
+          dot: "bg-purple-500",
+          badge: "bg-purple-50 text-purple-800 border-purple-200",
         };
       case "LEASE":
         return {
-          bg: "bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#B91C1C] border-[#EF4444]/20 border-l-[4px] border-l-[#EF4444]",
-          dot: "bg-[#EF4444]",
-          pill: "bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]",
-          badge: "bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]",
+          bg: "bg-rose-50 hover:bg-rose-100 text-rose-950 border-rose-200/90",
+          dot: "bg-rose-500",
+          badge: "bg-rose-50 text-rose-800 border-rose-200",
         };
       case "TOUR":
         return {
-          bg: "bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] border-[#007AFF]/20 border-l-[4px] border-l-[#007AFF]",
-          dot: "bg-[#007AFF]",
-          pill: "bg-[#DBEAFE] text-[#1D4ED8] border-[#BFDBFE]",
-          badge: "bg-[#DBEAFE] text-[#1D4ED8] border-[#BFDBFE]",
+          bg: "bg-blue-50 hover:bg-blue-100 text-blue-950 border-blue-200/90",
+          dot: "bg-blue-500",
+          badge: "bg-blue-50 text-blue-800 border-blue-200",
         };
       default:
         return {
-          bg: "bg-[#64748B]/10 hover:bg-[#64748B]/20 text-[#334155] border-[#64748B]/20 border-l-[4px] border-l-[#64748B]",
-          dot: "bg-[#64748B]",
-          pill: "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]",
-          badge: "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]",
+          bg: "bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300",
+          dot: "bg-slate-600",
+          badge: "bg-slate-100 text-slate-800 border-slate-200",
         };
     }
   };
@@ -172,44 +165,45 @@ export function CalendarGrid() {
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   return (
-    <div className="space-y-6 pb-24 font-sans">
-      {/* ── HEADER CONTROL BAR ── */}
-      <div className="bg-white rounded-3xl p-6 border border-[#E5E5EA] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
+      
+      {/* ── iOS HEADER CONTROL BAR ── */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#6E6E73] mb-1">
-            <CalendarIcon className="h-3.5 w-3.5 text-[#007AFF]" />
-            <span className="text-[#1D1D1F] font-bold">Activity Calendar</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-0.5">
+            <CalendarIcon className="h-3.5 w-3.5 text-rose-500" />
+            <span className="text-slate-900 font-black">Calendar</span>
             <span>&bull;</span>
-            <span className="text-[#007AFF] font-bold uppercase tracking-wider">{userRole} Scope</span>
+            <span className="text-slate-900 font-extrabold uppercase tracking-wider">{userRole} Scope</span>
           </div>
-          <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             {format(currentDate, "MMMM yyyy")}
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Month Navigation */}
+          {/* iOS Red Accent Today Button & Month Controls */}
           <div className="flex items-center gap-2">
             <button
               onClick={goToToday}
-              className="px-3.5 h-9 text-xs font-bold text-[#1D1D1F] bg-white hover:bg-[#F2F2F7] rounded-xl border border-[#E5E5EA] shadow-2xs transition-colors"
+              className="px-3.5 h-9 text-xs font-black text-white bg-rose-500 hover:bg-rose-600 rounded-xl shadow-xs transition-all cursor-pointer"
             >
               Today
             </button>
-            <div className="flex items-center gap-1 bg-[#F2F2F7] p-1 rounded-2xl border border-[#E5E5EA]">
+            <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
               <button
                 onClick={navigateBack}
-                className="h-8 w-8 rounded-xl bg-white hover:bg-slate-50 text-[#1D1D1F] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                 title="Previous"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <span className="px-3 text-xs font-extrabold text-[#1D1D1F] min-w-[110px] text-center">
+              <span className="px-3 text-xs font-black text-slate-900 min-w-[110px] text-center">
                 {format(currentDate, viewMode === "WEEK" ? "'Week of' MMM d" : "MMMM yyyy")}
               </span>
               <button
                 onClick={navigateForward}
-                className="h-8 w-8 rounded-xl bg-white hover:bg-slate-50 text-[#1D1D1F] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                 title="Next"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -217,28 +211,28 @@ export function CalendarGrid() {
             </div>
           </div>
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 bg-[#F2F2F7] p-1 rounded-2xl border border-[#E5E5EA]">
+          {/* iOS Segmented View Control Switcher */}
+          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
             <button
               onClick={() => setViewMode("MONTH")}
-              className={`px-3 h-8 text-xs font-bold rounded-xl transition-all ${
-                viewMode === "MONTH" ? "bg-white text-[#007AFF] shadow-2xs font-extrabold" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                viewMode === "MONTH" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Month
             </button>
             <button
               onClick={() => setViewMode("WEEK")}
-              className={`px-3 h-8 text-xs font-bold rounded-xl transition-all ${
-                viewMode === "WEEK" ? "bg-white text-[#007AFF] shadow-2xs font-extrabold" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                viewMode === "WEEK" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Week
             </button>
             <button
               onClick={() => setViewMode("AGENDA")}
-              className={`px-3 h-8 text-xs font-bold rounded-xl transition-all ${
-                viewMode === "AGENDA" ? "bg-white text-[#007AFF] shadow-2xs font-extrabold" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                viewMode === "AGENDA" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Agenda
@@ -263,10 +257,10 @@ export function CalendarGrid() {
             <button
               key={cat.key}
               onClick={() => setActiveCategory(cat.key)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border flex items-center gap-2 shrink-0 transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold border flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                 isActiveCat
-                  ? "bg-[#1D1D1F] text-white border-[#1D1D1F] shadow-sm"
-                  : "bg-white text-[#6E6E73] border-[#E5E5EA] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-slate-900 text-white border-slate-900 shadow-2xs"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -276,97 +270,182 @@ export function CalendarGrid() {
         })}
       </div>
 
-      {/* ── VIEW 1: MONTH GRID VIEW ── */}
+      {/* ── VIEW 1: iOS MONTH GRID VIEW ── */}
       {viewMode === "MONTH" && (
-        <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-xs overflow-hidden">
-          {/* Weekday Labels */}
-          <div className="grid grid-cols-7 border-b border-[#E5E5EA] bg-[#F2F2F7] text-center py-3">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-              <span key={day} className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">
-                {day}
-              </span>
-            ))}
+        <div className="space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            {/* Weekday Labels (iOS style SUN MON TUE WED THU FRI SAT) */}
+            <div className="grid grid-cols-7 border-b border-slate-200/80 bg-slate-50/70 text-center py-2.5">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <span key={day} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  {day}
+                </span>
+              ))}
+            </div>
+
+            {/* Month Days Grid */}
+            <div className="grid grid-cols-7 divide-x divide-y divide-slate-100">
+              {days.map((day) => {
+                const dayEvents = getEventsForDay(day);
+                const isCurrentMonth = isSameMonth(day, currentDate);
+                const isDayToday = isToday(day);
+                const isDaySelected = isSameDay(day, selectedDay);
+
+                return (
+                  <div
+                    key={day.toISOString()}
+                    onClick={() => setSelectedDay(day)}
+                    className={`min-h-[125px] p-2 flex flex-col justify-between transition-all cursor-pointer ${
+                      !isCurrentMonth ? "bg-slate-50/30 text-slate-400" : "bg-white hover:bg-slate-50/70"
+                    } ${isDaySelected ? "bg-rose-50/60 border-2 border-rose-500/80 rounded-2xl shadow-xs z-10" : ""}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span
+                        className={`h-7 w-7 rounded-full text-xs flex items-center justify-center transition-all ${
+                          isDayToday
+                            ? "bg-rose-500 text-white font-black shadow-xs"
+                            : isDaySelected
+                            ? "bg-rose-600 text-white font-black shadow-xs"
+                            : isCurrentMonth
+                            ? "text-slate-900 font-extrabold"
+                            : "text-slate-400 font-semibold"
+                        }`}
+                      >
+                        {format(day, "d")}
+                      </span>
+                      {dayEvents.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          {/* iOS Colored Event Dot Indicators */}
+                          <div className="flex items-center gap-0.5">
+                            {dayEvents.slice(0, 3).map((ev) => {
+                              const style = getCategoryStyle(ev.type);
+                              return (
+                                <span key={ev.id} className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+                              );
+                            })}
+                          </div>
+                          {dayEvents.length > 3 && (
+                            <span className="text-[9px] font-black text-slate-400">
+                              +{dayEvents.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Day Events iOS Pills */}
+                    <div className="space-y-1 flex-1 flex flex-col justify-start">
+                      {dayEvents.slice(0, 2).map((event) => {
+                        const style = getCategoryStyle(event.type);
+                        return (
+                          <button
+                            key={event.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(event);
+                            }}
+                            className={`w-full text-left px-2 py-1 rounded-lg border text-[11px] font-extrabold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 truncate ${style.bg}`}
+                          >
+                            <span className={`h-2 w-2 rounded-full shrink-0 ${style.dot}`} />
+                            <span className="truncate">{event.title}</span>
+                          </button>
+                        );
+                      })}
+
+                      {dayEvents.length > 2 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDayModalDate(day);
+                          }}
+                          className="w-full text-left px-2 py-0.5 rounded-md text-[10px] font-black text-slate-900 hover:underline mt-auto cursor-pointer"
+                        >
+                          + {dayEvents.length - 2} more events
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Month Days Grid */}
-          <div className="grid grid-cols-7 divide-x divide-y divide-[#E5E5EA]">
-            {days.map((day) => {
-              const dayEvents = getEventsForDay(day);
-              const isCurrentMonth = isSameMonth(day, currentDate);
-              const isDayToday = isToday(day);
+          {/* ── iOS SPLIT VIEW: SELECTED DAY AGENDA PANEL ── */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                  Selected Day Schedule
+                </span>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                  {format(selectedDay, "EEEE, MMMM d, yyyy")}
+                </h3>
+              </div>
+              <span className="text-xs font-black px-3 py-1 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 shadow-2xs">
+                {selectedDayEvents.length} Events
+              </span>
+            </div>
 
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`min-h-[135px] p-2 flex flex-col justify-between transition-colors ${
-                    !isCurrentMonth ? "bg-[#FAFAFC] text-[#8E8E93]" : "bg-white hover:bg-[#F8FAFC]"
-                  } ${isDayToday ? "bg-blue-50/20" : ""}`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span
-                      className={`h-7 w-7 rounded-full text-xs font-bold flex items-center justify-center ${
-                        isDayToday
-                          ? "bg-[#007AFF] text-white shadow-2xs font-extrabold"
-                          : isCurrentMonth
-                          ? "text-[#1D1D1F]"
-                          : "text-[#8E8E93]"
-                      }`}
+            {selectedDayEvents.length === 0 ? (
+              <div className="py-8 text-center text-slate-400 space-y-1">
+                <p className="text-xs font-bold text-slate-500">No events scheduled for this day</p>
+                <p className="text-[11px] text-slate-400">Select another date on the calendar above to view events.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {selectedDayEvents.map((event) => {
+                  const style = getCategoryStyle(event.type);
+                  return (
+                    <div
+                      key={event.id}
+                      onClick={() => setSelectedEvent(event)}
+                      className={`p-4 rounded-2xl border transition-all hover:shadow-md cursor-pointer flex items-center justify-between gap-3 ${style.bg}`}
                     >
-                      {format(day, "d")}
-                    </span>
-                    {dayEvents.length > 0 && (
-                      <span className="text-[10px] font-bold text-[#8E8E93] px-1.5 py-0.5 bg-[#F2F2F7] rounded-md">
-                        {dayEvents.length}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Day Events List (Max 2 visible, +X more button) */}
-                  <div className="space-y-1.5 flex-1 flex flex-col justify-start">
-                    {dayEvents.slice(0, 2).map((event) => {
-                      const style = getCategoryStyle(event.type);
-                      return (
-                        <button
-                          key={event.id}
-                          onClick={() => setSelectedEvent(event)}
-                          className={`w-full text-left px-2 py-1.5 rounded-lg border text-xs font-semibold truncate block transition-all shadow-2xs ${style.bg}`}
-                        >
-                          <div className="truncate font-semibold text-[#1D1D1F] text-[11px]">
-                            {event.title}
+                      <div className="flex items-center gap-3">
+                        <span className={`h-3 w-3 rounded-full shrink-0 ${style.dot}`} />
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                              {format(new Date(event.date), "h:mm a")}
+                            </span>
+                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
+                              {event.type}
+                            </span>
                           </div>
-                        </button>
-                      );
-                    })}
-
-                    {dayEvents.length > 2 && (
-                      <button
-                        onClick={() => setDayModalDate(day)}
-                        className="w-full text-left px-2 py-0.5 rounded-md text-[11px] font-bold text-[#007AFF] hover:underline mt-auto"
-                      >
-                        + {dayEvents.length - 2} more
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                          <h4 className="text-xs font-black text-slate-900 leading-snug">{event.title}</h4>
+                          {event.metadata?.propertyName && (
+                            <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                              <Building className="h-3 w-3 text-slate-400" />
+                              {event.metadata.propertyName}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button variant="ghost" className="h-8 w-8 p-0 rounded-xl hover:bg-slate-200/60 text-slate-900 shrink-0">
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ── VIEW 2: WEEK TIMETABLE VIEW ── */}
       {viewMode === "WEEK" && (
-        <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
           {/* Weekday Header */}
-          <div className="grid grid-cols-7 border-b border-[#E5E5EA] bg-[#F2F2F7] text-center py-3.5">
+          <div className="grid grid-cols-7 border-b border-slate-200/80 bg-slate-50/70 text-center py-3.5">
             {weekDays.map((day) => (
               <div key={day.toISOString()} className="space-y-1">
-                <span className="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider block">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
                   {format(day, "EEE")}
                 </span>
                 <span
                   className={`inline-flex h-8 w-8 rounded-full text-xs font-black items-center justify-center ${
-                    isToday(day) ? "bg-[#007AFF] text-white shadow-sm" : "text-[#1D1D1F]"
+                    isToday(day) ? "bg-rose-500 text-white shadow-2xs" : "text-slate-900"
                   }`}
                 >
                   {format(day, "d")}
@@ -376,13 +455,13 @@ export function CalendarGrid() {
           </div>
 
           {/* Timetable Body */}
-          <div className="grid grid-cols-7 divide-x divide-[#E5E5EA] min-h-[420px] bg-white">
+          <div className="grid grid-cols-7 divide-x divide-slate-100 min-h-[420px] bg-white">
             {weekDays.map((day) => {
               const dayEvents = getEventsForDay(day);
               return (
                 <div key={day.toISOString()} className="p-2 space-y-2.5">
                   {dayEvents.length === 0 ? (
-                    <div className="h-full min-h-[200px] flex items-center justify-center text-[#8E8E93] text-xs font-medium italic">
+                    <div className="h-full min-h-[200px] flex items-center justify-center text-slate-400 text-xs font-semibold italic">
                       No Events
                     </div>
                   ) : (
@@ -395,14 +474,14 @@ export function CalendarGrid() {
                           className={`p-3 rounded-xl border text-xs cursor-pointer transition-all hover:shadow-md ${style.bg}`}
                         >
                           <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-[10px] font-extrabold text-[#6E6E73] flex items-center gap-1 uppercase tracking-wider">
-                              <Clock className="h-3 w-3 text-[#007AFF]" />
+                            <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1 text-slate-600">
+                              <Clock className="h-3 w-3 text-slate-700" />
                               {format(new Date(event.date), "h:mm a")}
                             </span>
                           </div>
-                          <p className="font-bold text-[#1D1D1F] text-xs leading-snug line-clamp-2">{event.title}</p>
+                          <p className="font-extrabold text-xs text-slate-900 leading-snug line-clamp-2">{event.title}</p>
                           {event.metadata?.propertyName && (
-                            <p className="text-[11px] font-medium text-[#6E6E73] mt-1 truncate">
+                            <p className="text-[11px] font-semibold text-slate-500 mt-1 truncate">
                               {event.metadata.propertyName}
                             </p>
                           )}
@@ -419,58 +498,58 @@ export function CalendarGrid() {
 
       {/* ── VIEW 3: AGENDA CHRONOLOGICAL LIST VIEW ── */}
       {viewMode === "AGENDA" && (
-        <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-xs overflow-hidden space-y-4">
-          <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7] flex items-center justify-between">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-4">
+          <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-black text-[#1D1D1F] tracking-tight">Agenda Feed</h3>
-              <p className="text-xs font-semibold text-[#6E6E73]">Chronological schedule of upcoming events and tasks.</p>
+              <h3 className="text-base font-black text-slate-900 tracking-tight">Agenda Feed</h3>
+              <p className="text-xs font-semibold text-slate-500">Chronological schedule of upcoming events and tasks.</p>
             </div>
-            <span className="text-xs font-extrabold px-3.5 py-1 bg-white text-[#1D1D1F] border border-[#E5E5EA] rounded-xl shadow-2xs">
+            <span className="text-xs font-black px-3.5 py-1 bg-white text-slate-900 border border-slate-200 rounded-xl shadow-2xs">
               {filteredEvents.length} Scheduled Items
             </span>
           </div>
 
           {filteredEvents.length === 0 ? (
-            <div className="p-16 text-center text-[#8E8E93] space-y-2">
-              <CheckCircle2 className="h-10 w-10 text-[#34C759] mx-auto" />
-              <p className="text-sm font-bold text-[#1D1D1F]">No scheduled events found</p>
-              <p className="text-xs text-[#8E8E93]">Try selecting a different date range or event filter.</p>
+            <div className="p-16 text-center text-slate-400 space-y-2">
+              <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" />
+              <p className="text-sm font-extrabold text-slate-900">No scheduled events found</p>
+              <p className="text-xs text-slate-500 font-semibold">Try selecting a different date range or event filter.</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#E5E5EA]">
+            <div className="divide-y divide-slate-100">
               {filteredEvents.map((event) => {
                 const style = getCategoryStyle(event.type);
                 return (
                   <div
                     key={event.id}
                     onClick={() => setSelectedEvent(event)}
-                    className="p-5 hover:bg-[#F2F2F7]/50 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                    className="p-5 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-center min-w-[50px] p-2 bg-[#F2F2F7] rounded-2xl border border-[#E5E5EA]">
-                        <span className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider block">
+                      <div className="text-center min-w-[50px] p-2 bg-slate-100 rounded-2xl border border-slate-200 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
                           {format(new Date(event.date), "MMM")}
                         </span>
-                        <span className="text-xl font-black text-[#1D1D1F]">
+                        <span className="text-xl font-black text-slate-900">
                           {format(new Date(event.date), "d")}
                         </span>
                       </div>
 
                       <div className="space-y-1">
-                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
+                        <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md border shadow-2xs ${style.badge}`}>
                           {event.type}
                         </span>
-                        <h4 className="text-sm font-extrabold text-[#1D1D1F]">{event.title}</h4>
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">{event.title}</h4>
                         {event.metadata?.propertyName && (
-                          <p className="text-xs font-medium text-[#6E6E73] flex items-center gap-1">
-                            <Building className="h-3.5 w-3.5 text-[#8E8E93]" />
+                          <p className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                            <Building className="h-3.5 w-3.5 text-slate-400" />
                             {event.metadata.propertyName} {event.metadata.unitNumber ? `&bull; Unit ${event.metadata.unitNumber}` : ""}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <Button variant="ghost" className="h-9 px-4 text-xs font-bold text-[#007AFF] hover:text-[#0056B3] hover:bg-[#EFF6FF] rounded-xl border border-transparent hover:border-[#DBEAFE]">
+                    <Button variant="ghost" className="h-9 px-4 text-xs font-extrabold text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200/80 cursor-pointer">
                       Inspect <ArrowRight className="h-3.5 w-3.5 ml-1" />
                     </Button>
                   </div>
@@ -483,9 +562,9 @@ export function CalendarGrid() {
 
       {/* ── DAY EVENTS OVERFLOW MODAL (+X MORE) ── */}
       <Dialog open={Boolean(dayModalDate)} onOpenChange={(open) => !open && setDayModalDate(null)}>
-        <DialogContent className="max-w-md bg-white rounded-3xl border-[#E5E5EA] p-6 shadow-2xl">
+        <DialogContent className="max-w-md bg-white rounded-3xl border border-slate-200 p-6 shadow-2xl font-sans">
           <DialogHeader>
-            <DialogTitle className="text-lg font-black text-[#1D1D1F] tracking-tight">
+            <DialogTitle className="text-base font-extrabold text-slate-900 tracking-tight">
               {dayModalDate ? format(dayModalDate, "EEEE, MMMM d, yyyy") : "Scheduled Events"}
             </DialogTitle>
           </DialogHeader>
@@ -503,14 +582,14 @@ export function CalendarGrid() {
                   className={`p-3.5 rounded-2xl border text-xs font-semibold cursor-pointer transition-all hover:shadow-md ${style.bg}`}
                 >
                   <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
+                    <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md border shadow-2xs ${style.badge}`}>
                       {event.type}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#6E6E73]">
+                    <span className="text-[11px] font-semibold opacity-80">
                       {format(new Date(event.date), "h:mm a")}
                     </span>
                   </div>
-                  <p className="font-extrabold text-[#1D1D1F] leading-snug">{event.title}</p>
+                  <p className="font-extrabold leading-snug">{event.title}</p>
                 </div>
               );
             })}

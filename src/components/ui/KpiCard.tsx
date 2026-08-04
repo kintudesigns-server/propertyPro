@@ -30,67 +30,67 @@ export interface KpiCardProps {
 
 const variantStyles: Record<KpiCardVariant, { bg: string; text: string; iconBg: string; activeBg: string; dot: string }> = {
   blue: {
-    bg: "bg-blue-50 text-blue-700 border-blue-200/60",
-    text: "text-blue-600",
-    iconBg: "bg-blue-50 text-blue-600 border border-blue-100/80",
-    activeBg: "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/30 shadow-xs",
-    dot: "bg-blue-500",
+    bg: "bg-slate-100 text-slate-800 border-slate-200",
+    text: "text-slate-900",
+    iconBg: "bg-slate-100 text-slate-800 border border-slate-200/80",
+    activeBg: "border-slate-900 ring-2 ring-slate-900/10 bg-slate-50/60 shadow-xs",
+    dot: "bg-slate-800",
   },
   green: {
     bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-    text: "text-emerald-600",
-    iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-100/80",
-    activeBg: "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/30 shadow-xs",
-    dot: "bg-emerald-500",
+    text: "text-emerald-700",
+    iconBg: "bg-emerald-50 text-emerald-700 border border-emerald-100/80",
+    activeBg: "border-emerald-600 ring-2 ring-emerald-600/10 bg-emerald-50/40 shadow-xs",
+    dot: "bg-emerald-600",
   },
   emerald: {
     bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-    text: "text-emerald-600",
-    iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-100/80",
-    activeBg: "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/30 shadow-xs",
-    dot: "bg-emerald-500",
+    text: "text-emerald-700",
+    iconBg: "bg-emerald-50 text-emerald-700 border border-emerald-100/80",
+    activeBg: "border-emerald-600 ring-2 ring-emerald-600/10 bg-emerald-50/40 shadow-xs",
+    dot: "bg-emerald-600",
   },
   orange: {
-    bg: "bg-amber-50 text-amber-700 border-amber-200/60",
-    text: "text-amber-600",
-    iconBg: "bg-amber-50 text-amber-600 border border-amber-100/80",
-    activeBg: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/30 shadow-xs",
-    dot: "bg-amber-500",
+    bg: "bg-amber-50 text-amber-800 border-amber-200/60",
+    text: "text-amber-800",
+    iconBg: "bg-amber-50 text-amber-800 border border-amber-100/80",
+    activeBg: "border-amber-600 ring-2 ring-amber-600/10 bg-amber-50/40 shadow-xs",
+    dot: "bg-amber-600",
   },
   amber: {
-    bg: "bg-amber-50 text-amber-700 border-amber-200/60",
-    text: "text-amber-600",
-    iconBg: "bg-amber-50 text-amber-600 border border-amber-100/80",
-    activeBg: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/30 shadow-xs",
-    dot: "bg-amber-500",
+    bg: "bg-amber-50 text-amber-800 border-amber-200/60",
+    text: "text-amber-800",
+    iconBg: "bg-amber-50 text-amber-800 border border-amber-100/80",
+    activeBg: "border-amber-600 ring-2 ring-amber-600/10 bg-amber-50/40 shadow-xs",
+    dot: "bg-amber-600",
   },
   purple: {
-    bg: "bg-purple-50 text-purple-700 border-purple-200/60",
-    text: "text-purple-600",
-    iconBg: "bg-purple-50 text-purple-600 border border-purple-100/80",
-    activeBg: "border-purple-500 ring-2 ring-purple-500/20 bg-purple-50/30 shadow-xs",
-    dot: "bg-purple-500",
+    bg: "bg-purple-50 text-purple-800 border-purple-200/60",
+    text: "text-purple-800",
+    iconBg: "bg-purple-50 text-purple-800 border border-purple-100/80",
+    activeBg: "border-purple-600 ring-2 ring-purple-600/10 bg-purple-50/40 shadow-xs",
+    dot: "bg-purple-600",
   },
   indigo: {
-    bg: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
-    text: "text-indigo-600",
-    iconBg: "bg-indigo-50 text-indigo-600 border border-indigo-100/80",
-    activeBg: "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30 shadow-xs",
-    dot: "bg-indigo-500",
+    bg: "bg-indigo-50 text-indigo-800 border-indigo-200/60",
+    text: "text-indigo-800",
+    iconBg: "bg-indigo-50 text-indigo-800 border border-indigo-100/80",
+    activeBg: "border-indigo-600 ring-2 ring-indigo-600/10 bg-indigo-50/40 shadow-xs",
+    dot: "bg-indigo-600",
   },
   red: {
-    bg: "bg-rose-50 text-rose-700 border-rose-200/60",
-    text: "text-rose-600",
-    iconBg: "bg-rose-50 text-rose-600 border border-rose-100/80",
-    activeBg: "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/30 shadow-xs",
-    dot: "bg-rose-500",
+    bg: "bg-rose-50 text-rose-800 border-rose-200/60",
+    text: "text-rose-800",
+    iconBg: "bg-rose-50 text-rose-800 border border-rose-100/80",
+    activeBg: "border-rose-600 ring-2 ring-rose-600/10 bg-rose-50/40 shadow-xs",
+    dot: "bg-rose-600",
   },
   slate: {
     bg: "bg-slate-100 text-slate-700 border-slate-200",
-    text: "text-slate-700",
-    iconBg: "bg-slate-100 text-slate-600 border border-slate-200/80",
-    activeBg: "border-slate-500 ring-2 ring-slate-500/20 bg-slate-50 shadow-xs",
-    dot: "bg-slate-500",
+    text: "text-slate-800",
+    iconBg: "bg-slate-100 text-slate-700 border border-slate-200/80",
+    activeBg: "border-slate-800 ring-2 ring-slate-800/10 bg-slate-50 shadow-xs",
+    dot: "bg-slate-600",
   },
 };
 
@@ -116,7 +116,7 @@ export function KpiCard({
     <div
       onClick={onClick}
       className={`
-        bg-white border rounded-[20px] p-4.5 shadow-xs transition-all duration-200 relative overflow-hidden group flex flex-col justify-between
+        bg-white border rounded-[22px] p-4 sm:p-4.5 shadow-xs transition-all duration-200 relative overflow-hidden group flex flex-col justify-between
         ${onClick || href ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md" : ""}
         ${
           active
@@ -126,18 +126,18 @@ export function KpiCard({
         ${className}
       `}
     >
-      <div className="flex justify-between items-start mb-3 gap-2">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 truncate flex-1">
+      <div className="flex justify-between items-start mb-2.5 gap-1.5">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 leading-tight block min-w-0" title={title}>
           {title}
         </span>
         {Icon && (
-          <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 shadow-2xs ${styles.iconBg}`}>
-            <Icon className="h-4 w-4" />
+          <div className={`h-7.5 w-7.5 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 shadow-2xs ${styles.iconBg}`}>
+            <Icon className="h-3.5 w-3.5" />
           </div>
         )}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <div className="flex items-baseline justify-between gap-2 min-w-0">
           <p className={`${valueFontSize} font-black tracking-tight text-slate-900 leading-none truncate`} title={valueStr}>
             {value}

@@ -72,41 +72,48 @@ export default function FinancialSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#007AFF]" />
+      <div className="flex justify-center py-20 font-sans">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-800" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-5xl space-y-8 pb-20">
-      <div className="flex flex-col gap-1 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-black text-[#1D1D1F] flex items-center gap-2">
-          <Shield className="h-7 w-7 text-blue-600" />
-          Financial & Operational Settings
-        </h1>
-        <p className="text-sm text-[#6E6E73]">
-          Manage platform revenue commission rates, financial disbursement policies, and tour security rate limits.
-        </p>
+    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-8 pb-28 font-sans">
+      {/* ─── PAGE HEADER ─── */}
+      <div className="flex flex-col gap-1 border-b border-slate-100 pb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="h-10 w-10 bg-slate-900 rounded-2xl flex items-center justify-center text-amber-400 shadow-2xs">
+            <Shield className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+              Financial &amp; Operational Settings
+            </h1>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">
+              Manage platform revenue commission rates, financial disbursement policies, and tour security rate limits.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Platform Commission Rate Card */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+      {/* ─── PLATFORM COMMISSION RATE CARD ─── */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs font-sans">
+        <div className="flex items-start gap-5">
+          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs">
             <DollarSign className="h-6 w-6" />
           </div>
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Global Rent Commission Rate</h2>
-              <p className="text-sm text-[#6E6E73] mt-1">
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">Global Rent Commission Rate</h2>
+              <p className="text-xs font-semibold text-slate-500 mt-1 leading-relaxed">
                 This flat percentage cut is automatically deducted from rent and deposit payments before funds are disbursed to property owners. 
                 This directly impacts your platform "Rent Commissions" revenue.
               </p>
             </div>
             
-            <div className="w-full max-w-xs">
-              <label className="block text-sm font-semibold text-[#1D1D1F] mb-1">Commission Percentage (%)</label>
+            <div className="w-full max-w-xs space-y-1.5">
+              <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Commission Percentage (%)</label>
               <div className="relative">
                 <Input
                   type="number"
@@ -115,87 +122,87 @@ export default function FinancialSettingsPage() {
                   max="100"
                   value={platformSettings.adminFeePercent}
                   onChange={(e) => setPlatformSettings({ ...platformSettings, adminFeePercent: parseFloat(e.target.value) || 0 })}
-                  className="w-full border border-slate-300 rounded-lg h-11 px-3 pr-8 focus:ring-2 focus:ring-[#007AFF] font-bold text-base"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 pr-8 focus:bg-white focus:border-slate-900 font-extrabold text-sm text-slate-900 shadow-2xs"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8E93] font-bold">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-xs">%</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tour Booking & Anti-Spam Controls Card */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+      {/* ─── TOUR BOOKING & ANTI-SPAM CONTROLS CARD ─── */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs font-sans">
+        <div className="flex items-start gap-5">
+          <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center shrink-0 shadow-2xs">
             <Calendar className="h-6 w-6" />
           </div>
           <div className="flex-1 space-y-6">
             <div>
-              <h2 className="text-lg font-bold text-[#1D1D1F]">Tour Booking & Rate Limiting Controls</h2>
-              <p className="text-sm text-[#6E6E73] mt-1">
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">Tour Booking &amp; Rate Limiting Controls</h2>
+              <p className="text-xs font-semibold text-slate-500 mt-1 leading-relaxed">
                 Configure spam-prevention rules and email OTP expiration settings for public tour bookings across all property listings.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Max Request Limits</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Max Request Limits</Label>
                 <div className="relative">
                   <Input 
                     type="number"
                     min="1"
                     value={platformSettings.tourMaxRequestsPerEmail}
                     onChange={(e) => setPlatformSettings({ ...platformSettings, tourMaxRequestsPerEmail: parseInt(e.target.value) || 1 })}
-                    className="rounded-xl h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500 pr-20 font-bold text-slate-800"
+                    className="bg-slate-50 border border-slate-200 rounded-xl h-10 pr-16 font-extrabold text-xs text-slate-900 focus:bg-white focus:border-slate-900 shadow-2xs"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">tours</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-extrabold text-slate-400">tours</span>
                 </div>
-                <p className="text-[11px] text-[#8E8E93]">Maximum active/pending requests allowed per email.</p>
+                <p className="text-[10px] text-slate-400 font-semibold">Maximum active/pending requests allowed per email.</p>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Rate Limit Window</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rate Limit Window</Label>
                 <div className="relative">
                   <Input 
                     type="number"
                     min="1"
                     value={platformSettings.tourRateLimitWindowHours}
                     onChange={(e) => setPlatformSettings({ ...platformSettings, tourRateLimitWindowHours: parseInt(e.target.value) || 1 })}
-                    className="rounded-xl h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500 pr-20 font-bold text-slate-800"
+                    className="bg-slate-50 border border-slate-200 rounded-xl h-10 pr-16 font-extrabold text-xs text-slate-900 focus:bg-white focus:border-slate-900 shadow-2xs"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">hours</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-extrabold text-slate-400">hours</span>
                 </div>
-                <p className="text-[11px] text-[#8E8E93]">Rolling window time frame for request limits.</p>
+                <p className="text-[10px] text-slate-400 font-semibold">Rolling window time frame for request limits.</p>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">OTP Code Expiry</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">OTP Code Expiry</Label>
                 <div className="relative">
                   <Input 
                     type="number"
                     min="1"
                     value={platformSettings.tourOtpExpiryMinutes}
                     onChange={(e) => setPlatformSettings({ ...platformSettings, tourOtpExpiryMinutes: parseInt(e.target.value) || 1 })}
-                    className="rounded-xl h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500 pr-20 font-bold text-slate-800"
+                    className="bg-slate-50 border border-slate-200 rounded-xl h-10 pr-16 font-extrabold text-xs text-slate-900 focus:bg-white focus:border-slate-900 shadow-2xs"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8E8E93]">minutes</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-extrabold text-slate-400">minutes</span>
                 </div>
-                <p className="text-[11px] text-[#8E8E93]">Email verification OTP code expiration time.</p>
+                <p className="text-[10px] text-slate-400 font-semibold">Email verification OTP code expiration time.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Save Button Bar */}
+      {/* ─── SAVE BUTTON BAR ─── */}
       <div className="pt-2 flex justify-end">
         <Button
           onClick={saveSettings}
           disabled={saving}
-          className="bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold h-12 px-8 rounded-xl flex items-center gap-2 shadow-md shadow-blue-500/20"
+          className="bg-slate-900 hover:bg-slate-800 text-white font-black h-10 px-6 rounded-xl flex items-center gap-2 shadow-xs cursor-pointer border-none text-xs"
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save All Settings
         </Button>
       </div>

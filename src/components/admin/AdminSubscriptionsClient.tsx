@@ -176,10 +176,10 @@ export default function AdminSubscriptionsClient({
   const uniqueTiers = Array.from(new Set(owners.map(o => o.pricingTier?.name || "No Active Plan")));
 
   return (
-    <div className="space-y-8 relative pb-20">
+    <div className="space-y-6 relative pb-20 font-sans">
 
       {/* 1. MATCHING DASHBOARD HERO BANNER WITH MOTION BACKGROUND */}
-      <div className="relative overflow-hidden rounded-3xl bg-white border border-[#E5E5EA] shadow-sm min-h-[220px] w-full">
+      <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-xs min-h-[220px] w-full font-sans">
         {/* Background Image Crossfade Stack */}
         <div className="absolute inset-0 z-0 overflow-hidden bg-slate-100">
           {HERO_SLIDES.map((slide, idx) => {
@@ -225,19 +225,19 @@ export default function AdminSubscriptionsClient({
             className="space-y-2.5 max-w-2xl"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[#007AFF] shadow-2xs font-extrabold text-[10px] tracking-widest uppercase">
-                <CreditCard className="h-3.5 w-3.5" />
-                SaaS Revenue & Licensing Hub
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-900 shadow-2xs font-black text-[10px] tracking-wider uppercase">
+                <CreditCard className="h-3.5 w-3.5 text-slate-700" />
+                SaaS Revenue &amp; Licensing Hub
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold text-[10px]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-[10px]">
                 {HERO_SLIDES[slideIndex].tag}
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-[#1D1D1F]">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
               Active Owner Subscriptions
             </h1>
-            <p className="text-slate-600 text-xs md:text-sm font-medium leading-relaxed">
+            <p className="text-slate-500 text-xs md:text-sm font-semibold leading-relaxed">
               Manage landlord SaaS subscription contracts, recurring MRR performance, custom feature grants, and global past-due policy locks.
             </p>
           </motion.div>
@@ -246,18 +246,18 @@ export default function AdminSubscriptionsClient({
             <Button 
               variant="outline"
               onClick={() => setShowSettings(!showSettings)}
-              className="bg-white/90 hover:bg-white text-[#1D1D1F] border border-[#E5E5EA] rounded-xl font-bold text-xs h-10 px-4 transition-all shadow-xs"
+              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl font-black text-xs h-9 px-4 transition-all shadow-2xs cursor-pointer"
             >
-              <Settings2 className="h-4 w-4 mr-2 text-slate-600" />
+              <Settings2 className="h-3.5 w-3.5 mr-2 text-slate-500" />
               {showSettings ? "Hide Global Policies" : "Configure Policies"}
             </Button>
 
             <Link
               href="/dashboard/admin/settings/pricing"
-              className="inline-flex items-center bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-bold text-xs h-10 px-4 transition-all shadow-xs"
+              className="inline-flex items-center bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 px-4 transition-all shadow-xs cursor-pointer border-none"
             >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Pricing Tiers & Fees <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
+              <Sparkles className="h-3.5 w-3.5 mr-2" />
+              Pricing Tiers &amp; Fees <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
             </Link>
           </div>
         </div>
@@ -265,34 +265,34 @@ export default function AdminSubscriptionsClient({
 
       {/* Global Subscription Policy Settings Drawer/Card */}
       {showSettings && (
-        <Card className="bg-white border border-[#E5E5EA] shadow-lg rounded-3xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex items-center justify-between border-b border-[#F2F2F7] pb-4">
+        <Card className="bg-white border border-slate-200 shadow-md rounded-3xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200 font-sans">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+              <div className="p-2 bg-slate-100 text-slate-900 rounded-xl border border-slate-200 shadow-2xs">
                 <Settings2 className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-[#1D1D1F]">Global Subscription Gating & Overage Policies</h3>
-                <p className="text-xs text-[#6E6E73]">System-wide default policy parameters governing soft-locks and past-due grace windows</p>
+                <h3 className="text-base font-black text-slate-900">Global Subscription Gating &amp; Overage Policies</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">System-wide default policy parameters governing soft-locks and past-due grace windows</p>
               </div>
             </div>
-            <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-bold text-xs">Platform-Wide Defaults</Badge>
+            <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-black text-[9px] uppercase tracking-wider">Platform-Wide Defaults</Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Column 1: Financial Controls */}
-            <div className="bg-slate-50/70 border border-[#E5E5EA] rounded-2xl p-5 space-y-4 shadow-2xs">
-              <h4 className="text-xs font-black text-[#8E8E93] uppercase tracking-wider border-b border-slate-200/60 pb-2">Financial Controls</h4>
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-2xs">
+              <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Financial Controls</h4>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider block">Past_Due Grace Period</label>
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Past_Due Grace Period</label>
                 <div className="flex items-center gap-2">
                   <Input 
                     type="number" 
                     value={settings.gracePeriodDays} 
                     onChange={(e) => setSettings({ ...settings, gracePeriodDays: parseInt(e.target.value) || 0 })}
-                    className="bg-white rounded-xl border-[#E5E5EA] h-10 w-24 text-center font-bold text-sm"
+                    className="bg-white rounded-xl border-slate-200/80 h-9 w-24 text-center font-black text-xs shadow-2xs"
                   />
-                  <span className="text-xs font-semibold text-[#6E6E73]">Days grace before lock</span>
+                  <span className="text-xs font-semibold text-slate-500">Days grace before lock</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 pt-2">
@@ -301,9 +301,9 @@ export default function AdminSubscriptionsClient({
                   id="payoutsPastDue"
                   checked={!!settings.blockPayoutsOnPastDue}
                   onChange={(e) => setSettings({ ...settings, blockPayoutsOnPastDue: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="payoutsPastDue" className="text-xs font-bold text-[#1D1D1F] cursor-pointer">Block payouts during Past_Due grace</label>
+                <label htmlFor="payoutsPastDue" className="text-xs font-extrabold text-slate-900 cursor-pointer">Block payouts during Past_Due grace</label>
               </div>
               <div className="flex items-center gap-3">
                 <input 
@@ -311,24 +311,24 @@ export default function AdminSubscriptionsClient({
                   id="payoutsPaused"
                   checked={!!settings.blockPayoutsOnPaused}
                   onChange={(e) => setSettings({ ...settings, blockPayoutsOnPaused: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="payoutsPaused" className="text-xs font-bold text-[#1D1D1F] cursor-pointer">Block payouts when account paused</label>
+                <label htmlFor="payoutsPaused" className="text-xs font-extrabold text-slate-900 cursor-pointer">Block payouts when account paused</label>
               </div>
             </div>
 
             {/* Column 2: Paused Account Restrictions */}
-            <div className="bg-slate-50/70 border border-[#E5E5EA] rounded-2xl p-5 space-y-3.5 shadow-2xs">
-              <h4 className="text-xs font-black text-[#8E8E93] uppercase tracking-wider border-b border-slate-200/60 pb-2">Paused Account Restrictions</h4>
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-2xs">
+              <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Paused Account Restrictions</h4>
               <div className="flex items-center gap-3">
                 <input 
                   type="checkbox" 
                   id="unitsPaused"
                   checked={!!settings.blockNewUnitsOnPaused}
                   onChange={(e) => setSettings({ ...settings, blockNewUnitsOnPaused: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="unitsPaused" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Block adding new units & properties</label>
+                <label htmlFor="unitsPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Block adding new units &amp; properties</label>
               </div>
               <div className="flex items-center gap-3">
                 <input 
@@ -336,9 +336,9 @@ export default function AdminSubscriptionsClient({
                   id="vendorPaused"
                   checked={!!settings.blockAddVendorOnPaused}
                   onChange={(e) => setSettings({ ...settings, blockAddVendorOnPaused: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="vendorPaused" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Block adding external vendors</label>
+                <label htmlFor="vendorPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Block adding external vendors</label>
               </div>
               <div className="flex items-center gap-3">
                 <input 
@@ -346,9 +346,9 @@ export default function AdminSubscriptionsClient({
                   id="inspectorPaused"
                   checked={!!settings.blockAddInspectorOnPaused}
                   onChange={(e) => setSettings({ ...settings, blockAddInspectorOnPaused: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="inspectorPaused" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Block adding inspectors / team</label>
+                <label htmlFor="inspectorPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Block adding inspectors / team</label>
               </div>
               <div className="flex items-center gap-3">
                 <input 
@@ -356,25 +356,25 @@ export default function AdminSubscriptionsClient({
                   id="tenantPaused"
                   checked={!!settings.blockAddTenantOnPaused}
                   onChange={(e) => setSettings({ ...settings, blockAddTenantOnPaused: e.target.checked })}
-                  className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="tenantPaused" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Block registering new tenants</label>
+                <label htmlFor="tenantPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Block registering new tenants</label>
               </div>
             </div>
 
             {/* Column 3: Policy Welfare Exemptions */}
-            <div className="bg-slate-50/70 border border-[#E5E5EA] rounded-2xl p-5 space-y-3.5 shadow-2xs flex flex-col justify-between">
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-2xs flex flex-col justify-between">
               <div>
-                <h4 className="text-xs font-black text-[#8E8E93] uppercase tracking-wider border-b border-slate-200/60 pb-2">Welfare Exemptions</h4>
+                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Welfare Exemptions</h4>
                 <div className="flex items-center gap-3 mt-3">
                   <input 
                     type="checkbox" 
                     id="maintPaused"
                     checked={!!settings.allowMaintenanceOnPaused}
                     onChange={(e) => setSettings({ ...settings, allowMaintenanceOnPaused: e.target.checked })}
-                    className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                   />
-                  <label htmlFor="maintPaused" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Always allow tenant maintenance requests</label>
+                  <label htmlFor="maintPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Always allow tenant maintenance requests</label>
                 </div>
                 <div className="flex items-center gap-3 mt-2.5">
                   <input 
@@ -382,25 +382,25 @@ export default function AdminSubscriptionsClient({
                     id="welfareAllowMoveOut"
                     checked={!!settings.welfareAllowMoveOut}
                     onChange={(e) => setSettings({ ...settings, welfareAllowMoveOut: e.target.checked })}
-                    className="h-4 w-4 rounded border-[#E5E5EA] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                   />
-                  <label htmlFor="welfareAllowMoveOut" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer">Always allow move-out document access</label>
+                  <label htmlFor="welfareAllowMoveOut" className="text-xs font-semibold text-slate-900 cursor-pointer">Always allow move-out document access</label>
                 </div>
               </div>
-              <div className="bg-white border border-[#E5E5EA] rounded-xl p-3.5 text-xs text-[#6E6E73] space-y-1">
-                <div className="font-bold text-[#1D1D1F] flex items-center gap-1.5">
+              <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 text-xs text-slate-500 space-y-1 shadow-2xs">
+                <div className="font-bold text-slate-900 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-600" /> Welfare Safe Guarantee
                 </div>
-                <p className="text-[11px] leading-normal font-medium">
+                <p className="text-[11px] leading-normal font-semibold">
                   Maintenance tickets and lease document viewing remain exempt from billing suspension locks.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#F2F2F7]">
-            <Button variant="outline" onClick={() => { setSettings(platformSettings); setShowSettings(false); }} className="rounded-xl font-bold text-xs h-10">Cancel</Button>
-            <Button onClick={handleSaveSettings} disabled={savingSettings} className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-bold text-xs h-10 px-5 shadow-xs">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <Button variant="outline" onClick={() => { setSettings(platformSettings); setShowSettings(false); }} className="rounded-xl font-black text-xs h-9 border-slate-200 text-slate-900 bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 px-5 shadow-xs cursor-pointer border-none">
               {savingSettings ? "Saving..." : "Save Policies"}
             </Button>
           </div>
@@ -408,32 +408,32 @@ export default function AdminSubscriptionsClient({
       )}
 
       {/* 2. REVENUE & PORTFOLIO METRICS CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-sans">
         
         {/* MRR Card */}
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:border-[#007AFF] hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Monthly Recurring Revenue</span>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-              <DollarSign className="h-4 w-4" />
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Recurring Revenue</span>
+            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-200/80 shadow-2xs">
+              <DollarSign className="h-4 w-4 text-emerald-600" />
             </div>
           </div>
-          <p className="text-3xl font-black text-[#1D1D1F] mt-2.5 tracking-tight">${mrr.toLocaleString()}/mo</p>
-          <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-emerald-600">
+          <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">${mrr.toLocaleString()}/mo</p>
+          <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-emerald-700">
             <TrendingUp className="h-3.5 w-3.5" />
             <span>From {activeCount} active subscriptions</span>
           </div>
         </Card>
 
         {/* At Risk MRR Card */}
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:border-rose-300 hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">At-Risk MRR</span>
-            <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
-              <ShieldAlert className="h-4 w-4" />
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">At-Risk MRR</span>
+            <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200/80 shadow-2xs">
+              <ShieldAlert className="h-4 w-4 text-rose-600" />
             </div>
           </div>
-          <p className="text-3xl font-black text-rose-600 mt-2.5 tracking-tight">${atRiskMrr.toLocaleString()}/mo</p>
+          <p className="text-2xl font-black text-rose-600 mt-2 tracking-tight">${atRiskMrr.toLocaleString()}/mo</p>
           <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-rose-600">
             <AlertTriangle className="h-3.5 w-3.5" />
             <span>{pastDueCount + pausedCount} accounts in grace / lock</span>
@@ -441,63 +441,63 @@ export default function AdminSubscriptionsClient({
         </Card>
 
         {/* Paying Subscribers Card */}
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:border-[#007AFF] hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Paying Owners</span>
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-              <ShieldCheck className="h-4 w-4" />
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Paying Owners</span>
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-200/80 shadow-2xs">
+              <ShieldCheck className="h-4 w-4 text-blue-600" />
             </div>
           </div>
-          <p className="text-3xl font-black text-[#1D1D1F] mt-2.5 tracking-tight">{activeCount} / {totalOwners}</p>
-          <p className="text-[11px] font-semibold text-[#6E6E73] mt-1">
+          <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">{activeCount} / {totalOwners}</p>
+          <p className="text-[11px] font-semibold text-slate-500 mt-1">
             {totalOwners > 0 ? Math.round((activeCount / totalOwners) * 100) : 0}% active conversion rate
           </p>
         </Card>
 
         {/* Soft-Locked Portfolios */}
-        <Card className="bg-white border border-[#E5E5EA] shadow-2xs rounded-3xl p-5 transition-all hover:border-amber-300 hover:shadow-xs">
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Soft-Locked Portfolios</span>
-            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
-              <Lock className="h-4 w-4" />
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Soft-Locked Portfolios</span>
+            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-2xl border border-amber-200/80 shadow-2xs">
+              <Lock className="h-4 w-4 text-amber-600" />
             </div>
           </div>
-          <p className="text-3xl font-black text-amber-600 mt-2.5 tracking-tight">{pausedCount + pastDueCount}</p>
-          <p className="text-[11px] font-semibold text-[#6E6E73] mt-1">
+          <p className="text-2xl font-black text-amber-700 mt-2 tracking-tight">{pausedCount + pastDueCount}</p>
+          <p className="text-[11px] font-semibold text-slate-500 mt-1">
             {pastDueCount} past-due, {pausedCount} paused
           </p>
         </Card>
       </div>
 
       {/* 3. FILTER AND SEARCH CONSOLE */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 border border-[#E5E5EA] rounded-2xl shadow-2xs">
+      <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 border border-slate-200 shadow-xs rounded-3xl font-sans">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <Input 
             placeholder="Search owners by name or email address..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-[#F2F2F7] border border-[#E5E5EA] focus:bg-white focus:border-[#007AFF] rounded-xl h-10 w-full font-semibold text-xs transition-all"
+            className="pl-10 bg-slate-50 border-slate-200/80 focus:bg-white focus:border-slate-900 rounded-xl h-9 w-full font-semibold text-xs transition-all shadow-2xs text-slate-900"
           />
           {search && (
             <button 
               onClick={() => setSearch("")} 
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
 
-        <div className="flex gap-3 w-full sm:w-auto shrink-0">
+        <div className="flex gap-3 w-full sm:w-auto shrink-0 font-sans">
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-            <SelectTrigger className="w-full sm:w-[170px] bg-white border-[#E5E5EA] hover:border-[#1D1D1F] rounded-xl h-10 font-bold text-xs transition-all shadow-2xs">
+            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-extrabold text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
               <div className="flex items-center gap-1.5 truncate">
-                <span className="text-[#8E8E93] font-semibold">Status:</span>
+                <span className="text-slate-400 font-extrabold uppercase text-[10px]">Status:</span>
                 <span className="truncate">{formatStatus(statusFilter)}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="bg-white rounded-xl border-[#E5E5EA]">
+            <SelectContent className="bg-white rounded-xl border-slate-200 font-sans">
               <SelectItem value="ALL">All Statuses</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Trialing">Trialing</SelectItem>
@@ -508,13 +508,13 @@ export default function AdminSubscriptionsClient({
           </Select>
 
           <Select value={tierFilter} onValueChange={(v) => setTierFilter(v || "ALL")}>
-            <SelectTrigger className="w-full sm:w-[170px] bg-white border-[#E5E5EA] hover:border-[#1D1D1F] rounded-xl h-10 font-bold text-xs transition-all shadow-2xs">
+            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-extrabold text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
               <div className="flex items-center gap-1.5 truncate">
-                <span className="text-[#8E8E93] font-semibold">Tier:</span>
+                <span className="text-slate-400 font-extrabold uppercase text-[10px]">Tier:</span>
                 <span className="truncate">{tierFilter === "ALL" ? "All Tiers" : tierFilter}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="bg-white rounded-xl border-[#E5E5EA]">
+            <SelectContent className="bg-white rounded-xl border-slate-200 font-sans">
               <SelectItem value="ALL">All Tiers</SelectItem>
               {uniqueTiers.map(tier => (
                 <SelectItem key={tier} value={tier}>{tier}</SelectItem>
@@ -525,7 +525,7 @@ export default function AdminSubscriptionsClient({
       </div>
 
       {/* 4. EXECUTIVE SAAS SUBSCRIPTIONS TABLE */}
-      <Card className="bg-white border-[#E5E5EA] shadow-2xs rounded-3xl overflow-hidden">
+      <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
         <div className="overflow-x-auto min-h-[400px]">
           <Table>
             <TableHeader className="bg-slate-50/80 border-b border-[#E5E5EA]">

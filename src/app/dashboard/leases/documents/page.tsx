@@ -309,29 +309,29 @@ export default function TenantDocumentsPage() {
         />
       )}
       <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70 overflow-hidden" : ""}>
-      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 md:px-0">
+      <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 md:px-0 font-sans">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-            <FileText className="h-6 w-6" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs font-sans">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
+            <FileText className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Documents</h1>
-            <p className="text-[#6E6E73] text-sm mt-0.5">Access and manage your lease-related documents</p>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Documents</h1>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">Access and manage your lease-related documents</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={fetchData}
-            className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-[#F5F5F7] transition-colors shadow-sm w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 h-10 px-4 text-xs font-black text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs w-full sm:w-auto cursor-pointer"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-3.5 w-3.5" />
             Refresh
           </button>
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 h-10 px-5 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs w-full sm:w-auto cursor-pointer border-none"
           >
             <Plus className="h-4 w-4" />
             Upload Document
@@ -340,68 +340,68 @@ export default function TenantDocumentsPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans">
         {/* Total Documents */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
-          <div className="space-y-1.5">
-            <p className="text-[#6E6E73] text-sm font-medium">Total Documents</p>
-            <h3 className="text-3xl font-bold text-slate-900">{totalDocsCount}</h3>
-            <p className="text-[#8E8E93] text-xs">{totalSizeMB} MB total size</p>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Documents</p>
+            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{totalDocsCount}</h3>
+            <p className="text-[11px] font-semibold text-slate-500">{totalSizeMB} MB total size</p>
           </div>
-          <div className="p-2 bg-blue-50 text-blue-500 rounded-xl">
+          <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
             <FileText className="h-5 w-5" />
           </div>
         </div>
 
         {/* Filtered Results */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
-          <div className="space-y-1.5">
-            <p className="text-[#6E6E73] text-sm font-medium">Filtered Results</p>
-            <h3 className="text-3xl font-bold text-slate-900">{filteredDocsCount}</h3>
-            <p className="text-[#8E8E93] text-xs">Matching your current filters</p>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Filtered Results</p>
+            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{filteredDocsCount}</h3>
+            <p className="text-[11px] font-semibold text-slate-500">Matching your current filters</p>
           </div>
-          <div className="p-2 bg-cyan-50 text-cyan-500 rounded-xl">
+          <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
             <Search className="h-5 w-5" />
           </div>
         </div>
 
         {/* Categories */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
-          <div className="space-y-1.5">
-            <p className="text-[#6E6E73] text-sm font-medium">Categories</p>
-            <h3 className="text-3xl font-bold text-slate-900">{uniqueCategoriesCount}</h3>
-            <p className="text-[#8E8E93] text-xs">Available document categories</p>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Categories</p>
+            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{uniqueCategoriesCount}</h3>
+            <p className="text-[11px] font-semibold text-slate-500">Available document categories</p>
           </div>
-          <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
+          <div className="p-3 bg-amber-50 text-amber-600 border border-amber-200/80 rounded-2xl shadow-2xs">
             <Folder className="h-5 w-5" />
           </div>
         </div>
 
         {/* Recent Uploads */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start">
-          <div className="space-y-1.5">
-            <p className="text-[#6E6E73] text-sm font-medium">Recent Uploads</p>
-            <h3 className="text-3xl font-bold text-slate-900">{recentUploadsCount}</h3>
-            <p className="text-[#8E8E93] text-xs">Last 30 days</p>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Recent Uploads</p>
+            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{recentUploadsCount}</h3>
+            <p className="text-[11px] font-semibold text-emerald-600 font-extrabold">Last 30 days</p>
           </div>
-          <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-200/80 rounded-2xl shadow-2xs">
             <Upload className="h-5 w-5" />
           </div>
         </div>
       </div>
 
       {/* Filter and Table Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-6">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 md:p-8 space-y-6 font-sans">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h2 className="text-lg font-bold text-slate-950">Documents</h2>
-            <p className="text-[#8E8E93] text-xs mt-0.5">Access and manage all your lease-related documents</p>
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Documents</h2>
+            <p className="text-slate-500 text-xs font-semibold mt-0.5">Access and manage all your lease-related documents</p>
           </div>
           {/* Filters Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 w-full md:w-auto">
             {/* Search Input */}
             <div className="relative w-full md:w-64">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#8E8E93] pointer-events-none">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                 <Search className="h-4 w-4" />
               </span>
               <input
@@ -412,7 +412,7 @@ export default function TenantDocumentsPage() {
                   setDocSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full h-10 pl-10 pr-4 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-400 text-slate-800"
+                className="w-full h-10 pl-10 pr-4 text-xs font-extrabold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-slate-900 text-slate-900 shadow-2xs placeholder-slate-400"
               />
             </div>
 
@@ -423,7 +423,7 @@ export default function TenantDocumentsPage() {
                 setFilterCategory(e.target.value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-4 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"
+              className="h-10 px-3 text-xs font-extrabold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-slate-900 text-slate-900 shadow-2xs cursor-pointer"
             >
               <option value="ALL">All Categories</option>
               <option value="LEASE">Lease</option>

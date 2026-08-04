@@ -142,9 +142,9 @@ export function AdminHero({
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 shadow-2xs shrink-0"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 shadow-2xs shrink-0"
             >
-              <Shield className="h-3.5 w-3.5 text-[#007AFF]" />
+              <Shield className="h-3.5 w-3.5 text-slate-800" />
               <span className="text-[10px] font-extrabold tracking-widest uppercase">
                 PLATFORM ADMINISTRATOR
               </span>
@@ -168,10 +168,10 @@ export function AdminHero({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1D1D1F] tracking-tight leading-tight whitespace-nowrap"
+            className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap"
           >
             {getGreeting()},{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#007AFF] via-indigo-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-700 to-indigo-600">
               {displayName}
             </span>
             !
@@ -186,8 +186,8 @@ export function AdminHero({
             className="text-slate-600 text-xs sm:text-sm font-semibold leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis max-w-2xl"
           >
             Managing PropertyPro platform operations &bull;{" "}
-            <span className="text-[#007AFF] font-bold">{propertiesCount} properties</span> across{" "}
-            <span className="text-[#007AFF] font-bold">{totalUsers} active users</span>
+            <span className="text-slate-900 font-bold">{propertiesCount} properties</span> across{" "}
+            <span className="text-slate-900 font-bold">{totalUsers} active users</span>
           </motion.p>
         </motion.div>
 
@@ -211,7 +211,7 @@ export function AdminHero({
               <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <Users className="h-3.5 w-3.5" />
               </div>
-              <span className="text-[#1D1D1F] font-black text-lg leading-none">{totalUsers}</span>
+              <span className="text-slate-900 font-black text-lg leading-none">{totalUsers}</span>
               <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Users</span>
             </motion.div>
 
@@ -230,7 +230,7 @@ export function AdminHero({
               <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <Building className="h-3.5 w-3.5" />
               </div>
-              <span className="text-[#1D1D1F] font-black text-lg leading-none">{propertiesCount}</span>
+              <span className="text-slate-900 font-black text-lg leading-none">{propertiesCount}</span>
               <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Properties</span>
             </motion.div>
 
@@ -249,7 +249,7 @@ export function AdminHero({
               <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 <CreditCard className="h-3.5 w-3.5" />
               </div>
-              <span className="text-[#1D1D1F] font-black text-lg leading-none">{activeSubscribersCount}</span>
+              <span className="text-slate-900 font-black text-lg leading-none">{activeSubscribersCount}</span>
               <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Active Subs</span>
             </motion.div>
           </div>
@@ -298,7 +298,7 @@ export function AdminHero({
             onClick={() => setSlideIndex(idx)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               idx === slideIndex
-                ? "w-6 bg-[#007AFF]"
+                ? "w-6 bg-slate-900"
                 : "w-1.5 bg-slate-300 hover:bg-slate-400"
             }`}
             title={`Go to slide ${idx + 1}`}

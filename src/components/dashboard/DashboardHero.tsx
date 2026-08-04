@@ -76,7 +76,7 @@ export function DashboardHero({
   const activeSlide = HERO_SLIDES[slideIndex];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-white border border-[#E5E5EA] shadow-sm min-h-[220px]">
+    <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-xs min-h-[220px] font-sans">
       {/* Background Image Crossfade Stack */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-slate-100">
         {HERO_SLIDES.map((slide, idx) => {

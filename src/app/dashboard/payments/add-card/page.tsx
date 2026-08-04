@@ -156,12 +156,12 @@ function SetupForm({
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-[2] h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
+          className="flex-[2] h-12 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2"
         >
           {processing ? (
-            <><Loader2 className="h-4 w-4 animate-spin" /> Saving Card...</>
+            <><Loader2 className="h-4 w-4 animate-spin text-emerald-700" /> Saving Card...</>
           ) : (
-            <><Lock className="h-4 w-4" /> Save Card Securely</>
+            <><Lock className="h-4 w-4 text-emerald-700" /> Save Card Securely</>
           )}
         </Button>
       </div>
@@ -398,9 +398,9 @@ export default function AddCardPage() {
               <Button
                 onClick={openSetupForm}
                 disabled={loadingSetup}
-                className="bg-slate-900 hover:bg-[#007AFF] text-white font-extrabold h-12 px-8 rounded-2xl shadow-md text-xs uppercase tracking-wider flex items-center gap-2 mx-auto transition-all hover:scale-102 active:scale-98"
+                className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black h-12 px-8 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 mx-auto transition-all cursor-pointer"
               >
-                {loadingSetup ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                {loadingSetup ? <Loader2 className="h-4 w-4 animate-spin text-emerald-700" /> : <Plus className="h-4 w-4 text-emerald-700" />}
                 Add a Payment Card
               </Button>
             </div>

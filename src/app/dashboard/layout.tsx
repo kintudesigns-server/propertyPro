@@ -42,8 +42,8 @@ import { useBlockedFeatures } from "@/hooks/useBlockedFeatures";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <React.Suspense fallback={
-      <div className="min-h-screen bg-[#F0F4F8] flex flex-col items-center justify-center text-[#111111] gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3B82F6]"></div>
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center text-slate-900 gap-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-900"></div>
         <p className="text-slate-400 font-extrabold text-sm tracking-wider uppercase">Loading...</p>
       </div>
     }>
@@ -75,21 +75,34 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(true);
+  const [adminOpen, setAdminOpen] = useState(false);
 
   React.useEffect(() => {
     setMobileDrawerOpen(false);
   }, [pathname]);
-  const [propertiesOpen, setPropertiesOpen] = useState(true);
-  const [tenantsOpen, setTenantsOpen] = useState(true);
+
+  const [propertiesOpen, setPropertiesOpen] = useState(false);
+  const [tenantsOpen, setTenantsOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
-  const [leasesOpen, setLeasesOpen] = useState(true);
-  const [toursOpen, setToursOpen] = useState(true);
-  const [inspectionsOpen, setInspectionsOpen] = useState(true);
-  const [maintenanceOpen, setMaintenanceOpen] = useState(true);
-  const [financialsOpen, setFinancialsOpen] = useState(true);
-  const [activityOpen, setActivityOpen] = useState(true);
+  const [leasesOpen, setLeasesOpen] = useState(false);
+  const [toursOpen, setToursOpen] = useState(false);
+  const [inspectionsOpen, setInspectionsOpen] = useState(false);
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+  const [financialsOpen, setFinancialsOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const [expiringLeasesCount, setExpiringLeasesCount] = useState(0);
+
+  // Smart route auto-expand
+  React.useEffect(() => {
+    setPropertiesOpen(pathname.includes("/dashboard/properties"));
+    setTenantsOpen(pathname.includes("/dashboard/tenants"));
+    setLeasesOpen(pathname.includes("/dashboard/leases"));
+    setMaintenanceOpen(pathname.includes("/dashboard/maintenance"));
+    setFinancialsOpen(pathname.includes("/dashboard/payments") || pathname.includes("/dashboard/accounting"));
+    setToursOpen(pathname.includes("/dashboard/tours"));
+    setInspectionsOpen(pathname.includes("/dashboard/inspections"));
+    setActivityOpen(pathname.includes("/dashboard/messages") || pathname.includes("/dashboard/notifications"));
+  }, [pathname]);
 
   const isTenantTabActive = (tab: string) => {
     if (tab === "overview") return pathname === "/dashboard" || (pathname === "/dashboard/tenant" && currentTab === "overview");
@@ -176,8 +189,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center text-[#1D1D1F] gap-3">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007AFF]"></div>
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center text-slate-900 gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
         <p className="text-[#6E6E73] font-semibold text-xs tracking-wider uppercase">Loading PropertyPro...</p>
       </div>
     );
@@ -185,7 +198,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] font-sans flex text-[#1D1D1F]">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex text-slate-900">
       {/* Mobile Backdrop Overlay */}
       {mobileDrawerOpen && (
         <div 
@@ -196,7 +209,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar (Desktop + Mobile Drawer) */}
       <aside
-        className={`fixed md:relative top-0 bottom-0 left-0 z-50 flex flex-col justify-between bg-white border-r border-[#E5E5EA] transition-all duration-300 h-screen ${
+        className={`fixed md:relative top-0 bottom-0 left-0 z-50 flex flex-col justify-between bg-white border-r border-slate-200 transition-all duration-300 h-screen ${
           mobileDrawerOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full md:translate-x-0"
         } ${
           sidebarOpen ? "md:w-64" : "md:w-20"
@@ -204,8 +217,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       >
         <div className="flex flex-col gap-6 w-full h-full overflow-y-auto">
           {/* Logo Section */}
-          <div className="flex items-center gap-3 px-6 py-5 sticky top-0 bg-white z-10 border-b border-[#F0F0F0]">
-            <div className="bg-[#007AFF] text-white p-2 rounded-lg flex items-center justify-center shadow-xs">
+          <div className="flex items-center gap-3 px-6 py-5 sticky top-0 bg-white z-10 border-b border-slate-100">
+            <div className="bg-slate-900 text-white p-2 rounded-xl flex items-center justify-center shadow-xs">
               <Building className="h-5 w-5" />
             </div>
             {sidebarOpen && (
@@ -544,9 +557,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 )}
 
                 <Link
-                  href="/dashboard/tenant?tab=settings"
+                  href="/dashboard/settings"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    isTenantTabActive("settings")
+                    pathname === "/dashboard/settings" || isTenantTabActive("settings")
                       ? "bg-slate-100 text-slate-900 font-black border border-slate-200/80 shadow-2xs"
                       : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
@@ -1158,10 +1171,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <button
                       onClick={() => {
                         if (!sidebarOpen) setSidebarOpen(true);
-                        if (isOwner && !isAllowed("inspections")) {
-                          router.push("/dashboard/inspections");
-                          return;
-                        }
                         setInspectionsOpen(!inspectionsOpen);
                       }}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all w-full ${
@@ -1172,7 +1181,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                       <ShieldCheck className="h-5 w-5" />
                       {sidebarOpen && <span className="flex-1 text-left">Inspections</span>}
-                      {sidebarOpen && isOwner && !isAllowed("inspections") && (
+                      {sidebarOpen && isOwner && (!isAllowed("inspections") || !isAllowed("vendors") || isFeatureLocked("inspector_management")) && (
                         <Lock className="h-4 w-4 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
                       )}
                       {sidebarOpen && (
@@ -1183,29 +1192,39 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {/* Sub-menu */}
-                    {sidebarOpen && inspectionsOpen && isAllowed("inspections") && (
+                    {sidebarOpen && inspectionsOpen && (
                       <div className="flex flex-col mt-1 ml-5 pl-4 border-l-2 border-[#E2E8F0] gap-1 relative">
                         <Link
                           href="/dashboard/inspections"
-                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/inspections"
                               ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
-                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                          Turnovers & Move-Outs
+                          <div className="flex items-center">
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            Turnovers & Move-Outs
+                          </div>
+                          {isOwner && !isAllowed("inspections") && (
+                            <Lock className="h-3.5 w-3.5 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                          )}
                         </Link>
                         <Link
                           href="/dashboard/team"
-                          className={`relative flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          className={`relative flex items-center justify-between px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
                             pathname === "/dashboard/team"
                               ? "bg-slate-100 text-slate-900 font-extrabold"
                               : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                         >
-                          <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
-                          Inspectors & Vendors
+                          <div className="flex items-center">
+                            <div className="absolute -left-[18px] top-1/2 w-4 h-[2px] bg-[#E2E8F0] rounded-r" />
+                            Inspectors & Vendors
+                          </div>
+                          {isOwner && (!isAllowed("vendors") || isFeatureLocked("inspector_management")) && (
+                            <Lock className="h-3.5 w-3.5 text-slate-400 stroke-[2] shrink-0 ml-auto select-none" />
+                          )}
                         </Link>
                       </div>
                     )}
@@ -1512,32 +1531,50 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             )}
           </nav>
 
-          {/* User Profile at Bottom */}
-          <div className="p-4 mt-auto border-t border-[#E2E8F0] bg-[#F8FAFC]/50">
-            <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} gap-3`}>
-              <div className="flex items-center gap-3">
+          {/* User Profile & Logout at Bottom */}
+          <div className="p-3.5 mt-auto border-t border-slate-200 bg-slate-50/60 font-sans">
+            <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} gap-2`}>
+              <div className="flex items-center gap-3 min-w-0">
                 {(session?.user as any)?.avatar || (session?.user as any)?.image ? (
                   <img
                     src={(session?.user as any)?.avatar || (session?.user as any)?.image}
                     alt={session?.user?.name || "Profile"}
-                    className="h-10 w-10 min-w-[40px] rounded-full object-cover shadow-sm border border-slate-200"
+                    className="h-9 w-9 min-w-[36px] rounded-full object-cover shadow-2xs border border-slate-200"
                   />
                 ) : (
-                  <div className="h-10 w-10 min-w-[40px] rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
+                  <div className="h-9 w-9 min-w-[36px] rounded-full bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">
                     {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
                   </div>
                 )}
                 {sidebarOpen && (
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="font-extrabold text-xs text-[#0F172A] truncate">
+                  <div className="flex flex-col min-w-0 overflow-hidden">
+                    <span className="font-extrabold text-xs text-slate-900 truncate">
                       {session?.user?.name || "User"}
                     </span>
-                    <span className="text-[10px] text-[#64748B] font-extrabold tracking-wider truncate">
+                    <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase truncate">
                       {(session?.user as any)?.role || "Role"}
                     </span>
                   </div>
                 )}
               </div>
+
+              {sidebarOpen ? (
+                <button
+                  onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shrink-0 cursor-pointer border border-transparent hover:border-rose-100"
+                  title="Sign Out of PropertyPro"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                  className="mt-2 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1601,10 +1638,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="h-6 w-px bg-[#E5E5EA] hidden md:block" />
             <button 
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-full md:rounded-lg text-red-600 hover:bg-red-50 transition-colors text-xs font-semibold"
+              className="flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors text-xs font-semibold"
               title="Sign Out"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4 text-slate-500" />
               <span className="hidden md:inline">Sign Out</span>
             </button>
           </div>

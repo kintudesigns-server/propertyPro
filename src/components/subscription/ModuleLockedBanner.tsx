@@ -324,8 +324,8 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
           <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-3xl border border-white shadow-2xl ring-1 ring-slate-900/10 p-5 sm:p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-400 pointer-events-auto">
           
             {/* Header Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-blue-50 border border-blue-100 rounded-full text-[10px] font-extrabold text-blue-600 uppercase tracking-widest">
-              <Sparkles size={11} className="stroke-[2.5]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-emerald-50/90 border border-emerald-300/80 rounded-full text-[10px] font-black text-emerald-800 uppercase tracking-widest shadow-2xs">
+              <Sparkles size={11} className="stroke-[2.5] text-emerald-600" />
               Available on {details.requiredTier} Plan
             </div>
 
@@ -335,27 +335,27 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
                 <div className="h-12 w-12 bg-slate-100/80 rounded-2xl border border-slate-200/80 backdrop-blur-xl flex items-center justify-center text-slate-700 shadow-sm">
                   <IconComponent size={22} className="stroke-[1.8]" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-blue-600 rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
+                <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(52,211,153,0.7)] ring-2 ring-white">
                   <Lock size={10} className="text-white stroke-[2.2]" />
                 </div>
               </div>
             </div>
 
             {/* Title & Description */}
-            <div className="space-y-1">
-              <h2 className="text-lg font-black text-[#111111] tracking-tight">
+            <div className="space-y-1 font-sans">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">
                 {`${details.title} is locked`}
               </h2>
-              <p className="text-xs text-[#6E6E73] font-medium max-w-xs mx-auto leading-relaxed">
+              <p className="text-xs text-slate-500 font-semibold max-w-xs mx-auto leading-relaxed">
                 {details.description}
               </p>
             </div>
 
             {/* Tier Lock Content */}
-            <div className="space-y-2.5">
-              <div className="bg-blue-50/80 border border-blue-100/80 rounded-xl p-3 text-left flex items-start gap-2.5">
-                <TrendingUp size={15} className="text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-xs font-bold text-slate-800 leading-snug">
+            <div className="space-y-2.5 font-sans">
+              <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-3 text-left flex items-start gap-2.5 shadow-2xs">
+                <TrendingUp size={15} className="text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-xs font-black text-slate-900 leading-snug">
                   {details.roiMetric}
                 </p>
               </div>
@@ -364,17 +364,17 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
                 <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
                   What you get when you unlock:
                 </h4>
-                <ul className="space-y-1.5 text-xs text-slate-700 font-bold">
+                <ul className="space-y-1.5 text-xs text-slate-700 font-extrabold">
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-blue-500 shrink-0 mt-0.5" />
+                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet1}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-blue-500 shrink-0 mt-0.5" />
+                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet2}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-blue-500 shrink-0 mt-0.5" />
+                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet3}</span>
                   </li>
                 </ul>
@@ -382,17 +382,16 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1 font-sans">
               <Button
                 onClick={() => router.push("/dashboard/owner/billing")}
-                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:scale-[1.01] transition-all text-xs"
+                className="flex-1 h-10 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 rounded-xl font-black shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm transition-all text-xs cursor-pointer border-none"
               >
-                Upgrade to {details.requiredTier} →
+                Upgrade to {details.requiredTier} &rarr;
               </Button>
               <Button
-                variant="outline"
                 onClick={() => window.open("mailto:support@propertypro.com?subject=Plan%20Upgrade%20Inquiry")}
-                className="flex-1 h-10 border-slate-200 text-slate-700 rounded-xl font-bold bg-white hover:bg-slate-50 text-xs"
+                className="flex-1 h-10 border border-slate-200 text-slate-900 rounded-xl font-black bg-white hover:bg-slate-50 text-xs shadow-2xs cursor-pointer"
               >
                 Contact Support
               </Button>

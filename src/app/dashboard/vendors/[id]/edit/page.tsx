@@ -269,7 +269,7 @@ export default function EditVendorPage({
           <Button 
             type="submit" 
             disabled={submitting} 
-            className="h-12 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold px-8 rounded-xl shadow-sm shadow-blue-500/20 transition-all text-sm"
+            className="h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 rounded-xl shadow-sm transition-all text-sm"
           >
             {submitting ? "Saving Changes..." : "Save Vendor Profile"}
           </Button>
