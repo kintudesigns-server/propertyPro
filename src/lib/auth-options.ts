@@ -149,14 +149,18 @@ export const authOptions: NextAuthOptions = {
   } : undefined,
   events: {
     async signIn({ user }) {
-      await auditLog({
-        entityType: "USER",
-        entityId: user.id,
-        action: "LOGIN_SUCCESS",
-        actorId: user.id,
-        actorRole: (user as any).role,
-        note: `User logged in successfully.`,
-      });
+      try {
+        await auditLog({
+          entityType: "USER",
+          entityId: user.id,
+          action: "LOGIN_SUCCESS",
+          actorId: user.id,
+          actorRole: (user as any).role,
+          note: `User logged in successfully.`,
+        });
+      } catch (error) {
+        console.error("[NextAuth] Failed to write sign-in audit log:", error);
+      }
     }
   },
   secret: process.env.NEXTAUTH_SECRET,

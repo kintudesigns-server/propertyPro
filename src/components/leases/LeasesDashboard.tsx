@@ -18,6 +18,7 @@ import { useModuleAccess } from "@/hooks/useModuleAccess";
 import ModuleLockedBanner from "@/components/subscription/ModuleLockedBanner";
 import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { KpiCard } from "@/components/ui/KpiCard";
 
 export default function LeasesDashboard({ 
   initialFilter = "ALL",
@@ -260,10 +261,7 @@ export default function LeasesDashboard({
             count: totalCount,
             subtext: "All agreements",
             icon: FileText,
-            activeColor: "bg-blue-50/80 border-blue-500 text-blue-950 ring-2 ring-blue-500/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-blue-300 hover:shadow-xs",
-            iconBg: "bg-blue-100/70 text-blue-600",
-            dotColor: "bg-blue-500",
+            variant: "blue",
           },
           {
             key: "ACTION_NEEDED",
@@ -271,10 +269,7 @@ export default function LeasesDashboard({
             count: actionNeededCount,
             subtext: "Notice & Pending",
             icon: ShieldAlert,
-            activeColor: "bg-rose-50/80 border-rose-500 text-rose-950 ring-2 ring-rose-500/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-rose-300 hover:shadow-xs",
-            iconBg: "bg-rose-100/70 text-rose-600",
-            dotColor: "bg-rose-500",
+            variant: "red",
           },
           {
             key: "EXPIRING",
@@ -282,10 +277,7 @@ export default function LeasesDashboard({
             count: expiringCount,
             subtext: "Expiring ≤ 60d",
             icon: AlertTriangle,
-            activeColor: "bg-amber-50/80 border-amber-500 text-amber-950 ring-2 ring-amber-500/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-amber-300 hover:shadow-xs",
-            iconBg: "bg-amber-100/70 text-amber-600",
-            dotColor: "bg-amber-500",
+            variant: "amber",
           },
           {
             key: "ACTIVE",
@@ -293,10 +285,7 @@ export default function LeasesDashboard({
             count: activeCount,
             subtext: "Currently active",
             icon: CheckCircle,
-            activeColor: "bg-emerald-50/80 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-emerald-300 hover:shadow-xs",
-            iconBg: "bg-emerald-100/70 text-emerald-600",
-            dotColor: "bg-emerald-500",
+            variant: "green",
           },
           {
             key: "EXPIRED",
@@ -304,10 +293,7 @@ export default function LeasesDashboard({
             count: expiredCount,
             subtext: "Past end date",
             icon: XCircle,
-            activeColor: "bg-slate-100 border-slate-600 text-slate-950 ring-2 ring-slate-600/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-slate-400 hover:shadow-xs",
-            iconBg: "bg-slate-100 text-slate-600",
-            dotColor: "bg-slate-500",
+            variant: "slate",
           },
           {
             key: "TERMINATED",
@@ -315,45 +301,20 @@ export default function LeasesDashboard({
             count: terminatedCount,
             subtext: "Ended early",
             icon: XCircle,
-            activeColor: "bg-purple-50/80 border-purple-500 text-purple-950 ring-2 ring-purple-500/20 shadow-sm",
-            inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-purple-300 hover:shadow-xs",
-            iconBg: "bg-purple-100/70 text-purple-600",
-            dotColor: "bg-purple-500",
+            variant: "purple",
           },
-        ].map((kpi) => {
-          const Icon = kpi.icon;
-          const isActive = statusFilter === kpi.key;
-          return (
-            <div
-              key={kpi.key}
-              onClick={() => setStatusFilter(kpi.key)}
-              className={`rounded-[20px] border p-4 transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between space-y-3 ${
-                isActive ? kpi.activeColor : kpi.inactiveColor
-              }`}
-            >
-              <div className="flex items-start justify-between gap-1.5">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 truncate">
-                  {kpi.title}
-                </span>
-                <div className={`h-7 w-7 rounded-xl flex items-center justify-center shrink-0 ${kpi.iconBg}`}>
-                  <Icon className="h-3.5 w-3.5" />
-                </div>
-              </div>
-
-              <div>
-                <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-none">
-                  {kpi.count}
-                </div>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className={`h-1.5 w-1.5 rounded-full ${kpi.dotColor}`} />
-                  <span className="text-[10px] font-semibold text-slate-500 truncate">
-                    {kpi.subtext}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        ].map((kpi) => (
+          <KpiCard
+            key={kpi.key}
+            title={kpi.title}
+            value={kpi.count}
+            subtext={kpi.subtext}
+            icon={kpi.icon}
+            variant={kpi.variant as any}
+            active={statusFilter === kpi.key}
+            onClick={() => setStatusFilter(kpi.key)}
+          />
+        ))}
       </div>
 
       {/* Main Container */}

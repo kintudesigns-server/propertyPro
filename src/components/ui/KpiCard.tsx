@@ -28,59 +28,68 @@ export interface KpiCardProps {
   badgeText?: string;
 }
 
-const variantStyles: Record<KpiCardVariant, { bg: string; text: string; iconBg: string; dot: string }> = {
+const variantStyles: Record<KpiCardVariant, { bg: string; text: string; iconBg: string; activeBg: string; dot: string }> = {
   blue: {
     bg: "bg-blue-50 text-blue-700 border-blue-200/60",
     text: "text-blue-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-blue-50 text-blue-600 border border-blue-100/80",
+    activeBg: "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/30 shadow-xs",
     dot: "bg-blue-500",
   },
   green: {
     bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
     text: "text-emerald-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-100/80",
+    activeBg: "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/30 shadow-xs",
     dot: "bg-emerald-500",
   },
   emerald: {
     bg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
     text: "text-emerald-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-100/80",
+    activeBg: "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/30 shadow-xs",
     dot: "bg-emerald-500",
   },
   orange: {
     bg: "bg-amber-50 text-amber-700 border-amber-200/60",
     text: "text-amber-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-amber-50 text-amber-600 border border-amber-100/80",
+    activeBg: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/30 shadow-xs",
     dot: "bg-amber-500",
   },
   amber: {
     bg: "bg-amber-50 text-amber-700 border-amber-200/60",
     text: "text-amber-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-amber-50 text-amber-600 border border-amber-100/80",
+    activeBg: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/30 shadow-xs",
     dot: "bg-amber-500",
   },
   purple: {
     bg: "bg-purple-50 text-purple-700 border-purple-200/60",
     text: "text-purple-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-purple-50 text-purple-600 border border-purple-100/80",
+    activeBg: "border-purple-500 ring-2 ring-purple-500/20 bg-purple-50/30 shadow-xs",
     dot: "bg-purple-500",
   },
   indigo: {
     bg: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
     text: "text-indigo-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-indigo-50 text-indigo-600 border border-indigo-100/80",
+    activeBg: "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30 shadow-xs",
     dot: "bg-indigo-500",
   },
   red: {
     bg: "bg-rose-50 text-rose-700 border-rose-200/60",
     text: "text-rose-600",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-rose-50 text-rose-600 border border-rose-100/80",
+    activeBg: "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/30 shadow-xs",
     dot: "bg-rose-500",
   },
   slate: {
     bg: "bg-slate-100 text-slate-700 border-slate-200",
     text: "text-slate-700",
-    iconBg: "bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors",
+    iconBg: "bg-slate-100 text-slate-600 border border-slate-200/80",
+    activeBg: "border-slate-500 ring-2 ring-slate-500/20 bg-slate-50 shadow-xs",
     dot: "bg-slate-500",
   },
 };
@@ -111,7 +120,7 @@ export function KpiCard({
         ${onClick || href ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md" : ""}
         ${
           active
-            ? "border-[#007AFF] ring-2 ring-[#007AFF]/20 bg-blue-50/40 shadow-sm"
+            ? styles.activeBg
             : "border-slate-200/80 hover:border-slate-300"
         }
         ${className}

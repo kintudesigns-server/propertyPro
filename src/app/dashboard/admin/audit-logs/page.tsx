@@ -540,9 +540,17 @@ export default function AuditLogsPage() {
 
                         <td className="py-4 px-6 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-black text-slate-600">
-                              {log.actor?.name ? log.actor.name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5 text-slate-400" />}
-                            </div>
+                            {log.actor?.avatar ? (
+                              <img
+                                src={log.actor.avatar}
+                                alt={log.actor.name || "Actor Avatar"}
+                                className="h-7 w-7 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
+                              />
+                            ) : (
+                              <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-black text-slate-600 overflow-hidden shrink-0">
+                                {log.actor?.name ? log.actor.name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5 text-slate-400" />}
+                              </div>
+                            )}
                             <div>
                               <div className="font-bold text-slate-800 text-xs">
                                 {log.actor?.name || log.actorRole || "SYSTEM"}
@@ -663,8 +671,19 @@ export default function AuditLogsPage() {
 
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Actor</div>
-                  <div className="text-slate-800 font-bold">{selectedLog.actor?.name || selectedLog.actorRole || "SYSTEM"}</div>
-                  <div className="text-[10px] text-slate-400 truncate">{selectedLog.actor?.email || selectedLog.actorId || "System Task"}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {selectedLog.actor?.avatar ? (
+                      <img
+                        src={selectedLog.actor.avatar}
+                        alt={selectedLog.actor.name || "Actor Avatar"}
+                        className="h-6 w-6 rounded-full object-cover shrink-0 border border-slate-200"
+                      />
+                    ) : null}
+                    <div className="overflow-hidden">
+                      <div className="text-slate-800 font-bold truncate">{selectedLog.actor?.name || selectedLog.actorRole || "SYSTEM"}</div>
+                      <div className="text-[10px] text-slate-400 truncate">{selectedLog.actor?.email || selectedLog.actorId || "System Task"}</div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">

@@ -60,6 +60,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
 
 interface Tour {
@@ -422,54 +423,52 @@ export default function ShowingToursPage() {
           </div>
         </div>
 
-        {/* Sleek White KPI Cards with Border Accents */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Modern System KPI Metric Filter Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             {
+              key: "PENDING",
               title: "Pending Approval",
               count: counts.PENDING,
-              text: "Action required",
-              borderAccent: "border-l-4 border-l-amber-500 bg-white",
-              titleColor: "text-amber-800",
+              subtext: "Action required",
+              icon: AlertTriangle,
+              variant: "amber",
             },
             {
+              key: "CONFIRMED",
               title: "Confirmed Visits",
               count: counts.CONFIRMED,
-              text: "Upcoming tours",
-              borderAccent: "border-l-4 border-l-blue-500 bg-white",
-              titleColor: "text-blue-800",
+              subtext: "Upcoming tours",
+              icon: CalendarIcon,
+              variant: "blue",
             },
             {
+              key: "COMPLETED",
               title: "Completed",
               count: counts.COMPLETED,
-              text: "Past showings",
-              borderAccent: "border-l-4 border-l-emerald-500 bg-white",
-              titleColor: "text-emerald-800",
+              subtext: "Past showings",
+              icon: CheckCircle2,
+              variant: "emerald",
             },
             {
+              key: "CANCELLED",
               title: "Cancelled",
               count: counts.CANCELLED,
-              text: "Inactive requests",
-              borderAccent: "border-l-4 border-l-slate-400 bg-white",
-              titleColor: "text-slate-600",
+              subtext: "Inactive requests",
+              icon: XCircle,
+              variant: "slate",
             },
           ].map((m) => (
-            <Card
-              key={m.title}
-              className={`rounded-2xl border border-slate-200 shadow-xs transition-all ${m.borderAccent}`}
-            >
-              <CardContent className="p-4">
-                <p className={`text-[10px] font-extrabold uppercase tracking-wider ${m.titleColor}`}>
-                  {m.title}
-                </p>
-                <p className="text-2xl font-black text-slate-900 mt-1">
-                  {m.count}
-                </p>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                  {m.text}
-                </p>
-              </CardContent>
-            </Card>
+            <KpiCard
+              key={m.key}
+              title={m.title}
+              value={m.count}
+              subtext={m.subtext}
+              icon={m.icon}
+              variant={m.variant as any}
+              active={activeTab === m.key}
+              onClick={() => setActiveTab((prev) => (prev === m.key ? "ALL" : (m.key as any)))}
+            />
           ))}
         </div>
 

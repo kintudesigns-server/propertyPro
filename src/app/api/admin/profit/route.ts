@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
             unit: {
               include: {
                 property: {
-                  include: { owner: { select: { name: true, email: true } } }
+                  include: { owner: { select: { name: true, email: true, avatar: true } } }
                 }
               }
             },
@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         property: inv.lease.unit.property.name,
         unit: inv.lease.unit.name,
         owner: inv.lease.unit.property.owner.name || inv.lease.unit.property.owner.email,
+        ownerAvatar: inv.lease.unit.property.owner.avatar || null,
         tenant: inv.lease.tenant?.name || inv.lease.tenant?.email || "Unknown",
         grossAmount: gross,
         platformFee: fee,
@@ -103,6 +104,7 @@ export async function GET(req: NextRequest) {
         id: owner.id,
         owner: owner.name || owner.email,
         email: owner.email,
+        avatar: owner.avatar || null,
         tier: owner.pricingTier?.name || "Unknown",
         monthlyPrice: isTrialing ? 0 : Number(owner.pricingTier?.price || 0),
         status: owner.subscriptionStatus,
@@ -122,6 +124,7 @@ export async function GET(req: NextRequest) {
             id: true,
             name: true,
             email: true,
+            avatar: true,
             cardBrand: true,
             cardLast4: true
           }
@@ -134,6 +137,7 @@ export async function GET(req: NextRequest) {
       userId: item.userId,
       owner: item.user?.name || item.user?.email || "Unknown User",
       email: item.user?.email || "",
+      avatar: item.user?.avatar || null,
       cardBrand: item.user?.cardBrand || null,
       cardLast4: item.user?.cardLast4 || null,
       fromTierName: item.fromTierName,

@@ -94,16 +94,17 @@ const IMG = {
 };
 
 // ─── Date Helpers ────────────────────────────────────────────────────────────
-const dBefore     = (months: number) => { const d = new Date(); d.setMonth(d.getMonth() - months); return d; };
-const dAfter      = (months: number) => { const d = new Date(); d.setMonth(d.getMonth() + months); return d; };
-const dDaysBefore = (days: number)   => { const d = new Date(); d.setDate(d.getDate() - days); return d; };
-const dDaysAfter  = (days: number)   => { const d = new Date(); d.setDate(d.getDate() + days); return d; };
+const NOW         = new Date();
+const dBefore     = (months: number) => { const d = new Date(NOW); d.setMonth(d.getMonth() - months); return d; };
+const dAfter      = (months: number) => { const d = new Date(NOW); d.setMonth(d.getMonth() + months); return d; };
+const dDaysBefore = (days: number)   => { const d = new Date(NOW); d.setDate(d.getDate() - days); return d; };
+const dDaysAfter  = (days: number)   => { const d = new Date(NOW); d.setDate(d.getDate() + days); return d; };
 
 // ─── Main Seeder ──────────────────────────────────────────────────────────────
 async function main() {
   console.log("====================================================");
   console.log(" PropertyPro — Production Demo Seeder v3.0 (Subscription Tier Overhaul)");
-  console.log("====================================================\\n");
+  console.log("====================================================\n");
 
   // ── SECTION 0: Wipe Database ───────────────────────────────────────────────
   console.log("🧹 Wiping existing database...");
@@ -157,71 +158,31 @@ async function main() {
 
   // ─────────────────────────────────────────────────────────────────────────
   // SECTION 1: Pricing Tiers
-  //
-  // Test Scenarios covered by this data:
-  //   ✅ ESSENTIALS  → Gate test: maxInspectors:1, maxProperties:3, maxVendors:2, 500MB docs
-  //   ✅ PROFESSIONAL → Gate test: maxInspectors:5, maxProperties:20, maxVendors:10, 5GB docs
-  //   ✅ ENTERPRISE   → Gate test: all limits = 0 (unlimited), customQuotePrice for analytics
-  //
-  // Key fixes from implementation plan:
-  //   • Essentials maxInspectors: 0 → 1  (was causing seed inconsistency with Raj Patel's inspector)
-  //   • ALWAYS_AVAILABLE modules force-merged into every tier's modules[] array
-  //   • minUnits is now display-only (documented with comment, not enforced in code)
-  //   • Enterprise price: $0 kept for display; customQuotePrice: 299 used for revenue analytics
-  //   • Annual pricing added for Essentials and Professional (Enterprise = quoted separately)
-  //   • sortOrder controls display order on pricing page (not price, not createdAt)
   // ─────────────────────────────────────────────────────────────────────────
 
-  // ── TIER 1: Essentials ─────────────────────────────────────────────────────
-  // Who: Solo landlord, 1–10 units, no contractors, basic ops
-  // Gate tests:
-  //   - Can add up to 3 properties  → 4th property creation should return 403
-  //   - Can add up to 1 inspector   → 2nd inspector creation should return 403
-  //   - Can add up to 2 vendors     → 3rd vendor creation should return 403
-  //   - 500MB document storage cap
-  //   - Has NO access to: inspections, vendors, invoices, accounting, messages, calendar
-  // Demo user: Raj Patel (owner.patel@yopmail.com) — also on Past_Due status for billing test
-  // Demo user: Alex Morgan (owner.new@yopmail.com) — fresh onboarding, zero properties
   const essentialsTier = await prisma.pricingTier.create({
     data: {
-      // ── Identity ──
       name: "Essentials",
       description: "Perfect for solo landlords managing up to 10 units. Core property ops, rent collection, and tenant management.",
-
-      // ── Pricing ──
-      price: 49,                // Monthly price in USD
-      annualPrice: 470,         // Annual price = ~2 months free ($49 × 10 effective months)
-      isCustom: false,          // Fixed price, not a negotiated quote
-      customQuotePrice: null,   // N/A — only used for Enterprise analytics
-
-      // ── Unit Boundaries ──
-      minUnits: 0,              // DISPLAY ONLY — not enforced as a gate. Shown as "Ideal for 0–10 units".
-      maxUnits: 10,             // ENFORCED: owner cannot add more units beyond this cap
-
-      // ── Capacity Limits ──
-      maxInspectors: 0,         // Solo landlord tier — 0 inspector accounts
-      maxProperties: 3,         // max 3 distinct property records
-      maxVendors: 2,            // NEW: max 2 external vendor accounts
-      maxDocumentStorageMB: 500, // NEW: 500MB upload cap for documents
-
-      // ── Trial & Lifecycle ──
-      trialDays: 14,            // 2-week free trial
-      allowsTrial: true,        // Trial is offered during onboarding checkout
-      gracePeriodDays: null,    // Uses platform default (7 days from platformSettings)
-
-      // ── Display & Marketing ──
-      sortOrder: 1,             // First position on pricing page
-      highlightBadge: null,     // No badge — not the highlighted tier
-      isActive: true,           // Visible to new subscribers
-
-      // ── Module Entitlements ──
-      // Core modules (alwaysIncluded: true in modules-registry) are always merged in.
-      // Non-core modules NOT listed here will be blocked by module-guard.ts.
+      price: 49,
+      annualPrice: 470,
+      isCustom: false,
+      customQuotePrice: null,
+      minUnits: 0,
+      maxUnits: 10,
+      maxInspectors: 1,
+      maxProperties: 3,
+      maxVendors: 2,
+      maxDocumentStorageMB: 500,
+      trialDays: 14,
+      allowsTrial: true,
+      gracePeriodDays: null,
+      sortOrder: 1,
+      highlightBadge: null,
+      isActive: true,
       modules: [
-        // Core — always available (listed explicitly for DB clarity)
         "properties", "leases", "tenants", "applications",
         "payments", "payouts", "maintenance", "documents", "tours",
-        // Essentials has NO access to: inspections, vendors, invoices, accounting, messages, calendar
       ],
       features: [
         "Properties & Units (up to 3 properties, 10 units)",
@@ -239,62 +200,30 @@ async function main() {
     } as any
   });
 
-  // ── TIER 2: Professional ───────────────────────────────────────────────────
-  // Who: Active landlord/small firm, 11–50 units, uses contractors & inspections
-  // Gate tests:
-  //   - Can add up to 20 properties → 21st property creation should return 403
-  //   - Can add up to 5 inspectors  → 6th inspector creation should return 403
-  //   - Can add up to 10 vendors    → 11th vendor creation should return 403
-  //   - 5GB document storage cap
-  //   - Has access to: inspections, vendors, invoices, accounting
-  //   - Has NO access to: messages, calendar (Enterprise-only)
-  // Demo users: Marcus Reed (owner.atlas@yopmail.com), Linda Chen (owner.coastal@yopmail.com)
-  //             James Carter (james.carter@demo.com) — Paused status
-  //             James Impending (james.impending@demo.com) — Paused 55 days (near archival)
   const proTier = await prisma.pricingTier.create({
     data: {
-      // ── Identity ──
       name: "Professional",
       description: "Ideal for active landlords managing 11–50 units. Includes inspections, vendor management, invoicing, and financial reporting.",
-
-      // ── Pricing ──
-      price: 149,               // Monthly price in USD
-      annualPrice: 1430,        // Annual price = ~2 months free ($149 × 10 effective months)
+      price: 149,
+      annualPrice: 1430,
       isCustom: false,
       customQuotePrice: null,
-
-      // ── Unit Boundaries ──
-      minUnits: 11,             // DISPLAY ONLY — not enforced as a gate
-      maxUnits: 50,             // ENFORCED: hard cap
-
-      // ── Capacity Limits ──
-      maxInspectors: 5,         // Up from 3 — room for a small inspection team
-      maxProperties: 20,        // NEW: max 20 distinct property records
-      maxVendors: 10,           // NEW: max 10 external vendor accounts
-      maxDocumentStorageMB: 5120, // NEW: 5GB (5120MB) document storage
-
-      // ── Trial & Lifecycle ──
-      trialDays: 14,            // 2-week free trial
+      minUnits: 11,
+      maxUnits: 50,
+      maxInspectors: 5,
+      maxProperties: 20,
+      maxVendors: 10,
+      maxDocumentStorageMB: 5120,
+      trialDays: 14,
       allowsTrial: true,
-      gracePeriodDays: null,    // Uses platform default (7 days)
-
-      // ── Display & Marketing ──
-      sortOrder: 2,             // Second position on pricing page
-      highlightBadge: "Most Popular", // NEW: highlighted tier badge shown on pricing card
+      gracePeriodDays: null,
+      sortOrder: 2,
+      highlightBadge: "Most Popular",
       isActive: true,
-
-      // ── Module Entitlements ──
       modules: [
-        // Core (always available)
         "properties", "leases", "tenants", "applications",
         "payments", "payouts", "maintenance", "documents", "tours",
-        // Professional unlocks:
-        "inspections",     // Property inspection workflows
-        "team_management", // Inspector & Team Management
-        "vendors",         // External vendor/contractor management
-        "invoices",        // Invoice management for commercial/NNN leases
-        "accounting",      // Financial reporting & accounting overview
-        // Still locked (Enterprise-only): messages, calendar
+        "inspections", "team_management", "vendors", "invoices", "accounting",
       ],
       features: [
         "Properties & Units (up to 20 properties, 50 units)",
@@ -317,59 +246,31 @@ async function main() {
     } as any
   });
 
-  // ── TIER 3: Enterprise ─────────────────────────────────────────────────────
-  // Who: Large portfolio operators / property management firms (51+ units)
-  // Gate tests:
-  //   - All capacity limits = 0 = UNLIMITED (properties, vendors, inspectors, storage)
-  //   - Has access to ALL modules including: messages, calendar
-  //   - allowsTrial: false — Enterprise is a direct signed deal, no trial period
-  //   - gracePeriodDays: 14 — longer grace period than platform default (7 days)
-  //   - price: $0 for display (isCustom: true) — customQuotePrice: 299 used for revenue analytics
-  // Demo user: Marcus Reed (owner.atlas@yopmail.com) — seeded with proTier for upgrade test scenario
   const enterpriseTier = await prisma.pricingTier.create({
     data: {
-      // ── Identity ──
       name: "Enterprise",
       description: "Complete platform control for large portfolios and professional management firms. All modules, unlimited capacity, dedicated support.",
-
-      // ── Pricing ──
-      price: 0,                 // $0 displayed to owner — actual price is a custom negotiated quote
-      annualPrice: null,        // Quoted separately for Enterprise contracts
-      isCustom: true,           // Marks this as a "Contact Sales" tier — no self-serve checkout
-      customQuotePrice: 299,    // NEW: actual monthly rate used for MRR/revenue analytics (not shown to owner)
-
-      // ── Unit Boundaries ──
-      minUnits: 51,             // DISPLAY ONLY — shown as "For 51+ unit portfolios"
-      maxUnits: 99999,          // Effectively unlimited
-
-      // ── Capacity Limits (0 = unlimited) ──
-      maxInspectors: 99,        // Effectively unlimited inspector team
-      maxProperties: 0,         // NEW: 0 = unlimited properties
-      maxVendors: 0,            // NEW: 0 = unlimited vendors
-      maxDocumentStorageMB: 0,  // NEW: 0 = unlimited document storage
-
-      // ── Trial & Lifecycle ──
-      trialDays: 0,             // No self-serve trial — Enterprise is a signed contract
-      allowsTrial: false,       // NEW: explicitly disabled — Enterprise onboards via sales
-      gracePeriodDays: 14,      // NEW: 14-day grace period override (vs 7-day platform default)
-                                //      Large accounts need more time to resolve billing disputes
-
-      // ── Display & Marketing ──
-      sortOrder: 3,             // Third (last) position on pricing page
-      highlightBadge: "Enterprise", // NEW: badge shown on the pricing card
+      price: 0,
+      annualPrice: null,
+      isCustom: true,
+      customQuotePrice: 299,
+      minUnits: 51,
+      maxUnits: 99999,
+      maxInspectors: 99,
+      maxProperties: 0,
+      maxVendors: 0,
+      maxDocumentStorageMB: 0,
+      trialDays: 0,
+      allowsTrial: false,
+      gracePeriodDays: 14,
+      sortOrder: 3,
+      highlightBadge: "Enterprise",
       isActive: true,
-
-      // ── Module Entitlements — ALL modules ──
       modules: [
-        // Core
         "properties", "leases", "tenants", "applications",
         "payments", "payouts", "maintenance", "documents", "tours",
-        // Professional-tier modules
         "inspections", "vendors", "invoices", "accounting",
-        // Enterprise-only unlocks:
-        "messages",    // Tenant chat & direct messaging system
-        "calendar",    // Availability calendar & booking management
-        "analytics",   // Portfolio analytics dashboard
+        "messages", "calendar", "analytics",
       ],
       features: [
         "Unlimited Properties & Units",
@@ -400,7 +301,6 @@ async function main() {
   console.log("👤 Creating users (admin, owners, inspectors, tenants)...");
   const passwordHash = await bcrypt.hash("Demo@1234", 10);
 
-  // ── Admin ──
   const admin = await prisma.user.create({
     data: {
       email: "admin@yopmail.com",
@@ -409,11 +309,10 @@ async function main() {
       role: Role.SUPERADMIN,
       accountStatus: "ACTIVE",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
+      createdAt: dBefore(24),
     },
   });
 
-  // ── Owners ──
-  // Owner 1: Marcus Reed — Atlas Properties LLC (Enterprise tier, full portfolio)
   const ownerAtlas = await prisma.user.create({
     data: {
       email: "owner.atlas@yopmail.com", name: "Marcus Reed", password: passwordHash, role: Role.OWNER,
@@ -428,10 +327,11 @@ async function main() {
       cardLast4: "4242",
       creditScore: 800, hasCompletedOnboarding: true, onboardingStep: 4,
       approvalThreshold: 500.00, emergencyOverrideLimit: 2000.00,
+      trialUsedTierIds: [essentialsTier.id, proTier.id],
+      createdAt: dBefore(18),
     },
   });
 
-  // Owner 2: Linda Chen — Coastal Realty Group (Professional tier, commercial focus)
   const ownerCoastal = await prisma.user.create({
     data: {
       email: "owner.coastal@yopmail.com", name: "Linda Chen", password: passwordHash, role: Role.OWNER,
@@ -446,10 +346,11 @@ async function main() {
       cardLast4: "5555",
       creditScore: 760, hasCompletedOnboarding: true, onboardingStep: 4,
       approvalThreshold: 300.00, emergencyOverrideLimit: 1500.00,
+      trialUsedTierIds: [essentialsTier.id],
+      createdAt: dBefore(12),
     },
   });
 
-  // Owner 3: Raj Patel — Patel Realty (Essentials, single house)
   const ownerPatel = await prisma.user.create({
     data: {
       email: "owner.patel@yopmail.com", name: "Raj Patel", password: passwordHash, role: Role.OWNER,
@@ -461,6 +362,7 @@ async function main() {
       stripeCustomerId: "cus_demo_patel_345",
       creditScore: 720, hasCompletedOnboarding: true, onboardingStep: 4,
       approvalThreshold: 300.00, emergencyOverrideLimit: 1500.00,
+      createdAt: dBefore(8),
     },
   });
 
@@ -481,7 +383,8 @@ async function main() {
       phone: "+1 213-555-0400",
       avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
       currentTierId: null, subscriptionStatus: "PendingPlanSelection", accountStatus: "ACTIVE",
-      hasCompletedOnboarding: false, onboardingStep: 0, // ← sees full onboarding wizard
+      hasCompletedOnboarding: false, onboardingStep: 0,
+      createdAt: dDaysBefore(2),
     },
   });
 
@@ -513,6 +416,7 @@ async function main() {
       cardBrand: "visa",
       cardLast4: "4242",
       trialUsedTierIds: [proTier.id],
+      createdAt: dBefore(14),
     }
   });
 
@@ -544,79 +448,80 @@ async function main() {
       cardBrand: "mastercard",
       cardLast4: "5555",
       trialUsedTierIds: [proTier.id],
+      createdAt: dBefore(20),
     }
   });
 
   // ── Inspectors ──
   console.log("🔍 Seeding inspectors — respecting updated per-tier limits...");
   const inspectorJake = await prisma.user.create({
-    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400" },
+    data: { email: "inspector.jake@yopmail.com", name: "Jake Thorpe", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400", createdAt: dBefore(16) },
   });
   await prisma.user.create({
-    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400" },
+    data: { email: "inspector.sara@yopmail.com", name: "Sara Malone", password: passwordHash, role: Role.INSPECTOR, phone: "+1 310-555-1002", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400", createdAt: dBefore(14) },
   });
   await prisma.user.create({
-    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
-  });
-
-  await prisma.user.create({
-    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
-  });
-  await prisma.user.create({
-    data: { email: "inspector.coastal2@yopmail.com", name: "Alex Wong", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2003", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
+    data: { email: "inspector.david@yopmail.com", name: "David Kim", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2001", accountStatus: "ACTIVE", ownerId: ownerAtlas.id, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", createdAt: dBefore(12) },
   });
 
   await prisma.user.create({
-    data: { email: "inspector.patel1@yopmail.com", name: "Kumar Patel", password: passwordHash, role: Role.INSPECTOR, phone: "+1 408-555-3001", accountStatus: "ACTIVE", ownerId: ownerPatel.id, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" },
+    data: { email: "inspector.priya@yopmail.com", name: "Priya Nair", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2002", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400", createdAt: dBefore(10) },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.coastal2@yopmail.com", name: "Alex Wong", password: passwordHash, role: Role.INSPECTOR, phone: "+1 415-555-2003", accountStatus: "ACTIVE", ownerId: ownerCoastal.id, avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", createdAt: dBefore(9) },
   });
 
   await prisma.user.create({
-    data: { email: "inspector.carter1@yopmail.com", name: "Tom Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4001", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400" },
-  });
-  await prisma.user.create({
-    data: { email: "inspector.carter2@yopmail.com", name: "Jerry Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4002", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400" },
+    data: { email: "inspector.patel1@yopmail.com", name: "Kumar Patel", password: passwordHash, role: Role.INSPECTOR, phone: "+1 408-555-3001", accountStatus: "ACTIVE", ownerId: ownerPatel.id, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400", createdAt: dBefore(7) },
   });
 
   await prisma.user.create({
-    data: { email: "inspector.impending1@yopmail.com", name: "Frank Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5001", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400" },
+    data: { email: "inspector.carter1@yopmail.com", name: "Tom Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4001", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400", createdAt: dBefore(13) },
   });
   await prisma.user.create({
-    data: { email: "inspector.impending2@yopmail.com", name: "Alice Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5002", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400" },
+    data: { email: "inspector.carter2@yopmail.com", name: "Jerry Carter", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-4002", accountStatus: "ACTIVE", ownerId: ownerPaused.id, avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400", createdAt: dBefore(11) },
+  });
+
+  await prisma.user.create({
+    data: { email: "inspector.impending1@yopmail.com", name: "Frank Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5001", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400", createdAt: dBefore(18) },
+  });
+  await prisma.user.create({
+    data: { email: "inspector.impending2@yopmail.com", name: "Alice Impending", password: passwordHash, role: Role.INSPECTOR, phone: "+1 213-555-5002", accountStatus: "ACTIVE", ownerId: ownerPausedImpending.id, avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400", createdAt: dBefore(17) },
   });
 
   // ── Tenants ──
   const tenantAdam = await prisma.user.create({
-    data: { email: "tenant.adam@yopmail.com", name: "Adam Brooks", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3001", tenantStatus: "Active", creditScore: 780, annualIncome: 115000, ssn: encrypt("123-45-6789"), employer: "TechCorp Inc.", position: "Senior Engineer", employmentStatus: "EMPLOYED", emergencyName: "Lisa Brooks", emergencyRelationship: "Spouse", emergencyPhone: "+1 310-555-3002", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400" },
+    data: { email: "tenant.adam@yopmail.com", name: "Adam Brooks", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3001", tenantStatus: "Active", creditScore: 780, annualIncome: 115000, ssn: encrypt("123-45-6789"), employer: "TechCorp Inc.", position: "Senior Engineer", employmentStatus: "EMPLOYED", emergencyName: "Lisa Brooks", emergencyRelationship: "Spouse", emergencyPhone: "+1 310-555-3002", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400", createdAt: dBefore(14) },
   });
   const tenantNora = await prisma.user.create({
-    data: { email: "tenant.nora@yopmail.com", name: "Nora Klein", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3003", tenantStatus: "Pending Onboarding", creditScore: 710, annualIncome: 72000, ssn: encrypt("234-56-7890"), employer: "Design Studio LA", position: "Graphic Designer", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400" },
+    data: { email: "tenant.nora@yopmail.com", name: "Nora Klein", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3003", tenantStatus: "Pending Onboarding", creditScore: 710, annualIncome: 72000, ssn: encrypt("234-56-7890"), employer: "Design Studio LA", position: "Graphic Designer", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400", createdAt: dDaysBefore(15) },
   });
   const tenantOscar = await prisma.user.create({
-    data: { email: "tenant.oscar@yopmail.com", name: "Oscar Diaz", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3004", tenantStatus: "Active", creditScore: 620, annualIncome: 52000, ssn: encrypt("345-67-8901"), employer: "Warehouse Co.", position: "Supervisor", avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=400" },
+    data: { email: "tenant.oscar@yopmail.com", name: "Oscar Diaz", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3004", tenantStatus: "Active", creditScore: 620, annualIncome: 52000, ssn: encrypt("345-67-8901"), employer: "Warehouse Co.", position: "Supervisor", avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=400", createdAt: dBefore(10) },
   });
   const tenantMarvin = await prisma.user.create({
-    data: { email: "tenant.marvin@yopmail.com", name: "Marvin Torres", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3005", tenantStatus: "Active", creditScore: 740, annualIncome: 88000, ssn: encrypt("456-78-9012"), employer: "Metro Health", position: "Nurse Practitioner", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" },
+    data: { email: "tenant.marvin@yopmail.com", name: "Marvin Torres", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3005", tenantStatus: "Active", creditScore: 740, annualIncome: 88000, ssn: encrypt("456-78-9012"), employer: "Metro Health", position: "Nurse Practitioner", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400", createdAt: dBefore(9) },
   });
   const tenantLiam = await prisma.user.create({
-    data: { email: "tenant.liam@yopmail.com", name: "Liam Walsh", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3006", tenantStatus: "Active", creditScore: 690, annualIncome: 65000, ssn: encrypt("567-89-0123"), avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400" },
+    data: { email: "tenant.liam@yopmail.com", name: "Liam Walsh", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3006", tenantStatus: "Active", creditScore: 690, annualIncome: 65000, ssn: encrypt("567-89-0123"), avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400", createdAt: dBefore(12) },
   });
   const tenantAmy = await prisma.user.create({
-    data: { email: "tenant.amy@yopmail.com", name: "Amy Foster", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3007", tenantStatus: "Active", creditScore: 730, annualIncome: 78000, ssn: encrypt("678-90-1234"), avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400" },
+    data: { email: "tenant.amy@yopmail.com", name: "Amy Foster", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3007", tenantStatus: "Active", creditScore: 730, annualIncome: 78000, ssn: encrypt("678-90-1234"), avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400", createdAt: dBefore(12) },
   });
   const tenantDan = await prisma.user.create({
-    data: { email: "tenant.dan@yopmail.com", name: "Dan Gibbs", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3008", tenantStatus: "Active", creditScore: 680, annualIncome: 60000, ssn: encrypt("789-01-2345"), avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400" },
+    data: { email: "tenant.dan@yopmail.com", name: "Dan Gibbs", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3008", tenantStatus: "Active", creditScore: 680, annualIncome: 60000, ssn: encrypt("789-01-2345"), avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400", createdAt: dBefore(12) },
   });
   const tenantEve = await prisma.user.create({
-    data: { email: "tenant.eve@yopmail.com", name: "Eve Morales", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3009", tenantStatus: "Inactive", creditScore: 760, annualIncome: 90000, ssn: encrypt("890-12-3456"), avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400" },
+    data: { email: "tenant.eve@yopmail.com", name: "Eve Morales", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3009", tenantStatus: "Inactive", creditScore: 760, annualIncome: 90000, ssn: encrypt("890-12-3456"), avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400", createdAt: dBefore(15) },
   });
   const tenantKelly = await prisma.user.create({
-    data: { email: "tenant.kelly@yopmail.com", name: "Kelly Huang", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3010", tenantStatus: "Active", creditScore: 715, annualIncome: 70000, ssn: encrypt("901-23-4567"), avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
+    data: { email: "tenant.kelly@yopmail.com", name: "Kelly Huang", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3010", tenantStatus: "Active", creditScore: 715, annualIncome: 70000, ssn: encrypt("901-23-4567"), avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400", createdAt: dBefore(12) },
   });
   const tenantScott = await prisma.user.create({
-    data: { email: "tenant.scott@yopmail.com", name: "Scott Park", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3011", tenantStatus: "Active", creditScore: 750, annualIncome: 82000, ssn: encrypt("012-34-5678"), avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
+    data: { email: "tenant.scott@yopmail.com", name: "Scott Park", password: passwordHash, role: Role.TENANT, phone: "+1 310-555-3011", tenantStatus: "Active", creditScore: 750, annualIncome: 82000, ssn: encrypt("012-34-5678"), avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", createdAt: dBefore(12) },
   });
   const tenantCarlos = await prisma.user.create({
-    data: { email: "tenant.carlos@yopmail.com", name: "Carlos Ruiz", password: passwordHash, role: Role.TENANT, phone: "+1 415-555-4001", tenantStatus: "Active", creditScore: 800, annualIncome: 250000, ssn: encrypt("111-22-3333"), employer: "Ruiz Enterprises LLC", position: "CEO", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
+    data: { email: "tenant.carlos@yopmail.com", name: "Carlos Ruiz", password: passwordHash, role: Role.TENANT, phone: "+1 415-555-4001", tenantStatus: "Active", creditScore: 800, annualIncome: 250000, ssn: encrypt("111-22-3333"), employer: "Ruiz Enterprises LLC", position: "CEO", employmentStatus: "EMPLOYED", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", createdAt: dBefore(11) },
   });
   const tenantPatel = await prisma.user.create({
     data: { 
@@ -632,18 +537,19 @@ async function main() {
       employer: "Google LLC", 
       position: "Associate Product Manager", 
       employmentStatus: "EMPLOYED",
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400"
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400",
+      createdAt: dBefore(8),
     },
   });
   // FIRST-TIME TENANT — no lease, empty dashboard
   await prisma.user.create({
-    data: { email: "tenant.new@yopmail.com", name: "Sam Taylor", password: passwordHash, role: Role.TENANT, phone: "+1 213-555-5001", tenantStatus: "Pending Onboarding", creditScore: 700, annualIncome: 58000, avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400" },
+    data: { email: "tenant.new@yopmail.com", name: "Sam Taylor", password: passwordHash, role: Role.TENANT, phone: "+1 213-555-5001", tenantStatus: "Pending Onboarding", creditScore: 700, annualIncome: 58000, avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400", createdAt: dDaysBefore(3) },
   });
 
   // ── SECTION 2.5: Subscription History Events (for SaaS Billing Audits) ──
   console.log("📈 Seeding subscription history event stream...");
   
-  // Owner 1 (Atlas): Essentials -> Pro -> Enterprise
+  // Owner 1 (Atlas): Trial -> Pro -> Enterprise
   await prisma.subscriptionHistory.createMany({
     data: [
       {
@@ -652,7 +558,7 @@ async function main() {
         toTierName: essentialsTier.name,
         event: "TRIAL_STARTED",
         amountPaid: 0,
-        createdAt: dBefore(6),
+        createdAt: dDaysBefore(180),
       },
       {
         userId: ownerAtlas.id,
@@ -677,7 +583,7 @@ async function main() {
     ]
   });
 
-  // Owner 2 (Coastal): Essentials -> Canceled -> Reactivated
+  // Owner 2 (Coastal): Essentials -> Canceled -> Reactivated -> Upgraded to Pro
   await prisma.subscriptionHistory.createMany({
     data: [
       {
@@ -696,7 +602,7 @@ async function main() {
         toTierName: essentialsTier.name,
         event: "CANCELED",
         amountPaid: 0,
-        createdAt: dBefore(1.5),
+        createdAt: dDaysBefore(45),
       },
       {
         userId: ownerCoastal.id,
@@ -706,12 +612,22 @@ async function main() {
         toTierName: essentialsTier.name,
         event: "REACTIVATED",
         amountPaid: 49.00,
-        createdAt: dBefore(1),
+        createdAt: dDaysBefore(15),
+      },
+      {
+        userId: ownerCoastal.id,
+        fromTierId: essentialsTier.id,
+        fromTierName: essentialsTier.name,
+        toTierId: proTier.id,
+        toTierName: proTier.name,
+        event: "UPGRADED",
+        amountPaid: 149.00,
+        createdAt: dDaysBefore(5),
       },
     ]
   });
 
-  // Owner 3 (Patel): Subscribed -> Past Due
+  // Owner 3 (Patel): Trial -> Subscribed -> Past Due
   await prisma.subscriptionHistory.createMany({
     data: [
       {
@@ -720,7 +636,17 @@ async function main() {
         toTierName: essentialsTier.name,
         event: "TRIAL_STARTED",
         amountPaid: 0,
-        createdAt: dBefore(2),
+        createdAt: dDaysBefore(45),
+      },
+      {
+        userId: ownerPatel.id,
+        fromTierId: essentialsTier.id,
+        fromTierName: essentialsTier.name,
+        toTierId: essentialsTier.id,
+        toTierName: essentialsTier.name,
+        event: "SUBSCRIBED",
+        amountPaid: 49.00,
+        createdAt: dDaysBefore(31),
       },
       {
         userId: ownerPatel.id,
@@ -735,16 +661,45 @@ async function main() {
     ]
   });
 
-  // Owner Paused: James Carter (Subscribed -> Paused)
+  // Owner Paused: James Carter (Subscribed -> Renewals -> Past Due -> Paused)
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPaused.id,
+      toTierId: proTier.id,
+      toTierName: proTier.name,
+      event: "SUBSCRIBED",
+      amountPaid: 149.00,
+      createdAt: dBefore(6),
+    }
+  });
+  for (let m = 5; m >= 1; m--) {
+    const chargeDate = new Date(NOW);
+    chargeDate.setMonth(chargeDate.getMonth() - m);
+    chargeDate.setDate(1);
+    await prisma.subscriptionHistory.create({
+      data: {
+        userId: ownerPaused.id,
+        fromTierId: proTier.id,
+        fromTierName: proTier.name,
+        toTierId: proTier.id,
+        toTierName: proTier.name,
+        event: "RENEWED",
+        amountPaid: 149.00,
+        createdAt: chargeDate,
+      }
+    });
+  }
   await prisma.subscriptionHistory.createMany({
     data: [
       {
         userId: ownerPaused.id,
+        fromTierId: proTier.id,
+        fromTierName: proTier.name,
         toTierId: proTier.id,
         toTierName: proTier.name,
-        event: "SUBSCRIBED",
-        amountPaid: 149.00,
-        createdAt: dDaysBefore(180),
+        event: "PAST_DUE",
+        amountPaid: 0,
+        createdAt: dDaysBefore(9),
       },
       {
         userId: ownerPaused.id,
@@ -759,16 +714,45 @@ async function main() {
     ]
   });
 
-  // Owner Paused Impending: James Impending (Subscribed -> Paused)
+  // Owner Paused Impending: James Impending (Subscribed -> Renewals -> Past Due -> Paused)
+  await prisma.subscriptionHistory.create({
+    data: {
+      userId: ownerPausedImpending.id,
+      toTierId: proTier.id,
+      toTierName: proTier.name,
+      event: "SUBSCRIBED",
+      amountPaid: 149.00,
+      createdAt: dBefore(6),
+    }
+  });
+  for (let m = 5; m >= 1; m--) {
+    const chargeDate = new Date(NOW);
+    chargeDate.setMonth(chargeDate.getMonth() - m);
+    chargeDate.setDate(1);
+    await prisma.subscriptionHistory.create({
+      data: {
+        userId: ownerPausedImpending.id,
+        fromTierId: proTier.id,
+        fromTierName: proTier.name,
+        toTierId: proTier.id,
+        toTierName: proTier.name,
+        event: "RENEWED",
+        amountPaid: 149.00,
+        createdAt: chargeDate,
+      }
+    });
+  }
   await prisma.subscriptionHistory.createMany({
     data: [
       {
         userId: ownerPausedImpending.id,
+        fromTierId: proTier.id,
+        fromTierName: proTier.name,
         toTierId: proTier.id,
         toTierName: proTier.name,
-        event: "SUBSCRIBED",
-        amountPaid: 149.00,
-        createdAt: dDaysBefore(180),
+        event: "PAST_DUE",
+        amountPaid: 0,
+        createdAt: dDaysBefore(62),
       },
       {
         userId: ownerPausedImpending.id,
@@ -992,27 +976,30 @@ async function main() {
   });
 
   // Create 6 new tenant users for James Carter
-  const carterTenants = [];
-  const carterAvatars = [
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
-    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400",
+  const carterTenantData = [
+    { name: "Brian Walsh",   email: "tenant.carter1@yopmail.com", creditScore: 710, annualIncome: 72000, employer: "Metro Transit", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
+    { name: "Chloe Rivera",  email: "tenant.carter2@yopmail.com", creditScore: 695, annualIncome: 68000, employer: "City Hospital", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400" },
+    { name: "Derek Owens",   email: "tenant.carter3@yopmail.com", creditScore: 730, annualIncome: 85000, employer: "Carter & Co Law", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
+    { name: "Fiona Park",    email: "tenant.carter4@yopmail.com", creditScore: 705, annualIncome: 71000, employer: "Eastside School", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
+    { name: "George Okafor", email: "tenant.carter5@yopmail.com", creditScore: 720, annualIncome: 78000, employer: "Sunrise Logistics", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400" },
+    { name: "Hannah Brooks", email: "tenant.carter6@yopmail.com", creditScore: 698, annualIncome: 66000, employer: "Freelance Designer", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400" },
   ];
-  for (let i = 1; i <= 6; i++) {
+  const carterTenants = [];
+  for (let i = 0; i < carterTenantData.length; i++) {
+    const data = carterTenantData[i];
     const t = await prisma.user.create({
       data: {
-        email: `tenant.carter${i}@yopmail.com`,
-        name: `Carter Tenant ${i}`,
+        email: data.email,
+        name: data.name,
         password: passwordHash,
         role: Role.TENANT,
-        phone: `+1 213-555-900${i}`,
+        phone: `+1 213-555-900${i+1}`,
         tenantStatus: "Active",
-        creditScore: 700,
-        annualIncome: 80000,
-        avatar: carterAvatars[(i - 1) % carterAvatars.length],
+        creditScore: data.creditScore,
+        annualIncome: data.annualIncome,
+        employer: data.employer,
+        avatar: data.avatar,
+        createdAt: dDaysBefore(180 - i * 15),
       }
     });
     carterTenants.push(t);
@@ -1092,7 +1079,7 @@ async function main() {
     }
 
     // Unpaid/Overdue rent invoice for current month
-    const currentMonthDueDate = new Date();
+    const currentMonthDueDate = new Date(NOW);
     currentMonthDueDate.setDate(1);
 
     await prisma.invoice.create({
@@ -1222,51 +1209,6 @@ async function main() {
     }
   });
 
-  // Seed Subscription History for James Carter
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPaused.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "SUBSCRIBED",
-      amountPaid: 149.00,
-      createdAt: dBefore(6),
-    }
-  });
-
-  for (let m = 5; m >= 1; m--) {
-    await prisma.subscriptionHistory.create({
-      data: {
-        userId: ownerPaused.id,
-        toTierId: proTier.id,
-        toTierName: proTier.name,
-        event: "SUBSCRIBED",
-        amountPaid: 149.00,
-        createdAt: dBefore(m),
-      }
-    });
-  }
-
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPaused.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "PAST_DUE",
-      createdAt: dDaysBefore(9),
-    }
-  });
-
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPaused.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "PAUSED",
-      createdAt: dDaysBefore(2),
-    }
-  });
-
   // Create a tenant for James Impending
   const impendingTenant = await prisma.user.create({
     data: {
@@ -1278,6 +1220,15 @@ async function main() {
       tenantStatus: "Active",
       creditScore: 710,
       annualIncome: 95000,
+      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
+      ssn: encrypt("555-44-3333"),
+      employer: "Apex Solutions",
+      position: "Operations Manager",
+      employmentStatus: "EMPLOYED",
+      emergencyName: "Sandra Tenant",
+      emergencyRelationship: "Spouse",
+      emergencyPhone: "+1 213-555-9020",
+      createdAt: dBefore(18),
     }
   });
 
@@ -1345,7 +1296,7 @@ async function main() {
   }
 
   // Create current month's UNPAID invoice for James Impending
-  const currentMonthDueImpending = new Date();
+  const currentMonthDueImpending = new Date(NOW);
   currentMonthDueImpending.setDate(1);
 
   await prisma.invoice.create({
@@ -1405,51 +1356,6 @@ async function main() {
     }
   });
 
-  // Seed Subscription History for James Impending
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPausedImpending.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "SUBSCRIBED",
-      amountPaid: 149.00,
-      createdAt: dBefore(6),
-    }
-  });
-
-  for (let m = 5; m >= 1; m--) {
-    await prisma.subscriptionHistory.create({
-      data: {
-        userId: ownerPausedImpending.id,
-        toTierId: proTier.id,
-        toTierName: proTier.name,
-        event: "SUBSCRIBED",
-        amountPaid: 149.00,
-        createdAt: dBefore(m),
-      }
-    });
-  }
-
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPausedImpending.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "PAST_DUE",
-      createdAt: dDaysBefore(62),
-    }
-  });
-
-  await prisma.subscriptionHistory.create({
-    data: {
-      userId: ownerPausedImpending.id,
-      toTierId: proTier.id,
-      toTierName: proTier.name,
-      event: "PAUSED",
-      createdAt: dDaysBefore(55),
-    }
-  });
-
   // ── SECTION 5: Leases ──────────────────────────────────────────────────────
   console.log("📋 Creating leases (all lifecycle states)...");
 
@@ -1464,6 +1370,67 @@ async function main() {
     },
   });
   await prisma.invoice.create({ data: { leaseId: leaseNora.id, amount: 2500, dueDate: dDaysAfter(7), status: "UNPAID", invoiceType: "DEPOSIT" } });
+
+  // ── Lease 1b: Ryan Cole — SIGNED (Signed + deposit paid, awaiting key handover / activation) ──
+  const tenantRyan = await prisma.user.create({
+    data: {
+      email: "tenant.ryan@yopmail.com",
+      name: "Ryan Cole",
+      password: passwordHash,
+      role: Role.TENANT,
+      phone: "+1 310-555-3099",
+      tenantStatus: "Active",
+      creditScore: 720,
+      annualIncome: 75000,
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
+    },
+  });
+  const leaseRyan = await prisma.lease.create({
+    data: {
+      unitId: u105.id,
+      tenantId: tenantRyan.id,
+      status: "SIGNED",
+      startDate: dDaysAfter(3),
+      endDate: dAfter(12),
+      monthlyRent: 2800,
+      securityDeposit: 3000,
+      depositStatus: "HELD",
+      depositBalance: 3000,
+      depositPaidAt: dDaysBefore(1),
+      depositPaidAmount: 3000,
+      signedAt: dDaysBefore(2),
+      rentDueDay: 1,
+      gracePeriodDays: 5,
+      lateFeeAmount: 100,
+    },
+  });
+  const ryanDepInv = await prisma.invoice.create({
+    data: {
+      leaseId: leaseRyan.id,
+      amount: 3000,
+      dueDate: dDaysBefore(2),
+      status: "PAID",
+      paymentMethod: "STRIPE",
+      grossPaid: 3087.00,
+      processingFee: 87.00,
+      adminFee: 60.00,
+      netToOwner: 2940.00,
+      invoiceType: "DEPOSIT",
+      createdAt: dDaysBefore(1),
+    },
+  });
+  const ryanDepTx = await prisma.transaction.create({
+    data: {
+      type: "INCOME",
+      category: "DEPOSIT",
+      amount: 3000,
+      status: "COMPLETED",
+      tenantId: tenantRyan.id,
+      invoiceId: ryanDepInv.id,
+      createdAt: dDaysBefore(1),
+    },
+  });
+  await prisma.lease.update({ where: { id: leaseRyan.id }, data: { depositTransactionId: ryanDepTx.id } });
 
   // ── Lease 2: Adam Brooks — ACTIVE (Perfect payer, 6-month history) ──
   const leaseAdam = await prisma.lease.create({
@@ -1484,9 +1451,11 @@ async function main() {
     const inv = await prisma.invoice.create({ data: { leaseId: leaseAdam.id, amount: 3000, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3087.00, processingFee: 87.00, adminFee: 60.00, netToOwner: 2940.00, invoiceType: "RENT" } });
     await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 3000, status: "COMPLETED", tenantId: tenantAdam.id, invoiceId: inv.id, createdAt: dBefore(m) } });
   }
-  await prisma.invoice.create({ data: { leaseId: leaseAdam.id, amount: 3000, dueDate: new Date(), status: "UNPAID", invoiceType: "RENT" } });
+  const todayDate = new Date(NOW);
+  todayDate.setHours(0, 0, 0, 0);
+  await prisma.invoice.create({ data: { leaseId: leaseAdam.id, amount: 3000, dueDate: todayDate, status: "UNPAID", invoiceType: "RENT" } });
 
-  // ── Lease 3: Oscar Diaz — ACTIVE (Overdue rent + late fee) ──
+  // ── Lease 3: Oscar Diaz — ACTIVE (Overdue rent + late fee, 4-month history) ──
   const leaseOscar = await prisma.lease.create({
     data: {
       unitId: u103.id, tenantId: tenantOscar.id, status: "ACTIVE",
@@ -1497,10 +1466,14 @@ async function main() {
     },
   });
   await prisma.invoice.create({ data: { leaseId: leaseOscar.id, amount: 2800, dueDate: dBefore(4), status: "PAID", invoiceType: "DEPOSIT" } });
+  for (let m = 4; m >= 2; m--) {
+    const inv = await prisma.invoice.create({ data: { leaseId: leaseOscar.id, amount: 2400, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", grossPaid: 2469.60, processingFee: 69.60, adminFee: 48.00, netToOwner: 2352.00, invoiceType: "RENT" } });
+    await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 2400, status: "COMPLETED", tenantId: tenantOscar.id, invoiceId: inv.id, createdAt: dBefore(m) } });
+  }
   await prisma.invoice.create({ data: { leaseId: leaseOscar.id, amount: 2400, dueDate: dBefore(1), status: "OVERDUE", invoiceType: "RENT" } });
   await prisma.invoice.create({ data: { leaseId: leaseOscar.id, amount: 120, dueDate: dDaysAfter(3), status: "UNPAID", invoiceType: "FEE", note: "Late payment fee — rent overdue 30+ days" } });
 
-  // ── Lease 4: Marvin Torres — ACTIVE (Active maintenance sandbox) ──
+  // ── Lease 4: Marvin Torres — ACTIVE (Active maintenance sandbox, 5-month history) ──
   const leaseMarvin = await prisma.lease.create({
     data: {
       unitId: u104.id, tenantId: tenantMarvin.id, status: "ACTIVE",
@@ -1510,8 +1483,11 @@ async function main() {
     },
   });
   await prisma.invoice.create({ data: { leaseId: leaseMarvin.id, amount: 3800, dueDate: dBefore(5), status: "PAID", invoiceType: "DEPOSIT" } });
-  await prisma.invoice.create({ data: { leaseId: leaseMarvin.id, amount: 3200, dueDate: dBefore(1), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3292.80, processingFee: 92.80, adminFee: 64.00, netToOwner: 3136.00, invoiceType: "RENT" } });
-  await prisma.invoice.create({ data: { leaseId: leaseMarvin.id, amount: 3200, dueDate: new Date(), status: "UNPAID", invoiceType: "RENT" } });
+  for (let m = 5; m >= 1; m--) {
+    const inv = await prisma.invoice.create({ data: { leaseId: leaseMarvin.id, amount: 3200, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", grossPaid: 3292.80, processingFee: 92.80, adminFee: 64.00, netToOwner: 3136.00, invoiceType: "RENT" } });
+    await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 3200, status: "COMPLETED", tenantId: tenantMarvin.id, invoiceId: inv.id, createdAt: dBefore(m) } });
+  }
+  await prisma.invoice.create({ data: { leaseId: leaseMarvin.id, amount: 3200, dueDate: todayDate, status: "UNPAID", invoiceType: "RENT" } });
 
   // ── Lease 5: Eve Morales — EXPIRED (Deposit partially refunded with deductions) ──
   const leaseEve = await prisma.lease.create({
@@ -1531,7 +1507,7 @@ async function main() {
     },
   });
   await prisma.payoutRequest.create({
-    data: { tenantId: tenantEve.id, leaseId: leaseEve.id, amount: 2650, status: PayoutStatus.COMPLETED, bankName: "Wells Fargo", accountNumber: encrypt("999988887777"), accountName: "Eve Morales", disbursedAt: dBefore(2), refNumber: "TXN-EVE-REFUND-001" },
+    data: { tenantId: tenantEve.id, leaseId: leaseEve.id, amount: 2650, status: PayoutStatus.COMPLETED, bankName: "Wells Fargo", accountNumber: encrypt("999988887777"), accountName: "Eve Morales", disbursedAt: dDaysBefore(80), refNumber: "TXN-EVE-REFUND-001" },
   });
 
   // ── Lease 6: Carlos Ruiz — ACTIVE Commercial NNN (Pacific Commerce Center) ──
@@ -1550,7 +1526,7 @@ async function main() {
     const inv = await prisma.invoice.create({ data: { leaseId: leaseCarlos.id, amount: 8500, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", grossPaid: 8746.50, processingFee: 246.50, adminFee: 170.00, netToOwner: 8330.00, invoiceType: "RENT" } });
     await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 8500, status: "COMPLETED", tenantId: tenantCarlos.id, invoiceId: inv.id, createdAt: dBefore(m) } });
   }
-  await prisma.invoice.create({ data: { leaseId: leaseCarlos.id, amount: 8500, dueDate: new Date(), status: "UNPAID", invoiceType: "RENT" } });
+  await prisma.invoice.create({ data: { leaseId: leaseCarlos.id, amount: 8500, dueDate: todayDate, status: "UNPAID", invoiceType: "RENT" } });
 
   // ── Lease for Raj Patel (Main Home) ──
   const leasePatel = await prisma.lease.create({
@@ -1634,17 +1610,58 @@ async function main() {
     data: {
       leaseId: leasePatel.id,
       amount: 4200,
-      dueDate: new Date(),
+      dueDate: todayDate,
       status: "UNPAID",
       invoiceType: "RENT"
     }
   });
 
+  // ── Lease 7: Atlas Expiring Soon Lease — ACTIVE (Expires in 45 days → populates Renewals Needed KPI) ──
+  await prisma.user.update({ where: { id: tenantEve.id }, data: { tenantStatus: "Active" } });
+  const leaseExpiring = await prisma.lease.create({
+    data: {
+      unitId: u106.id,
+      tenantId: tenantEve.id,
+      status: "ACTIVE",
+      startDate: dBefore(11),
+      endDate: dDaysAfter(45),
+      monthlyRent: 4500,
+      securityDeposit: 5000,
+      depositStatus: "HELD",
+      depositBalance: 5000,
+      depositPaidAt: dBefore(11),
+      depositPaidAmount: 5000,
+      signedAt: dBefore(11),
+      keysHandedOverAt: dBefore(11),
+      rentDueDay: 1,
+      gracePeriodDays: 5,
+      lateFeeAmount: 150,
+      renewalStatus: "PENDING_DECISION",
+      renewalNoticeDays: 60,
+    },
+  });
+  const expiringDepInv = await prisma.invoice.create({ data: { leaseId: leaseExpiring.id, amount: 5000, dueDate: dBefore(11), status: "PAID", paymentMethod: "STRIPE", grossPaid: 5145.00, processingFee: 145.00, adminFee: 100.00, netToOwner: 4900.00, invoiceType: "DEPOSIT" } });
+  await prisma.transaction.create({ data: { type: "INCOME", category: "DEPOSIT", amount: 5000, status: "COMPLETED", tenantId: tenantEve.id, invoiceId: expiringDepInv.id, createdAt: dBefore(11) } });
+  for (let m = 5; m >= 1; m--) {
+    const inv = await prisma.invoice.create({ data: { leaseId: leaseExpiring.id, amount: 4500, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", grossPaid: 4630.50, processingFee: 130.50, adminFee: 90.00, netToOwner: 4410.00, invoiceType: "RENT" } });
+    await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: 4500, status: "COMPLETED", tenantId: tenantEve.id, invoiceId: inv.id, createdAt: dBefore(m) } });
+  }
+
   // ── SECTION 6: Move-Out Lifecycle Leases (propMoveout units 201-205) ──────
   console.log("📦 Creating move-out lifecycle leases...");
 
+  // Helper for seeding past invoice history on move-out leases
+  const seedMoveOutHistory = async (leaseId: string, tenantId: string, rentAmount: number, depositAmount: number) => {
+    const depInv = await prisma.invoice.create({ data: { leaseId, amount: depositAmount, dueDate: dBefore(12), status: "PAID", invoiceType: "DEPOSIT", createdAt: dBefore(12) } });
+    await prisma.transaction.create({ data: { type: "INCOME", category: "DEPOSIT", amount: depositAmount, status: "COMPLETED", tenantId, invoiceId: depInv.id, createdAt: dBefore(12) } });
+    for (let m = 3; m >= 1; m--) {
+      const inv = await prisma.invoice.create({ data: { leaseId, amount: rentAmount, dueDate: dBefore(m), status: "PAID", paymentMethod: "STRIPE", invoiceType: "RENT", createdAt: dBefore(m) } });
+      await prisma.transaction.create({ data: { type: "INCOME", category: "RENT", amount: rentAmount, status: "COMPLETED", tenantId, invoiceId: inv.id, createdAt: dBefore(m) } });
+    }
+  };
+
   // Liam Walsh — NOTICE_GIVEN + INSPECTION_SCHEDULED
-  await prisma.lease.create({
+  const leaseLiam = await prisma.lease.create({
     data: {
       unitId: moUnit("201").id, tenantId: tenantLiam.id, status: "NOTICE_GIVEN",
       startDate: dBefore(12), endDate: dDaysAfter(14), monthlyRent: 2200, securityDeposit: 2500,
@@ -1658,16 +1675,17 @@ async function main() {
       cleaningAcknowledgedAt: dDaysBefore(10), utilitiesAcknowledgedAt: dDaysBefore(10),
     },
   });
+  await seedMoveOutHistory(leaseLiam.id, tenantLiam.id, 2200, 2500);
 
-  // Amy Foster — ACTIVE + TENANT_ACCEPTED (accepted deductions)
-  await prisma.lease.create({
+  // Amy Foster — NOTICE_GIVEN + TENANT_ACCEPTED (accepted deductions)
+  const leaseAmy = await prisma.lease.create({
     data: {
-      unitId: moUnit("202").id, tenantId: tenantAmy.id, status: "ACTIVE",
+      unitId: moUnit("202").id, tenantId: tenantAmy.id, status: "NOTICE_GIVEN",
       startDate: dBefore(12), endDate: dDaysBefore(7), monthlyRent: 2200, securityDeposit: 2500,
       depositStatus: "PARTIALLY_REFUNDED", depositBalance: 0, depositPaidAt: dBefore(12), depositPaidAmount: 2500,
       signedAt: dBefore(12),
       moveOutStatus: "TENANT_ACCEPTED", moveOutRequestDate: dDaysBefore(30), moveOutDate: dDaysBefore(7),
-      moveOutReason: "End of lease", inspectionDate: dDaysBefore(10),
+      moveOutReason: "End of lease", inspectionDate: dDaysBefore(4),
       inspectionNotes: "Light scuff marks on living room wall. Minor wear on kitchen cabinet door.",
       deductions: [
         { amount: 120.00, description: "Wall scuff marks — professional repaint", category: "DAMAGE" },
@@ -1677,16 +1695,17 @@ async function main() {
       forwardingAddress: "802 Maple Ave, Santa Monica, CA 90401", refundMethod: "BANK_TRANSFER",
     },
   });
+  await seedMoveOutHistory(leaseAmy.id, tenantAmy.id, 2200, 2500);
 
-  // Dan Gibbs — ACTIVE + TENANT_DISPUTED
-  await prisma.lease.create({
+  // Dan Gibbs — NOTICE_GIVEN + TENANT_DISPUTED
+  const leaseDan = await prisma.lease.create({
     data: {
-      unitId: moUnit("203").id, tenantId: tenantDan.id, status: "ACTIVE",
+      unitId: moUnit("203").id, tenantId: tenantDan.id, status: "NOTICE_GIVEN",
       startDate: dBefore(12), endDate: dDaysBefore(5), monthlyRent: 2200, securityDeposit: 2500,
       depositStatus: "HELD", depositBalance: 2500, depositPaidAt: dBefore(12), depositPaidAmount: 2500,
       signedAt: dBefore(12),
       moveOutStatus: "TENANT_DISPUTED", moveOutRequestDate: dDaysBefore(25), moveOutDate: dDaysBefore(5),
-      moveOutReason: "End of lease", inspectionDate: dDaysBefore(8),
+      moveOutReason: "End of lease", inspectionDate: dDaysBefore(2),
       inspectionNotes: "Broken window blind in bedroom. Large stain on bathroom tiles.",
       deductions: [
         { amount: 175.00, description: "Bedroom window blind replacement", category: "DAMAGE" },
@@ -1697,26 +1716,43 @@ async function main() {
       forwardingAddress: "42 Harbor Blvd, Long Beach, CA 90802", refundMethod: "BANK_TRANSFER",
     },
   });
+  await seedMoveOutHistory(leaseDan.id, tenantDan.id, 2200, 2500);
 
-  // Kelly Huang — NOTICE_GIVEN + KEYS_RETURNED (awaiting deposit decision)
-  await prisma.lease.create({
+  // Kelly Huang — TERMINATED + COMPLETED (early owner termination, full deposit refunded)
+  const leaseKelly = await prisma.lease.create({
     data: {
-      unitId: moUnit("204").id, tenantId: tenantKelly.id, status: "NOTICE_GIVEN",
+      unitId: moUnit("204").id, tenantId: tenantKelly.id, status: "TERMINATED",
       startDate: dBefore(12), endDate: dDaysBefore(2), monthlyRent: 2200, securityDeposit: 2500,
-      depositStatus: "HELD", depositBalance: 2500, depositPaidAt: dBefore(12), depositPaidAmount: 2500,
+      depositStatus: "REFUNDED", depositBalance: 0, depositPaidAt: dBefore(12), depositPaidAmount: 2500,
+      depositRefundAmount: 2500, depositWithheldAmount: 0,
       signedAt: dBefore(12), keysHandedOverAt: dBefore(12),
-      moveOutStatus: "KEYS_RETURNED", moveOutRequestDate: dDaysBefore(35), moveOutDate: dDaysBefore(2),
+      moveOutStatus: "COMPLETED", moveOutRequestDate: dDaysBefore(35), moveOutDate: dDaysBefore(2),
       moveOutReason: "Purchased a home",
       actualMoveOutDate: dDaysBefore(2), keyReturnConfirmedAt: dDaysBefore(2), depositDueBy: dDaysAfter(19),
       forwardingAddress: "112 Homeowner Drive, Pasadena, CA 91101",
       cleaningAcknowledgedAt: dDaysBefore(35), utilitiesAcknowledgedAt: dDaysBefore(35),
     },
   });
-
-  // Scott Park — ACTIVE + OWNER_REVIEWING (inspection bypassed by owner)
-  await prisma.lease.create({
+  await seedMoveOutHistory(leaseKelly.id, tenantKelly.id, 2200, 2500);
+  await prisma.payoutRequest.create({
     data: {
-      unitId: moUnit("205").id, tenantId: tenantScott.id, status: "ACTIVE",
+      tenantId: tenantKelly.id,
+      leaseId: leaseKelly.id,
+      amount: 2500,
+      status: PayoutStatus.COMPLETED,
+      bankName: "Wells Fargo",
+      accountNumber: encrypt("555566667777"),
+      accountName: "Kelly Huang",
+      disbursedAt: dDaysBefore(1),
+      refNumber: "TXN-KELLY-REFUND-001",
+      createdAt: dDaysBefore(1),
+    },
+  });
+
+  // Scott Park — NOTICE_GIVEN + OWNER_REVIEWING (inspection bypassed by owner)
+  const leaseScott = await prisma.lease.create({
+    data: {
+      unitId: moUnit("205").id, tenantId: tenantScott.id, status: "NOTICE_GIVEN",
       startDate: dBefore(12), endDate: dDaysBefore(4), monthlyRent: 2200, securityDeposit: 2500,
       depositStatus: "HELD", depositBalance: 2500, depositPaidAt: dBefore(12), depositPaidAmount: 2500,
       signedAt: dBefore(12),
@@ -1728,9 +1764,7 @@ async function main() {
       forwardingAddress: "789 State St, Denver, CO 80202",
     },
   });
-
-  // ── SECTION 7: Maintenance Requests ───────────────────────────────────────
-  console.log("🔨 Creating maintenance requests (all status states)...");
+  await seedMoveOutHistory(leaseScott.id, tenantScott.id, 2200, 2500);
 
   // ── SECTION 7: Maintenance Requests ───────────────────────────────────────
   console.log("🔨 Creating maintenance requests (all status states)...");
@@ -1747,6 +1781,7 @@ async function main() {
       status: "SUBMITTED",
       entryPermission: true,
       hasPets: "No",
+      createdAt: dDaysBefore(12),
     },
   });
 
@@ -1762,6 +1797,7 @@ async function main() {
       status: "SUBMITTED",
       entryPermission: true,
       hasPets: "No",
+      createdAt: dDaysBefore(8),
     },
   });
 
@@ -1777,6 +1813,7 @@ async function main() {
       entryPermission: true,
       hasPets: "No",
       inspectorId: inspectorJake.id,
+      createdAt: dDaysBefore(6),
     },
   });
 
@@ -1788,6 +1825,7 @@ async function main() {
       description: "The smoke detector in the hallway has been beeping every 30 seconds for 2 days. Low battery.",
       category: "GENERAL", priority: "LOW", status: "SUBMITTED", entryPermission: true, hasPets: "No",
       photos: [IMG.maint.smokeDetector],
+      createdAt: dDaysBefore(2),
     },
   });
 
@@ -1800,6 +1838,7 @@ async function main() {
       category: "GENERAL", priority: "MEDIUM", status: "SUBMITTED", entryPermission: true, hasPets: "No",
       preferredTimes: "Weekday mornings between 9 AM – 12 PM",
       photos: [IMG.maint.leak],
+      createdAt: dDaysBefore(1),
     },
   });
 
@@ -1813,6 +1852,7 @@ async function main() {
       inspectorId: inspectorJake.id, scheduledDate: dDaysAfter(2), diagnosisDate: dDaysAfter(2),
       entryPermission: false, hasPets: "Yes", tenantConfirmedSchedule: false,
       photos: [IMG.maint.hvac],
+      createdAt: dDaysBefore(5),
     },
   });
 
@@ -1824,10 +1864,10 @@ async function main() {
       description: "A pool of water forms under the front panel after each dishwasher cycle.",
       category: "APPLIANCE", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
       inspectorId: inspectorJake.id,
-
       inspectorNotes: "Dishwasher pump seal is cracked. Needs vendor to replace the pump.",
       entryPermission: true, hasPets: "No",
       photos: [IMG.maint.leak],
+      createdAt: dDaysBefore(7),
     },
   });
 
@@ -1839,7 +1879,6 @@ async function main() {
       description: "Water heater has severe corrosion and is leaking from the base. Complete unit failure imminent.",
       category: "PLUMBING", priority: "HIGH", status: "AWAITING_APPROVAL",
       inspectorId: inspectorJake.id,
-
       externalVendorId: vendorPlumbing.id,
       vendorMagicToken: "DEMO-VENDOR-WATER-HEATER-REPLACE",
       vendorTokenExpiresAt: dDaysAfter(14),
@@ -1847,6 +1886,7 @@ async function main() {
       inspectorNotes: "Tank is ~15 years old with severe base corrosion. Total replacement required. Inspector estimated $1,000, vendor quoted $1,400.",
       diagnosisDate: dDaysBefore(2),
       photos: [IMG.maint.waterHeater],
+      createdAt: dDaysBefore(10),
     },
   });
 
@@ -1858,12 +1898,12 @@ async function main() {
       description: "A pipe under the bathroom sink has burst. Water spraying out. I shut the under-sink valve but may still be water in walls.",
       category: "PLUMBING", priority: "EMERGENCY", status: "ASSIGNED",
       inspectorId: inspectorJake.id,
-
       externalVendorId: vendorPlumbing.id,
       vendorMagicToken: "DEMO-VENDOR-BURST-PIPE-2025-TOKEN",
       vendorTokenExpiresAt: dDaysAfter(14),
       entryPermission: true, hasPets: "No",
       photos: [IMG.maint.leak],
+      createdAt: dDaysBefore(3),
     },
   });
 
@@ -1878,6 +1918,7 @@ async function main() {
       vendorReportedFault: true, ownerChargebackDecision: null,
       inspectorNotes: "Glass shows external impact point pattern. Tenant claims it was pre-existing.",
       photos: [IMG.maint.brokenWindow],
+      createdAt: dDaysBefore(14),
     },
   });
 
@@ -1894,6 +1935,7 @@ async function main() {
       inspectorNotes: "Deadbolt mechanism worn from age and repeated use. Replaced with new set.",
       tenantRating: 5, tenantFeedback: "Super fast response! Issue resolved perfectly.",
       photos: [IMG.maint.brokenWindow],
+      createdAt: dDaysBefore(45),
     },
   });
 
@@ -1910,10 +1952,27 @@ async function main() {
       chargebackSource: "DEPOSIT", chargebackDepositAmount: 125.00, chargebackInvoiceAmount: 0.00,
       inspectorNotes: "Impact crack pattern consistent with dropped heavy object. Deposit deduction recommended.",
       photos: [IMG.maint.brokenWindow],
+      createdAt: dDaysBefore(30),
     },
   });
   await prisma.transaction.create({
-    data: { type: "EXPENSE", category: "DEPOSIT", amount: 125.00, reference: `DEPOSIT_DEDUCT_${ticketTile.id.slice(-6).toUpperCase()}`, status: "COMPLETED", tenantId: tenantMarvin.id },
+    data: { type: "EXPENSE", category: "DEPOSIT", amount: 125.00, reference: `DEPOSIT_DEDUCT_${ticketTile.id.slice(-6).toUpperCase()}`, status: "COMPLETED", tenantId: tenantMarvin.id, createdAt: dDaysBefore(30) },
+  });
+
+  // 9b. CLOSED — Emergency Burst Pipe Resolved (Full lifecycle test)
+  await prisma.maintenanceRequest.create({
+    data: {
+      unitId: u104.id, tenantId: tenantMarvin.id,
+      title: "Emergency: Burst Pipe — RESOLVED",
+      description: "Prior burst pipe under bathroom sink — fully repaired and pressure-tested.",
+      category: "PLUMBING", priority: "EMERGENCY", status: "CLOSED",
+      inspectorId: inspectorJake.id,
+      finalLabor: 420.00, finalMaterials: 180.00,
+      vendorReportedFault: false, ownerChargebackDecision: "WEAR_AND_TEAR",
+      inspectorNotes: "Old galvanized pipe. Age-related failure. Wear and tear — no tenant fault.",
+      tenantRating: 4, tenantFeedback: "Responded within 2 hours. Great job!",
+      createdAt: dDaysBefore(20),
+    },
   });
 
   // 10. SUBMITTED — Commercial property ticket (Coastal)
@@ -1924,6 +1983,7 @@ async function main() {
       description: "HVAC creating inconsistent temperatures across the office floor. East zone is 10°F warmer than west zone. Impacting employee productivity.",
       category: "APPLIANCE", priority: "MEDIUM", status: "SUBMITTED", entryPermission: true,
       photos: [IMG.maint.hvac],
+      createdAt: dDaysBefore(4),
     },
   });
 
@@ -1934,9 +1994,10 @@ async function main() {
       title: "Loose Kitchen Cabinet Hinges",
       description: "Several cabinet doors are sagging and not closing properly.",
       category: "GENERAL", priority: "LOW", status: "ASSIGNED",
-      inspectorId: ownerAtlas.id, // Owner assigned to self
+      inspectorId: ownerAtlas.id,
       entryPermission: true, hasPets: "No",
       photos: [IMG.maint.brokenWindow],
+      createdAt: dDaysBefore(3),
     },
   });
 
@@ -1947,12 +2008,12 @@ async function main() {
       title: "Leaking Faucet in Master Bath",
       description: "Continuous drip from the master bathroom sink. Driving us crazy at night.",
       category: "PLUMBING", priority: "MEDIUM", status: "DIAGNOSIS_COMPLETE",
-      inspectorId: ownerAtlas.id, // Owner self-inspected
-
+      inspectorId: ownerAtlas.id,
       inspectorNotes: "Self-diagnosed. Just needs a new O-ring and cartridge. I can fix this myself this weekend.",
       diagnosisDate: dDaysBefore(1),
       entryPermission: true, hasPets: "No",
       photos: [IMG.maint.leak],
+      createdAt: dDaysBefore(2),
     },
   });
 
@@ -1968,14 +2029,15 @@ async function main() {
       status: "SUBMITTED",
       entryPermission: true,
       photos: [IMG.maint.brokenWindow],
+      createdAt: dDaysBefore(5),
     },
   });
 
-  // Maintenance Request 14: Leaking sink (Impending Plaza, James Impending)
+  // Maintenance Request 14: Leaking sink (Impending Plaza, James Impending — Corrected FK to impendingTenant)
   await prisma.maintenanceRequest.create({
     data: {
       unitId: propImpendingPlaza.units.find(u => u.name === "Unit 102")!.id,
-      tenantId: carterTenants[1].id,
+      tenantId: impendingTenant.id,
       title: "Leaky Kitchen Faucet",
       description: "The kitchen faucet is dripping constantly from the base.",
       category: "PLUMBING",
@@ -1983,17 +2045,18 @@ async function main() {
       status: "SUBMITTED",
       entryPermission: true,
       photos: [IMG.maint.leak],
+      createdAt: dDaysBefore(1),
     },
   });
 
   // ── SECTION 8: Owner Payout Requests ──────────────────────────────────────
   console.log("💰 Creating payout requests and financial records...");
 
-  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 12500, status: PayoutStatus.PENDING, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow" } });
-  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 18000, status: PayoutStatus.COMPLETED, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow", disbursedAt: dBefore(2), proofUrl: "https://example.com/receipt-atlas-q1.pdf", refNumber: "WIRE-ATL-2025-001" } });
-  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 9500, status: PayoutStatus.REJECTED, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow", rejectionReason: "Banking details could not be verified. Please re-submit with updated documentation." } });
-  await prisma.payoutRequest.create({ data: { ownerId: ownerCoastal.id, amount: 7500, status: PayoutStatus.PENDING, bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow" } });
-  await prisma.payoutRequest.create({ data: { ownerId: ownerCoastal.id, amount: 14200, status: PayoutStatus.COMPLETED, bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow", disbursedAt: dBefore(3), refNumber: "WIRE-CST-2025-001" } });
+  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 12500, status: PayoutStatus.PENDING, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow", createdAt: dDaysBefore(1) } });
+  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 18000, status: PayoutStatus.COMPLETED, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow", disbursedAt: dBefore(2), proofUrl: "https://example.com/receipt-atlas-q1.pdf", refNumber: "WIRE-ATL-2025-001", createdAt: dBefore(2) } });
+  await prisma.payoutRequest.create({ data: { ownerId: ownerAtlas.id, amount: 9500, status: PayoutStatus.REJECTED, bankName: "Chase Bank", accountNumber: encrypt("111122223333"), accountName: "Atlas Properties Escrow", rejectionReason: "Banking details could not be verified. Please re-submit with updated documentation.", createdAt: dDaysBefore(15) } });
+  await prisma.payoutRequest.create({ data: { ownerId: ownerCoastal.id, amount: 7500, status: PayoutStatus.PENDING, bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow", createdAt: dDaysBefore(2) } });
+  await prisma.payoutRequest.create({ data: { ownerId: ownerCoastal.id, amount: 14200, status: PayoutStatus.COMPLETED, bankName: "Wells Fargo", accountNumber: encrypt("444455556666"), accountName: "Coastal Realty Escrow", disbursedAt: dBefore(3), refNumber: "WIRE-CST-2025-001", createdAt: dBefore(3) } });
 
   // ── SECTION 9: Tours ──────────────────────────────────────────────────────
   console.log("🏡 Creating tours, owner availability, and applications...");
@@ -2014,8 +2077,8 @@ async function main() {
       ownerId: ownerAtlas.id,
       workingHours: atlasWorkingHours,
       blackoutDates: [
-        new Date(new Date().getFullYear(), new Date().getMonth(), 25).toISOString().split("T")[0],
-        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split("T")[0],
+        new Date(NOW.getFullYear(), NOW.getMonth(), 25).toISOString().split("T")[0],
+        new Date(NOW.getFullYear(), NOW.getMonth() + 1, 1).toISOString().split("T")[0],
       ],
       timezone: "America/Los_Angeles",
     },
@@ -2073,7 +2136,7 @@ async function main() {
     data: {
       propertyId: propGrand.id,
       unitId: u106.id,
-      tenantName: "Adam Smith",
+      tenantName: "Adam Brooks",
       tenantEmail: "tenant.adam@yopmail.com",
       tenantPhone: "+1 310-555-0010",
       tenantMessage: "Hello, I am interested in checking the layout and morning sunlight. Is early AM available?",
@@ -2081,6 +2144,7 @@ async function main() {
       scheduledAt: dDaysAfter(5),
       status: TourStatus.PENDING,
       verifiedEmail: true,
+      createdAt: dDaysBefore(1),
     },
   });
 
@@ -2089,7 +2153,7 @@ async function main() {
     data: {
       propertyId: propGrand.id,
       unitId: u106.id,
-      tenantName: "Oscar Wilde",
+      tenantName: "Oscar Diaz",
       tenantEmail: "tenant.oscar@yopmail.com",
       tenantPhone: "+1 310-555-0020",
       tenantMessage: "Looking forward to a virtual tour — please send call link.",
@@ -2099,6 +2163,7 @@ async function main() {
       meetingLink: "https://meet.google.com/abc-defg-hij",
       ownerNotes: "Join via the Google Meet link 5 minutes before. I will share screen of the full unit walkthrough.",
       verifiedEmail: true,
+      createdAt: dDaysBefore(2),
     } as any,
   });
 
@@ -2116,6 +2181,7 @@ async function main() {
       status: TourStatus.CONFIRMED,
       ownerNotes: "Buzz gate code #1122 at the entrance. Park along the main drive.",
       verifiedEmail: true,
+      createdAt: dDaysBefore(3),
     },
   });
 
@@ -2124,7 +2190,7 @@ async function main() {
     data: {
       propertyId: propVilla.id,
       unitId: propVilla.units[0].id,
-      tenantName: "Adam Smith",
+      tenantName: "Adam Brooks",
       tenantEmail: "tenant.adam@yopmail.com",
       tenantPhone: "+1 310-555-0010",
       tourType: TourType.IN_PERSON,
@@ -2141,6 +2207,7 @@ async function main() {
         neighborhoodSafety: 4,
       },
       verifiedEmail: true,
+      createdAt: dDaysBefore(8),
     } as any,
   });
 
@@ -2149,7 +2216,7 @@ async function main() {
     data: {
       propertyId: propGrand.id,
       unitId: u106.id,
-      tenantName: "Marvin Gaye",
+      tenantName: "Marvin Torres",
       tenantEmail: "tenant.marvin@yopmail.com",
       tenantPhone: "+1 310-555-0030",
       tenantMessage: "Interested in the penthouse views and commercial lease potential.",
@@ -2167,6 +2234,7 @@ async function main() {
         neighborhoodSafety: 3,
       },
       verifiedEmail: true,
+      createdAt: dDaysBefore(5),
     } as any,
   });
 
@@ -2184,6 +2252,7 @@ async function main() {
       cancellationReason: "We apologize — this unit has just been leased and is no longer available for showings.",
       cancelledAt: dDaysBefore(9),
       verifiedEmail: true,
+      createdAt: dDaysBefore(12),
     } as any,
   });
 
@@ -2192,15 +2261,16 @@ async function main() {
     data: {
       propertyId: propVilla.id,
       unitId: propVilla.units[0].id,
-      tenantName: "Oscar Wilde",
+      tenantName: "Oscar Diaz",
       tenantEmail: "tenant.oscar@yopmail.com",
       tenantPhone: "+1 310-555-0020",
       tourType: TourType.IN_PERSON,
-      scheduledAt: dDaysBefore(1),
+      scheduledAt: dDaysAfter(3),
       status: TourStatus.CANCELLED,
       cancellationReason: "I found a unit closer to my workplace. Thank you.",
       cancelledAt: dDaysBefore(1),
       verifiedEmail: true,
+      createdAt: dDaysBefore(4),
     } as any,
   });
 
@@ -2219,6 +2289,7 @@ async function main() {
       rescheduledAt: dDaysBefore(2),
       ownerNotes: "Join the Zoom call 2 minutes early. Recording will be shared after the tour.",
       verifiedEmail: true,
+      createdAt: dDaysBefore(6),
     } as any,
   });
 
@@ -2235,6 +2306,7 @@ async function main() {
       scheduledAt: dDaysAfter(5),
       status: TourStatus.PENDING,
       verifiedEmail: true,
+      createdAt: dDaysBefore(1),
     },
   });
 
@@ -2253,6 +2325,7 @@ async function main() {
       meetingLink: "https://teams.microsoft.com/l/meetup-join/19%3ameeting_DEMO",
       ownerNotes: "Join via Microsoft Teams. I will screen-share the full suite floor plan during the call.",
       verifiedEmail: true,
+      createdAt: dDaysBefore(2),
     } as any,
   });
 
@@ -2269,6 +2342,7 @@ async function main() {
       scheduledAt: dDaysAfter(6),
       status: TourStatus.PENDING,
       verifiedEmail: true,
+      createdAt: dDaysBefore(1),
     },
   });
 
@@ -2285,6 +2359,7 @@ async function main() {
       scheduledAt: dDaysAfter(4),
       status: TourStatus.PENDING,
       verifiedEmail: true,
+      createdAt: dDaysBefore(1),
     },
   });
 
@@ -2301,13 +2376,14 @@ async function main() {
       emergencyContactName: "Henry Nguyen", emergencyContactPhone: "+1 408-555-0001", emergencyContactRelation: "Father",
       backgroundCheckConsent: true, agreedToTerms: true,
       idDocumentUrl: "https://example.com/alice_id.jpg", incomeProofUrl: "https://example.com/alice_paystub.pdf",
+      createdAt: dDaysBefore(4),
     },
   });
 
   // Approved application (Sunset Villa)
-  await prisma.application.create({
+  const appWhitmore = await prisma.application.create({
     data: {
-      unitId: propVilla.units[0].id, name: "James Whitmore", email: "james.app@yopmail.com", phone: "+1 310-555-8002",
+      unitId: propVilla.units[0].id, name: "James Whitmore", email: "james.whitmore@yopmail.com", phone: "+1 310-555-8002",
       status: "APPROVED", leaseDuration: 24, moveInDate: dDaysAfter(14), occupantsCount: 3,
       employerName: "Goldman Sachs", jobTitle: "Vice President", monthlyIncome: 30000,
       hasGuarantor: false, prevLandlordName: "Beverly Hills Estates",
@@ -2315,6 +2391,39 @@ async function main() {
       emergencyContactName: "Susan Whitmore", emergencyContactPhone: "+1 310-555-8003", emergencyContactRelation: "Wife",
       backgroundCheckConsent: true, agreedToTerms: true,
       idDocumentUrl: "https://example.com/james_id.jpg", incomeProofUrl: "https://example.com/james_paystub.pdf",
+      createdAt: dDaysBefore(10),
+    },
+  });
+
+  // Create Whitmore user and PENDING_SIGNATURE lease for approved application
+  const tenantWhitmore = await prisma.user.create({
+    data: {
+      email: "james.whitmore@yopmail.com",
+      name: "James Whitmore",
+      password: passwordHash,
+      role: Role.TENANT,
+      phone: "+1 310-555-8002",
+      tenantStatus: "Active",
+      creditScore: 780,
+      annualIncome: 360000,
+      employer: "Goldman Sachs",
+      position: "Vice President",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+      createdAt: dDaysBefore(10),
+    },
+  });
+  await prisma.lease.create({
+    data: {
+      unitId: propVilla.units[0].id,
+      tenantId: tenantWhitmore.id,
+      status: "PENDING_SIGNATURE",
+      startDate: dDaysAfter(14),
+      endDate: dAfter(24),
+      monthlyRent: 7500,
+      securityDeposit: 7500,
+      depositStatus: "HELD",
+      depositBalance: 0,
+      rentDueDay: 1,
     },
   });
 
@@ -2328,6 +2437,7 @@ async function main() {
       prevLandlordName: "Angry Andy Rentals", reasonForMoving: "Eviction",
       petsCount: 2, petDetails: "2 large dogs",
       backgroundCheckConsent: false, agreedToTerms: true,
+      createdAt: dDaysBefore(15),
     },
   });
 
@@ -2339,6 +2449,7 @@ async function main() {
       employerName: "Vertex Analytics Inc.", jobTitle: "Business", monthlyIncome: 150000,
       hasGuarantor: false, reasonForMoving: "Business expansion into SF financial district",
       backgroundCheckConsent: true, agreedToTerms: true,
+      createdAt: dDaysBefore(2),
     },
   });
 
@@ -2360,6 +2471,7 @@ async function main() {
       reasonForMoving: "Closer to work",
       backgroundCheckConsent: true,
       agreedToTerms: true,
+      createdAt: dDaysBefore(3),
     },
   });
 
@@ -2381,48 +2493,49 @@ async function main() {
       reasonForMoving: "Expanding fields",
       backgroundCheckConsent: true,
       agreedToTerms: true,
+      createdAt: dDaysBefore(2),
     },
   });
 
   // ── SECTION 11: Documents ─────────────────────────────────────────────────
   console.log("📄 Creating documents...");
-  await prisma.document.create({ data: { name: "Lease_Agreement_Adam_Brooks.pdf", url: "https://example.com/lease_adam.pdf", category: "LEASE", type: "Lease", description: "Fully executed 12-month lease agreement — Unit 102", fileSize: "1.4 MB", tenantId: tenantAdam.id, propertyId: propGrand.id } });
-  await prisma.document.create({ data: { name: "Paystub_Adam_Brooks_6Mo.pdf", url: "https://example.com/paystub_adam.pdf", category: "PAYMENTS", type: "Income", description: "6-month paystub history from TechCorp Inc.", fileSize: "890 KB", tenantId: tenantAdam.id, propertyId: propGrand.id } });
-  await prisma.document.create({ data: { name: "ID_Marvin_Torres.jpg", url: "https://example.com/id_marvin.jpg", category: "IDENTIFICATION", type: "Identification", fileSize: "420 KB", tenantId: tenantMarvin.id, propertyId: propGrand.id } });
-  await prisma.document.create({ data: { name: "Commercial_Lease_Carlos_Ruiz_NNN.pdf", url: "https://example.com/lease_carlos.pdf", category: "LEASE", type: "Lease", description: "NNN Commercial Lease — Suite A, Pacific Commerce Center", fileSize: "2.1 MB", tenantId: tenantCarlos.id, propertyId: propCommercial.id } });
-  await prisma.document.create({ data: { name: "Move_Out_Inspection_Eve_Morales.pdf", url: "https://example.com/inspection_eve.pdf", category: "MAINTENANCE", type: "Inspection", description: "Final move-out inspection report with deduction photos", fileSize: "3.5 MB", tenantId: tenantEve.id, propertyId: propGrand.id } });
+  await prisma.document.create({ data: { name: "Lease_Agreement_Adam_Brooks.pdf", url: "https://example.com/lease_adam.pdf", category: "LEASE", type: "Lease", description: "Fully executed 12-month lease agreement — Unit 102", fileSize: "1.4 MB", tenantId: tenantAdam.id, propertyId: propGrand.id, uploadedAt: dBefore(6) } });
+  await prisma.document.create({ data: { name: "Paystub_Adam_Brooks_6Mo.pdf", url: "https://example.com/paystub_adam.pdf", category: "PAYMENTS", type: "Income", description: "6-month paystub history from TechCorp Inc.", fileSize: "890 KB", tenantId: tenantAdam.id, propertyId: propGrand.id, uploadedAt: dBefore(6) } });
+  await prisma.document.create({ data: { name: "ID_Marvin_Torres.jpg", url: "https://example.com/id_marvin.jpg", category: "IDENTIFICATION", type: "Identification", fileSize: "420 KB", tenantId: tenantMarvin.id, propertyId: propGrand.id, uploadedAt: dBefore(5) } });
+  await prisma.document.create({ data: { name: "Commercial_Lease_Carlos_Ruiz_NNN.pdf", url: "https://example.com/lease_carlos.pdf", category: "LEASE", type: "Lease", description: "NNN Commercial Lease — Suite A, Pacific Commerce Center", fileSize: "2.1 MB", tenantId: tenantCarlos.id, propertyId: propCommercial.id, uploadedAt: dBefore(8) } });
+  await prisma.document.create({ data: { name: "Move_Out_Inspection_Eve_Morales.pdf", url: "https://example.com/inspection_eve.pdf", category: "MAINTENANCE", type: "Inspection", description: "Final move-out inspection report with deduction photos", fileSize: "3.5 MB", tenantId: tenantEve.id, propertyId: propGrand.id, uploadedAt: dBefore(3) } });
 
   // ── SECTION 12: Messages ──────────────────────────────────────────────────
   console.log("💬 Creating message threads...");
 
   // Thread 1: Adam ↔ Atlas Owner (rent confirmation)
   const convAdamAtlas = [tenantAdam.id, ownerAtlas.id].sort().join("_");
-  await prisma.message.create({ data: { senderId: tenantAdam.id, receiverId: ownerAtlas.id, content: "Hi Marcus, just wanted to confirm my rent payment went through for this month.", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantAdam.id, content: "Yes Adam, received it! Thank you for always being on time. Invoice is marked as paid in your dashboard.", isRead: true, conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: tenantAdam.id, receiverId: ownerAtlas.id, content: "Great! Also, is it possible to get a copy of my original lease document?", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantAdam.id, content: "Of course! I've uploaded it to your Documents tab. You should be able to download it from there.", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT" } });
+  await prisma.message.create({ data: { senderId: tenantAdam.id, receiverId: ownerAtlas.id, content: "Hi Marcus, just wanted to confirm my rent payment went through for this month.", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(5) } });
+  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantAdam.id, content: "Yes Adam, received it! Thank you for always being on time. Invoice is marked as paid in your dashboard.", isRead: true, conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(5) } });
+  await prisma.message.create({ data: { senderId: tenantAdam.id, receiverId: ownerAtlas.id, content: "Great! Also, is it possible to get a copy of my original lease document?", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
+  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantAdam.id, content: "Of course! I've uploaded it to your Documents tab. You should be able to download it from there.", conversationId: convAdamAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
 
   // Thread 2: Marvin ↔ Jake (HVAC scheduling)
   const convMarvinJake = [tenantMarvin.id, inspectorJake.id].sort().join("_");
-  await prisma.message.create({ data: { senderId: tenantMarvin.id, receiverId: inspectorJake.id, content: "Hi Jake, is the HVAC inspection still confirmed for Thursday at 10 AM?", conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: inspectorJake.id, receiverId: tenantMarvin.id, content: "Yes, confirmed! Please ensure the entry keypad code works. I'll need full unit access.", isRead: true, conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: tenantMarvin.id, receiverId: inspectorJake.id, content: "Gate code is 4821#. I'll be home if you have any questions. Thank you!", conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT" } });
+  await prisma.message.create({ data: { senderId: tenantMarvin.id, receiverId: inspectorJake.id, content: "Hi Jake, is the HVAC inspection still confirmed for Thursday at 10 AM?", conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(4) } });
+  await prisma.message.create({ data: { senderId: inspectorJake.id, receiverId: tenantMarvin.id, content: "Yes, confirmed! Please ensure the entry keypad code works. I'll need full unit access.", isRead: true, conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(4) } });
+  await prisma.message.create({ data: { senderId: tenantMarvin.id, receiverId: inspectorJake.id, content: "Gate code is 4821#. I'll be home if you have any questions. Thank you!", conversationId: convMarvinJake, ticketId: ticketHvac.id, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
 
   // Thread 3: Atlas Owner ↔ Jake (estimate approval)
   const convAtlasJake = [ownerAtlas.id, inspectorJake.id].sort().join("_");
-  await prisma.message.create({ data: { senderId: inspectorJake.id, receiverId: ownerAtlas.id, content: "Marcus, submitted the estimate for Unit 104 water heater replacement. Total cost $1,400 — above your $500 threshold, needs approval.", conversationId: convAtlasJake, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: inspectorJake.id, content: "Approved, Jake! Schedule the replacement ASAP — they have a toddler and it's been days without hot water.", isRead: true, conversationId: convAtlasJake, deliveryChannel: "LIVE_CHAT" } });
+  await prisma.message.create({ data: { senderId: inspectorJake.id, receiverId: ownerAtlas.id, content: "Marcus, submitted the estimate for Unit 104 water heater replacement. Total cost $1,400 — above your $500 threshold, needs approval.", conversationId: convAtlasJake, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(2) } });
+  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: inspectorJake.id, content: "Approved, Jake! Schedule the replacement ASAP — they have a toddler and it's been days without hot water.", isRead: true, conversationId: convAtlasJake, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(2) } });
 
   // Thread 4: Dan ↔ Atlas Owner (deposit dispute)
   const convDanAtlas = [tenantDan.id, ownerAtlas.id].sort().join("_");
-  await prisma.message.create({ data: { senderId: tenantDan.id, receiverId: ownerAtlas.id, content: "Hi Marcus, I'm disputing the window blind deduction. I have timestamped photos from move-in day showing it was already broken.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantDan.id, content: "Thank you for providing context, Dan. I'll review the original move-in inspection photos and get back to you within 3 business days.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: tenantDan.id, receiverId: ownerAtlas.id, content: "I've attached all relevant photos to the dispute form in my dashboard. Please review at your earliest convenience.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT" } });
+  await prisma.message.create({ data: { senderId: tenantDan.id, receiverId: ownerAtlas.id, content: "Hi Marcus, I'm disputing the window blind deduction. I have timestamped photos from move-in day showing it was already broken.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(4) } });
+  await prisma.message.create({ data: { senderId: ownerAtlas.id, receiverId: tenantDan.id, content: "Thank you for providing context, Dan. I'll review the original move-in inspection photos and get back to you within 3 business days.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
+  await prisma.message.create({ data: { senderId: tenantDan.id, receiverId: ownerAtlas.id, content: "I've attached all relevant photos to the dispute form in my dashboard. Please review at your earliest convenience.", conversationId: convDanAtlas, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
 
   // Thread 5: Carlos ↔ Coastal Owner (commercial HVAC query)
   const convCarlosCoastal = [tenantCarlos.id, ownerCoastal.id].sort().join("_");
-  await prisma.message.create({ data: { senderId: tenantCarlos.id, receiverId: ownerCoastal.id, content: "Linda, we submitted a maintenance request for Suite A HVAC — it's creating a 10°F temperature differential across the office. Affecting our team.", conversationId: convCarlosCoastal, deliveryChannel: "LIVE_CHAT" } });
-  await prisma.message.create({ data: { senderId: ownerCoastal.id, receiverId: tenantCarlos.id, content: "Hi Carlos, I've assigned our inspector David Kim to assess this. He'll contact you to schedule a site visit early next week.", conversationId: convCarlosCoastal, deliveryChannel: "LIVE_CHAT" } });
+  await prisma.message.create({ data: { senderId: tenantCarlos.id, receiverId: ownerCoastal.id, content: "Linda, we submitted a maintenance request for Suite A HVAC — it's creating a 10°F temperature differential across the office. Affecting our team.", conversationId: convCarlosCoastal, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(4) } });
+  await prisma.message.create({ data: { senderId: ownerCoastal.id, receiverId: tenantCarlos.id, content: "Hi Carlos, I've assigned our inspector David Kim to assess this. He'll contact you to schedule a site visit early next week.", conversationId: convCarlosCoastal, deliveryChannel: "LIVE_CHAT", createdAt: dDaysBefore(3) } });
 
   // Thread 6: Tenant ↔ Patel Owner (Email Fallback Mode — Essentials Tier)
   const convTenantPatel = [tenantAdam.id, ownerPatel.id].sort().join("_");
@@ -2432,7 +2545,8 @@ async function main() {
       receiverId: ownerPatel.id,
       content: "Hi Raj, I wanted to inquire if visitor parking passes can be renewed online?",
       conversationId: convTenantPatel,
-      deliveryChannel: "EMAIL_NOTIFIED"
+      deliveryChannel: "EMAIL_NOTIFIED",
+      createdAt: dDaysBefore(6),
     }
   });
 
@@ -2441,46 +2555,50 @@ async function main() {
   await prisma.notification.createMany({
     data: [
       // Owner Atlas — Tour notifications
-      { userId: ownerAtlas.id, title: "New Maintenance Estimate Pending", message: "Jake Thorpe submitted a $1,400 estimate for Unit 104 water heater replacement. Review & approve.", type: "MAINTENANCE", priority: "HIGH", relatedEntityId: ticketWaterHeater.id },
-      { userId: ownerAtlas.id, title: "Move-Out Request Received", message: "Liam Walsh (Unit 201) has submitted a move-out request. Inspection needs to be scheduled.", type: "SYSTEM", priority: "HIGH" },
-      { userId: ownerAtlas.id, title: "Payout Request Under Review", message: "Your $12,500 disbursement request is pending admin review. Estimated 1-2 business days.", type: "BILLING", priority: "MEDIUM" },
-      { userId: ownerAtlas.id, title: "Tenant Dispute Raised", message: "Dan Gibbs (Unit 203) has disputed deposit deductions of $375. Resolution required.", type: "SYSTEM", priority: "HIGH" },
-      { userId: ownerAtlas.id, title: "Renewal Window Open", message: "Adam Brooks' lease (Unit 102) expires in 6 months. Renewal decision needed.", type: "SYSTEM", priority: "MEDIUM" },
-      { userId: ownerAtlas.id, title: "🏡 New Tour Request — Unit 106", message: "Adam Smith has requested an in-person tour of Unit 106 at Grand Horizon Towers. Review and confirm.", type: "SYSTEM", priority: "HIGH" },
-      { userId: ownerAtlas.id, title: "📹 New Video Call Tour Request — Unit 106", message: "Oscar Wilde requested a video call tour of Unit 106. Add a meeting link when confirming.", type: "SYSTEM", priority: "HIGH" },
-      { userId: ownerAtlas.id, title: "⭐ High Prospect Rating — Apply Invitation Sent", message: "Adam Smith received a 5-star prospect rating. A rental application invite was automatically sent.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: ownerAtlas.id, title: "New Maintenance Estimate Pending", message: "Jake Thorpe submitted a $1,400 estimate for Unit 104 water heater replacement. Review & approve.", type: "MAINTENANCE", priority: "HIGH", relatedEntityId: ticketWaterHeater.id, createdAt: dDaysBefore(2) },
+      { userId: ownerAtlas.id, title: "Move-Out Request Received", message: "Liam Walsh (Unit 201) has submitted a move-out request. Inspection needs to be scheduled.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(10) },
+      { userId: ownerAtlas.id, title: "Payout Request Under Review", message: "Your $12,500 disbursement request is pending admin review. Estimated 1-2 business days.", type: "BILLING", priority: "MEDIUM", createdAt: dDaysBefore(1) },
+      { userId: ownerAtlas.id, title: "Tenant Dispute Raised", message: "Dan Gibbs (Unit 203) has disputed deposit deductions of $375. Resolution required.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(4) },
+      { userId: ownerAtlas.id, title: "Renewal Window Open", message: "Adam Brooks' lease (Unit 102) expires in 6 months. Renewal decision needed.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(15) },
+      { userId: ownerAtlas.id, title: "🏡 New Tour Request — Unit 106", message: "Adam Brooks has requested an in-person tour of Unit 106 at Grand Horizon Towers. Review and confirm.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(1) },
+      { userId: ownerAtlas.id, title: "📹 New Video Call Tour Request — Unit 106", message: "Oscar Diaz requested a video call tour of Unit 106. Add a meeting link when confirming.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(2) },
+      { userId: ownerAtlas.id, title: "⭐ High Prospect Rating — Apply Invitation Sent", message: "Adam Brooks received a 5-star prospect rating. A rental application invite was automatically sent.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(7) },
       // Owner Coastal
-      { userId: ownerCoastal.id, title: "Commercial Maintenance Request", message: "Carlos Ruiz (Suite A) submitted an HVAC maintenance request. Assign an inspector.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketCommercial.id },
-      { userId: ownerCoastal.id, title: "New Commercial Application", message: "Vertex Analytics Inc. applied for Suite B — 36-month NNN lease, $6,500/month.", type: "SYSTEM", priority: "HIGH" },
-      { userId: ownerCoastal.id, title: "📹 Video Tour Confirmed — Suite B", message: "Carlos Ruiz's Microsoft Teams video tour for Suite B is confirmed for 3 days from now.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: ownerCoastal.id, title: "Commercial Maintenance Request", message: "Carlos Ruiz (Suite A) submitted an HVAC maintenance request. Assign an inspector.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketCommercial.id, createdAt: dDaysBefore(4) },
+      { userId: ownerCoastal.id, title: "New Commercial Application", message: "Vertex Analytics Inc. applied for Suite B — 36-month NNN lease, $6,500/month.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(2) },
+      { userId: ownerCoastal.id, title: "📹 Video Tour Confirmed — Suite B", message: "Carlos Ruiz's Microsoft Teams video tour for Suite B is confirmed for 3 days from now.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(2) },
+      // Owner Raj Patel (Past_Due & Pending Actions)
+      { userId: ownerPatel.id, title: "⚠️ Payment Overdue — Account Past Due", message: "Your Essentials subscription payment is past due. Please update your payment method to avoid service interruption.", type: "BILLING", priority: "HIGH", createdAt: dDaysBefore(10) },
+      { userId: ownerPatel.id, title: "Payout Pending Admin Review", message: "Your $3,800 payout request is pending. A subscription override allows processing despite Past Due status.", type: "BILLING", priority: "MEDIUM", createdAt: dDaysBefore(1) },
+      { userId: ownerPatel.id, title: "Property Pending Approval", message: "Patel Silicon Valley Condos is awaiting platform approval. You'll be notified once reviewed.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(5) },
       // Admin
-      { userId: admin.id, title: "Payout Request — Atlas Properties", message: "Marcus Reed (Atlas Properties LLC) requested a $12,500 disbursement. Admin action required.", type: "BILLING", priority: "HIGH" },
-      { userId: admin.id, title: "Property Pending Approval", message: "Raj Patel submitted 'Patel Family Home' for platform listing approval. Review required.", type: "SYSTEM", priority: "HIGH" },
-      { userId: admin.id, title: "New Owner Application", message: "Greenfield Holdings LLC submitted an owner application. Review in the admin panel.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: admin.id, title: "Payout Request — Atlas Properties", message: "Marcus Reed (Atlas Properties LLC) requested a $12,500 disbursement. Admin action required.", type: "BILLING", priority: "HIGH", createdAt: dDaysBefore(1) },
+      { userId: admin.id, title: "Property Pending Approval", message: "Raj Patel submitted 'Patel Silicon Valley Condos' for platform listing approval. Review required.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(5) },
+      { userId: admin.id, title: "New Owner Application", message: "Greenfield Holdings LLC submitted an owner application. Review in the admin panel.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(3) },
       // Tenant Adam
-      { userId: tenantAdam.id, title: "Rent Receipt Confirmed", message: "Your rent payment of $3,000 has been received and recorded. Receipt available in your dashboard.", type: "BILLING", isRead: true, priority: "LOW" },
-      { userId: tenantAdam.id, title: "Lease Renewal Offer", message: "Your lease expires in 6 months. Your owner Marcus Reed has sent a renewal offer for review.", type: "SYSTEM", priority: "MEDIUM" },
-      { userId: tenantAdam.id, title: "🏡 Tour Confirmed — Grand Horizon Unit 106", message: "Your in-person tour at Grand Horizon Towers (Unit 106) is confirmed. Check your email for the calendar invite.", type: "SYSTEM", priority: "HIGH" },
-      { userId: tenantAdam.id, title: "📋 Submit Rental Application — You're a Top Prospect!", message: "Great news! The landlord rated you 5 stars after your tour. Submit your rental application now to secure your unit.", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantAdam.id, title: "Rent Receipt Confirmed", message: "Your rent payment of $3,000 has been received and recorded. Receipt available in your dashboard.", type: "BILLING", isRead: true, priority: "LOW", createdAt: dDaysBefore(5) },
+      { userId: tenantAdam.id, title: "Lease Renewal Offer", message: "Your lease expires in 6 months. Your owner Marcus Reed has sent a renewal offer for review.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(15) },
+      { userId: tenantAdam.id, title: "🏡 Tour Confirmed — Grand Horizon Unit 106", message: "Your in-person tour at Grand Horizon Towers (Unit 106) is confirmed. Check your email for the calendar invite.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(1) },
+      { userId: tenantAdam.id, title: "📋 Submit Rental Application — You're a Top Prospect!", message: "Great news! The landlord rated you 5 stars after your tour. Submit your rental application now to secure your unit.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(7) },
       // Tenant Oscar
-      { userId: tenantOscar.id, title: "⚠️ Rent Overdue Notice", message: "Your rent of $2,400 is now overdue. A late fee of $120 has been applied. Please pay immediately.", type: "BILLING", priority: "HIGH" },
-      { userId: tenantOscar.id, title: "📹 Video Tour Confirmed — Join via Google Meet", message: "Your virtual tour of Grand Horizon Unit 106 is confirmed. Meeting link: https://meet.google.com/abc-defg-hij", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantOscar.id, title: "⚠️ Rent Overdue Notice", message: "Your rent of $2,400 is now overdue. A late fee of $120 has been applied. Please pay immediately.", type: "BILLING", priority: "HIGH", createdAt: dDaysBefore(1) },
+      { userId: tenantOscar.id, title: "📹 Video Tour Confirmed — Join via Google Meet", message: "Your virtual tour of Grand Horizon Unit 106 is confirmed. Meeting link: https://meet.google.com/abc-defg-hij", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(2) },
       // Tenant Marvin
-      { userId: tenantMarvin.id, title: "Inspection Scheduled", message: "Jake Thorpe will inspect your HVAC on Thursday at 10 AM. Ensure entry access is available.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketHvac.id },
-      { userId: tenantMarvin.id, title: "🏡 Tour Complete — Leave Feedback", message: "Your in-person tour of Grand Horizon Unit 106 is now marked complete. Please rate your experience.", type: "SYSTEM", priority: "LOW" },
+      { userId: tenantMarvin.id, title: "Inspection Scheduled", message: "Jake Thorpe will inspect your HVAC on Thursday at 10 AM. Ensure entry access is available.", type: "MAINTENANCE", priority: "MEDIUM", relatedEntityId: ticketHvac.id, createdAt: dDaysBefore(4) },
+      { userId: tenantMarvin.id, title: "🏡 Tour Complete — Leave Feedback", message: "Your in-person tour of Grand Horizon Unit 106 is now marked complete. Please rate your experience.", type: "SYSTEM", priority: "LOW", createdAt: dDaysBefore(3) },
       // Tenant Nora
-      { userId: tenantNora.id, title: "Action Required: Sign Your Lease", message: "Your lease for Unit 101 is ready for signature and deposit payment. Complete now to confirm your move-in.", type: "SYSTEM", priority: "HIGH" },
-      { userId: tenantNora.id, title: "🏡 Tour Confirmed — Sunset Villa Tomorrow", message: "Your in-person tour at Sunset Villa is confirmed for tomorrow. Gate code: #1122.", type: "SYSTEM", priority: "HIGH" },
-      { userId: tenantNora.id, title: "📹 Video Tour Rescheduled — Zoom Link Ready", message: "Your Zoom video tour at Sunset Villa was rescheduled. New date is in 8 days. Join: https://zoom.us/j/12345678901", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantNora.id, title: "Action Required: Sign Your Lease", message: "Your lease for Unit 101 is ready for signature and deposit payment. Complete now to confirm your move-in.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(3) },
+      { userId: tenantNora.id, title: "🏡 Tour Confirmed — Sunset Villa Tomorrow", message: "Your in-person tour at Sunset Villa is confirmed for tomorrow. Gate code: #1122.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(1) },
+      { userId: tenantNora.id, title: "📹 Video Tour Rescheduled — Zoom Link Ready", message: "Your Zoom video tour at Sunset Villa was rescheduled. New date is in 8 days. Join: https://zoom.us/j/12345678901", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(2) },
       // Tenant Liam
-      { userId: tenantLiam.id, title: "Move-Out Inspection Scheduled", message: "Your move-out inspection is scheduled for next Thursday at 2 PM. Inspector: Jake Thorpe.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantLiam.id, title: "Move-Out Inspection Scheduled", message: "Your move-out inspection is scheduled for next Thursday at 2 PM. Inspector: Jake Thorpe.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(7) },
       // Tenant Dan
-      { userId: tenantDan.id, title: "Dispute Under Review", message: "Your deposit dispute has been submitted. The owner will respond within 3 business days.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantDan.id, title: "Dispute Under Review", message: "Your deposit dispute has been submitted. The owner will respond within 3 business days.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(4) },
       // Tenant Kelly
-      { userId: tenantKelly.id, title: "Keys Confirmed — Deposit Decision Pending", message: "Your key return has been confirmed. Your deposit of $2,500 will be processed within 21 days.", type: "SYSTEM", priority: "MEDIUM" },
-      { userId: tenantKelly.id, title: "🏡 Tour Request Received — Unit 105", message: "Your in-person tour request for Grand Horizon Unit 105 has been submitted. You'll be notified once confirmed.", type: "SYSTEM", priority: "MEDIUM" },
+      { userId: tenantKelly.id, title: "Keys Confirmed — Deposit Refund Completed", message: "Your key return has been confirmed. Your deposit refund of $2,500 has been disbursed.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(1) },
+      { userId: tenantKelly.id, title: "🏡 Tour Request Received — Unit 105", message: "Your in-person tour request for Grand Horizon Unit 105 has been submitted. You'll be notified once confirmed.", type: "SYSTEM", priority: "MEDIUM", createdAt: dDaysBefore(1) },
       // Tenant Carlos
-      { userId: tenantCarlos.id, title: "📹 Commercial Video Tour Confirmed — Suite B", message: "Your Microsoft Teams virtual tour of Suite B at Pacific Commerce Center is confirmed for 3 days from now.", type: "SYSTEM", priority: "HIGH" },
+      { userId: tenantCarlos.id, title: "📹 Commercial Video Tour Confirmed — Suite B", message: "Your Microsoft Teams virtual tour of Suite B at Pacific Commerce Center is confirmed for 3 days from now.", type: "SYSTEM", priority: "HIGH", createdAt: dDaysBefore(2) },
     ],
   });
 
@@ -2497,15 +2615,17 @@ async function main() {
       leaseStartDate: dDaysAfter(30),
       status: "PENDING",
       invitedByOwnerId: ownerAtlas.id,
-      expiresAt: dDaysAfter(14),
+      expiresAt: dDaysAfter(30),
+      createdAt: dDaysBefore(1),
     },
   });
 
   // ── SECTION 15: Owner Applications (Admin Queue) ───────────────────────────
   console.log("📁 Creating owner applications (admin queue)...");
-  await prisma.ownerApplication.create({ data: { name: "Greenfield Holdings LLC", email: "greenfield@yopmail.com", phone: "+1 212-555-0001", entityType: "Property Management Company", portfolioSize: "50+", currentSoftware: "Buildium", status: "PENDING", trackingId: "trk_greenfield_001" } });
-  await prisma.ownerApplication.create({ data: { name: "Sunrise Properties Corp.", email: "sunrise@yopmail.com", phone: "+1 305-555-0002", entityType: "Real Estate Investor", portfolioSize: "10-50", status: "UNDER_REVIEW", adminNotes: "Large portfolio. Needs enterprise-tier verification.", trackingId: "trk_sunrise_002" } });
-  await prisma.ownerApplication.create({ data: { name: "John Solo Landlord", email: "john.solo@yopmail.com", phone: "+1 713-555-0003", entityType: "Independent Landlord", portfolioSize: "1-5", status: "REJECTED", rejectionReason: "Insufficient documentation. Business license could not be verified after 3 attempts.", trackingId: "trk_solo_003" } });
+  await prisma.ownerApplication.create({ data: { name: "Greenfield Holdings LLC", email: "greenfield@yopmail.com", phone: "+1 212-555-0001", entityType: "Property Management Company", portfolioSize: "50+", currentSoftware: "Buildium", status: "PENDING", trackingId: "trk_greenfield_001", createdAt: dDaysBefore(3) } });
+  await prisma.ownerApplication.create({ data: { name: "Sunrise Properties Corp.", email: "sunrise@yopmail.com", phone: "+1 305-555-0002", entityType: "Real Estate Investor", portfolioSize: "10-50", status: "UNDER_REVIEW", adminNotes: "Large portfolio. Needs enterprise-tier verification.", trackingId: "trk_sunrise_002", createdAt: dDaysBefore(5) } });
+  await prisma.ownerApplication.create({ data: { name: "John Solo Landlord", email: "john.solo@yopmail.com", phone: "+1 713-555-0003", entityType: "Independent Landlord", portfolioSize: "1-5", status: "REJECTED", rejectionReason: "Insufficient documentation. Business license could not be verified after 3 attempts.", trackingId: "trk_solo_003", createdAt: dDaysBefore(12) } });
+  await prisma.ownerApplication.create({ data: { name: "Pacific Summit Properties", email: "pacific.summit@yopmail.com", phone: "+1 415-555-0010", entityType: "Real Estate Investor", portfolioSize: "10-50", status: "APPROVED", adminNotes: "Verified mid-size portfolio. Onboarded to Professional tier.", trackingId: "trk_pacific_004", createdAt: dDaysBefore(20) } });
 
   // ── SECTION 16: Access Controls, Overrides & Audit Logs ─────────────────────
   console.log("🔒 Seeding access control overrides, grants, and audit logs...");
@@ -2718,12 +2838,12 @@ async function main() {
       {
         key: "tour_otp:tenant.nora@yopmail.com",
         code: "654321",
-        expiresAt: dDaysAfter(1),
+        expiresAt: dDaysAfter(30),
       },
       {
         key: "lease_otp:demo-lease-signature",
         code: "987654",
-        expiresAt: dDaysAfter(1),
+        expiresAt: dDaysAfter(30),
       },
     ],
   });

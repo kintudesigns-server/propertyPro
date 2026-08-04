@@ -390,9 +390,17 @@ export default function AdminProfitDashboard() {
                         </TableCell>
                         <TableCell className="py-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs">
-                              {item.owner.charAt(0).toUpperCase()}
-                            </div>
+                            {item.ownerAvatar ? (
+                              <img
+                                src={item.ownerAvatar}
+                                alt={item.owner}
+                                className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs shrink-0">
+                                {item.owner.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                             <span className="font-semibold text-[#334155]">{item.owner}</span>
                           </div>
                         </TableCell>
@@ -546,9 +554,17 @@ export default function AdminProfitDashboard() {
                           </TableCell>
                           <TableCell className="py-4">
                             <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
-                                {item.owner.charAt(0).toUpperCase()}
-                              </div>
+                              {item.avatar ? (
+                                <img
+                                  src={item.avatar}
+                                  alt={item.owner}
+                                  className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                  {item.owner.charAt(0).toUpperCase()}
+                                </div>
+                              )}
                               <div>
                                 <p className="font-semibold text-[#334155] text-sm">{item.owner}</p>
                                 <p className="text-xs text-[#6E6E73]">{item.email}</p>
@@ -624,9 +640,17 @@ export default function AdminProfitDashboard() {
                           </TableCell>
                           <TableCell className="py-4">
                             <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs">
-                                {item.owner.charAt(0).toUpperCase()}
-                              </div>
+                              {item.avatar ? (
+                                <img
+                                  src={item.avatar}
+                                  alt={item.owner}
+                                  className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                  {item.owner.charAt(0).toUpperCase()}
+                                </div>
+                              )}
                               <div>
                                 <p className="font-semibold text-[#334155] text-sm">{item.owner}</p>
                                 <p className="text-xs text-[#6E6E73]">{item.email}</p>
@@ -680,9 +704,17 @@ export default function AdminProfitDashboard() {
                         <TableRow key={item.id} className="hover:bg-[#F2F2F7] border-b border-[#E5E5EA] transition-colors">
                           <TableCell className="py-4">
                             <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs">
-                                {item.owner.charAt(0).toUpperCase()}
-                              </div>
+                              {item.avatar ? (
+                                <img
+                                  src={item.avatar}
+                                  alt={item.owner}
+                                  className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs shrink-0">
+                                  {item.owner.charAt(0).toUpperCase()}
+                                </div>
+                              )}
                               <div>
                                 <span className="font-semibold text-[#334155] block">{item.owner}</span>
                                 <span className="text-xs text-[#6E6E73]">{item.email}</span>
