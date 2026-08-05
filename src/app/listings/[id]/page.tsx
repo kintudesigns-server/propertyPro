@@ -87,29 +87,28 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   ])) as string[];
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] text-slate-900 flex flex-col font-sans pb-28 lg:pb-16">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#1D1D1F] flex flex-col font-sans pb-28 lg:pb-16">
 
       {/* ── Sticky Nav ── */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-8 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-8 py-3 flex items-center justify-between">
         <Link
           href="/listings"
-          className="inline-flex items-center gap-1.5 text-slate-600 font-semibold text-sm hover:text-slate-900 transition-colors"
+          className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center justify-center transition-colors cursor-pointer"
         >
-          <ArrowLeft className="h-4 w-4 stroke-[2]" />
-          Listings
+          <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
-        <span className="hidden sm:block text-sm font-bold text-slate-800 truncate max-w-xs">
+        <span className="hidden sm:block text-base font-semibold text-[#1D1D1F] tracking-tight truncate max-w-xs">
           {displayName}
         </span>
         <div className="flex items-center gap-2">
           <button
-            className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
+            className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center justify-center cursor-pointer transition-colors"
             title="Share"
           >
             <Share2 className="h-3.5 w-3.5" />
           </button>
           <button
-            className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
+            className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center justify-center cursor-pointer transition-colors"
             title="Save"
           >
             <Heart className="h-3.5 w-3.5" />
@@ -124,23 +123,23 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="bg-slate-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-900 text-white shadow-2xs">
                 {typeLabel}
               </span>
               {unit.leaseStructure && (
-                <span className="bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                   {unit.leaseStructure} Lease
                 </span>
               )}
-              <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <span className="flex items-center gap-1 text-xs font-normal text-emerald-600">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
                 Available Immediately
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
               {displayName}
             </h1>
-            <p className="text-[13px] text-slate-500 flex items-center gap-1.5 mt-1 font-medium">
+            <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-1">
               <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               {fullAddress}
             </p>
@@ -154,31 +153,39 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className={`grid gap-3 ${isCommercial ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
           {!isCommercial && (
             <>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-                <BedDouble className="h-5 w-5 text-slate-400 mx-auto mb-1.5" />
-                <p className="text-xl font-black text-slate-900">{unit.rooms}</p>
-                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 text-center shadow-xs">
+                <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mx-auto mb-2">
+                  <BedDouble className="h-5 w-5" />
+                </div>
+                <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{unit.rooms}</p>
+                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
                   {unit.rooms === 1 ? "Bedroom" : "Bedrooms"}
                 </p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-                <Bath className="h-5 w-5 text-slate-400 mx-auto mb-1.5" />
-                <p className="text-xl font-black text-slate-900">{unit.bathrooms || 1}</p>
-                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 text-center shadow-xs">
+                <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mx-auto mb-2">
+                  <Bath className="h-5 w-5" />
+                </div>
+                <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{unit.bathrooms || 1}</p>
+                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
                   {(unit.bathrooms || 1) === 1 ? "Bathroom" : "Bathrooms"}
                 </p>
               </div>
             </>
           )}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-            <Square className="h-5 w-5 text-slate-400 mx-auto mb-1.5" />
-            <p className="text-xl font-black text-slate-900">{unit.sqFootage}</p>
-            <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Sq Ft</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 text-center shadow-xs">
+            <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mx-auto mb-2">
+              <Square className="h-5 w-5" />
+            </div>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{unit.sqFootage}</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Sq Ft</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-            <Building className="h-5 w-5 text-slate-400 mx-auto mb-1.5" />
-            <p className="text-base font-black text-slate-900 leading-tight">{typeLabel}</p>
-            <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Property Type</p>
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 text-center shadow-xs">
+            <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mx-auto mb-2">
+              <Building className="h-5 w-5" />
+            </div>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{typeLabel}</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Property Type</p>
           </div>
         </div>
 
@@ -189,32 +196,32 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <div className="lg:col-span-2 space-y-4">
 
             {/* About */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
               <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                <Building className="h-4 w-4 text-slate-400" />
-                <h3 className="text-[14px] font-bold text-slate-800">About this space</h3>
+                <Building className="h-4 w-4 text-slate-700" />
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">About this space</h3>
               </div>
               <div className="px-5 py-4 space-y-3">
-                <p className="text-[13px] text-slate-600 leading-relaxed">
+                <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                   {unit.property.description ||
                     "Welcome to your new space! Professionally managed with top-tier amenities, refined craftsmanship, and prompt maintenance support. Designed to maximize natural light and functional space."}
                 </p>
-                <div className="flex items-center gap-2 text-[12px] text-slate-400 pt-2 border-t border-slate-100">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Professionally managed by <strong className="text-slate-600">{unit.property.name}</strong></span>
+                <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73] pt-2 border-t border-slate-100">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span>Professionally managed by <strong className="font-semibold text-[#1D1D1F]">{unit.property.name}</strong></span>
                 </div>
               </div>
             </div>
 
             {/* Amenities */}
             {amenities.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-slate-400" />
-                    <h3 className="text-[14px] font-bold text-slate-800">What this place offers</h3>
+                    <CheckCircle2 className="h-4 w-4 text-slate-700" />
+                    <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">What this place offers</h3>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-normal text-[#6E6E73]">
                     {amenities.length} amenities
                   </span>
                 </div>
@@ -225,10 +232,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       return (
                         <div
                           key={am}
-                          className="flex items-center gap-2.5 px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2.5 bg-slate-50/50 rounded-2xl border border-slate-200/80 shadow-2xs"
                         >
-                          <Icon className="h-4 w-4 text-slate-500 shrink-0" />
-                          <span className="text-[12px] font-semibold text-slate-700 truncate">{am}</span>
+                          <Icon className="h-4 w-4 text-slate-700 shrink-0" />
+                          <span className="text-xs font-medium text-[#1D1D1F] truncate">{am}</span>
                         </div>
                       );
                     })}
@@ -238,10 +245,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             )}
 
             {/* Lease & Payment Terms */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
               <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-slate-400" />
-                <h3 className="text-[14px] font-bold text-slate-800">Lease & Payment Terms</h3>
+                <DollarSign className="h-4 w-4 text-slate-700" />
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Lease &amp; Payment Terms</h3>
               </div>
               <div className="divide-y divide-slate-100">
                 {[
@@ -252,11 +259,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   { label: "Lease Type",        value: unit.leaseStructure || "Standard",  icon: Building,   accent: false },
                 ].map(({ label, value, icon: Icon, accent }) => (
                   <div key={label} className="flex items-center justify-between px-5 py-3.5">
-                    <span className="flex items-center gap-2 text-[13px] text-slate-500 font-medium">
+                    <span className="flex items-center gap-2 text-xs font-normal text-[#6E6E73]">
                       <Icon className="h-3.5 w-3.5 text-slate-400" />
                       {label}
                     </span>
-                    <span className={`text-[13px] font-bold ${accent ? "text-emerald-600" : "text-slate-800"}`}>
+                    <span className={`text-xs font-semibold ${accent ? "text-emerald-600" : "text-[#1D1D1F]"}`}>
                       {value}
                     </span>
                   </div>
@@ -265,13 +272,13 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Map */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
               <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-slate-400" />
-                <h3 className="text-[14px] font-bold text-slate-800">Neighborhood Map</h3>
+                <MapPin className="h-4 w-4 text-slate-700" />
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Neighborhood Map</h3>
               </div>
               <div className="p-3">
-                <div className="w-full h-[280px] rounded-xl overflow-hidden border border-slate-100">
+                <div className="w-full h-[280px] rounded-2xl overflow-hidden border border-slate-100">
                   <iframe
                     width="100%"
                     height="100%"
@@ -282,7 +289,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     allowFullScreen
                   />
                 </div>
-                <p className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium mt-2.5 px-1">
+                <p className="flex items-center gap-1.5 text-xs font-normal text-[#6E6E73] mt-2.5 px-1">
                   <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                   <span className="truncate">{fullAddress}</span>
                 </p>
@@ -294,17 +301,17 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* ── Right: Sticky Apply Card ── */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-20">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
 
                 {/* Price Header */}
                 <div className="px-6 pt-5 pb-4 border-b border-slate-100">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-slate-900">
+                    <span className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
                       ${rent.toLocaleString()}
                     </span>
-                    <span className="text-[13px] text-slate-400 font-medium">/ month</span>
+                    <span className="text-xs font-normal text-[#6E6E73]">/ month</span>
                   </div>
-                  <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+                  <p className="text-xs font-normal text-emerald-600 flex items-center gap-1 mt-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
                     Available immediately
                   </p>
@@ -312,44 +319,37 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
                 {/* Move-In Cost Breakdown */}
                 <div className="px-6 py-4 border-b border-slate-100 space-y-2.5">
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                  <p className="text-xs font-normal text-[#6E6E73] mb-1">
                     Move-In Cost Breakdown
                   </p>
-                  <div className="flex justify-between items-center text-[13px]">
-                    <span className="text-slate-500 font-medium">First Month Rent</span>
-                    <span className="font-bold text-slate-800">${rent.toLocaleString()}</span>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-normal text-[#6E6E73]">First Month Rent</span>
+                    <span className="font-semibold text-[#1D1D1F]">${rent.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between items-center text-[13px]">
-                    <span className="text-slate-500 font-medium">Security Deposit</span>
-                    <span className="font-bold text-slate-800">${deposit.toLocaleString()}</span>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-normal text-[#6E6E73]">Security Deposit</span>
+                    <span className="font-semibold text-[#1D1D1F]">${deposit.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between items-center text-[13px] pt-2.5 border-t border-slate-100">
-                    <span className="font-bold text-slate-700">Total Due at Move-In</span>
-                    <span className="font-black text-slate-900 text-base">${totalMoveIn.toLocaleString()}</span>
+                  <div className="flex justify-between items-center text-xs pt-2.5 border-t border-slate-100">
+                    <span className="font-normal text-[#1D1D1F]">Total Due at Move-In</span>
+                    <span className="font-semibold text-sm text-[#1D1D1F]">${totalMoveIn.toLocaleString()}</span>
                   </div>
                 </div>
 
-                {/* Urgency Signal */}
-                <div className="px-6 py-3 bg-amber-50 border-b border-amber-100">
-                  <p className="text-[11px] font-semibold text-amber-700 flex items-center gap-1.5">
-                    <Eye className="h-3.5 w-3.5" />
-                    12 people viewed this listing this week
-                  </p>
-                </div>
 
                 {/* CTAs */}
                 <div className="px-6 py-5 space-y-3">
                   <Link href={`/listings?applyUnitId=${unit.id}`} className="block">
-                    <Button className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition-all">
-                      Apply Now <ArrowRight className="h-4 w-4" />
+                    <Button className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 transition-all">
+                      Apply Now <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </Link>
                   <TourButtonClient unit={unit} />
                 </div>
 
                 {/* Trust Signal */}
-                <div className="px-6 pb-5 flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                <div className="px-6 pb-5 flex items-center justify-center gap-2 text-xs font-normal text-[#6E6E73]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                   <span>Free to apply • Digital Lease Agreement</span>
                 </div>
 
@@ -363,19 +363,19 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       {/* ── Mobile Floating Bar ── */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
         <div>
-          <div className="text-lg font-black text-slate-900">
+          <div className="text-lg font-semibold text-[#1D1D1F]">
             ${rent.toLocaleString()}
-            <span className="text-[10px] font-normal text-slate-400 ml-1">/mo</span>
+            <span className="text-xs font-normal text-[#6E6E73] ml-1">/mo</span>
           </div>
-          <div className="text-[10px] text-emerald-600 font-bold">No application fee</div>
+          <div className="text-xs font-normal text-emerald-600">No application fee</div>
         </div>
         <div className="flex items-center gap-2">
           <TourButtonClient
             unit={unit}
-            className="h-10 px-3.5 rounded-xl font-semibold text-xs text-slate-700 border border-slate-200 bg-white flex items-center gap-1 hover:bg-slate-50 transition-colors"
+            className="h-9 px-3.5 rounded-xl font-medium text-xs text-[#1D1D1F] border border-slate-200 bg-white flex items-center gap-1 hover:bg-slate-50 transition-colors shadow-2xs"
           />
           <Link href={`/listings?applyUnitId=${unit.id}`}>
-            <Button className="h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5">
+            <Button className="h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs border-none cursor-pointer">
               Apply <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>

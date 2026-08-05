@@ -162,49 +162,49 @@ export default function InspectorDetailsPage({
   const completedTasks = assignedTasks.filter((t: any) => t.status === "COMPLETED" || t.status === "RESOLVED");
 
   return (
-    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 pb-28 font-sans">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-28 px-2 sm:px-6 font-sans">
       {/* ─── BREADCRUMB & HEADER ACTIONS ─── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2">
-            <Link href="/dashboard/team" className="hover:text-slate-900 transition-colors flex items-center gap-1 font-bold">
+          <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73] mb-1">
+            <Link href="/dashboard/team" className="hover:text-slate-900 transition-colors flex items-center gap-1 font-normal">
               <ArrowLeft className="h-3.5 w-3.5" /> Team &amp; Staff
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-300" />
-            <span className="text-slate-900 font-bold">Inspector Profile</span>
+            <span className="text-[#1D1D1F] font-medium">Inspector Profile</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
             {inspector.name}
           </h1>
-          <p className="text-slate-500 text-xs font-semibold mt-0.5">
-            Internal Staff &bull; Field Inspector ID: <span className="font-mono text-slate-700 font-bold">{inspector.id}</span>
+          <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
+            Internal Staff &bull; Field Inspector ID: <span className="font-mono text-[#6E6E73]">{inspector.id}</span>
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link href={`/dashboard/team/${id}/edit`}>
             <Button
-              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-black rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
+              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-medium rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
             >
               <Edit className="h-3.5 w-3.5 text-slate-600" /> Edit Profile
             </Button>
           </Link>
           <Button
             onClick={() => setDispatchOpen(true)}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer gap-2 border-none"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer gap-2 border-none"
           >
             <Wrench className="h-3.5 w-3.5" /> Assign Work Order
           </Button>
           <Button
             onClick={() => window.open(`mailto:${inspector.email}`)}
-            className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-black rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
+            className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-medium rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
           >
             <Mail className="h-3.5 w-3.5 text-slate-600" /> Direct Email
           </Button>
           {inspector.phone && (
             <Button
               onClick={() => (window.location.href = `tel:${inspector.phone}`)}
-              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-black rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
+              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs font-medium rounded-xl text-xs h-9 px-4 cursor-pointer gap-2"
             >
               <Phone className="h-3.5 w-3.5 text-slate-600" /> Call Staff
             </Button>
@@ -223,25 +223,25 @@ export default function InspectorDetailsPage({
                 "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80"
               }
               alt={inspector.name}
-              className="h-20 w-20 rounded-2xl object-cover border-2 border-white shadow-md"
+              className="h-20 w-20 rounded-2xl object-cover border-2 border-white shadow-2xs"
             />
             <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Available for Dispatch" />
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-md text-[10px] font-medium uppercase tracking-wider">
                 <ShieldCheck className="h-3 w-3 text-amber-600" />
                 Certified Inspector
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-medium uppercase tracking-wider">
                 <CheckCircle2 className="h-3 w-3" /> Active &amp; Ready
               </span>
             </div>
 
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{inspector.name}</h2>
+            <h2 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{inspector.name}</h2>
 
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 flex-wrap">
+            <div className="flex items-center gap-4 text-xs font-normal text-[#6E6E73] flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5 text-slate-400" /> {inspector.email}
               </span>
@@ -260,56 +260,56 @@ export default function InspectorDetailsPage({
         {/* Financial Cap Info */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 w-full md:w-auto shrink-0 flex items-center gap-6 shadow-2xs font-sans">
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Approval Cap</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">${inspector.approvalThreshold || "200.00"}</p>
+            <p className="text-xs font-normal text-[#6E6E73]">Approval Cap</p>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">${inspector.approvalThreshold || "200.00"}</p>
           </div>
           <div className="h-8 w-px bg-slate-200" />
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Emergency Limit</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">${inspector.emergencyOverrideLimit || "1,500.00"}</p>
+            <p className="text-xs font-normal text-[#6E6E73]">Emergency Limit</p>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">${inspector.emergencyOverrideLimit || "1,500.00"}</p>
           </div>
         </div>
       </div>
 
       {/* ─── SUMMARY KPI METRICS GRID ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
           <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 shrink-0 border border-slate-200/60 shadow-2xs">
             <Wrench className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Work Orders</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{assignedTasks.length}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Total Work Orders</p>
+            <h3 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{assignedTasks.length}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
           <div className="h-12 w-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-200/60 shadow-2xs">
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Open / Pending</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{openTasks.length}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Open / Pending</p>
+            <h3 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{openTasks.length}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
           <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-200/60 shadow-2xs">
             <CheckCircle2 className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Resolved Repairs</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{completedTasks.length}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Resolved Repairs</p>
+            <h3 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{completedTasks.length}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
           <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-2xs">
             <Sparkles className="h-5 w-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">SLA Completion</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">100% <span className="text-xs font-black text-emerald-600">On Time</span></h3>
+            <p className="text-xs font-normal text-[#6E6E73]">SLA Completion</p>
+            <h3 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">100% <span className="text-xs font-normal text-emerald-600">On Time</span></h3>
           </div>
         </div>
       </div>
@@ -318,13 +318,13 @@ export default function InspectorDetailsPage({
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-4 font-sans">
         <div className="p-6 pb-2 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Assigned Maintenance &amp; Repair Work Orders</h3>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">Tickets assigned to {inspector.name} for field inspection and resolution.</p>
+            <h3 className="text-lg font-semibold text-[#1D1D1F] tracking-tight">Assigned Maintenance &amp; Repair Work Orders</h3>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Tickets assigned to {inspector.name} for field inspection and resolution.</p>
           </div>
 
           <Button
             onClick={() => setDispatchOpen(true)}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer border-none gap-1.5"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer border-none gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" /> Dispatch Work Order
           </Button>
@@ -334,12 +334,12 @@ export default function InspectorDetailsPage({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200">
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Ticket Title &amp; Category</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Property &amp; Unit</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Priority</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Date Assigned</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider text-right">Action</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Ticket Title &amp; Category</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Property &amp; Unit</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Priority</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Status</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Date Assigned</th>
+                <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73] text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -350,11 +350,11 @@ export default function InspectorDetailsPage({
                       <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400 border border-slate-200/60 shadow-2xs">
                         <Wrench className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-black text-slate-900">No work orders assigned yet</p>
-                      <p className="text-xs font-semibold text-slate-500">Click "Dispatch Work Order" to assign an open maintenance ticket to this inspector.</p>
+                      <p className="text-sm font-semibold text-[#1D1D1F]">No work orders assigned yet</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">Click "Dispatch Work Order" to assign an open maintenance ticket to this inspector.</p>
                       <Button
                         onClick={() => setDispatchOpen(true)}
-                        className="bg-slate-900 hover:bg-slate-800 text-white font-black h-9 px-4 rounded-xl text-xs shadow-xs cursor-pointer border-none"
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 px-4 rounded-xl text-xs shadow-xs cursor-pointer border-none"
                       >
                         Dispatch Ticket Now
                       </Button>
@@ -367,20 +367,20 @@ export default function InspectorDetailsPage({
                     {/* Ticket Title & Category */}
                     <td className="py-4 px-6">
                       <div>
-                        <span className="font-black text-sm text-slate-900 block">{ticket.title}</span>
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{ticket.category || "General Repair"}</span>
+                        <span className="font-semibold text-xs text-[#1D1D1F] block">{ticket.title}</span>
+                        <span className="text-[10px] font-medium text-[#6E6E73] uppercase tracking-wider">{ticket.category || "General Repair"}</span>
                       </div>
                     </td>
 
                     {/* Property & Unit */}
                     <td className="py-4 px-6">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-black text-slate-900 flex items-center gap-1">
+                        <span className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1">
                           <Building className="h-3.5 w-3.5 text-slate-400" />
                           {ticket.property?.name || "Property"}
                         </span>
                         {ticket.unit && (
-                          <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                          <span className="text-xs font-normal text-[#6E6E73] flex items-center gap-1">
                             <Home className="h-3 w-3 text-slate-400" /> Unit {ticket.unit.name}
                           </span>
                         )}
@@ -390,7 +390,7 @@ export default function InspectorDetailsPage({
                     {/* Priority */}
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider ${
                           ticket.priority === "EMERGENCY"
                             ? "bg-rose-50 text-rose-700 border border-rose-200/80"
                             : ticket.priority === "HIGH"
@@ -407,7 +407,7 @@ export default function InspectorDetailsPage({
                     {/* Status */}
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider ${
                           ticket.status === "COMPLETED" || ticket.status === "RESOLVED"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
                             : ticket.status === "IN_PROGRESS"
@@ -420,14 +420,14 @@ export default function InspectorDetailsPage({
                     </td>
 
                     {/* Date Assigned */}
-                    <td className="py-4 px-6 text-xs font-semibold text-slate-500">
+                    <td className="py-4 px-6 text-xs font-normal text-[#6E6E73]">
                       {format(new Date(ticket.createdAt), "MMM d, yyyy")}
                     </td>
 
                     {/* Action */}
                     <td className="py-4 px-6 text-right">
                       <Link href={`/dashboard/maintenance/${ticket.id}`}>
-                        <Button className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-8 px-3 transition-all cursor-pointer">
+                        <Button className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-medium text-xs h-8 px-3 transition-all cursor-pointer">
                           View Ticket <ArrowRight className="h-3.5 w-3.5 ml-1" />
                         </Button>
                       </Link>
@@ -442,28 +442,28 @@ export default function InspectorDetailsPage({
 
       {/* ─── DISPATCH WORK ORDER MODAL ─── */}
       <Dialog open={dispatchOpen} onOpenChange={setDispatchOpen}>
-        <DialogContent className="bg-white max-w-md rounded-3xl p-6 shadow-2xl">
+        <DialogContent className="bg-white max-w-md rounded-3xl p-6 shadow-2xl font-sans">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900">
+            <DialogTitle className="text-xl font-semibold text-slate-900 tracking-tight">
               Dispatch Work Order to {inspector.name}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleDispatchTicket} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-700">Select Maintenance Ticket</Label>
+              <Label className="text-xs font-normal text-[#6E6E73]">Select Maintenance Ticket</Label>
               {unassignedTickets.length === 0 ? (
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-2">
-                  <p className="text-xs font-bold text-slate-600">No open unassigned tickets available.</p>
+                  <p className="text-xs font-semibold text-[#1D1D1F]">No open unassigned tickets available.</p>
                   <Link href="/dashboard/maintenance/new">
-                    <Button type="button" variant="outline" className="h-8 text-xs font-bold rounded-xl mt-1">
+                    <Button type="button" variant="outline" className="h-8 text-xs font-medium rounded-xl mt-1">
                       Create New Maintenance Request
                     </Button>
                   </Link>
                 </div>
               ) : (
                 <Select value={selectedTicketId} onValueChange={(v) => setSelectedTicketId(v || "")}>
-                  <SelectTrigger className="rounded-xl h-11 text-xs">
+                  <SelectTrigger className="rounded-xl h-9 text-xs font-normal text-[#1D1D1F]">
                     <SelectValue placeholder="Choose a ticket to dispatch..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
@@ -478,13 +478,13 @@ export default function InspectorDetailsPage({
             </div>
 
             <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={() => setDispatchOpen(false)} className="rounded-xl h-10 text-xs">
+              <Button type="button" variant="outline" onClick={() => setDispatchOpen(false)} className="rounded-xl h-9 text-xs font-medium">
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={dispatching || !selectedTicketId}
-                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-10 text-xs font-bold"
+                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 text-xs font-medium cursor-pointer border-none"
               >
                 {dispatching ? "Dispatching..." : "Confirm Dispatch"}
               </Button>

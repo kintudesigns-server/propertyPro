@@ -233,34 +233,34 @@ export default function WalletPage() {
       {/* PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Wallet &amp; Payouts</h1>
-          <p className="text-slate-500 text-xs font-semibold mt-0.5">Manage your rental income, view earnings, and request bank wire transfers.</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Wallet &amp; Payouts</h1>
+          <p className="text-[#6E6E73] text-xs font-normal mt-1">Manage your rental income, view earnings, and request bank wire transfers.</p>
         </div>
         <button onClick={() => { fetchPayouts(); fetchStats(); toast.success("Refreshed"); }}
-          className="flex items-center gap-2 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl px-4 h-9 shadow-2xs transition-all cursor-pointer">
+          className="flex items-center gap-2 text-xs font-medium text-[#1D1D1F] bg-white hover:bg-slate-50 border border-slate-200 rounded-xl px-4 h-9 shadow-2xs transition-all cursor-pointer">
           <RefreshCw className="h-3.5 w-3.5 text-slate-500" /> Refresh
         </button>
       </div>
 
       {/* HERO BALANCE STRIP */}
-      <div className="relative overflow-hidden rounded-3xl text-white shadow-md border border-slate-800 font-sans bg-slate-900">
+      <div className="relative overflow-hidden rounded-3xl text-white shadow-xs border border-slate-800 font-sans bg-slate-900">
         <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 left-1/3 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
         <div className="relative z-10 p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] font-extrabold text-blue-300 uppercase tracking-widest">Available Balance</span>
-                <span className="flex items-center gap-1 bg-white/10 border border-white/10 rounded-full px-2 py-0.5">
+                <span className="text-xs font-normal text-slate-300">Available Balance</span>
+                <span className="flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 rounded-md px-2 py-0.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase">Live</span>
+                  <span className="text-[10px] font-medium text-emerald-300 uppercase tracking-wider">Live</span>
                 </span>
               </div>
-              <p className="text-5xl sm:text-6xl font-black tracking-tight">${fmt(balance)}</p>
-              <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-xs text-[#8E8E93]">
-                <span className="flex items-center gap-1.5"><Info className="h-3 w-3" />Net earned: <span className="text-emerald-400 font-bold ml-1">+${fmt(stats.totalNetEarnings)}</span></span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" />Withdrawn: <span className="text-rose-400 font-bold ml-1">-${fmt(completedAmount)}</span></span>
-                {pendingAmount > 0 && <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />Pending: <span className="text-amber-400 font-bold ml-1">-${fmt(pendingAmount)}</span></span>}
+              <p className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">${fmt(balance)}</p>
+              <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-xs text-slate-300 font-normal">
+                <span className="flex items-center gap-1.5"><Info className="h-3.5 w-3.5" />Net earned: <span className="text-emerald-400 font-semibold ml-1">+${fmt(stats.totalNetEarnings)}</span></span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" />Withdrawn: <span className="text-rose-400 font-semibold ml-1">-${fmt(completedAmount)}</span></span>
+                {pendingAmount > 0 && <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />Pending: <span className="text-amber-400 font-semibold ml-1">-${fmt(pendingAmount)}</span></span>}
               </div>
             </div>
             <div className="flex flex-col items-start sm:items-end gap-3">
@@ -273,10 +273,10 @@ export default function WalletPage() {
                    setPanelOpen(true);
                  }}
                  disabled={blockPayouts}
-                 className={`flex items-center gap-2 font-black h-11 px-6 rounded-xl shadow-sm text-sm transition-all ${
+                 className={`flex items-center gap-2 font-medium h-9 px-4 rounded-xl shadow-xs text-xs transition-all border-none cursor-pointer ${
                    blockPayouts 
                      ? "bg-[#D1D1D6] text-[#8E8E93] cursor-not-allowed hover:bg-[#D1D1D6]" 
-                     : "bg-white text-slate-900 hover:bg-[#F2F2F7]"
+                     : "bg-emerald-600 text-white hover:bg-emerald-500"
                  }`}
                >
                  {blockPayouts ? (
@@ -290,10 +290,10 @@ export default function WalletPage() {
                  )}
                </Button>
               {bankName && !userProfileLoading && (
-                <div className="flex items-center gap-2 text-[11px] text-[#8E8E93]">
+                <div className="flex items-center gap-2 text-xs font-normal text-slate-400">
                   <Building className="h-3.5 w-3.5" />
-                  <span className="font-medium">{bankName}</span>
-                  <span className="font-mono opacity-70">{maskAccount(accountNumber)}</span>
+                  <span className="font-normal">{bankName}</span>
+                  <span className="font-mono opacity-80">{maskAccount(accountNumber)}</span>
                 </div>
               )}
             </div>
@@ -304,20 +304,20 @@ export default function WalletPage() {
       {/* KPI STRIP */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
         {[
-          { label: "Gross Income",    value: `$${fmt(stats.grossRevenue)}`,     sub: "Total rent collected",                                                        Icon: TrendingUp,      icolor: "text-slate-800", ibg: "bg-slate-100", vcolor: "text-slate-900"   },
+          { label: "Gross Income",    value: `$${fmt(stats.grossRevenue)}`,     sub: "Total rent collected",                                                        Icon: TrendingUp,      icolor: "text-slate-800", ibg: "bg-slate-100", vcolor: "text-[#1D1D1F]"   },
           { label: "Platform Fees",   value: `-$${fmt(stats.totalPlatformFees)}`, sub: `${feeRate}% commission on gross`,                                           Icon: Percent,         icolor: "text-rose-600",   ibg: "bg-rose-50",   vcolor: "text-rose-600"    },
-          { label: "Net Earnings",    value: `$${fmt(stats.totalNetEarnings)}`, sub: "After all fees deducted",                                                     Icon: CircleDollarSign, icolor: "text-emerald-600", ibg: "bg-emerald-50", vcolor: "text-emerald-600" },
-          { label: "Total Withdrawn", value: `$${fmt(completedAmount)}`,        sub: `${payouts.filter(p => p.status === "COMPLETED").length} payouts completed`,   Icon: ArrowDownRight,  icolor: "text-blue-600",   ibg: "bg-blue-50",   vcolor: "text-blue-600"    },
+          { label: "Net Earnings",    value: `$${fmt(stats.totalNetEarnings)}`, sub: "After all fees deducted",                                                     Icon: CircleDollarSign, icolor: "text-emerald-600", ibg: "bg-emerald-50", vcolor: "text-emerald-700" },
+          { label: "Total Withdrawn", value: `$${fmt(completedAmount)}`,        sub: `${payouts.filter(p => p.status === "COMPLETED").length} payouts completed`,   Icon: ArrowDownRight,  icolor: "text-blue-600",   ibg: "bg-blue-50",   vcolor: "text-[#1D1D1F]"    },
         ].map((c) => (
-          <div key={c.label} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs font-sans">
+          <div key={c.label} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className={`h-9 w-9 ${c.ibg} rounded-xl flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs`}>
+              <div className={`h-8 w-8 ${c.ibg} rounded-xl flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs`}>
                 <c.Icon className={`h-4 w-4 ${c.icolor}`} />
               </div>
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{c.label}</span>
+              <span className="text-xs font-normal text-[#6E6E73]">{c.label}</span>
             </div>
-            <p className={`text-2xl font-black ${c.vcolor}`}>{c.value}</p>
-            <p className="text-[11px] text-slate-500 mt-1 font-semibold">{c.sub}</p>
+            <p className={`text-2xl font-semibold tracking-tight ${c.vcolor}`}>{c.value}</p>
+            <p className="text-xs text-[#6E6E73] mt-1 font-normal">{c.sub}</p>
           </div>
         ))}
       </div>
@@ -328,10 +328,10 @@ export default function WalletPage() {
           <div className="absolute left-0 top-0 w-1.5 h-full bg-amber-500 rounded-l-2xl" />
           <Clock className="ml-2 h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-black text-amber-900">
+            <p className="text-xs font-medium text-amber-900">
               {pendingCount === 1 ? `1 withdrawal of $${fmt(pendingAmount)} is being reviewed` : `${pendingCount} withdrawals totalling $${fmt(pendingAmount)} are in review`}
             </p>
-            <p className="text-[11px] font-semibold text-amber-700 mt-0.5">Admin typically processes withdrawals within <strong className="font-extrabold text-amber-900">2–3 business days</strong>.</p>
+            <p className="text-xs font-normal text-amber-700 mt-0.5">Admin typically processes withdrawals within <strong className="font-semibold text-amber-900">2–3 business days</strong>.</p>
           </div>
         </div>
       )}
@@ -339,17 +339,17 @@ export default function WalletPage() {
       {/* PAYOUT HISTORY TABLE */}
       <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden font-sans">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-base font-black text-slate-900 tracking-tight">Payout History</h2>
-            <p className="text-xs text-slate-500 mt-0.5 font-semibold">{payouts.length} total withdrawal requests</p>
+            <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Payout History</h2>
+            <p className="text-xs text-[#6E6E73] mt-0.5 font-normal">{payouts.length} total withdrawal requests</p>
           </div>
-          <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/60 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/30 rounded-xl p-1">
             {TABS.map((tab) => (
               <button key={tab} onClick={() => setStatusFilter(tab)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${statusFilter === tab ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}>
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${statusFilter === tab ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"}`}>
                 {tab === "ALL" ? "All" : tab.charAt(0) + tab.slice(1).toLowerCase()}
-                <span className={`ml-1.5 text-[9px] font-extrabold ${statusFilter === tab ? "text-slate-500" : "text-slate-400"}`}>{tabCounts[tab]}</span>
+                <span className={`ml-1.5 text-[10px] font-normal ${statusFilter === tab ? "text-[#6E6E73]" : "text-slate-400"}`}>{tabCounts[tab]}</span>
               </button>
             ))}
           </div>
@@ -359,15 +359,15 @@ export default function WalletPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <Loader2 className="h-7 w-7 animate-spin text-slate-300" />
-            <p className="text-xs text-[#8E8E93] font-semibold">Loading payouts...</p>
+            <p className="text-xs text-[#6E6E73] font-normal">Loading payouts...</p>
           </div>
         ) : filteredPayouts.length === 0 ? (
           <div className="text-center py-20 px-6">
             <div className="h-16 w-16 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center mx-auto mb-4">
               <Wallet className="h-7 w-7 text-slate-300" />
             </div>
-            <h3 className="text-base font-black text-slate-800 mb-1">No payout requests yet</h3>
-            <p className="text-sm text-[#8E8E93] max-w-xs mx-auto">
+            <h3 className="text-base font-semibold text-[#1D1D1F] mb-1">No payout requests yet</h3>
+            <p className="text-xs text-[#6E6E73] font-normal max-w-xs mx-auto">
               {statusFilter === "ALL" ? "Click \"Withdraw Funds\" above to request your first payout." : `No ${statusFilter.toLowerCase()} payouts found.`}
             </p>
           </div>
@@ -375,13 +375,13 @@ export default function WalletPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/60 border-b border-slate-200">
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Payout ID &amp; Date</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Destination Bank</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Withdrawal Amount</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Disbursal Status</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Transaction Reference</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                <tr className="bg-slate-50/60 border-b border-slate-100 text-[#6E6E73]">
+                  <th className="py-3.5 px-6 sm:px-8 text-xs font-normal">Payout ID &amp; Date</th>
+                  <th className="py-3.5 px-6 text-xs font-normal">Destination Bank</th>
+                  <th className="py-3.5 px-6 text-xs font-normal">Withdrawal Amount</th>
+                  <th className="py-3.5 px-6 text-xs font-normal">Disbursal Status</th>
+                  <th className="py-3.5 px-6 text-xs font-normal">Transaction Reference</th>
+                  <th className="py-3.5 px-6 sm:px-8 text-xs font-normal text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -426,7 +426,7 @@ export default function WalletPage() {
 
                         {/* 3. Withdrawal Amount */}
                         <td className="py-3.5 px-6">
-                          <span className="font-black text-sm text-slate-900">
+                          <span className="font-semibold text-sm text-slate-900">
                             ${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </span>
                         </td>
@@ -543,7 +543,7 @@ export default function WalletPage() {
                     Your account is currently paused due to a billing issue. Reactivate your subscription in billing settings to transfer funds.
                   </p>
                   <a href="/dashboard/owner/billing" className="w-full">
-                    <Button className="w-full bg-[#B25E00] hover:bg-[#804400] text-white font-bold h-11 rounded-xl shadow-xs">
+                    <Button className="w-full bg-[#B25E00] hover:bg-[#804400] text-white font-medium h-11 rounded-xl shadow-xs">
                       Reactivate Subscription
                     </Button>
                   </a>
@@ -553,7 +553,7 @@ export default function WalletPage() {
                   {/* Balance recap */}
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                 <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest mb-1">Available to Withdraw</p>
-                <p className="text-3xl font-black text-slate-900">${fmt(balance)}</p>
+                <p className="text-3xl font-semibold text-slate-900">${fmt(balance)}</p>
                 <div className="mt-3 pt-3 border-t border-slate-200 space-y-1.5 text-[11px] text-[#6E6E73]">
                   <div className="flex justify-between"><span>Net earnings</span><span className="font-bold text-emerald-600">+${fmt(stats.totalNetEarnings)}</span></div>
                   <div className="flex justify-between"><span>Already withdrawn</span><span className="font-bold text-rose-500">-${fmt(completedAmount)}</span></div>
@@ -573,7 +573,7 @@ export default function WalletPage() {
                         <Building className="h-4 w-4 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">{bankName}</p>
+                        <p className="text-sm font-semibold text-slate-900">{bankName}</p>
                         <p className="text-[11px] text-[#6E6E73] font-mono">{accountName} · {maskAccount(accountNumber)}</p>
                       </div>
                     </div>
@@ -648,7 +648,7 @@ export default function WalletPage() {
             {bankName && !blockPayouts && (
               <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 space-y-3">
                 <Button onClick={handleWithdraw as any} disabled={submitting || !isAmountValid}
-                  className="w-full h-12 rounded-xl font-black text-sm bg-slate-900 hover:bg-[#007AFF] text-white disabled:opacity-40 transition-all">
+                  className="w-full h-12 rounded-xl font-medium text-sm bg-slate-900 hover:bg-[#007AFF] text-white disabled:opacity-40 transition-all">
                   {submitting ? (
                     <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Submitting...</span>
                   ) : (
@@ -671,3 +671,4 @@ export default function WalletPage() {
     </div>
   );
 }
+

@@ -207,7 +207,7 @@ function CheckoutForm({
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-[2] h-12 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2"
+          className="flex-[2] h-12 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-medium text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2"
         >
           {processing ? (
             <><Loader2 className="h-4 w-4 animate-spin text-emerald-700" /> Processing...</>
@@ -396,16 +396,16 @@ export default function PayRentPage() {
       )}
 
       {/* ── BREADCRUMB & HEADER ── */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-[10px] font-black text-[#8E8E93] uppercase tracking-widest pl-1">
+      <div className="space-y-2 font-sans">
+        <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73] uppercase tracking-wider pl-1">
           <span>Dashboard</span>
-          <span className="text-[#C7C7CC]">/</span>
+          <span>/</span>
           <span>Payments</span>
-          <span className="text-[#C7C7CC]">/</span>
-          <span className="text-[#007AFF]">Pay Rent</span>
+          <span>/</span>
+          <span className="text-[#1D1D1F] font-semibold">Pay Rent</span>
         </div>
         {/* ── HIGH-END HERO BANNER WITH LIGHT WHITE GLASS EFFECT & FRAMER MOTION ── */}
-        <div className="relative rounded-[28px] overflow-hidden shadow-sm bg-white text-slate-900 min-h-[200px] flex flex-col justify-center p-6 sm:p-8 border border-slate-200/80">
+        <div className="relative rounded-3xl overflow-hidden shadow-2xs bg-white text-slate-900 min-h-[200px] flex flex-col justify-center p-6 sm:p-8 border border-slate-200">
           {/* Animated Background Image with Light Gradient White Overlay */}
           <motion.div
             animate={{ scale: [1, 1.05, 1] }}
@@ -414,56 +414,46 @@ export default function PayRentPage() {
             style={{ backgroundImage: `url('/images/hero/hero_subscription_billing.png')` }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/60 backdrop-blur-[2px] pointer-events-none" />
-          <div className="absolute right-0 top-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
           {/* Foreground Content */}
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="space-y-2.5 max-w-xl">
-              {/* Floating Animated Security Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 backdrop-blur-md shadow-2xs"
-              >
+              {/* Floating Security Badge */}
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xs">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[10px] font-extrabold tracking-wider uppercase">256-Bit SSL Encrypted Payment Gateway</span>
-              </motion.div>
-
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
-                  <Banknote className="h-5 w-5 text-indigo-300" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Pay Your Rent</h1>
+                <span>256-Bit SSL Encrypted Payment Gateway</span>
               </div>
 
-              <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
-                Secure, instant, and encrypted payments powered by <span className="font-bold text-slate-900 underline decoration-indigo-500 decoration-2 underline-offset-2">Stripe</span>.
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Banknote className="h-4 w-4 text-slate-700" />
+                </div>
+                <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Pay Your Rent</h1>
+              </div>
+
+              <p className="text-[#6E6E73] text-xs font-normal leading-relaxed">
+                Secure, instant, and encrypted payments powered by <span className="font-semibold text-[#1D1D1F] underline decoration-slate-400 underline-offset-2">Stripe</span>.
               </p>
             </div>
 
-            {/* Floating Hero Widget: Add Card if no saved card, or Card Details */}
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="shrink-0"
-            >
+            {/* Floating Hero Widget */}
+            <div className="shrink-0">
               {savedCard ? (
-                <div className="flex items-center gap-3 bg-white/90 border border-slate-200/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-sm">
-                  <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                    <CreditCard className="h-4 w-4" />
+                <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-2xl shadow-2xs">
+                  <div className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-700 flex items-center justify-center shadow-2xs">
+                    <CreditCard className="h-4 w-4 text-slate-700" />
                   </div>
                   <div className="text-left">
-                    <p className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1.5">
                       <span>•••• {savedCard.cardLast4}</span>
-                      <span className="text-[9px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-black uppercase">Default</span>
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-medium uppercase tracking-wider">Default</span>
                     </p>
                     <button
                       onClick={() => router.push("/dashboard/payments/add-card")}
-                      className="text-[10px] text-slate-500 hover:text-indigo-600 font-bold tracking-tight block transition-colors mt-0.5"
+                      className="text-xs text-[#6E6E73] hover:text-[#1D1D1F] font-normal transition-colors mt-0.5 cursor-pointer"
                     >
                       Manage Card →
                     </button>
@@ -472,13 +462,13 @@ export default function PayRentPage() {
               ) : (
                 <Button
                   onClick={() => router.push("/dashboard/payments/add-card")}
-                  className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black h-12 px-6 rounded-2xl transition-all cursor-pointer flex items-center gap-2 text-xs uppercase tracking-wider"
+                  className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center gap-2"
                 >
-                  <Plus className="h-4 w-4 text-emerald-700" />
+                  <Plus className="h-4 w-4 text-white" />
                   <span>Add Card</span>
                 </Button>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -486,69 +476,47 @@ export default function PayRentPage() {
 
 
       {/* ── SUMMARY STATS ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-sans">
         {/* Card 1: Amount Owed */}
-        <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-200/80 bg-white shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Total Owed</p>
-              <div className="flex items-center gap-2 mt-2">
-                <p className={`text-3xl font-black tracking-tight ${totalOwed > 0 ? "text-rose-600" : "text-slate-900"}`}>
-                  {formatCurrency(totalOwed)}
-                </p>
-                {totalOwed > 0 && (
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
-              totalOwed > 0 ? "bg-rose-50 text-rose-600 border-rose-200/60" : "bg-slate-100 text-slate-700 border-slate-200"
-            }`}>
-              {totalOwed > 0 ? <AlertTriangle className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-            </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Total Owed</p>
+            <h3 className={`text-2xl font-semibold tracking-tight ${totalOwed > 0 ? "text-rose-600" : "text-[#1D1D1F]"}`}>
+              {formatCurrency(totalOwed)}
+            </h3>
+            <p className="text-xs font-normal text-[#6E6E73]">
+              {pendingInvoices.length > 0 ? `${pendingInvoices.length} unpaid invoice${pendingInvoices.length !== 1 ? "s" : ""} pending` : "No pending balances"}
+            </p>
           </div>
-          <p className="text-xs font-semibold text-slate-500 mt-4">
-            {pendingInvoices.length > 0 ? `${pendingInvoices.length} unpaid invoice${pendingInvoices.length !== 1 ? "s" : ""} pending` : "No pending balances"}
-          </p>
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            {totalOwed > 0 ? <AlertTriangle className="h-4 w-4 text-rose-600" /> : <ShieldCheck className="h-4 w-4" />}
+          </div>
         </div>
 
         {/* Card 2: Monthly Rent */}
-        <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-200/80 bg-white shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Monthly Rent</p>
-              <p className="text-3xl font-black tracking-tight mt-2 text-slate-900">
-                {activeLease ? formatCurrency(activeLease.monthlyRent) : "—"}
-              </p>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0">
-              <Home className="h-4 w-4" />
-            </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Monthly Rent</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">
+              {activeLease ? formatCurrency(activeLease.monthlyRent) : "—"}
+            </h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Due on the 1st of every month</p>
           </div>
-          <p className="text-xs font-semibold text-slate-500 mt-4">
-            Due on the 1st of every month
-          </p>
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <Home className="h-4 w-4" />
+          </div>
         </div>
 
         {/* Card 3: Paid Invoices */}
-        <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-200/80 bg-white shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Payments Made</p>
-              <p className="text-3xl font-black tracking-tight mt-2 text-slate-900">
-                {paidInvoices.length}
-              </p>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Payments Made</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{paidInvoices.length}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">All-time completed payments</p>
           </div>
-          <p className="text-xs font-semibold text-slate-500 mt-4">
-            All-time completed payments
-          </p>
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <CheckCircle2 className="h-4 w-4" />
+          </div>
         </div>
 
         {/* Card 4: Next Due Date */}
@@ -558,38 +526,34 @@ export default function PayRentPage() {
           const isUrgent = daysInfo?.isOverdue || daysInfo?.isToday;
           
           return (
-            <div className="relative overflow-hidden rounded-[24px] p-6 border border-slate-200/80 bg-white shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[140px]">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Next Payment Due</p>
-                  <p className="text-2xl font-black tracking-tight mt-2 text-slate-900">
-                    {nextInv ? formatDate(nextInv.dueDate) : "—"}
-                  </p>
-                </div>
-                <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                  isUrgent ? "bg-rose-50 text-rose-600 border-rose-200/60" : "bg-slate-100 border-slate-200 text-slate-700"
-                }`}>
-                  <Calendar className="h-4 w-4" />
-                </div>
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
+              <div className="space-y-1">
+                <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Next Payment Due</p>
+                <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">
+                  {nextInv ? formatDate(nextInv.dueDate) : "—"}
+                </h3>
+                <p className={`text-xs font-medium ${isUrgent ? "text-rose-600 font-semibold" : "text-[#6E6E73]"}`}>
+                  {nextInv ? daysInfo?.label : "All balances settled"}
+                </p>
               </div>
-              <p className={`text-xs font-semibold mt-4 ${isUrgent ? "text-rose-600" : "text-slate-500"}`}>
-                {nextInv ? daysInfo?.label : "All balances settled"}
-              </p>
+              <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                <Calendar className="h-4 w-4" />
+              </div>
             </div>
           );
         })()}
       </div>
 
       {/* ── OUTSTANDING INVOICES ── */}
-      <div className="space-y-4">
+      <div className="space-y-4 font-sans">
         <div className="flex items-center gap-2.5 pl-1">
-          <div className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200/40">
-            <Banknote className="h-5 w-5 text-[#6E6E73]" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <Banknote className="h-4 w-4 text-slate-700" />
           </div>
-          <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+          <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
             Outstanding Invoices
             {pendingInvoices.length > 0 && (
-              <span className="text-xs font-black bg-red-50 text-red-650 px-2.5 py-1 rounded-full border border-red-100/50">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
                 {pendingInvoices.length} Pending
               </span>
             )}
@@ -652,14 +616,11 @@ export default function PayRentPage() {
                   ? "border-amber-200 shadow-[0_8px_30px_rgb(245,158,11,0.03)]" 
                   : "border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.015)]";
                   
-              const accentColorClass = daysInfo.isOverdue 
-                ? "bg-red-500" 
-                : daysInfo.isToday 
-                  ? "bg-amber-400" 
-                  : "bg-indigo-500";
-
               const textType = inv.invoiceType 
-                  return (
+                ? inv.invoiceType.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) 
+                : (Number(inv.amount) === Number(inv.lease?.securityDeposit || activeLease?.securityDeposit) ? 'Security Deposit' : 'Monthly Rent');
+
+              return (
                 <div
                   key={inv.id}
                   className={`bg-white rounded-[24px] border overflow-hidden transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-[#E5E5EA] relative ${
@@ -687,10 +648,10 @@ export default function PayRentPage() {
                         
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <span className="font-extrabold text-slate-900 text-lg tracking-tight">
+                            <span className="font-semibold text-slate-900 text-lg tracking-tight">
                               {textType}
                             </span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider border ${
                               daysInfo.isOverdue 
                                 ? "bg-red-50 text-red-700 border-red-200" 
                                 : daysInfo.isToday 
@@ -701,7 +662,7 @@ export default function PayRentPage() {
                             </span>
                           </div>
                           
-                          <p className="text-xs font-semibold text-[#8E8E93] flex items-center gap-1.5">
+                          <p className="text-xs font-normal text-[#8E8E93] flex items-center gap-1.5">
                             <Building className="h-3.5 w-3.5 text-slate-400" />
                             <span>{inv.lease?.unit?.property?.name || activeLease?.unit?.property?.name}</span>
                             <span>&bull;</span>
@@ -907,7 +868,7 @@ export default function PayRentPage() {
               </div>
               <h2 className="text-xl font-black text-slate-800 tracking-tight">Payment History</h2>
             </div>
-            <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">
+            <span className="text-xs font-normal text-[#8E8E93] uppercase tracking-wider">
               {paidInvoices.length} Receipt{paidInvoices.length !== 1 ? "s" : ""} Available
             </span>
           </div>
@@ -1044,3 +1005,4 @@ export default function PayRentPage() {
     </div>
   );
 }
+

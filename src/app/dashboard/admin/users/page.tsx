@@ -250,24 +250,24 @@ export default function AdminUsersPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">User Management</h1>
-          <p className="text-[#64748B] text-base mt-0.5">Manage system users and their permissions</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">User Management</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-1">Manage system users and their permissions</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-[#64748B] hover:bg-[#F8FAFC]">
-            <RefreshCw className="h-5 w-5" />
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-slate-500 hover:bg-slate-100 rounded-xl h-9 w-9 cursor-pointer">
+            <RefreshCw className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
-            className="border-[#E2E8F0] text-[#0F172A] font-semibold h-11 px-5 rounded-xl flex items-center gap-2"
+            className="border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs h-9 px-4 rounded-xl shadow-2xs flex items-center gap-2 cursor-pointer"
           >
-            <ShieldAlert className="h-4 w-4 text-[#64748B]" /> Manage Roles
+            <ShieldAlert className="h-3.5 w-3.5 text-slate-500" /> Manage Roles
           </Button>
           <Link href="/dashboard/admin/users/new">
-            <Button className="bg-[#1E293B] hover:bg-[#0F172A] text-white font-semibold rounded-xl flex items-center gap-2 h-11 px-6 shadow-sm">
-              <UserPlus className="h-4 w-4" /> Add User
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl flex items-center gap-2 h-9 px-4 shadow-xs border-none cursor-pointer">
+              <UserPlus className="h-3.5 w-3.5" /> Add User
             </Button>
           </Link>
         </div>
@@ -306,48 +306,48 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Users List Card */}
-      <Card className="bg-white border-[#E2E8F0] shadow-sm rounded-2xl overflow-hidden">
-        <div className="p-5 border-b border-[#E2E8F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-[#0F172A]">Users ({totalUsers})</h2>
-            <span className="text-xs text-[#64748B] bg-[#F8FAFC] px-2 py-1 rounded-md border border-[#E2E8F0]">
+            <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Users ({totalUsers})</h2>
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
               Showing {filteredUsers.length} users total
             </span>
           </div>
 
           <div className="flex items-center gap-3 flex-1 md:justify-end">
             <div className="relative w-full md:max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <Input
                 placeholder="Search users by name or email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-[#F8FAFC] border-[#E2E8F0] h-10 rounded-xl"
+                className="pl-9 bg-white border-slate-200 h-9 rounded-xl text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] shadow-2xs"
               />
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium inline-flex items-center justify-center text-sm px-4 py-2 border hover:bg-slate-50 transition-colors bg-white">
-                <Filter className="h-4 w-4" /> {roleFilter === "ALL" ? "All Roles" : formatRole(roleFilter)}
+              <DropdownMenuTrigger className="border-slate-200 text-[#1D1D1F] h-9 rounded-xl shrink-0 gap-2 font-medium inline-flex items-center justify-center text-xs px-3 border hover:bg-slate-50 transition-colors bg-white shadow-2xs cursor-pointer">
+                <Filter className="h-3.5 w-3.5 text-slate-500" /> {roleFilter === "ALL" ? "All Roles" : formatRole(roleFilter)}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white border-[#E2E8F0] shadow-lg p-1">
-                <DropdownMenuItem onClick={() => setRoleFilter("ALL")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">All Roles</DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#E2E8F0]" />
-                <DropdownMenuItem onClick={() => setRoleFilter("SUPERADMIN")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Admin</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("OWNER")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Property Owner</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("TENANT")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Tenant</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("INSPECTOR")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">Inspector</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white border-slate-200 shadow-lg p-1">
+                <DropdownMenuItem onClick={() => setRoleFilter("ALL")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">All Roles</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-slate-100" />
+                <DropdownMenuItem onClick={() => setRoleFilter("SUPERADMIN")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">Admin</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("OWNER")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">Property Owner</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("TENANT")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">Tenant</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRoleFilter("INSPECTOR")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">Inspector</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="border-[#E2E8F0] text-[#0F172A] h-10 rounded-xl shrink-0 gap-2 font-medium hidden sm:inline-flex items-center justify-center text-sm px-4 py-2 border hover:bg-slate-50 transition-colors bg-white">
-                <Filter className="h-4 w-4" /> {statusFilter === "ALL" ? "All Status" : statusFilter}
+              <DropdownMenuTrigger className="border-slate-200 text-[#1D1D1F] h-9 rounded-xl shrink-0 gap-2 font-medium hidden sm:inline-flex items-center justify-center text-xs px-3 border hover:bg-slate-50 transition-colors bg-white shadow-2xs cursor-pointer">
+                <Filter className="h-3.5 w-3.5 text-slate-500" /> {statusFilter === "ALL" ? "All Status" : statusFilter}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 rounded-xl bg-white border-[#E2E8F0] shadow-lg p-1">
-                <DropdownMenuItem onClick={() => setStatusFilter("ALL")} className="cursor-pointer rounded-lg font-semibold text-[#0F172A]">All Status</DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#E2E8F0]" />
-                <DropdownMenuItem onClick={() => setStatusFilter("Active")} className="cursor-pointer rounded-lg font-semibold text-[#16A34A]"><CheckCircle2 className="h-4 w-4 mr-2" /> Active</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("Inactive")} className="cursor-pointer rounded-lg font-semibold text-[#EF4444]"><Ban className="h-4 w-4 mr-2" /> Inactive</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-40 rounded-xl bg-white border-slate-200 shadow-lg p-1">
+                <DropdownMenuItem onClick={() => setStatusFilter("ALL")} className="cursor-pointer rounded-lg font-medium text-xs text-[#1D1D1F]">All Status</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-slate-100" />
+                <DropdownMenuItem onClick={() => setStatusFilter("Active")} className="cursor-pointer rounded-lg font-medium text-xs text-emerald-800"><CheckCircle2 className="h-3.5 w-3.5 mr-2 text-emerald-600" /> Active</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Inactive")} className="cursor-pointer rounded-lg font-medium text-xs text-rose-800"><Ban className="h-3.5 w-3.5 mr-2 text-rose-600" /> Inactive</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -355,15 +355,15 @@ export default function AdminUsersPage() {
 
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-[#F8FAFC]">
-              <TableRow className="border-[#E2E8F0] hover:bg-transparent">
-                <TableHead className="w-12 text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">#</TableHead>
-                <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">User</TableHead>
-                <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">Role</TableHead>
-                <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">Contact</TableHead>
-                <TableHead className="text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">Created</TableHead>
-                <TableHead className="text-right text-[#64748B] font-extrabold text-[10px] uppercase tracking-wider">
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="border-slate-100 hover:bg-transparent">
+                <TableHead className="w-12 text-[#6E6E73] font-normal text-xs">#</TableHead>
+                <TableHead className="text-[#6E6E73] font-normal text-xs">User</TableHead>
+                <TableHead className="text-[#6E6E73] font-normal text-xs">Role</TableHead>
+                <TableHead className="text-[#6E6E73] font-normal text-xs">Status</TableHead>
+                <TableHead className="text-[#6E6E73] font-normal text-xs">Contact</TableHead>
+                <TableHead className="text-[#6E6E73] font-normal text-xs">Created</TableHead>
+                <TableHead className="text-right text-[#6E6E73] font-normal text-xs">
                   Actions
                 </TableHead>
               </TableRow>
@@ -371,7 +371,7 @@ export default function AdminUsersPage() {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-[#64748B]">
+                  <TableCell colSpan={7} className="h-32 text-center text-[#6E6E73] text-xs font-normal">
                     No users found matching your search.
                   </TableCell>
                 </TableRow>
@@ -380,46 +380,46 @@ export default function AdminUsersPage() {
                   const start = (currentPage - 1) * itemsPerPage;
                   const paginated = filteredUsers.slice(start, start + itemsPerPage);
                   return paginated.map((user, idx) => (
-                    <TableRow key={user.id} className="border-[#E2E8F0] hover:bg-blue-50/50 transition-colors group">
-                      <TableCell className="text-[#64748B] text-sm font-bold">{start + idx + 1}</TableCell>
+                    <TableRow key={user.id} className="border-slate-100 hover:bg-slate-50/60 transition-colors group">
+                      <TableCell className="text-[#6E6E73] text-xs font-normal">{start + idx + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {user.avatar ? (
                             <img
                               src={user.avatar}
                               alt={user.name || "User Avatar"}
-                              className="h-10 w-10 rounded-full object-cover shrink-0 shadow-xs border border-slate-200"
+                              className="h-9 w-9 rounded-full object-cover shrink-0 shadow-2xs border border-slate-200"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                            <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-200/80 text-[#1D1D1F] flex items-center justify-center font-semibold text-xs shrink-0 shadow-2xs">
                               {user.name?.charAt(0)?.toUpperCase() || "U"}
                             </div>
                           )}
                           <div>
-                            <p className="font-extrabold text-[#0F172A] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
-                            <p className="text-xs font-medium text-[#64748B]">{user.email}</p>
+                            <p className="font-semibold text-xs text-[#1D1D1F] group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => handleViewDetails(user.id)}>{user.name || "Unknown User"}</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">{user.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm font-semibold text-[#0F172A]">{formatRole(user.role)}</p>
+                        <p className="text-xs font-semibold text-[#1D1D1F]">{formatRole(user.role)}</p>
                       </TableCell>
                       <TableCell>
                         {user.tenantStatus === "Inactive" ? (
-                          <Badge className="bg-[#FEE2E2] text-[#EF4444] border-0 rounded-lg px-2.5 py-1 font-bold">
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">
                             Inactive
-                          </Badge>
+                          </span>
                         ) : (
-                          <Badge className="bg-[#DCFCE7] text-[#16A34A] border-0 rounded-lg px-2.5 py-1 font-bold">
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                             Active
-                          </Badge>
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm text-[#64748B]">{user.phone || user.email}</p>
+                        <p className="text-xs font-normal text-[#6E6E73]">{user.phone || user.email}</p>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm text-[#64748B]">
+                        <p className="text-xs font-normal text-[#6E6E73]">
                           {new Date(user.createdAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -574,7 +574,7 @@ export default function AdminUsersPage() {
               <Button
                 type="submit"
                 disabled={actionLoading}
-                className="rounded-xl h-11 font-bold px-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center gap-2"
+                className="rounded-xl h-11 font-medium px-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center gap-2"
               >
                 {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save Changes
@@ -623,7 +623,7 @@ export default function AdminUsersPage() {
               <Button
                 onClick={handleDeleteUser}
                 disabled={actionLoading}
-                className="rounded-xl h-11 font-bold px-6 bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
+                className="rounded-xl h-11 font-medium px-6 bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
               >
                 {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Delete User

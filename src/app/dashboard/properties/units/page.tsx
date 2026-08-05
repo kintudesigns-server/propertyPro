@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -87,20 +87,20 @@ export default function UnitsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">All Units</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage all individual units across your portfolio</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">All Units</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage all individual units across your portfolio</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={fetchUnits}
             disabled={loading}
-            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-black rounded-xl text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium rounded-xl text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Link href="/dashboard/properties/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer">
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Add Property
             </Button>
@@ -149,8 +149,8 @@ export default function UnitsPage() {
               <Home className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="font-black text-slate-900 text-base tracking-tight">Unit Directory</h2>
-              <p className="text-xs text-slate-500 font-semibold">Showing {filteredUnits.length} units</p>
+              <h2 className="font-semibold text-slate-900 text-base tracking-tight">Unit Directory</h2>
+              <p className="text-xs text-[#6E6E73] font-normal">Showing {filteredUnits.length} units</p>
             </div>
           </div>
           <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
@@ -195,12 +195,12 @@ export default function UnitsPage() {
             <Table className="w-full">
               <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
                 <TableRow>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Unit</TableHead>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Property</TableHead>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Status</TableHead>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Details</TableHead>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Rent</TableHead>
-                  <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Actions</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Unit</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Property</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Status</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Details</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Rent</TableHead>
+                  <TableHead className="font-medium text-[11px] uppercase text-slate-500 py-3.5 px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-slate-100">
@@ -235,7 +235,7 @@ export default function UnitsPage() {
                         </TableCell>
                         <TableCell className="py-4 px-6">
                           <div className="flex flex-col">
-                            <span className="font-extrabold text-slate-900 text-xs">{u.property?.name}</span>
+                            <span className="font-semibold text-slate-900 text-xs">{u.property?.name}</span>
                             <span className="text-[10px] text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
                                <MapPin className="h-3 w-3 text-slate-400" />
                                {u.property?.city}
@@ -244,11 +244,11 @@ export default function UnitsPage() {
                         </TableCell>
                         <TableCell className="py-4 px-6">
                           {u.status === "VACANT" ? (
-                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">VACANT</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">VACANT</span>
                           ) : u.status === "OCCUPIED" ? (
-                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">OCCUPIED</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">OCCUPIED</span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
                           )}
                         </TableCell>
                         <TableCell className="py-4 px-6">
@@ -311,11 +311,11 @@ export default function UnitsPage() {
                       
                       <div className="absolute top-3 left-3">
                         {u.status === "VACANT" ? (
-                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
                         ) : u.status === "OCCUPIED" ? (
-                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">Occupied</span>
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">Occupied</span>
                         ) : (
-                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
                         )}
                       </div>
                       <div className="absolute top-3 right-3">
@@ -328,10 +328,10 @@ export default function UnitsPage() {
                     
                     <div className="p-5 flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-black text-slate-900 text-base tracking-tight">Unit {u.name}</h3>
-                        <p className="text-xs text-slate-500 font-semibold mt-0.5 truncate">{u.property?.name}</p>
+                        <h3 className="font-semibold text-slate-900 text-base tracking-tight">Unit {u.name}</h3>
+                        <p className="text-xs text-[#6E6E73] font-normal mt-0.5 truncate">{u.property?.name}</p>
                         
-                        <div className="flex items-center gap-1 text-xs text-slate-500 font-semibold mt-2.5">
+                        <div className="flex items-center gap-1 text-xs text-[#6E6E73] font-normal mt-2.5">
                           <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                           <span className="truncate">{u.property?.city}, {u.property?.country}</span>
                         </div>
@@ -339,7 +339,7 @@ export default function UnitsPage() {
 
                       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                         <div>
-                          <p className="font-black text-slate-900 text-sm">${Number(u.rentAmount).toFixed(2)} <span className="text-[10px] text-slate-500 font-semibold">/mo</span></p>
+                          <p className="font-semibold text-slate-900 text-sm">${Number(u.rentAmount).toFixed(2)} <span className="text-[10px] text-slate-500 font-semibold">/mo</span></p>
                         </div>
                         <Button onClick={() => router.push(`/dashboard/properties/${u.propertyId}/units/${u.id}`)} className="h-8 px-3 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs hover:bg-slate-800 cursor-pointer">
                           Details
@@ -365,3 +365,4 @@ export default function UnitsPage() {
     </div>
   );
 }
+

@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { DispatchVendorModal } from "@/components/maintenance/DispatchVendorModal";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureBlockedOverlay } from "@/components/subscription/FeatureBlockedBanner";
+import { getUserAvatar } from "@/lib/avatar";
 
 export default function MaintenanceDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const featureAccess = useFeatureAccess("maintenance_detail");
@@ -89,7 +90,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
   if (!request) {
     return (
       <div className="p-8 text-center space-y-4">
-        <h2 className="text-xl font-bold text-[#1D1D1F]">Ticket Not Found</h2>
+        <h2 className="text-xl font-semibold text-[#1D1D1F]">Ticket Not Found</h2>
         <Link href="/dashboard/maintenance">
           <Button variant="outline">Back to Requests</Button>
         </Link>
@@ -281,37 +282,37 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         />
       )}
       <div className={isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
-      <div className="max-w-5xl mx-auto space-y-6 pt-6 pb-20 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto space-y-6 pt-4 pb-20 px-2 sm:px-6 font-sans">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="h-10 w-10 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] shadow-xs transition-all"
+            className="h-9 w-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Request Details</h1>
-            <p className="text-xs font-bold text-[#8E8E93] mt-0.5">Ticket ID: <span className="font-mono text-[#6E6E73]">{request.id.split("-")[0].toUpperCase()}</span></p>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Request Details</h1>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Ticket ID: <span className="font-mono">{request.id.split("-")[0].toUpperCase()}</span></p>
           </div>
         </div>
         
         {/* Unpaid badge for Owner */}
         {showUnpaidWarning && !isTenant && (
-          <span className="px-3.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-150 text-[11px] font-extrabold rounded-xl shadow-xs flex items-center gap-1.5 animate-pulse">
+          <span className="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium rounded-xl shadow-2xs flex items-center gap-1.5 animate-pulse">
             <AlertCircle className="h-3.5 w-3.5 text-rose-500" /> Vendor Payout Pending
           </span>
         )}
       </div>
 
       {request.isDuplicateSuspect && (
-        <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/70 text-amber-850 rounded-2xl px-5 py-4 text-xs font-semibold shadow-xs">
-          <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
+        <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/70 text-amber-900 rounded-2xl px-5 py-4 text-xs font-normal shadow-2xs">
+          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
           <span>
             This ticket is flagged as a possible duplicate of a recent open request for the same unit and category.
             {request.duplicateOfId && (
-              <Link href={`/dashboard/maintenance/${request.duplicateOfId}`} className="underline font-bold ml-1.5 text-indigo-650 hover:text-indigo-800">
+              <Link href={`/dashboard/maintenance/${request.duplicateOfId}`} className="underline font-medium ml-1.5 text-slate-900 hover:text-slate-700">
                 View original ticket →
               </Link>
             )}
@@ -320,9 +321,9 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
       )}
 
       {/* Dynamic Progress Stepper */}
-      <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-6">
-        <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 text-indigo-500" /> Ticket Guided Progress
+      <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 space-y-6 font-sans">
+        <h3 className="text-xs font-normal text-[#6E6E73] flex items-center gap-2">
+          <Clock className="h-4 w-4 text-slate-600" /> Ticket Guided Progress
         </h3>
         
         {/* Horizontal Steps */}
@@ -340,34 +341,34 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
               <div key={idx} className="flex flex-col items-center text-center relative group">
                 {/* Connecting Line */}
                 {idx < 4 && (
-                  <div className={`absolute top-4 left-1/2 right-[-50%] h-[3px] z-0 transition-colors duration-300 rounded-full ${
+                  <div className={`absolute top-4 left-1/2 right-[-50%] h-[2px] z-0 transition-colors duration-300 ${
                     getStepState(idx + 1).completed || getStepState(idx + 1).active
-                      ? "bg-indigo-600"
+                      ? "bg-slate-900"
                       : completed
-                        ? "bg-indigo-200"
-                        : "bg-[#F2F2F7]"
+                        ? "bg-slate-400"
+                        : "bg-slate-100"
                   }`} />
                 )}
                 
                 {/* Step Circle */}
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs relative z-10 transition-all duration-300 border-2 ${
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center font-medium text-xs relative z-10 transition-all duration-300 border-2 ${
                   completed
-                    ? "bg-indigo-650 border-indigo-650 text-white shadow-xs scale-105"
+                    ? "bg-slate-900 border-slate-900 text-white shadow-2xs scale-105"
                     : active
-                      ? "bg-white border-indigo-600 text-indigo-600 shadow-md ring-4 ring-indigo-50 scale-105 animate-pulse"
+                      ? "bg-white border-slate-900 text-slate-900 shadow-xs ring-4 ring-slate-100 scale-105"
                       : "bg-white text-slate-300 border-slate-200"
                 }`}>
                   {completed ? "✓" : idx + 1}
                 </div>
                 
                 {/* Labels */}
-                <div className="mt-3.5 space-y-0.5">
-                  <p className={`text-[11px] font-black transition-colors ${
-                    completed || active ? "text-[#1D1D1F]" : "text-[#8E8E93]"
+                <div className="mt-3 space-y-0.5">
+                  <p className={`text-xs transition-colors ${
+                    completed || active ? "font-semibold text-[#1D1D1F]" : "font-normal text-[#6E6E73]"
                   }`}>
                     {step.label}
                   </p>
-                  <p className="text-[10px] font-medium text-[#8E8E93] block md:inline max-w-[90px] mx-auto leading-tight">
+                  <p className="text-[11px] font-normal text-[#6E6E73] block md:inline max-w-[90px] mx-auto leading-tight">
                     {step.desc}
                   </p>
                 </div>
@@ -377,11 +378,11 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         </div>
 
         {/* Current status explanation */}
-        <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-2.5">
-            <span className="h-2 w-2 rounded-full bg-indigo-600 animate-ping shrink-0" />
-            <p className="text-xs font-semibold text-slate-650">
-              <span className="font-extrabold text-slate-800">Current Action:</span>{" "}
+            <span className="h-2 w-2 rounded-full bg-slate-900 animate-ping shrink-0" />
+            <p className="text-xs font-normal text-[#6E6E73]">
+              <span className="font-semibold text-[#1D1D1F]">Current Action:</span>{" "}
               {request.status === "SUBMITTED" && "Awaiting assignment or dispatch."}
               {request.status === "ASSIGNED" && "Inspector assigned. Scheduling diagnosis visit."}
               {request.status === "DIAGNOSIS_SCHEDULED" && "Inspector visit scheduled. Awaiting on-site diagnosis."}
@@ -395,12 +396,12 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             </p>
           </div>
           {request.status === "AWAITING_APPROVAL" && !isTenant && (
-            <span className="text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200/60 shadow-xs animate-pulse">
+            <span className="text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md border border-amber-200">
               Requires Approval
             </span>
           )}
           {request.status === "CLOSED" && !request.vendorExpenseTransactionId && !isTenant && (
-            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg border border-rose-200/60 shadow-xs">
+            <span className="text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-700 px-2.5 py-1 rounded-md border border-rose-200">
               Payout Pending
             </span>
           )}
@@ -434,35 +435,34 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
         
         {/* Left Column - Main Details */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-200 overflow-hidden">
-            {/* Premium Header Banner */}
-            <div className="bg-[#1D1D1F] p-8 text-white border-b border-slate-800 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)]" />
-              <div className="flex justify-between items-start gap-4 relative z-10">
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-200 overflow-hidden font-sans">
+            {/* Header Banner */}
+            <div className="bg-white p-6 sm:p-8 border-b border-slate-100">
+              <div className="flex justify-between items-start gap-4">
                 <div>
-                  <div className="flex flex-wrap gap-1.5 mb-3.5">
-                    <span className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider bg-white/10 text-slate-200 border border-white/10">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-[#6E6E73] border border-slate-200/60">
                       {request.category}
                     </span>
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider border ${
-                      request.priority === "EMERGENCY" ? "bg-rose-500/10 text-rose-300 border-rose-500/25" :
-                      request.priority === "HIGH" ? "bg-orange-500/10 text-orange-300 border-orange-500/25" :
-                      "bg-white/10 text-slate-200 border-white/10"
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border ${
+                      request.priority === "EMERGENCY" ? "bg-rose-50 text-rose-700 border-rose-200" :
+                      request.priority === "HIGH" ? "bg-amber-50 text-amber-800 border-amber-200" :
+                      "bg-slate-100 text-[#6E6E73] border-slate-200/60"
                     }`}>
                       {request.priority} PRIORITY
                     </span>
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider border ${
-                      request.status === "CLOSED" ? "bg-slate-500/15 text-slate-300 border-slate-500/20" :
-                      ["RESOLVED", "PENDING_TENANT_CONFIRMATION"].includes(request.status) ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/20" :
-                      "bg-indigo-500/15 text-indigo-300 border-indigo-500/20"
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border ${
+                      request.status === "CLOSED" ? "bg-slate-100 text-slate-500 border-slate-200/60" :
+                      ["RESOLVED", "PENDING_TENANT_CONFIRMATION"].includes(request.status) ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                      "bg-purple-50 text-purple-700 border-purple-200"
                     }`}>
-                      {request.status.replace("_", " ")}
+                      {request.status.replace(/_/g, " ")}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-black tracking-tight leading-tight">{request.title}</h2>
+                  <h2 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight leading-tight">{request.title}</h2>
                 </div>
-                <div className="h-14 w-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10 shadow-inner">
-                  <Wrench className="h-7 w-7 text-indigo-400" />
+                <div className="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-700">
+                  <Wrench className="h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -478,7 +478,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 } space-y-4`}>
                   <div className="flex justify-between items-start gap-4 flex-wrap">
                     <div className="space-y-1">
-                      <p className={`text-[10px] font-black uppercase tracking-wider ${
+                      <p className={`text-[10px] font-semibold uppercase tracking-wider ${
                         (request.tenantConfirmedSchedule || request.entryPermission)
                           ? 'text-emerald-700' 
                           : request.rescheduleRequested 
@@ -511,15 +511,15 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                     </div>
                     <div>
                       {(request.tenantConfirmedSchedule || request.entryPermission) ? (
-                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm">
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-semibold uppercase tracking-wider rounded-full shadow-sm">
                           {request.entryPermission ? "Auto-Confirmed" : (isTenant ? "Confirmed by you" : "Confirmed by tenant")}
                         </span>
                       ) : request.rescheduleRequested ? (
-                        <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm animate-pulse">
+                        <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-semibold uppercase tracking-wider rounded-full shadow-sm animate-pulse">
                           Reschedule Pending
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm animate-pulse">
+                        <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-semibold uppercase tracking-wider rounded-full shadow-sm animate-pulse">
                           {isTenant ? "Awaiting your confirmation" : "Awaiting tenant confirmation"}
                         </span>
                       )}
@@ -615,43 +615,43 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                 </div>
               )}
 
-              <div className="">
-                <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Issue Description
+              <div>
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-2 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-slate-700" /> Issue Description
                 </h3>
-                <p className="text-[15px] font-medium text-slate-700 leading-relaxed bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm whitespace-pre-wrap">
+                <p className="text-xs font-normal text-[#1D1D1F] leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-200/60 shadow-2xs whitespace-pre-wrap">
                   {request.description}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5">
-                  <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                    <Clock className="h-4 w-4" /> Preferred Schedule
+                <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4">
+                  <h3 className="text-xs font-normal text-[#6E6E73] mb-1.5 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-slate-700" /> Preferred Schedule
                   </h3>
-                  <p className="text-[15px] font-bold text-blue-900 leading-tight">
+                  <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">
                     {request.preferredTimes || "No preferred times specified"}
                   </p>
                 </div>
-                <div className={`${request.entryPermission ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'} border rounded-2xl p-5`}>
-                  <h3 className={`text-[11px] font-black uppercase tracking-widest mb-2 flex items-center gap-2 ${request.entryPermission ? 'text-emerald-500' : 'text-rose-400'}`}>
-                    <Home className="h-4 w-4" /> Entry Permission
+                <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4">
+                  <h3 className="text-xs font-normal text-[#6E6E73] mb-1.5 flex items-center gap-2">
+                    <Home className="h-4 w-4 text-slate-700" /> Entry Permission
                   </h3>
-                  <p className={`text-[15px] font-bold leading-tight ${request.entryPermission ? 'text-emerald-900' : 'text-rose-900'}`}>
-                    {request.entryPermission ? "✅ Granted (Can enter if not home)" : "❌ Must be home"}
+                  <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">
+                    {request.entryPermission ? "✓ Granted (Can enter if not home)" : "❌ Must be home"}
                   </p>
                 </div>
               </div>
               
               {request.photos && request.photos.length > 0 && (
-                <div className="pt-4">
-                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Camera className="h-4 w-4" /> Attached Evidence
+                <div className="pt-2">
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-3 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-slate-700" /> Attached Evidence
                   </h3>
                   <div className="flex flex-wrap gap-4">
                     {request.photos.map((photo: string, i: number) => (
-                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-                        <img src={photo} alt="Issue photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition-all">
+                        <img src={photo} alt="Issue photo" className="h-28 w-28 object-cover group-hover:scale-105 transition-transform duration-300" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </a>
                     ))}
@@ -661,13 +661,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.diagnosisPhotos && request.diagnosisPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Camera className="h-4 w-4 text-blue-500" /> Diagnosis Photos (Before Repair)
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-3 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-slate-700" /> Diagnosis Photos (Before Repair)
                   </h3>
                   <div className="flex flex-wrap gap-4">
                     {request.diagnosisPhotos.map((photo: string, i: number) => (
-                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-                        <img src={photo} alt="Diagnosis photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition-all">
+                        <img src={photo} alt="Diagnosis photo" className="h-28 w-28 object-cover group-hover:scale-105 transition-transform duration-300" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </a>
                     ))}
@@ -677,13 +677,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.repairPhotos && request.repairPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Camera className="h-4 w-4 text-emerald-500" /> Repair Completion Photos (After Repair)
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-3 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-slate-700" /> Repair Completion Photos (After Repair)
                   </h3>
                   <div className="flex flex-wrap gap-4">
                     {request.repairPhotos.map((photo: string, i: number) => (
-                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-                        <img src={photo} alt="Repair photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition-all">
+                        <img src={photo} alt="Repair photo" className="h-28 w-28 object-cover group-hover:scale-105 transition-transform duration-300" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </a>
                     ))}
@@ -693,13 +693,13 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
               {request.receiptPhotos && request.receiptPhotos.length > 0 && (
                 <div className="pt-6 border-t border-slate-100 mt-6">
-                  <h3 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#6E6E73]" /> Material & Parts Receipts
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-slate-700" /> Material &amp; Parts Receipts
                   </h3>
                   <div className="flex flex-wrap gap-4">
                     {request.receiptPhotos.map((photo: string, i: number) => (
-                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-                        <img src={photo} alt="Receipt photo" className="h-32 w-32 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition-all">
+                        <img src={photo} alt="Receipt photo" className="h-28 w-28 object-cover group-hover:scale-105 transition-transform duration-300" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </a>
                     ))}
@@ -721,7 +721,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                       Submitted by <strong>{request.inspector?.name || "Inspector"}</strong> · For reference only — no approval required.
                     </p>
                   </div>
-                  <span className="px-2.5 py-1 bg-teal-100 text-teal-800 border border-teal-200 text-[9px] font-black uppercase tracking-wider rounded-full shrink-0">
+                  <span className="px-2.5 py-1 bg-teal-100 text-teal-800 border border-teal-200 text-[9px] font-semibold uppercase tracking-wider rounded-full shrink-0">
                     Informational
                   </span>
                 </div>
@@ -798,7 +798,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                         <p className="text-[10px] text-teal-600">by {request.inspector?.name || "Inspector"}</p>
                       </div>
                       <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 space-y-1">
-                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-wider">💼 Vendor Quote</p>
+                        <p className="text-[9px] font-semibold text-amber-600 uppercase tracking-wider">💼 Vendor Quote</p>
                         <p className="font-black text-sm text-amber-900">${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}</p>
                         <p className="text-[10px] text-amber-600">by {request.externalVendor?.name || "Vendor"}</p>
                       </div>
@@ -951,33 +951,33 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
             {/* Tenant Review & Feedback */}
             {request.tenantRating !== null && request.tenantRating !== undefined && (
-              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4 mt-6">
-                <h3 className="text-xs font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 md:p-8 space-y-4 mt-6 font-sans">
+                <h3 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider flex items-center gap-2">
                   <Star className="h-4 w-4 text-amber-500 fill-amber-500" /> Tenant Feedback &amp; Rating
                 </h3>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
                         className={`h-4 w-4 ${
                           star <= (request.tenantRating || 0)
-                            ? "text-amber-550 fill-amber-500"
-                            : "text-[#EBEBF0]"
+                            ? "text-amber-400 fill-amber-400"
+                            : "text-slate-200"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs font-bold text-slate-700">({request.tenantRating} / 5)</span>
+                  <span className="text-xs font-semibold text-[#1D1D1F]">({request.tenantRating} / 5)</span>
                 </div>
 
                 {request.tenantFeedback ? (
-                  <p className="text-xs font-medium text-slate-600 italic bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed">
+                  <p className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-normal text-[#6E6E73] italic leading-relaxed shadow-2xs">
                     &ldquo;{request.tenantFeedback}&rdquo;
                   </p>
                 ) : (
-                  <p className="text-xs text-[#8E8E93] italic">No written feedback was provided by the tenant.</p>
+                  <p className="text-xs font-normal text-[#6E6E73] italic">No written feedback was provided by the tenant.</p>
                 )}
               </div>
             )}
@@ -1146,7 +1146,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                         <p className="text-xs font-bold text-red-800 flex items-center gap-1.5"><span>🔴</span> Ruled: Tenant Fault (Split)</p>
                         <p className="text-xs text-red-700">${Number(request.chargebackDepositAmount || 0).toFixed(2)} deducted from deposit (exhausted) + ${Number(request.chargebackInvoiceAmount || 0).toFixed(2)} invoice issued.</p>
                         {request.chargebackInvoiceId && (
-                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-bold text-red-700">View Invoice →</Link>
+                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-medium text-red-700">View Invoice →</Link>
                         )}
                       </>
                     )}
@@ -1155,7 +1155,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                         <p className="text-xs font-bold text-red-800 flex items-center gap-1.5"><span>🔴</span> Ruled: Tenant Fault</p>
                         <p className="text-xs text-red-700">Invoice of ${Number(request.chargebackInvoiceAmount || 0).toFixed(2)} has been generated and sent to the tenant.</p>
                         {request.chargebackInvoiceId && (
-                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-bold text-red-700">View Invoice →</Link>
+                          <Link href={`/dashboard/leases`} className="text-[11px] underline font-medium text-red-700">View Invoice →</Link>
                         )}
                       </>
                     )}
@@ -1200,7 +1200,7 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                           This payout is recorded and logged in your accounting ledger.
                         </p>
                         <Link href={`/dashboard/accounting/transactions?search=VENDOR_PAY_${request.id.slice(-6)}`}>
-                          <Button variant="outline" size="sm" className="w-full border-emerald-200 text-emerald-850 hover:bg-emerald-100/50 bg-white font-bold rounded-xl text-xs h-9 flex items-center justify-center gap-1.5 shadow-sm">
+                          <Button variant="outline" size="sm" className="w-full border-emerald-200 text-emerald-850 hover:bg-emerald-100/50 bg-white font-medium rounded-xl text-xs h-9 flex items-center justify-center gap-1.5 shadow-sm">
                             <ArrowRight className="h-3.5 w-3.5" /> View Transaction in Ledger
                           </Button>
                         </Link>
@@ -1233,44 +1233,44 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
             )}
 
             {/* Elegant Activity Timeline Card */}
-            <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5 mt-6">
-              <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest flex items-center gap-2">
-                <FileText className="h-3.5 w-3.5 text-indigo-500" /> Ticket Activity History
+            <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 space-y-5 mt-6 font-sans">
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
+                <FileText className="h-4 w-4 text-slate-700" /> Ticket Activity History
               </h3>
               
-              <div className="relative border-l-2 border-slate-100 ml-3.5 pl-6 space-y-6 py-1">
+              <div className="relative border-l-2 border-slate-200 ml-3.5 pl-6 space-y-6 py-1">
                 {timelineEvents.map((evt, idx) => {
                   const isLatest = idx === timelineEvents.length - 1;
                   
                   // Color theme configs
-                  let borderClass = "border-indigo-500";
-                  let bgClass = "bg-indigo-600";
-                  let textClass = "text-slate-800 font-bold";
-                  let bgHighlightClass = "ring-indigo-100";
+                  let borderClass = "border-slate-900";
+                  let bgClass = "bg-slate-900";
+                  let textClass = "text-[#1D1D1F] font-semibold";
+                  let bgHighlightClass = "ring-slate-100";
                   
                   if (evt.type === "danger") {
                     borderClass = "border-rose-500";
                     bgClass = "bg-rose-500";
-                    textClass = "text-rose-700 font-bold";
+                    textClass = "text-rose-700 font-semibold";
                     bgHighlightClass = "ring-rose-100";
                   } else if (evt.type === "success") {
                     borderClass = "border-emerald-500";
                     bgClass = "bg-emerald-500";
-                    textClass = "text-emerald-800 font-bold";
+                    textClass = "text-emerald-800 font-semibold";
                     bgHighlightClass = "ring-emerald-100";
                   } else if (evt.type === "neutral") {
                     borderClass = "border-slate-400";
                     bgClass = "bg-slate-500";
-                    textClass = "text-slate-700 font-bold";
+                    textClass = "text-[#6E6E73] font-normal";
                     bgHighlightClass = "ring-slate-100";
                   }
 
                   return (
                     <div key={evt.key} className="relative">
                       {/* Timeline dot */}
-                      <span className={`absolute -left-[31px] top-1.5 h-3.5 w-3.5 rounded-full border-2 bg-white flex items-center justify-center shadow-xs transition-all duration-300 ${
+                      <span className={`absolute -left-[31px] top-1.5 h-3.5 w-3.5 rounded-full border-2 bg-white flex items-center justify-center shadow-2xs transition-all duration-300 ${
                         isLatest 
-                          ? `${borderClass} ring-4 ${bgHighlightClass} animate-pulse scale-110` 
+                          ? `${borderClass} ring-4 ${bgHighlightClass} scale-110` 
                           : borderClass
                       }`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
@@ -1279,22 +1279,22 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
                       {/* Content details */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className={`text-xs ${isLatest ? "text-slate-900 font-extrabold text-sm" : textClass}`}>
+                          <h4 className={`text-xs ${isLatest ? "text-[#1D1D1F] font-semibold" : textClass}`}>
                             {evt.title}
                           </h4>
                           {isLatest && (
-                            <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-md border ${
+                            <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider rounded-md border ${
                               evt.type === "danger"
-                                ? "bg-rose-50 text-rose-700 border-rose-150 animate-pulse"
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
                                 : evt.type === "success"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-150"
-                                  : "bg-indigo-50 text-indigo-700 border-indigo-150"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : "bg-purple-50 text-purple-700 border-purple-200"
                             }`}>
                               Current State
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] font-medium text-slate-450 leading-relaxed">
+                        <div className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                           {evt.description}
                         </div>
                       </div>
@@ -1307,80 +1307,90 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Right Column - Meta Data */}
-          <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5">
-            <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5">Location &amp; Tenant</h3>
+          <div className="space-y-6 font-sans">
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 space-y-5">
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Location &amp; Tenant</h3>
             
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#6E6E73]">
-                  <Building className="h-4 w-4" />
-                </div>
+                {request.unit?.property?.images?.[0] ? (
+                  <img
+                    src={request.unit.property.images[0]}
+                    alt={request.unit.property.name}
+                    className="h-9 w-9 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                  />
+                ) : (
+                  <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-700">
+                    <Building className="h-4 w-4" />
+                  </div>
+                )}
                 <div>
-                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Property</p>
-                  <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">{request.unit.property.name}</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Property</p>
+                  <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5 leading-snug">{request.unit.property.name}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#6E6E73]">
+                <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-700">
                   <Home className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Unit</p>
-                  <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">Unit {request.unit.name}</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Unit</p>
+                  <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5 leading-snug">Unit {request.unit.name}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-indigo-50/50 border border-indigo-100/50 flex items-center justify-center shrink-0 text-indigo-500">
-                  <User className="h-4 w-4" />
-                </div>
+                <img
+                  src={getUserAvatar(request.tenant)}
+                  alt={request.tenant.name}
+                  className="h-9 w-9 rounded-full object-cover border border-slate-200 shadow-2xs shrink-0"
+                />
                 <div>
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-wider">Reported By</p>
-                  <p className="font-bold text-slate-850 text-xs mt-0.5 leading-snug">{request.tenant.name}</p>
-                  <p className="text-[11px] font-medium text-slate-450 mt-0.5">{request.tenant.phone || request.tenant.email}</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Reported By</p>
+                  <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5 leading-snug">{request.tenant.name}</p>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{request.tenant.phone || request.tenant.email}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-5">
-            <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5">Assignment Details</h3>
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 space-y-5">
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Assignment Details</h3>
             
-            <div className="space-y-4 text-xs font-semibold text-slate-700">
+            <div className="space-y-4 text-xs">
               <div className="flex gap-3">
-                <Wrench className="h-4 w-4 text-[#8E8E93] shrink-0 mt-0.5" />
+                <Wrench className="h-4 w-4 text-[#6E6E73] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider mb-1">{request.externalVendor ? "Assigned Vendor" : "Assigned Inspector"}</p>
+                  <p className="text-xs font-normal text-[#6E6E73] mb-0.5">{request.externalVendor ? "Assigned Vendor" : "Assigned Inspector"}</p>
                   {request.inspector ? (
                     <>
-                      <p className="font-bold text-slate-800 text-xs leading-snug">{request.inspector.name}</p>
-                      <p className="text-[11px] font-medium text-slate-450 mt-0.5">{request.inspector.phone || "No phone provided"}</p>
+                      <p className="font-semibold text-[#1D1D1F] text-xs leading-snug">{request.inspector.name}</p>
+                      <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{request.inspector.phone || "No phone provided"}</p>
                     </>
                   ) : request.externalVendor ? (
                     <>
-                      <p className="font-bold text-indigo-650 text-xs leading-snug">{request.externalVendor.name}</p>
-                      <p className="text-[11px] font-medium text-slate-450 mt-0.5">{request.externalVendor.phone || "No phone provided"}</p>
+                      <p className="font-semibold text-[#1D1D1F] text-xs leading-snug">{request.externalVendor.name}</p>
+                      <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{request.externalVendor.phone || "No phone provided"}</p>
                     </>
                   ) : (
-                    <p className="font-bold text-[#8E8E93] italic">Unassigned</p>
+                    <p className="font-normal text-[#6E6E73] italic">Unassigned</p>
                   )}
                 </div>
               </div>
               <div className="flex gap-3">
-                <Calendar className="h-4 w-4 text-[#8E8E93] shrink-0 mt-0.5" />
+                <Calendar className="h-4 w-4 text-[#6E6E73] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider mb-1">Created At</p>
-                  <p className="font-bold text-slate-800 text-xs">{format(new Date(request.createdAt), "PPp")}</p>
+                  <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Created At</p>
+                  <p className="font-semibold text-[#1D1D1F] text-xs">{format(new Date(request.createdAt), "PPp")}</p>
                 </div>
               </div>
               {request.scheduledDate && (
                 <div className="flex gap-3">
-                  <Clock className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
+                  <Clock className="h-4 w-4 text-slate-700 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-wider mb-1">Scheduled For</p>
-                    <p className="font-bold text-indigo-950 text-xs">{format(new Date(request.scheduledDate), "PPp")}</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Scheduled For</p>
+                    <p className="font-semibold text-[#1D1D1F] text-xs">{format(new Date(request.scheduledDate), "PPp")}</p>
                   </div>
                 </div>
               )}
@@ -1389,36 +1399,36 @@ export default function MaintenanceDetailsPage({ params }: { params: Promise<{ i
 
           {/* Vendor Dispatch Section for Owner/Inspector */}
           {isOwnerOrAdmin && (
-            <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest border-b border-slate-100 pb-3.5 flex items-center gap-2">
-                <Wrench className="h-3.5 w-3.5 text-indigo-500" /> External Vendor Dispatch
+            <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 space-y-4">
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3 flex items-center gap-2">
+                <Wrench className="h-4 w-4 text-slate-700" /> External Vendor Dispatch
               </h3>
 
               {request.status === "CLOSED" ? (
                 request.externalVendor ? (
-                  <div className="p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl flex justify-between items-center shadow-inner">
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
                     <div>
-                      <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-wider">Assigned Vendor</p>
-                      <p className="text-xs font-bold text-slate-800 mt-0.5">{request.externalVendor.name}</p>
-                      <p className="text-[11px] font-medium text-slate-450">{request.externalVendor.email}</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">Assigned Vendor</p>
+                      <p className="text-xs font-semibold text-[#1D1D1F] mt-0.5">{request.externalVendor.name}</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">{request.externalVendor.email}</p>
                     </div>
-                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-extrabold rounded uppercase tracking-wider">
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium rounded-md uppercase tracking-wider">
                       Completed
                     </span>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#8E8E93] italic">No external vendor was assigned to this request.</p>
+                  <p className="text-xs text-[#6E6E73] font-normal italic">No external vendor was assigned to this request.</p>
                 )
               ) : (
                 <>
-                  <p className="text-xs font-semibold text-slate-450 leading-relaxed">Notify an external provider to handle this request. They will receive a secure magic link to submit estimates without needing to log in.</p>
+                  <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">Notify an external provider to handle this request. They will receive a secure magic link to submit estimates without needing to log in.</p>
                   
                   <div className="flex gap-2 items-center flex-wrap pt-1">
                     <DispatchVendorModal ticketId={request.id} onDispatched={fetchTicket} isReassign={!!request.externalVendor} />
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 text-[11px] font-bold border-slate-200 text-slate-600 rounded-xl hover:bg-[#F5F5F7] transition-all flex-1 min-w-[140px]"
+                      className="h-9 text-xs font-medium border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 rounded-xl transition-all shadow-2xs flex-1 min-w-[140px] cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(typeof window !== "undefined" ? `${window.location.origin}/vendor/ticket/${request.vendorMagicToken || ""}` : "");
                         toast.success("Magic link copied to clipboard!");

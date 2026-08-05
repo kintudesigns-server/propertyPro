@@ -340,7 +340,7 @@ export default function LeaseDetailsPage() {
   if (!lease) {
     return <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
       <FileText className="h-12 w-12 text-[#94A3B8]" />
-      <h2 className="text-xl font-bold text-[#1D1D1F]">Lease Not Found</h2>
+      <h2 className="text-xl font-semibold text-[#1D1D1F]">Lease Not Found</h2>
       <Button onClick={() => router.back()} className="mt-2">Go Back</Button>
     </div>;
   }
@@ -413,7 +413,7 @@ export default function LeaseDetailsPage() {
       <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 font-sans">
         <Link
           href={isTenant ? "/dashboard/tenant/leases" : "/dashboard/leases"}
-          className="hover:text-slate-900 transition-colors flex items-center gap-1 font-black text-xs text-slate-700 cursor-pointer"
+          className="hover:text-slate-900 transition-colors flex items-center gap-1 font-medium text-xs text-slate-700 cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Leases
         </Link>
@@ -562,13 +562,13 @@ export default function LeaseDetailsPage() {
 
       {/* Owner banner: Limbo State for Move-Out */}
       {isOwner && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (
-        <Card className="p-5 rounded-3xl shadow-xs border bg-amber-50/80 border-amber-200 text-amber-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
+        <Card className="p-5 rounded-3xl shadow-2xs border bg-amber-50/80 border-amber-200 text-amber-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-black text-base flex items-center gap-2 tracking-tight">
+            <h4 className="text-base font-semibold text-amber-900 tracking-tight flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-amber-700" />
               {lease.status === "NOTICE_GIVEN" ? "Move-Out Pending" : "Lease Terminated"}
             </h4>
-            <p className="text-xs font-semibold text-amber-900 mt-1">
+            <p className="text-xs font-normal text-amber-800 mt-1">
               {lease.status === "NOTICE_GIVEN"
                 ? `Tenant is scheduled to move out on ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Use the pipeline below to manage each step.`
                 : "This lease has ended and the unit is vacant."}
@@ -577,7 +577,7 @@ export default function LeaseDetailsPage() {
           {lease.status === "TERMINATED" && (
             <Button
               onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
-              className="bg-amber-900 hover:bg-amber-950 text-white font-black h-9 px-4 rounded-xl text-xs shadow-xs self-stretch md:self-auto shrink-0 cursor-pointer"
+              className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
             >
               View Final Statement
             </Button>
@@ -587,13 +587,13 @@ export default function LeaseDetailsPage() {
 
       {/* Optional: Preliminary Walkthrough */}
       {isOwner && ["MOVE_OUT_REQUESTED", "KEYS_RETURNED"].includes(lease.moveOutStatus) && lease.preliminaryInspectionStatus !== "SKIPPED" && (
-        <Card className="p-5 rounded-[20px] shadow-sm border bg-purple-50 border-purple-200 text-purple-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <Card className="p-5 rounded-3xl shadow-2xs border bg-purple-50/80 border-purple-200 text-purple-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-extrabold text-base flex items-center gap-2">
+            <h4 className="text-base font-semibold text-purple-900 tracking-tight flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-purple-600" />
               Optional: Preliminary Walkthrough
             </h4>
-            <p className="text-sm font-semibold opacity-90 mt-1">
+            <p className="text-xs font-normal text-purple-800 mt-1">
               {lease.preliminaryInspectionStatus === "NONE" 
                 ? "Offer the tenant a preliminary walkthrough to identify issues before they move out." 
                 : lease.preliminaryInspectionStatus === "SCHEDULED" 
@@ -606,14 +606,13 @@ export default function LeaseDetailsPage() {
               <>
                 <Button
                   onClick={() => setShowConfirmSkipPrelim(true)}
-                  variant="outline"
-                  className="bg-transparent border-purple-300 text-purple-700 hover:bg-purple-100 font-bold h-10 px-4 rounded-xl text-xs"
+                  className="h-9 border border-purple-200 bg-white text-purple-900 hover:bg-purple-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer"
                 >
                   Skip
                 </Button>
                 <Button
                   onClick={() => setScheduleInspectionType("PRELIMINARY")}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+                  className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
                 >
                   Schedule Walkthrough
                 </Button>
@@ -628,7 +627,7 @@ export default function LeaseDetailsPage() {
                     toast.error("This is assigned to another inspector.");
                   }
                 }}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+                className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
               >
                 Start Walkthrough
               </Button>
@@ -636,7 +635,7 @@ export default function LeaseDetailsPage() {
             {lease.preliminaryInspectionStatus === "COMPLETED" && (
               <Button
                 onClick={() => setShowPrelimResultsModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm"
+                className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
               >
                 View Results
               </Button>
@@ -647,28 +646,28 @@ export default function LeaseDetailsPage() {
 
       {/* Owner Move-Out Pipeline — 4-Step Linear Wizard */}
       {isOwner && lease.status === "NOTICE_GIVEN" && (
-        <Card className="rounded-3xl shadow-xs border border-slate-200 bg-white text-slate-900 overflow-hidden font-sans">
+        <Card className="rounded-3xl shadow-xs border border-slate-200 bg-white text-[#1D1D1F] overflow-hidden font-sans">
           {/* Panel Header */}
           <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider bg-slate-100 px-3 py-1 rounded-md border border-slate-200 shadow-2xs">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                 Move-Out Pipeline
               </span>
-              <h3 className="text-xl font-black mt-2 text-slate-900 tracking-tight">Unit Turnover — 4 Steps</h3>
-              <p className="text-slate-500 text-xs mt-0.5 font-semibold">
-                Tenant: <strong className="text-slate-900 font-extrabold">{lease.tenant?.name}</strong>
-                {" · "}Requested: <strong className="text-slate-900 font-extrabold">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}</strong>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-2">Unit Turnover — 4 Steps</h3>
+              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
+                Tenant: <strong className="font-semibold text-[#1D1D1F]">{lease.tenant?.name}</strong>
+                {" · "}Requested: <strong className="font-semibold text-[#1D1D1F]">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}</strong>
               </p>
             </div>
             {lease.depositDueBy && (() => {
               const daysLeft = Math.ceil((new Date(lease.depositDueBy).getTime() - Date.now()) / 86400000);
               const urgent = daysLeft <= 5;
               return (
-                <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black shrink-0 ${urgent ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-amber-50 border-amber-200 text-amber-900"}`}>
-                  <Clock className="h-4 w-4" />
+                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs shadow-2xs shrink-0 ${urgent ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-amber-50 border-amber-200 text-amber-900"}`}>
+                  <Clock className="h-4 w-4 text-amber-700" />
                   <div>
-                    <p className="text-[9px] uppercase tracking-wider opacity-70">Deposit Deadline</p>
-                    <p>{daysLeft <= 0 ? "⚠️ OVERDUE" : `${daysLeft} days left`}</p>
+                    <p className="text-[10px] font-normal text-amber-700 uppercase tracking-wider">Deposit Deadline</p>
+                    <p className="font-semibold text-xs text-amber-900">{daysLeft <= 0 ? "⚠️ OVERDUE" : `${daysLeft} days left`}</p>
                   </div>
                 </div>
               );
@@ -683,29 +682,29 @@ export default function LeaseDetailsPage() {
               const done = !!lease.actualMoveOutDate;
               return (
                 <div className={`px-6 py-4 flex items-start gap-4 ${done ? "opacity-60" : ""}`}>
-                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${done ? "bg-emerald-600 border-emerald-600 text-white" : "bg-slate-900 border-slate-900 text-white"}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-semibold ${done ? "bg-emerald-600 border-emerald-600 text-white" : "bg-slate-900 border-slate-900 text-white"}`}>
                     {done ? "✓" : "1"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-black text-slate-900">Key Return &amp; Move-Out Date</p>
+                      <p className="text-base font-semibold text-[#1D1D1F] tracking-tight">Key Return &amp; Move-Out Date</p>
                       {done
-                        ? <span className="text-[9px] font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0 uppercase tracking-wider">Done</span>
-                        : <span className="text-[9px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0 uppercase tracking-wider">Action Needed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs shrink-0">Done</span>
+                        : <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">Action Needed</span>
                       }
                     </div>
                     {done ? (
-                      <p className="text-xs text-slate-500 font-semibold mt-1">
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">
                         Keys confirmed on {new Date(lease.actualMoveOutDate).toLocaleDateString()}.
-                        {lease.depositDueBy && <> Deposit due by <strong className="text-amber-800">{new Date(lease.depositDueBy).toLocaleDateString()}</strong>.</>}
+                        {lease.depositDueBy && <> Deposit due by <strong className="font-semibold text-[#1D1D1F]">{new Date(lease.depositDueBy).toLocaleDateString()}</strong>.</>}
                       </p>
                     ) : (
                       <>
-                        <p className="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">
+                        <p className="text-xs text-[#6E6E73] font-normal mt-1 leading-relaxed">
                           Confirm when keys are physically returned. This locks the move-out date and starts the 21-day legal deposit deadline.
                         </p>
-                        <Button onClick={() => setShowKeyReturnModal(true)} className="mt-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black h-9 px-4 rounded-xl shadow-xs cursor-pointer">
-                          <KeyRound className="h-3.5 w-3.5 mr-1.5" />Confirm Key Return
+                        <Button onClick={() => setShowKeyReturnModal(true)} className="mt-3 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center gap-1.5">
+                          <KeyRound className="h-3.5 w-3.5" />Confirm Key Return
                         </Button>
                       </>
                     )}
@@ -724,76 +723,70 @@ export default function LeaseDetailsPage() {
               const current = keysReturned && !inspectionDone;
               return (
                 <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : inspectionDone ? "opacity-60" : ""}`}>
-                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${inspectionDone ? "bg-emerald-500 border-emerald-500 text-white" : current ? "bg-white border-blue-500 text-blue-600" : "bg-slate-50 border-slate-200 text-[#8E8E93]"}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-semibold ${inspectionDone ? "bg-emerald-600 border-emerald-600 text-white" : current ? "bg-white border-blue-600 text-blue-600" : "bg-slate-50 border-slate-200 text-[#6E6E73]"}`}>
                     {inspectionDone ? "✓" : "2"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-black text-slate-900">Property Inspection</p>
+                      <p className="text-base font-semibold text-[#1D1D1F] tracking-tight">Property Inspection</p>
                       {inspectionDone
-                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Completed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs shrink-0">Completed</span>
                         : inspectionScheduled
-                        ? <span className="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shrink-0">Scheduled</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs shrink-0">Scheduled</span>
                         : locked
-                        ? <span className="text-[9px] font-black text-[#6E6E73] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">Locked</span>
-                        : <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Action Needed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs shrink-0">Locked</span>
+                        : <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">Action Needed</span>
                       }
                     </div>
                     {inspectionDone ? (
-                      <p className="text-xs text-[#6E6E73] font-semibold mt-1">
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">
                         Inspection report submitted{lease.inspectionDate ? ` on ${new Date(lease.inspectionDate).toLocaleDateString()}` : ""}.
                       </p>
                     ) : inspectionScheduled ? (
-                      <p className="text-xs text-[#6E6E73] font-semibold mt-1">
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">
                         Scheduled for {new Date(lease.inspectionDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}.
                         {lease.moveOutInspector && <> Inspector: {lease.moveOutInspector.name}.</>}
                       </p>
                     ) : locked ? (
-                      <p className="text-xs text-[#8E8E93] font-semibold mt-1">Confirm key return first to unlock inspection.</p>
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">Confirm key return first to unlock inspection.</p>
                     ) : (
                       <>
-                        <p className="text-xs text-[#6E6E73] font-semibold mt-1 leading-relaxed">
+                        <p className="text-xs text-[#6E6E73] font-normal mt-1 leading-relaxed">
                           Keys returned. You can now schedule an inspection or skip it if no damages are suspected.
                         </p>
                         <div className="flex flex-col gap-3 mt-4">
                           <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => setSelfInspectMode("final")} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200 hover:border-indigo-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
-                              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <CheckCircle2 className="h-12 w-12 text-indigo-600" />
-                              </div>
-                              <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs mb-1.5 z-10">
-                                <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <button onClick={() => setSelfInspectMode("final")} className="relative overflow-hidden flex flex-col items-start p-4 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl text-left transition-all group cursor-pointer shadow-2xs">
+                              <div className="flex items-center gap-2 text-[#1D1D1F] font-semibold text-xs mb-1.5">
+                                <div className="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
                                   <CheckCircle2 className="h-3.5 w-3.5" />
                                 </div>
                                 Self-Inspect
                               </div>
-                              <p className="text-[10px] text-[#6E6E73] font-medium leading-relaxed max-w-[85%] z-10">Use our guided room-by-room checklist with photo uploads.</p>
+                              <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">Use our guided room-by-room checklist with photo uploads.</p>
                             </button>
                             
-                            <button onClick={() => setScheduleInspectionType("FINAL")} className="relative overflow-hidden flex flex-col items-start p-4 bg-gradient-to-br from-slate-50 to-white border border-slate-200 hover:border-slate-400 hover:shadow-sm rounded-2xl text-left transition-all duration-300 group">
-                              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <Settings className="h-12 w-12 text-slate-600" />
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-900 font-bold text-xs mb-1.5 z-10">
-                                <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                            <button onClick={() => setScheduleInspectionType("FINAL")} className="relative overflow-hidden flex flex-col items-start p-4 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl text-left transition-all group cursor-pointer shadow-2xs">
+                              <div className="flex items-center gap-2 text-[#1D1D1F] font-semibold text-xs mb-1.5">
+                                <div className="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
                                   <Settings className="h-3.5 w-3.5" />
                                 </div>
                                 Assign Inspector
                               </div>
-                              <p className="text-[10px] text-[#6E6E73] font-medium leading-relaxed max-w-[85%] z-10">Send a professional inspector from your team to the unit.</p>
+                              <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">Send a professional inspector from your team to the unit.</p>
                             </button>
                           </div>
 
-                          <button onClick={() => setShowBypassModal(true)} className="relative overflow-hidden flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-50 to-white border border-amber-200 hover:border-amber-400 hover:shadow-sm rounded-xl text-left transition-all duration-300 group">
-                            <div className="flex flex-col z-10">
-                              <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs mb-0.5">
-                                <CheckCircle className="h-3.5 w-3.5" /> 
+                          <button onClick={() => setShowBypassModal(true)} className="relative overflow-hidden flex items-center justify-between p-3.5 bg-amber-50/50 border border-amber-200 hover:border-amber-300 rounded-2xl text-left transition-all group cursor-pointer shadow-2xs">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1.5 text-amber-900 font-semibold text-xs mb-0.5">
+                                <CheckCircle className="h-3.5 w-3.5 text-amber-700" /> 
                                 Skip Inspection (Refund Full Deposit)
                               </div>
-                              <p className="text-[10px] text-[#6E6E73] font-medium">Bypass the physical inspection and advance directly to closing with zero deductions. Reason & acknowledgment required.</p>
+                              <p className="text-xs font-normal text-[#6E6E73]">Bypass physical inspection and advance directly to closing with zero deductions.</p>
                             </div>
-                            <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors shrink-0 z-10">
-                              <ArrowUpRight className="h-4 w-4" />
+                            <div className="h-7 w-7 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800 shrink-0">
+                              <ArrowUpRight className="h-3.5 w-3.5" />
                             </div>
                           </button>
                         </div>
@@ -813,30 +806,30 @@ export default function LeaseDetailsPage() {
               const needsAction = ["OWNER_REVIEWING", "TENANT_DISPUTED"].includes(lease.moveOutStatus);
               return (
                 <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : settled ? "opacity-60" : ""}`}>
-                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${settled ? "bg-emerald-500 border-emerald-500 text-white" : needsAction ? "bg-white border-blue-500 text-blue-600" : inspectionDone ? "bg-white border-amber-500 text-amber-600" : "bg-slate-50 border-slate-200 text-[#8E8E93]"}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-semibold ${settled ? "bg-emerald-600 border-emerald-600 text-white" : needsAction ? "bg-white border-blue-600 text-blue-600" : inspectionDone ? "bg-white border-amber-600 text-amber-600" : "bg-slate-50 border-slate-200 text-[#6E6E73]"}`}>
                     {settled ? "✓" : "3"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-black text-slate-900">Review &amp; Price Deductions</p>
+                      <p className="text-base font-semibold text-[#1D1D1F] tracking-tight">Review &amp; Price Deductions</p>
                       {settled
-                        ? <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">Done</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs shrink-0">Done</span>
                         : lease.moveOutStatus === "TENANT_DISPUTED"
-                        ? <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Disputed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">Disputed</span>
                         : lease.moveOutStatus === "INSPECTION_COMPLETED"
-                        ? <span className="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shrink-0">Tenant Reviewing</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs shrink-0">Tenant Reviewing</span>
                         : needsAction
-                        ? <span className="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">Action Needed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">Action Needed</span>
                         : locked
-                        ? <span className="text-[9px] font-black text-[#6E6E73] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">Locked</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs shrink-0">Locked</span>
                         : null
                       }
                     </div>
                     {locked ? (
-                      <p className="text-xs text-[#8E8E93] font-semibold mt-1">Complete the inspection first to unlock this step.</p>
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">Complete the inspection first to unlock this step.</p>
                     ) : (
                       <>
-                        <p className="text-xs text-[#6E6E73] font-semibold mt-1 leading-relaxed">
+                        <p className="text-xs text-[#6E6E73] font-normal mt-1 leading-relaxed">
                           {lease.moveOutStatus === "OWNER_REVIEWING"
                             ? "Inspection done. Price each damage item and send the statement to the tenant."
                             : lease.moveOutStatus === "TENANT_DISPUTED"
@@ -850,7 +843,7 @@ export default function LeaseDetailsPage() {
                         {!settled && (
                           <Button
                             onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
-                            className="mt-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black h-9 px-4 rounded-xl shadow-xs cursor-pointer"
+                            className="mt-3 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center gap-1.5"
                           >
                             {lease.moveOutStatus === "OWNER_REVIEWING" ? "Price & Send Statement" : lease.moveOutStatus === "TENANT_DISPUTED" ? "Resolve Dispute" : "Open Final Statement"}
                           </Button>
@@ -872,34 +865,34 @@ export default function LeaseDetailsPage() {
               const refund = Math.max(0, originalDeposit - totalDeducted);
               return (
                 <div className={`px-6 py-4 flex items-start gap-4 ${locked ? "opacity-40" : ""}`}>
-                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-black ${settled ? "bg-emerald-600 border-emerald-600 text-white" : ready ? "bg-emerald-50 border-emerald-600 text-emerald-800" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                  <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 text-xs font-semibold ${settled ? "bg-emerald-600 border-emerald-600 text-white" : ready ? "bg-emerald-50 border-emerald-600 text-emerald-800" : "bg-slate-50 border-slate-200 text-[#6E6E73]"}`}>
                     {settled ? "✓" : "4"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-black text-slate-900">Settle Deposit &amp; Close Lease</p>
+                      <p className="text-base font-semibold text-[#1D1D1F] tracking-tight">Settle Deposit &amp; Close Lease</p>
                       {settled
-                        ? <span className="text-[9px] font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0 uppercase tracking-wider">Closed</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs shrink-0">Closed</span>
                         : ready
-                        ? <span className="text-[9px] font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0 uppercase tracking-wider">Ready</span>
-                        : <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 shrink-0 uppercase tracking-wider">Locked</span>
+                        ? <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs shrink-0">Ready</span>
+                        : <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs shrink-0">Locked</span>
                       }
                     </div>
                     {settled ? (
-                      <p className="text-xs text-slate-500 font-semibold mt-1">
-                        Lease closed. Refund of <strong className="text-emerald-700">${refund.toFixed(2)}</strong> issued via {lease.refundMethod === "ORIGINAL" ? "original payment method" : lease.refundMethod === "CHECK" ? "mailed check" : "bank transfer"}.
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">
+                        Lease closed. Refund of <strong className="font-semibold text-[#1D1D1F]">${refund.toFixed(2)}</strong> issued via {lease.refundMethod === "ORIGINAL" ? "original payment method" : lease.refundMethod === "CHECK" ? "mailed check" : "bank transfer"}.
                       </p>
                     ) : ready ? (
                       <>
-                        <p className="text-xs text-slate-500 font-semibold mt-1">
-                          Tenant accepted. Issue the refund of <strong className="text-emerald-700">${refund.toFixed(2)}</strong> and officially close the lease.
+                        <p className="text-xs text-[#6E6E73] font-normal mt-1">
+                          Tenant accepted. Issue the refund of <strong className="font-semibold text-emerald-700">${refund.toFixed(2)}</strong> and officially close the lease.
                         </p>
-                        <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="mt-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black h-9 px-4 rounded-xl shadow-xs cursor-pointer">
+                        <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="mt-3 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center gap-1.5">
                           Finalize &amp; Process Refund
                         </Button>
                       </>
                     ) : (
-                      <p className="text-xs text-slate-400 font-semibold mt-1">Tenant must accept the statement before you can settle the deposit.</p>
+                      <p className="text-xs text-[#6E6E73] font-normal mt-1">Tenant must accept the statement before you can settle the deposit.</p>
                     )}
                   </div>
                 </div>
@@ -943,7 +936,7 @@ export default function LeaseDetailsPage() {
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Lease Agreement</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Lease Agreement</h1>
             <div className="flex items-center gap-2.5 mt-0.5">
               <span className="text-[10px] font-extrabold text-slate-400 tracking-wider uppercase">ID: {lease.id.substring(0,8)}</span>
               {getStatusBadge(lease.status)}
@@ -975,7 +968,7 @@ export default function LeaseDetailsPage() {
                 <div className="group relative flex-1 md:flex-none">
                   <Button 
                     disabled
-                    className="w-full h-9 rounded-xl font-black text-xs bg-slate-100 text-slate-400 shadow-2xs opacity-100"
+                    className="w-full h-9 rounded-xl font-medium text-xs bg-slate-100 text-slate-400 shadow-2xs opacity-100"
                   >
                     <Lock className="mr-1.5 h-3.5 w-3.5" /> Locked
                   </Button>
@@ -998,7 +991,7 @@ export default function LeaseDetailsPage() {
                 <div className="group relative flex-1 md:flex-none">
                   <Button 
                     disabled
-                    className="w-full h-9 rounded-xl font-black text-xs bg-slate-100 text-slate-400 shadow-2xs opacity-100"
+                    className="w-full h-9 rounded-xl font-medium text-xs bg-slate-100 text-slate-400 shadow-2xs opacity-100"
                   >
                     <Lock className="mr-1.5 h-3.5 w-3.5" /> Locked
                   </Button>
@@ -1017,21 +1010,21 @@ export default function LeaseDetailsPage() {
               <Button
                 variant="outline"
                 onClick={() => setActiveTab('payments')}
-                className="h-9 rounded-xl font-extrabold text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
+                className="h-9 rounded-xl font-medium text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
               >
                 Manage Payments
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setActiveTab('payments')}
-                className="h-9 rounded-xl font-extrabold text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
+                className="h-9 rounded-xl font-medium text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
               >
                 View Invoices
               </Button>
               <Button
                 variant="outline"
                 onClick={() => router.push(`/dashboard/financials/invoices/new?leaseId=${lease.id}`)}
-                className="h-9 rounded-xl font-extrabold text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
+                className="h-9 rounded-xl font-medium text-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs flex-1 md:flex-none cursor-pointer"
               >
                 <Plus className="mr-1 h-3.5 w-3.5 text-slate-500" /> Quick Invoice
               </Button>
@@ -1040,22 +1033,22 @@ export default function LeaseDetailsPage() {
                   <MoreVertical className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 rounded-2xl border-slate-200 p-1 shadow-xl font-sans">
-                  <DropdownMenuItem onClick={() => generateLeasePDF(lease)} className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl py-2">
+                  <DropdownMenuItem onClick={() => generateLeasePDF(lease)} className="cursor-pointer font-medium text-xs text-slate-900 rounded-xl py-2">
                     <FileDown className="mr-2 h-4 w-4 text-slate-400" /> Download PDF
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl py-2">
+                  <DropdownMenuItem className="cursor-pointer font-medium text-xs text-slate-900 rounded-xl py-2">
                     <ArrowUpRight className="mr-2 h-4 w-4 text-slate-400" /> Full Invoice Page
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
-                    className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl py-2"
+                    className="cursor-pointer font-medium text-xs text-slate-900 rounded-xl py-2"
                   >
                     <ShieldAlert className="mr-2 h-4 w-4 text-amber-600" /> Process Move-Out &amp; Refund
                   </DropdownMenuItem>
                   {lease.status === "SIGNED" && (
                     <DropdownMenuItem
                       onClick={() => setShowConfirmActivate(true)}
-                      className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl py-2"
+                      className="cursor-pointer font-medium text-xs text-slate-900 rounded-xl py-2"
                     >
                       <KeyRound className="mr-2 h-4 w-4 text-slate-400" /> Confirm Key Handover
                     </DropdownMenuItem>
@@ -1063,7 +1056,7 @@ export default function LeaseDetailsPage() {
                   <DropdownMenuItem
                     onClick={() => setShowConfirmTerminate(true)}
                     disabled={lease.status === "TERMINATED" || lease.status === "EXPIRED" || lease.status === "DRAFT"}
-                    className="cursor-pointer font-extrabold text-xs text-rose-600 rounded-xl py-2"
+                    className="cursor-pointer font-medium text-xs text-rose-600 rounded-xl py-2"
                   >
                     <XCircle className="mr-2 h-4 w-4" /> Terminate Lease
                   </DropdownMenuItem>
@@ -1074,27 +1067,31 @@ export default function LeaseDetailsPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shadow-2xs w-fit overflow-x-auto no-scrollbar font-sans">
+      {/* Tab Switcher — Standardized Segment Control */}
+      <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-fit border border-slate-200/30">
         {(() => {
           let baseTabs = isTenant ? ['overview', 'payments', 'documents'] : ['overview', 'payments', 'documents', 'settings'];
           if (lease.moveOutStatus !== "NONE") {
             baseTabs.push('move-out');
           }
           return baseTabs;
-        })().map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-xl font-extrabold text-xs capitalize transition-all cursor-pointer ${
-              activeTab === tab 
-                ? 'bg-slate-900 text-white shadow-2xs' 
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+        })().map(tab => {
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all capitalize flex items-center gap-1.5 cursor-pointer ${
+                isActive
+                  ? "bg-white text-[#1D1D1F] shadow-2xs"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
+              }`}
+            >
+              {tab === "move-out" ? "Move-Out" : tab}
+            </button>
+          );
+        })}
       </div>
 
       {/* Overview Tab Content */}
@@ -1107,10 +1104,10 @@ export default function LeaseDetailsPage() {
               <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 font-sans">
                 <div className="flex justify-between items-start mb-4 gap-4">
                   <div>
-                    <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                       <ShieldAlert className="h-5 w-5 text-amber-600" /> Active Move-Out Pipeline
                     </h2>
-                    <p className="text-xs text-slate-500 font-semibold mt-1">
+                    <p className="text-xs text-[#6E6E73] font-normal mt-1">
                       Current Status: <strong className="text-slate-900 font-extrabold">{
                         lease.status === "TERMINATED" ? "Lease Closed / Terminated" :
                         lease.moveOutStatus === "MOVE_OUT_REQUESTED" ? "Move-Out Requested" :
@@ -1126,7 +1123,7 @@ export default function LeaseDetailsPage() {
                   </div>
                   {isTenant ? (
                     <Link href={`/dashboard/tenant/leases/${lease.id}/move-out`}>
-                      <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black h-9 text-xs rounded-xl shadow-xs shrink-0 cursor-pointer">
+                      <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 text-xs rounded-xl shadow-xs shrink-0 cursor-pointer">
                         {lease.moveOutStatus === "INSPECTION_COMPLETED" ? "⚡ Review Statement & Deductions" : "View Move-Out Details"}
                       </Button>
                     </Link>
@@ -1241,7 +1238,7 @@ export default function LeaseDetailsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 px-3 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white/90 hover:bg-white border-slate-200/90 shadow-xs rounded-xl transition-all"
+                            className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white/90 hover:bg-white border-slate-200/90 shadow-xs rounded-xl transition-all"
                           >
                             <ArrowUpRight className="h-3.5 w-3.5 mr-1 text-slate-500" /> View Listing Details
                           </Button>
@@ -1253,7 +1250,7 @@ export default function LeaseDetailsPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-end">
                       {/* Property Title & Address (Left 7 Cols) */}
                       <div className="lg:col-span-7 space-y-2">
-                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
                           {lease.unit?.property?.name || "Unknown Property"}
                         </h1>
                         <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600">
@@ -1310,40 +1307,48 @@ export default function LeaseDetailsPage() {
             })()}
 
             {/* ─── TENANT INFORMATION CARD ─── */}
-            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-5 font-sans">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-black text-slate-900 flex items-center gap-2 tracking-tight">
+            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-4 font-sans">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 tracking-tight">
                   <User className="h-4 w-4 text-slate-700" /> Tenant Information
                 </h2>
-                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-900 border border-slate-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-2xs">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Primary Tenant
+                <span className="inline-flex items-center gap-1 bg-slate-100 text-[#6E6E73] border border-slate-200/80 text-xs font-medium px-2.5 py-0.5 rounded-lg shadow-2xs">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Primary Tenant
                 </span>
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <div className="h-14 w-14 rounded-2xl bg-slate-900 text-white shadow-xs flex items-center justify-center text-lg font-black shrink-0">
-                  {lease.tenant?.name ? lease.tenant.name.substring(0, 2).toUpperCase() : "U"}
+                <div className="h-14 w-14 rounded-2xl bg-slate-900 text-white shadow-xs flex items-center justify-center text-lg font-semibold shrink-0 overflow-hidden border border-slate-200">
+                  {lease.tenant?.avatar || (lease.tenant as any)?.image ? (
+                    <img
+                      src={lease.tenant.avatar || (lease.tenant as any).image}
+                      alt={lease.tenant?.name || "Tenant profile photo"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    lease.tenant?.name ? lease.tenant.name.substring(0, 2).toUpperCase() : "U"
+                  )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 w-full text-xs font-semibold">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 w-full text-xs">
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Full Name</p>
-                    <p className="text-xs font-black text-slate-900">{lease.tenant?.name || "Unknown Tenant"}</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Full Name</p>
+                    <p className="text-xs font-semibold text-[#1D1D1F]">{lease.tenant?.name || "Unknown Tenant"}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Contact Status</p>
-                    <p className="text-xs font-black text-emerald-800 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Contact Status</p>
+                    <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1 mt-0.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" /> Active Renter
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Email Address</p>
-                    <p className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5 truncate">
+                    <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Email Address</p>
+                    <p className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1.5 truncate">
                       <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {lease.tenant?.email || "N/A"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Phone Number</p>
-                    <p className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5 truncate">
+                    <p className="text-xs font-normal text-[#6E6E73] mb-0.5">Phone Number</p>
+                    <p className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1.5 truncate">
                       <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {lease.tenant?.phone || "N/A"}
                     </p>
                   </div>
@@ -1353,13 +1358,13 @@ export default function LeaseDetailsPage() {
 
             {/* ─── LEASE TERMS & RULES CARD ─── */}
             <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-4 font-sans">
-              <h2 className="text-base font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
+              <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
                 <FileText className="h-4 w-4 text-slate-700" /> Lease Terms &amp; Rules
               </h2>
               <div className="space-y-4">
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                  <h3 className="font-extrabold text-slate-900 text-xs mb-1">Standard Residential Agreement</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                  <h3 className="font-semibold text-slate-900 text-xs mb-1">Standard Residential Agreement</h3>
+                  <p className="text-xs text-[#6E6E73] leading-relaxed font-normal">
                     This lease is a standard fixed-term residential agreement. Rent is due on the 1st of every month. A late fee will be applied on the 5th day of the month if rent is not received in full.
                   </p>
                 </div>
@@ -1367,29 +1372,29 @@ export default function LeaseDetailsPage() {
                 {/* 4 Visual Rule Badges */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                   <div className="bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl text-center space-y-1 shadow-2xs">
-                    <p className="text-[10px] font-extrabold text-rose-800 uppercase tracking-wider">Pets Allowed</p>
-                    <p className="text-xs font-black text-rose-700 flex items-center justify-center gap-1">
+                    <p className="text-xs font-normal text-rose-800">Pets Allowed</p>
+                    <p className="text-xs font-semibold text-rose-700 flex items-center justify-center gap-1">
                       <XCircle className="h-3.5 w-3.5 text-rose-600" /> No Pets
                     </p>
                   </div>
 
                   <div className="bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl text-center space-y-1 shadow-2xs">
-                    <p className="text-[10px] font-extrabold text-rose-800 uppercase tracking-wider">Smoking</p>
-                    <p className="text-xs font-black text-rose-700 flex items-center justify-center gap-1">
+                    <p className="text-xs font-normal text-rose-800">Smoking</p>
+                    <p className="text-xs font-semibold text-rose-700 flex items-center justify-center gap-1">
                       <XCircle className="h-3.5 w-3.5 text-rose-600" /> Strictly No
                     </p>
                   </div>
 
                   <div className="bg-amber-50/70 border border-amber-200/80 p-3 rounded-2xl text-center space-y-1 shadow-2xs">
-                    <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">Subletting</p>
-                    <p className="text-xs font-black text-amber-800 flex items-center justify-center gap-1">
+                    <p className="text-xs font-normal text-amber-900">Subletting</p>
+                    <p className="text-xs font-semibold text-amber-800 flex items-center justify-center gap-1">
                       <AlertCircle className="h-3.5 w-3.5 text-amber-600" /> With Approval
                     </p>
                   </div>
 
                   <div className="bg-emerald-50/70 border border-emerald-200/80 p-3 rounded-2xl text-center space-y-1 shadow-2xs">
-                    <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">Insurance</p>
-                    <p className="text-xs font-black text-emerald-800 flex items-center justify-center gap-1">
+                    <p className="text-xs font-normal text-emerald-900">Insurance</p>
+                    <p className="text-xs font-semibold text-emerald-800 flex items-center justify-center gap-1">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Required
                     </p>
                   </div>
@@ -1402,25 +1407,25 @@ export default function LeaseDetailsPage() {
           <div className="space-y-6 font-sans">
             {/* ─── LEASE SUMMARY CARD ─── */}
             <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-4">
-              <h2 className="text-base font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
+              <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
                 <Calendar className="h-4 w-4 text-slate-700" /> Lease Summary
               </h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Start Date</p>
-                    <p className="font-black text-slate-900 text-xs">{lease.startDate ? new Date(lease.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mb-1">Start Date</p>
+                    <p className="font-semibold text-[#1D1D1F] text-xs">{lease.startDate ? new Date(lease.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">End Date</p>
-                    <p className="font-black text-slate-900 text-xs">{lease.endDate ? new Date(lease.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mb-1">End Date</p>
+                    <p className="font-semibold text-[#1D1D1F] text-xs">{lease.endDate ? new Date(lease.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : "N/A"}</p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-black text-slate-900">
+                  <div className="flex justify-between text-xs font-medium text-[#1D1D1F]">
                     <span>Lease Term Progress</span>
-                    <span className="text-emerald-600 font-black">{calculateProgress()}%</span>
+                    <span className="text-emerald-600 font-semibold">{calculateProgress()}%</span>
                   </div>
                   <div className="relative h-2.5 bg-slate-100/90 rounded-full overflow-hidden border border-slate-200/70 p-0.5 shadow-2xs">
                     <motion.div 
@@ -1453,8 +1458,8 @@ export default function LeaseDetailsPage() {
                           <AlertCircle className="h-3.5 w-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-extrabold text-slate-900 text-xs">{d.description}</p>
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">Category: {d.category}</p>
+                          <p className="font-semibold text-slate-900 text-xs">{d.description}</p>
+                          <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mt-1">Category: {d.category}</p>
                           {d.photoUrl && (
                             <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 max-w-[200px] shadow-2xs bg-slate-50">
                               <img 
@@ -1485,7 +1490,7 @@ export default function LeaseDetailsPage() {
                   <h2 className="text-base font-black text-slate-900 flex items-center gap-2 tracking-tight">
                     <Clock className="h-4 w-4 text-slate-700" /> Move-Out Progress
                   </h2>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                     Active Pipeline
                   </span>
                 </div>
@@ -1551,7 +1556,7 @@ export default function LeaseDetailsPage() {
                             <div className="mt-2 p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl shadow-2xs space-y-2">
                               <p className="text-amber-900 font-extrabold text-[11px]">⚡ Action Required: Please review final charges</p>
                               <Link href={`/dashboard/tenant/leases/${lease.id}/move-out`} className="block">
-                                <Button size="sm" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-8 rounded-xl shadow-xs cursor-pointer">
+                                <Button size="sm" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-8 rounded-xl shadow-xs cursor-pointer">
                                   Review Statement &amp; Deductions
                                 </Button>
                               </Link>
@@ -1615,29 +1620,29 @@ export default function LeaseDetailsPage() {
 
             {/* ─── FINANCIAL TERMS CARD ─── */}
             <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-4">
-              <h2 className="text-base font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
+              <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 tracking-tight">
                 <DollarSign className="h-4 w-4 text-emerald-700" /> Financial Terms
               </h2>
-              <div className="space-y-3 text-xs font-semibold text-slate-600">
+              <div className="space-y-3 text-xs font-medium text-slate-600">
                 <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-                  <span className="text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">Monthly Rent</span>
-                  <span className="text-xs font-black text-slate-900">${Number(lease.monthlyRent || 0).toLocaleString()}</span>
+                  <span className="text-xs font-normal text-[#6E6E73]">Monthly Rent</span>
+                  <span className="text-xs font-semibold text-[#1D1D1F]">${Number(lease.monthlyRent || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-                  <span className="text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">Security Deposit</span>
-                  <span className="text-xs font-black text-slate-900">${Number(lease.securityDeposit || 0).toLocaleString()}</span>
+                  <span className="text-xs font-normal text-[#6E6E73]">Security Deposit</span>
+                  <span className="text-xs font-semibold text-[#1D1D1F]">${Number(lease.securityDeposit || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-                  <span className="text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">Rent Due On</span>
-                  <span className="font-black text-slate-900 text-xs">Day {lease.rentDueDay || 1}</span>
+                  <span className="text-xs font-normal text-[#6E6E73]">Rent Due On</span>
+                  <span className="font-semibold text-[#1D1D1F] text-xs">Day {lease.rentDueDay || 1}</span>
                 </div>
                 <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-                  <span className="text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">Grace Period</span>
-                  <span className="font-black text-slate-900 text-xs">{lease.gracePeriodDays || 5} Days</span>
+                  <span className="text-xs font-normal text-[#6E6E73]">Grace Period</span>
+                  <span className="font-semibold text-[#1D1D1F] text-xs">{lease.gracePeriodDays || 5} Days</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">Late Fee</span>
-                  <span className="font-black text-slate-900 text-xs">
+                  <span className="text-xs font-normal text-[#6E6E73]">Late Fee</span>
+                  <span className="font-semibold text-[#1D1D1F] text-xs">
                     {lease.lateFeeAmount ? (
                       lease.lateFeeType === "PERCENTAGE" 
                         ? `${lease.lateFeeAmount}%` 
@@ -1654,14 +1659,14 @@ export default function LeaseDetailsPage() {
         {/* Security Deposit Ledger — Full Width Card */}
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 space-y-6 mt-6 font-sans">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-            <h2 className="text-base font-black text-slate-900 flex items-center gap-2 tracking-tight">
+            <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 tracking-tight">
               <ShieldAlert className="h-4 w-4 text-slate-700" /> Security Deposit Ledger
             </h2>
             {!isTenant && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 px-4 text-xs font-black border-slate-200 text-slate-900 hover:bg-slate-50 shadow-2xs rounded-xl shrink-0 cursor-pointer"
+                className="h-9 px-4 text-xs font-medium border-slate-200 text-slate-900 hover:bg-slate-50 shadow-2xs rounded-xl shrink-0 cursor-pointer"
                 onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
               >
                 <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" /> Process Move-Out &amp; Refund
@@ -1672,24 +1677,24 @@ export default function LeaseDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* ── SECTION 1: Deposit Collection ── */}
             <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3">
-              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Deposit Collection</p>
-              <div className="space-y-2 text-xs font-semibold text-slate-600">
+              <p className="text-xs font-normal text-[#6E6E73]">Deposit Collection</p>
+              <div className="space-y-2 text-xs font-medium text-slate-600">
                 <div className="flex justify-between items-center">
                   <span>Required Amount:</span>
-                  <span className="font-extrabold text-slate-900">${Number(lease.securityDeposit || 0).toFixed(2)}</span>
+                  <span className="font-semibold text-[#1D1D1F]">${Number(lease.securityDeposit || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Paid:</span>
                   {(lease as any).depositPaidAt ? (
-                    <span className="font-extrabold text-emerald-700 flex items-center gap-1">
+                    <span className="font-semibold text-emerald-700 flex items-center gap-1">
                       <CheckCircle className="h-3.5 w-3.5" />
                       ${Number((lease as any).depositPaidAmount || lease.securityDeposit || 0).toFixed(2)}
-                      <span className="text-[10px] text-[#8E8E93] font-normal ml-1">
+                      <span className="text-[10px] text-[#6E6E73] font-normal ml-1">
                         {new Date((lease as any).depositPaidAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold flex items-center gap-1">
+                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-medium flex items-center gap-1">
                       <Clock className="h-3 w-3" /> Awaiting Payment
                     </span>
                   )}
@@ -1699,11 +1704,11 @@ export default function LeaseDetailsPage() {
                   {(() => {
                     const status = lease.depositStatus || "HELD";
                     const payout = lease.payoutRequests?.[0];
-                    if (status === "HELD") return <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded border border-indigo-200">Held in Escrow</span>;
-                    if (status === "PENDING_ADMIN_PAYOUT" || payout?.status === "PENDING") return <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-200 animate-pulse">Pending Disbursement</span>;
-                    if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || payout?.status === "COMPLETED") return <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">Refunded</span>;
-                    if (status === "FULLY_DEDUCTED") return <span className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded border border-red-200">Fully Forfeited</span>;
-                    return <span className="px-2 py-0.5 bg-slate-50 text-slate-600 text-[10px] font-bold rounded border border-slate-200">{status}</span>;
+                    if (status === "HELD") return <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-medium rounded border border-indigo-200">Held in Escrow</span>;
+                    if (status === "PENDING_ADMIN_PAYOUT" || payout?.status === "PENDING") return <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-medium rounded border border-amber-200 animate-pulse">Pending Disbursement</span>;
+                    if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED" || payout?.status === "COMPLETED") return <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-medium rounded border border-emerald-200">Refunded</span>;
+                    if (status === "FULLY_DEDUCTED") return <span className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-medium rounded border border-red-200">Fully Forfeited</span>;
+                    return <span className="px-2 py-0.5 bg-slate-50 text-slate-600 text-[10px] font-medium rounded border border-slate-200">{status}</span>;
                   })()}
                 </div>
               </div>
@@ -1713,9 +1718,9 @@ export default function LeaseDetailsPage() {
             <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3 flex flex-col justify-between">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Mid-Tenancy Deductions</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Mid-Tenancy Deductions</p>
                   {(lease as any).depositDeductions?.length > 0 && (
-                    <span className="text-[10px] text-red-600 font-bold">
+                    <span className="text-xs text-red-600 font-semibold">
                       -{(lease as any).depositDeductions.reduce((s: number, d: any) => s + Number(d.amount), 0).toFixed(2)}
                     </span>
                   )}
@@ -1727,16 +1732,16 @@ export default function LeaseDetailsPage() {
                       return (
                         <div key={d.id} className="bg-red-50/60 border border-red-100 rounded-lg p-2 space-y-1">
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="text-slate-600 font-semibold truncate max-w-[140px]">
+                            <span className="text-slate-600 font-medium truncate max-w-[140px]">
                               {new Date(d.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} — Maint.
                             </span>
-                            <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
+                            <span className="text-red-600 font-semibold">-${Number(d.amount).toFixed(2)}</span>
                           </div>
-                          <div className="flex items-center justify-between text-[10px] text-[#8E8E93]">
+                          <div className="flex items-center justify-between text-[10px] text-[#6E6E73]">
                             <span className="font-mono">Ref: {d.reference}</span>
                             <Link
                               href={isTenant ? "/dashboard/maintenance/my-requests" : `/dashboard/maintenance?search=${ticketRef}`}
-                              className="text-indigo-600 hover:underline font-bold"
+                              className="text-indigo-600 hover:underline font-medium"
                             >
                               View →
                             </Link>
@@ -1746,14 +1751,14 @@ export default function LeaseDetailsPage() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-[#8E8E93] italic">No deductions during tenancy.</p>
+                  <p className="text-xs text-[#6E6E73] font-normal italic">No deductions during tenancy.</p>
                 )}
               </div>
 
               {/* Current Balance */}
-              <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-bold mt-2">
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-medium mt-2">
                 <span className="text-[#3C3C43]">Current Balance:</span>
-                <span className={`text-sm font-black ${Number((lease as any).depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                <span className={`text-sm font-semibold ${Number((lease as any).depositBalance || 0) > 0 ? "text-emerald-600" : "text-red-500"}`}>
                   ${Number((lease as any).depositBalance || 0).toFixed(2)}
                 </span>
               </div>
@@ -1761,23 +1766,23 @@ export default function LeaseDetailsPage() {
 
             {/* ── SECTION 3: Move-Out Deductions ── */}
             <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3">
-              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Move-Out Deductions</p>
+              <p className="text-xs font-normal text-[#6E6E73]">Move-Out Deductions</p>
               {Array.isArray(lease.deductions) && lease.deductions.length > 0 ? (
                 <div className="space-y-1.5">
                   {lease.deductions.map((d: any, idx: number) => (
                     <div key={idx} className="flex justify-between items-center bg-red-50/50 p-2 rounded-lg border border-red-100/50 text-[11px]">
-                      <span className="text-red-950 font-bold truncate max-w-[130px]">
+                      <span className="text-red-950 font-medium truncate max-w-[130px]">
                         {d.description}
                         {d.photoUrl && (
                           <a href={d.photoUrl} target="_blank" rel="noopener noreferrer" className="ml-1 text-indigo-600 hover:underline">(Proof)</a>
                         )}
                       </span>
-                      <span className="text-red-600 font-extrabold">-${Number(d.amount).toFixed(2)}</span>
+                      <span className="text-red-600 font-semibold">-${Number(d.amount).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-[11px] text-[#8E8E93] italic">
+                <p className="text-xs text-[#6E6E73] font-normal italic">
                   {lease.moveOutStatus === "NONE" ? "None logged — completed at move-out." : "No move-out deductions recorded."}
                 </p>
               )}
@@ -1794,16 +1799,16 @@ export default function LeaseDetailsPage() {
               return (
                 <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 space-y-3 flex flex-col justify-between">
                   <div className="space-y-2">
-                    <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Deposit Summary</p>
-                    <div className="space-y-1.5 text-[11px] font-semibold text-slate-600">
-                      <div className="flex justify-between"><span>Original Deposit:</span><span className="font-extrabold text-slate-900">${original.toFixed(2)}</span></div>
-                      {midDeductions > 0 && <div className="flex justify-between"><span>Mid Deductions:</span><span className="font-extrabold text-red-600">-${midDeductions.toFixed(2)}</span></div>}
-                      {moveOutDeductions > 0 && <div className="flex justify-between"><span>Move-Out Deductions:</span><span className="font-extrabold text-red-600">-${moveOutDeductions.toFixed(2)}</span></div>}
+                    <p className="text-xs font-normal text-[#6E6E73]">Deposit Summary</p>
+                    <div className="space-y-1.5 text-[11px] font-medium text-slate-600">
+                      <div className="flex justify-between"><span>Original Deposit:</span><span className="font-semibold text-[#1D1D1F]">${original.toFixed(2)}</span></div>
+                      {midDeductions > 0 && <div className="flex justify-between"><span>Mid Deductions:</span><span className="font-semibold text-red-600">-${midDeductions.toFixed(2)}</span></div>}
+                      {moveOutDeductions > 0 && <div className="flex justify-between"><span>Move-Out Deductions:</span><span className="font-semibold text-red-600">-${moveOutDeductions.toFixed(2)}</span></div>}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-bold mt-2">
-                    <span className="text-slate-900">{isFinalised ? "Final Refund:" : "Est. Refund:"}</span>
-                    <span className="text-sm font-black text-emerald-600">${estimatedRefund.toFixed(2)}</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs font-medium mt-2">
+                    <span className="text-[#1D1D1F]">{isFinalised ? "Final Refund:" : "Est. Refund:"}</span>
+                    <span className="text-sm font-semibold text-emerald-600">${estimatedRefund.toFixed(2)}</span>
                   </div>
                 </div>
               );
@@ -1824,7 +1829,7 @@ export default function LeaseDetailsPage() {
                   {lease.refundRef && <div><span className="text-slate-400 block text-[10px] font-bold uppercase">Reference / Check #</span><span className="font-bold text-slate-900">{lease.refundRef}</span></div>}
                 </div>
                 {payout.status === "COMPLETED" && payout.proofUrl && (
-                  <Button variant="outline" size="sm" className="w-full text-[11px] h-8 font-bold border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg" onClick={() => window.open(payout.proofUrl, "_blank")}>
+                  <Button variant="outline" size="sm" className="w-full text-[11px] h-8 font-medium border-indigo-200 text-indigo-600 bg-indigo-50/30 hover:bg-indigo-50 rounded-lg" onClick={() => window.open(payout.proofUrl, "_blank")}>
                     <FileText className="h-3.5 w-3.5 mr-1.5" /> View Admin Payout Proof
                   </Button>
                 )}
@@ -1846,15 +1851,15 @@ export default function LeaseDetailsPage() {
               className="relative overflow-hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Paid</span>
+                <span className="text-xs font-normal text-[#6E6E73]">Total Paid</span>
                 <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">${amountPaid.toLocaleString()}</p>
-                <p className="text-[11px] font-bold text-emerald-700 flex items-center gap-1 mt-1">
-                  <TrendingUp className="h-3 w-3 text-emerald-600" /> Settled Payments
+                <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">${amountPaid.toLocaleString()}</p>
+                <p className="text-xs font-normal text-emerald-700 flex items-center gap-1 mt-1">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-600" /> Settled Payments
                 </p>
               </div>
             </motion.div>
@@ -1865,14 +1870,14 @@ export default function LeaseDetailsPage() {
               className="relative overflow-hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Upcoming Due</span>
+                <span className="text-xs font-normal text-[#6E6E73]">Upcoming Due</span>
                 <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
                   <Clock className="h-4 w-4 text-slate-700" />
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">${upcomingDue.toLocaleString()}</p>
-                <p className="text-[11px] font-bold text-slate-500 flex items-center gap-1 mt-1">
+                <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">${upcomingDue.toLocaleString()}</p>
+                <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1 mt-1">
                   Scheduled Next Cycle
                 </p>
               </div>
@@ -1886,7 +1891,7 @@ export default function LeaseDetailsPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Overdue</span>
+                <span className="text-xs font-normal text-[#6E6E73]">Overdue</span>
                 <div className={`h-8 w-8 rounded-xl flex items-center justify-center shadow-2xs border ${
                   overdue > 0 ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-slate-100 text-slate-400 border-slate-200"
                 }`}>
@@ -1894,10 +1899,10 @@ export default function LeaseDetailsPage() {
                 </div>
               </div>
               <div>
-                <p className={`text-2xl font-black tracking-tight ${overdue > 0 ? "text-rose-600" : "text-slate-900"}`}>
+                <p className={`text-3xl font-semibold tracking-tight ${overdue > 0 ? "text-rose-600" : "text-[#1D1D1F]"}`}>
                   ${overdue.toLocaleString()}
                 </p>
-                <p className={`text-[11px] font-bold flex items-center gap-1 mt-1 ${overdue > 0 ? "text-rose-600" : "text-slate-400"}`}>
+                <p className={`text-xs font-normal flex items-center gap-1 mt-1 ${overdue > 0 ? "text-rose-600" : "text-[#6E6E73]"}`}>
                   {overdue > 0 ? "Immediate Attention Required" : "No Overdue Balances"}
                 </p>
               </div>
@@ -1909,14 +1914,14 @@ export default function LeaseDetailsPage() {
               className="relative overflow-hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Lease Value</span>
+                <span className="text-xs font-normal text-[#6E6E73]">Total Lease Value</span>
                 <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
                   <DollarSign className="h-4 w-4 text-slate-700" />
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">${totalLeaseValue.toLocaleString()}</p>
-                <p className="text-[11px] font-bold text-slate-500 flex items-center gap-1 mt-1">
+                <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">${totalLeaseValue.toLocaleString()}</p>
+                <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1 mt-1">
                   Full Contract Value
                 </p>
               </div>
@@ -1927,7 +1932,7 @@ export default function LeaseDetailsPage() {
           <Card className="p-6 rounded-3xl shadow-xs border border-slate-200 bg-white space-y-4 font-sans">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="font-black text-slate-900 text-base tracking-tight flex items-center gap-2">
+                <h3 className="font-semibold text-slate-900 text-base tracking-tight flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-slate-700" /> Payment Progress
                 </h3>
                 <p className="text-xs font-semibold text-slate-500 mt-0.5">Amount paid against total expected lease value</p>
@@ -1967,8 +1972,8 @@ export default function LeaseDetailsPage() {
 
           <Card className="p-0 rounded-3xl shadow-xs border border-slate-200 bg-white overflow-hidden font-sans">
             <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-              <h3 className="font-black text-slate-900 text-base tracking-tight">Recent Payments</h3>
-              <Button variant="outline" className="h-8 rounded-xl text-xs font-black border-slate-200 bg-white text-slate-900 shadow-2xs hover:bg-slate-50 cursor-pointer" onClick={() => router.push(isTenant ? "/dashboard/payments/pay-rent" : "/dashboard/accounting/transactions")}>View All</Button>
+              <h3 className="font-semibold text-slate-900 text-base tracking-tight">Recent Payments</h3>
+              <Button variant="outline" className="h-8 px-3 rounded-xl text-xs font-medium border-slate-200 bg-white text-slate-900 shadow-2xs hover:bg-slate-50 cursor-pointer" onClick={() => router.push(isTenant ? "/dashboard/payments/pay-rent" : "/dashboard/accounting/transactions")}>View All</Button>
             </div>
             <div className="p-6">
               {(() => {
@@ -1977,7 +1982,7 @@ export default function LeaseDetailsPage() {
                 if (paidInvoices.length === 0) {
                   return (
                     <div className="text-center py-6">
-                      <p className="text-xs font-semibold text-slate-500">No recent payments found.</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">No recent payments found.</p>
                     </div>
                   );
                 }
@@ -1989,13 +1994,13 @@ export default function LeaseDetailsPage() {
                         <CreditCard className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-black text-slate-900 text-xs truncate">{inv.invoiceType === "DEPOSIT" ? 'Security Deposit' : 'Rent Payment'}</p>
-                        <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">Due on {new Date(inv.dueDate).toLocaleDateString()}</p>
+                        <p className="font-semibold text-[#1D1D1F] text-xs truncate">{inv.invoiceType === "DEPOSIT" ? 'Security Deposit' : 'Rent Payment'}</p>
+                        <p className="text-xs font-normal text-[#6E6E73] mt-0.5 truncate">Due on {new Date(inv.dueDate).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-black text-slate-900 text-xs">${Number(inv.amount || 0).toLocaleString()}</p>
-                      <span className="inline-block mt-0.5 px-2 py-0.5 bg-emerald-50 text-emerald-800 text-[9px] font-black rounded-md uppercase border border-emerald-200 tracking-wider shadow-2xs">Paid</span>
+                      <p className="font-semibold text-[#1D1D1F] text-xs">${Number(inv.amount || 0).toLocaleString()}</p>
+                      <span className="inline-block mt-0.5 px-2 py-0.5 bg-emerald-50 text-emerald-800 text-[10px] font-medium rounded-md uppercase border border-emerald-200 tracking-wider shadow-2xs">Paid</span>
                     </div>
                   </div>
                 ));
@@ -2015,10 +2020,10 @@ export default function LeaseDetailsPage() {
             <>
           <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-xs border border-slate-200">
             <div>
-              <h3 className="font-black text-slate-900 text-base tracking-tight">Lease Documents</h3>
+              <h3 className="font-semibold text-slate-900 text-base tracking-tight">Lease Documents</h3>
               <p className="text-xs font-semibold text-slate-500 mt-0.5">Manage contracts, addendums, and condition reports</p>
             </div>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-4 rounded-xl font-black text-xs shadow-xs cursor-pointer">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-4 rounded-xl font-medium text-xs shadow-xs cursor-pointer">
               <UploadCloud className="h-4 w-4 mr-2" /> Upload Document
             </Button>
           </div>
@@ -2033,7 +2038,7 @@ export default function LeaseDetailsPage() {
                         <FileDown className="h-6 w-6" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-black text-slate-900 text-sm truncate">Signed Lease Agreement</p>
+                        <p className="font-semibold text-slate-900 text-sm truncate">Signed Lease Agreement</p>
                         <p className="text-xs font-semibold text-slate-500 mt-0.5 truncate">Auto-generated PDF • {new Date(lease.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -2044,7 +2049,7 @@ export default function LeaseDetailsPage() {
                           <Button 
                             disabled
                             variant="outline" 
-                            className="h-9 rounded-xl text-xs font-black border-slate-200 text-slate-400 bg-slate-50 shadow-2xs opacity-100 cursor-not-allowed"
+                            className="h-9 rounded-xl text-xs font-medium border-slate-200 text-slate-400 bg-slate-50 shadow-2xs opacity-100 cursor-not-allowed"
                           >
                             <Lock className="h-3.5 w-3.5 mr-1.5" /> Locked
                           </Button>
@@ -2080,8 +2085,8 @@ export default function LeaseDetailsPage() {
                   )}
                   <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
-                      <h3 className="font-black text-slate-900 text-sm">Tenant Signature Record</h3>
-                      <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                      <h3 className="font-semibold text-slate-900 text-sm">Tenant Signature Record</h3>
+                      <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
                         Signed by {lease.tenant?.name} on {lease.signedAt ? new Date(lease.signedAt).toLocaleString() : 'N/A'}
                       </p>
                     </div>
@@ -2126,17 +2131,17 @@ export default function LeaseDetailsPage() {
           <Card className="p-6 rounded-3xl shadow-xs border border-slate-200 bg-white space-y-6">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                   <ShieldAlert className="h-4 w-4 text-amber-600" /> Move-Out Request Details
                 </h2>
-                <p className="text-xs text-slate-500 mt-1 font-semibold">
+                <p className="text-xs text-[#6E6E73] mt-1 font-normal">
                   {isOwner 
                     ? "Review the tenant's move-out request and generate a final disposition statement."
                     : "Your move-out request has been submitted and is currently being processed."}
                 </p>
               </div>
               {isOwner && (
-                <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-black text-xs h-9 px-4 shadow-xs cursor-pointer">
+                <Button onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)} className="bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-medium text-xs h-9 px-4 shadow-xs cursor-pointer">
                   Generate Final Statement
                 </Button>
               )}
@@ -2147,8 +2152,8 @@ export default function LeaseDetailsPage() {
                 <div className="flex items-start gap-3">
                   <ShieldAlert className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-black text-rose-950 text-sm">Short Notice Detected</h3>
-                    <p className="text-xs font-semibold text-rose-800 mt-1">The tenant requested a move-out date that is less than the required {lease.moveOutNoticeDays} days notice. You may apply an Early Termination Fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)} on their final statement.</p>
+                    <h3 className="font-semibold text-rose-950 text-sm">Short Notice Detected</h3>
+                    <p className="text-xs font-normal text-rose-800 mt-1">The tenant requested a move-out date that is less than the required {lease.moveOutNoticeDays} days notice. You may apply an Early Termination Fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)} on their final statement.</p>
                   </div>
                 </div>
               </div>
@@ -2156,17 +2161,17 @@ export default function LeaseDetailsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Requested Move-Out Date</p>
-                <p className="text-sm font-black text-slate-900 mt-1">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : 'N/A'}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Requested Move-Out Date</p>
+                <p className="text-xs font-semibold text-[#1D1D1F] mt-1">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : 'N/A'}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Reason for Moving</p>
-                <p className="text-sm font-black text-slate-900 mt-1">{lease.moveOutReason || 'N/A'}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Reason for Moving</p>
+                <p className="text-xs font-semibold text-[#1D1D1F] mt-1">{lease.moveOutReason || 'N/A'}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs md:col-span-2">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Forwarding Address</p>
-                <p className="text-sm font-black text-slate-900 mt-1 whitespace-pre-wrap">{lease.forwardingAddress || 'Not provided'}</p>
-                <p className="text-[10px] text-amber-800 font-extrabold uppercase tracking-wider mt-2">* Required for mailing the security deposit refund</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Forwarding Address</p>
+                <p className="text-xs font-semibold text-[#1D1D1F] mt-1 whitespace-pre-wrap">{lease.forwardingAddress || 'Not provided'}</p>
+                <p className="text-xs text-amber-800 font-normal mt-2">* Required for mailing the security deposit refund</p>
               </div>
             </div>
           </Card>
@@ -2178,20 +2183,20 @@ export default function LeaseDetailsPage() {
       {activeTab === 'settings' && !isTenant && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 font-sans">
           <Card className="p-6 rounded-3xl shadow-xs border border-slate-200 bg-white">
-            <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2 mb-2">
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2 mb-2">
               <Settings className="h-4 w-4 text-slate-700" /> Lease Status Management
             </h2>
-            <p className="text-xs text-slate-500 mb-6 font-semibold leading-relaxed">
+            <p className="text-xs text-[#6E6E73] mb-6 font-normal leading-relaxed">
               Manually transition the lease status. This action might trigger automated emails to the tenant depending on your platform settings.
             </p>
             <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start h-11 rounded-xl border-slate-200 font-black text-xs text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer">
+              <Button variant="outline" className="w-full justify-start h-11 rounded-xl border-slate-200 font-medium text-xs text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer">
                 <CheckCircle className="h-4 w-4 mr-2.5 text-emerald-600" /> Mark as Active
               </Button>
               <Button
                 onClick={() => router.push(`/dashboard/leases/${lease.id}/move-out`)}
                 variant="outline"
-                className="w-full justify-start h-11 rounded-xl border-slate-200 font-black text-xs text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer"
+                className="w-full justify-start h-11 rounded-xl border-slate-200 font-medium text-xs text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer"
               >
                 <ShieldAlert className="h-4 w-4 mr-2.5 text-amber-600" /> Process Move-Out &amp; Refund
               </Button>
@@ -2199,7 +2204,7 @@ export default function LeaseDetailsPage() {
                 onClick={() => setShowConfirmTerminate(true)}
                 disabled={lease.status === "TERMINATED" || lease.status === "EXPIRED" || lease.status === "DRAFT"}
                 variant="outline"
-                className="w-full justify-start h-11 rounded-xl border-slate-200 font-black text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 shadow-2xs cursor-pointer"
+                className="w-full justify-start h-11 rounded-xl border-slate-200 font-medium text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 shadow-2xs cursor-pointer"
               >
                 <XCircle className="h-4 w-4 mr-2.5 text-rose-600" /> Terminate Lease
               </Button>
@@ -2207,25 +2212,25 @@ export default function LeaseDetailsPage() {
           </Card>
 
           <Card className="p-6 rounded-3xl shadow-xs border border-slate-200 bg-white">
-            <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2 mb-6">
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2 mb-6">
               <ShieldAlert className="h-4 w-4 text-amber-600" /> Permissions Overview
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Can Edit</p>
-                <p className="text-xs font-black text-emerald-700 mt-1">Yes</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Can Edit</p>
+                <p className="text-xs font-semibold text-emerald-700 mt-1">Yes</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Can Renew</p>
-                <p className="text-xs font-black text-emerald-700 mt-1">Yes</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Can Renew</p>
+                <p className="text-xs font-semibold text-emerald-700 mt-1">Yes</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Can Sign</p>
-                <p className="text-xs font-black text-rose-600 mt-1">No (Already Active)</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Can Sign</p>
+                <p className="text-xs font-semibold text-rose-600 mt-1">No (Already Active)</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Collect Rent</p>
-                <p className="text-xs font-black text-emerald-700 mt-1">Yes</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Collect Rent</p>
+                <p className="text-xs font-semibold text-emerald-700 mt-1">Yes</p>
               </div>
             </div>
           </Card>
@@ -2241,7 +2246,7 @@ export default function LeaseDetailsPage() {
             <div className="px-7 py-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
               <div>
                 <h2 className="text-xl font-black text-slate-900">Sign Lease Agreement</h2>
-                <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">Unit {lease.unit?.name} · {lease.unit?.property?.name}</p>
+                <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Unit {lease.unit?.name} · {lease.unit?.property?.name}</p>
               </div>
               <div className="flex items-center gap-3">
                 {[1, 2, 3].map(s => (
@@ -2259,7 +2264,7 @@ export default function LeaseDetailsPage() {
               <>
                 <div className="px-7 pt-5 pb-2">
                   <h3 className="text-base font-black text-slate-800">Read & Agree to Lease Terms</h3>
-                  <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">Scroll to the bottom to proceed.</p>
+                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Scroll to the bottom to proceed.</p>
                 </div>
                 <div
                   className="mx-7 mb-4 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50"
@@ -2274,7 +2279,7 @@ export default function LeaseDetailsPage() {
                   <div className="p-5 space-y-5 text-sm text-slate-600 leading-relaxed">
                     {/* Platform Standard Terms */}
                     <div>
-                      <h4 className="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-2">
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2 flex items-center gap-2">
                         <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-[10px] font-black">P</span>
                         Platform Standard Terms
                       </h4>
@@ -2294,7 +2299,7 @@ export default function LeaseDetailsPage() {
                     {/* Owner Custom Terms */}
                     {lease.customTerms && (
                       <div>
-                        <h4 className="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-2">
+                        <h4 className="font-semibold text-slate-900 text-sm mb-2 flex items-center gap-2">
                           <span className="w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[10px] font-black">O</span>
                           Property-Specific Terms (Added by Owner)
                         </h4>
@@ -2315,7 +2320,7 @@ export default function LeaseDetailsPage() {
                       </div>
                     </div>
 
-                    <div className="text-center py-2 text-[11px] text-[#8E8E93] font-semibold border-t border-slate-200 pt-4">
+                    <div className="text-center py-2 text-[11px] text-[#8E8E93] font-normal border-t border-slate-200 pt-4">
                       ✓ You've reached the end of the terms.
                     </div>
                   </div>
@@ -2341,7 +2346,7 @@ export default function LeaseDetailsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-black text-slate-800">Your Signature</h3>
-                      <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">Choose how you want to sign your lease.</p>
+                      <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Choose how you want to sign your lease.</p>
                     </div>
                     <div className="flex bg-slate-100 p-1 rounded-xl">
                       <button
@@ -2384,7 +2389,7 @@ export default function LeaseDetailsPage() {
                           </div>
                         )}
                         <div className="absolute bottom-3 right-4 z-20">
-                          <button onClick={clearCanvas} className="text-xs font-bold text-[#8E8E93] hover:text-slate-600 bg-white/80 px-2 py-1 rounded backdrop-blur">Clear</button>
+                          <button onClick={clearCanvas} className="text-xs font-medium text-[#8E8E93] hover:text-slate-600 bg-white/80 px-2 py-1 rounded backdrop-blur">Clear</button>
                         </div>
                       </>
                     ) : (
@@ -2418,7 +2423,7 @@ export default function LeaseDetailsPage() {
                       onChange={(e) => setSignatureName(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium text-slate-900 text-sm"
                     />
-                    <p className="text-[11px] font-semibold text-[#8E8E93]">Must exactly match: <strong className="text-[#3C3C43]">{lease.tenant?.name}</strong></p>
+                    <p className="text-[11px] font-normal text-[#8E8E93]">Must exactly match: <strong className="text-[#3C3C43]">{lease.tenant?.name}</strong></p>
                   </div>
                 </div>
                 <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
@@ -2443,7 +2448,7 @@ export default function LeaseDetailsPage() {
               <>
                 <div className="px-7 pt-5 pb-3">
                   <h3 className="text-base font-black text-slate-800">Confirm & Sign</h3>
-                  <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">Review your signature before final submission.</p>
+                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Review your signature before final submission.</p>
                 </div>
                 <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
                   {/* Signature Preview */}
@@ -2484,7 +2489,7 @@ export default function LeaseDetailsPage() {
                   <Button
                     onClick={handleRequestOtp}
                     disabled={signing || !signatureConsent}
-                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md disabled:opacity-40"
+                    className="h-11 px-8 rounded-2xl font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-md disabled:opacity-40"
                   >
                     {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : 'Request OTP & Continue →'}
                   </Button>
@@ -2497,7 +2502,7 @@ export default function LeaseDetailsPage() {
               <>
                 <div className="px-7 pt-5 pb-3">
                   <h3 className="text-base font-black text-slate-800">Verify Your Identity</h3>
-                  <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">We sent a 6-digit code to your email.</p>
+                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">We sent a 6-digit code to your email.</p>
                 </div>
                 <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
                   <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -2514,7 +2519,7 @@ export default function LeaseDetailsPage() {
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                       className="w-[280px] text-center text-4xl tracking-[0.4em] font-mono font-black px-4 py-4 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none text-slate-900 bg-white placeholder:text-slate-300"
                     />
-                    <button onClick={handleRequestOtp} className="text-xs font-bold text-indigo-600 hover:text-indigo-700 underline mt-4">
+                    <button onClick={handleRequestOtp} className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline mt-4">
                       Didn't receive it? Resend Code
                     </button>
                   </div>
@@ -2524,7 +2529,7 @@ export default function LeaseDetailsPage() {
                   <Button
                     onClick={handleVerifyOtpAndSign}
                     disabled={signing || otp.length !== 6}
-                    className="h-11 px-8 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-40"
+                    className="h-11 px-8 rounded-2xl font-medium bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-40"
                   >
                     {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying...</> : '✓ Verify & Sign Lease'}
                   </Button>
@@ -2588,14 +2593,14 @@ export default function LeaseDetailsPage() {
       <Dialog open={showKeyReturnModal} onOpenChange={setShowKeyReturnModal}>
         <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-md p-6 font-sans shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Confirm Key Handover</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-slate-900 tracking-tight">Confirm Key Handover</DialogTitle>
             <DialogDescription className="text-xs font-semibold text-slate-500">
               Record the actual move-out date to start the deposit return timer.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleConfirmKeyReturn} className="space-y-4 mt-4">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Actual Move-Out Date</Label>
+              <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Actual Move-Out Date</Label>
               <Input
                 type="date"
                 required
@@ -2616,7 +2621,7 @@ export default function LeaseDetailsPage() {
               <Button
                 type="submit"
                 disabled={confirmingKeyReturn}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-10 text-xs font-black shadow-xs cursor-pointer"
+                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-10 text-xs font-medium shadow-xs cursor-pointer"
               >
                 {confirmingKeyReturn ? "Confirming..." : "Confirm Key Return"}
               </Button>
@@ -2641,13 +2646,13 @@ export default function LeaseDetailsPage() {
           <div className="space-y-4 my-4 max-h-[60vh] overflow-y-auto pr-1">
             {lease?.preliminaryInspectionNotes && (
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">General Notes</p>
+                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">General Notes</p>
                 <p className="text-xs font-semibold text-slate-700">{lease.preliminaryInspectionNotes}</p>
               </div>
             )}
             
             <div className="space-y-3">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Flagged Issues ({lease?.preliminaryDeductions?.length || 0})</p>
+              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Flagged Issues ({lease?.preliminaryDeductions?.length || 0})</p>
               {Array.isArray(lease?.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
                 lease.preliminaryDeductions.map((d: any, idx: number) => (
                   <div key={idx} className="flex gap-3 items-start p-3 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-2xs">
@@ -2655,8 +2660,8 @@ export default function LeaseDetailsPage() {
                       <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-slate-900 text-xs">{d.description}</p>
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">Category: {d.category}</p>
+                      <p className="font-semibold text-slate-900 text-xs">{d.description}</p>
+                      <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mt-1">Category: {d.category}</p>
                       {d.photoUrl && (
                         <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 max-w-[150px] shadow-2xs">
                           <img 

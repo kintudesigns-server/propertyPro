@@ -99,12 +99,12 @@ export default function PausedAccountGate({
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link href="/dashboard/owner/billing">
-                <Button className="bg-[#B25E00] hover:bg-[#804400] text-white font-bold rounded-xl h-10 px-5 text-sm shadow-xs flex items-center gap-2 transition-all">
+                <Button className="bg-[#B25E00] hover:bg-[#804400] text-white font-medium rounded-xl h-10 px-5 text-sm shadow-xs flex items-center gap-2 transition-all">
                   Reactivate Subscription <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button variant="ghost" className="font-bold text-[#804400] hover:bg-[#FFF0CC] rounded-xl h-10 px-4 text-sm">
+                <Button variant="ghost" className="font-medium text-[#804400] hover:bg-[#FFF0CC] rounded-xl h-10 px-4 text-sm">
                   Go to Dashboard
                 </Button>
               </Link>

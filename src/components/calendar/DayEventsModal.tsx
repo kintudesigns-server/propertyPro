@@ -50,7 +50,7 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]">
           <div>
-            <h2 className="text-xl font-extrabold text-[#1D1D1F] tracking-tight">
+            <h2 className="text-xl font-semibold text-[#1D1D1F] tracking-tight">
               {format(date, "MMMM d, yyyy")}
             </h2>
             <p className="text-sm font-medium text-[#6E6E73] mt-1">
@@ -108,7 +108,7 @@ export function DayEventsModal({ date, events, onClose }: DayEventsModalProps) {
                   <div className="pt-3 border-t border-[#E5E5EA] flex justify-end">
                     <Link 
                       href={getEventActionLink(event)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-[#007AFF] hover:text-[#0062CC] transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-medium text-[#007AFF] hover:text-[#0062CC] transition-colors"
                     >
                       View Details <ChevronRight className="h-3.5 w-3.5" />
                     </Link>

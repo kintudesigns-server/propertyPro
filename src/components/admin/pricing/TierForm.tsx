@@ -32,7 +32,8 @@ import {
   FolderOpen, 
   Calendar,
   AlertTriangle,
-  Info
+  Info,
+  Sparkles
 } from "lucide-react";
 import { 
   GATABLE_MODULES, 
@@ -235,29 +236,35 @@ export default function TierForm({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top action links */}
-      <div className="flex items-center justify-between">
+      {/* Top action link */}
+      <div>
         <button 
           onClick={() => router.push("/dashboard/admin/settings/pricing")}
-          className="flex items-center gap-1.5 text-xs font-black text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] hover:text-[#1D1D1F] transition-colors cursor-pointer mb-3"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Tiers
         </button>
 
-        {isEditing && (
-          <Badge className="bg-slate-100 text-slate-800 border border-slate-200 font-black text-[10px] px-3 py-1 rounded-xl shadow-2xs">
-            {subscriberCount} Active Subscriber{subscriberCount === 1 ? "" : "s"} on this Plan
-          </Badge>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-black tracking-tight text-slate-900">
-          {isEditing ? `Edit Pricing Plan: ${initialTier.name}` : "Create New Pricing Plan"}
-        </h1>
-        <p className="text-xs text-slate-500 font-semibold">
-          Configure subscribed modules, feature benefits, unit capacity tiers, and direct payment mapping.
-        </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+              <Sparkles className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
+                {isEditing ? `Edit Pricing Plan: ${initialTier.name}` : "Create New Pricing Plan"}
+              </h1>
+              <p className="text-[#6E6E73] text-sm font-normal mt-0.5">
+                Configure subscribed modules, feature benefits, unit capacity tiers, and direct payment mapping.
+              </p>
+            </div>
+          </div>
+          {isEditing && (
+            <Badge className="bg-slate-100 text-slate-800 border border-slate-200 font-medium text-xs px-3 py-1 rounded-xl shadow-2xs">
+              {subscriberCount} Active Subscriber{subscriberCount === 1 ? "" : "s"} on this Plan
+            </Badge>
+          )}
+        </div>
       </div>
 
       {isEditing && subscriberCount > 0 && (
@@ -742,7 +749,7 @@ export default function TierForm({
                         variant="destructive" 
                         onClick={handleDelete}
                         disabled={deleting}
-                        className="flex-1 rounded-xl text-xs font-bold h-9 bg-red-600 hover:bg-red-700 text-white"
+                        className="flex-1 rounded-xl text-xs font-medium h-9 bg-red-600 hover:bg-red-700 text-white"
                       >
                         {deleting ? "Deleting..." : "Yes, Delete Tier"}
                       </Button>
@@ -775,7 +782,7 @@ export default function TierForm({
             <Button 
               type="submit" 
               disabled={saving}
-              className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs cursor-pointer shadow-xs border-none"
+              className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs cursor-pointer shadow-xs border-none"
             >
               {saving ? "Saving Tier..." : isEditing ? "Save Pricing Plan" : "Create Pricing Plan"}
             </Button>
@@ -785,47 +792,43 @@ export default function TierForm({
 
         {/* Right Column: Live upgrade selection Preview card */}
         <div className="space-y-4 font-sans">
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Live Billing Preview</span>
+          <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Live Billing Preview</span>
           
           <div className="sticky top-6">
             <Card className="rounded-3xl border border-slate-200 shadow-md bg-white overflow-hidden font-sans">
-              {/* Card Banner with Single Neon Color & Light Class Glass Effects */}
-              <div className="bg-indigo-600 px-6 py-5 text-white relative overflow-hidden shadow-xs">
-                {/* Light class glass sheen overlay */}
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm pointer-events-none" />
-                <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/20 rounded-full blur-2xl pointer-events-none" />
-                
+              {/* Card Banner */}
+              <div className="bg-slate-900 px-6 py-5 text-white relative overflow-hidden shadow-xs">
                 <div className="relative z-10">
-                  <span className="text-[9px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-md text-white border border-white/30 px-2.5 py-0.5 rounded-full block w-fit mb-2 shadow-2xs">
+                  <span className="text-[10px] font-medium uppercase tracking-wider bg-white/10 text-slate-300 border border-white/20 px-2.5 py-0.5 rounded-md block w-fit mb-2">
                     Previewing Selection
                   </span>
-                  <h4 className="text-xl font-black tracking-tight text-white drop-shadow-xs">{name || "Tier Name"}</h4>
-                  <p className="text-xs text-indigo-100 font-semibold line-clamp-1 mt-0.5">{description || "Marketplace Tagline"}</p>
+                  <h4 className="text-xl font-semibold tracking-tight text-white">{name || "Tier Name"}</h4>
+                  <p className="text-xs text-slate-300 font-normal line-clamp-1 mt-0.5">{description || "Marketplace Tagline"}</p>
                 </div>
               </div>
 
               <CardContent className="p-6 space-y-6">
                 {/* Pricing section */}
                 <div>
-                  <span className="text-3xl font-black text-slate-900 tracking-tight">{isCustom ? 'Custom Quote' : `$${price}`}</span>
-                  {!isCustom && <span className="text-slate-500 text-xs font-extrabold"> / month</span>}
+                  <span className="text-3xl font-semibold text-slate-900 tracking-tight">{isCustom ? 'Custom Quote' : `$${price}`}</span>
+                  {!isCustom && <span className="text-slate-500 text-xs font-normal"> / month</span>}
                 </div>
 
                 {/* Scope details */}
-                <div className="space-y-2.5 border-b border-slate-100 pb-4 text-xs font-semibold text-slate-500">
+                <div className="space-y-2.5 border-b border-slate-100 pb-4 text-xs font-normal text-slate-500">
                   <div className="flex justify-between">
                     <span>Portfolio Unit Scope</span>
-                    <span className="text-slate-900 font-black">
+                    <span className="text-[#1D1D1F] font-semibold">
                       {minUnits} to {isUnlimitedUnits ? "Unlimited" : maxUnits} units
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Inspector Accounts</span>
-                    <span className="text-slate-900 font-black">{maxInspectors} max</span>
+                    <span className="text-[#1D1D1F] font-semibold">{maxInspectors} max</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Evaluation Period</span>
-                    <span className="text-slate-900 font-black">
+                    <span className="text-[#1D1D1F] font-semibold">
                       {trialDays > 0 ? `${trialDays}-day free trial` : "No Free Trial"}
                     </span>
                   </div>
@@ -833,17 +836,17 @@ export default function TierForm({
 
                 {/* Features listing derived */}
                 <div className="space-y-3">
-                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Entitled Operations &amp; Features</span>
+                  <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Entitled Operations &amp; Features</span>
                   
                   <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                     {derivedFeatures.map((feat, idx) => (
                       <div key={idx} className="flex gap-2 items-start text-xs">
                         <Check className="h-3.5 w-3.5 text-emerald-600 mt-0.5 shrink-0" />
-                        <span className="text-slate-900 font-extrabold leading-normal">{feat}</span>
+                        <span className="text-[#1D1D1F] font-normal leading-normal">{feat}</span>
                       </div>
                     ))}
                     {derivedFeatures.length === 0 && (
-                      <p className="text-xs text-slate-400 font-medium italic">Select modules or add features above to generate the preview list.</p>
+                      <p className="text-xs text-slate-400 font-normal italic">Select modules or add features above to generate the preview list.</p>
                     )}
                   </div>
                 </div>
@@ -851,14 +854,14 @@ export default function TierForm({
                 {/* Call to action button */}
                 <Button 
                   disabled 
-                  className="w-full bg-slate-100 text-slate-400 rounded-xl h-9 text-xs font-black cursor-not-allowed shadow-none border-none"
+                  className="w-full bg-slate-100 text-slate-400 rounded-xl h-9 text-xs font-medium cursor-not-allowed shadow-none border-none"
                 >
                   Select Plan
                 </Button>
               </CardContent>
             </Card>
 
-            <div className="mt-4 bg-slate-50 rounded-2xl border border-slate-200/80 p-4 text-xs font-semibold text-slate-500 flex gap-2.5 items-start leading-normal shadow-2xs">
+            <div className="mt-4 bg-slate-50 rounded-2xl border border-slate-200/80 p-4 text-xs font-normal text-slate-500 flex gap-2.5 items-start leading-normal shadow-2xs">
               <Info className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
               <p>
                 The live preview shows the exact plan specifications card presented to landlord owners during checkout and checkout change events.
@@ -871,3 +874,4 @@ export default function TierForm({
     </div>
   );
 }
+

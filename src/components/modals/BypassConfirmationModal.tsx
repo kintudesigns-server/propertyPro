@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -65,7 +65,7 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
           <DialogTitle className="text-xl font-black text-slate-900 leading-tight">
             Confirm Bypass Inspection
           </DialogTitle>
-          <DialogDescription className="text-xs font-semibold text-[#8E8E93] leading-relaxed">
+          <DialogDescription className="text-xs font-normal text-[#8E8E93] leading-relaxed">
             Bypassing the walkthrough inspection creates a legal gap if the tenant disputes their refund. Please provide a reason to confirm.
           </DialogDescription>
         </DialogHeader>
@@ -108,7 +108,7 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
             <Button
               onClick={handleSubmit}
               disabled={submitting || bypassReason.trim().length < 5 || !acknowledged}
-              className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl h-11 transition-colors disabled:opacity-50"
+              className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-xl h-11 transition-colors disabled:opacity-50"
             >
               {submitting ? "Processing..." : "Confirm Bypass"}
             </Button>
@@ -118,3 +118,4 @@ export function BypassConfirmationModal({ leaseId, open, onOpenChange, onSuccess
     </Dialog>
   );
 }
+

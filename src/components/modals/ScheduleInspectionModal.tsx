@@ -92,7 +92,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
       <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-slate-900">Schedule Inspection Walkthrough</DialogTitle>
-          <DialogDescription className="text-xs font-semibold text-[#8E8E93]">
+          <DialogDescription className="text-xs font-normal text-[#8E8E93]">
             Assign an inspector and choose a type and date/time for the walkthrough.
           </DialogDescription>
         </DialogHeader>
@@ -170,7 +170,7 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
             <Button
               type="submit"
               disabled={schedulingInspection}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 text-xs font-bold"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 text-xs font-medium"
             >
               {schedulingInspection ? "Scheduling..." : "Schedule"}
             </Button>

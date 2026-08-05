@@ -81,13 +81,13 @@ export default function PortfolioAnalyticsPage() {
     <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-4 sm:px-6">
       
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <BarChart2 className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-3">
+            <BarChart2 className="h-7 w-7 text-[#1D1D1F]" />
             Portfolio Analytics
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">
+          <p className="text-xs font-normal text-[#6E6E73] mt-1">
             Executive business intelligence, occupancy rate trends, and asset yield metrics.
           </p>
         </div>
@@ -96,7 +96,7 @@ export default function PortfolioAnalyticsPage() {
             onClick={fetchAnalytics} 
             disabled={loading}
             variant="outline" 
-            className="rounded-xl border-slate-200 text-slate-700 font-bold text-xs h-10 px-4 flex items-center gap-2 hover:bg-slate-50"
+            className="rounded-xl border-slate-200 text-[#1D1D1F] font-medium text-xs h-9 px-4 flex items-center gap-2 hover:bg-slate-50 shadow-2xs cursor-pointer"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh Data
@@ -136,53 +136,53 @@ export default function PortfolioAnalyticsPage() {
         />
       </div>
 
-      {/* Monthly Trends Chart — Recharts + Framer Motion SaaS Component */}
+      {/* Monthly Trends Chart */}
       <RevenueTrendChart data={monthlyTrends} />
 
       {/* Property Performance Table */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Property Performance Leaderboard</h2>
-          <p className="text-xs text-slate-500 font-medium">Breakdown of occupancy and estimated annual ROI per asset</p>
+          <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Property Performance Leaderboard</h2>
+          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Breakdown of occupancy and estimated annual ROI per asset</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                <th className="pb-3 pl-2">Property Name</th>
-                <th className="pb-3">Location</th>
-                <th className="pb-3 text-center">Occupancy Rate</th>
-                <th className="pb-3 text-right">Monthly Rent Potential</th>
-                <th className="pb-3 text-right pr-2">Est. Annual ROI</th>
+              <tr className="border-b border-slate-100 text-[#6E6E73] font-normal text-xs">
+                <th className="pb-3 pl-2 font-normal">Property Name</th>
+                <th className="pb-3 font-normal">Location</th>
+                <th className="pb-3 text-center font-normal">Occupancy Rate</th>
+                <th className="pb-3 text-right font-normal">Monthly Rent Potential</th>
+                <th className="pb-3 text-right pr-2 font-normal">Est. Annual ROI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {propertyPerformance.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 italic font-normal">
+                  <td colSpan={5} className="py-8 text-center text-[#6E6E73] italic font-normal">
                     No properties listed yet. Add properties to see asset yield metrics.
                   </td>
                 </tr>
               ) : (
                 propertyPerformance.map((p: any, idx: number) => (
                   <tr key={p.id || idx} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-4 pl-2 font-bold text-slate-900 flex items-center gap-2">
-                      <Building2 size={16} className="text-blue-500 shrink-0" />
+                    <td className="py-4 pl-2 font-semibold text-[#1D1D1F] flex items-center gap-2">
+                      <Building2 size={16} className="text-slate-700 shrink-0" />
                       {p.name}
                     </td>
-                    <td className="py-4 text-slate-500 font-medium">{p.city || "N/A"}</td>
+                    <td className="py-4 text-[#6E6E73] font-normal">{p.city || "N/A"}</td>
                     <td className="py-4 text-center">
                       <div className="inline-flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900">{p.occupancyRate ?? p.occupancy ?? 0}%</span>
-                        <span className="text-[10px] text-slate-400 font-bold">({p.occupiedUnits ?? 0}/{p.units ?? 0})</span>
+                        <span className="font-semibold text-[#1D1D1F]">{p.occupancyRate ?? p.occupancy ?? 0}%</span>
+                        <span className="text-xs text-[#6E6E73] font-normal">({p.occupiedUnits ?? 0}/{p.units ?? 0})</span>
                       </div>
                     </td>
-                    <td className="py-4 text-right font-extrabold text-slate-900">${(p.monthlyPotential ?? 0).toLocaleString()}</td>
+                    <td className="py-4 text-right font-semibold text-[#1D1D1F]">${(p.monthlyPotential ?? 0).toLocaleString()}</td>
                     <td className="py-4 text-right pr-2">
-                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs shadow-none">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
                         ~{p.estimatedRoi ?? p.yield ?? 0}% ROI
-                      </Badge>
+                      </span>
                     </td>
                   </tr>
                 ))

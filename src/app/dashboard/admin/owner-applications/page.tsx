@@ -13,6 +13,7 @@ import {
   Building2, Globe, Phone, Mail, Users, ChevronRight, Filter, ExternalLink, Shield
 } from "lucide-react";
 import { toast } from "sonner";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 
@@ -102,8 +103,8 @@ export default function AdminOwnerApplicationsPage() {
   if (loading || status === "loading") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#EF4444]" />
-        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Loading owner applications...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-slate-900" />
+        <p className="text-slate-500 font-semibold text-sm uppercase tracking-wider">Loading owner applications...</p>
       </div>
     );
   }
@@ -117,8 +118,8 @@ export default function AdminOwnerApplicationsPage() {
             <Shield className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Owner Applications</h1>
-            <p className="text-[#6E6E73] text-base mt-0.5">Review and manage owner account requests</p>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Owner Applications</h1>
+            <p className="text-[#6E6E73] text-sm font-normal mt-0.5">Review and manage owner account requests</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -128,63 +129,20 @@ export default function AdminOwnerApplicationsPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid — Standardized KpiCards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Pending Review</p>
-              <Clock className="h-5 w-5 text-amber-500" />
-            </div>
-            <p className="text-3xl font-black text-amber-600 mb-1 leading-none">{stats.pending}</p>
-            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Requires administrative action</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Under Review</p>
-              <Search className="h-5 w-5 text-blue-500" />
-            </div>
-            <p className="text-3xl font-black text-blue-600 mb-1 leading-none">{stats.underReview}</p>
-            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Currently being verified</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Approved</p>
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-            </div>
-            <p className="text-3xl font-black text-emerald-600 mb-1 leading-none">{stats.approved}</p>
-            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Access granted to platform</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[20px] overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-black text-[#8E8E93] uppercase tracking-widest leading-none mt-1">Rejected</p>
-              <XCircle className="h-5 w-5 text-red-500" />
-            </div>
-            <p className="text-3xl font-black text-red-600 mb-1 leading-none">{stats.rejected}</p>
-            <p className="text-xs text-[#6E6E73] font-semibold mt-2">Denied application requests</p>
-          </CardContent>
-        </Card>
+        <KpiCard title="Pending Review" value={stats.pending} subtext="Requires administrative action" icon={Clock} variant="amber" />
+        <KpiCard title="Under Review" value={stats.underReview} subtext="Currently being verified" icon={Search} variant="blue" />
+        <KpiCard title="Approved" value={stats.approved} subtext="Access granted to platform" icon={CheckCircle2} variant="emerald" />
+        <KpiCard title="Rejected" value={stats.rejected} subtext="Denied application requests" icon={XCircle} variant="red" />
       </div>
 
       {/* Filter and Register Ledger */}
       <Card className="bg-white border border-[#E5E5EA] shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[24px] overflow-hidden">
         <CardHeader className="border-b border-[#E5E5EA] pb-5 bg-slate-50/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 sm:p-8">
           <div>
-            <CardTitle className="text-lg font-black text-[#1D1D1F]">Applications Register</CardTitle>
-            <CardDescription className="text-[#6E6E73] font-medium text-xs mt-0.5">Verify landlord credentials and set approval status.</CardDescription>
+            <CardTitle className="text-lg font-semibold text-[#1D1D1F]">Applications Register</CardTitle>
+            <CardDescription className="text-[#6E6E73] font-normal text-xs mt-0.5">Verify landlord credentials and set approval status.</CardDescription>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
             {/* Status Segment Filter */}
@@ -193,7 +151,7 @@ export default function AdminOwnerApplicationsPage() {
                 <button
                   key={statusOption}
                   onClick={() => setStatusFilter(statusOption)}
-                  className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                     statusFilter === statusOption
                       ? "bg-white text-slate-800 shadow-sm"
                       : "text-[#6E6E73] hover:text-slate-800"
@@ -218,7 +176,7 @@ export default function AdminOwnerApplicationsPage() {
                 placeholder="Search applications..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 h-10 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#EF4444] text-[#1D1D1F] font-semibold text-sm shadow-sm placeholder:text-[#8E8E93]"
+                className="pl-10 h-10 rounded-xl bg-white border-[#E5E5EA] focus:ring-[#EF4444] text-[#1D1D1F] font-normal text-sm shadow-sm placeholder:text-[#8E8E93]"
               />
             </div>
           </div>
@@ -227,18 +185,18 @@ export default function AdminOwnerApplicationsPage() {
           {filtered.length === 0 ? (
             <div className="text-center py-20 text-[#6E6E73]">
               <FileText className="h-14 w-14 mx-auto text-slate-200 mb-3" />
-              <p className="font-extrabold text-base">No applications matching filters.</p>
+              <p className="font-semibold text-base">No applications matching filters.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-[#E5E5EA] hover:bg-transparent bg-slate-50/20">
-                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider pl-6 sm:pl-8 py-4">Landlord</TableHead>
-                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Entity</TableHead>
-                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Portfolio</TableHead>
-                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Applied</TableHead>
-                  <TableHead className="text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider py-4">Status</TableHead>
-                  <TableHead className="text-right text-[#6E6E73] font-extrabold text-[10px] uppercase tracking-wider pr-6 sm:pr-8 py-4">Actions</TableHead>
+                  <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider pl-6 sm:pl-8 py-4">Landlord</TableHead>
+                  <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider py-4">Entity</TableHead>
+                  <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider py-4">Portfolio</TableHead>
+                  <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider py-4">Applied</TableHead>
+                  <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider py-4">Status</TableHead>
+                  <TableHead className="text-right text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider pr-6 sm:pr-8 py-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -253,26 +211,26 @@ export default function AdminOwnerApplicationsPage() {
                         onClick={() => router.push(`/dashboard/admin/owner-applications/${app.id}`)}
                         className="border-[#E5E5EA] hover:bg-[#F2F2F7] cursor-pointer transition-colors"
                       >
-                        <TableCell className="font-bold text-[#1D1D1F] pl-6 sm:pl-8 py-4">
+                        <TableCell className="font-medium text-[#1D1D1F] pl-6 sm:pl-8 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg shrink-0">
+                            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
                               {app.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-bold text-slate-900 text-sm hover:text-blue-600 transition-colors">{app.name}</p>
-                              <p className="text-[#6E6E73] text-xs font-semibold">{app.email}</p>
+                              <p className="font-semibold text-slate-900 text-sm hover:text-blue-600 transition-colors">{app.name}</p>
+                              <p className="text-[#6E6E73] text-xs font-normal">{app.email}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-bold text-[#1D1D1F] py-4">{app.entityType}</TableCell>
-                        <TableCell className="font-bold text-[#1D1D1F] py-4">{app.portfolioSize}</TableCell>
-                        <TableCell className="font-semibold text-[#6E6E73] py-4">
+                        <TableCell className="font-medium text-xs text-[#6E6E73] py-4">{app.entityType}</TableCell>
+                        <TableCell className="font-medium text-xs text-[#6E6E73] py-4">{app.portfolioSize}</TableCell>
+                        <TableCell className="font-normal text-xs text-[#6E6E73] py-4">
                           {new Date(app.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="py-4">
                           <div className="flex items-center gap-2">
                             {app.status === "PENDING" && <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>}
-                            <Badge className={`${cfg.bg} ${cfg.color} border text-xs font-extrabold px-2.5 py-1 rounded-lg`}>
+                            <Badge className={`${cfg.bg} ${cfg.color} border text-xs font-semibold px-2.5 py-1 rounded-lg`}>
                               {cfg.label}
                             </Badge>
                           </div>
@@ -281,9 +239,9 @@ export default function AdminOwnerApplicationsPage() {
                           <Button 
                             size="sm" 
                             onClick={() => router.push(`/dashboard/admin/owner-applications/${app.id}`)} 
-                            className="rounded-xl gap-2 font-bold bg-slate-900 hover:bg-slate-800 text-white px-4 h-9 shadow-sm"
+                            className="rounded-lg gap-1.5 font-medium bg-slate-900 hover:bg-slate-800 text-white px-3 h-8 text-xs transition-all shadow-2xs"
                           >
-                            <Eye className="h-3.5 w-3.5" /> Review Dossier
+                            <Eye className="h-3.5 w-3.5 text-slate-300" /> Review Dossier
                           </Button>
                         </TableCell>
                       </TableRow>

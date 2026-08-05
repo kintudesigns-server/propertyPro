@@ -123,8 +123,8 @@ export default function AddTenantPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Add New Tenant</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Create a new tenant profile and invite them to the portal.</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Add New Tenant</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Create a new tenant profile and invite them to the portal.</p>
         </div>
       </div>
 
@@ -142,7 +142,7 @@ export default function AddTenantPage() {
             </div>
           </div>
           <Link href="/dashboard/properties">
-            <Button type="button" className="bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold whitespace-nowrap px-5 py-2 h-10 shrink-0 border-0 text-xs">
+            <Button type="button" className="bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-medium whitespace-nowrap px-5 py-2 h-10 shrink-0 border-0 text-xs">
               View Properties
             </Button>
           </Link>
@@ -171,9 +171,9 @@ export default function AddTenantPage() {
               </div>
             </div>
             <div>
-              <h2 className="font-extrabold text-slate-900 text-base">Profile Photo</h2>
+              <h2 className="font-semibold text-slate-900 text-base">Profile Photo</h2>
               <p className="text-xs text-slate-500 font-medium mt-1 mb-4 max-w-md leading-relaxed">Upload a clear, professional photo for the tenant's profile. PNG, JPG, or GIF up to 5MB.</p>
-              <Button type="button" variant="outline" className="h-9 px-4 rounded-xl font-bold text-xs border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-xs">
+              <Button type="button" variant="outline" className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-xs">
                 Select Image
               </Button>
             </div>
@@ -186,7 +186,7 @@ export default function AddTenantPage() {
             <div className="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
               <User className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-extrabold text-slate-900">Personal Information</h2>
+            <h2 className="text-base font-semibold text-slate-900">Personal Information</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -250,7 +250,7 @@ export default function AddTenantPage() {
             <div className="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
               <Briefcase className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-extrabold text-slate-900">Employment Information</h2>
+            <h2 className="text-base font-semibold text-slate-900">Employment Information</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -282,7 +282,7 @@ export default function AddTenantPage() {
             <div className="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
               <PhoneCall className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-extrabold text-slate-900">Emergency Contact</h2>
+            <h2 className="text-base font-semibold text-slate-900">Emergency Contact</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -318,7 +318,7 @@ export default function AddTenantPage() {
           {/* Additional Information */}
           <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-              <h2 className="text-base font-extrabold text-slate-900">Additional Details</h2>
+              <h2 className="text-base font-semibold text-slate-900">Additional Details</h2>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2">
@@ -335,7 +335,7 @@ export default function AddTenantPage() {
           {/* Notes Section */}
           <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-              <h2 className="text-base font-extrabold text-slate-900">Administrative Notes</h2>
+              <h2 className="text-base font-semibold text-slate-900">Administrative Notes</h2>
             </div>
             <CardContent className="p-6">
               <textarea 
@@ -355,20 +355,20 @@ export default function AddTenantPage() {
             <div className="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
               <FileText className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-extrabold text-slate-900">Documents & Verification</h2>
+            <h2 className="text-base font-semibold text-slate-900">Documents & Verification</h2>
           </div>
           <CardContent className="p-6">
             <div className="border-2 border-dashed border-slate-200 rounded-3xl p-10 flex flex-col items-center justify-center text-center hover:bg-slate-50/60 transition-colors cursor-pointer">
               <div className="h-14 w-14 bg-slate-100 text-slate-800 rounded-2xl flex items-center justify-center mb-3 border border-slate-200">
                 <UploadCloud className="h-7 w-7 text-slate-700" />
               </div>
-              <h3 className="text-base font-extrabold text-slate-900">Upload Tenant Documents</h3>
+              <h3 className="text-base font-semibold text-slate-900">Upload Tenant Documents</h3>
               <p className="text-xs text-slate-500 font-medium mt-1 mb-4">Drag and drop IDs, proof of income, or references here.</p>
               <div className="flex items-center gap-4 text-xs font-bold text-emerald-700 mb-5">
                 <span className="flex items-center gap-1">✓ PDF, DOC, JPG</span>
                 <span className="flex items-center gap-1">✓ Up to 10MB each</span>
               </div>
-              <Button type="button" variant="outline" className="h-9 px-5 rounded-xl border-slate-200 text-slate-800 font-bold text-xs bg-white hover:bg-slate-50 shadow-xs">
+              <Button type="button" variant="outline" className="h-9 px-5 rounded-xl border-slate-200 text-slate-800 font-medium text-xs bg-white hover:bg-slate-50 shadow-xs">
                 Choose Files
               </Button>
             </div>
@@ -378,9 +378,9 @@ export default function AddTenantPage() {
         {/* Floating Action Bar */}
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 flex justify-end gap-3 z-20 shadow-md">
           <Link href="/dashboard/tenants">
-            <Button type="button" variant="outline" className="h-10 px-5 rounded-xl font-bold text-xs text-slate-700 border-slate-200 bg-white hover:bg-slate-50 shadow-xs">Cancel</Button>
+            <Button type="button" variant="outline" className="h-10 px-5 rounded-xl font-medium text-xs text-slate-700 border-slate-200 bg-white hover:bg-slate-50 shadow-xs">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={loading || !hasApprovedProperty} className="bg-slate-900 hover:bg-slate-800 text-white h-10 px-6 rounded-xl font-black text-xs shadow-xs flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          <Button type="submit" disabled={loading || !hasApprovedProperty} className="bg-slate-900 hover:bg-slate-800 text-white h-10 px-6 rounded-xl font-medium text-xs shadow-xs flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             {loading ? "Saving..." : "Create Tenant"}
           </Button>
         </div>
@@ -389,3 +389,4 @@ export default function AddTenantPage() {
     </div>
   );
 }
+

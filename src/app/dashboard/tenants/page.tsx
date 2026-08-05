@@ -133,17 +133,17 @@ export default function TenantsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tenants</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage tenant applications, directory and profiles</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Tenants</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage tenant applications, directory and profiles</p>
         </div>
         {!checkingProperties && properties.some(p => p.approvalStatus === "APPROVED") ? (
           <Link href="/dashboard/tenants/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-black flex items-center gap-2 cursor-pointer">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-medium flex items-center gap-2 cursor-pointer">
               <Plus className="h-4 w-4" /> Add Tenant
             </Button>
           </Link>
         ) : (
-          <Button disabled className="bg-slate-100 text-slate-400 border border-slate-200 shadow-xs rounded-xl h-9 px-4 text-xs font-bold flex items-center gap-2 cursor-not-allowed">
+          <Button disabled className="bg-slate-100 text-slate-400 border border-slate-200 shadow-xs rounded-xl h-9 px-4 text-xs font-medium flex items-center gap-2 cursor-not-allowed">
             <Plus className="h-4 w-4" /> Add Tenant (Locked)
           </Button>
         )}
@@ -163,7 +163,7 @@ export default function TenantsPage() {
             </div>
           </div>
           <Link href="/dashboard/properties">
-            <Button type="button" className="bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold whitespace-nowrap px-4 py-2 h-9 text-xs shrink-0 shadow-xs border-0">
+            <Button type="button" className="bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-medium whitespace-nowrap px-4 py-2 h-9 text-xs shrink-0 shadow-xs border-0">
               View Properties
             </Button>
           </Link>
@@ -186,8 +186,8 @@ export default function TenantsPage() {
               <Users className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="font-extrabold text-slate-900 text-base leading-tight">Tenants ({filteredTenants.length})</h2>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">Showing {filteredTenants.length} of {tenants.length} tenants</p>
+              <h2 className="font-semibold text-slate-900 text-base leading-tight">Tenants ({filteredTenants.length})</h2>
+              <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Showing {filteredTenants.length} of {tenants.length} tenants</p>
             </div>
           </div>
           <div className="flex items-center bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
@@ -288,22 +288,22 @@ export default function TenantsPage() {
                                 </div>
                               )}
                               <div className="flex flex-col min-w-0">
-                                <span className="font-extrabold text-slate-900 text-xs truncate">{t.name}</span>
+                                <span className="font-semibold text-slate-900 text-xs truncate">{t.name}</span>
                                 <span className="text-[11px] text-slate-500 font-medium truncate">{t.email}</span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="py-3.5">
-                            <Badge className={`${badgeConfig.bg} border rounded-lg px-2.5 py-0.5 font-extrabold text-[10px] uppercase shadow-2xs whitespace-nowrap`}>
-                              {badgeConfig.label}
+                            <Badge className={`${badgeConfig.bg} border rounded-md px-2.5 py-0.5 font-medium text-[10px] uppercase tracking-wider shadow-2xs whitespace-nowrap`}>
+                              {badgeConfig.label === "PENDING ONBOARDING" || badgeConfig.label === "PENDING_ONBOARDING" ? "Pending Onboarding" : badgeConfig.label}
                             </Badge>
                           </TableCell>
                           <TableCell className="py-3.5">
-                            <div className="text-xs font-extrabold text-slate-900">{t.phone || "-"}</div>
+                            <div className="text-xs font-semibold text-slate-900">{t.phone || "-"}</div>
                             <div className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">{t.email}</div>
                           </TableCell>
                           <TableCell className="py-3.5">
-                            <div className="text-xs font-extrabold text-slate-900 truncate max-w-[150px]" title={t.position || t.employmentStatus}>
+                            <div className="text-xs font-semibold text-slate-900 truncate max-w-[150px]" title={t.position || t.employmentStatus}>
                               {t.employmentStatus === "EMPLOYED" 
                                 ? (t.position || "Employed") 
                                 : t.employmentStatus 
@@ -355,7 +355,7 @@ export default function TenantsPage() {
             {filteredTenants.length === 0 ? (
               <div className="col-span-full py-16 text-center border border-dashed border-slate-200 rounded-3xl bg-white">
                 <Users className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                <h3 className="text-base font-extrabold text-slate-900">No Tenants Found</h3>
+                <h3 className="text-base font-semibold text-slate-900">No Tenants Found</h3>
                 <p className="text-xs text-slate-500 mt-1 font-medium">Try adjusting your search or add a new tenant.</p>
               </div>
             ) : (
@@ -410,7 +410,7 @@ export default function TenantsPage() {
                             {t.name ? t.name.charAt(0).toUpperCase() : "U"}
                           </div>
                         )}
-                        <h3 className="font-extrabold text-slate-900 text-base truncate w-full">{t.name}</h3>
+                        <h3 className="font-semibold text-slate-900 text-base truncate w-full">{t.name}</h3>
                         <p className="text-xs text-slate-500 font-medium truncate w-full mt-0.5">{t.email}</p>
                         <div className="mt-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-2.5 w-full text-center">
                           <p className="text-xs font-bold text-slate-800 truncate">
@@ -422,11 +422,11 @@ export default function TenantsPage() {
                         </div>
                       </div>
 
-                      <div className="mt-auto pt-3.5 border-t border-slate-100 flex justify-between items-center">
-                        <Badge className={`${badgeConfig.bg} border rounded-lg px-2.5 py-0.5 font-extrabold text-[10px] uppercase shadow-2xs`}>
-                          {badgeConfig.label}
+                      <div className="mt-auto pt-3.5 border-t border-slate-100 flex justify-between items-center gap-2">
+                        <Badge className={`${badgeConfig.bg} border rounded-md px-2 py-0.5 font-medium text-[10px] uppercase tracking-wider shadow-2xs shrink-0 max-w-[55%] truncate`}>
+                          {badgeConfig.label === "PENDING ONBOARDING" || badgeConfig.label === "PENDING_ONBOARDING" ? "Pending" : badgeConfig.label}
                         </Badge>
-                        <span className="text-xs font-bold text-slate-700">{t.phone || "-"}</span>
+                        <span className="text-xs font-medium text-[#6E6E73] truncate text-right">{t.phone || "-"}</span>
                       </div>
                     </div>
                   );
@@ -451,7 +451,7 @@ export default function TenantsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
           <Card className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h2 className="font-extrabold text-slate-900 text-base">Change Tenant Status</h2>
+              <h2 className="font-semibold text-slate-900 text-base">Change Tenant Status</h2>
               <button onClick={() => setShowStatusModal(false)} className="text-slate-400 hover:text-slate-900 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <form onSubmit={handleStatusChange}>
@@ -481,7 +481,7 @@ export default function TenantsPage() {
                 <Button type="button" variant="outline" onClick={() => setShowStatusModal(false)} className="h-9 px-4 rounded-xl font-bold text-xs border-slate-200 text-slate-700 bg-white">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-5 rounded-xl font-black text-xs shadow-xs">
+                <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-5 rounded-xl font-medium text-xs shadow-xs">
                   Save Status
                 </Button>
               </div>
@@ -493,3 +493,4 @@ export default function TenantsPage() {
     </div>
   );
 }
+

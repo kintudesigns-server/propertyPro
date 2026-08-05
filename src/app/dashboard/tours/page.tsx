@@ -396,10 +396,10 @@ export default function ShowingToursPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
             Showings &amp; Tours
           </h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
             Review prospect tour requests, send meeting details, and manage your property showing schedule.
           </p>
         </div>
@@ -415,7 +415,7 @@ export default function ShowingToursPage() {
           <Button
             onClick={fetchTours}
             variant="outline"
-            className="h-9 px-3.5 text-xs font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer"
+            className="h-9 px-3.5 text-xs font-medium rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer"
           >
             Refresh
           </Button>
@@ -480,8 +480,8 @@ export default function ShowingToursPage() {
               <CalendarIcon className="h-4.5 w-4.5 text-slate-800" />
             </div>
             <div>
-              <h2 className="font-extrabold text-slate-900 text-base leading-tight">Showing Schedules ({filteredTours.length})</h2>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">Showing {filteredTours.length} of {tours.length} tour requests</p>
+              <h2 className="font-semibold text-slate-900 text-base leading-tight">Showing Schedules ({filteredTours.length})</h2>
+              <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Showing {filteredTours.length} of {tours.length} tour requests</p>
             </div>
           </div>
           <div className="relative w-full sm:w-72">
@@ -498,7 +498,7 @@ export default function ShowingToursPage() {
         {/* Row 2: Status Filter Tabs & Format/Sort Selects */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
           {/* Status Segment Filter Tabs */}
-          <div className="flex flex-wrap items-center bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs gap-1">
+          <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-fit border border-slate-200/30">
             {(
               [
                 { key: "ALL", label: "All Showings" },
@@ -514,19 +514,19 @@ export default function ShowingToursPage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all capitalize flex items-center gap-1.5 cursor-pointer ${
                     active
-                      ? "bg-slate-900 text-white shadow-2xs"
-                      : "text-slate-500 hover:text-slate-900"
+                      ? "bg-white text-[#1D1D1F] shadow-2xs"
+                      : "text-[#6E6E73] hover:text-[#1D1D1F]"
                   }`}
                 >
                   {tab.label}
                   {count > 0 && (
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
                         active
-                          ? "bg-slate-800 text-white"
-                          : "bg-slate-200 text-slate-700"
+                          ? "bg-slate-100 text-[#1D1D1F]"
+                          : "bg-slate-200/60 text-[#6E6E73]"
                       }`}
                     >
                       {count}
@@ -542,7 +542,7 @@ export default function ShowingToursPage() {
             <select
               value={formatFilter}
               onChange={(e) => setFormatFilter(e.target.value as any)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer flex-1 lg:flex-none"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer flex-1 lg:flex-none"
             >
               <option value="ALL">All Formats</option>
               <option value="IN_PERSON">In-Person</option>
@@ -552,7 +552,7 @@ export default function ShowingToursPage() {
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value as any)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer flex-1 lg:flex-none"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer flex-1 lg:flex-none"
             >
               <option value="NEWEST_REQUESTED">⚡ Newest First</option>
               <option value="OLDEST_REQUESTED">Oldest First</option>
@@ -564,14 +564,14 @@ export default function ShowingToursPage() {
           {/* Consolidated 5-Column High-Density Table Ledger */}
           <CardContent className="p-0 overflow-x-auto">
             {loading ? (
-              <div className="p-12 text-center text-slate-400 font-bold text-xs">
+              <div className="p-12 text-center text-[#6E6E73] font-normal text-xs">
                 Loading showing requests...
               </div>
             ) : filteredTours.length === 0 ? (
               <div className="p-16 text-center space-y-3">
                 <CalendarIcon className="h-10 w-10 text-slate-300 mx-auto" />
-                <p className="text-sm font-bold text-slate-700">No tour requests found</p>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-[#1D1D1F]">No tour requests found</p>
+                <p className="text-xs text-[#6E6E73] font-normal max-w-sm mx-auto">
                   When prospective renters schedule property visits, their booking requests will appear here.
                 </p>
               </div>
@@ -579,19 +579,19 @@ export default function ShowingToursPage() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow className="border-slate-200 bg-slate-50/60 hover:bg-transparent">
-                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider pl-6 py-3.5 w-[30%]">
+                    <TableHead className="font-normal text-xs text-[#6E6E73] pl-6 py-3.5 w-[30%]">
                       Prospect Details
                     </TableHead>
-                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[22%]">
+                    <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 w-[22%]">
                       Property &amp; Unit
                     </TableHead>
-                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[24%]">
+                    <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 w-[24%]">
                       Showing Time &amp; Request Date
                     </TableHead>
-                    <TableHead className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider py-3.5 w-[14%]">
+                    <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 w-[14%]">
                       Format &amp; Status
                     </TableHead>
-                    <TableHead className="text-right text-slate-500 font-extrabold text-[10px] uppercase tracking-wider pr-6 py-3.5 w-[10%]">
+                    <TableHead className="text-right font-normal text-xs text-[#6E6E73] pr-6 py-3.5 w-[10%]">
                       Action
                     </TableHead>
                   </TableRow>
@@ -631,31 +631,31 @@ export default function ShowingToursPage() {
                           }`}
                         >
                           {/* 1. Prospect Details */}
-                          <TableCell className="font-bold text-slate-900 pl-6 py-3.5">
+                          <TableCell className="pl-6 py-3.5">
                             <div className="flex items-start gap-3">
-                              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 font-black text-sm flex items-center justify-center shrink-0 mt-0.5">
+                              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 font-semibold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                 {tour.tenantName.charAt(0).toUpperCase()}
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-bold text-slate-900 text-sm hover:text-blue-600 transition-colors">
+                                  <span className="font-semibold text-[#1D1D1F] text-xs hover:text-blue-600 transition-colors">
                                     {tour.tenantName}
                                   </span>
                                   {tour.verifiedEmail && (
-                                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] font-bold px-1.5 py-0 rounded-full">
+                                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-medium px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                                       <ShieldCheck className="h-2.5 w-2.5 mr-0.5 text-blue-600" /> Verified
                                     </Badge>
                                   )}
                                   {isMultiBooker && (
-                                    <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[9px] font-bold px-1.5 py-0 rounded-full">
+                                    <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] font-medium px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                                       <ShieldAlert className="h-2.5 w-2.5 mr-0.5 text-amber-600" /> Multi
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-xs font-semibold text-slate-500 truncate mt-0.5">
+                                <p className="text-xs font-normal text-[#6E6E73] truncate mt-0.5">
                                   {tour.tenantEmail}
                                 </p>
-                                <p className="text-[11px] font-medium text-slate-400 mt-0.5">
+                                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
                                   {tour.tenantPhone}
                                 </p>
                               </div>
@@ -664,23 +664,23 @@ export default function ShowingToursPage() {
 
                           {/* 2. Property & Unit */}
                           <TableCell className="py-3.5">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+                            <div className="flex items-center gap-1.5 font-semibold text-[#1D1D1F] text-xs">
                               <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                               <span className="truncate">{tour.property.name}</span>
                             </div>
-                            <p className="text-[11px] font-medium text-slate-500 pl-5 mt-0.5">
+                            <p className="text-xs font-normal text-[#6E6E73] pl-5 mt-0.5">
                               {formattedUnitName || tour.property.address}
                             </p>
                           </TableCell>
 
-                          {/* 3. Showing Time & Request Date (Combined Column!) */}
+                          {/* 3. Showing Time & Request Date */}
                           <TableCell className="py-3.5">
-                            <p className="font-bold text-slate-900 text-xs">{dateStr}</p>
-                            <p className="text-xs font-semibold text-slate-600 flex items-center gap-1 mt-0.5">
+                            <p className="font-semibold text-[#1D1D1F] text-xs">{dateStr}</p>
+                            <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1 mt-0.5">
                               <Clock className="h-3 w-3 text-slate-400" />
-                              {timeStr} <span className="text-[10px] font-extrabold text-slate-400">{tzAbbrev}</span>
+                              {timeStr} <span className="text-xs font-normal text-[#6E6E73]">{tzAbbrev}</span>
                             </p>
-                            <p className="text-[10px] font-semibold text-slate-400 mt-1">
+                            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
                               Requested {createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} ({daysAgo === 0 ? "Today" : `${daysAgo}d ago`})
                             </p>
                           </TableCell>
@@ -690,16 +690,16 @@ export default function ShowingToursPage() {
                             <div className="space-y-1.5">
                               <div>
                                 {tour.tourType === "VIDEO_CALL" ? (
-                                  <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[11px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
+                                  <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 w-fit">
                                     <Video className="h-3 w-3" /> Video Call
                                   </Badge>
                                 ) : (
-                                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
+                                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 w-fit">
                                     <MapPin className="h-3 w-3 text-slate-400" /> In-Person
                                   </Badge>
                                 )}
                               </div>
-                              <Badge className={`${theme.badge} border text-[11px] font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit`}>
+                              <Badge className={`${theme.badge} border text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 w-fit`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
                                 {theme.label}
                               </Badge>
@@ -829,33 +829,33 @@ export default function ShowingToursPage() {
                 <div className="w-screen max-w-lg bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300">
 
                   {/* Drawer Header */}
-                  <div className="bg-slate-950 text-white p-6 shrink-0 relative">
+                  <div className="bg-white border-b border-slate-100 p-6 shrink-0 relative font-sans">
                     <button
                       onClick={() => setDetailTour(null)}
-                      className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+                      className="absolute top-5 right-5 text-[#6E6E73] hover:text-[#1D1D1F] p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                       <X className="h-5 w-5" />
                     </button>
 
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-[10px] font-mono uppercase px-2 py-0.5">
+                        <Badge className="bg-slate-100 text-[#6E6E73] border-slate-200 text-[10px] font-medium font-mono uppercase px-2 py-0.5 rounded-md">
                           Ref #{detailTour.id.slice(-6).toUpperCase()}
                         </Badge>
-                        <Badge className={`rounded-full text-xs font-bold px-3 py-0.5 border ${STATUS_THEMES[detailTour.status].badge}`}>
+                        <Badge className={`rounded-md text-[10px] font-medium px-2.5 py-0.5 border uppercase tracking-wider ${STATUS_THEMES[detailTour.status].badge}`}>
                           {STATUS_THEMES[detailTour.status].label}
                         </Badge>
                       </div>
 
                       <div>
-                        <h2 className="text-xl font-black text-white">{detailTour.tenantName}</h2>
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                        <h2 className="text-xl font-semibold text-[#1D1D1F] tracking-tight">{detailTour.tenantName}</h2>
+                        <div className="flex items-center gap-3 text-xs font-normal text-[#6E6E73] mt-1">
                           <span className="flex items-center gap-1">
-                            <Mail className="h-3.5 w-3.5" />
+                            <Mail className="h-3.5 w-3.5 text-slate-400" />
                             {detailTour.tenantEmail}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Phone className="h-3.5 w-3.5" />
+                            <Phone className="h-3.5 w-3.5 text-slate-400" />
                             {detailTour.tenantPhone}
                           </span>
                         </div>
@@ -864,29 +864,29 @@ export default function ShowingToursPage() {
                   </div>
 
                   {/* Drawer Body */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <div className="flex-1 overflow-y-auto p-6 space-y-6 font-sans">
 
                     {/* Schedule & Property Cards */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Schedule</p>
-                        <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5">
-                          <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
+                        <p className="text-xs font-normal text-[#6E6E73]">Schedule</p>
+                        <p className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1.5 pt-0.5">
+                          <CalendarIcon className="h-3.5 w-3.5 text-slate-400" />
                           {dateStr}
                         </p>
-                        <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-slate-500" />
-                          {timeStr} <span className="text-slate-400 text-[10px]">{tzAbbrev}</span>
+                        <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-slate-400" />
+                          {timeStr} <span className="text-[#6E6E73] text-xs font-normal">{tzAbbrev}</span>
                         </p>
                       </div>
 
                       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Property</p>
-                        <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5 pt-0.5 truncate">
-                          <Building2 className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                        <p className="text-xs font-normal text-[#6E6E73]">Property</p>
+                        <p className="text-xs font-semibold text-[#1D1D1F] flex items-center gap-1.5 pt-0.5 truncate">
+                          <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                           <span className="truncate">{detailTour.property.name}</span>
                         </p>
-                        <p className="text-xs font-semibold text-slate-600 truncate">
+                        <p className="text-xs font-normal text-[#6E6E73] truncate">
                           {detailTour.unit ? `Unit ${detailTour.unit.name.replace(/^unit\s+/i, "")}` : detailTour.property.address}
                         </p>
                       </div>
@@ -894,14 +894,14 @@ export default function ShowingToursPage() {
 
                     {/* Format Badge */}
                     <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-1">
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Tour Format</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">Tour Format</p>
                       <div className="pt-1">
                         {detailTour.tourType === "VIDEO_CALL" ? (
-                          <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-xs font-bold px-3 py-1 rounded-xl">
+                          <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] font-medium px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                             <Video className="h-3.5 w-3.5 mr-1.5" /> Virtual Video Call
                           </Badge>
                         ) : (
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-xs font-bold px-3 py-1 rounded-xl">
+                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px] font-medium px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                             <MapPin className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> In-Person Visit
                           </Badge>
                         )}
@@ -911,8 +911,8 @@ export default function ShowingToursPage() {
                     {/* Prospect Message */}
                     {detailTour.tenantMessage && (
                       <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Prospect Note</p>
-                        <p className="text-xs font-medium text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/80 italic">
+                        <p className="text-xs font-normal text-[#6E6E73]">Prospect Note</p>
+                        <p className="text-xs font-normal text-[#6E6E73] bg-slate-50 p-3 rounded-xl border border-slate-200/80 italic">
                           "{detailTour.tenantMessage}"
                         </p>
                       </div>
@@ -921,12 +921,12 @@ export default function ShowingToursPage() {
                     {/* Actions Panel */}
                     {detailTour.status === "PENDING" && (
                       <div className="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3">
-                        <p className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                        <p className="text-xs font-semibold text-emerald-950 flex items-center gap-1.5">
                           <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Confirm Showing Request
                         </p>
                         {detailTour.tourType === "VIDEO_CALL" && (
                           <div className="space-y-1">
-                            <Label className="text-[11px] font-bold text-slate-700">Video Call Link (Google Meet / Zoom)</Label>
+                            <Label className="text-xs font-normal text-[#6E6E73]">Video Call Link (Google Meet / Zoom)</Label>
                             <Input
                               placeholder="https://meet.google.com/xyz-abc"
                               value={meetingLinkInput}
@@ -939,14 +939,14 @@ export default function ShowingToursPage() {
                           <Button
                             onClick={() => handleConfirm(detailTour)}
                             disabled={actionLoading}
-                            className="flex-1 h-9 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+                            className="flex-1 h-9 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-xs border-none cursor-pointer"
                           >
                             Confirm Tour &amp; Email Prospect
                           </Button>
                           <Button
                             variant="outline"
                             onClick={() => setShowCancelDialog(true)}
-                            className="h-9 text-xs font-bold text-rose-600 border-rose-200 hover:bg-rose-50 rounded-xl"
+                            className="h-9 text-xs font-medium text-rose-600 border-rose-200 hover:bg-rose-50 rounded-xl cursor-pointer"
                           >
                             Reject
                           </Button>
@@ -1015,7 +1015,7 @@ export default function ShowingToursPage() {
         <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
           <DialogContent className="sm:max-w-md rounded-3xl p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-900">Cancel Tour Request</DialogTitle>
+              <DialogTitle className="text-lg font-semibold text-slate-900">Cancel Tour Request</DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
                 Please provide a cancellation reason. An email notification will be sent to the prospect.
               </DialogDescription>
@@ -1054,7 +1054,7 @@ export default function ShowingToursPage() {
         <Dialog open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
           <DialogContent className="sm:max-w-lg rounded-3xl p-6 space-y-4">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-900">Configure Showing Availability</DialogTitle>
+              <DialogTitle className="text-lg font-semibold text-slate-900">Configure Showing Availability</DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
                 Set active days and working hours for prospective renters booking showing slots.
               </DialogDescription>
@@ -1125,7 +1125,7 @@ export default function ShowingToursPage() {
               <Button
                 onClick={handleSaveAvailability}
                 disabled={savingAvailability}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium"
               >
                 Save Availability
               </Button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -37,7 +37,7 @@ export function PaginationBar({
 
   return (
     <div className="bg-white border-t border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div className="text-xs text-slate-500 font-semibold text-center sm:text-left">
+      <div className="text-xs text-[#6E6E73] font-normal text-center sm:text-left">
         Showing <span className="font-bold text-slate-800">{startItem}</span> to{" "}
         <span className="font-bold text-slate-800">{endItem}</span> of{" "}
         <span className="font-bold text-slate-800">{totalItems}</span> {itemLabel}

@@ -106,7 +106,7 @@ export default function ApplicationDetailsPage() {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
+              <h1 className="text-lg font-semibold text-slate-900 tracking-tight leading-none">
                 {app.name}
               </h1>
               <Badge
@@ -157,7 +157,7 @@ export default function ApplicationDetailsPage() {
 
           {app.status === "APPROVED" && (
             <Link href={`/dashboard/leases/new?appId=${app.id}`}>
-              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-xs text-xs cursor-pointer">
+              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-xs text-xs cursor-pointer">
                 <FileText className="h-3.5 w-3.5" /> Create Lease
               </Button>
             </Link>
@@ -184,14 +184,14 @@ export default function ApplicationDetailsPage() {
         {/* Document Header Banner */}
         <div className="border-b border-slate-200 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase text-slate-500 tracking-wider mb-1">
               <Building2 className="h-3.5 w-3.5 text-slate-700" />
               Official Rental Application Dossier
             </div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">
               {app.name}
             </h2>
-            <p className="text-xs text-slate-500 font-semibold mt-1">
+            <p className="text-xs text-[#6E6E73] font-normal mt-1">
               Submitted on <span className="text-slate-900 font-extrabold">{new Date(app.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span> • Ref: <span className="font-mono text-slate-700 select-all">{app.id}</span>
             </p>
           </div>
@@ -199,11 +199,11 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 px-4 flex items-center gap-6 text-xs shrink-0 w-full sm:w-auto">
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Unit</span>
-              <span className="font-extrabold text-slate-900">{app.unit?.property?.name} ({app.unit?.name})</span>
+              <span className="font-semibold text-slate-900">{app.unit?.property?.name} ({app.unit?.name})</span>
             </div>
             <div className="border-l border-slate-200 pl-6">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Monthly Rent</span>
-              <span className="font-extrabold text-slate-900">${rentAmount.toLocaleString()}/mo</span>
+              <span className="font-semibold text-slate-900">${rentAmount.toLocaleString()}/mo</span>
             </div>
           </div>
         </div>
@@ -212,21 +212,21 @@ export default function ApplicationDetailsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-4">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Move-In</span>
-            <span className="font-black text-slate-900 text-sm mt-0.5 block">
+            <span className="font-semibold text-slate-900 text-sm mt-0.5 block">
               {app.moveInDate ? new Date(app.moveInDate).toLocaleDateString() : "Immediate"}
             </span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lease Duration</span>
-            <span className="font-black text-slate-900 text-sm mt-0.5 block">{app.leaseDuration} Months</span>
+            <span className="font-semibold text-slate-900 text-sm mt-0.5 block">{app.leaseDuration} Months</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Occupants</span>
-            <span className="font-black text-slate-900 text-sm mt-0.5 block">{app.occupantsCount || 1} Person(s)</span>
+            <span className="font-semibold text-slate-900 text-sm mt-0.5 block">{app.occupantsCount || 1} Person(s)</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Income Ratio</span>
-            <span className="font-black text-slate-900 text-sm mt-0.5 block">
+            <span className="font-semibold text-slate-900 text-sm mt-0.5 block">
               {incomeRatio ? `${incomeRatio}x Rent` : "N/A"}
             </span>
           </div>
@@ -238,7 +238,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-100/90 border border-slate-200/90 p-3 px-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-slate-900" />
-              <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+              <h3 className="text-xs font-semibold uppercase text-slate-900 tracking-wider">
                 1. Applicant Contact & Emergency Details
               </h3>
             </div>
@@ -251,7 +251,7 @@ export default function ApplicationDetailsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-6 text-xs">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Full Name</span>
-                <span className="font-extrabold text-slate-900 text-sm">{app.name}</span>
+                <span className="font-semibold text-slate-900 text-sm">{app.name}</span>
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</span>
@@ -288,7 +288,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-100/90 border border-slate-200/90 p-3 px-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-slate-900" />
-              <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+              <h3 className="text-xs font-semibold uppercase text-slate-900 tracking-wider">
                 2. Financial & Employment Profile
               </h3>
             </div>
@@ -300,7 +300,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-50/60 border border-slate-200/80 rounded-2xl p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-6 text-xs">
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employer / Business</span>
-              <span className="font-extrabold text-slate-900 text-sm">{app.employerName || "Not Provided"}</span>
+              <span className="font-semibold text-slate-900 text-sm">{app.employerName || "Not Provided"}</span>
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Job Title</span>
@@ -308,7 +308,7 @@ export default function ApplicationDetailsPage() {
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gross Monthly Income</span>
-              <span className="font-extrabold text-slate-900 text-sm">
+              <span className="font-semibold text-slate-900 text-sm">
                 {monthlyIncome > 0 ? `$${monthlyIncome.toLocaleString()}` : "Not Provided"}
               </span>
             </div>
@@ -323,7 +323,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-100/90 border border-slate-200/90 p-3 px-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PhoneCall className="h-4 w-4 text-slate-900" />
-              <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+              <h3 className="text-xs font-semibold uppercase text-slate-900 tracking-wider">
                 3. {app.hasGuarantor ? "Guarantor Information" : "Previous Landlord Reference"}
               </h3>
             </div>
@@ -337,7 +337,7 @@ export default function ApplicationDetailsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Guarantor Name</span>
-                  <span className="font-extrabold text-slate-900">{app.guarantorName || "N/A"}</span>
+                  <span className="font-semibold text-slate-900">{app.guarantorName || "N/A"}</span>
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Contact Phone</span>
@@ -349,7 +349,7 @@ export default function ApplicationDetailsPage() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Monthly Income</span>
-                  <span className="font-extrabold text-slate-900">
+                  <span className="font-semibold text-slate-900">
                     {app.guarantorIncome ? `$${Number(app.guarantorIncome).toLocaleString()}/mo` : "N/A"}
                   </span>
                 </div>
@@ -358,7 +358,7 @@ export default function ApplicationDetailsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Landlord Name</span>
-                  <span className="font-extrabold text-slate-900">{app.prevLandlordName || "N/A"}</span>
+                  <span className="font-semibold text-slate-900">{app.prevLandlordName || "N/A"}</span>
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Contact Phone</span>
@@ -385,7 +385,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-100/90 border border-slate-200/90 p-3 px-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-slate-900" />
-              <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+              <h3 className="text-xs font-semibold uppercase text-slate-900 tracking-wider">
                 4. Pets, Vehicles & Legal Consents
               </h3>
             </div>
@@ -398,7 +398,7 @@ export default function ApplicationDetailsPage() {
             <div className="space-y-2.5">
               <div className="flex justify-between py-1 border-b border-slate-200/60">
                 <span className="font-bold text-slate-500">Pets Count:</span>
-                <span className="font-extrabold text-slate-900">{app.petsCount || 0} pet(s)</span>
+                <span className="font-semibold text-slate-900">{app.petsCount || 0} pet(s)</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200/60">
                 <span className="font-bold text-slate-500">Pet Details:</span>
@@ -460,7 +460,7 @@ export default function ApplicationDetailsPage() {
           <div className="bg-slate-100/90 border border-slate-200/90 p-3 px-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Paperclip className="h-4 w-4 text-slate-900" />
-              <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+              <h3 className="text-xs font-semibold uppercase text-slate-900 tracking-wider">
                 5. Attached Verification Documents
               </h3>
             </div>
@@ -483,7 +483,7 @@ export default function ApplicationDetailsPage() {
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="truncate">
-                        <p className="text-xs font-extrabold text-slate-900 truncate">Government ID</p>
+                        <p className="text-xs font-semibold text-slate-900 truncate">Government ID</p>
                         <p className="text-[10px] text-slate-500 font-semibold">ID Card / Passport</p>
                       </div>
                     </div>
@@ -505,7 +505,7 @@ export default function ApplicationDetailsPage() {
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="truncate">
-                        <p className="text-xs font-extrabold text-slate-900 truncate">Proof of Income</p>
+                        <p className="text-xs font-semibold text-slate-900 truncate">Proof of Income</p>
                         <p className="text-[10px] text-slate-500 font-semibold">Pay Stubs / Tax Returns</p>
                       </div>
                     </div>

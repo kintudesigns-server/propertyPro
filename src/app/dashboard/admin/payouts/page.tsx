@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { UnmaskAccountNumber } from "@/components/UnmaskAccountNumber";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { KpiCard } from "@/components/ui/KpiCard";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface PayoutRecord {
@@ -322,15 +323,15 @@ export default function AdminPayoutsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-100 border border-slate-200 rounded-2xl shrink-0 shadow-2xs">
-            <Shield className="h-6 w-6 text-slate-900" />
+          <div className="p-2.5 bg-rose-50 text-rose-500 rounded-xl">
+            <Shield className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Payouts Control Ledger</h1>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Payouts Control Ledger</h1>
+            <p className="text-sm text-[#6E6E73] font-normal mt-0.5">
               {stats ? (
                 stats.overdueCount > 0 ? (
-                  <span className="text-rose-600 font-black">{stats.pendingCount} pending · {stats.overdueCount} past {slaHours}h SLA</span>
+                  <span className="text-rose-600 font-semibold">{stats.pendingCount} pending · {stats.overdueCount} past {slaHours}h SLA</span>
                 ) : (
                   <span>{stats.pendingCount} pending · All within {slaHours}h SLA target</span>
                 )
@@ -344,11 +345,11 @@ export default function AdminPayoutsPage() {
           {/* SLA Target Selector */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 h-9 rounded-xl shadow-2xs">
             <Clock className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-xs font-extrabold text-slate-500">SLA:</span>
+            <span className="text-xs font-semibold text-slate-500">SLA:</span>
             <select
               value={slaHours}
               onChange={(e) => setSlaHours(Number(e.target.value))}
-              className="text-xs font-black text-slate-900 bg-transparent focus:outline-none cursor-pointer"
+              className="text-xs font-medium text-slate-900 bg-transparent focus:outline-none cursor-pointer"
             >
               <option value={12}>12 Hours</option>
               <option value={24}>24 Hours (1 Day)</option>
@@ -362,7 +363,7 @@ export default function AdminPayoutsPage() {
             variant="outline"
             size="sm"
             onClick={handleExport}
-            className="h-9 gap-2 border-slate-200 text-slate-900 hover:bg-slate-50 font-black text-xs rounded-xl shadow-2xs cursor-pointer bg-white"
+            className="h-9 gap-2 border-slate-200 text-slate-900 hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer bg-white"
           >
             <Download className="h-3.5 w-3.5 text-slate-700" /> Export CSV
           </Button>
@@ -377,79 +378,57 @@ export default function AdminPayoutsPage() {
         </div>
       </div>
 
-      {/* Stats Row */}
+      {/* Stats Row — Standardized KpiCards */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 font-sans">
-          {/* Pending */}
-          <div className="bg-white border border-slate-200 border-l-4 border-l-amber-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Pending</p>
-              <p className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.pendingCount}</p>
-              <p className="text-[10px] text-amber-700 font-extrabold mt-1">
-                ${stats.pendingAmountAtRisk.toLocaleString(undefined, { minimumFractionDigits: 2 })} at risk
-              </p>
-            </div>
-            <Wallet className="h-5 w-5 text-amber-500 shrink-0" />
-          </div>
-
-          {/* Settled */}
-          <div className="bg-white border border-slate-200 border-l-4 border-l-emerald-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Settled</p>
-              <p className="text-2xl font-black text-emerald-800 mt-1 tracking-tight">
-                ${stats.settledVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-[10px] text-emerald-700 font-semibold mt-1">Total disbursed</p>
-            </div>
-            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-          </div>
-
-          {/* Rejected */}
-          <div className="bg-white border border-slate-200 border-l-4 border-l-rose-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rejected</p>
-              <p className="text-2xl font-black text-rose-600 mt-1 tracking-tight">
-                ${stats.rejectedVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-[10px] text-rose-600 font-semibold mt-1">Volume reversed</p>
-            </div>
-            <XCircle className="h-5 w-5 text-rose-500 shrink-0" />
-          </div>
-
-          {/* Avg Processing */}
-          <div className="bg-white border border-slate-200 border-l-4 border-l-violet-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Avg Time</p>
-              <p className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
-                {stats.avgProcessingHours < 48 ? `${stats.avgProcessingHours}h` : `${Math.round(stats.avgProcessingHours / 24)}d`}
-              </p>
-              <p className="text-[10px] text-slate-500 font-semibold mt-1">Avg to disburse</p>
-            </div>
-            <Timer className="h-5 w-5 text-violet-500 shrink-0" />
-          </div>
-
-          {/* 30-Day Approval Rate */}
-          <div className="bg-white border border-slate-200 border-l-4 border-l-blue-500 shadow-xs rounded-3xl p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">30-Day Approval</p>
-              <p className="text-2xl font-black text-blue-700 mt-1 tracking-tight">{stats.approvalRate}%</p>
-              <p className="text-[10px] text-blue-600 font-semibold mt-1">Rolling operational score</p>
-            </div>
-            <Activity className="h-5 w-5 text-blue-500 shrink-0" />
-          </div>
+          <KpiCard
+            title="Pending"
+            value={stats.pendingCount}
+            subtext={`$${stats.pendingAmountAtRisk.toLocaleString(undefined, { minimumFractionDigits: 2 })} at risk`}
+            icon={Wallet}
+            variant="amber"
+          />
+          <KpiCard
+            title="Settled"
+            value={`$${stats.settledVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            subtext="Total disbursed"
+            icon={CheckCircle2}
+            variant="emerald"
+          />
+          <KpiCard
+            title="Rejected"
+            value={`$${stats.rejectedVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            subtext="Volume reversed"
+            icon={XCircle}
+            variant="red"
+          />
+          <KpiCard
+            title="Avg Time"
+            value={stats.avgProcessingHours < 48 ? `${stats.avgProcessingHours}h` : `${Math.round(stats.avgProcessingHours / 24)}d`}
+            subtext="Avg to disburse"
+            icon={Timer}
+            variant="purple"
+          />
+          <KpiCard
+            title="30-Day Approval"
+            value={`${stats.approvalRate}%`}
+            subtext="Rolling operational score"
+            icon={Activity}
+            variant="blue"
+          />
         </div>
       )}
 
       {/* SLA Breach Warning Banner */}
       {stats && stats.overdueCount > 0 && (
-        <div className="bg-rose-50/80 border border-rose-200/80 rounded-3xl p-5 flex items-center justify-between shadow-2xs font-sans">
+        <div className="bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 flex items-center justify-between shadow-2xs font-sans">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
             <div>
-              <p className="text-xs font-black text-rose-950">
+              <p className="text-xs font-semibold text-rose-950">
                 {stats.overdueCount} payout{stats.overdueCount > 1 ? "s exceed" : " exceeds"} the target {slaHours}h SLA
               </p>
-              <p className="text-xs text-rose-900 font-semibold mt-0.5">
+              <p className="text-xs text-rose-900 font-normal mt-0.5">
                 Prioritize pending disbursements marked as overdue below.
               </p>
             </div>
@@ -457,7 +436,7 @@ export default function AdminPayoutsPage() {
           <Button
             size="sm"
             onClick={() => { setStatusFilter("PENDING"); setActiveTab("ALL"); }}
-            className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer border-none"
+            className="bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs h-8 px-3 rounded-lg shadow-2xs cursor-pointer border-none"
           >
             Filter Overdue
           </Button>
@@ -465,33 +444,33 @@ export default function AdminPayoutsPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shadow-2xs font-sans w-fit">
+      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-2xs font-sans w-fit">
         <button
           onClick={() => { setActiveTab("ALL"); }}
-          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+          className={`px-3.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === "ALL"
-              ? "bg-slate-900 text-white shadow-2xs"
-              : "text-slate-600 hover:text-slate-900 font-extrabold"
+              ? "bg-white text-slate-800 shadow-2xs"
+              : "text-[#6E6E73] hover:text-slate-800"
           }`}
         >
           All Payouts ({pagination.totalCount})
         </button>
         <button
           onClick={() => { setActiveTab("OWNER"); }}
-          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+          className={`px-3.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === "OWNER"
-              ? "bg-slate-900 text-white shadow-2xs"
-              : "text-slate-600 hover:text-slate-900 font-extrabold"
+              ? "bg-white text-slate-800 shadow-2xs"
+              : "text-[#6E6E73] hover:text-slate-800"
           }`}
         >
           Owner Withdrawals ({stats?.ownerCount || 0})
         </button>
         <button
           onClick={() => { setActiveTab("TENANT"); }}
-          className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+          className={`px-3.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === "TENANT"
-              ? "bg-slate-900 text-white shadow-2xs"
-              : "text-slate-600 hover:text-slate-900 font-extrabold"
+              ? "bg-white text-slate-800 shadow-2xs"
+              : "text-[#6E6E73] hover:text-slate-800"
           }`}
         >
           Tenant Refunds ({stats?.tenantCount || 0})
@@ -507,7 +486,7 @@ export default function AdminPayoutsPage() {
             placeholder="Name, email or bank..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 h-9 rounded-xl bg-slate-50 border-slate-200/80 text-slate-900 font-semibold text-xs shadow-2xs focus-visible:ring-slate-900/10"
+            className="pl-9 h-9 rounded-xl bg-slate-50 border-slate-200/80 text-slate-900 font-normal text-xs shadow-2xs focus-visible:ring-slate-900/10"
           />
         </div>
 
@@ -515,7 +494,7 @@ export default function AdminPayoutsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 rounded-xl border border-slate-200/80 bg-slate-50 text-slate-900 text-xs font-extrabold px-3 shadow-2xs focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer"
+          className="h-9 rounded-xl border border-slate-200/80 bg-slate-50 text-slate-900 text-xs font-medium px-3 shadow-2xs focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer"
         >
           <option value="ALL">All Statuses</option>
           <option value="PENDING">Pending</option>
@@ -569,13 +548,13 @@ export default function AdminPayoutsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent">
-                  <TableHead className="w-[140px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pl-5 align-top pt-4">Requested</TableHead>
-                  <TableHead className="w-[170px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Type</TableHead>
-                  <TableHead className="text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Recipient</TableHead>
-                  <TableHead className="w-[200px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Bank Details</TableHead>
-                  <TableHead className="w-[140px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Amount</TableHead>
-                  <TableHead className="w-[130px] text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider align-top pt-4">Status</TableHead>
-                  <TableHead className="w-[90px] text-right text-[#8E8E93] font-extrabold text-[10px] uppercase tracking-wider pr-5 align-top pt-4">Actions</TableHead>
+                  <TableHead className="w-[140px] text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider pl-5 align-top pt-4">Requested</TableHead>
+                  <TableHead className="w-[170px] text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider align-top pt-4">Type</TableHead>
+                  <TableHead className="text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider align-top pt-4">Recipient</TableHead>
+                  <TableHead className="w-[200px] text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider align-top pt-4">Bank Details</TableHead>
+                  <TableHead className="w-[140px] text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider align-top pt-4">Amount</TableHead>
+                  <TableHead className="w-[130px] text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider align-top pt-4">Status</TableHead>
+                  <TableHead className="w-[90px] text-right text-[#8E8E93] font-medium text-[11px] uppercase tracking-wider pr-5 align-top pt-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -661,7 +640,7 @@ export default function AdminPayoutsPage() {
 
                       {/* Amount */}
                       <TableCell className="py-5 align-top">
-                        <p className="font-extrabold text-slate-900 text-base leading-none">${Number(po.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                        <p className="font-semibold text-slate-900 text-base leading-none">${Number(po.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                         {po.status === "COMPLETED" && po.refNumber && (
                           <p className="text-[10px] text-[#8E8E93] font-semibold font-mono mt-2 bg-slate-50 border border-slate-100 px-1 py-0.5 rounded w-fit">
                             Ref: {po.refNumber}
@@ -830,7 +809,7 @@ export default function AdminPayoutsPage() {
                       }`}>
                         {isTenantRefundModal ? "Tenant Refund" : "Owner Withdrawal"}
                       </span>
-                      <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{recipientName || "N/A"}</h4>
+                      <h4 className="font-semibold text-slate-900 text-base mt-1.5">{recipientName || "N/A"}</h4>
                       <p className="text-xs text-[#6E6E73] flex items-center gap-1 mt-0.5">
                         <Mail className="h-3 w-3 text-[#8E8E93]" />{recipientEmail || "—"}
                       </p>
@@ -838,7 +817,7 @@ export default function AdminPayoutsPage() {
 
                     <div className="text-right">
                       <p className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-wider">Disbursement</p>
-                      <p className="text-2xl font-black text-emerald-600 mt-0.5">
+                      <p className="text-2xl font-semibold text-emerald-600 mt-0.5">
                         ${payoutAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
                       {ledgerBalance !== null && (
@@ -993,7 +972,7 @@ export default function AdminPayoutsPage() {
                 <Button
                   onClick={handleConfirmApproval}
                   disabled={processing || !isReadyToDisburse}
-                  className="flex-1 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white h-10 shadow-sm text-xs transition-all"
+                  className="flex-1 rounded-xl font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white h-10 shadow-sm text-xs transition-all"
                 >
                   {processing ? (
                     <><Loader2 className="h-4 w-4 animate-spin mr-1.5" />Disbursing...</>
@@ -1015,7 +994,7 @@ export default function AdminPayoutsPage() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full border border-slate-200 shadow-2xl p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
                 <X className="h-5 w-5 text-red-500 bg-red-50 rounded-full p-0.5" /> Reject Payout Request
               </h2>
               <p className="text-sm text-[#6E6E73] mt-1">Rejected funds are automatically returned to the sender's ledger.</p>
@@ -1074,7 +1053,7 @@ export default function AdminPayoutsPage() {
               <Button
                 onClick={handleConfirmRejection}
                 disabled={rejecting}
-                className="flex-1 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white h-11 shadow-md shadow-red-200"
+                className="flex-1 rounded-xl font-medium bg-red-600 hover:bg-red-700 text-white h-11 shadow-md shadow-red-200"
               >
                 {rejecting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Rejecting...</> : "Confirm Rejection"}
               </Button>
@@ -1099,7 +1078,7 @@ export default function AdminPayoutsPage() {
               {/* Drawer header */}
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-lg font-extrabold text-slate-900">Payout Details</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">Payout Details</h2>
                   <p className="text-xs text-[#8E8E93] font-mono mt-0.5">{drawerPayout.id}</p>
                 </div>
                 <button onClick={() => setDrawerPayout(null)} className="text-[#8E8E93] hover:text-[#6E6E73] rounded-lg p-1 hover:bg-slate-100">
@@ -1119,7 +1098,7 @@ export default function AdminPayoutsPage() {
                 <p className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider mb-1">
                   {drawerPayout.tenantId ? "Tenant Refund" : "Owner Withdrawal"}
                 </p>
-                <p className="text-4xl font-extrabold text-slate-900">${Number(drawerPayout.amount).toFixed(2)}</p>
+                <p className="text-4xl font-semibold text-slate-900">${Number(drawerPayout.amount).toFixed(2)}</p>
                 {drawerPayout.disbursedAt && (
                   <p className="text-xs text-emerald-600 font-semibold mt-1">Disbursed {new Date(drawerPayout.disbursedAt).toLocaleDateString()}</p>
                 )}

@@ -50,7 +50,7 @@ export default function LeaseInvoicePage() {
   if (!lease) {
     return <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
       <FileText className="h-12 w-12 text-[#94A3B8]" />
-      <h2 className="text-xl font-bold text-[#1D1D1F]">Lease Not Found</h2>
+      <h2 className="text-xl font-semibold text-[#1D1D1F]">Lease Not Found</h2>
       <Button onClick={() => router.back()} className="mt-2">Go Back</Button>
     </div>;
   }
@@ -145,19 +145,19 @@ export default function LeaseInvoicePage() {
 
       {/* Action Toolbar */}
       <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-[#E5E5EA]">
-        <Button onClick={handlePrint} variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
+        <Button onClick={handlePrint} variant="outline" className="h-10 rounded-xl font-medium bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
           <Printer className="h-4 w-4 mr-2 text-[#6E6E73]" /> Print
         </Button>
         <Button onClick={() => generateInvoicePDF(lease)} variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
           <Download className="h-4 w-4 mr-2 text-[#6E6E73]" /> Download PDF
         </Button>
-        <Button onClick={handleEmail} variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
+        <Button onClick={handleEmail} variant="outline" className="h-10 rounded-xl font-medium bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
           <Mail className="h-4 w-4 mr-2 text-[#6E6E73]" /> Email
         </Button>
-        <Button onClick={handleSave} variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
+        <Button onClick={handleSave} variant="outline" className="h-10 rounded-xl font-medium bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F]">
           <Save className="h-4 w-4 mr-2 text-[#6E6E73]" /> Save to Documents
         </Button>
-        <Button onClick={handleShare} variant="outline" className="h-10 rounded-xl font-bold bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F] ml-auto">
+        <Button onClick={handleShare} variant="outline" className="h-10 rounded-xl font-medium bg-white hover:bg-[#F2F2F7] border-[#E5E5EA] text-[#1D1D1F] ml-auto">
           <Share className="h-4 w-4 mr-2 text-[#6E6E73]" /> Share
         </Button>
       </div>
@@ -171,10 +171,10 @@ export default function LeaseInvoicePage() {
               <div className="h-12 w-12 bg-[#007AFF] rounded-xl flex items-center justify-center text-white">
                 <Building className="h-6 w-6" />
               </div>
-              <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">PropertyPro</h1>
+              <h1 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">PropertyPro</h1>
             </div>
             <p className="text-sm font-bold text-[#94A3B8] uppercase tracking-wider mb-2">From</p>
-            <p className="text-base font-bold text-[#1D1D1F]">{lease.unit?.property?.name || "Property Management"}</p>
+            <p className="text-base font-semibold text-[#1D1D1F]">{lease.unit?.property?.name || "Property Management"}</p>
             <p className="text-sm font-medium text-[#6E6E73] mt-1">{lease.unit?.property?.address}</p>
             <p className="text-sm font-medium text-[#6E6E73]">{lease.unit?.property?.city}, {lease.unit?.property?.state} {lease.unit?.property?.zipCode}</p>
           </div>
@@ -296,7 +296,7 @@ export default function LeaseInvoicePage() {
                 <span className="font-black text-[#1D1D1F]">${tax.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
               </div>
               <div className="flex justify-between items-center border-t-2 border-[#007AFF] pt-3 mt-3">
-                <span className="text-base font-bold text-[#1D1D1F]">Total Initial Payment</span>
+                <span className="text-base font-semibold text-[#1D1D1F]">Total Initial Payment</span>
                 <span className="text-2xl font-black text-[#007AFF]">${total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
               </div>
             </div>

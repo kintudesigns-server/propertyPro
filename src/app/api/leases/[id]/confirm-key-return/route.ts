@@ -8,7 +8,10 @@ import { notify } from "@/lib/notify";
 // OWNER only. Records actual move-out date, starts the legal deposit return clock.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "OWNER") {
+  const user = session?.user as any;
+  const isManager = user && ["OWNER", "SUPERADMIN", "ADMIN", "PROPERTY_MANAGER"].includes(user.role);
+
+  if (!session?.user || !isManager) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       include: { tenant: true, unit: { include: { property: true } } },
     });
 
-    if (!lease || lease.unit.property.ownerId !== (session.user as any).id) {
+    if (!lease || (user.role === "OWNER" && lease.unit.property.ownerId !== user.id)) {
       return NextResponse.json({ error: "Lease not found or access denied" }, { status: 404 });
     }
 

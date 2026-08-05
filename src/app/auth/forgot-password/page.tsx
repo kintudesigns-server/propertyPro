@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
               💡 Didn't see it? Check your <strong>Spam / Junk</strong> folder.
             </div>
             <Link href="/auth/login">
-              <Button className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold mt-2 text-sm shadow-xs">
+              <Button className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium mt-2 text-sm shadow-xs">
                 Back to Sign In
               </Button>
             </Link>
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-xs transition-all"
+                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-sm shadow-xs transition-all"
               >
                 {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</> : "Send Reset Link"}
               </Button>

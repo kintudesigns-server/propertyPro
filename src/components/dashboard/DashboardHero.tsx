@@ -129,38 +129,36 @@ export function DashboardHero({
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs"
               >
-                <Shield className="h-3.5 w-3.5 text-[#007AFF]" />
-                <span className="text-[10px] font-extrabold tracking-widest uppercase">
-                  Platform Administrator
-                </span>
+                <Shield className="h-3 w-3 text-[#007AFF]" />
+                <span>Platform Administrator</span>
               </motion.div>
             ) : role === "TENANT" ? (
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[10px] font-bold tracking-wide uppercase">TENANT PORTAL ACTIVE</span>
+                <span>TENANT PORTAL ACTIVE</span>
               </motion.div>
             ) : (
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[10px] font-bold tracking-wide uppercase">
+                <span>
                   {stats?.subscriptionTier || "Hobbyist"} Plan •{" "}
                   {stats?.subscriptionStatus === "active" ? "Active" : "Trial"}
                 </span>
@@ -173,7 +171,7 @@ export function DashboardHero({
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-white/90 border border-slate-200/80 px-2.5 py-1 rounded-full shadow-2xs backdrop-blur-xs"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-white border border-slate-200 text-[#6E6E73] shadow-2xs"
             >
               <ImageIcon className="h-3 w-3 text-slate-400" />
               {activeSlide.tag}
@@ -185,7 +183,7 @@ export function DashboardHero({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="text-3xl md:text-4xl font-black text-[#1D1D1F] tracking-tight leading-tight"
+            className="text-3xl font-semibold text-[#1D1D1F] tracking-tight leading-tight"
           >
             {getGreeting()},{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#007AFF] via-indigo-600 to-purple-600">
@@ -201,20 +199,20 @@ export function DashboardHero({
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             {role === "SUPERADMIN" ? (
-              <p className="text-slate-600 text-sm font-semibold leading-relaxed">
+              <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                 Managing PropertyPro platform operations •{" "}
-                <span className="text-[#007AFF] font-bold">{stats?.totalProperties ?? 0} properties</span> across{" "}
-                <span className="text-[#007AFF] font-bold">{stats?.activeTenantsCount ?? 0} active tenants</span>
+                <span className="text-[#1D1D1F] font-semibold">{stats?.totalProperties ?? 0} properties</span> across{" "}
+                <span className="text-[#1D1D1F] font-semibold">{stats?.activeTenantsCount ?? 0} active tenants</span>
               </p>
             ) : role === "TENANT" ? (
-              <p className="text-slate-600 text-sm font-semibold leading-relaxed flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-[#007AFF] shrink-0" />
+              <p className="text-xs font-normal text-[#6E6E73] leading-relaxed flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 <span>{unitInfo || "Welcome to your tenant portal"}</span>
               </p>
             ) : stats ? (
-              <p className="text-slate-600 text-sm font-semibold leading-relaxed">
+              <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                 Portfolio Revenue:{" "}
-                <span className="text-[#1D1D1F] font-black text-base">${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>{" "}
+                <span className="font-semibold text-xs text-[#1D1D1F]">${stats.monthlyRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>{" "}
                 collected this month
               </p>
             ) : null}
@@ -235,13 +233,13 @@ export function DashboardHero({
                   y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
                 }}
                 whileHover={{ scale: 1.04 }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Home className="h-4 w-4" />
                 </div>
-                <span className="text-slate-900 font-extrabold text-base leading-none">{tenantStats.leaseStatus}</span>
-                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Lease</span>
+                <span className="font-semibold text-xl text-[#1D1D1F] tracking-tight leading-none">{tenantStats.leaseStatus}</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Lease</span>
               </motion.div>
 
               <motion.div
@@ -253,19 +251,15 @@ export function DashboardHero({
                   y: { duration: 3.8, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
                 }}
                 whileHover={{ scale: 1.04 }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className={`p-2 rounded-xl transition-colors ${
-                  tenantStats.hasUnpaid 
-                    ? "bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white" 
-                    : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
-                }`}>
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Wallet className="h-4 w-4" />
                 </div>
-                <span className={`font-extrabold text-base leading-none ${tenantStats.hasUnpaid ? "text-rose-600" : "text-slate-900"}`}>
+                <span className={`font-semibold text-xl tracking-tight leading-none ${tenantStats.hasUnpaid ? "text-rose-600" : "text-[#1D1D1F]"}`}>
                   {tenantStats.balanceDue}
                 </span>
-                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Balance</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Balance</span>
               </motion.div>
 
               <motion.div
@@ -277,13 +271,13 @@ export function DashboardHero({
                   y: { duration: 4.2, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
                 }}
                 whileHover={{ scale: 1.04 }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3 min-w-[85px] cursor-pointer shadow-xs hover:shadow-md transition-all group"
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Calendar className="h-4 w-4" />
                 </div>
-                <span className="text-slate-900 font-extrabold text-base leading-none">{tenantStats.nextRentDue}</span>
-                <span className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Rent Due</span>
+                <span className="font-semibold text-xl text-[#1D1D1F] tracking-tight leading-none">{tenantStats.nextRentDue}</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Rent Due</span>
               </motion.div>
             </div>
           )}
@@ -299,14 +293,14 @@ export function DashboardHero({
                   scale: { duration: 0.4, delay: 0.3 },
                   y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06, borderColor: "#007AFF" }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Building className="h-4 w-4" />
                 </div>
-                <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.totalProperties}</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Properties</span>
+                <span className="font-semibold text-2xl text-[#1D1D1F] tracking-tight leading-none">{stats.totalProperties}</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Properties</span>
               </motion.div>
 
               <motion.div
@@ -317,14 +311,14 @@ export function DashboardHero({
                   scale: { duration: 0.4, delay: 0.45 },
                   y: { duration: 3.2, delay: 0.5, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06 }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Users className="h-4 w-4" />
                 </div>
-                <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.activeTenantsCount}</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Tenants</span>
+                <span className="font-semibold text-2xl text-[#1D1D1F] tracking-tight leading-none">{stats.activeTenantsCount}</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Tenants</span>
               </motion.div>
 
               <motion.div
@@ -335,14 +329,14 @@ export function DashboardHero({
                   scale: { duration: 0.4, delay: 0.6 },
                   y: { duration: 4.0, delay: 1.0, repeat: Infinity, ease: "easeInOut" },
                 }}
-                whileHover={{ scale: 1.06 }}
-                className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-4 py-3 min-w-[78px] cursor-pointer shadow-md transition-all group"
+                whileHover={{ scale: 1.04 }}
+                className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-3xl p-4 min-w-[85px] text-center shadow-xs cursor-pointer"
               >
-                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs mb-1">
                   <Home className="h-4 w-4" />
                 </div>
-                <span className="text-[#1D1D1F] font-black text-xl leading-none">{stats.occupancyRate}%</span>
-                <span className="text-slate-500 text-[9px] font-extrabold uppercase tracking-widest">Occupied</span>
+                <span className="font-semibold text-2xl text-[#1D1D1F] tracking-tight leading-none">{stats.occupancyRate}%</span>
+                <span className="text-xs font-normal text-[#6E6E73] mt-0.5">Occupied</span>
               </motion.div>
             </div>
           )}
@@ -352,30 +346,28 @@ export function DashboardHero({
             initial={{ opacity: 0, x: 15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.7 }}
-            className="flex items-center gap-2.5 ml-auto"
+            className="flex items-center gap-2 ml-auto"
           >
-            <Button
-              variant="outline"
-              size="icon"
+            <button
               onClick={onRefresh}
               disabled={statsLoading}
               title="Refresh Dashboard Data"
-              className="bg-white hover:bg-slate-100 transition-colors border border-slate-200 text-slate-700 font-bold rounded-xl shadow-xs cursor-pointer h-[42px] w-[42px] shrink-0"
+              className="h-9 w-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs flex items-center justify-center cursor-pointer transition-colors"
             >
-              <RefreshCw className={`h-4 w-4 text-slate-600 ${statsLoading ? "animate-spin" : ""}`} />
-            </Button>
+              <RefreshCw className={`h-3.5 w-3.5 text-slate-600 ${statsLoading ? "animate-spin" : ""}`} />
+            </button>
 
             <Button
               onClick={onViewFinancials}
-              className="bg-[#1D1D1F] hover:bg-black text-white border-0 rounded-xl font-extrabold flex items-center justify-center gap-2 h-[42px] px-5 shadow-sm transition-transform hover:scale-[1.02] active:scale-95 text-xs whitespace-nowrap cursor-pointer"
+              className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 transition-all"
             >
               {role === "TENANT" ? (
                 <>
-                  <CreditCard className="h-4 w-4 text-white" /> Pay Rent
+                  <CreditCard className="h-3.5 w-3.5 text-white" /> Pay Rent
                 </>
               ) : (
                 <>
-                  <BarChart3 className="h-4 w-4 text-white" /> View Financials
+                  <BarChart3 className="h-3.5 w-3.5 text-white" /> View Financials
                 </>
               )}
             </Button>
@@ -401,3 +393,4 @@ export function DashboardHero({
     </div>
   );
 }
+

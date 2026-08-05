@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import {
@@ -42,7 +42,7 @@ export function ConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] rounded-2xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-slate-900">{title}</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-slate-900">{title}</DialogTitle>
           <DialogDescription className="text-sm text-slate-500 mt-2">
             {description}
           </DialogDescription>

@@ -111,14 +111,14 @@ export default function PropertiesPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Properties</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your property portfolio and building listings</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Properties</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage your property portfolio and building listings</p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <Link href="/listings">
             <Button
               variant="outline"
-              className="h-9 px-3.5 rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer"
+              className="h-9 px-3.5 rounded-xl font-medium text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer"
             >
               <Eye className="h-3.5 w-3.5 mr-1.5" />
               View Public Search Map
@@ -128,13 +128,13 @@ export default function PropertiesPage() {
             variant="outline"
             onClick={fetchProperties}
             disabled={loading}
-            className="h-9 px-3.5 rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer"
+            className="h-9 px-3.5 rounded-xl font-medium text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Link href="/dashboard/properties/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-black flex items-center gap-1.5 cursor-pointer">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-medium flex items-center gap-1.5 cursor-pointer">
               <Plus className="h-4 w-4" />
               Add Property
             </Button>
@@ -159,7 +159,7 @@ export default function PropertiesPage() {
               <Building className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="font-extrabold text-slate-900 text-base leading-tight">Properties</h2>
+              <h2 className="font-semibold text-slate-900 text-base leading-tight">Properties</h2>
               <p className="text-xs text-slate-500 font-medium">Showing {filteredProperties.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredProperties.length)} of {properties.length} properties</p>
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function PropertiesPage() {
                                 className="cursor-pointer" 
                                 onClick={() => router.push(`/dashboard/properties/${p.id}`)}
                               >
-                                <p className="font-extrabold text-slate-900 text-xs group-hover:text-slate-700 transition-colors">{p.name}</p>
+                                <p className="font-semibold text-slate-900 text-xs group-hover:text-slate-700 transition-colors">{p.name}</p>
                                 <p className="text-[11px] text-slate-500 font-medium mt-0.5">ID: {p.id.slice(0, 8)}</p>
                               </div>
                             </div>
@@ -311,7 +311,7 @@ export default function PropertiesPage() {
                           </TableCell>
                           <TableCell className="py-3.5">
                             <div className="flex flex-col">
-                              <span className="font-extrabold text-slate-900 text-xs">{totalUnits} Units</span>
+                              <span className="font-semibold text-slate-900 text-xs">{totalUnits} Units</span>
                               <div className="flex gap-2 text-[10px] mt-0.5 font-bold">
                                 <span className="text-emerald-700">{availableUnitsCount} avail</span>
                                 <span className="text-slate-600">{occupiedUnitsCount} occ</span>
@@ -320,7 +320,7 @@ export default function PropertiesPage() {
                           </TableCell>
                           <TableCell className="py-3.5">
                             <div className="flex flex-col">
-                              <span className="font-extrabold text-slate-900 text-xs">{rentDisplay}</span>
+                              <span className="font-semibold text-slate-900 text-xs">{rentDisplay}</span>
                               <span className="text-[10px] text-slate-500 font-semibold mt-0.5">/month</span>
                             </div>
                           </TableCell>
@@ -427,7 +427,7 @@ export default function PropertiesPage() {
                         className="p-5 flex-1 flex flex-col cursor-pointer" 
                         onClick={() => router.push(`/dashboard/properties/${p.id}`)}
                       >
-                        <h3 className="font-extrabold text-slate-900 text-base leading-tight group-hover:text-slate-700 transition-colors">{p.name}</h3>
+                        <h3 className="font-semibold text-slate-900 text-base leading-tight group-hover:text-slate-700 transition-colors">{p.name}</h3>
                         <p className="text-xs text-slate-500 font-medium mt-1 truncate">{p.description || "No description provided"}</p>
                         
                         <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-3 font-medium">
@@ -438,7 +438,7 @@ export default function PropertiesPage() {
                         {/* Gray Units Box */}
                         <div className="mt-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-1.5">
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-slate-900 text-xs">{totalUnits} Units Total</span>
+                            <span className="font-semibold text-slate-900 text-xs">{totalUnits} Units Total</span>
                             {availableUnitsCount > 0 && <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md">{availableUnitsCount} available</span>}
                           </div>
                           <span className="text-[11px] text-slate-500 font-medium">Type: {p.type || "Apartment"}</span>
@@ -447,7 +447,7 @@ export default function PropertiesPage() {
                         {/* Footer */}
                         <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
                           <div className="flex flex-col">
-                            <p className="font-black text-slate-900 text-sm">{rentDisplay} <span className="text-[11px] text-slate-500 font-medium">/mo</span></p>
+                            <p className="font-semibold text-slate-900 text-sm">{rentDisplay} <span className="text-[11px] text-slate-500 font-medium">/mo</span></p>
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger className="h-7 w-7 p-0 text-slate-400 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center rounded-xl transition-colors cursor-pointer">
@@ -487,3 +487,4 @@ export default function PropertiesPage() {
     </div>
   );
 }
+

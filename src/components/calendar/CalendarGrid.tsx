@@ -168,42 +168,42 @@ export function CalendarGrid() {
     <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       
       {/* ── iOS HEADER CONTROL BAR ── */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-0.5">
-            <CalendarIcon className="h-3.5 w-3.5 text-rose-500" />
-            <span className="text-slate-900 font-black">Calendar</span>
+          <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73] mb-1">
+            <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
+            <span className="text-[#1D1D1F] font-semibold">Calendar</span>
             <span>&bull;</span>
-            <span className="text-slate-900 font-extrabold uppercase tracking-wider">{userRole} Scope</span>
+            <span className="text-[#6E6E73] font-medium uppercase tracking-wider">{userRole} Scope</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
             {format(currentDate, "MMMM yyyy")}
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* iOS Red Accent Today Button & Month Controls */}
+          {/* Today Button & Month Controls */}
           <div className="flex items-center gap-2">
             <button
               onClick={goToToday}
-              className="px-3.5 h-9 text-xs font-black text-white bg-rose-500 hover:bg-rose-600 rounded-xl shadow-xs transition-all cursor-pointer"
+              className="px-4 h-9 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-xs transition-all cursor-pointer border-none"
             >
               Today
             </button>
-            <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
+            <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs">
               <button
                 onClick={navigateBack}
-                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer border-none"
                 title="Previous"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <span className="px-3 text-xs font-black text-slate-900 min-w-[110px] text-center">
+              <span className="px-3 text-xs font-semibold text-[#1D1D1F] min-w-[110px] text-center">
                 {format(currentDate, viewMode === "WEEK" ? "'Week of' MMM d" : "MMMM yyyy")}
               </span>
               <button
                 onClick={navigateForward}
-                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-900 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="h-7 w-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer border-none"
                 title="Next"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -211,28 +211,28 @@ export function CalendarGrid() {
             </div>
           </div>
 
-          {/* iOS Segmented View Control Switcher */}
-          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
+          {/* View Control Switcher */}
+          <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs">
             <button
               onClick={() => setViewMode("MONTH")}
-              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
-                viewMode === "MONTH" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 h-7 text-xs font-medium rounded-lg transition-all cursor-pointer border-none ${
+                viewMode === "MONTH" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               Month
             </button>
             <button
               onClick={() => setViewMode("WEEK")}
-              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
-                viewMode === "WEEK" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 h-7 text-xs font-medium rounded-lg transition-all cursor-pointer border-none ${
+                viewMode === "WEEK" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               Week
             </button>
             <button
               onClick={() => setViewMode("AGENDA")}
-              className={`px-3 h-7 text-xs font-black rounded-lg transition-all cursor-pointer ${
-                viewMode === "AGENDA" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 h-7 text-xs font-medium rounded-lg transition-all cursor-pointer border-none ${
+                viewMode === "AGENDA" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               Agenda
@@ -257,10 +257,10 @@ export function CalendarGrid() {
             <button
               key={cat.key}
               onClick={() => setActiveCategory(cat.key)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold border flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                 isActiveCat
-                  ? "bg-slate-900 text-white border-slate-900 shadow-2xs"
-                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                  ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
+                  : "bg-white text-[#6E6E73] border-slate-200 hover:bg-slate-100"
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -270,14 +270,14 @@ export function CalendarGrid() {
         })}
       </div>
 
-      {/* ── VIEW 1: iOS MONTH GRID VIEW ── */}
+      {/* ── VIEW 1: MONTH GRID VIEW ── */}
       {viewMode === "MONTH" && (
         <div className="space-y-6">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-            {/* Weekday Labels (iOS style SUN MON TUE WED THU FRI SAT) */}
-            <div className="grid grid-cols-7 border-b border-slate-200/80 bg-slate-50/70 text-center py-2.5">
+            {/* Weekday Labels */}
+            <div className="grid grid-cols-7 border-b border-slate-100 text-center py-2.5">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <span key={day} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span key={day} className="text-xs font-normal text-[#6E6E73]">
                   {day}
                 </span>
               ))}
@@ -297,25 +297,24 @@ export function CalendarGrid() {
                     onClick={() => setSelectedDay(day)}
                     className={`min-h-[125px] p-2 flex flex-col justify-between transition-all cursor-pointer ${
                       !isCurrentMonth ? "bg-slate-50/30 text-slate-400" : "bg-white hover:bg-slate-50/70"
-                    } ${isDaySelected ? "bg-rose-50/60 border-2 border-rose-500/80 rounded-2xl shadow-xs z-10" : ""}`}
+                    } ${isDaySelected ? "bg-slate-50/80 border-2 border-slate-900 rounded-2xl shadow-xs z-10" : ""}`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span
-                        className={`h-7 w-7 rounded-full text-xs flex items-center justify-center transition-all ${
+                        className={`h-7 w-7 rounded-lg text-xs flex items-center justify-center transition-all ${
                           isDayToday
-                            ? "bg-rose-500 text-white font-black shadow-xs"
+                            ? "bg-emerald-600 text-white font-semibold shadow-xs"
                             : isDaySelected
-                            ? "bg-rose-600 text-white font-black shadow-xs"
+                            ? "bg-slate-900 text-white font-semibold shadow-xs"
                             : isCurrentMonth
-                            ? "text-slate-900 font-extrabold"
-                            : "text-slate-400 font-semibold"
+                            ? "text-[#1D1D1F] font-semibold"
+                            : "text-slate-400 font-normal"
                         }`}
                       >
                         {format(day, "d")}
                       </span>
                       {dayEvents.length > 0 && (
                         <div className="flex items-center gap-1">
-                          {/* iOS Colored Event Dot Indicators */}
                           <div className="flex items-center gap-0.5">
                             {dayEvents.slice(0, 3).map((ev) => {
                               const style = getCategoryStyle(ev.type);
@@ -325,7 +324,7 @@ export function CalendarGrid() {
                             })}
                           </div>
                           {dayEvents.length > 3 && (
-                            <span className="text-[9px] font-black text-slate-400">
+                            <span className="text-[9px] font-normal text-[#6E6E73]">
                               +{dayEvents.length - 3}
                             </span>
                           )}
@@ -333,7 +332,7 @@ export function CalendarGrid() {
                       )}
                     </div>
 
-                    {/* Day Events iOS Pills */}
+                    {/* Day Events Pills */}
                     <div className="space-y-1 flex-1 flex flex-col justify-start">
                       {dayEvents.slice(0, 2).map((event) => {
                         const style = getCategoryStyle(event.type);
@@ -344,7 +343,7 @@ export function CalendarGrid() {
                               e.stopPropagation();
                               setSelectedEvent(event);
                             }}
-                            className={`w-full text-left px-2 py-1 rounded-lg border text-[11px] font-extrabold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 truncate ${style.bg}`}
+                            className={`w-full text-left px-2 py-1 rounded-lg border text-xs font-medium transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 truncate ${style.bg}`}
                           >
                             <span className={`h-2 w-2 rounded-full shrink-0 ${style.dot}`} />
                             <span className="truncate">{event.title}</span>
@@ -358,7 +357,7 @@ export function CalendarGrid() {
                             e.stopPropagation();
                             setDayModalDate(day);
                           }}
-                          className="w-full text-left px-2 py-0.5 rounded-md text-[10px] font-black text-slate-900 hover:underline mt-auto cursor-pointer"
+                          className="w-full text-left px-2 py-0.5 rounded-md text-xs font-normal text-[#6E6E73] hover:underline mt-auto cursor-pointer"
                         >
                           + {dayEvents.length - 2} more events
                         </button>
@@ -370,26 +369,26 @@ export function CalendarGrid() {
             </div>
           </div>
 
-          {/* ── iOS SPLIT VIEW: SELECTED DAY AGENDA PANEL ── */}
+          {/* ── SELECTED DAY AGENDA PANEL ── */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                <span className="text-xs font-normal text-[#6E6E73] block mb-0.5">
                   Selected Day Schedule
                 </span>
-                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">
                   {format(selectedDay, "EEEE, MMMM d, yyyy")}
                 </h3>
               </div>
-              <span className="text-xs font-black px-3 py-1 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 shadow-2xs">
+              <span className="text-xs font-medium px-3 py-1 bg-slate-50 border border-slate-200/80 rounded-xl text-[#1D1D1F] shadow-2xs">
                 {selectedDayEvents.length} Events
               </span>
             </div>
 
             {selectedDayEvents.length === 0 ? (
-              <div className="py-8 text-center text-slate-400 space-y-1">
-                <p className="text-xs font-bold text-slate-500">No events scheduled for this day</p>
-                <p className="text-[11px] text-slate-400">Select another date on the calendar above to view events.</p>
+              <div className="py-8 text-center text-[#6E6E73] space-y-1">
+                <p className="text-xs font-normal text-[#6E6E73]">No events scheduled for this day</p>
+                <p className="text-xs text-[#6E6E73] font-normal">Select another date on the calendar above to view events.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -399,29 +398,29 @@ export function CalendarGrid() {
                     <div
                       key={event.id}
                       onClick={() => setSelectedEvent(event)}
-                      className={`p-4 rounded-2xl border transition-all hover:shadow-md cursor-pointer flex items-center justify-between gap-3 ${style.bg}`}
+                      className={`p-4 rounded-2xl border transition-all hover:shadow-xs cursor-pointer flex items-center justify-between gap-3 ${style.bg}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className={`h-3 w-3 rounded-full shrink-0 ${style.dot}`} />
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                            <span className="text-xs font-normal text-[#6E6E73]">
                               {format(new Date(event.date), "h:mm a")}
                             </span>
-                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
+                            <span className={`text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
                               {event.type}
                             </span>
                           </div>
-                          <h4 className="text-xs font-black text-slate-900 leading-snug">{event.title}</h4>
+                          <h4 className="text-xs font-semibold text-[#1D1D1F] leading-snug">{event.title}</h4>
                           {event.metadata?.propertyName && (
-                            <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                              <Building className="h-3 w-3 text-slate-400" />
+                            <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1">
+                              <Building className="h-3.5 w-3.5 text-[#6E6E73]" />
                               {event.metadata.propertyName}
                             </p>
                           )}
                         </div>
                       </div>
-                      <Button variant="ghost" className="h-8 w-8 p-0 rounded-xl hover:bg-slate-200/60 text-slate-900 shrink-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0 rounded-xl hover:bg-slate-200/60 text-[#1D1D1F] shrink-0">
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </div>
@@ -437,15 +436,15 @@ export function CalendarGrid() {
       {viewMode === "WEEK" && (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
           {/* Weekday Header */}
-          <div className="grid grid-cols-7 border-b border-slate-200/80 bg-slate-50/70 text-center py-3.5">
+          <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50 text-center py-3.5">
             {weekDays.map((day) => (
               <div key={day.toISOString()} className="space-y-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                <span className="text-xs font-normal text-[#6E6E73] block">
                   {format(day, "EEE")}
                 </span>
                 <span
-                  className={`inline-flex h-8 w-8 rounded-full text-xs font-black items-center justify-center ${
-                    isToday(day) ? "bg-rose-500 text-white shadow-2xs" : "text-slate-900"
+                  className={`inline-flex h-7 w-7 rounded-lg text-xs font-semibold items-center justify-center ${
+                    isToday(day) ? "bg-emerald-600 text-white shadow-2xs" : "text-[#1D1D1F]"
                   }`}
                 >
                   {format(day, "d")}
@@ -461,7 +460,7 @@ export function CalendarGrid() {
               return (
                 <div key={day.toISOString()} className="p-2 space-y-2.5">
                   {dayEvents.length === 0 ? (
-                    <div className="h-full min-h-[200px] flex items-center justify-center text-slate-400 text-xs font-semibold italic">
+                    <div className="h-full min-h-[200px] flex items-center justify-center text-[#6E6E73] text-xs font-normal italic">
                       No Events
                     </div>
                   ) : (
@@ -471,17 +470,17 @@ export function CalendarGrid() {
                         <div
                           key={event.id}
                           onClick={() => setSelectedEvent(event)}
-                          className={`p-3 rounded-xl border text-xs cursor-pointer transition-all hover:shadow-md ${style.bg}`}
+                          className={`p-3 rounded-xl border text-xs cursor-pointer transition-all hover:shadow-xs ${style.bg}`}
                         >
                           <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1 text-slate-600">
-                              <Clock className="h-3 w-3 text-slate-700" />
+                            <span className="text-xs font-normal text-[#6E6E73] flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-[#6E6E73]" />
                               {format(new Date(event.date), "h:mm a")}
                             </span>
                           </div>
-                          <p className="font-extrabold text-xs text-slate-900 leading-snug line-clamp-2">{event.title}</p>
+                          <p className="font-semibold text-xs text-[#1D1D1F] leading-snug line-clamp-2">{event.title}</p>
                           {event.metadata?.propertyName && (
-                            <p className="text-[11px] font-semibold text-slate-500 mt-1 truncate">
+                            <p className="text-xs font-normal text-[#6E6E73] mt-1 truncate">
                               {event.metadata.propertyName}
                             </p>
                           )}
@@ -501,19 +500,19 @@ export function CalendarGrid() {
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-4">
           <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h3 className="text-base font-black text-slate-900 tracking-tight">Agenda Feed</h3>
-              <p className="text-xs font-semibold text-slate-500">Chronological schedule of upcoming events and tasks.</p>
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Agenda Feed</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Chronological schedule of upcoming events and tasks.</p>
             </div>
-            <span className="text-xs font-black px-3.5 py-1 bg-white text-slate-900 border border-slate-200 rounded-xl shadow-2xs">
+            <span className="text-xs font-medium px-3 py-1 bg-white text-[#1D1D1F] border border-slate-200 rounded-xl shadow-2xs">
               {filteredEvents.length} Scheduled Items
             </span>
           </div>
 
           {filteredEvents.length === 0 ? (
-            <div className="p-16 text-center text-slate-400 space-y-2">
+            <div className="p-16 text-center text-[#6E6E73] space-y-2">
               <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" />
-              <p className="text-sm font-extrabold text-slate-900">No scheduled events found</p>
-              <p className="text-xs text-slate-500 font-semibold">Try selecting a different date range or event filter.</p>
+              <p className="text-xs font-semibold text-[#1D1D1F]">No scheduled events found</p>
+              <p className="text-xs text-[#6E6E73] font-normal">Try selecting a different date range or event filter.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -526,30 +525,30 @@ export function CalendarGrid() {
                     className="p-5 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-center min-w-[50px] p-2 bg-slate-100 rounded-2xl border border-slate-200 shadow-2xs">
-                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                      <div className="text-center min-w-[50px] p-2 bg-slate-50 rounded-2xl border border-slate-200/80 shadow-2xs">
+                        <span className="text-[10px] font-medium text-[#6E6E73] uppercase tracking-wider block">
                           {format(new Date(event.date), "MMM")}
                         </span>
-                        <span className="text-xl font-black text-slate-900">
+                        <span className="text-xl font-semibold text-[#1D1D1F]">
                           {format(new Date(event.date), "d")}
                         </span>
                       </div>
 
                       <div className="space-y-1">
-                        <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md border shadow-2xs ${style.badge}`}>
+                        <span className={`text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border ${style.badge}`}>
                           {event.type}
                         </span>
-                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">{event.title}</h4>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F]">{event.title}</h4>
                         {event.metadata?.propertyName && (
-                          <p className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                            <Building className="h-3.5 w-3.5 text-slate-400" />
+                          <p className="text-xs font-normal text-[#6E6E73] flex items-center gap-1">
+                            <Building className="h-3.5 w-3.5 text-[#6E6E73]" />
                             {event.metadata.propertyName} {event.metadata.unitNumber ? `&bull; Unit ${event.metadata.unitNumber}` : ""}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <Button variant="ghost" className="h-9 px-4 text-xs font-extrabold text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200/80 cursor-pointer">
+                    <Button variant="ghost" className="h-9 px-4 text-xs font-medium text-[#1D1D1F] hover:bg-slate-100 rounded-xl border border-slate-200/80 cursor-pointer">
                       Inspect <ArrowRight className="h-3.5 w-3.5 ml-1" />
                     </Button>
                   </div>
@@ -564,7 +563,7 @@ export function CalendarGrid() {
       <Dialog open={Boolean(dayModalDate)} onOpenChange={(open) => !open && setDayModalDate(null)}>
         <DialogContent className="max-w-md bg-white rounded-3xl border border-slate-200 p-6 shadow-2xl font-sans">
           <DialogHeader>
-            <DialogTitle className="text-base font-extrabold text-slate-900 tracking-tight">
+            <DialogTitle className="text-base font-semibold text-slate-900 tracking-tight">
               {dayModalDate ? format(dayModalDate, "EEEE, MMMM d, yyyy") : "Scheduled Events"}
             </DialogTitle>
           </DialogHeader>
@@ -607,3 +606,4 @@ export function CalendarGrid() {
     </div>
   );
 }
+

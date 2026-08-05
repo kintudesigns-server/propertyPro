@@ -80,16 +80,16 @@ export default function VendorDetailsPage({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2">
-            <Link href="/dashboard/team" className="hover:text-slate-900 transition-colors flex items-center gap-1 font-bold">
+            <Link href="/dashboard/team" className="hover:text-slate-900 transition-colors flex items-center gap-1 font-medium">
               <ArrowLeft className="h-3.5 w-3.5" /> Inspectors &amp; Vendors
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-300" />
             <span className="text-slate-900 font-bold">Vendor Profile</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
             {vendor.name}
           </h1>
-          <p className="text-slate-500 text-xs font-semibold mt-0.5">
+          <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
             External Trade Specialist &bull; Vendor ID: <span className="font-mono text-slate-700 font-bold">{vendor.id.substring(0, 8)}</span>
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function VendorDetailsPage({
         <div className="flex flex-wrap items-center gap-2.5">
           <Link href={`/dashboard/vendors/${id}/edit`}>
             <Button
-              className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer gap-2 border-none"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer gap-2 border-none"
             >
               <Edit className="h-3.5 w-3.5" /> Edit Vendor Info
             </Button>
@@ -137,35 +137,35 @@ export default function VendorDetailsPage({
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 border border-amber-200/80 text-amber-800 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                 <Briefcase className="h-3 w-3 text-amber-600" />
                 {vendor.specialty || "Trade Specialist"}
               </span>
 
               {vendor.w9OnFile ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                   <CheckCircle2 className="h-3 w-3" /> W-9 Verified
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                   <AlertTriangle className="h-3 w-3" /> W-9 Missing
                 </span>
               )}
 
               {vendor.insuranceOnFile ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                   <ShieldCheck className="h-3 w-3" /> Insured Active
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                   <AlertTriangle className="h-3 w-3" /> Insurance Missing
                 </span>
               )}
             </div>
 
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{vendor.name}</h2>
+            <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">{vendor.name}</h2>
 
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 flex-wrap">
+            <div className="flex items-center gap-4 text-xs font-normal text-slate-500 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5 text-slate-400" /> {vendor.email}
               </span>
@@ -181,8 +181,8 @@ export default function VendorDetailsPage({
         {/* Call-Out Fee Pill */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 w-full md:w-auto shrink-0 flex items-center gap-6 shadow-2xs font-sans">
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Base Call-Out Fee</p>
-            <p className="text-2xl font-black text-slate-900 mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</p>
+            <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Base Call-Out Fee</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -194,8 +194,8 @@ export default function VendorDetailsPage({
             <Wrench className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Work Orders</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{assignedTasks.length}</h3>
+            <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Total Work Orders</p>
+            <h3 className="text-3xl font-semibold text-slate-900 tracking-tight mt-0.5">{assignedTasks.length}</h3>
           </div>
         </div>
 
@@ -204,8 +204,8 @@ export default function VendorDetailsPage({
             <DollarSign className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Call-Out Fee</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</h3>
+            <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Call-Out Fee</p>
+            <h3 className="text-3xl font-semibold text-slate-900 tracking-tight mt-0.5">${Number(vendor.baseCallOutFee || 0).toFixed(2)}</h3>
           </div>
         </div>
 
@@ -214,8 +214,8 @@ export default function VendorDetailsPage({
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">W-9 Tax Form</p>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+            <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">W-9 Tax Form</p>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight mt-0.5">
               {vendor.w9OnFile ? <span className="text-emerald-600">On File</span> : <span className="text-rose-600">Missing</span>}
             </h3>
           </div>
@@ -226,8 +226,8 @@ export default function VendorDetailsPage({
             <ShieldCheck className="h-5 w-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Liability Insurance</p>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+            <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Liability Insurance</p>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight mt-0.5">
               {vendor.insuranceOnFile ? <span className="text-emerald-600">Verified Active</span> : <span className="text-rose-600">Missing</span>}
             </h3>
           </div>
@@ -238,7 +238,7 @@ export default function VendorDetailsPage({
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-4 font-sans">
         <div className="p-6 pb-2 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Assigned Contractor Work Orders</h3>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight">Assigned Contractor Work Orders</h3>
             <p className="text-xs font-semibold text-slate-500 mt-0.5">Maintenance repair jobs assigned to {vendor.name}.</p>
           </div>
         </div>
@@ -247,12 +247,12 @@ export default function VendorDetailsPage({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200">
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Ticket Title &amp; Category</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Property &amp; Unit</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Priority</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Date Created</th>
-                <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider text-right">Action</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Ticket Title &amp; Category</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Property &amp; Unit</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Priority</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Status</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Date Created</th>
+                <th className="py-3.5 px-6 text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -273,8 +273,8 @@ export default function VendorDetailsPage({
                   <tr key={ticket.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-4 px-6">
                       <div>
-                        <span className="font-black text-sm text-slate-900 block">{ticket.title}</span>
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{ticket.category || "General Repair"}</span>
+                        <span className="font-semibold text-sm text-slate-900 block">{ticket.title}</span>
+                        <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">{ticket.category || "General Repair"}</span>
                       </div>
                     </td>
 
@@ -285,7 +285,7 @@ export default function VendorDetailsPage({
                           {ticket.unit?.property?.name || "Property"}
                         </span>
                         {ticket.unit && (
-                          <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                          <span className="text-[11px] font-normal text-slate-500 flex items-center gap-1">
                             <Home className="h-3 w-3 text-slate-400" /> Unit {ticket.unit.name}
                           </span>
                         )}
@@ -294,7 +294,7 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider shadow-2xs ${
                           ticket.priority === "EMERGENCY"
                             ? "bg-rose-50 text-rose-700 border border-rose-200/80"
                             : ticket.priority === "HIGH"
@@ -310,7 +310,7 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-2xs ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider shadow-2xs ${
                           ticket.status === "COMPLETED" || ticket.status === "RESOLVED"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
                             : ticket.status === "IN_PROGRESS"
@@ -328,7 +328,7 @@ export default function VendorDetailsPage({
 
                     <td className="py-4 px-6 text-right">
                       <Link href={`/dashboard/maintenance/${ticket.id}`}>
-                        <Button className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-8 px-3 transition-all cursor-pointer">
+                        <Button className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-medium text-xs h-8 px-3 transition-all cursor-pointer">
                           View Ticket <ArrowRight className="h-3.5 w-3.5 ml-1" />
                         </Button>
                       </Link>

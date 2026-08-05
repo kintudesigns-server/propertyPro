@@ -163,68 +163,68 @@ export default function EmergencyMaintenancePage() {
     <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/maintenance">
-            <Button variant="outline" className="h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs cursor-pointer">
+            <Button variant="outline" className="h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs cursor-pointer">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-rose-700 tracking-tight flex items-center gap-2">
-              <AlertTriangle className="h-6 w-6 text-rose-600" /> Emergency Response
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
+              Emergency Response
             </h1>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">High priority and emergency maintenance tickets requiring immediate action.</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-1">High priority and emergency maintenance tickets requiring immediate action.</p>
           </div>
         </div>
       </div>
 
-      {/* Metric Cards - Emergency Themed */}
+      {/* Metric Cards - Standard Platform Style */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-rose-600 text-white shadow-xs rounded-3xl border-none overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-xs">
-              <AlertTriangle className="h-6 w-6 text-white" />
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-700">
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-rose-100">Total Emergencies</p>
-              <h3 className="text-2xl font-black text-white mt-0.5">{totalEmergencies}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Total Emergencies</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{totalEmergencies}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-rose-200/80 shadow-xs rounded-3xl overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
-              <Flame className="h-6 w-6 text-rose-600" />
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 text-rose-600">
+              <Flame className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Critical (Active)</p>
-              <h3 className="text-2xl font-black text-rose-600 mt-0.5">{critical}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Critical (Active)</p>
+              <h3 className="text-2xl font-semibold text-rose-600 tracking-tight mt-0.5">{critical}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-amber-200/80 shadow-xs rounded-3xl overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
-              <Clock className="h-6 w-6 text-amber-600" />
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center shrink-0 text-amber-600">
+              <Clock className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">In Progress</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-0.5">{active}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">In Progress</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{active}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-rose-200/80 shadow-xs rounded-3xl overflow-hidden relative">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
-              <UserX className="h-6 w-6 text-rose-600" />
+        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-700">
+              <UserX className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Unassigned</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-0.5">{unassigned}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Unassigned</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mt-0.5">{unassigned}</h3>
             </div>
           </CardContent>
         </Card>
@@ -232,21 +232,21 @@ export default function EmergencyMaintenancePage() {
 
       {/* Main Content Area */}
       <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
             <Input 
               placeholder="Search emergency tickets..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 rounded-xl bg-white border-slate-200 text-xs font-semibold shadow-xs"
+              className="pl-9 h-9 rounded-xl bg-white border-slate-200 text-xs font-normal text-[#1D1D1F] shadow-2xs"
             />
           </div>
           <div className="flex items-center gap-2">
             <select 
               value={statusFilter} 
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-normal px-3.5 shadow-2xs outline-none cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="SUBMITTED">Submitted</option>
@@ -259,42 +259,42 @@ export default function EmergencyMaintenancePage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse whitespace-nowrap">
             <thead>
-              <tr className="border-b border-rose-100 bg-rose-50/50 text-rose-800 text-[10px] font-extrabold uppercase tracking-wider">
-                <th className="px-6 py-3.5">Emergency Request</th>
-                <th className="px-6 py-3.5">Property / Unit</th>
-                <th className="px-6 py-3.5">Tenant</th>
-                <th className="px-6 py-3.5">Elapsed Time</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5">Assigned To</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+              <tr className="border-b border-slate-100 text-[#6E6E73] font-normal text-xs">
+                <th className="px-6 py-3">Emergency Request</th>
+                <th className="px-6 py-3">Property / Unit</th>
+                <th className="px-6 py-3">Tenant</th>
+                <th className="px-6 py-3">Elapsed Time</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Assigned To</th>
+                <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400 font-extrabold text-xs">Loading emergency requests...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-[#6E6E73] font-normal text-xs">Loading emergency requests...</td></tr>
               ) : filteredRequests.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-emerald-600 font-extrabold text-sm">🎉 No emergency maintenance requests found!</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-[#6E6E73] font-normal text-xs">No emergency maintenance requests found.</td></tr>
               ) : (
                 filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-rose-50/30 transition-colors group border-b border-slate-100">
+                  <tr key={req.id} className="hover:bg-slate-50/50 transition-colors group border-b border-slate-100">
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0">
+                        <div className="h-9 w-9 rounded-xl bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0">
                           <AlertTriangle className="h-4 w-4 text-rose-600" />
                         </div>
                         <div>
-                          <p className="font-extrabold text-slate-900 text-xs">{req.title}</p>
-                          <p className="text-[11px] text-slate-500 font-semibold">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
+                          <p className="font-semibold text-[#1D1D1F] text-xs">{req.title}</p>
+                          <p className="text-xs font-normal text-[#6E6E73]">{format(new Date(req.createdAt), "MMM d, h:mm a")}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-3.5">
-                      <p className="font-extrabold text-slate-900 text-xs">{req.unit.property.name}</p>
-                      <p className="text-[11px] text-slate-500 font-semibold">Unit: {req.unit.name}</p>
+                      <p className="font-semibold text-[#1D1D1F] text-xs">{req.unit.property.name}</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">Unit: {req.unit.name}</p>
                     </td>
                     <td className="px-6 py-3.5">
-                      <p className="font-extrabold text-slate-900 text-xs">{req.tenant.name}</p>
-                      <p className="text-[11px] text-rose-600 font-bold">{req.tenant.phone || req.tenant.email}</p>
+                      <p className="font-semibold text-[#1D1D1F] text-xs">{req.tenant.name}</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">{req.tenant.phone || req.tenant.email}</p>
                     </td>
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-1.5">
@@ -310,35 +310,35 @@ export default function EmergencyMaintenancePage() {
                     <td className="px-6 py-3.5">
                       {req.inspector ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-800">
+                          <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-semibold text-slate-800">
                             {req.inspector.name?.charAt(0)}
                           </div>
-                          <span className="font-extrabold text-slate-900 text-xs">{req.inspector.name}</span>
+                          <span className="font-semibold text-[#1D1D1F] text-xs">{req.inspector.name}</span>
                         </div>
                       ) : (
-                        <span className="text-rose-600 font-black text-xs uppercase tracking-wider">Action Required</span>
+                        <span className="text-rose-600 font-medium text-[10px] uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">Action Required</span>
                       )}
                     </td>
                     <td className="px-6 py-3.5 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200/80 outline-none cursor-pointer">
+                        <DropdownMenuTrigger className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200/80 outline-none cursor-pointer">
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-white rounded-2xl shadow-xl border-slate-200 p-1.5">
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer font-bold text-xs text-slate-900 py-2 rounded-xl">
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}`)} className="cursor-pointer font-medium text-xs text-[#1D1D1F] py-2 rounded-xl">
                             <Eye className="h-3.5 w-3.5 mr-2 text-slate-500" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer font-bold text-xs text-slate-900 py-2 rounded-xl">
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${req.id}/edit`)} className="cursor-pointer font-medium text-xs text-[#1D1D1F] py-2 rounded-xl">
                             <Edit className="h-3.5 w-3.5 mr-2 text-slate-500" />
                             Edit Request
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer font-bold text-xs text-rose-600 py-2 rounded-xl">
+                          <DropdownMenuItem onClick={() => openAssignModal(req)} className="cursor-pointer font-medium text-xs text-rose-600 py-2 rounded-xl">
                             <UserPlus className="h-3.5 w-3.5 mr-2" />
                             Assign Inspector
                           </DropdownMenuItem>
                           <div className="h-px bg-slate-100 my-1" />
-                          <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer font-bold text-xs text-rose-600 py-2 rounded-xl">
+                          <DropdownMenuItem onClick={() => handleCancelRequest(req.id)} className="cursor-pointer font-medium text-xs text-rose-600 py-2 rounded-xl">
                             <XCircle className="h-3.5 w-3.5 mr-2" />
                             Cancel Request
                           </DropdownMenuItem>
@@ -358,7 +358,7 @@ export default function EmergencyMaintenancePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-base font-extrabold text-slate-900 mb-1">Assign Inspector</h2>
+              <h2 className="text-base font-semibold text-slate-900 mb-1">Assign Inspector</h2>
               <p className="text-xs font-medium text-slate-500 mb-6">Select a team member to handle this emergency.</p>
               
               <div className="space-y-2">
@@ -378,7 +378,7 @@ export default function EmergencyMaintenancePage() {
             </div>
             <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 h-9 px-4">Cancel</Button>
-              <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white h-9 px-5 shadow-xs">Confirm Assignment</Button>
+              <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white h-9 px-5 shadow-xs">Confirm Assignment</Button>
             </div>
           </div>
         </div>
@@ -387,3 +387,4 @@ export default function EmergencyMaintenancePage() {
     </div>
   );
 }
+

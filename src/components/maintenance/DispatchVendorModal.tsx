@@ -83,12 +83,12 @@ export function DispatchVendorModal({ ticketId, onDispatched, isReassign = false
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="inline-flex items-center justify-center bg-[#007AFF] hover:bg-blue-600 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm transition-colors">
-        <Send className="h-4 w-4" /> {isReassign ? "Reassign Vendor" : "Dispatch Vendor"}
+      <DialogTrigger className="inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-medium gap-2 rounded-xl h-9 px-4 shadow-xs text-xs transition-all border-none cursor-pointer flex-1">
+        <Send className="h-3.5 w-3.5" /> {isReassign ? "Reassign Vendor" : "Dispatch Vendor"}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[425px] rounded-3xl max-h-[90vh] overflow-y-auto font-sans">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{mode === "select" ? "Dispatch External Vendor" : "Add New Vendor"}</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-[#1D1D1F]">{mode === "select" ? "Dispatch External Vendor" : "Add New Vendor"}</DialogTitle>
         </DialogHeader>
 
         {mode === "select" ? (
@@ -96,8 +96,8 @@ export function DispatchVendorModal({ ticketId, onDispatched, isReassign = false
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label className="font-bold text-[#1D1D1F] uppercase text-[12px] tracking-wide">Select Vendor</Label>
-                  <button onClick={() => setMode("create")} className="text-xs font-bold text-[#007AFF] hover:underline">+ New Vendor</button>
+                  <Label className="font-normal text-[#6E6E73] text-xs">Select Vendor</Label>
+                  <button onClick={() => setMode("create")} className="text-xs font-medium text-slate-900 hover:underline cursor-pointer">+ New Vendor</button>
                 </div>
                 <Select value={selectedVendorId} onValueChange={(val) => setSelectedVendorId(val || "")}>
                   <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA] focus:ring-[#007AFF] font-semibold text-[#1D1D1F]">
@@ -120,7 +120,7 @@ export function DispatchVendorModal({ ticketId, onDispatched, isReassign = false
               <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
                 Cancel
               </Button>
-              <Button onClick={handleDispatch} disabled={loading || !selectedVendorId} className="bg-[#007AFF] hover:bg-blue-600 text-white font-bold rounded-xl px-8 shadow-sm">
+              <Button onClick={handleDispatch} disabled={loading || !selectedVendorId} className="bg-[#007AFF] hover:bg-blue-600 text-white font-medium rounded-xl px-8 shadow-sm">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Dispatch Job"}
               </Button>
             </div>
@@ -164,7 +164,7 @@ export function DispatchVendorModal({ ticketId, onDispatched, isReassign = false
               <Button type="button" variant="outline" onClick={() => setMode("select")} className="rounded-xl font-bold border-[#E5E5EA]">
                 Back
               </Button>
-              <Button onClick={handleCreateVendor} disabled={loading || !newVendor.name || !newVendor.email} className="bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl px-8 shadow-sm">
+              <Button onClick={handleCreateVendor} disabled={loading || !newVendor.name || !newVendor.email} className="bg-[#10B981] hover:bg-emerald-600 text-white font-medium rounded-xl px-8 shadow-sm">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Vendor"}
               </Button>
             </div>

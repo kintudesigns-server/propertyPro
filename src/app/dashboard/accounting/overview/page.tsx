@@ -91,16 +91,16 @@ export default function FinancialOverviewPage() {
   return (
     <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Financial Overview</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Financial Overview</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-1">
             Real-time analysis of your cash flow, escrowed deposits, and rental payouts.
           </p>
         </div>
         <Button
           onClick={() => { fetchData(); toast.success("Refreshed stats"); }}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs px-4 h-9 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer shrink-0"
+          className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 h-9 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer shrink-0 border-none"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </Button>
@@ -109,22 +109,22 @@ export default function FinancialOverviewPage() {
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Available Wallet */}
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-slate-500 mb-3">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Available Wallet</span>
-              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 shadow-2xs">
+              <span className="text-xs font-normal text-[#6E6E73]">Available Wallet</span>
+              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-700 shadow-2xs">
                 <Wallet className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight">${fmt(balance)}</p>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${fmt(balance)}</p>
           </div>
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-            <span className="text-[11px] text-slate-500 font-semibold">Unwithdrawn earnings</span>
+            <span className="text-xs font-normal text-[#6E6E73]">Unwithdrawn earnings</span>
             <Button
               size="sm"
               onClick={() => router.push("/dashboard/accounting/wallet")}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl text-xs h-8 px-3 shadow-2xs cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-xs h-8 px-3.5 shadow-xs cursor-pointer border-none"
             >
               Withdraw
             </Button>
@@ -132,68 +132,68 @@ export default function FinancialOverviewPage() {
         </div>
 
         {/* Escrow Held */}
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-slate-500 mb-3">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Escrow Held</span>
-              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 shadow-2xs">
+              <span className="text-xs font-normal text-[#6E6E73]">Escrow Held</span>
+              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-700 shadow-2xs">
                 <ShieldCheck className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight">${fmt(data.escrowBalance)}</p>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${fmt(data.escrowBalance)}</p>
           </div>
-          <p className="text-[11px] text-slate-500 font-semibold mt-4 pt-3 border-t border-slate-100">Active security deposits in trust</p>
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">Active security deposits in trust</p>
         </div>
 
         {/* YTD Net Rent */}
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-slate-500 mb-3">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">YTD Net Rent</span>
-              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xs">
+              <span className="text-xs font-normal text-[#6E6E73]">YTD Net Rent</span>
+              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200/60 text-emerald-700 shadow-2xs">
                 <TrendingUp className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-3xl font-black text-emerald-700 tracking-tight">${fmt(data.totalNetEarnings)}</p>
+            <p className="text-2xl font-semibold text-emerald-700 tracking-tight">${fmt(data.totalNetEarnings)}</p>
           </div>
-          <p className="text-[11px] text-emerald-800 font-semibold mt-4 pt-3 border-t border-slate-100">
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">
             Rent profit after platform fee
           </p>
         </div>
 
         {/* Total Refunds Paid */}
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-slate-500 mb-3">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Refunds Settled</span>
-              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-2xs">
+              <span className="text-xs font-normal text-[#6E6E73]">Refunds Settled</span>
+              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200/60 text-rose-700 shadow-2xs">
                 <HeartHandshake className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight">${fmt(data.totalRefunded)}</p>
+            <p className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${fmt(data.totalRefunded)}</p>
           </div>
-          <p className="text-[11px] text-slate-500 font-semibold mt-4 pt-3 border-t border-slate-100">Total deposits returned to tenants</p>
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">Total deposits returned to tenants</p>
         </div>
       </div>
 
       {/* Main Section */}
       <div className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
-        <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-base font-black text-slate-900 tracking-tight">Unified Portfolio Ledger</h2>
-          <p className="text-xs font-semibold text-slate-500 mt-0.5">
+        <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Unified Portfolio Ledger</h2>
+          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
             A single ledger tracking all rent incomes, fee commissions, maintenance outflows, and tenant security deposit distributions.
           </p>
         </div>
-        <div className="p-5 sm:p-6">
+        <div className="p-6 sm:p-8">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="bg-slate-100 border border-slate-200/80 p-1 rounded-xl mb-4 shadow-2xs">
-              <TabsTrigger value="all" className="rounded-lg font-extrabold text-xs px-4 py-1.5 cursor-pointer data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-2xs">
+            <TabsList className="bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl mb-4 shadow-2xs w-fit">
+              <TabsTrigger value="all" className="rounded-lg font-medium text-xs px-3.5 py-1.5 cursor-pointer data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-2xs text-[#6E6E73]">
                 All Transactions ({data.transactions.length})
               </TabsTrigger>
-              <TabsTrigger value="rent" className="rounded-lg font-extrabold text-xs px-4 py-1.5 cursor-pointer data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="rent" className="rounded-lg font-medium text-xs px-3.5 py-1.5 cursor-pointer data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-2xs text-[#6E6E73]">
                 Rent Ledger ({rentTx.length})
               </TabsTrigger>
-              <TabsTrigger value="escrow" className="rounded-lg font-extrabold text-xs px-4 py-1.5 cursor-pointer data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="escrow" className="rounded-lg font-medium text-xs px-3.5 py-1.5 cursor-pointer data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-2xs text-[#6E6E73]">
                 Escrow &amp; Refunds ({escrowTx.length})
               </TabsTrigger>
             </TabsList>
@@ -231,8 +231,8 @@ function LedgerTable({ list }: { list: any[] }) {
     return (
       <div className="text-center py-12 border border-dashed border-slate-200 rounded-2xl space-y-2 mt-2">
         <FileText className="h-8 w-8 text-slate-300 mx-auto" />
-        <h4 className="font-extrabold text-slate-900 text-sm">No transactions found</h4>
-        <p className="text-xs text-slate-500 font-semibold max-w-xs mx-auto">No records match this ledger filter in your history.</p>
+        <h4 className="font-semibold text-[#1D1D1F] text-xs">No transactions found</h4>
+        <p className="text-xs text-[#6E6E73] font-normal max-w-xs mx-auto">No records match this ledger filter in your history.</p>
       </div>
     );
   }
@@ -245,14 +245,14 @@ function LedgerTable({ list }: { list: any[] }) {
   return (
     <div className="rounded-2xl border border-slate-200 overflow-hidden mt-2 flex flex-col">
       <Table>
-        <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
+        <TableHeader className="bg-slate-50/70 border-b border-slate-100">
           <TableRow>
-            <TableHead className="font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Date</TableHead>
-            <TableHead className="font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Transaction ID</TableHead>
-            <TableHead className="font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Category</TableHead>
-            <TableHead className="font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Leaseholder</TableHead>
-            <TableHead className="font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Reference</TableHead>
-            <TableHead className="text-right font-extrabold text-slate-500 text-[10px] uppercase tracking-wider">Amount</TableHead>
+            <TableHead className="font-normal text-[#6E6E73] text-xs">Date</TableHead>
+            <TableHead className="font-normal text-[#6E6E73] text-xs">Transaction ID</TableHead>
+            <TableHead className="font-normal text-[#6E6E73] text-xs">Category</TableHead>
+            <TableHead className="font-normal text-[#6E6E73] text-xs">Leaseholder</TableHead>
+            <TableHead className="font-normal text-[#6E6E73] text-xs">Reference</TableHead>
+            <TableHead className="text-right font-normal text-[#6E6E73] text-xs">Amount</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-slate-100">
@@ -260,39 +260,39 @@ function LedgerTable({ list }: { list: any[] }) {
             const isExpense = tx.type === "EXPENSE";
             return (
               <TableRow key={tx.id} className="hover:bg-slate-50/50 transition-colors">
-                <TableCell className="text-xs font-semibold text-slate-500">
+                <TableCell className="text-xs font-normal text-[#6E6E73]">
                   {new Date(tx.createdAt).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
                     year: "numeric"
                   })}
                 </TableCell>
-                <TableCell className="text-xs font-mono text-slate-600 font-extrabold uppercase">
+                <TableCell className="text-xs font-mono text-[#1D1D1F] font-medium uppercase">
                   {tx.id.slice(0, 8)}
                 </TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider uppercase border shadow-2xs ${
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium tracking-wider uppercase border ${
                     tx.category === "RENT" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
-                    tx.category === "DEPOSIT" ? "bg-purple-50 text-purple-800 border-purple-200" :
+                    tx.category === "DEPOSIT" ? "bg-purple-50 text-purple-700 border-purple-200" :
                     "bg-slate-100 text-slate-700 border-slate-200"
                   }`}>
                     {tx.category === "DEPOSIT" ? (isExpense ? "REFUND" : "ESCROW") : tx.category}
                   </span>
                 </TableCell>
-                <TableCell className="text-xs font-extrabold text-slate-900">
+                <TableCell className="text-xs font-semibold text-[#1D1D1F]">
                   {tx.tenant?.name || "System Expense"}
                 </TableCell>
-                <TableCell className="text-xs font-semibold text-slate-500">
+                <TableCell className="text-xs font-normal text-[#6E6E73]">
                   {tx.reference ? (
                     <span className="flex items-center gap-1">
                       {tx.reference}
                       {tx.reference.startsWith("re_") && (
-                        <ExternalLink className="h-3 w-3 text-slate-400" />
+                        <ExternalLink className="h-3 w-3 text-[#6E6E73]" />
                       )}
                     </span>
                   ) : "—"}
                 </TableCell>
-                <TableCell className={`text-right text-xs font-black ${isExpense ? "text-rose-600" : "text-emerald-700"}`}>
+                <TableCell className={`text-right text-xs font-semibold ${isExpense ? "text-rose-600" : "text-emerald-700"}`}>
                   {isExpense ? "-" : "+"}${fmt(Number(tx.amount))}
                 </TableCell>
               </TableRow>
@@ -303,8 +303,8 @@ function LedgerTable({ list }: { list: any[] }) {
 
       {/* Pagination Footer */}
       <div className="p-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
-        <span className="text-xs font-semibold text-slate-500">
-          Showing <span className="font-extrabold text-slate-900">{startIndex + 1}</span> to <span className="font-extrabold text-slate-900">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="font-extrabold text-slate-900">{totalItems}</span> transactions
+        <span className="text-xs font-normal text-[#6E6E73]">
+          Showing <span className="font-semibold text-[#1D1D1F]">{startIndex + 1}</span> to <span className="font-semibold text-[#1D1D1F]">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="font-semibold text-[#1D1D1F]">{totalItems}</span> transactions
         </span>
         <div className="flex items-center gap-2">
           <button 
@@ -314,7 +314,7 @@ function LedgerTable({ list }: { list: any[] }) {
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="text-xs font-extrabold text-slate-800 px-2">Page {currentPage} of {totalPages}</span>
+          <span className="text-xs font-semibold text-[#1D1D1F] px-2">Page {currentPage} of {totalPages}</span>
           <button 
             disabled={currentPage === totalPages || totalPages === 0}
             onClick={() => setCurrentPage((p) => p + 1)}

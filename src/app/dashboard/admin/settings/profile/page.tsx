@@ -196,7 +196,7 @@ export default function AdminProfileSettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
             Admin Profile & Security Settings
           </h1>
           <p className="text-[#6E6E73] text-sm mt-0.5 font-medium">
@@ -215,7 +215,7 @@ export default function AdminProfileSettingsPage() {
         {/* Avatar & Basic Profile Card */}
         <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-slate-900 flex items-center gap-2">
               <User className="h-4 w-4 text-blue-600" /> Personal Profile Information
             </CardTitle>
             <CardDescription className="text-xs text-[#6E6E73] font-medium">
@@ -260,7 +260,7 @@ export default function AdminProfileSettingsPage() {
                     variant="outline" 
                     size="sm"
                     disabled={uploadingAvatar}
-                    className="border-slate-200 font-bold rounded-xl text-slate-800 text-xs"
+                    className="border-slate-200 font-medium rounded-xl text-slate-800 text-xs"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-3.5 w-3.5 mr-1.5" /> Select Image
@@ -270,7 +270,7 @@ export default function AdminProfileSettingsPage() {
                       type="button"
                       variant="ghost" 
                       size="sm"
-                      className="text-rose-600 hover:bg-rose-50 font-bold rounded-xl text-xs"
+                      className="text-rose-600 hover:bg-rose-50 font-medium rounded-xl text-xs"
                       onClick={() => setAvatarUrl("")}
                     >
                       <X className="h-3.5 w-3.5 mr-1" /> Remove
@@ -333,7 +333,7 @@ export default function AdminProfileSettingsPage() {
         {/* Security & Password Change */}
         <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-slate-900 flex items-center gap-2">
               <KeyRound className="h-4 w-4 text-emerald-600" /> Security & Password Update
             </CardTitle>
             <CardDescription className="text-xs text-[#6E6E73] font-medium">
@@ -406,7 +406,7 @@ export default function AdminProfileSettingsPage() {
         {/* Administrator Alert Preferences */}
         <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-slate-900 flex items-center gap-2">
               <Bell className="h-4 w-4 text-purple-600" /> Platform Event Notification Preferences
             </CardTitle>
             <CardDescription className="text-xs text-[#6E6E73] font-medium">
@@ -460,7 +460,7 @@ export default function AdminProfileSettingsPage() {
           <Button 
             type="submit"
             disabled={saving || uploadingAvatar}
-            className="bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 h-12 px-8 shadow-sm transition-all text-sm"
+            className="bg-slate-900 hover:bg-[#007AFF] text-white font-medium rounded-xl flex items-center justify-center gap-2 h-12 px-8 shadow-sm transition-all text-sm"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             Save Profile & Security Changes

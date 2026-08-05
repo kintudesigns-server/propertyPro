@@ -274,7 +274,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                 Step {step} of 3
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs font-semibold text-[#8E8E93] mt-1">
+            <DialogDescription className="text-xs font-normal text-[#8E8E93] mt-1">
               {step === 1 && "Rate the condition of each room — this becomes your official inspection record."}
               {step === 2 && "Describe the issues found and attach photo evidence for each flagged room."}
               {step === 3 && "Review your findings, confirm the declaration, and submit."}
@@ -371,7 +371,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                       <div className={`flex items-center gap-2 px-4 py-3 ${cfg.bg}`}>
                         {cfg.icon}
                         <span className={`text-sm font-black ${cfg.color}`}>{room.name}</span>
-                        <span className={`ml-auto text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
+                        <span className={`ml-auto text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
                           {cfg.label}
                         </span>
                       </div>
@@ -497,7 +497,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                           <div className="flex items-center justify-between">
                             <p className="text-sm font-bold text-slate-800">{room.name}</p>
                             {cfg && (
-                              <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
+                              <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
                                 {cfg.label}
                               </span>
                             )}
@@ -560,7 +560,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
             {step === 1 ? "Cancel" : "Back"}
           </Button>
 
-          <div className="text-xs font-semibold text-[#8E8E93]">
+          <div className="text-xs font-normal text-[#8E8E93]">
             {step === 1 && `${rooms.filter((r) => r.condition !== null).length} / ${rooms.length} rooms rated`}
             {step === 2 && flaggedRooms.length > 0 && `${flaggedRooms.filter((r) => r.findings.length > 0).length} / ${flaggedRooms.length} rooms detailed`}
           </div>
@@ -587,7 +587,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
             <Button
               onClick={handleSubmit}
               disabled={submitting || !declared}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 px-5 text-xs font-bold disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 px-5 text-xs font-medium disabled:opacity-50"
             >
               {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "Submit Inspection"}
             </Button>

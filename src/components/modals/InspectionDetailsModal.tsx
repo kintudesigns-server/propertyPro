@@ -55,7 +55,7 @@ export function InspectionDetailsModal({ lease, open, onOpenChange, onSuccess }:
       <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-lg p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-slate-900">Inspection Details</DialogTitle>
-          <DialogDescription className="text-xs font-semibold text-[#8E8E93]">
+          <DialogDescription className="text-xs font-normal text-[#8E8E93]">
             Complete details for the walkthrough inspection.
           </DialogDescription>
         </DialogHeader>
@@ -118,7 +118,7 @@ export function InspectionDetailsModal({ lease, open, onOpenChange, onSuccess }:
               <Button
                 onClick={handleResolveDispute}
                 disabled={submitting || responseNotes.trim().length < 5}
-                className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold h-9 text-xs rounded-xl transition-colors disabled:opacity-50"
+                className="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium h-9 text-xs rounded-xl transition-colors disabled:opacity-50"
               >
                 Submit Response
               </Button>

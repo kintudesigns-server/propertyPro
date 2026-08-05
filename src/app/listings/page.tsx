@@ -47,6 +47,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { ScheduleTourModal } from "@/components/modals/ScheduleTourModal";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const ListingsMap = dynamic(() => import("@/components/listings/ListingsMap"), {
   ssr: false,
@@ -180,6 +181,7 @@ export default function ListingsPage() {
   // Consent States
   const [backgroundCheckConsent, setBackgroundCheckConsent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [appTurnstileToken, setAppTurnstileToken] = useState<string | null>(null);
 
   // Document States
   const [idDocument, setIdDocument] = useState<File | null>(null);
@@ -687,7 +689,8 @@ export default function ListingsPage() {
           emergencyContactPhone,
           emergencyContactRelation,
           backgroundCheckConsent,
-          agreedToTerms
+          agreedToTerms,
+          turnstileToken: appTurnstileToken
         }),
       });
 
@@ -751,29 +754,29 @@ export default function ListingsPage() {
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-8 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center group-hover:bg-slate-700 transition-colors">
+          <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center group-hover:bg-slate-800 transition-colors shadow-xs">
             <Building2 className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[15px] font-extrabold tracking-tight text-slate-900 leading-tight">PropertyPro</span>
-            <span className="text-[10px] text-slate-400 font-medium">Verified Listings</span>
+            <span className="text-xl font-semibold tracking-tight text-[#1D1D1F] leading-tight">PropertyPro</span>
+            <span className="text-[10px] text-[#6E6E73] font-normal tracking-wider uppercase">Verified Listings</span>
           </div>
         </Link>
 
         {/* Mobile View Toggle */}
-        <div className="flex lg:hidden items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <div className="flex lg:hidden items-center bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs text-xs font-medium">
           <button
             onClick={() => setViewMode("list")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              viewMode === "list" ? "bg-white text-slate-900 shadow-sm font-bold" : "text-slate-400"
+            className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer border-none ${
+              viewMode === "list" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
             <List className="h-3.5 w-3.5" /> List
           </button>
           <button
             onClick={() => setViewMode("map")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              viewMode === "map" ? "bg-white text-slate-900 shadow-sm font-bold" : "text-slate-400"
+            className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer border-none ${
+              viewMode === "map" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
             <MapIcon className="h-3.5 w-3.5" /> Map
@@ -781,7 +784,7 @@ export default function ListingsPage() {
         </div>
 
         <Link href={session ? "/dashboard" : "/auth/login"}>
-          <Button className="bg-slate-900 hover:bg-slate-700 text-white font-semibold px-4 h-9 rounded-xl text-xs transition-all">
+          <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer">
             {session ? "Workspace" : "Sign In"}
           </Button>
         </Link>
@@ -789,7 +792,7 @@ export default function ListingsPage() {
 
       {/* ── Search & Filter Bar ── */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-2 w-full">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-4 space-y-3">
           <div className="flex flex-col md:flex-row items-center gap-3">
             {/* Search Input */}
             <div className="relative flex-1 w-full">
@@ -799,12 +802,12 @@ export default function ListingsPage() {
                 placeholder="Search city, neighborhood, or building..."
                 value={searchCity}
                 onChange={(e) => setSearchCity(e.target.value)}
-                className="w-full pl-10 pr-9 py-2.5 bg-slate-50 text-slate-800 placeholder-slate-400 text-sm font-medium rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all outline-none"
+                className="w-full h-9 rounded-xl border border-slate-200 bg-white pl-10 pr-9 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
               />
               {searchCity && (
                 <button
                   onClick={() => setSearchCity("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -812,7 +815,7 @@ export default function ListingsPage() {
             </div>
 
             {/* Property Type Segmented Control */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold shrink-0 w-full md:w-auto overflow-x-auto gap-0.5">
+            <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs shrink-0 w-full md:w-auto overflow-x-auto">
               {[
                 { id: "all", label: "All Types" },
                 { id: "apartment", label: "Apartments" },
@@ -822,10 +825,10 @@ export default function ListingsPage() {
                 <button
                   key={t.id}
                   onClick={() => setPropertyType(t.id)}
-                  className={`px-3.5 py-2 rounded-lg text-xs whitespace-nowrap transition-all ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer border-none ${
                     propertyType === t.id
-                      ? "bg-white text-slate-900 font-bold shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-white text-[#1D1D1F] shadow-2xs"
+                      : "text-[#6E6E73] hover:text-[#1D1D1F]"
                   }`}
                 >
                   {t.label}
@@ -840,7 +843,7 @@ export default function ListingsPage() {
               <select
                 value={minRooms}
                 onChange={(e) => setMinRooms(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-slate-400"
+                className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-3.5 rounded-xl shadow-2xs cursor-pointer focus:outline-none"
               >
                 <option value="all">Bedrooms: Any</option>
                 <option value="1">1+ Bed</option>
@@ -849,20 +852,20 @@ export default function ListingsPage() {
               </select>
 
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-slate-400 font-medium text-xs">$</span>
+                <span className="absolute left-3.5 text-slate-400 font-normal text-xs">$</span>
                 <input
                   type="number"
                   placeholder="Max Rent"
                   value={maxRent}
                   onChange={(e) => setMaxRent(e.target.value)}
-                  className="w-28 pl-6 pr-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 text-xs font-medium rounded-lg focus:outline-none focus:border-slate-400"
+                  className="w-28 h-9 pl-7 pr-3 border border-slate-200 bg-white text-[#1D1D1F] placeholder:text-[#6E6E73] font-normal text-xs rounded-xl shadow-2xs focus:outline-none"
                 />
               </div>
 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:border-slate-400"
+                className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-3.5 rounded-xl shadow-2xs cursor-pointer focus:outline-none"
               >
                 <option value="featured">Featured First</option>
                 <option value="rent_asc">Rent: Low to High</option>
@@ -872,11 +875,11 @@ export default function ListingsPage() {
             </div>
 
             <div className="flex items-center gap-3 text-xs">
-              <span className="font-semibold text-slate-500">{processedUnits.length} units matching</span>
+              <span className="text-xs font-normal text-[#6E6E73]">{processedUnits.length} units matching</span>
               {(searchCity || maxRent || minRooms !== "all" || propertyType !== "all") && (
                 <button
                   onClick={() => { setSearchCity(""); setMaxRent(""); setMinRooms("all"); setPropertyType("all"); setSortBy("featured"); }}
-                  className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1 border border-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-3 rounded-xl shadow-2xs cursor-pointer flex items-center gap-1 transition-colors"
                 >
                   Clear Filters <X className="h-3 w-3" />
                 </button>
@@ -895,14 +898,14 @@ export default function ListingsPage() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="h-80 rounded-2xl bg-white border border-slate-200 animate-pulse shadow-sm" />
+                <div key={n} className="h-80 rounded-3xl bg-white border border-slate-200 animate-pulse shadow-2xs" />
               ))}
             </div>
           ) : groupedList.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200 max-w-md mx-auto shadow-sm w-full">
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 max-w-md mx-auto shadow-2xs w-full">
               <Home className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-base font-bold text-slate-800 mb-1">No Properties Found</h3>
-              <p className="text-sm text-slate-400 font-medium px-4">Try adjusting your filters, max rent budget, or search terms.</p>
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight mb-1">No Properties Found</h3>
+              <p className="text-xs text-[#6E6E73] font-normal px-4">Try adjusting your filters, max rent budget, or search terms.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -923,14 +926,14 @@ export default function ListingsPage() {
                         window.location.href = `/listings/${unit.id}`;
                       }
                     }}
-                    className={`group relative bg-white rounded-2xl border transition-all duration-200 overflow-hidden cursor-pointer flex flex-col ${
+                    className={`group relative bg-white rounded-3xl border transition-all duration-200 overflow-hidden cursor-pointer flex flex-col ${
                       hoveredPropertyId === group.property.id
-                        ? "border-slate-400 shadow-lg -translate-y-0.5"
-                        : "border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300"
+                        ? "border-slate-400 shadow-md -translate-y-0.5"
+                        : "border-slate-200 shadow-2xs hover:shadow-xs hover:border-slate-300"
                     }`}
                   >
                     {/* Visual Media Cover */}
-                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#E5E5EA]">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
                       <img
                         src={group.property.coverPhoto || unit.images?.[0] || "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800"}
                         alt={group.property.name}
@@ -945,23 +948,23 @@ export default function ListingsPage() {
                       <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                         <button
                           onClick={(e) => copyShareLink(unit.id, e)}
-                          className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-[#1D1D1F] flex items-center justify-center backdrop-blur-md shadow-sm transition-all active:scale-90"
+                          className="h-8 w-8 rounded-xl border border-slate-200 bg-white/90 text-slate-700 hover:bg-white flex items-center justify-center backdrop-blur-md shadow-2xs transition-all cursor-pointer"
                           title="Copy Link"
                         >
                           <Share2 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => toggleFavorite(group.property.id, e)}
-                          className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-[#1D1D1F] flex items-center justify-center backdrop-blur-md shadow-sm transition-all active:scale-90"
+                          className="h-8 w-8 rounded-xl border border-slate-200 bg-white/90 text-slate-700 hover:bg-white flex items-center justify-center backdrop-blur-md shadow-2xs transition-all cursor-pointer"
                           title="Save Home"
                         >
-                          <Heart className={`h-3.5 w-3.5 transition-colors ${isFav ? "fill-[#FF2D55] text-[#FF2D55]" : "text-[#1D1D1F]"}`} />
+                          <Heart className={`h-3.5 w-3.5 transition-colors ${isFav ? "fill-rose-500 text-rose-500" : "text-[#1D1D1F]"}`} />
                         </button>
                       </div>
 
                       {/* Property Type Badge */}
                       <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-                        <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-900 text-white shadow-2xs flex items-center gap-1">
                           <span className={`h-1.5 w-1.5 rounded-full ${
                             group.property.type === "House" ? "bg-amber-400" :
                             group.property.type === "Commercial" ? "bg-indigo-400" : "bg-emerald-400"
@@ -972,13 +975,13 @@ export default function ListingsPage() {
 
                       {/* Rent Price Pill Overlay */}
                       <div className="absolute bottom-3 left-3 z-10">
-                        <span className="bg-white/95 backdrop-blur-md text-[#1D1D1F] px-3 py-1 rounded-full font-black text-sm shadow-md flex items-center gap-1 border border-white/60">
+                        <span className="bg-white/90 backdrop-blur-md text-[#1D1D1F] px-3 py-1 rounded-xl font-semibold text-xs shadow-2xs flex items-center gap-1 border border-slate-200/60">
                           {isMultiUnit ? (
                             group.minRent === group.maxRent ? `$${group.minRent.toLocaleString()}` : `$${group.minRent.toLocaleString()} - $${group.maxRent.toLocaleString()}`
                           ) : (
                             `$${Number(unit.rentAmount).toLocaleString()}`
                           )}
-                          <span className="text-[10px] text-[#8E8E93] font-normal">/mo</span>
+                          <span className="text-[10px] text-[#6E6E73] font-normal">/mo</span>
                         </span>
                       </div>
                     </div>
@@ -986,40 +989,44 @@ export default function ListingsPage() {
                     {/* Card Body */}
                     <div className="p-4 flex-1 flex flex-col justify-between space-y-3 text-left">
                       <div>
-                        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
+                        <div className="flex items-center gap-1 text-xs text-[#6E6E73] font-normal">
                           <MapPin className="h-3 w-3" />
                           <span>{group.property.city}, {group.property.country}</span>
                         </div>
-                        <h3 className="text-[15px] font-extrabold text-slate-900 group-hover:text-slate-700 transition-colors line-clamp-1 mt-1">
+                        <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight group-hover:text-slate-700 transition-colors line-clamp-1 mt-1">
                           {group.property.name}
                         </h3>
-                        <p className="text-xs text-slate-400 font-normal truncate mt-0.5">
+                        <p className="text-xs text-[#6E6E73] font-normal truncate mt-0.5">
                           {group.property.address}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-slate-500 border-t border-slate-100 pt-3 font-medium">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#6E6E73] border-t border-slate-100 pt-3 font-normal">
                         {group.property.type !== "Commercial" && (
-                          <span className="flex items-center gap-1.5">
-                            <BedDouble className="h-3.5 w-3.5 text-slate-400" />
-                            <strong className="text-slate-700">
-                              {isMultiUnit
-                                ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}–${group.maxBeds}`)
-                                : unit.rooms}
-                            </strong> Beds
+                          <span className="flex items-center gap-1.5 whitespace-nowrap">
+                            <BedDouble className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            <span>
+                              <strong className="text-[#1D1D1F] font-semibold">
+                                {isMultiUnit
+                                  ? (group.minBeds === group.maxBeds ? group.minBeds : `${group.minBeds}–${group.maxBeds}`)
+                                  : unit.rooms}
+                              </strong> Beds
+                            </span>
                           </span>
                         )}
-                        <span className="flex items-center gap-1.5">
-                          <Square className="h-3.5 w-3.5 text-slate-400" />
-                          <strong className="text-slate-700">
-                            {isMultiUnit
-                              ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}–${group.maxSqft}`)
-                              : unit.sqFootage}
-                          </strong> sqft
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <Square className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <span>
+                            <strong className="text-[#1D1D1F] font-semibold">
+                              {isMultiUnit
+                                ? (group.minSqft === group.maxSqft ? group.minSqft : `${group.minSqft}–${group.maxSqft}`)
+                                : unit.sqFootage}
+                            </strong> sqft
+                          </span>
                         </span>
 
                         {isMultiUnit && (
-                          <span className="ml-auto text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                          <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
                             {group.units.length} Floorplans
                           </span>
                         )}
@@ -1034,7 +1041,7 @@ export default function ListingsPage() {
                             window.location.href = `/listings/${unit.id}`;
                           }
                         }}
-                        className="w-full bg-slate-900 hover:bg-slate-700 text-white font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                        className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-1.5 transition-all"
                       >
                         {isMultiUnit ? "Browse Floorplans" : "View Details"}
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -1296,7 +1303,7 @@ export default function ListingsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors mt-2">
+                <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-medium h-11 rounded-xl transition-colors mt-2">
                   {schedulingTour ? "Checking Limits..." : "Next: Verify Email"}
                 </Button>
               </form>
@@ -1336,7 +1343,7 @@ export default function ListingsPage() {
                 )}
 
                 <div className="flex flex-col gap-3">
-                  <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-bold h-11 rounded-xl transition-colors">
+                  <Button type="submit" disabled={schedulingTour} className="w-full bg-blue-600 hover:bg-blue-650 text-white font-medium h-11 rounded-xl transition-colors">
                     {schedulingTour ? "Verifying..." : "Confirm & Schedule Tour"}
                   </Button>
                   
@@ -1457,7 +1464,7 @@ export default function ListingsPage() {
                 <div className="flex flex-col gap-2.5 pt-2">
                   <Link href={`/listings/apply/track?id=${submittedAppId}`} className="w-full">
                     <Button 
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs"
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs"
                       onClick={() => {
                         setDialogOpen(false);
                         setSubmittedAppId(null);
@@ -1492,20 +1499,20 @@ export default function ListingsPage() {
                 </div>
                 
                 <div className="relative z-10 flex flex-col h-full p-8 lg:p-12">
-                  <div className="mb-12">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight mb-2">Apply for<br/>{selectedUnit?.property?.name || 'Property'}</h2>
-                    <div className="flex items-center gap-2 text-slate-600 font-bold mb-6">
-                      <span className="bg-white px-3 py-1 rounded-full shadow-xs border border-slate-200 text-xs font-bold text-slate-800">
+                  <div className="mb-10">
+                    <h2 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight leading-tight mb-3">Apply for<br/>{selectedUnit?.property?.name || 'Property'}</h2>
+                    <div className="flex items-center gap-2 text-slate-600 font-normal mb-6">
+                      <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl shadow-2xs border border-slate-200/60 text-xs font-medium text-[#1D1D1F]">
                         {selectedUnit?.name?.toLowerCase().startsWith("unit") ? selectedUnit.name : `Unit ${selectedUnit?.name || ''}`}
                       </span>
-                      <span className="bg-white px-3 py-1 rounded-full shadow-xs border border-slate-200 text-xs font-extrabold text-slate-900">
+                      <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl shadow-2xs border border-slate-200/60 text-xs font-semibold text-[#1D1D1F]">
                         ${Number(selectedUnit?.rentAmount || 0).toLocaleString()}/mo
                       </span>
                     </div>
                   </div>
 
                   {/* Vertical Stepper */}
-                  <div className="flex-1 space-y-8">
+                  <div className="flex-1 space-y-7">
                     {[
                       { step: 1, title: "Personal & Preferences", desc: "Basic contact info" },
                       { step: 2, title: "Finances & Guarantor", desc: "Income verification" },
@@ -1515,28 +1522,28 @@ export default function ListingsPage() {
                     ].map((s) => (
                       <div key={s.step} className="flex gap-4">
                         <div className="flex flex-col items-center">
-                          <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+                          <div className={`h-7 w-7 rounded-xl flex items-center justify-center font-medium text-xs transition-colors ${
                             formStep > s.step ? 'bg-slate-900 text-white shadow-xs' :
-                            formStep === s.step ? 'bg-slate-900 text-white ring-4 ring-slate-200' :
-                            'bg-white text-slate-400 border border-slate-200'
+                            formStep === s.step ? 'bg-slate-900 text-white shadow-xs' :
+                            'bg-white text-[#6E6E73] border border-slate-200 shadow-2xs'
                           }`}>
-                            {formStep > s.step ? <CheckCircle2 className="h-4 w-4" /> : s.step}
+                            {formStep > s.step ? <CheckCircle2 className="h-3.5 w-3.5" /> : s.step}
                           </div>
                           {s.step < 5 && <div className={`w-0.5 h-full my-1 rounded-full ${formStep > s.step ? 'bg-slate-900' : 'bg-slate-200'}`}></div>}
                         </div>
-                        <div className={`pb-8 ${formStep === s.step ? 'opacity-100' : 'opacity-60'}`}>
-                          <h4 className={`text-sm font-extrabold ${formStep === s.step ? 'text-slate-900' : 'text-slate-500'}`}>{s.title}</h4>
-                          <p className="text-xs font-semibold text-slate-400 mt-0.5">{s.desc}</p>
+                        <div className={`pb-6 ${formStep === s.step ? 'opacity-100' : 'opacity-60'}`}>
+                          <h4 className={`text-sm font-semibold ${formStep === s.step ? 'text-[#1D1D1F]' : 'text-[#6E6E73]'}`}>{s.title}</h4>
+                          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{s.desc}</p>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-auto bg-slate-100/80 rounded-2xl p-4 border border-slate-200 flex gap-3 items-start">
-                    <Lock className="h-5 w-5 text-slate-700 shrink-0" />
+                  <div className="mt-auto bg-slate-100/80 rounded-2xl p-4 border border-slate-200/60 shadow-2xs flex gap-3 items-start">
+                    <Lock className="h-4 w-4 text-slate-700 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-slate-900">256-bit Encryption</p>
-                      <p className="text-[10px] font-semibold text-slate-500 mt-0.5">Your sensitive data is encrypted in transit and at rest.</p>
+                      <p className="text-xs font-semibold text-[#1D1D1F]">256-bit Encryption</p>
+                      <p className="text-[10px] font-normal text-[#6E6E73] mt-0.5">Your sensitive data is encrypted in transit and at rest.</p>
                     </div>
                   </div>
                 </div>
@@ -1549,11 +1556,11 @@ export default function ListingsPage() {
                   {/* Mobile Header (Hidden on Desktop) */}
                   <div className="md:hidden mb-8 space-y-4">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-black text-slate-900">Apply</h2>
-                      <Button variant="ghost" size="icon" onClick={() => setDialogOpen(false)} className="rounded-full bg-slate-50 text-slate-500"><X className="h-5 w-5"/></Button>
+                      <h2 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">Apply</h2>
+                      <Button variant="ghost" size="icon" onClick={() => setDialogOpen(false)} className="rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"><X className="h-4 w-4"/></Button>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <span className="text-[10px] text-slate-900 font-black uppercase tracking-widest">Step {formStep} of 5</span>
+                      <span className="text-[10px] text-[#6E6E73] font-normal uppercase tracking-wider">Step {formStep} of 5</span>
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-slate-900 h-full transition-all duration-300" style={{ width: `${(formStep / 5) * 100}%` }} />
@@ -1562,31 +1569,31 @@ export default function ListingsPage() {
                   
                   {/* Desktop close button */}
                   <div className="hidden md:flex justify-end mb-8">
-                    <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-slate-600 hover:text-slate-900 font-bold text-xs bg-slate-100 hover:bg-slate-200 rounded-xl px-4 h-9">
+                    <button onClick={() => setDialogOpen(false)} className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer">
                       Close
-                    </Button>
+                    </button>
                   </div>
 
               <form onSubmit={handleApplySubmit} className="space-y-4 text-left">
                 {formStep === 1 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-xs font-bold text-slate-700">
-                        Full Name <span className="text-red-500 font-extrabold">*</span>
+                      <Label htmlFor="name" className="text-xs font-normal text-[#6E6E73]">
+                        Full Name <span className="text-rose-500">*</span>
                       </Label>
                       <Input
                         id="name"
                         placeholder="John Doe"
                         value={applicantName}
                         onChange={(e) => setApplicantName(e.target.value)}
-                        className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                         required
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="email" className="text-xs font-bold text-slate-700">
-                          Email Address <span className="text-red-500 font-extrabold">*</span>
+                        <Label htmlFor="email" className="text-xs font-normal text-[#6E6E73]">
+                          Email Address <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="email"
@@ -1594,20 +1601,20 @@ export default function ListingsPage() {
                           placeholder="john@example.com"
                           value={applicantEmail}
                           onChange={(e) => setApplicantEmail(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="phone" className="text-xs font-bold text-slate-700">
-                          Phone Number <span className="text-red-500 font-extrabold">*</span>
+                        <Label htmlFor="phone" className="text-xs font-normal text-[#6E6E73]">
+                          Phone Number <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="phone"
                           placeholder="+1 (555) 019-9922"
                           value={applicantPhone}
                           onChange={(e) => setApplicantPhone(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                           required
                         />
                       </div>
@@ -1615,14 +1622,14 @@ export default function ListingsPage() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="leaseDuration" className="text-xs font-bold text-slate-700">
-                          Lease Duration (Months) <span className="text-red-500 font-extrabold">*</span>
+                        <Label htmlFor="leaseDuration" className="text-xs font-normal text-[#6E6E73]">
+                          Lease Duration (Months) <span className="text-rose-500">*</span>
                         </Label>
                         <select
                           id="leaseDuration"
                           value={leaseDuration}
                           onChange={(e) => setLeaseDuration(e.target.value)}
-                          className="w-full bg-white border border-slate-200 text-slate-800 rounded-xl h-11 px-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                          className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-3.5 rounded-xl shadow-2xs cursor-pointer focus:outline-none w-full"
                         >
                           <option value="1">1 Month (Short Term)</option>
                           <option value="2">2 Months</option>
@@ -1652,8 +1659,8 @@ export default function ListingsPage() {
                       </div>
                       
                       <div className="space-y-1.5">
-                        <Label htmlFor="moveInDate" className="text-xs font-bold text-slate-700">
-                          Preferred Move-In Date <span className="text-red-500 font-extrabold">*</span>
+                        <Label htmlFor="moveInDate" className="text-xs font-normal text-[#6E6E73]">
+                          Preferred Move-In Date <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="moveInDate"
@@ -1661,15 +1668,15 @@ export default function ListingsPage() {
                           value={moveInDate}
                           min={new Date().toISOString().split('T')[0]}
                           onChange={(e) => setMoveInDate(e.target.value)}
-                          className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 text-xs focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="occupantsCount" className="text-xs font-bold text-slate-700">
-                        Total Number of Occupants <span className="text-red-500 font-extrabold">*</span>
+                      <Label htmlFor="occupantsCount" className="text-xs font-normal text-[#6E6E73]">
+                        Total Number of Occupants <span className="text-rose-500">*</span>
                       </Label>
                       <Input
                         id="occupantsCount"
@@ -1687,7 +1694,7 @@ export default function ListingsPage() {
                             setOccupantsCount(e.target.value);
                           }
                         }}
-                        className="bg-white border border-slate-200 text-slate-800 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-blue-500 focus:bg-white"
+                        className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                         required
                       />
                     </div>
@@ -2360,14 +2367,13 @@ export default function ListingsPage() {
                 {/* Bottom Navigation Buttons */}
                 <div className="flex items-center gap-3 pt-4 border-t border-slate-100 mt-6">
                   {formStep > 1 && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
                       onClick={() => setFormStep(formStep - 1)}
-                      className="flex-1 font-bold text-slate-500 hover:text-slate-800 h-11 rounded-xl transition-all"
+                      className="flex-1 h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer"
                     >
                       Back
-                    </Button>
+                    </button>
                   )}
                   {formStep < 5 && (
                     <Button
@@ -2423,27 +2429,53 @@ export default function ListingsPage() {
                         }
                         setFormStep(formStep + 1);
                       }}
-                      className="flex-[2] bg-slate-900 hover:bg-slate-800 text-white h-11 rounded-xl font-bold shadow-xs transition-all"
+                      className="flex-[2] h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center"
                     >
                       Continue
                     </Button>
                   )}
                   {formStep === 5 && (
-                    <Button
-                      key="btn-submit"
-                      type="submit"
-                      disabled={applying || !backgroundCheckConsent || !agreedToTerms}
-                      className="flex-[2] bg-slate-900 hover:bg-slate-800 text-white h-11 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2"
-                    >
-                      {applying ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Application"
-                      )}
-                    </Button>
+                    <>
+                      {/* Cloudflare Turnstile bot verification */}
+                      <div className="w-full">
+                        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+                          <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                            onSuccess={(token) => setAppTurnstileToken(token)}
+                            onExpire={() => setAppTurnstileToken(null)}
+                            onError={() => setAppTurnstileToken(null)}
+                          />
+                        ) : (
+                          // Dev bypass — show checkbox when no real key configured
+                          <div className="flex items-center gap-2 text-xs text-slate-500 py-1">
+                            <div
+                              role="checkbox"
+                              aria-checked={!!appTurnstileToken}
+                              onClick={() => setAppTurnstileToken(appTurnstileToken ? null : "dev-bypass-token")}
+                              className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-colors ${appTurnstileToken ? "bg-emerald-500 border-emerald-500" : "bg-white border-slate-300 hover:border-slate-400"}`}
+                            >
+                              {appTurnstileToken && <CheckCircle2 className="h-3 w-3 text-white" />}
+                            </div>
+                            <span>I am not a robot <span className="text-slate-400">(dev mode)</span></span>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        key="btn-submit"
+                        type="submit"
+                        disabled={applying || !backgroundCheckConsent || !agreedToTerms || !appTurnstileToken}
+                        className="flex-[2] bg-slate-900 hover:bg-slate-800 text-white h-11 rounded-xl font-medium shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {applying ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Submit Application"
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
               </form>

@@ -147,13 +147,8 @@ export default function TenantDashboard() {
   // Move-Out State is handled by the dedicated My Leases tab and Final Statement page.
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-    if (activeTab === "settings") {
-      router.replace("/dashboard/settings");
-    }
-  }, [status, activeTab, router]);
+    router.replace("/dashboard");
+  }, [router]);
 
   const fetchData = async () => {
     try {
@@ -667,7 +662,7 @@ export default function TenantDashboard() {
                   </div>
                   <div className="flex flex-row md:flex-col items-baseline md:items-end gap-3 shrink-0">
                     <div>
-                      <p className="text-slate-300 text-[10px] font-black uppercase tracking-wider text-left md:text-right drop-shadow-xs">Monthly Rent</p>
+                      <p className="text-slate-300 text-[10px] font-semibold uppercase tracking-wider text-left md:text-right drop-shadow-xs">Monthly Rent</p>
                       <p className="text-2xl sm:text-3xl font-black text-emerald-400 drop-shadow-md">${Number(activeLease.monthlyRent).toLocaleString()}</p>
                     </div>
                   </div>
@@ -701,8 +696,8 @@ export default function TenantDashboard() {
                 <div className="h-16 w-16 bg-slate-100 text-slate-800 rounded-2xl flex items-center justify-center border border-slate-200/80 shadow-2xs">
                   <Home className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">No Active Lease Agreement</h3>
-                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                <h3 className="text-xl font-semibold text-slate-900 tracking-tight">No Active Lease Agreement</h3>
+                <p className="text-xs text-[#6E6E73] font-normal leading-relaxed">
                   You are not currently registered to any active property leases. If you have recently applied, check your application status.
                 </p>
                 <Button 
@@ -723,7 +718,7 @@ export default function TenantDashboard() {
                 }`}>
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rent Balance</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Rent Balance</span>
                       <h3 className={`text-2xl font-black tracking-tight ${totalUnpaid > 0 ? "text-rose-600" : "text-emerald-600"}`}>
                         {totalUnpaid > 0 ? `$${totalUnpaid.toLocaleString()}` : "Fully Paid"}
                       </h3>
@@ -757,8 +752,8 @@ export default function TenantDashboard() {
                 <Card className="border border-slate-200 rounded-3xl p-6 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Maintenance</span>
-                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Maintenance</span>
+                      <h3 className="text-3xl font-semibold text-slate-900 tracking-tight">
                         {openRequestsCount} Open
                       </h3>
                       <p className="text-xs font-semibold text-slate-500">
@@ -790,7 +785,7 @@ export default function TenantDashboard() {
                 <Card className="border border-slate-200 rounded-3xl p-6 shadow-xs bg-white">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Contract Window</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Contract Window</span>
                       {(() => {
                         const expiry = new Date(activeLease.endDate).getTime();
                         const diff = expiry - Date.now();
@@ -831,7 +826,7 @@ export default function TenantDashboard() {
               <div className="lg:col-span-2 space-y-6">
                 <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8">
                   <div className="pb-4 border-b border-slate-100 mb-6">
-                    <h2 className="text-lg font-black text-slate-900 tracking-tight">Recent Activity &amp; Updates</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Recent Activity &amp; Updates</h2>
                     <span className="text-xs font-semibold text-slate-500">Real-time tenant actions and platform updates</span>
                   </div>
 
@@ -870,7 +865,7 @@ export default function TenantDashboard() {
 
                     {/* Recent Updates Sub-Section */}
                     <div className="space-y-3">
-                      <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                      <h3 className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">
                         Recent Updates
                       </h3>
                       
@@ -936,7 +931,7 @@ export default function TenantDashboard() {
               <div className="lg:col-span-1 space-y-6">
                 <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8">
                   <div className="pb-4 border-b border-slate-100 mb-4">
-                    <h2 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                       <UserCheck className="h-5 w-5 text-slate-900" />
                       Support Contacts
                     </h2>
@@ -963,7 +958,7 @@ export default function TenantDashboard() {
                             )}
                             <div className="min-w-0">
                               <h4 className="text-xs font-black text-slate-900 truncate">{c.name}</h4>
-                              <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-slate-200/70 text-slate-800">
+                              <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-slate-200/70 text-slate-800">
                                 {c.role}
                               </span>
                             </div>
@@ -1051,8 +1046,8 @@ export default function TenantDashboard() {
           <div className="space-y-6">
             <div className="pb-2 border-b border-[#F1F5F9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-black text-[#1D1D1F] tracking-tight">Leases Registry</h2>
-                <p className="text-xs text-[#6E6E73] font-semibold mt-0.5">All active and historical tenancy agreements</p>
+                <h2 className="text-xl font-semibold text-[#1D1D1F] tracking-tight">Leases Registry</h2>
+                <p className="text-xs text-[#6E6E73] font-normal mt-0.5">All active and historical tenancy agreements</p>
               </div>
             </div>
 
@@ -1075,8 +1070,8 @@ export default function TenantDashboard() {
                       <div className="p-6 space-y-4">
                         <div className="flex justify-between items-start gap-4">
                           <div className="space-y-1">
-                            <h3 className="font-extrabold text-slate-900 text-base">{l.unit.property.name}</h3>
-                            <p className="text-xs text-[#6E6E73] font-semibold flex items-center gap-1">
+                            <h3 className="font-semibold text-slate-900 text-base">{l.unit.property.name}</h3>
+                            <p className="text-xs text-[#6E6E73] font-normal flex items-center gap-1">
                               <Home className="h-3.5 w-3.5 text-[#496E5C]" />
                               Unit: {l.unit.name}
                             </p>
@@ -1161,7 +1156,7 @@ export default function TenantDashboard() {
                   {/* Filters */}
                   <div className="flex flex-col sm:flex-row gap-4 justify-between items-center pb-4 border-b border-[#F1F5F9] mb-6">
                     <div>
-                      <h2 className="text-base font-extrabold text-[#1D1D1F]">Tenant Documents</h2>
+                      <h2 className="text-base font-semibold text-[#1D1D1F]">Tenant Documents</h2>
                       <span className="text-xs text-[#6E6E73]">Legal papers, policy documents, and receipts</span>
                     </div>
 
@@ -1191,11 +1186,11 @@ export default function TenantDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Document Name</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Size</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Uploaded</TableHead>
-                          <TableHead className="font-bold text-xs uppercase text-[#6E6E73] text-right">Action</TableHead>
+                          <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Document Name</TableHead>
+                          <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Category</TableHead>
+                          <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Size</TableHead>
+                          <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Date Uploaded</TableHead>
+                          <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] text-right">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1237,7 +1232,7 @@ export default function TenantDashboard() {
               <div className="lg:col-span-1">
                 <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
                   <div className="pb-4 border-b border-[#F1F5F9] mb-4">
-                    <h2 className="text-base font-extrabold text-[#1D1D1F]">Upload New Document</h2>
+                    <h2 className="text-base font-semibold text-[#1D1D1F]">Upload New Document</h2>
                     <span className="text-xs text-[#6E6E73]">Add a contract, proof of utility, or insurance copy</span>
                   </div>
 
@@ -1283,7 +1278,7 @@ export default function TenantDashboard() {
                     <Button 
                       type="submit" 
                       disabled={docSubmitting}
-                      className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-bold h-11 rounded-xl shadow-sm transition-colors mt-2"
+                      className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-medium h-11 rounded-xl shadow-sm transition-colors mt-2"
                     >
                       {docSubmitting ? "Uploading Entry..." : "Register Document"}
                     </Button>
@@ -1299,7 +1294,7 @@ export default function TenantDashboard() {
         {activeTab === "submit-request" && (
           <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6 max-w-2xl mx-auto">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#1D1D1F] flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-[#1D1D1F] flex items-center gap-2">
                 <Wrench className="h-5 w-5 text-[#496E5C]" />
                 Log a Maintenance Request
               </h2>
@@ -1436,7 +1431,7 @@ export default function TenantDashboard() {
               <Button 
                 type="submit" 
                 disabled={mSubmitting}
-                className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-bold h-11 rounded-xl shadow-sm transition-colors mt-2"
+                className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-medium h-11 rounded-xl shadow-sm transition-colors mt-2"
               >
                 {mSubmitting ? "Logging Ticket..." : "Submit Maintenance Ticket"}
               </Button>
@@ -1450,7 +1445,7 @@ export default function TenantDashboard() {
             
             <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[#F1F5F9] mb-6">
               <div>
-                <h2 className="text-lg font-extrabold text-[#1D1D1F]">Maintenance Log</h2>
+                <h2 className="text-lg font-semibold text-[#1D1D1F]">Maintenance Log</h2>
                 <span className="text-xs text-[#6E6E73]">All logged repairs and their current statuses</span>
               </div>
 
@@ -1487,12 +1482,12 @@ export default function TenantDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Ticket Title</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Priority</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Assigned Inspector</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Filed</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Ticket Title</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Category</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Priority</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Assigned Inspector</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Date Filed</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1538,7 +1533,7 @@ export default function TenantDashboard() {
           <div className="space-y-6 max-w-xl mx-auto">
             <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
               <div className="pb-4 border-b border-[#F1F5F9] mb-6 text-center">
-                <h2 className="text-lg font-extrabold text-[#1D1D1F]">Outstanding Balance</h2>
+                <h2 className="text-lg font-semibold text-[#1D1D1F]">Outstanding Balance</h2>
                 <h3 className={`text-3xl font-extrabold mt-2 ${totalUnpaid > 0 ? "text-red-600" : "text-[#496E5C]"}`}>
                   ${totalUnpaid.toLocaleString()}
                 </h3>
@@ -1594,7 +1589,7 @@ export default function TenantDashboard() {
                 <Button 
                   type="submit" 
                   disabled={paySubmitting || totalUnpaid === 0}
-                  className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-bold h-11 rounded-xl shadow-sm transition-colors mt-4"
+                  className="w-full bg-[#496E5C] hover:bg-[#3d5a4b] text-white font-medium h-11 rounded-xl shadow-sm transition-colors mt-4"
                 >
                   {paySubmitting ? "Processing Payment..." : `Pay Outstanding $${totalUnpaid.toLocaleString()}`}
                 </Button>
@@ -1607,7 +1602,7 @@ export default function TenantDashboard() {
         {activeTab === "transactions" && (
           <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Transactions Ledger</h2>
+              <h2 className="text-lg font-semibold text-[#1D1D1F]">Transactions Ledger</h2>
               <span className="text-xs text-[#6E6E73]">All rent receipts and financial records registered in database</span>
             </div>
 
@@ -1615,12 +1610,12 @@ export default function TenantDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Transaction Reference</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Category</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Payment Type</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Amount</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Date Paid</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Transaction Reference</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Category</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Payment Type</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Amount</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Date Paid</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1658,7 +1653,7 @@ export default function TenantDashboard() {
         {activeTab === "invoices" && (
           <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Rent Invoices</h2>
+              <h2 className="text-lg font-semibold text-[#1D1D1F]">Rent Invoices</h2>
               <span className="text-xs text-[#6E6E73]">Pay rent directly online using Stripe checkout flow</span>
             </div>
 
@@ -1666,17 +1661,17 @@ export default function TenantDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Due Date</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Rent Amount</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73]">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] text-right">Actions</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Due Date</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Rent Amount</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73]">Status</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {invoices.map((inv) => (
                     <TableRow key={inv.id} className="hover:bg-[#F5F5F7]/50">
                       <TableCell className="font-semibold text-slate-800">{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
-                      <TableCell className="font-extrabold text-[#1D1D1F]">${Number(inv.amount).toLocaleString()}</TableCell>
+                      <TableCell className="font-semibold text-[#1D1D1F]">${Number(inv.amount).toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge className={
                           inv.status === "PAID" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
@@ -1717,7 +1712,7 @@ export default function TenantDashboard() {
             <Card className="lg:col-span-1 bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-4 flex flex-col justify-between">
               <div>
                 <div className="pb-3 border-b border-[#F1F5F9] mb-4">
-                  <h2 className="text-sm font-extrabold text-[#1D1D1F]">Inbox Messages</h2>
+                  <h2 className="text-sm font-semibold text-[#1D1D1F]">Inbox Messages</h2>
                   <span className="text-[10px] text-[#6E6E73]">Choose a landlord or inspector to chat</span>
                 </div>
 
@@ -1831,7 +1826,7 @@ export default function TenantDashboard() {
         {activeTab === "calendar" && (
           <Card className="bg-white border border-[#E5E5EA] rounded-[24px] shadow-sm p-6">
             <div className="pb-4 border-b border-[#F1F5F9] mb-6">
-              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Calendar Schedule</h2>
+              <h2 className="text-lg font-semibold text-[#1D1D1F]">Calendar Schedule</h2>
               <span className="text-xs text-[#6E6E73]">Scheduled inspect visits, lease deadlines, and rent payments</span>
             </div>
 
@@ -1910,8 +1905,8 @@ export default function TenantDashboard() {
                   <Settings className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h2>
-                  <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your preferences and profile</p>
+                  <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Account Settings</h2>
+                  <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage your preferences and profile</p>
                 </div>
               </div>
             </div>
@@ -1963,7 +1958,7 @@ export default function TenantDashboard() {
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <div className="relative inline-block">
-                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-black rounded-xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer">
+                          <Button type="button" variant="outline" className="h-9 px-4 text-xs font-medium rounded-xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50 shadow-2xs cursor-pointer">
                             Change Photo
                           </Button>
                           <input 
@@ -1973,7 +1968,7 @@ export default function TenantDashboard() {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
                         </div>
-                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-black text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer" onClick={handleRemoveAvatar}>
+                        <Button type="button" variant="ghost" className="h-9 px-4 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer" onClick={handleRemoveAvatar}>
                           Remove
                         </Button>
                       </div>
@@ -1983,7 +1978,7 @@ export default function TenantDashboard() {
 
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="profName" className="text-xs font-black uppercase tracking-wider text-slate-500">Full Name</Label>
+                      <Label htmlFor="profName" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Full Name</Label>
                       <Input 
                         id="profName"
                         placeholder="Your Name"
@@ -1994,7 +1989,7 @@ export default function TenantDashboard() {
                     </div>
                     
                     <div className="space-y-1.5">
-                      <Label htmlFor="profPhone" className="text-xs font-black uppercase tracking-wider text-slate-500">Phone Number</Label>
+                      <Label htmlFor="profPhone" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Phone Number</Label>
                       <Input 
                         id="profPhone"
                         type="tel"
@@ -2006,7 +2001,7 @@ export default function TenantDashboard() {
                     </div>
                     
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Email Address</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Email Address</Label>
                       <div className="relative">
                         <Input 
                           disabled
@@ -2024,7 +2019,7 @@ export default function TenantDashboard() {
                   
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Current Status</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Current Status</Label>
                       <Select value={profileEmploymentStatus} onValueChange={(val) => setProfileEmploymentStatus(val || "EMPLOYED")}>
                         <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-xl h-11 text-xs font-semibold text-slate-900">
                           <SelectValue placeholder="Select Status" />
@@ -2042,7 +2037,7 @@ export default function TenantDashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Employer / School / Income Source</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Employer / School / Income Source</Label>
                         <Input 
                           placeholder="e.g. Company Name, University, Savings"
                           value={profileEmployer}
@@ -2051,7 +2046,7 @@ export default function TenantDashboard() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Job Title / Support Type</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Job Title / Support Type</Label>
                         <Input 
                           placeholder="e.g. Software Engineer, Scholarship"
                           value={profilePosition}
@@ -2068,7 +2063,7 @@ export default function TenantDashboard() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Contact Name</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Contact Name</Label>
                       <Input 
                         placeholder="Jane Doe"
                         value={emergencyName}
@@ -2077,7 +2072,7 @@ export default function TenantDashboard() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Relationship</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Relationship</Label>
                       <Input 
                         placeholder="e.g. Parent, Sibling"
                         value={emergencyRelationship}
@@ -2086,7 +2081,7 @@ export default function TenantDashboard() {
                       />
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Phone Number</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Phone Number</Label>
                       <Input 
                         type="tel"
                         placeholder="Emergency Phone"
@@ -2103,7 +2098,7 @@ export default function TenantDashboard() {
                   
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Bank Name</Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Bank Name</Label>
                       <Input 
                         placeholder="e.g. Chase Bank"
                         value={bankName}
@@ -2113,7 +2108,7 @@ export default function TenantDashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Account Name</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Account Name</Label>
                         <Input 
                           placeholder="John Doe"
                           value={accountName}
@@ -2122,7 +2117,7 @@ export default function TenantDashboard() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-black uppercase tracking-wider text-slate-500">Account / IBAN Number</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Account / IBAN Number</Label>
                         <Input 
                           placeholder="**** **** **** 1234"
                           value={accountNumber}
@@ -2138,7 +2133,7 @@ export default function TenantDashboard() {
                   <Button 
                     type="submit" 
                     disabled={profileSubmitting}
-                    className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-11 px-8 rounded-xl shadow-xs border-none cursor-pointer"
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-11 px-8 rounded-xl shadow-xs border-none cursor-pointer"
                   >
                     {profileSubmitting ? (
                       <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</>
@@ -2164,3 +2159,4 @@ export default function TenantDashboard() {
     </>
   );
 }
+

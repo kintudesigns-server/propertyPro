@@ -210,41 +210,49 @@ export default function PropertyDetailsPage() {
     <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
-        <div className="flex flex-col gap-1.5">
-          <Link href="/dashboard/properties" className="text-xs font-extrabold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors w-fit">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Properties
-          </Link>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73]">
+            <Link
+              href="/dashboard/properties"
+              className="h-7 w-7 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </Link>
+            <Link href="/dashboard/properties" className="hover:text-[#1D1D1F] transition-colors">
+              Properties
+            </Link>
+          </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{property.name}</h1>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">{property.name}</h1>
             <div className="flex items-center gap-1.5">
               {property.status === "AVAILABLE" ? (
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">{property.status}</span>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">{property.status}</span>
               ) : property.status === "OCCUPIED" ? (
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">{property.status}</span>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">{property.status}</span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{property.status}</span>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{property.status}</span>
               )}
-              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-black text-[10px] uppercase tracking-wider shadow-2xs flex items-center gap-1">
+              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-medium text-[10px] uppercase tracking-wider shadow-2xs flex items-center gap-1">
                 <Building className="h-3 w-3" /> {property.type || "Apartment"}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+          <div className="flex items-center gap-1 text-xs font-normal text-[#6E6E73]">
             <MapPin className="h-3.5 w-3.5 text-slate-400" /> {property.city}, {property.country}
           </div>
           
           {property.approvalStatus === "PENDING" && (
-            <div className="mt-2 p-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-2xl text-xs font-extrabold flex items-center gap-2 shadow-2xs">
-              <Wrench className="h-4 w-4 text-amber-600" /> 
+            <div className="mt-2 p-3 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-2xl text-xs font-normal flex items-center gap-2 shadow-2xs">
+              <Wrench className="h-4 w-4 text-amber-600 shrink-0" /> 
               {userRole === "SUPERADMIN" 
                 ? "This property is pending your approval to become active on the platform." 
                 : "Property Under Review. You cannot add units until an Admin approves it."}
             </div>
           )}
           {property.approvalStatus === "REJECTED" && (
-            <div className="mt-2 p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl text-xs font-extrabold flex items-center gap-2 shadow-2xs">
-              <Wrench className="h-4 w-4 text-rose-600" /> 
+            <div className="mt-2 p-3 bg-rose-50 text-rose-800 border border-rose-200/80 rounded-2xl text-xs font-normal flex items-center gap-2 shadow-2xs">
+              <Wrench className="h-4 w-4 text-rose-600 shrink-0" /> 
               {`Property Rejected. Reason: ${property.rejectionReason || "Not specified"}`}
             </div>
           )}
@@ -254,7 +262,7 @@ export default function PropertyDetailsPage() {
           {userRole === "SUPERADMIN" ? (
              <>
                {property.approvalStatus !== "APPROVED" && (
-                 <Button onClick={() => handlePropertyApproval("APPROVED")} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
+                 <Button onClick={() => handlePropertyApproval("APPROVED")} className="flex-1 md:flex-none bg-slate-900 hover:bg-slate-800 text-white shadow-xs border-none rounded-xl h-9 font-medium text-xs px-4 cursor-pointer">
                    <Check className="h-3.5 w-3.5 mr-1.5" /> Approve Property
                  </Button>
                )}
@@ -262,7 +270,7 @@ export default function PropertyDetailsPage() {
                  <Button onClick={() => {
                    const reason = prompt("Enter rejection reason:");
                    if (reason !== null) handlePropertyApproval("REJECTED", reason);
-                 }} className="flex-1 md:flex-none bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
+                 }} className="flex-1 md:flex-none bg-rose-50/50 text-rose-700 border border-rose-200 hover:bg-rose-100 shadow-2xs rounded-xl h-9 font-medium text-xs px-4 cursor-pointer">
                    <X className="h-3.5 w-3.5 mr-1.5" /> Reject
                  </Button>
                )}
@@ -270,14 +278,14 @@ export default function PropertyDetailsPage() {
           ) : (
              <>
                {property.type !== "House" && (
-                 <Button className="flex-1 md:flex-none bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
-                   <Download className="h-3.5 w-3.5 mr-1.5" /> Generate Rent Roll
+                 <Button className="flex-1 md:flex-none bg-white text-[#1D1D1F] hover:bg-slate-50 border border-slate-200 shadow-2xs rounded-xl h-9 font-medium text-xs px-4 cursor-pointer">
+                   <Download className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Generate Rent Roll
                  </Button>
                )}
-               <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
-                 <Edit className="h-3.5 w-3.5 mr-1.5" /> Edit Property
+               <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="flex-1 md:flex-none bg-white text-[#1D1D1F] border border-slate-200 hover:bg-slate-50 shadow-2xs rounded-xl h-9 font-medium text-xs px-4 cursor-pointer">
+                 <Edit className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Edit Property
                </Button>
-               <Button onClick={handleDelete} className="flex-1 md:flex-none bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-2xs rounded-xl h-9 font-black text-xs px-4 cursor-pointer">
+               <Button onClick={handleDelete} className="flex-1 md:flex-none bg-rose-50/50 text-rose-700 border border-rose-200 hover:bg-rose-100 shadow-2xs rounded-xl h-9 font-medium text-xs px-4 cursor-pointer">
                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete
                </Button>
              </>
@@ -285,21 +293,25 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
 
-      {/* Horizontal Tabs Navigation */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shadow-2xs w-fit overflow-x-auto no-scrollbar">
-        {["overview", "details", ...(property.type === "House" ? [] : ["units"]), "media", "amenities"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-xl font-extrabold text-xs transition-all capitalize cursor-pointer flex items-center gap-1.5 ${
-              activeTab === tab 
-                ? "bg-slate-900 text-white shadow-2xs" 
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            {tab === "units" && property.type === "Commercial" ? "Suites" : tab === "media" ? <><ImageIcon2 className="h-3.5 w-3.5" /> Media</> : tab}
-          </button>
-        ))}
+      {/* Tab Switcher — Standardized Segment Control */}
+      <div className="flex gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs w-fit">
+        {["overview", "details", ...(property.type === "House" ? [] : ["units"]), "media", "amenities"].map((tab) => {
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all capitalize flex items-center gap-1.5 cursor-pointer border-none ${
+                isActive
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
+              }`}
+            >
+              {tab === "units" && property.type === "Commercial" ? "Suites" : tab === "media" ? <><ImageIcon2 className="h-3.5 w-3.5" /> Media</> : tab}
+            </button>
+          );
+        })}
       </div>
 
       {/* TAB CONTENTS */}
@@ -332,15 +344,15 @@ export default function PropertyDetailsPage() {
               <Card className="col-span-1 lg:col-span-2 bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden flex flex-col justify-between">
                 <div className="p-5 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <div>
-                    <h2 className="font-black text-slate-900 text-base tracking-tight">
+                    <h2 className="font-semibold text-[#1D1D1F] text-base tracking-tight">
                       {property.type === "House" ? "Lease & Unit Status" : "Occupancy Overview"}
                     </h2>
-                    <p className="text-xs font-semibold text-slate-500 mt-0.5">Real-time unit status</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Real-time unit status</p>
                   </div>
                   {property.type !== "House" && (
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-xl font-black text-xs border-slate-200 text-slate-900 bg-white hover:bg-slate-50 shadow-2xs h-8">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
-                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs shadow-2xs h-8">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setActiveTab("units")} className="rounded-xl font-medium text-xs border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 shadow-2xs h-8 px-3">View {property.type === "Commercial" ? "Suites" : "Units"}</Button>
+                      <Button size="sm" disabled={property.approvalStatus !== "APPROVED"} onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs shadow-xs h-8 px-3 border-none">Add {property.type === "Commercial" ? "Suite" : "Unit"}</Button>
                     </div>
                   )}
                 </div>
@@ -350,20 +362,20 @@ export default function PropertyDetailsPage() {
                       <div className={`h-20 w-20 rounded-full flex items-center justify-center mb-4 shadow-2xs border-4 ${property.units?.[0]?.status === "OCCUPIED" ? "bg-slate-100 border-slate-200 text-slate-900" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}>
                         {property.units?.[0]?.status === "OCCUPIED" ? <Users className="h-8 w-8" /> : <CheckCircle2 className="h-8 w-8" />}
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 mb-0.5">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
-                      <p className="text-slate-500 font-semibold text-xs">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
+                      <h3 className="text-xl font-semibold text-[#1D1D1F] mb-0.5 tracking-tight">{property.units?.[0]?.status === "OCCUPIED" ? "Currently Rented" : "Vacant & Ready"}</h3>
+                      <p className="text-[#6E6E73] font-normal text-xs">Rent: ${Number(property.units?.[0]?.rentAmount || 0).toLocaleString()}/mo</p>
                       {property.units?.[0]?.status !== "OCCUPIED" && (
-                        <Button onClick={() => router.push(`/dashboard/tenants/new`)} className="mt-6 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl h-10 px-6 shadow-xs cursor-pointer">Invite Tenant</Button>
+                        <Button onClick={() => router.push(`/dashboard/tenants/new`)} className="mt-6 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl h-9 px-5 shadow-xs border-none cursor-pointer">Invite Tenant</Button>
                       )}
                     </div>
                   ) : (
                     <>
                       <div>
                         <div className="flex justify-between items-end mb-2">
-                          <span className="font-black text-3xl text-slate-900 tracking-tight">{occupancyRate}%</span>
-                          <span className="font-extrabold text-slate-400 text-[10px] uppercase tracking-wider">{occupiedUnits} of {totalUnits} units occupied</span>
+                          <span className="font-semibold text-3xl text-[#1D1D1F] tracking-tight">{occupancyRate}%</span>
+                          <span className="font-normal text-[#6E6E73] text-xs">{occupiedUnits} of {totalUnits} units occupied</span>
                         </div>
-                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div className="h-full bg-slate-900 rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }} />
                         </div>
                       </div>
@@ -371,15 +383,15 @@ export default function PropertyDetailsPage() {
                       {/* Units Quick View Snapshot */}
                       <div className="my-5 flex-1 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50">
                         <div className="flex justify-between items-center mb-3">
-                          <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Units Status Snapshot</h4>
-                          <button onClick={() => setActiveTab("units")} className="text-xs font-extrabold text-slate-900 hover:text-slate-700 transition-colors cursor-pointer">
+                          <h4 className="text-xs font-normal text-[#6E6E73]">Units Status Snapshot</h4>
+                          <button onClick={() => setActiveTab("units")} className="text-xs font-semibold text-[#1D1D1F] hover:underline transition-colors cursor-pointer border-none bg-transparent">
                             Manage Units ({totalUnits}) →
                           </button>
                         </div>
                         
                         <div className="space-y-2">
                           {!property.units || property.units.length === 0 ? (
-                            <p className="text-xs text-slate-500 font-semibold text-center py-6">No units added to this property.</p>
+                            <p className="text-xs text-[#6E6E73] font-normal text-center py-6">No units added to this property.</p>
                           ) : (
                             property.units.slice(0, 3).map((u: any) => (
                               <div key={u.id} className="flex justify-between items-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
@@ -387,11 +399,11 @@ export default function PropertyDetailsPage() {
                                   <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400 shrink-0">
                                     <Home className="h-3.5 w-3.5" />
                                   </div>
-                                  <span className="text-xs font-black text-slate-900">{property.type === "Commercial" ? "" : "Unit "}{u.name}</span>
+                                  <span className="text-xs font-semibold text-[#1D1D1F]">{property.type === "Commercial" ? "" : "Unit "}{u.name}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <span className="text-xs font-black text-slate-900">${Number(u.rentAmount || 0).toLocaleString()}/mo</span>
-                                  <span className={`px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider shadow-2xs ${
+                                  <span className="text-xs font-semibold text-[#1D1D1F]">${Number(u.rentAmount || 0).toLocaleString()}/mo</span>
+                                  <span className={`px-2 py-0.5 rounded-md font-medium text-[9px] uppercase tracking-wider ${
                                     u.status === "VACANT" 
                                       ? "bg-emerald-50 text-emerald-800 border border-emerald-200" 
                                       : u.status === "OCCUPIED" 
@@ -408,21 +420,21 @@ export default function PropertyDetailsPage() {
                       </div>
  
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-auto">
-                        <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200">
-                          <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-0.5">Available</p>
-                          <p className="text-2xl font-black text-emerald-950 leading-none">{vacantUnits}</p>
+                        <div className="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-200/60">
+                          <p className="text-xs font-normal text-[#6E6E73] mb-1">Available</p>
+                          <p className="text-2xl font-semibold text-[#1D1D1F] leading-none">{vacantUnits}</p>
                         </div>
-                        <div className="p-3.5 bg-slate-100 rounded-2xl border border-slate-200">
-                          <p className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Occupied</p>
-                          <p className="text-2xl font-black text-slate-900 leading-none">{occupiedUnits}</p>
+                        <div className="p-3.5 bg-slate-100/70 rounded-2xl border border-slate-200/60">
+                          <p className="text-xs font-normal text-[#6E6E73] mb-1">Occupied</p>
+                          <p className="text-2xl font-semibold text-[#1D1D1F] leading-none">{occupiedUnits}</p>
                         </div>
-                        <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200">
-                          <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider mb-0.5">Maintenance</p>
-                          <p className="text-2xl font-black text-amber-950 leading-none">{maintenanceUnits}</p>
+                        <div className="p-3.5 bg-amber-50/60 rounded-2xl border border-amber-200/60">
+                          <p className="text-xs font-normal text-[#6E6E73] mb-1">Maintenance</p>
+                          <p className="text-2xl font-semibold text-[#1D1D1F] leading-none">{maintenanceUnits}</p>
                         </div>
-                        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                          <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-0.5">Total</p>
-                          <p className="text-2xl font-black text-slate-900 leading-none">{totalUnits}</p>
+                        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/60">
+                          <p className="text-xs font-normal text-[#6E6E73] mb-1">Total</p>
+                          <p className="text-2xl font-semibold text-[#1D1D1F] leading-none">{totalUnits}</p>
                         </div>
                       </div>
                     </>
@@ -434,7 +446,7 @@ export default function PropertyDetailsPage() {
               <div className="col-span-1 space-y-6 flex flex-col justify-between">
                 <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden flex flex-col flex-1">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-                    <h2 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight">
+                    <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2 tracking-tight">
                       <MapPin className="h-4 w-4 text-slate-700" /> Location
                     </h2>
                   </div>
@@ -454,17 +466,17 @@ export default function PropertyDetailsPage() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Street Address</p>
+                        <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Street Address</p>
                         <p className="font-black text-slate-900 text-xs mt-0.5">{property.address || "N/A"}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">City</p>
-                          <p className="font-extrabold text-slate-900 text-xs mt-0.5">{property.city}</p>
+                          <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">City</p>
+                          <p className="font-semibold text-slate-900 text-xs mt-0.5">{property.city}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">State/ZIP</p>
-                          <p className="font-extrabold text-slate-900 text-xs mt-0.5">{property.state} {property.zip}</p>
+                          <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">State/ZIP</p>
+                          <p className="font-semibold text-slate-900 text-xs mt-0.5">{property.state} {property.zip}</p>
                         </div>
                       </div>
                     </div>
@@ -473,17 +485,17 @@ export default function PropertyDetailsPage() {
  
                 <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden flex flex-col justify-between">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-                    <h2 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight">
+                    <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2 tracking-tight">
                       <DollarSign className="h-4 w-4 text-slate-700" /> Financial Overview
                     </h2>
                   </div>
                   <CardContent className="p-5 space-y-3">
                     <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Rent Range</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Monthly Rent Range</span>
                       <span className="font-black text-slate-900 text-xs">{rentRange}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Price per Sq. Ft.</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Price per Sq. Ft.</span>
                       <span className="font-black text-emerald-700 text-xs">${ppsqft} {property.type === "Commercial" ? "/yr" : "/mo"}</span>
                     </div>
                   </CardContent>
@@ -497,7 +509,7 @@ export default function PropertyDetailsPage() {
         {activeTab === "details" && (
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
             <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
-              <h2 className="font-black text-slate-900 text-base tracking-tight flex items-center gap-2">
+              <h2 className="font-semibold text-slate-900 text-base tracking-tight flex items-center gap-2">
                 <Shield className="h-4 w-4 text-slate-700" />
                 Property Specifications
               </h2>
@@ -516,7 +528,7 @@ export default function PropertyDetailsPage() {
                         <div className={`p-2 rounded-xl ${spec.color}`}>
                           <spec.Icon className="h-4 w-4" />
                         </div>
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{spec.label}</span>
+                        <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">{spec.label}</span>
                       </div>
                       {spec.isBadge ? (
                         <span className={`px-2.5 py-0.5 rounded-md font-black text-[10px] uppercase tracking-wider shadow-2xs ${
@@ -563,10 +575,10 @@ export default function PropertyDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">{property.type === "Commercial" ? "Suites List" : "Units List"}</h2>
+                <h2 className="text-xl font-semibold text-slate-900 tracking-tight">{property.type === "Commercial" ? "Suites List" : "Units List"}</h2>
                 <p className="text-xs font-semibold text-slate-500 mt-0.5">Showing {totalUnits} {property.type === "Commercial" ? "suites" : "units"} for {property.name}</p>
               </div>
-              <Button disabled={property.approvalStatus !== "APPROVED"} className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs rounded-xl h-9 px-4 cursor-pointer">
+              <Button disabled={property.approvalStatus !== "APPROVED"} className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-xs rounded-xl h-9 px-4 cursor-pointer">
                 Add {property.type === "Commercial" ? "Suite" : "Unit"}
               </Button>
             </div>
@@ -587,23 +599,23 @@ export default function PropertyDetailsPage() {
                     )}
                     <div className="absolute top-3 left-3 z-10">
                       {u.status === "VACANT" ? (
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Available</span>
                       ) : u.status === "OCCUPIED" ? (
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">Occupied</span>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">Occupied</span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">{u.status}</span>
                       )}
                     </div>
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-black text-slate-900 text-base tracking-tight">{property.type === "Commercial" ? "" : "Unit "}{u.name}</h3>
+                      <h3 className="font-semibold text-slate-900 text-base tracking-tight">{property.type === "Commercial" ? "" : "Unit "}{u.name}</h3>
                       <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider mt-0.5">{u.type || (property.type === "Commercial" ? "Space" : "Apartment")}</p>
                     </div>
                     
                     <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
                       <div>
-                        <p className="font-black text-slate-900 text-sm">${Number(u.rentAmount).toLocaleString()} <span className="text-[10px] text-slate-500 font-semibold">/mo</span></p>
+                        <p className="font-semibold text-slate-900 text-sm">${Number(u.rentAmount).toLocaleString()} <span className="text-[10px] text-slate-500 font-semibold">/mo</span></p>
                       </div>
                       <Button onClick={() => router.push(`/dashboard/properties/${id}/units/${u.id}`)} className="h-8 px-3 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs hover:bg-slate-800 cursor-pointer">
                         Details
@@ -621,7 +633,7 @@ export default function PropertyDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">Property Images</h2>
+                <h2 className="text-xl font-semibold text-slate-900 tracking-tight">Property Images</h2>
                 <p className="text-xs font-semibold text-slate-500 mt-0.5">Showing {property.images?.length || 0} images</p>
               </div>
               <Button onClick={() => setIsUploaderOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs rounded-xl h-9 px-4 cursor-pointer">
@@ -650,7 +662,7 @@ export default function PropertyDetailsPage() {
                 <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
                   <ImageIcon2 className="h-10 w-10 text-slate-400 mx-auto mb-2" />
                   <h3 className="text-base font-black text-slate-900">No Images</h3>
-                  <p className="text-xs text-slate-500 font-semibold mt-0.5">Upload photos to showcase this property.</p>
+                  <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Upload photos to showcase this property.</p>
                 </div>
               )}
             </div>
@@ -662,7 +674,7 @@ export default function PropertyDetailsPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">Property Amenities</h2>
+                <h2 className="text-xl font-semibold text-slate-900 tracking-tight">Property Amenities</h2>
                 <p className="text-xs font-semibold text-slate-500 mt-0.5">Features available at this location</p>
               </div>
               <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)} className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs rounded-xl h-9 px-4 cursor-pointer">
@@ -683,7 +695,7 @@ export default function PropertyDetailsPage() {
               <div className="py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
                 <CheckCircle2 className="h-10 w-10 text-slate-400 mx-auto mb-2" />
                 <h3 className="text-base font-black text-slate-900">No Amenities Listed</h3>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">No amenities have been added to this property yet.</p>
+                <p className="text-xs text-[#6E6E73] font-normal mt-0.5">No amenities have been added to this property yet.</p>
               </div>
             )}
           </div>
@@ -694,7 +706,7 @@ export default function PropertyDetailsPage() {
       <Dialog open={isUploaderOpen} onOpenChange={setIsUploaderOpen}>
         <DialogContent className="sm:max-w-md bg-white border-slate-200 rounded-3xl p-0 overflow-hidden shadow-2xl font-sans">
           <div className="p-6 border-b border-slate-100 bg-slate-50/70">
-            <DialogTitle className="text-lg font-black text-slate-900 tracking-tight">Upload Media</DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight">Upload Media</DialogTitle>
             <DialogDescription className="text-xs font-semibold text-slate-500 mt-0.5">
               Photos will be automatically compressed to optimize load times.
             </DialogDescription>
@@ -702,7 +714,7 @@ export default function PropertyDetailsPage() {
           
           <div className="p-6 space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-slate-900 block uppercase tracking-wider">What are you uploading?</label>
+              <label className="text-xs font-semibold text-slate-900 block uppercase tracking-wider">What are you uploading?</label>
               <select 
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs"
                 value={uploadCategory}
@@ -733,7 +745,7 @@ export default function PropertyDetailsPage() {
 
             {uploadCategory === "UNIT_INTERIOR" && property.units?.length > 0 && (
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900 block uppercase tracking-wider">Which {property.type === "Commercial" ? "Suite" : "Unit"}?</label>
+                <label className="text-xs font-semibold text-slate-900 block uppercase tracking-wider">Which {property.type === "Commercial" ? "Suite" : "Unit"}?</label>
                 <select 
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3.5 text-xs font-semibold text-slate-900 outline-none shadow-2xs"
                   value={uploadTargetUnit}
@@ -778,8 +790,8 @@ function SpecCard({ title, value, Icon }: any) {
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">{title}</p>
-        <p className="font-black text-slate-900 text-lg leading-tight truncate">{value}</p>
+        <p className="text-xs font-normal text-[#6E6E73] mb-0.5">{title}</p>
+        <p className="font-semibold text-[#1D1D1F] text-lg leading-tight truncate">{value}</p>
       </div>
     </div>
   );

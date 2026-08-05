@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
         where: { id },
         include: {
           unit: { include: { property: true } },
-          tenant: { select: { name: true, email: true, phone: true } },
+          tenant: { select: { id: true, name: true, email: true, phone: true, avatar: true } },
           inspector: { select: { name: true, email: true, phone: true } },
           externalVendor: true
         } as any
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
           data: { vendorMagicToken: token } as any,
           include: {
             unit: { include: { property: true } },
-            tenant: { select: { name: true, email: true, phone: true } },
+            tenant: { select: { id: true, name: true, email: true, phone: true, avatar: true } },
             inspector: { select: { name: true, email: true, phone: true } },
             externalVendor: true
           } as any
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
           }
         },
         tenant: {
-          select: { name: true, email: true, phone: true }
+          select: { id: true, name: true, email: true, phone: true, avatar: true }
         },
         inspector: {
           select: { name: true, email: true }

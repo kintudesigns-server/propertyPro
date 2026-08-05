@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -552,31 +552,22 @@ export default function OwnerDetailClient({
   return (
     <div className="space-y-6 font-sans">
 
-      {/* iOS-Style Breadcrumbs and Header */}
+      {/* Header */}
       <div className="flex flex-col gap-2 font-sans">
-        {/* Breadcrumb Trail */}
-        <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-          <Link href="/dashboard/admin" className="hover:text-slate-900 transition-colors">Admin</Link>
-          <span>/</span>
-          <Link href="/dashboard/admin/subscriptions" className="hover:text-slate-900 transition-colors">Subscriptions</Link>
-          <span>/</span>
-          <span className="text-slate-900 font-black">{owner.name || "Owner Details"}</span>
-        </div>
-
         <button 
           onClick={() => router.push("/dashboard/admin/subscriptions")}
-          className="flex items-center gap-1.5 text-xs font-black text-slate-700 hover:text-slate-900 transition-colors w-fit mt-1 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] hover:text-[#1D1D1F] transition-colors w-fit cursor-pointer"
         >
           <ChevronLeft size={14} /> Back to Subscriptions
         </button>
         
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-1">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">{owner.name || "Owner Management"}</h1>
-              {hasActiveOverride && <Badge className="bg-purple-50 text-purple-700 border border-purple-200 font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">⚙ Policy Override Active</Badge>}
+              <h1 className="text-3xl font-semibold tracking-tight text-[#1D1D1F]">{owner.name || "Owner Management"}</h1>
+              {hasActiveOverride && <Badge className="bg-purple-50 text-purple-700 border border-purple-200 font-medium text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">Policy Override Active</Badge>}
             </div>
-            <p className="text-slate-500 text-xs font-semibold mt-0.5">{owner.email} · Registered {new Date(owner.createdAt).toLocaleDateString()}</p>
+            <p className="text-[#6E6E73] text-sm font-normal mt-0.5">{owner.email} · Registered {new Date(owner.createdAt).toLocaleDateString()}</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -584,7 +575,7 @@ export default function OwnerDetailClient({
               variant="outline"
               disabled={syncing || !owner.stripeSubscriptionId}
               onClick={handleSyncStripe}
-              className="border-slate-200 text-slate-900 bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-black text-xs h-9 px-4 shadow-2xs cursor-pointer"
+              className="border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-medium text-xs h-9 px-4 shadow-2xs cursor-pointer"
             >
               <RefreshCw size={14} className={syncing ? "animate-spin text-slate-500" : "text-slate-500"} />
               {syncing ? "Syncing..." : "Sync Stripe Status"}
@@ -592,7 +583,7 @@ export default function OwnerDetailClient({
             <Button 
               variant="outline"
               onClick={() => window.location.href = `mailto:${owner.email}`}
-              className="border-slate-200 text-slate-900 bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-black text-xs h-9 px-4 shadow-2xs cursor-pointer"
+              className="border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 rounded-xl flex items-center gap-1.5 font-medium text-xs h-9 px-4 shadow-2xs cursor-pointer"
             >
               <Mail size={14} className="text-slate-500" />
               Email Owner
@@ -601,8 +592,8 @@ export default function OwnerDetailClient({
         </div>
       </div>
 
-      {/* Tab Switcher */}
-      <div className="flex border-b border-slate-200 gap-6 font-sans">
+      {/* Tab Switcher — Standardized Segment Control */}
+      <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-fit border border-slate-200/30">
         {[
           { key: 'overview', label: 'Overview', icon: User },
           { key: 'modules', label: 'Module Access', icon: Layers },
@@ -610,18 +601,19 @@ export default function OwnerDetailClient({
           { key: 'activity', label: 'Activity Log', icon: History }
         ].map(tab => {
           const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
           return (
             <button
               key={tab.key}
               type="button"
-              className={`py-3 px-1 text-xs font-black border-b-2 transition-all flex items-center gap-2 -mb-[2px] cursor-pointer ${
-                activeTab === tab.key 
-                  ? 'border-slate-900 text-slate-900' 
-                  : 'border-transparent text-slate-500 hover:text-slate-900'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                isActive
+                  ? 'bg-white text-[#1D1D1F] shadow-2xs' 
+                  : 'text-[#6E6E73] hover:text-[#1D1D1F]'
               }`}
               onClick={() => setActiveTab(tab.key as any)}
             >
-              <Icon size={15} />
+              <Icon size={14} className={isActive ? "text-slate-900" : "text-slate-500"} />
               {tab.label}
             </button>
           );
@@ -637,10 +629,10 @@ export default function OwnerDetailClient({
             <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl md:col-span-2 font-sans">
               <CardContent className="p-6 space-y-6">
                 <div>
-                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 mb-4">Account Portfolio &amp; Billing Details</h3>
+                  <h3 className="text-base font-semibold text-[#1D1D1F] border-b border-slate-100 pb-3 mb-4">Account Portfolio &amp; Billing Details</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Billing Status</span>
+                      <span className="text-xs font-normal text-[#6E6E73] block">Billing Status</span>
                       <div className="flex items-center gap-2">
                         <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
                           owner.subscriptionStatus === 'Active' || owner.subscriptionStatus === 'Active (Canceling)' ? 'bg-emerald-500' :
@@ -660,7 +652,7 @@ export default function OwnerDetailClient({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Subscribed Tier</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Subscribed Tier</span>
                       <p className="text-sm font-black text-slate-900">
                         {owner.pricingTier ? owner.pricingTier.name : "No Subscribed Plan"}
                         {owner.pricingTier && <span className="font-semibold text-slate-400 ml-1.5">(${owner.pricingTier.price}/mo)</span>}
@@ -668,7 +660,7 @@ export default function OwnerDetailClient({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Portfolio Unit Utilization</span>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Portfolio Unit Utilization</span>
                       <p className={`text-sm font-black ${isOverLimit ? "text-rose-600" : "text-slate-900"}`}>
                         {owner.ownedProperties?.length || 0} properties / {totalUnits} unit{totalUnits === 1 ? "" : "s"} occupied
                         {owner.pricingTier && <span className="font-semibold text-slate-400 ml-1.5">({owner.pricingTier.maxUnits} units max)</span>}
@@ -688,14 +680,14 @@ export default function OwnerDetailClient({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Contact Phone</span>
-                      <p className="text-sm font-extrabold text-slate-900">{owner.phone || "No phone added"}</p>
+                      <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Contact Phone</span>
+                      <p className="text-sm font-semibold text-slate-900">{owner.phone || "No phone added"}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-slate-100">
-                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-4">Stripe Gateway IDs</h3>
+                  <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">Stripe Gateway IDs</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-xs shadow-2xs">
                       <span className="font-extrabold text-slate-600 flex items-center gap-1.5"><CreditCard size={14} className="text-slate-400" /> Stripe Customer ID</span>
@@ -755,7 +747,7 @@ export default function OwnerDetailClient({
             {/* Column 2: Status Indicator Panel */}
             <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl flex flex-col justify-between font-sans">
               <CardContent className="p-6 space-y-4">
-                <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Gating Status</h3>
+                <h3 className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Gating Status</h3>
                 
                 {owner.subscriptionStatus === 'Paused' ? (
                   <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-center space-y-2 shadow-2xs">
@@ -805,7 +797,7 @@ export default function OwnerDetailClient({
             <CardContent className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Feature Access Manager</h3>
+                  <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Feature Access Manager</h3>
                   <p className="text-slate-500 text-xs mt-0.5 font-semibold">Control which platform features this owner can access, regardless of their subscription plan.</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1224,7 +1216,7 @@ export default function OwnerDetailClient({
                 <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
                   {/* Card Header */}
                   <div className="px-5 pt-5 pb-3 border-b border-slate-100">
-                    <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Account Status Controls</h3>
+                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Account Status Controls</h3>
                     <p className="text-[11px] text-slate-500 mt-0.5 font-semibold">Grant temporary access or extend billing grace outside Stripe.</p>
                   </div>
 
@@ -1236,12 +1228,12 @@ export default function OwnerDetailClient({
                         <span className="text-[10px] font-black text-emerald-900 uppercase tracking-wider">Complimentary Access</span>
                       </div>
                       <div className="px-4 py-3.5 space-y-3 bg-white">
-                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                        <p className="text-xs text-[#6E6E73] font-normal leading-relaxed">
                           Bypass billing restrictions for a set number of days. The owner retains full feature access as if actively subscribed.
                         </p>
                         {/* Duration Selector */}
                         <div className="space-y-2">
-                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Duration</span>
+                          <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Duration</span>
                           <div className="grid grid-cols-4 gap-1.5">
                             {["7", "14", "30"].map(days => (
                               <button
@@ -1310,12 +1302,12 @@ export default function OwnerDetailClient({
                         <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Extend Grace Period</span>
                       </div>
                       <div className="px-4 py-3.5 space-y-3 bg-white">
-                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                        <p className="text-xs text-[#6E6E73] font-normal leading-relaxed">
                           Push out the billing delinquency deadline. The account won&apos;t lock during the extension window.
                         </p>
                         {/* Duration Selector */}
                         <div className="space-y-2">
-                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Extension</span>
+                          <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Extension</span>
                           <div className="grid grid-cols-4 gap-1.5">
                             {["3", "7", "14"].map(days => (
                               <button
@@ -1383,11 +1375,11 @@ export default function OwnerDetailClient({
                 <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
                   <div className="px-5 pt-5 pb-3 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Save Matrix Configurations</h3>
+                      <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Save Matrix Configurations</h3>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-semibold">Review pending changes before committing overrides.</p>
                     </div>
                     {getChangedPoliciesPreview().length > 0 && (
-                      <span className="text-[9px] font-black uppercase tracking-wider bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md border border-purple-200/60 shadow-2xs">
+                      <span className="text-[9px] font-semibold uppercase tracking-wider bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md border border-purple-200/60 shadow-2xs">
                         {getChangedPoliciesPreview().length} change{getChangedPoliciesPreview().length > 1 ? "s" : ""}
                       </span>
                     )}
@@ -1404,7 +1396,7 @@ export default function OwnerDetailClient({
                         <div className="space-y-2 max-h-[160px] overflow-y-auto">
                           {getChangedPoliciesPreview().map((change: { label: string; from: string; to: string }, idx: number) => (
                             <div key={idx} className="bg-white border border-purple-200/60 rounded-xl px-3 py-2 space-y-1 shadow-2xs">
-                              <div className="text-xs font-extrabold text-slate-900">{change.label}</div>
+                              <div className="text-xs font-semibold text-slate-900">{change.label}</div>
                               <div className="flex items-center gap-1.5 text-[10px] font-semibold">
                                 <span className="text-slate-400 line-through">{change.from}</span>
                                 <span className="text-purple-400">→</span>
@@ -1475,7 +1467,7 @@ export default function OwnerDetailClient({
                   </div>
 
                   <div className="px-5 py-4 space-y-3">
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                    <p className="text-xs text-[#6E6E73] font-normal leading-relaxed">
                       Manually pausing or resuming this account bypasses Stripe billing. Every action is permanently recorded in the audit log.
                     </p>
 
@@ -1487,7 +1479,7 @@ export default function OwnerDetailClient({
                         "bg-emerald-500"
                       }`} />
                       <div>
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Current Status: </span>
+                        <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Current Status: </span>
                         <span className="text-xs font-black text-slate-900">
                           {owner.subscriptionStatus === "Paused" ? "Suspended" :
                            owner.subscriptionStatus === "Past_Due" ? "Past Due / Grace" :
@@ -1555,7 +1547,7 @@ export default function OwnerDetailClient({
                     key={cat}
                     type="button"
                     onClick={() => setCategoryFilter(cat)}
-                    className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
+                    className={`text-[9px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
                       categoryFilter === cat
                         ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
                         : "bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
@@ -1569,7 +1561,7 @@ export default function OwnerDetailClient({
                 variant="outline"
                 size="sm"
                 onClick={handleExportCsv}
-                className="border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl font-black text-xs h-9 bg-white shadow-2xs cursor-pointer"
+                className="border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl font-medium text-xs h-9 bg-white shadow-2xs cursor-pointer"
               >
                 Export Audit Trail (CSV)
               </Button>
@@ -1653,7 +1645,7 @@ export default function OwnerDetailClient({
                         {/* Event info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <span className="text-[11px] font-extrabold text-[#1D1D1F]">{meta.label}</span>
+                            <span className="text-[11px] font-semibold text-[#1D1D1F]">{meta.label}</span>
                             <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${meta.color}`}>
                               {meta.category}
                             </span>
@@ -1797,3 +1789,4 @@ export default function OwnerDetailClient({
     </div>
   );
 }
+

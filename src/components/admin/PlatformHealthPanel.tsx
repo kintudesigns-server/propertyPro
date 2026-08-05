@@ -32,7 +32,7 @@ export function PlatformHealthPanel({ owners }: PlatformHealthPanelProps) {
     <div className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl p-6 space-y-5">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#F2F2F7] pb-4">
         <div>
-          <h3 className="text-base font-extrabold text-[#1D1D1F] tracking-tight">Platform Health & SaaS Subscriptions</h3>
+          <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Platform Health & SaaS Subscriptions</h3>
           <p className="text-xs text-[#8E8E93] font-semibold mt-0.5">Live status monitor across subscription tiers, payment health, and compliance exceptions.</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
@@ -78,7 +78,7 @@ export function PlatformHealthPanel({ owners }: PlatformHealthPanelProps) {
         <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl relative group">
           <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Past-Due Accounts</span>
           <div className="text-2xl font-black text-amber-900 mt-1">{pastDueCount}</div>
-          <Link href="/dashboard/admin/subscriptions?status=Past_Due" className="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1 mt-1">
+          <Link href="/dashboard/admin/subscriptions?status=Past_Due" className="text-xs font-medium text-amber-700 hover:text-amber-900 flex items-center gap-1 mt-1">
             View Past Due <ArrowRight size={12} />
           </Link>
         </div>
@@ -87,7 +87,7 @@ export function PlatformHealthPanel({ owners }: PlatformHealthPanelProps) {
         <div className="bg-rose-50/50 border border-rose-100 p-4 rounded-2xl relative group">
           <span className="text-[10px] font-extrabold text-rose-800 uppercase tracking-wider block">Paused Accounts</span>
           <div className="text-2xl font-black text-rose-900 mt-1">{pausedCount}</div>
-          <Link href="/dashboard/admin/subscriptions?status=Paused" className="text-xs font-bold text-rose-700 hover:text-rose-900 flex items-center gap-1 mt-1">
+          <Link href="/dashboard/admin/subscriptions?status=Paused" className="text-xs font-medium text-rose-700 hover:text-rose-900 flex items-center gap-1 mt-1">
             View Paused <ArrowRight size={12} />
           </Link>
         </div>
@@ -103,7 +103,7 @@ export function PlatformHealthPanel({ owners }: PlatformHealthPanelProps) {
       <div className="pt-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-[#F2F2F7] text-xs font-semibold text-slate-700">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-purple-500" />
-          <span>Active Policy Overrides: <span className="font-extrabold text-slate-900">{exceptionCount} account{exceptionCount !== 1 ? "s" : ""}</span></span>
+          <span>Active Policy Overrides: <span className="font-semibold text-slate-900">{exceptionCount} account{exceptionCount !== 1 ? "s" : ""}</span></span>
         </div>
         <div className="text-xs text-[#8E8E93] font-bold uppercase tracking-wider">
           Delinquency Risk Rate: <span className={atRiskPct > 15 ? "text-rose-600 font-black text-sm" : "text-slate-900 font-black text-sm"}>{atRiskPct}%</span>

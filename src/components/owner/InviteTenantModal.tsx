@@ -41,14 +41,14 @@ export default function InviteTenantModal({ unitId, unitName, propertyName, rent
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-bold h-11 px-6 rounded-xl transition-all flex items-center gap-2">
+        <Button variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium h-11 px-6 rounded-xl transition-all flex items-center gap-2">
           <Mail className="h-4 w-4" /> Invite Existing Tenant
         </Button>
       } />
       <DialogContent className="sm:max-w-md rounded-2xl overflow-hidden p-0 border-0 bg-white">
         <div className="bg-gradient-to-b from-blue-50 to-white p-6 pb-2 border-b border-blue-100">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <DialogTitle className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
               <Mail className="h-6 w-6 text-blue-600" /> Invite Tenant
             </DialogTitle>
             <DialogDescription className="text-[#6E6E73] font-medium">
@@ -80,7 +80,7 @@ export default function InviteTenantModal({ unitId, unitName, propertyName, rent
 
           <Button 
             type="submit" 
-            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-all flex items-center justify-center"
+            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md transition-all flex items-center justify-center"
             disabled={loading}
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Send className="h-4 w-4 mr-2" /> Send Invitation Link</>}

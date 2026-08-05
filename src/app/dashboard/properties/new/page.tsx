@@ -626,22 +626,22 @@ export default function NewPropertyPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={discardDraft} variant="ghost" className="h-8 text-xs font-bold text-amber-700 hover:bg-amber-100 hover:text-amber-900">Discard</Button>
-            <Button onClick={restoreDraft} className="h-8 text-xs font-black bg-amber-600 hover:bg-amber-700 text-white shadow-2xs">Restore Draft</Button>
+            <Button onClick={discardDraft} variant="ghost" className="h-8 text-xs font-medium text-amber-700 hover:bg-amber-100 hover:text-amber-900">Discard</Button>
+            <Button onClick={restoreDraft} className="h-8 text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white shadow-2xs">Restore Draft</Button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard/properties">
-          <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl bg-white border border-slate-200 shadow-2xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Add Property</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Create a new property and manage its units.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+            <Building className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Add Property</h1>
+            <p className="text-[#6E6E73] text-sm font-normal mt-0.5">Create a new property and manage its units.</p>
+          </div>
         </div>
       </div>
 
@@ -661,14 +661,14 @@ export default function NewPropertyPage() {
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/70 flex justify-between items-center">
             <div>
-              <h2 className="font-black text-slate-900 text-lg tracking-tight">General Information</h2>
-              <p className="text-xs font-semibold text-slate-500 mt-0.5">Basic details about this property.</p>
+              <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">General Information</h2>
+              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Basic details about this property.</p>
             </div>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Property Type</label>
+                <label className="text-xs font-medium text-[#1D1D1F]">Property Type</label>
                 <select name="type" value={formData.type} onChange={handleChange} className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-slate-400 shadow-2xs cursor-pointer">
                   <option value="Apartment">Apartment Complex</option>
                   <option value="House">Single Family House</option>
@@ -676,21 +676,21 @@ export default function NewPropertyPage() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Property Name <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-medium text-[#1D1D1F]">Property Name <span className="text-rose-500">*</span></label>
                 <Input required name="name" value={formData.name} onChange={handleChange} placeholder={formData.type === "House" ? "e.g. 123 Sunset Villa" : "e.g. Grand Horizon Towers"} className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Year Built (Optional)</label>
+                <label className="text-xs font-medium text-[#1D1D1F]">Year Built (Optional)</label>
                 <Input name="yearBuilt" type="number" value={formData.yearBuilt} onChange={handleChange} placeholder="e.g. 2015" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
               
               {formData.type === "Commercial" && (
                 <>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Zoning Type (Optional)</label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Zoning Type (Optional)</label>
                     <div className="flex gap-2">
                       <select name="zoningType" value={formData.zoningType} onChange={handleChange} className="flex-1 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-slate-400 shadow-2xs cursor-pointer">
                         <option value="">Select a zoning type...</option>
@@ -707,7 +707,7 @@ export default function NewPropertyPage() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Total Parking Spaces (Optional)</label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Total Parking Spaces (Optional)</label>
                     <Input name="parkingSpaces" type="number" value={formData.parkingSpaces} onChange={handleChange} placeholder="e.g. 50" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                 </>
@@ -720,27 +720,27 @@ export default function NewPropertyPage() {
                 <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2 text-sm"><Building className="h-4 w-4 text-slate-700"/> House Specifications</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-extrabold text-slate-900">Monthly Rent ($) <span className="text-rose-500">*</span></label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Monthly Rent ($) <span className="text-rose-500">*</span></label>
                     <Input required name="houseRent" type="number" value={formData.houseRent} onChange={handleChange} placeholder="2500" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                   <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-extrabold text-slate-900">Security Deposit ($)</label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Security Deposit ($)</label>
                     <Input name="houseDeposit" type="number" value={formData.houseDeposit} onChange={handleChange} placeholder="2500" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Bedrooms <span className="text-rose-500">*</span></label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Bedrooms <span className="text-rose-500">*</span></label>
                     <Input required name="houseRooms" type="number" value={formData.houseRooms} onChange={handleChange} placeholder="3" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Bathrooms <span className="text-rose-500">*</span></label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Bathrooms <span className="text-rose-500">*</span></label>
                     <Input required name="houseBaths" type="number" value={formData.houseBaths} onChange={handleChange} placeholder="2" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Sq Footage <span className="text-rose-500">*</span></label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Sq Footage <span className="text-rose-500">*</span></label>
                     <Input required name="houseSqft" type="number" value={formData.houseSqft} onChange={handleChange} placeholder="2000" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-900">Max Occupants</label>
+                    <label className="text-xs font-medium text-[#1D1D1F]">Max Occupants</label>
                     <Input name="houseOccupants" type="number" value={formData.houseOccupants} onChange={handleChange} placeholder="5" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                   </div>
                 </div>
@@ -748,7 +748,7 @@ export default function NewPropertyPage() {
             )}
 
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-slate-900">Description</label>
+              <label className="text-xs font-medium text-[#1D1D1F]">Description</label>
               <textarea 
                 name="description" 
                 value={formData.description} 
@@ -764,12 +764,12 @@ export default function NewPropertyPage() {
         {/* Address */}
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/70">
-            <h2 className="font-black text-slate-900 text-lg tracking-tight">Address Information</h2>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">Where is this property located?</p>
+            <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">Address Information</h2>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Where is this property located?</p>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-1 relative" onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
-              <label className="text-xs font-extrabold text-slate-900">Street Address <span className="text-rose-500">*</span></label>
+              <label className="text-xs font-medium text-[#1D1D1F]">Street Address <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <Input 
                   required={false}
@@ -817,22 +817,22 @@ export default function NewPropertyPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">City <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-medium text-[#1D1D1F]">City <span className="text-rose-500">*</span></label>
                 <Input required name="city" value={formData.city} onChange={handleChange} placeholder="e.g. London" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">State / Province</label>
+                <label className="text-xs font-medium text-[#1D1D1F]">State / Province</label>
                 <Input name="state" value={formData.state} onChange={handleChange} placeholder="e.g. NY" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">ZIP / Postal Code</label>
+                <label className="text-xs font-medium text-[#1D1D1F]">ZIP / Postal Code</label>
                 <Input name="zip" value={formData.zip} onChange={handleChange} placeholder="e.g. 10001" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Country <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-medium text-[#1D1D1F]">Country <span className="text-rose-500">*</span></label>
                 <Input required name="country" value={formData.country} onChange={handleChange} placeholder="e.g. UK" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
             </div>
@@ -842,8 +842,8 @@ export default function NewPropertyPage() {
         {/* Property Images Upload Area */}
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/70">
-            <h2 className="font-black text-slate-900 text-lg tracking-tight">Property Images</h2>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">Categorize and upload high-quality images to showcase your property.</p>
+            <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">Property Images</h2>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Categorize and upload high-quality images to showcase your property.</p>
           </div>
           <CardContent className="p-6 space-y-6">
             
@@ -900,7 +900,7 @@ export default function NewPropertyPage() {
                         ) : (
                           <UploadCloud className="h-8 w-8 text-slate-400 mb-3" />
                         )}
-                        <h3 className={`text-xs font-black ${hasImages ? "text-emerald-900" : "text-slate-900"}`}>
+                        <h3 className={`text-xs font-semibold ${hasImages ? "text-emerald-900" : "text-slate-900"}`}>
                           {cat.label}
                         </h3>
                         {!hasImages && <p className="text-[10px] text-slate-500 font-semibold mt-1">Click to upload</p>}
@@ -949,10 +949,10 @@ export default function NewPropertyPage() {
         {/* Dynamic Amenities */}
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/70">
-            <h2 className="font-black text-slate-900 text-lg tracking-tight flex items-center gap-2">
+            <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight flex items-center gap-2">
               {formData.type === "Commercial" ? "Commercial Features" : "Amenities & Features"}
             </h2>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">Select the core amenities that best describe this property.</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Select the core amenities that best describe this property.</p>
           </div>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -977,7 +977,7 @@ export default function NewPropertyPage() {
             </div>
 
             <div className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <label className="text-xs font-extrabold text-slate-900 mb-2 block">Add custom amenity or feature</label>
+              <label className="text-xs font-semibold text-slate-900 mb-2 block">Add custom amenity or feature</label>
               <div className="flex gap-2">
                 <Input 
                   value={customAmenity}
@@ -1028,18 +1028,18 @@ export default function NewPropertyPage() {
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
             <div className="p-6 border-b border-slate-100 bg-slate-50/70 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
               <div>
-                <h2 className="font-black text-slate-900 text-lg tracking-tight">
+                <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">
                   {formData.type === "Commercial" ? "Suite Management" : "Smart Unit Management"}
                 </h2>
-                <p className="text-xs font-semibold text-slate-500 mt-0.5">Add the initial {formData.type === "Commercial" ? "suites" : "units"} for this property.</p>
+                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Add the initial {formData.type === "Commercial" ? "suites" : "units"} for this property.</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 {formData.type !== "House" && (
-                  <Button type="button" onClick={() => setBulkDialogOpen(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-900 h-9 px-4 rounded-xl text-xs font-black shadow-2xs flex items-center gap-2 border border-slate-200 cursor-pointer">
+                  <Button type="button" onClick={() => setBulkDialogOpen(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-900 h-9 px-4 rounded-xl text-xs font-medium shadow-2xs flex items-center gap-2 border border-slate-200 cursor-pointer">
                     <Layers className="h-3.5 w-3.5" /> Bulk Add {formData.type === "Commercial" ? "Suites" : "Units"}
                   </Button>
                 )}
-                <Button type="button" onClick={addUnit} className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-4 rounded-xl text-xs font-black shadow-2xs flex items-center gap-2 cursor-pointer">
+                <Button type="button" onClick={addUnit} className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-4 rounded-xl text-xs font-medium shadow-2xs flex items-center gap-2 cursor-pointer border-none">
                   <Plus className="h-3.5 w-3.5" /> Add {formData.type === "Commercial" ? "Suite" : "Unit"}
                 </Button>
               </div>
@@ -1060,11 +1060,11 @@ export default function NewPropertyPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-extrabold text-slate-900">{formData.type === "Commercial" ? "Suite Name / Number" : "Unit Name / Number"} <span className="text-rose-500">*</span></label>
+                      <label className="text-xs font-semibold text-slate-900">{formData.type === "Commercial" ? "Suite Name / Number" : "Unit Name / Number"} <span className="text-rose-500">*</span></label>
                       <Input required value={unit.name} onChange={(e) => handleUnitChange(index, "name", e.target.value)} placeholder={formData.type === "Commercial" ? "e.g. Suite 200" : "e.g. Apt 101"} className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Type</label>
+                      <label className="text-xs font-semibold text-slate-900">Type</label>
                       <select value={unit.type || (formData.type === "Commercial" ? "Retail" : "Apartment")} onChange={(e) => handleUnitChange(index, "type", e.target.value)} className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer">
                         {formData.type === "Commercial" ? (
                           <>
@@ -1083,7 +1083,7 @@ export default function NewPropertyPage() {
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Status</label>
+                      <label className="text-xs font-semibold text-slate-900">Status</label>
                       <select value={unit.status || "VACANT"} onChange={(e) => handleUnitChange(index, "status", e.target.value)} className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer">
                         <option value="VACANT">Vacant</option>
                         <option value="OCCUPIED">Occupied</option>
@@ -1092,38 +1092,38 @@ export default function NewPropertyPage() {
                     </div>
                     
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Floor</label>
+                      <label className="text-xs font-semibold text-slate-900">Floor</label>
                       <Input type="number" value={unit.floor} onChange={(e) => handleUnitChange(index, "floor", e.target.value)} placeholder="e.g. 1" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                     
                     {formData.type !== "Commercial" && (
                       <>
                         <div className="space-y-1">
-                          <label className="text-xs font-extrabold text-slate-900">Bedrooms <span className="text-rose-500">*</span></label>
+                          <label className="text-xs font-semibold text-slate-900">Bedrooms <span className="text-rose-500">*</span></label>
                           <Input required type="number" value={unit.rooms} onChange={(e) => handleUnitChange(index, "rooms", e.target.value)} placeholder="2" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-extrabold text-slate-900">Bathrooms <span className="text-rose-500">*</span></label>
+                          <label className="text-xs font-semibold text-slate-900">Bathrooms <span className="text-rose-500">*</span></label>
                           <Input required type="number" value={unit.bathrooms} onChange={(e) => handleUnitChange(index, "bathrooms", e.target.value)} placeholder="1" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-extrabold text-slate-900">Max Occupants</label>
+                          <label className="text-xs font-semibold text-slate-900">Max Occupants</label>
                           <Input type="number" value={unit.maxOccupants} onChange={(e) => handleUnitChange(index, "maxOccupants", e.target.value)} placeholder="2" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                         </div>
                       </>
                     )}
 
                     <div className={`space-y-1 ${formData.type === "Commercial" && unit.leaseStructure === "NNN" ? "md:col-span-4" : (formData.type === "Commercial" ? "md:col-span-2" : "")}`}>
-                      <label className="text-xs font-extrabold text-slate-900">Square Footage <span className="text-rose-500">*</span></label>
+                      <label className="text-xs font-semibold text-slate-900">Square Footage <span className="text-rose-500">*</span></label>
                       <Input required type="number" value={unit.sqFootage} onChange={(e) => handleUnitChange(index, "sqFootage", e.target.value)} placeholder="800" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-extrabold text-slate-900">Monthly Rent ($) <span className="text-rose-500">*</span></label>
+                      <label className="text-xs font-semibold text-slate-900">Monthly Rent ($) <span className="text-rose-500">*</span></label>
                       <Input required type="number" value={unit.rentAmount} onChange={(e) => handleUnitChange(index, "rentAmount", e.target.value)} placeholder="1500" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                     <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-extrabold text-slate-900">Security Deposit ($)</label>
+                      <label className="text-xs font-semibold text-slate-900">Security Deposit ($)</label>
                       <Input type="number" value={unit.depositAmt} onChange={(e) => handleUnitChange(index, "depositAmt", e.target.value)} placeholder="1500" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                   </div>
@@ -1136,14 +1136,14 @@ export default function NewPropertyPage() {
         {/* Floating Action Bar */}
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 flex justify-end gap-3 z-20 shadow-lg">
           <Link href="/dashboard/properties">
-            <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-extrabold text-xs text-slate-700 border-slate-200 bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
+            <Button type="button" variant="outline" className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
           </Link>
           <Button 
             type="submit" 
             disabled={loading} 
-            className="bg-emerald-100 hover:bg-emerald-200 text-slate-900 border border-emerald-300/80 h-11 px-8 rounded-xl font-black text-xs shadow-2xs flex items-center gap-2 transition-all cursor-pointer"
+            className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-5 rounded-xl font-medium text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer border-none"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin text-slate-900" /> : <Save className="h-4 w-4 text-slate-900" />}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Save className="h-4 w-4 text-white" />}
             {loading ? "Saving..." : "Create Property"}
           </Button>
         </div>
@@ -1179,60 +1179,60 @@ export default function NewPropertyPage() {
         <DialogContent className="max-w-md bg-white border-slate-200 rounded-3xl p-0 overflow-hidden flex flex-col max-h-[90vh] font-sans">
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
             <DialogHeader className="mb-4">
-              <DialogTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2"><Layers className="h-5 w-5 text-emerald-600"/> Bulk Generate Units</DialogTitle>
+              <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2"><Layers className="h-5 w-5 text-emerald-600"/> Bulk Generate Units</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Quantity to Create</label>
+                <label className="text-xs font-semibold text-slate-900">Quantity to Create</label>
                 <Input type="number" value={bulkQty} onChange={(e) => setBulkQty(e.target.value)} placeholder="10" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Starting Number</label>
+                <label className="text-xs font-semibold text-slate-900">Starting Number</label>
                 <Input type="number" value={bulkStartNum} onChange={(e) => setBulkStartNum(e.target.value)} placeholder="101" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Prefix (Optional)</label>
+                <label className="text-xs font-semibold text-slate-900">Prefix (Optional)</label>
                 <Input value={bulkPrefix} onChange={(e) => setBulkPrefix(e.target.value)} placeholder="e.g. Apt " className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Floor Assignment</label>
+                <label className="text-xs font-semibold text-slate-900">Floor Assignment</label>
                 <Input type="number" value={bulkFloor} onChange={(e) => setBulkFloor(e.target.value)} placeholder="e.g. 1" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
               </div>
             </div>
             
             <div className="pt-4 border-t border-slate-100">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3">Base Template Settings</p>
+              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-3">Base Template Settings</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {formData.type !== "Commercial" && (
                   <>
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Bedrooms</label>
+                      <label className="text-xs font-semibold text-slate-900">Bedrooms</label>
                       <Input type="number" value={bulkBeds} onChange={(e) => setBulkBeds(e.target.value)} placeholder="2" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Bathrooms</label>
+                      <label className="text-xs font-semibold text-slate-900">Bathrooms</label>
                       <Input type="number" value={bulkBaths} onChange={(e) => setBulkBaths(e.target.value)} placeholder="1" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-extrabold text-slate-900">Max Occupants</label>
+                      <label className="text-xs font-semibold text-slate-900">Max Occupants</label>
                       <Input type="number" value={bulkMaxOccupants} onChange={(e) => setBulkMaxOccupants(e.target.value)} placeholder="2" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                     </div>
                   </>
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-extrabold text-slate-900">Sq Footage</label>
+                  <label className="text-xs font-semibold text-slate-900">Sq Footage</label>
                   <Input type="number" value={bulkSqft} onChange={(e) => setBulkSqft(e.target.value)} placeholder="800" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-extrabold text-slate-900">Default Rent</label>
+                  <label className="text-xs font-semibold text-slate-900">Default Rent</label>
                   <Input type="number" value={bulkRent} onChange={(e) => setBulkRent(e.target.value)} placeholder="1500" className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-extrabold text-slate-900">Sec. Deposit</label>
+                  <label className="text-xs font-semibold text-slate-900">Sec. Deposit</label>
                   <Input type="number" value={bulkDeposit} onChange={(e) => setBulkDeposit(e.target.value)} placeholder={bulkRent || "1500"} className="h-10 rounded-xl bg-slate-50 border-slate-200 text-xs font-semibold text-slate-900 shadow-2xs" />
                 </div>
               </div>
@@ -1250,7 +1250,7 @@ export default function NewPropertyPage() {
           </div>
           <DialogFooter className="p-4 border-t border-slate-100 bg-slate-50/70 shrink-0 rounded-b-3xl">
             <Button variant="ghost" onClick={() => setBulkDialogOpen(false)} className="h-10 font-bold rounded-xl text-slate-600">Cancel</Button>
-            <Button onClick={handleBulkGenerate} className="bg-slate-900 hover:bg-slate-800 text-white h-10 font-black rounded-xl px-6 text-xs shadow-xs">Generate {bulkQty} Units</Button>
+            <Button onClick={handleBulkGenerate} className="bg-slate-900 hover:bg-slate-800 text-white h-10 font-medium rounded-xl px-6 text-xs shadow-xs">Generate {bulkQty} Units</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1263,3 +1263,4 @@ function XIcon(props: any) {
     <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
   );
 }
+

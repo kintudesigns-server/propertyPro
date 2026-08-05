@@ -274,7 +274,7 @@ export function MockCardForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-[2] h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
+            className="flex-[2] h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>

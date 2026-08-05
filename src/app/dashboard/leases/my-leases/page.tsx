@@ -318,12 +318,12 @@ export default function MyLeasesPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 font-sans">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
-            <FileText className="h-5 w-5 text-white" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <FileText className="h-4 w-4 text-slate-700" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Leases</h1>
-            <p className="text-slate-500 text-xs font-semibold mt-0.5">View and manage your lease agreements</p>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">My Leases</h1>
+            <p className="text-[#6E6E73] text-xs font-normal mt-0.5">View and manage your lease agreements</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
@@ -334,7 +334,7 @@ export default function MyLeasesPage() {
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
                   ? "bg-slate-900 text-white shadow-2xs"
-                  : "text-slate-500 hover:bg-white hover:text-slate-900"
+                  : "text-[#6E6E73] hover:bg-white hover:text-[#1D1D1F]"
               }`}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -344,7 +344,7 @@ export default function MyLeasesPage() {
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "list"
                   ? "bg-slate-900 text-white shadow-2xs"
-                  : "text-slate-500 hover:bg-white hover:text-slate-900"
+                  : "text-[#6E6E73] hover:bg-white hover:text-[#1D1D1F]"
               }`}
             >
               <List className="h-4 w-4" />
@@ -353,7 +353,7 @@ export default function MyLeasesPage() {
           <Button
             onClick={fetchLeases}
             variant="outline"
-            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-black text-xs flex items-center gap-2 h-9 px-4 shadow-2xs cursor-pointer"
+            className="h-9 bg-white hover:bg-slate-50 border border-slate-200 text-[#1D1D1F] font-medium text-xs rounded-xl shadow-2xs cursor-pointer flex items-center justify-center gap-2 px-4"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
@@ -362,7 +362,7 @@ export default function MyLeasesPage() {
 
       {/* ── Pending Lease Alert ── */}
       {pendingLease && (
-        <Card className={`rounded-3xl shadow-xs border overflow-hidden p-6 md:p-8 relative font-sans ${
+        <Card className={`rounded-3xl shadow-2xs border overflow-hidden p-6 md:p-8 relative font-sans ${
           pendingLeaseUnpaidDepositInvoice
             ? "bg-rose-50/80 border-rose-200 text-rose-950"
             : "bg-amber-50/80 border-amber-200 text-amber-950"
@@ -370,7 +370,7 @@ export default function MyLeasesPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md ${
+                <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider ${
                   pendingLeaseUnpaidDepositInvoice
                     ? "bg-rose-100 text-rose-800 border border-rose-200"
                     : "bg-amber-100 text-amber-800 border border-amber-200"
@@ -378,14 +378,14 @@ export default function MyLeasesPage() {
                   Action Required
                 </span>
               </div>
-              <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
                 <ShieldAlert className={`h-5 w-5 ${pendingLeaseUnpaidDepositInvoice ? 'text-rose-600' : 'text-amber-600'}`} />
                 {pendingLeaseUnpaidDepositInvoice
                   ? "Pay Security Deposit to Complete Lease"
                   : "Review & Sign Lease Agreement"
                 }
               </h2>
-              <p className={`text-xs font-semibold max-w-2xl leading-relaxed ${pendingLeaseUnpaidDepositInvoice ? 'text-rose-800' : 'text-amber-800'}`}>
+              <p className={`text-xs font-normal max-w-2xl leading-relaxed ${pendingLeaseUnpaidDepositInvoice ? 'text-rose-800' : 'text-amber-800'}`}>
                 {pendingLeaseUnpaidDepositInvoice
                   ? `Your lease for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} is approved. Please pay the security deposit of $${Number(pendingLease.securityDeposit).toLocaleString()} to finalize your lease agreement.`
                   : `You have a pending lease contract for Unit ${pendingLease.unit?.name} at ${pendingLease.unit?.property?.name} awaiting your signature.`
@@ -402,7 +402,7 @@ export default function MyLeasesPage() {
                     router.push(`/dashboard/leases/${pendingLease.id}`);
                   }
                 }}
-                className={`w-full sm:w-auto font-black text-xs h-10 px-6 rounded-xl shadow-xs transition-all border-none cursor-pointer ${
+                className={`w-full sm:w-auto h-9 font-medium text-xs px-4 rounded-xl shadow-xs transition-all border-none cursor-pointer ${
                   pendingLeaseUnpaidDepositInvoice
                     ? "bg-rose-600 hover:bg-rose-700 text-white"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
@@ -413,7 +413,7 @@ export default function MyLeasesPage() {
               <Button
                 onClick={() => router.push(`/dashboard/leases/${pendingLease.id}`)}
                 variant="outline"
-                className={`w-full sm:w-auto font-black text-xs h-10 px-6 rounded-xl bg-white border shadow-2xs transition-all cursor-pointer ${
+                className={`w-full sm:w-auto h-9 font-medium text-xs px-4 rounded-xl bg-white border shadow-2xs transition-all cursor-pointer ${
                   pendingLeaseUnpaidDepositInvoice
                     ? "border-rose-200 text-rose-900 hover:bg-rose-50"
                     : "border-amber-200 text-amber-900 hover:bg-amber-50"
@@ -428,34 +428,34 @@ export default function MyLeasesPage() {
 
       {/* ── Pending Renewal Alert ── */}
       {pendingRenewal && (
-        <Card className="bg-slate-900 text-white border border-slate-800 rounded-3xl shadow-xs p-6 md:p-8 relative font-sans">
+        <Card className="bg-slate-900 text-white border border-slate-800 rounded-3xl shadow-2xs p-6 md:p-8 relative font-sans">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md shadow-2xs">
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-500 text-white shadow-2xs">
                   RENEWAL AVAILABLE
                 </span>
               </div>
-              <h2 className="text-xl font-black tracking-tight flex items-center gap-2 text-white">
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2 text-white">
                 <ShieldAlert className="h-5 w-5 text-emerald-400" />
                 Lease Renewal Offer
               </h2>
-              <p className="text-xs font-semibold text-slate-300 max-w-2xl leading-relaxed">
-                Your lease for Unit {pendingRenewal.unit?.name} at {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal with a proposed rent of <strong className="text-emerald-400 font-black">${Number(pendingRenewal.monthlyRent).toLocaleString()}/month</strong>.
+              <p className="text-xs font-normal text-slate-300 max-w-2xl leading-relaxed">
+                Your lease for Unit {pendingRenewal.unit?.name} at {pendingRenewal.unit?.property?.name} is expiring soon. The owner has offered a renewal with a proposed rent of <strong className="text-emerald-400 font-semibold">${Number(pendingRenewal.monthlyRent).toLocaleString()}/month</strong>.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
               <Button
                 onClick={() => handleAcceptRenewal(pendingRenewal.id)}
-                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs h-10 px-6 rounded-xl shadow-xs transition-all border-none cursor-pointer"
+                className="w-full sm:w-auto h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border border-slate-700 cursor-pointer"
               >
                 Accept &amp; Renew
               </Button>
               <Button
                 onClick={() => setDeclineRenewalLeaseId(pendingRenewal.id)}
                 variant="outline"
-                className="w-full sm:w-auto border border-white/20 text-white hover:bg-white/10 bg-white/5 font-black text-xs h-10 px-6 rounded-xl shadow-2xs transition-all cursor-pointer"
+                className="w-full sm:w-auto h-9 border border-white/20 text-white hover:bg-white/10 bg-white/5 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer"
               >
                 Decline (Move Out)
               </Button>
@@ -467,75 +467,75 @@ export default function MyLeasesPage() {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans">
         {/* Total Leases */}
-        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs font-sans">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Leases</p>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{leases.length}</h3>
-              <p className="text-[11px] font-semibold text-slate-500">Registry count</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Total Leases</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{leases.length}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Registry count</p>
             </div>
-            <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
-              <Home className="h-5 w-5" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <Home className="h-4 w-4" />
             </div>
           </div>
         </Card>
 
         {/* Active Leases */}
-        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs font-sans">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Active Leases</p>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{activeCount}</h3>
-              <p className="text-[11px] font-black text-emerald-600">Currently active</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Active Leases</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{activeCount}</h3>
+              <p className="text-xs font-medium text-emerald-600">Currently active</p>
             </div>
-            <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-200/80 rounded-2xl shadow-2xs">
-              <FileText className="h-5 w-5" />
+            <div className="h-9 w-9 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center justify-center text-emerald-600 shadow-2xs shrink-0">
+              <FileText className="h-4 w-4" />
             </div>
           </div>
         </Card>
 
         {/* Expiring Soon */}
-        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs font-sans">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Expiring Soon</p>
-              <h3 className={`text-3xl font-black tracking-tight ${expiringCount > 0 ? "text-rose-600" : "text-slate-900"}`}>{expiringCount}</h3>
-              <p className="text-[11px] font-semibold text-rose-600">Within 60 days</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Expiring Soon</p>
+              <h3 className={`text-2xl font-semibold tracking-tight ${expiringCount > 0 ? "text-rose-600" : "text-[#1D1D1F]"}`}>{expiringCount}</h3>
+              <p className="text-xs font-medium text-rose-600">Within 60 days</p>
             </div>
-            <div className="p-3 bg-rose-50 text-rose-600 border border-rose-200/80 rounded-2xl shadow-2xs">
-              <Calendar className="h-5 w-5" />
+            <div className="h-9 w-9 bg-rose-50 border border-rose-200/80 rounded-xl flex items-center justify-center text-rose-600 shadow-2xs shrink-0">
+              <Calendar className="h-4 w-4" />
             </div>
           </div>
         </Card>
 
         {/* Total Monthly Rent */}
-        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs font-sans hover:-translate-y-0.5 transition-all">
+        <Card className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs font-sans">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Commitment</p>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Monthly Commitment</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">
                 ${totalRent.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </h3>
-              <p className="text-[11px] font-semibold text-slate-500">Total rent obligation</p>
+              <p className="text-xs font-normal text-[#6E6E73]">Total rent obligation</p>
             </div>
-            <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
-              <DollarSign className="h-5 w-5" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <DollarSign className="h-4 w-4" />
             </div>
           </div>
         </Card>
       </div>
 
       {/* ── Leases Panel (full-width) ── */}
-      <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden font-sans">
+      <Card className="bg-white border border-slate-200 rounded-3xl shadow-2xs overflow-hidden font-sans">
         {/* Card header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="bg-slate-900 text-white p-2 rounded-xl shadow-2xs">
-              <FileText className="h-4 w-4" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <FileText className="h-4 w-4 text-slate-700" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">Leases</h2>
-              <p className="text-xs font-semibold text-slate-500">Manage your property leases and agreements</p>
+              <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Leases</h2>
+              <p className="text-xs font-normal text-[#6E6E73]">Manage your property leases and agreements</p>
             </div>
           </div>
           {/* Duplicate view toggle inside card header */}
@@ -545,17 +545,17 @@ export default function MyLeasesPage() {
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
                   ? "bg-slate-900 text-white shadow-2xs"
-                  : "text-slate-500 hover:bg-white hover:text-slate-900"
+                  : "text-[#6E6E73] hover:bg-white hover:text-[#1D1D1F]"
               }`}
             >
               <LayoutGrid className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "list"
-                  ? "bg-[#007AFF] text-white shadow-sm"
-                  : "text-[#6E6E73] hover:bg-white"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "text-[#6E6E73] hover:bg-white hover:text-[#1D1D1F]"
               }`}
             >
               <List className="h-3.5 w-3.5" />
@@ -564,15 +564,15 @@ export default function MyLeasesPage() {
         </div>
 
         {/* Filter bar — single row: search stretches left, dropdowns on right */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 px-6 py-4 border-b border-[#F1F5F9] bg-[#FAFAFA]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 px-6 py-4 border-b border-slate-100 bg-[#FBFBFD]">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
             <input
               type="text"
               placeholder="Search leases..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2.5 w-full bg-white border border-[#E5E5EA] rounded-xl text-sm text-[#1D1D1F] placeholder-[#94A3B8] focus:outline-none focus:border-[#007AFF] shadow-sm"
+              className="w-full h-9 rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
             />
           </div>
 
@@ -580,7 +580,7 @@ export default function MyLeasesPage() {
             value={statusFilter}
             onValueChange={(v: string | null) => setStatusFilter(v || "all")}
           >
-            <SelectTrigger className="w-full sm:w-[160px] bg-white border border-[#E5E5EA] h-10 px-3.5 rounded-xl shadow-xs font-semibold text-xs text-[#1D1D1F] focus:ring-1 focus:ring-[#007AFF] cursor-pointer">
+            <SelectTrigger className="w-full sm:w-[160px] h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -597,7 +597,7 @@ export default function MyLeasesPage() {
             value={sortBy}
             onValueChange={(v: string | null) => setSortBy(v || "newest")}
           >
-            <SelectTrigger className="w-full sm:w-[160px] bg-white border border-[#E5E5EA] h-10 px-3.5 rounded-xl shadow-xs font-semibold text-xs text-[#1D1D1F] focus:ring-1 focus:ring-[#007AFF] cursor-pointer">
+            <SelectTrigger className="w-full sm:w-[160px] h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer">
               <SelectValue placeholder="Newest First" />
             </SelectTrigger>
             <SelectContent>
@@ -611,8 +611,8 @@ export default function MyLeasesPage() {
 
         {/* Sub-heading */}
         <div className="px-6 pt-5 pb-3 flex items-center gap-2">
-          <Shield className="h-4 w-4 text-[#007AFF]" />
-          <h3 className="font-extrabold text-[#1D1D1F] text-sm">
+          <Shield className="h-4 w-4 text-slate-700" />
+          <h3 className="font-semibold text-[#1D1D1F] text-xs">
             My Leases ({filtered.length})
           </h3>
           <span className="text-xs text-[#6E6E73] font-normal">
@@ -645,12 +645,12 @@ export default function MyLeasesPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent bg-[#F2F2F7]">
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3 pl-4">Property & Unit</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3">Lease Period</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3">Monthly Rent</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3">Status</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3">Timeline</TableHead>
-                    <TableHead className="font-bold text-xs uppercase text-[#6E6E73] py-3 text-right pr-4">Actions</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3 pl-4">Property & Unit</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3">Lease Period</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3">Monthly Rent</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3">Status</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3">Timeline</TableHead>
+                    <TableHead className="font-medium text-[11px] uppercase text-[#6E6E73] py-3 text-right pr-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -658,55 +658,55 @@ export default function MyLeasesPage() {
                     const daysLeft = Math.ceil((new Date(l.endDate).getTime() - Date.now()) / 86400000);
                     const months = Math.round(Math.abs(daysLeft) / 30);
                     return (
-                      <TableRow key={l.id} className="hover:bg-[#F2F2F7]/55 transition-colors border-t border-[#F1F5F9]">
+                      <TableRow key={l.id} className="hover:bg-slate-50 transition-colors border-t border-slate-100">
                         <TableCell className="py-4 pl-4">
                           <div className="space-y-0.5">
-                            <p className="font-extrabold text-[#1D1D1F] text-sm flex items-center gap-2">
+                            <p className="font-semibold text-[#1D1D1F] text-xs flex items-center gap-2">
                               {l.unit?.property?.name || "Unknown"}
-                              <span className="bg-[#EFF6FF] text-[#007AFF] font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs shrink-0">
                                 Unit {l.unit?.name || "—"}
                               </span>
                             </p>
                             {l.unit?.property?.address && (
-                              <p className="text-[11px] text-[#6E6E73] truncate max-w-[220px] font-semibold">
+                              <p className="text-xs text-[#6E6E73] truncate max-w-[220px] font-normal">
                                 {l.unit.property.address}, {l.unit.property.city}
                               </p>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <p className="text-sm text-[#1D1D1F] font-bold">
+                          <p className="text-xs text-[#1D1D1F] font-semibold">
                             {new Date(l.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(l.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </p>
-                          <p className="text-[11px] text-[#6E6E73] font-semibold flex items-center gap-1.5 mt-0.5">
-                            <Clock className="h-3 w-3 text-[#8E8E93]" />
+                          <p className="text-xs text-[#6E6E73] font-normal flex items-center gap-1.5 mt-0.5">
+                            <Clock className="h-3 w-3 text-slate-500" />
                             {months} month{months !== 1 ? "s" : ""} duration
                           </p>
                         </TableCell>
                         <TableCell>
-                          <p className="font-extrabold text-sm text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString()}<span className="text-[#6E6E73] text-[10px] font-normal">/mo</span></p>
-                          <p className="text-[11px] text-[#6E6E73] font-semibold">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
+                          <p className="font-semibold text-xs text-[#1D1D1F]">${Number(l.monthlyRent).toLocaleString()}<span className="text-[#6E6E73] font-normal">/mo</span></p>
+                          <p className="text-xs text-[#6E6E73] font-normal">Deposit: ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}</p>
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${statusBadge(l)}`}>
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5">
                             <span className={`h-1.5 w-1.5 rounded-full ${statusDot(l)}`} />
                             {formatStatus(l)}
                           </span>
                         </TableCell>
                         <TableCell>
                           {l.status === "SIGNED" && new Date(l.startDate).getTime() > Date.now() ? (
-                            <span className="text-xs text-indigo-600 font-bold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Move-in in {Math.ceil((new Date(l.startDate).getTime() - Date.now()) / 86400000)}d</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">Move-in in {Math.ceil((new Date(l.startDate).getTime() - Date.now()) / 86400000)}d</span>
                           ) : daysLeft > 0 ? (
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${daysLeft < 30 ? 'text-amber-700 bg-amber-50 border border-amber-100' : 'text-[#6E6E73] bg-slate-50 border border-slate-100'}`}>{daysLeft}d left</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">{daysLeft}d left</span>
                           ) : (
-                            <span className="text-xs text-red-600 font-bold bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">Expired</span>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">Expired</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right pr-4">
                           <div className="flex items-center justify-end gap-2">
                             {l.status === "PENDING_SIGNATURE" && (
                               <Button size="sm" onClick={() => router.push(`/dashboard/leases/${l.id}`)}
-                                className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl h-8 px-3">
+                                className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer">
                                 View & Sign
                               </Button>
                             )}
@@ -803,13 +803,13 @@ export default function MyLeasesPage() {
                       {/* Rent + Deposit */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Monthly Rent</p>
-                          <p className="text-sm font-extrabold text-[#1D1D1F] mt-1">
+                          <p className="text-[9px] text-[#94A3B8] font-semibold uppercase tracking-widest">Monthly Rent</p>
+                          <p className="text-sm font-semibold text-[#1D1D1F] mt-1">
                             ${Number(l.monthlyRent).toLocaleString()}<span className="text-[10px] text-[#8E8E93] font-normal">/mo</span>
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Deposit</p>
+                          <p className="text-[9px] text-[#94A3B8] font-semibold uppercase tracking-widest">Deposit</p>
                           <p className="text-sm font-extrabold text-[#6E6E73] mt-1">
                             ${Number(l.securityDeposit || l.monthlyRent).toLocaleString()}
                           </p>
@@ -821,7 +821,7 @@ export default function MyLeasesPage() {
                       {/* Lease term */}
                       <div className="flex justify-between items-center text-xs">
                         <div>
-                          <p className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Lease Term</p>
+                          <p className="text-[9px] text-[#94A3B8] font-semibold uppercase tracking-widest">Lease Term</p>
                           <p className="text-[11px] text-[#1D1D1F] font-semibold mt-1">
                             {new Date(l.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &mdash; {new Date(l.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </p>
@@ -879,7 +879,7 @@ export default function MyLeasesPage() {
               {/* Sticky Header */}
               <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div>
-                  <h2 className="text-xl font-extrabold text-[#1D1D1F]">Request Move-Out</h2>
+                  <h2 className="text-xl font-semibold text-[#1D1D1F]">Request Move-Out</h2>
                   <p className="text-xs text-[#6E6E73] mt-0.5">{activeLeaseForMoveOut.unit?.property?.name} — {activeLeaseForMoveOut.unit?.name}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1112,7 +1112,7 @@ export default function MyLeasesPage() {
                       (moveOutStep === 1 && !step1Valid) ||
                       (moveOutStep === 2 && (!step2Valid || moveOutSubmitting))
                     }
-                    className={`flex-1 rounded-xl h-11 font-bold text-white disabled:opacity-50 ${
+                    className={`flex-1 rounded-xl h-11 font-medium text-white disabled:opacity-50 ${
                       isShortNotice ? "bg-amber-500 hover:bg-amber-600" : "bg-[#007AFF] hover:bg-[#0062CC]"
                     }`}
                   >
@@ -1142,3 +1142,4 @@ export default function MyLeasesPage() {
     </div>
   );
 }
+

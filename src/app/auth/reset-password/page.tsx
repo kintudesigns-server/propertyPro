@@ -65,7 +65,7 @@ function ResetPasswordForm() {
         <h1 className="text-2xl font-black text-slate-800">Invalid Link</h1>
         <p className="text-slate-500 text-sm font-medium">This password reset link is invalid or missing.</p>
         <Link href="/auth/forgot-password">
-          <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold">
+          <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium">
             Request a New Link
           </Button>
         </Link>
@@ -178,7 +178,7 @@ function ResetPasswordForm() {
         <Button
           type="submit"
           disabled={loading || password !== confirmPassword || !hasMinLength}
-          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/20 disabled:opacity-50 transition-all"
+          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 disabled:opacity-50 transition-all"
         >
           {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Updating...</> : "Set New Password"}
         </Button>
@@ -195,7 +195,7 @@ export default function ResetPasswordPage() {
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 font-black text-2xl text-blue-600">
+          <Link href="/" className="inline-flex items-center gap-2 font-medium text-2xl text-blue-600">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <Building className="h-5 w-5 text-white" />
             </div>
@@ -212,3 +212,4 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+

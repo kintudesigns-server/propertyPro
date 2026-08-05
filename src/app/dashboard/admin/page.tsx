@@ -181,14 +181,14 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 shrink-0 w-full md:w-auto relative z-10">
             {pendingPayouts.length > 0 && (
               <Link href="/dashboard/admin/payouts" className="w-full md:w-auto">
-                <Button className="bg-rose-600 hover:bg-rose-500 text-white font-bold h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
+                <Button className="bg-rose-600 hover:bg-rose-500 text-white font-medium h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
                   Process Payouts ({pendingPayouts.length})
                 </Button>
               </Link>
             )}
             {pendingProperties.length > 0 && (
               <Link href="/dashboard/admin/properties" className="w-full md:w-auto">
-                <Button className="bg-white hover:bg-slate-100 text-slate-900 font-bold h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
+                <Button className="bg-white hover:bg-slate-100 text-slate-900 font-medium h-9 px-4 rounded-xl text-xs w-full md:w-auto shadow-xs">
                   Review Listings ({pendingProperties.length})
                 </Button>
               </Link>
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
             <LayoutGrid className="h-4 w-4 text-[#007AFF]" />
             <span>Admin Console Shortcuts</span>
           </h2>
-          <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">
+          <span className="text-xs font-normal text-[#8E8E93] uppercase tracking-wider">
             8 Modules Configured
           </span>
         </div>
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Users</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Users</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Owners & Tenants</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Properties</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Properties</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Listing Approvals</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Payout Requests</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Payout Requests</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Owner Transfers</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Platform Profit</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Platform Profit</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Fee Commissions</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -361,7 +361,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Subscriptions</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Subscriptions</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">SaaS Tiers & MRR</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -382,7 +382,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Pricing Tiers</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Pricing Tiers</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Plans & Limits</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Audit Logs</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Audit Logs</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Activity Stream</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -424,7 +424,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Console Settings</h4>
+                  <h4 className="font-semibold text-slate-900 text-sm tracking-tight group-hover:text-[#007AFF] transition-colors">Console Settings</h4>
                   <p className="text-[10px] text-[#8E8E93] font-semibold">Global Prefs</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
@@ -443,11 +443,11 @@ export default function AdminDashboard() {
           <CardHeader className="border-b border-[#E5E5EA] pb-4">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-base font-extrabold text-[#1D1D1F]">Recent Registrations</CardTitle>
+                <CardTitle className="text-base font-semibold text-[#1D1D1F]">Recent Registrations</CardTitle>
                 <CardDescription className="text-[#6E6E73] text-xs mt-0.5">Latest users who created accounts on the platform.</CardDescription>
               </div>
               <Link href="/dashboard/admin/users">
-                <Button variant="ghost" size="sm" className="text-[#007AFF] hover:text-[#0062CC] hover:bg-blue-50 font-bold text-xs gap-1 rounded-xl">
+                <Button variant="ghost" size="sm" className="text-[#007AFF] hover:text-[#0062CC] hover:bg-blue-50 font-medium text-xs gap-1 rounded-xl">
                   View All Users <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -463,10 +463,10 @@ export default function AdminDashboard() {
                     </div>
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <p className="font-extrabold text-slate-900 truncate text-sm">{u.name || "Unknown User"}</p>
+                        <p className="font-semibold text-slate-900 truncate text-sm">{u.name || "Unknown User"}</p>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] shrink-0 font-black uppercase tracking-wider ${
+                          className={`text-[9px] shrink-0 font-semibold uppercase tracking-wider ${
                             u.role === "OWNER"
                               ? "bg-blue-50 text-blue-700 border-blue-200"
                               : u.role === "TENANT"
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <Link href={`/dashboard/admin/users`}>
-                    <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs text-slate-600 hover:text-[#007AFF] font-bold rounded-lg border border-slate-200/60 shrink-0">
+                    <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs text-slate-600 hover:text-[#007AFF] font-medium rounded-lg border border-slate-200/60 shrink-0">
                       <span>View</span>
                       <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
                     </Button>
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
           <CardHeader className="border-b border-[#E5E5EA] pb-4">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
+                <CardTitle className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2">
                   <span>Action Items & Compliance</span>
                   {alertCount > 0 && (
                     <span className="bg-rose-500 text-white text-[10px] font-black rounded-full px-2 py-0.5 leading-none animate-pulse">
@@ -548,7 +548,7 @@ export default function AdminDashboard() {
                   <div className="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
-                  <p className="text-sm font-extrabold text-slate-900">All clear!</p>
+                  <p className="text-sm font-semibold text-slate-900">All clear!</p>
                   <p className="text-xs text-[#6E6E73] font-medium">No pending approval actions required right now.</p>
                 </div>
               )}
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
       <Card className="bg-white border-[#E5E5EA] shadow-xs rounded-2xl">
         <CardHeader className="border-b border-[#E5E5EA] pb-4 flex flex-row justify-between items-center gap-4">
           <div>
-            <CardTitle className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2">
               <Zap className="h-4.5 w-4.5 text-amber-500" />
               <span>System Operations & Cron Utilities</span>
             </CardTitle>
@@ -594,7 +594,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                       Monthly Invoice Generation
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Monthly</span>
+                    <span className="text-[9px] font-semibold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Monthly</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Creates rent invoices for all ACTIVE leases for the upcoming billing period.
@@ -616,7 +616,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-red-500" />
                       Late Fee Automation
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-red-100 text-red-800 px-2 py-0.5 rounded">Daily</span>
+                    <span className="text-[9px] font-semibold uppercase bg-red-100 text-red-800 px-2 py-0.5 rounded">Daily</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Marks overdue invoices past grace period and auto-creates late fee invoices.
@@ -638,7 +638,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-amber-500" />
                       Lease Expiry Engine
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Daily</span>
+                    <span className="text-[9px] font-semibold uppercase bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Daily</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Auto-expires ACTIVE leases past end date, marks units VACANT, and notifies parties.
@@ -660,7 +660,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-blue-500" />
                       Lease Activation Cron
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Daily</span>
+                    <span className="text-[9px] font-semibold uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Daily</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Scans SIGNED leases with current/past move-in dates and activates them.
@@ -682,7 +682,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-slate-500" />
                       Renewals Engine
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Weekly</span>
+                    <span className="text-[9px] font-semibold uppercase bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Weekly</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Analyzes expiring ACTIVE leases and sends renewal notice emails to tenants.
@@ -704,7 +704,7 @@ export default function AdminDashboard() {
                       <span className="h-2 w-2 rounded-full bg-slate-500" />
                       Maintenance Audit
                     </h4>
-                    <span className="text-[9px] font-black uppercase bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Daily</span>
+                    <span className="text-[9px] font-semibold uppercase bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Daily</span>
                   </div>
                   <p className="text-xs text-[#6E6E73] leading-relaxed font-medium">
                     Auto-closes maintenance requests in PENDING_TENANT_CONFIRMATION with no response.

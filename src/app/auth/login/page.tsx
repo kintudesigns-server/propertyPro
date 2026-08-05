@@ -52,7 +52,7 @@ export default function LoginPage() {
         if (role === "INSPECTOR") {
           router.push("/dashboard/inspector");
         } else if (role === "TENANT") {
-          router.push("/dashboard/tenant");
+          router.push("/dashboard");
         } else if (role) {
           router.push("/dashboard");
         } else {
@@ -77,22 +77,22 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-center items-center px-4 py-12 relative font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#1D1D1F] flex flex-col justify-center items-center px-4 py-12 relative font-sans">
       {/* Brand logo header */}
       <Link href="/" className="flex items-center gap-2.5 group mb-8 z-10">
-        <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md shadow-slate-900/10 group-hover:bg-slate-800 transition-all">
+        <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-xs group-hover:bg-slate-800 transition-all">
           <Building2 className="h-5 w-5 text-white" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xl font-black tracking-tight text-slate-900 leading-tight">PropertyPro</span>
-          <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">SaaS OS</span>
+          <span className="text-xl font-semibold tracking-tight text-[#1D1D1F] leading-tight">PropertyPro</span>
+          <span className="text-[10px] text-[#6E6E73] font-normal tracking-wider uppercase">SaaS OS</span>
         </div>
       </Link>
 
-      <Card className="w-full max-w-md bg-white border border-slate-200 shadow-sm rounded-2xl z-10 overflow-hidden">
+      <Card className="w-full max-w-md bg-white border border-slate-200 shadow-xs rounded-3xl z-10 overflow-hidden">
         <CardHeader className="space-y-1.5 pt-8 px-6 sm:px-8 text-center border-b border-slate-100">
-          <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">Welcome Back</CardTitle>
-          <CardDescription className="text-slate-500 text-xs font-medium">
+          <CardTitle className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Welcome Back</CardTitle>
+          <CardDescription className="text-[#6E6E73] text-xs font-normal">
             Sign in to access your properties, leases, and financial operations.
           </CardDescription>
         </CardHeader>
@@ -100,7 +100,7 @@ export default function LoginPage() {
         <CardContent className="p-6 sm:p-8 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-slate-700 font-bold text-xs uppercase tracking-wider">
+              <Label htmlFor="email" className="text-[#6E6E73] font-normal text-xs">
                 Email Address
               </Label>
               <Input
@@ -109,17 +109,17 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 rounded-xl h-11 text-sm font-medium transition-all"
+                className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 shadow-2xs transition-all"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-slate-700 font-bold text-xs uppercase tracking-wider">
+                <Label htmlFor="password" className="text-[#6E6E73] font-normal text-xs">
                   Password
                 </Label>
-                <Link href="/auth/forgot-password" className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                <Link href="/auth/forgot-password" className="text-xs font-normal text-[#6E6E73] hover:text-[#1D1D1F] transition-colors">
                   Forgot password?
                 </Link>
               </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 rounded-xl h-11 text-sm font-medium transition-all"
+                className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 shadow-2xs transition-all"
                 required
               />
             </div>
@@ -137,17 +137,17 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl shadow-xs transition-all flex justify-center items-center gap-2 text-sm mt-2 active:scale-[0.98]"
+              className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex justify-center items-center gap-2 transition-all mt-2"
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   <span>Signing In...</span>
                 </>
               ) : (
                 <>
                   <span>Sign In</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </>
               )}
             </Button>
@@ -155,11 +155,11 @@ export default function LoginPage() {
         </CardContent>
 
         {/* Demo Credentials Quick Switcher */}
-        <CardFooter className="flex flex-col gap-3 pt-5 text-center text-xs text-slate-500 bg-slate-50 border-t border-slate-100 p-6">
-          <div className="flex items-center justify-center gap-1.5 font-bold text-slate-700 text-xs">
+        <CardFooter className="flex flex-col gap-3 pt-5 text-center text-xs text-[#6E6E73] bg-slate-50/50 border-t border-slate-100 p-6">
+          <div className="flex items-center justify-center gap-1.5 font-normal text-[#6E6E73] text-xs">
             <Key className="h-3.5 w-3.5 text-slate-400" />
             <span>Quick Demo Login</span>
-            <code className="text-slate-700 bg-slate-200/60 px-1.5 py-0.5 rounded font-mono text-[11px] ml-1">Demo@1234</code>
+            <code className="text-[#1D1D1F] bg-slate-200/60 px-1.5 py-0.5 rounded font-mono text-[11px] ml-1">Demo@1234</code>
           </div>
 
           <div className="grid grid-cols-2 gap-1.5 w-full text-left max-h-44 overflow-y-auto pt-1">
@@ -168,15 +168,15 @@ export default function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => fillDemoAccount(acc.email)}
-                className="flex flex-col text-left px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-slate-400 hover:bg-slate-100/50 transition-all text-xs group"
+                className="flex flex-col text-left px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-xs cursor-pointer shadow-2xs group"
               >
-                <span className="font-bold text-slate-900 text-[11px] group-hover:text-slate-700">{acc.label}</span>
-                <span className="text-[10px] text-slate-400 truncate">{acc.email}</span>
+                <span className="font-semibold text-[#1D1D1F] text-xs group-hover:text-slate-700">{acc.label}</span>
+                <span className="text-[10px] text-[#6E6E73] truncate">{acc.email}</span>
               </button>
             ))}
           </div>
 
-          <Link href="/listings" className="text-slate-600 hover:text-slate-900 font-semibold text-xs mt-2 transition-colors">
+          <Link href="/listings" className="text-[#6E6E73] hover:text-[#1D1D1F] font-normal text-xs mt-2 transition-colors">
             ← Back to Listings
           </Link>
         </CardFooter>

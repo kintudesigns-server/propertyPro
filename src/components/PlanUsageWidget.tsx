@@ -74,7 +74,7 @@ export function PlanUsageWidget() {
           </div>
           <Link
             href="/dashboard/owner/billing"
-            className="px-3 py-1 bg-white text-red-700 hover:bg-gray-100 rounded-md text-xs font-bold shrink-0 transition"
+            className="px-3 py-1 bg-white text-red-700 hover:bg-gray-100 rounded-md text-xs font-medium shrink-0 transition"
           >
             Fix Billing →
           </Link>

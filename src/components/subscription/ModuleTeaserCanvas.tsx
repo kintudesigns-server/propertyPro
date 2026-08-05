@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { 
@@ -56,7 +56,7 @@ function AnalyticsTeaser() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Gross Annual Revenue</p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900">$184,200.00</span>
+            <span className="text-2xl font-semibold text-slate-900">$184,200.00</span>
             <span className="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
               <ArrowUpRight size={12} className="mr-0.5" /> +14.2%
             </span>
@@ -65,7 +65,7 @@ function AnalyticsTeaser() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Occupancy</p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900">96.8%</span>
+            <span className="text-2xl font-semibold text-slate-900">96.8%</span>
             <span className="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
               <ArrowUpRight size={12} className="mr-0.5" /> +2.1%
             </span>
@@ -74,7 +74,7 @@ function AnalyticsTeaser() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Net Operating Yield</p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900">8.45%</span>
+            <span className="text-2xl font-semibold text-slate-900">8.45%</span>
             <span className="inline-flex items-center text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
               Top Tier
             </span>
@@ -83,7 +83,7 @@ function AnalyticsTeaser() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Units</p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-black text-slate-900">32 / 33</span>
+            <span className="text-2xl font-semibold text-slate-900">32 / 33</span>
             <span className="text-xs font-bold text-slate-500">1 Vacant</span>
           </div>
         </div>
@@ -93,7 +93,7 @@ function AnalyticsTeaser() {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Portfolio Income vs Expense Breakdown</h3>
+            <h3 className="text-base font-semibold text-slate-900">Portfolio Income vs Expense Breakdown</h3>
             <p className="text-xs text-slate-500 font-medium">12-Month Rolling Comparative Cashflow</p>
           </div>
           <div className="flex gap-2">
@@ -153,7 +153,7 @@ function InspectionsTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85">
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Inspection Management Portal</h3>
+          <h3 className="text-base font-semibold text-slate-900">Inspection Management Portal</h3>
           <p className="text-xs text-slate-500 font-medium">Scheduled & Completed Property Walkthroughs</p>
         </div>
         <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -174,12 +174,12 @@ function InspectionsTeaser() {
                 <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${item.badge}`}>
                   {item.status}
                 </span>
-                <h4 className="text-sm font-bold text-slate-900 pt-1">{item.title}</h4>
+                <h4 className="text-sm font-semibold text-slate-900 pt-1">{item.title}</h4>
                 <p className="text-xs text-slate-500 font-medium">{item.prop}</p>
               </div>
               <ShieldCheck className="text-blue-500" size={24} />
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold border-t border-slate-100 pt-3">
+            <div className="flex items-center justify-between text-xs text-[#6E6E73] font-normal border-t border-slate-100 pt-3">
               <span>📅 {item.date}</span>
               <span>📷 14 Photos Attached</span>
               <span className="text-blue-600 font-bold">Export PDF →</span>
@@ -197,7 +197,7 @@ function TeamTeaser() {
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Property Team & Inspector Roster</h3>
+            <h3 className="text-base font-semibold text-slate-900">Property Team & Inspector Roster</h3>
             <p className="text-xs text-slate-500 font-medium">Assign inspections and manage staff roles</p>
           </div>
           <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -217,7 +217,7 @@ function TeamTeaser() {
                   {user.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{user.name}</h4>
+                  <h4 className="text-sm font-semibold text-slate-900">{user.name}</h4>
                   <p className="text-xs text-slate-500">{user.role} • {user.email}</p>
                 </div>
               </div>
@@ -241,7 +241,7 @@ function VendorsTeaser() {
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">External Vendor & Contractor Directory</h3>
+            <h3 className="text-base font-semibold text-slate-900">External Vendor & Contractor Directory</h3>
             <p className="text-xs text-slate-500 font-medium">Compliance tracking, W9 records, and direct payouts</p>
           </div>
           <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -261,7 +261,7 @@ function VendorsTeaser() {
                   <Truck size={20} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{v.company}</h4>
+                  <h4 className="text-sm font-semibold text-slate-900">{v.company}</h4>
                   <p className="text-xs text-slate-500">{v.trade}</p>
                 </div>
               </div>
@@ -285,23 +285,23 @@ function AccountingTeaser() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase">Total Collected</p>
-          <p className="text-2xl font-black text-emerald-600">$42,500.00</p>
+          <p className="text-2xl font-semibold text-emerald-600">$42,500.00</p>
           <p className="text-xs text-slate-500 font-medium">July 2026 Rental Income</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase">Operating Expenses</p>
-          <p className="text-2xl font-black text-rose-600">$6,840.00</p>
+          <p className="text-2xl font-semibold text-rose-600">$6,840.00</p>
           <p className="text-xs text-slate-500 font-medium">Maintenance & Platform Fees</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase">Net Owner Disbursement</p>
-          <p className="text-2xl font-black text-slate-900">$35,660.00</p>
+          <p className="text-2xl font-semibold text-slate-900">$35,660.00</p>
           <p className="text-xs text-slate-500 font-medium">Ready for Bank Deposit</p>
         </div>
       </div>
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <h4 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">Recent Transaction Ledger</h4>
+        <h4 className="text-sm font-semibold text-slate-900 border-b border-slate-100 pb-2">Recent Transaction Ledger</h4>
         {[
           { desc: "Rent Collection — Apt 4B (Jul 2026)", cat: "Income", amount: "+$2,450.00", color: "text-emerald-600" },
           { desc: "Vendor Payout — Apex HVAC Repair", cat: "Maintenance Expense", amount: "-$380.00", color: "text-rose-600" },
@@ -326,7 +326,7 @@ function WalletTeaser() {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase">Available Payout Balance</p>
-          <p className="text-3xl font-black text-slate-900">$18,420.50</p>
+          <p className="text-3xl font-semibold text-slate-900">$18,420.50</p>
           <p className="text-xs text-emerald-600 font-bold">✓ Verified Bank Deposit Connected</p>
         </div>
         <div className="h-11 px-6 bg-blue-600 text-white rounded-xl font-bold text-sm flex items-center shadow-md">
@@ -335,14 +335,14 @@ function WalletTeaser() {
       </div>
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <h4 className="text-sm font-bold text-slate-900">Linked Bank Accounts</h4>
+        <h4 className="text-sm font-semibold text-slate-900">Linked Bank Accounts</h4>
         <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold">
               🏦
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900">CHASE BUSINESS CHECKING (•••• 4821)</p>
+              <p className="text-sm font-semibold text-slate-900">CHASE BUSINESS CHECKING (•••• 4821)</p>
               <p className="text-xs text-slate-500">Primary Direct Deposit Account • Routing 021000021</p>
             </div>
           </div>
@@ -358,7 +358,7 @@ function MessagesTeaser() {
     <div className="w-full space-y-4 select-none pointer-events-none opacity-85">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-base font-bold text-slate-900">Tenant & Team Messaging Center</h3>
+          <h3 className="text-base font-semibold text-slate-900">Tenant & Team Messaging Center</h3>
           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Real-Time SSE</span>
         </div>
         <div className="space-y-3 max-w-lg mx-auto">
@@ -383,7 +383,7 @@ function CalendarTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900">July 2026 Operational Schedule</h3>
+          <h3 className="text-base font-semibold text-slate-900">July 2026 Operational Schedule</h3>
           <div className="flex gap-2">
             <span className="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-700">Month View</span>
           </div>

@@ -198,22 +198,22 @@ export default function InvoicesPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "PAID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Paid</span>;
-      case "UNPAID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">Unpaid</span>;
-      case "OVERDUE": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Overdue</span>;
-      case "VOID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Void</span>;
-      default: return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">{status}</span>;
+      case "PAID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Paid</span>;
+      case "UNPAID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">Unpaid</span>;
+      case "OVERDUE": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Overdue</span>;
+      case "VOID": return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Void</span>;
+      default: return <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">{status}</span>;
     }
   };
 
   const getTypeBadge = (type: string) => {
     const safeType = type || "RENT";
     switch (safeType) {
-      case "RENT": return <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Rent</span>;
-      case "DEPOSIT": return <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">Deposit</span>;
-      case "LATE_FEE": return <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">Late Fee</span>;
-      case "MAINTENANCE": return <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Maintenance</span>;
-      default: return <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">{safeType}</span>;
+      case "RENT": return <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Rent</span>;
+      case "DEPOSIT": return <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">Deposit</span>;
+      case "LATE_FEE": return <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">Late Fee</span>;
+      case "MAINTENANCE": return <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Maintenance</span>;
+      default: return <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">{safeType}</span>;
     }
   };
 
@@ -233,15 +233,15 @@ export default function InvoicesPage() {
       <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Invoices</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Invoices</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-1">
             {isTenant ? "View your rent statements and transaction invoices." : "Manage billing, track payments, and generate invoices."}
           </p>
         </div>
         {!isTenant && (
-          <Button onClick={() => setIsModalOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer">
+          <Button onClick={() => setIsModalOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs transition-all cursor-pointer border-none">
             <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Invoice
           </Button>
         )}
@@ -249,37 +249,37 @@ export default function InvoicesPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 sm:p-6 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">{isTenant ? "Total Paid" : "Total Collected"}</span>
-            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xs">
+            <span className="text-xs font-normal text-[#6E6E73]">{isTenant ? "Total Paid" : "Total Collected"}</span>
+            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200/60 text-emerald-700 shadow-2xs">
               <CheckCircle className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 tracking-tight">${totalCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          <p className="text-[11px] font-semibold text-emerald-800 mt-4 pt-3 border-t border-slate-100">Payments marked as PAID</p>
+          <div className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${totalCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">Payments marked as PAID</p>
         </div>
 
-        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 sm:p-6 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900">Outstanding Balance</span>
-            <div className="p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 shadow-2xs">
+            <span className="text-xs font-normal text-[#6E6E73]">Outstanding Balance</span>
+            <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-700 shadow-2xs">
               <Receipt className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 tracking-tight">${totalOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          <p className="text-[11px] font-semibold text-amber-900 mt-4 pt-3 border-t border-slate-100">Awaiting payment</p>
+          <div className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${totalOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">Awaiting payment</p>
         </div>
 
-        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 sm:p-6 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">Total Overdue</span>
-            <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-2xs">
+            <span className="text-xs font-normal text-[#6E6E73]">Total Overdue</span>
+            <div className="p-2 rounded-xl bg-rose-50 border border-rose-200/60 text-rose-700 shadow-2xs">
               <XCircle className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 tracking-tight">${totalOverdue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          <p className="text-[11px] font-semibold text-rose-800 mt-4 pt-3 border-t border-slate-100">Requires immediate action</p>
+          <div className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${totalOverdue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <p className="text-xs font-normal text-[#6E6E73] mt-4 pt-3 border-t border-slate-100">Requires immediate action</p>
         </div>
       </div>
 
@@ -288,12 +288,12 @@ export default function InvoicesPage() {
         <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-3 bg-slate-50/50">
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Search by invoice ID, tenant, or property..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-10 rounded-xl bg-white border-slate-200 text-xs font-semibold text-slate-900 placeholder-slate-400 focus-visible:ring-slate-400 shadow-2xs"
+                className="pl-9 h-9 rounded-xl bg-white border-slate-200 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus-visible:ring-slate-400 shadow-2xs"
               />
             </div>
             
@@ -301,7 +301,7 @@ export default function InvoicesPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-10 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer"
+                className="w-full h-9 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-normal text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
               >
                 <option value="all">Status: All</option>
                 <option value="PAID">Paid</option>
@@ -315,7 +315,7 @@ export default function InvoicesPage() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full h-10 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer"
+                className="w-full h-9 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-normal text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
               >
                 <option value="all">Type: All</option>
                 <option value="RENT">Rent</option>
@@ -329,27 +329,27 @@ export default function InvoicesPage() {
 
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
+            <TableHeader className="bg-slate-50/70 border-b border-slate-100 text-[#6E6E73]">
               <TableRow>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Invoice ID</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Property &amp; Tenant</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Type</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Issue Date</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Due Date</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Gross Amount</TableHead>
-                {!isTenant && <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Net Earnings</TableHead>}
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Status</TableHead>
-                <TableHead className="text-right font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Actions</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Invoice ID</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Property &amp; Tenant</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Type</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Issue Date</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Due Date</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Gross Amount</TableHead>
+                {!isTenant && <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Net Earnings</TableHead>}
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Status</TableHead>
+                <TableHead className="text-right font-normal text-xs text-[#6E6E73] py-3.5 px-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-slate-100">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-slate-500 font-extrabold text-xs">Loading invoices...</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#6E6E73] font-normal text-xs">Loading invoices...</TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-slate-500 font-extrabold text-xs">No invoices found.</TableCell>
+                  <TableCell colSpan={isTenant ? 8 : 9} className="h-32 text-center text-[#6E6E73] font-normal text-xs">No invoices found.</TableCell>
                 </TableRow>
               ) : (
                 (() => {
@@ -360,27 +360,27 @@ export default function InvoicesPage() {
                     <>
                       {paginated.map((inv) => (
                         <TableRow key={inv.id} className="hover:bg-slate-50/50 transition-colors">
-                          <TableCell className="font-mono text-xs font-black text-slate-900">
+                          <TableCell className="font-mono text-xs font-semibold text-[#1D1D1F]">
                             INV-{inv.id.substring(0, 6).toUpperCase()}
                           </TableCell>
                           <TableCell>
-                            <div className="font-extrabold text-xs text-slate-900">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
-                            <div className="text-[11px] font-semibold text-slate-500">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
+                            <div className="font-semibold text-xs text-[#1D1D1F]">{inv.lease?.unit?.property?.name || "Unknown Property"}</div>
+                            <div className="text-xs font-normal text-[#6E6E73]">{inv.lease?.tenant?.name || "Unknown Tenant"}</div>
                           </TableCell>
                           <TableCell>
                             {getTypeBadge(inv.invoiceType)}
                           </TableCell>
-                          <TableCell className="text-xs font-semibold text-slate-500">
+                          <TableCell className="text-xs font-normal text-[#6E6E73]">
                             {new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                           </TableCell>
-                          <TableCell className="text-xs font-semibold text-slate-500">
+                          <TableCell className="text-xs font-normal text-[#6E6E73]">
                             {new Date(inv.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                           </TableCell>
-                          <TableCell className="font-black text-xs text-slate-900">
+                          <TableCell className="font-semibold text-xs text-[#1D1D1F]">
                             ${Number(inv.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </TableCell>
                           {!isTenant && (
-                            <TableCell className="font-black text-xs text-emerald-700">
+                            <TableCell className="font-semibold text-xs text-emerald-700">
                               {inv.netToOwner 
                                 ? `$${Number(inv.netToOwner).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
                                 : "-"}
@@ -400,7 +400,7 @@ export default function InvoicesPage() {
                                     setSelectedInvoice(inv);
                                     setIsDetailModalOpen(true);
                                   }} 
-                                  className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl"
+                                  className="cursor-pointer font-medium text-xs text-[#1D1D1F] rounded-xl"
                                 >
                                   <Eye className="mr-2 h-4 w-4 text-slate-400" /> View Details
                                 </DropdownMenuItem>
@@ -410,36 +410,36 @@ export default function InvoicesPage() {
                                     generateSingleInvoicePDF(inv);
                                     toast.success("Invoice PDF download initiated");
                                   }} 
-                                  className="cursor-pointer font-extrabold text-xs text-slate-900 rounded-xl"
+                                  className="cursor-pointer font-medium text-xs text-[#1D1D1F] rounded-xl"
                                 >
                                   <Download className="mr-2 h-4 w-4 text-slate-400" /> Download PDF
                                 </DropdownMenuItem>
                                 
                                 {isTenant ? (
                                   (inv.status === "UNPAID" || inv.status === "OVERDUE") && (
-                                    <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-extrabold text-xs text-emerald-800 rounded-xl">
+                                    <DropdownMenuItem onClick={() => router.push("/dashboard/payments/pay-rent")} className="cursor-pointer font-medium text-xs text-emerald-800 rounded-xl">
                                       <Receipt className="mr-2 h-4 w-4 text-emerald-600" /> Pay Invoice
                                     </DropdownMenuItem>
                                   )
                                 ) : (
                                   <>
                                     {inv.status !== "PAID" && (
-                                      <DropdownMenuItem onClick={() => handleSendReminder(inv)} className="cursor-pointer font-extrabold text-xs text-amber-800 rounded-xl">
+                                      <DropdownMenuItem onClick={() => handleSendReminder(inv)} className="cursor-pointer font-medium text-xs text-amber-800 rounded-xl">
                                         <Bell className="mr-2 h-4 w-4 text-amber-600" /> Send Reminder
                                       </DropdownMenuItem>
                                     )}
                                     {inv.status !== "PAID" && (
-                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "PAID")} className="cursor-pointer font-extrabold text-xs text-emerald-800 rounded-xl">
+                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "PAID")} className="cursor-pointer font-medium text-xs text-emerald-800 rounded-xl">
                                         <CheckCircle className="mr-2 h-4 w-4 text-emerald-600" /> Mark as Paid
                                       </DropdownMenuItem>
                                     )}
                                     {inv.status !== "OVERDUE" && inv.status !== "PAID" && (
-                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "OVERDUE")} className="cursor-pointer font-extrabold text-xs text-rose-700 rounded-xl">
+                                      <DropdownMenuItem onClick={() => handleUpdateStatus(inv.id, "OVERDUE")} className="cursor-pointer font-medium text-xs text-rose-700 rounded-xl">
                                         <AlertCircle className="mr-2 h-4 w-4 text-rose-600" /> Mark Overdue
                                       </DropdownMenuItem>
                                     )}
                                     
-                                    <DropdownMenuItem onClick={() => handleDelete(inv.id)} className="cursor-pointer font-extrabold text-xs text-rose-600 rounded-xl hover:bg-rose-50 mt-1">
+                                    <DropdownMenuItem onClick={() => handleDelete(inv.id)} className="cursor-pointer font-medium text-xs text-rose-600 rounded-xl hover:bg-rose-50 mt-1">
                                       <Trash2 className="mr-2 h-4 w-4" /> Delete Invoice
                                     </DropdownMenuItem>
                                   </>
@@ -459,12 +459,12 @@ export default function InvoicesPage() {
 
         {/* Footer Pagination */}
         <div className="bg-slate-50/50 border-t border-slate-100 px-6 py-4 flex items-center justify-between">
-          <div className="text-xs text-slate-500 font-semibold">
-            Showing <span className="font-extrabold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-            <span className="font-extrabold text-slate-900">
+          <div className="text-xs text-[#6E6E73] font-normal">
+            Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+            <span className="font-semibold text-slate-900">
               {Math.min(currentPage * itemsPerPage, filteredInvoices.length)}
             </span>{" "}
-            of <span className="font-extrabold text-slate-900">{filteredInvoices.length}</span> invoices
+            of <span className="font-semibold text-slate-900">{filteredInvoices.length}</span> invoices
           </div>
           <div className="flex items-center gap-1.5">
             <button
@@ -490,12 +490,12 @@ export default function InvoicesPage() {
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="sm:max-w-md bg-white rounded-3xl p-0 border border-slate-200 shadow-2xl overflow-hidden font-sans">
             <div className="p-6 border-b border-slate-100 bg-slate-50/70">
-              <DialogTitle className="text-lg font-black text-slate-900 tracking-tight">Create New Invoice</DialogTitle>
+              <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight">Create New Invoice</DialogTitle>
             </div>
             
             <form onSubmit={handleCreateInvoice} className="p-6 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Select Lease <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-900">Select Lease <span className="text-rose-500">*</span></label>
                 <select 
                   required
                   className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-slate-400 shadow-2xs"
@@ -512,7 +512,7 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Invoice Amount ($) <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-900">Invoice Amount ($) <span className="text-rose-500">*</span></label>
                 <Input 
                   required
                   type="number"
@@ -525,7 +525,7 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Due Date <span className="text-rose-500">*</span></label>
+                <label className="text-xs font-semibold text-slate-900">Due Date <span className="text-rose-500">*</span></label>
                 <Input 
                   required
                   type="date"
@@ -536,7 +536,7 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Invoice Type</label>
+                <label className="text-xs font-semibold text-slate-900">Invoice Type</label>
                 <select 
                   className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-slate-400 shadow-2xs"
                   value={formData.invoiceType}
@@ -550,7 +550,7 @@ export default function InvoicesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-extrabold text-slate-900">Initial Status</label>
+                <label className="text-xs font-semibold text-slate-900">Initial Status</label>
                 <select 
                   className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-slate-400 shadow-2xs"
                   value={formData.status}
@@ -566,7 +566,7 @@ export default function InvoicesPage() {
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-10 font-black text-xs px-6 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs cursor-pointer">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="rounded-xl h-10 font-black text-xs px-6 bg-slate-900 hover:bg-slate-800 text-white shadow-xs cursor-pointer">
+                <Button type="submit" disabled={isSubmitting} className="rounded-xl h-10 font-medium text-xs px-6 bg-slate-900 hover:bg-slate-800 text-white shadow-xs cursor-pointer">
                   {isSubmitting ? "Creating..." : "Create Invoice"}
                 </Button>
               </DialogFooter>
@@ -582,7 +582,7 @@ export default function InvoicesPage() {
             <>
               <div className="p-6 border-b border-slate-100 bg-slate-50/70 flex justify-between items-center">
                 <div>
-                  <DialogTitle className="text-lg font-black text-slate-900 tracking-tight">
+                  <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight">
                     Invoice Detail
                   </DialogTitle>
                   <p className="text-slate-500 text-xs font-extrabold mt-0.5 font-mono">
@@ -605,11 +605,11 @@ export default function InvoicesPage() {
               <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-2xs">
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status</p>
+                    <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Status</p>
                     <div className="mt-1">{getStatusBadge(selectedInvoice.status)}</div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Gross Rent Billed</p>
+                    <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Gross Rent Billed</p>
                     <p className="text-xl font-black text-slate-900 mt-0.5">
                       ${Number(selectedInvoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
@@ -618,13 +618,13 @@ export default function InvoicesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Issue Date</p>
+                    <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Issue Date</p>
                     <p className="text-xs font-black text-slate-900 mt-1">
                       {new Date(selectedInvoice.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Due Date</p>
+                    <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Due Date</p>
                     <p className="text-xs font-black text-slate-900 mt-1">
                       {new Date(selectedInvoice.dueDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
@@ -649,3 +649,4 @@ export default function InvoicesPage() {
     </div>
   );
 }
+

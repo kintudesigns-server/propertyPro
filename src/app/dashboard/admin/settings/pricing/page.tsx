@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -228,10 +228,10 @@ export default function PricingSettingsPage() {
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1D1D1F]">
               Pricing Plans & Tier Licensing
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm font-semibold leading-relaxed">
+            <p className="text-[#6E6E73] text-xs md:text-sm font-normal leading-relaxed">
               Configure landlord subscription products, Stripe price IDs, module access gating lists, and property unit quotas.
             </p>
           </motion.div>
@@ -239,7 +239,7 @@ export default function PricingSettingsPage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/dashboard/admin/subscriptions"
-              className="inline-flex items-center bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl font-black text-xs h-9 px-4 transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl font-medium text-xs h-9 px-4 transition-all shadow-2xs cursor-pointer"
             >
               <CreditCard className="h-3.5 w-3.5 mr-2 text-slate-500" />
               Active Subscriptions <ArrowUpRight className="h-3.5 w-3.5 ml-1 text-slate-400" />
@@ -260,8 +260,8 @@ export default function PricingSettingsPage() {
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total SaaS Plans</p>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">{tiers.length} plans</p>
+              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Total SaaS Plans</p>
+              <p className="text-3xl font-semibold text-slate-900 tracking-tight">{tiers.length} plans</p>
               <p className="text-[11px] font-bold text-emerald-700">{activeTiers} active in marketplace</p>
             </div>
             <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-200/80 shadow-2xs">
@@ -273,8 +273,8 @@ export default function PricingSettingsPage() {
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Plan Subscribers</p>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">{totalSubscribers} owners</p>
+              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Plan Subscribers</p>
+              <p className="text-3xl font-semibold text-slate-900 tracking-tight">{totalSubscribers} owners</p>
               <p className="text-[11px] font-semibold text-slate-500">Paying landlord contracts</p>
             </div>
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-200/80 shadow-2xs">
@@ -286,8 +286,8 @@ export default function PricingSettingsPage() {
         <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Est. Monthly MRR Forecast</p>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">${estimatedMrr.toLocaleString()}/mo</p>
+              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Est. Monthly MRR Forecast</p>
+              <p className="text-3xl font-semibold text-slate-900 tracking-tight">${estimatedMrr.toLocaleString()}/mo</p>
               <p className="text-[11px] font-semibold text-slate-500">Stripe recurring forecast</p>
             </div>
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-200/80 shadow-2xs">
@@ -318,8 +318,8 @@ export default function PricingSettingsPage() {
                 {/* Header Title & Badges */}
                 <div className="flex justify-between items-start gap-3">
                   <div className="space-y-1 min-w-0">
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight truncate">{tier.name}</h3>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed line-clamp-2">{tier.description}</p>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight truncate">{tier.name}</h3>
+                    <p className="text-xs text-[#6E6E73] font-normal leading-relaxed line-clamp-2">{tier.description}</p>
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
@@ -342,48 +342,50 @@ export default function PricingSettingsPage() {
                 </div>
 
                 {/* Price Display Box */}
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex justify-between items-baseline shadow-2xs">
-                  <div>
-                    <span className="text-3xl font-black text-slate-900 tracking-tight">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-2xs gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-semibold text-slate-900 tracking-tight">
                       {tier.isCustom ? 'Custom' : `$${tier.price}`}
                     </span>
-                    {!tier.isCustom && <span className="text-slate-500 font-extrabold text-xs"> / month</span>}
+                    {!tier.isCustom && <span className="text-slate-500 font-normal text-xs">/mo</span>}
                   </div>
                   
-                  <span className="text-xs font-black text-slate-600 flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-slate-400" />
-                    {subCount} subscriber{subCount === 1 ? "" : "s"}
-                  </span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 shadow-2xs shrink-0">
+                    <Users className="h-3.5 w-3.5 text-slate-500" />
+                    <span className="text-xs font-medium text-slate-700">
+                      {subCount} {subCount === 1 ? "subscriber" : "subscribers"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Core Quotas & Boundaries */}
-                <div className="space-y-3 text-xs text-slate-700 font-semibold border-b border-slate-100 pb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
+                <div className="space-y-3 text-xs border-b border-slate-100 pb-4">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[#6E6E73] font-normal flex items-center gap-1.5">
                       <Building className="h-3.5 w-3.5 text-slate-400" />
                       Portfolio Unit Cap
                     </span>
-                    <span className="text-slate-900 font-black">
+                    <span className="text-[#1D1D1F] font-semibold">
                       Up to {isUnlimited ? 'Unlimited' : `${tier.maxUnits} units`}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[#6E6E73] font-normal flex items-center gap-1.5">
                       <Wrench className="h-3.5 w-3.5 text-slate-400" />
                       Max Inspectors
                     </span>
-                    <span className="text-slate-900 font-black">
-                      {tier.maxInspectors ?? 1} inspector accounts
+                    <span className="text-[#1D1D1F] font-semibold">
+                      {tier.maxInspectors ?? 1} accounts
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-extrabold flex items-center gap-1.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[#6E6E73] font-normal flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-slate-400" />
                       Evaluation Period
                     </span>
-                    <span className="text-slate-900 font-black">
+                    <span className="text-[#1D1D1F] font-semibold">
                       {isTrialActive ? `${tier.trialDays} days free` : 'No free trial'}
                     </span>
                   </div>
@@ -391,20 +393,20 @@ export default function PricingSettingsPage() {
 
                 {/* Enabled Modules Tags */}
                 <div className="space-y-2">
-                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Enabled Modules</span>
+                  <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Enabled Modules</span>
                   <div className="flex flex-wrap gap-1.5">
                     {GATABLE_MODULES.filter(m => (tier.modules || []).includes(m.key)).slice(0, 6).map((mod) => (
-                      <Badge key={mod.key} className="bg-slate-100 text-slate-800 border border-slate-200/80 rounded-md text-[9px] font-black shadow-2xs px-2 py-0.5">
+                      <Badge key={mod.key} className="bg-slate-100 text-slate-800 border border-slate-200/80 rounded-md text-[10px] font-medium shadow-2xs px-2 py-0.5">
                         {mod.label}
                       </Badge>
                     ))}
                     {(tier.modules || []).length > 6 && (
-                      <Badge className="bg-blue-50 text-blue-800 border border-blue-200 rounded-md text-[9px] font-black shadow-2xs px-2 py-0.5">
+                      <Badge className="bg-blue-50 text-blue-800 border border-blue-200 rounded-md text-[10px] font-medium shadow-2xs px-2 py-0.5">
                         +{(tier.modules || []).length - 6} more
                       </Badge>
                     )}
                     {(tier.modules || []).length === 0 && (
-                      <span className="text-xs text-slate-400 font-medium italic">No modules enabled</span>
+                      <span className="text-xs text-slate-400 font-normal italic">No modules enabled</span>
                     )}
                   </div>
                 </div>
@@ -416,7 +418,7 @@ export default function PricingSettingsPage() {
                 <div className="flex items-center gap-2 pt-4">
                   <Button 
                     onClick={() => router.push(`/dashboard/admin/settings/pricing/${tier.id}`)}
-                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 font-black text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none"
+                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 font-medium text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none"
                   >
                     <Edit2 className="h-3.5 w-3.5" /> Edit Plan & Gating
                   </Button>
@@ -455,3 +457,4 @@ export default function PricingSettingsPage() {
     </div>
   );
 }
+

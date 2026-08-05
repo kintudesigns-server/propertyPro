@@ -110,13 +110,13 @@ export function KpiCard({
 
   const valueStr = String(value);
   const isLongValue = valueStr.length > 8;
-  const valueFontSize = isLongValue ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl";
+  const valueFontSize = isLongValue ? "text-xl" : "text-2xl";
 
   const content = (
     <div
       onClick={onClick}
       className={`
-        bg-white border rounded-[22px] p-4 sm:p-4.5 shadow-xs transition-all duration-200 relative overflow-hidden group flex flex-col justify-between
+        bg-white border rounded-3xl p-5 shadow-xs transition-all duration-200 relative overflow-hidden group flex flex-col justify-between
         ${onClick || href ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md" : ""}
         ${
           active
@@ -126,31 +126,31 @@ export function KpiCard({
         ${className}
       `}
     >
-      <div className="flex justify-between items-start mb-2.5 gap-1.5">
-        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 leading-tight block min-w-0" title={title}>
+      <div className="flex justify-between items-start mb-2 gap-1.5">
+        <span className="text-xs font-normal text-[#6E6E73] leading-tight block min-w-0" title={title}>
           {title}
         </span>
         {Icon && (
-          <div className={`h-7.5 w-7.5 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 shadow-2xs ${styles.iconBg}`}>
-            <Icon className="h-3.5 w-3.5" />
+          <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 shadow-2xs ${styles.iconBg}`}>
+            <Icon className="h-4 w-4" />
           </div>
         )}
       </div>
 
       <div className="space-y-1">
         <div className="flex items-baseline justify-between gap-2 min-w-0">
-          <p className={`${valueFontSize} font-black tracking-tight text-slate-900 leading-none truncate`} title={valueStr}>
+          <p className={`${valueFontSize} font-semibold tracking-tight text-[#1D1D1F] leading-none truncate`} title={valueStr}>
             {value}
           </p>
           {badgeText && (
-            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border shrink-0 ${styles.bg}`}>
+            <span className={`text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${styles.bg}`}>
               {badgeText}
             </span>
           )}
         </div>
 
         {subtext && (
-          <div className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5 truncate pt-0.5">
+          <div className="text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 truncate pt-0.5">
             <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${styles.dot}`} />
             <span className="truncate">{subtext}</span>
           </div>

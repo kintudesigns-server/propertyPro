@@ -230,7 +230,7 @@ export default function TenantDocumentsPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Verifying feature permissions...</p>
+        <p className="text-slate-400 font-medium text-[11px] uppercase tracking-wider">Verifying feature permissions...</p>
       </div>
     );
   }
@@ -311,27 +311,27 @@ export default function TenantDocumentsPage() {
       <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70 overflow-hidden" : ""}>
       <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 px-4 md:px-0 font-sans">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs font-sans">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-2xs font-sans">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
-            <FileText className="h-5 w-5 text-white" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <FileText className="h-4 w-4 text-slate-700" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Documents</h1>
-            <p className="text-slate-500 text-xs font-semibold mt-0.5">Access and manage your lease-related documents</p>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Documents</h1>
+            <p className="text-[#6E6E73] text-xs font-normal mt-0.5">Access and manage your lease-related documents</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={fetchData}
-            className="flex items-center justify-center gap-2 h-10 px-4 text-xs font-black text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs w-full sm:w-auto cursor-pointer"
+            className="flex items-center justify-center gap-2 h-9 px-4 text-xs font-medium text-[#1D1D1F] bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs w-full sm:w-auto cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
           </button>
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center justify-center gap-2 h-10 px-5 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs w-full sm:w-auto cursor-pointer border-none"
+            className="flex items-center justify-center gap-2 h-9 px-4 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs w-full sm:w-auto cursor-pointer border-none"
           >
             <Plus className="h-4 w-4" />
             Upload Document
@@ -342,66 +342,66 @@ export default function TenantDocumentsPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans">
         {/* Total Documents */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
           <div className="space-y-1">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Documents</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{totalDocsCount}</h3>
-            <p className="text-[11px] font-semibold text-slate-500">{totalSizeMB} MB total size</p>
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Total Documents</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{totalDocsCount}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">{totalSizeMB} MB total size</p>
           </div>
-          <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
-            <FileText className="h-5 w-5" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <FileText className="h-4 w-4" />
           </div>
         </div>
 
         {/* Filtered Results */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
           <div className="space-y-1">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Filtered Results</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{filteredDocsCount}</h3>
-            <p className="text-[11px] font-semibold text-slate-500">Matching your current filters</p>
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Filtered Results</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{filteredDocsCount}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Matching your current filters</p>
           </div>
-          <div className="p-3 bg-slate-100 text-slate-900 border border-slate-200/80 rounded-2xl shadow-2xs">
-            <Search className="h-5 w-5" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <Search className="h-4 w-4" />
           </div>
         </div>
 
         {/* Categories */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
           <div className="space-y-1">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Categories</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{uniqueCategoriesCount}</h3>
-            <p className="text-[11px] font-semibold text-slate-500">Available document categories</p>
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Categories</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{uniqueCategoriesCount}</h3>
+            <p className="text-xs font-normal text-[#6E6E73]">Available document categories</p>
           </div>
-          <div className="p-3 bg-amber-50 text-amber-600 border border-amber-200/80 rounded-2xl shadow-2xs">
-            <Folder className="h-5 w-5" />
+          <div className="h-9 w-9 bg-amber-50 border border-amber-200/80 rounded-xl flex items-center justify-center text-amber-600 shadow-2xs shrink-0">
+            <Folder className="h-4 w-4" />
           </div>
         </div>
 
         {/* Recent Uploads */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex justify-between items-start">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start">
           <div className="space-y-1">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Recent Uploads</p>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{recentUploadsCount}</h3>
-            <p className="text-[11px] font-semibold text-emerald-600 font-extrabold">Last 30 days</p>
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Recent Uploads</p>
+            <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{recentUploadsCount}</h3>
+            <p className="text-xs font-medium text-emerald-600">Last 30 days</p>
           </div>
-          <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-200/80 rounded-2xl shadow-2xs">
-            <Upload className="h-5 w-5" />
+          <div className="h-9 w-9 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center justify-center text-emerald-600 shadow-2xs shrink-0">
+            <Upload className="h-4 w-4" />
           </div>
         </div>
       </div>
 
       {/* Filter and Table Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 md:p-8 space-y-6 font-sans">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 md:p-8 space-y-6 font-sans">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Documents</h2>
-            <p className="text-slate-500 text-xs font-semibold mt-0.5">Access and manage all your lease-related documents</p>
+            <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Documents</h2>
+            <p className="text-[#6E6E73] text-xs font-normal mt-0.5">Access and manage all your lease-related documents</p>
           </div>
           {/* Filters Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 w-full md:w-auto">
             {/* Search Input */}
             <div className="relative w-full md:w-64">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#6E6E73] pointer-events-none">
                 <Search className="h-4 w-4" />
               </span>
               <input
@@ -412,7 +412,7 @@ export default function TenantDocumentsPage() {
                   setDocSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full h-10 pl-10 pr-4 text-xs font-extrabold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-slate-900 text-slate-900 shadow-2xs placeholder-slate-400"
+                className="w-full h-9 rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
               />
             </div>
 
@@ -423,7 +423,7 @@ export default function TenantDocumentsPage() {
                 setFilterCategory(e.target.value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-3 text-xs font-extrabold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-slate-900 text-slate-900 shadow-2xs cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer"
             >
               <option value="ALL">All Categories</option>
               <option value="LEASE">Lease</option>
@@ -442,7 +442,7 @@ export default function TenantDocumentsPage() {
                 setFilterType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-4 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"
+              className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer"
             >
               <option value="ALL">All Types</option>
               <option value="Lease">Lease</option>
@@ -463,7 +463,7 @@ export default function TenantDocumentsPage() {
                 setFilterProperty(e.target.value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-4 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"
+              className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer"
             >
               <option value="ALL">All Properties</option>
               {uniqueProperties.map((p: any) => (
@@ -474,34 +474,33 @@ export default function TenantDocumentsPage() {
         </div>
 
         {/* Documents count and subtext */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-bold text-slate-800">Documents ({filteredDocsCount})</h4>
-          <p className="text-[#8E8E93] text-xs">Access and manage all your lease-related documents</p>
+        <div className="space-y-0.5">
+          <h3 className="text-xs font-semibold text-[#1D1D1F]">Documents ({filteredDocsCount})</h3>
+          <p className="text-[#6E6E73] text-xs font-normal">Access and manage all your lease-related documents</p>
         </div>
 
         {/* Table Container */}
         <div className="overflow-hidden border border-slate-100 rounded-2xl">
-          <table className="w-full border-collapse text-left text-sm text-[#6E6E73]">
-            <thead className="bg-slate-50/75 border-b border-slate-100 text-[#8E8E93] font-bold uppercase text-[10px] tracking-wider">
+          <table className="w-full border-collapse text-left text-xs font-normal text-[#1D1D1F]">
+            <thead className="bg-[#F2F2F7] border-b border-slate-100 text-[#6E6E73] font-medium uppercase text-[11px] tracking-wider">
               <tr>
-                <th scope="col" className="px-6 py-4">Document</th>
-                <th scope="col" className="px-6 py-4">Type</th>
-                <th scope="col" className="px-6 py-4">Property</th>
-                <th scope="col" className="px-6 py-4">Upload Date</th>
-                <th scope="col" className="px-6 py-4">Size</th>
-                <th scope="col" className="px-6 py-4 text-right">Actions</th>
+                <th scope="col" className="px-6 py-3">Document</th>
+                <th scope="col" className="px-6 py-3">Type</th>
+                <th scope="col" className="px-6 py-3">Property</th>
+                <th scope="col" className="px-6 py-3">Upload Date</th>
+                <th scope="col" className="px-6 py-3">Size</th>
+                <th scope="col" className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
+            <tbody className="divide-y divide-slate-100 bg-white text-[#1D1D1F]">
               {paginatedDocs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-[#8E8E93] italic">
+                  <td colSpan={6} className="text-center py-16 text-[#6E6E73] text-xs font-normal italic">
                     No documents found matching the current criteria.
                   </td>
                 </tr>
               ) : (
                 paginatedDocs.map((doc) => {
-                  const catClass = categoryColors[doc.category] || "bg-slate-50 text-slate-700 border-slate-200";
                   const formattedDate = new Date(doc.uploadedAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
@@ -509,23 +508,23 @@ export default function TenantDocumentsPage() {
                   });
 
                   return (
-                    <tr key={doc.id} className="hover:bg-[#F5F5F7]/50 transition-colors">
-                      <td className="px-6 py-4 font-semibold text-slate-900 flex items-start gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-500 rounded-lg mt-0.5 shrink-0">
+                    <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-[#1D1D1F] flex items-start gap-3">
+                        <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0 mt-0.5">
                           <FileText className="h-4 w-4" />
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="truncate">{doc.name}</span>
+                          <span className="truncate text-xs font-semibold text-[#1D1D1F]">{doc.name}</span>
                           {doc.description && (
-                            <span className="text-[11px] text-[#8E8E93] font-normal mt-0.5 truncate max-w-xs md:max-w-md">
+                            <span className="text-xs text-[#6E6E73] font-normal mt-0.5 truncate max-w-xs md:max-w-md">
                               {doc.description}
                             </span>
                           )}
                           {doc.tags && doc.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1.5">
                               {doc.tags.map((t: string, idx: number) => (
-                                <span key={idx} className="inline-flex items-center text-[9px] bg-slate-100 text-[#6E6E73] px-1.5 py-0.5 rounded-full font-medium">
-                                  <Tag className="h-2 w-2 mr-0.5" />
+                                <span key={idx} className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center">
+                                  <Tag className="h-2 w-2 mr-1 text-slate-500" />
                                   {t}
                                 </span>
                               ))}
@@ -534,23 +533,23 @@ export default function TenantDocumentsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${catClass}`}>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                           {doc.type}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-[#6E6E73]">
-                          <Building2 className="h-3.5 w-3.5 text-[#8E8E93]" />
+                        <div className="flex items-center gap-1.5 text-[#6E6E73] text-xs font-normal">
+                          <Building2 className="h-3.5 w-3.5 text-slate-500" />
                           <span>{doc.property?.name || "—"}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-[#6E6E73]">
-                          <Calendar className="h-3.5 w-3.5 text-[#8E8E93]" />
+                        <div className="flex items-center gap-1.5 text-[#6E6E73] text-xs font-normal">
+                          <Calendar className="h-3.5 w-3.5 text-slate-500" />
                           <span>{formattedDate}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-[#6E6E73] font-medium">
+                      <td className="px-6 py-4 text-[#6E6E73] text-xs font-normal">
                         {doc.fileSize || "1.0 MB"}
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -661,7 +660,7 @@ export default function TenantDocumentsPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Upload Documents</h3>
+                <h3 className="text-base font-semibold text-slate-900">Upload Documents</h3>
                 <p className="text-[11px] text-[#8E8E93] mt-0.5">
                   Select up to 5 files. Supported types: PDF, DOC, DOCX, JPG, PNG, TXT.
                 </p>
@@ -806,7 +805,7 @@ export default function TenantDocumentsPage() {
                         <div className="p-3 bg-slate-50 text-[#8E8E93] group-hover:text-blue-500 group-hover:bg-blue-50 rounded-2xl transition-colors">
                           <Upload className="h-6 w-6" />
                         </div>
-                        <p className="text-xs text-[#6E6E73] font-semibold mt-1">
+                        <p className="text-xs text-[#6E6E73] font-normal mt-1">
                           Drag and drop files here, or <span className="text-blue-600">browse files</span>
                         </p>
                       </>
@@ -830,7 +829,7 @@ export default function TenantDocumentsPage() {
                 <button
                   type="submit"
                   disabled={uploadSubmitting || !selectedFile}
-                  className="h-10 px-5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-colors border-0 flex items-center gap-1.5"
+                  className="h-10 px-5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-colors border-0 flex items-center gap-1.5"
                 >
                   {uploadSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {uploadSubmitting ? "Uploading..." : "Upload"}
@@ -846,7 +845,7 @@ export default function TenantDocumentsPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Document Preview</h3>
+                <h3 className="text-base font-semibold text-slate-900">Document Preview</h3>
                 <p className="text-[11px] text-[#8E8E93] mt-0.5">
                   {previewDoc.description || "lease document"}
                 </p>
@@ -950,3 +949,4 @@ export default function TenantDocumentsPage() {
     </div>
   );
 }
+

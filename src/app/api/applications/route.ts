@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
+import { verifyTurnstileToken } from "@/lib/verify-turnstile";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -70,8 +71,18 @@ export async function POST(req: NextRequest) {
       emergencyContactPhone,
       emergencyContactRelation,
       backgroundCheckConsent,
-      agreedToTerms
+      agreedToTerms,
+      turnstileToken
     } = await req.json();
+
+    // Cloudflare Turnstile bot verification
+    const isHuman = await verifyTurnstileToken(turnstileToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { error: "Bot verification failed. Please refresh and try again." },
+        { status: 403 }
+      );
+    }
 
     if (!unitId || !name || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

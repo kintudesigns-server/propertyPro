@@ -131,44 +131,44 @@ export default function RevenueTrendChart({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold">
+            <div className="h-8 w-8 bg-slate-100 text-[#1D1D1F] rounded-xl flex items-center justify-center font-bold">
               <TrendingUp className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">{title}</h2>
+            <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">{title}</h2>
           </div>
-          <p className="text-xs text-slate-500 font-medium mt-1 pl-10">{subtitle}</p>
+          <p className="text-xs text-[#6E6E73] font-normal mt-1 pl-10">{subtitle}</p>
         </div>
 
         {/* Controls & Filter Toggles */}
         <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
           {/* View Segment Switcher */}
-          <div className="bg-slate-100/90 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
+          <div className="bg-slate-100/80 p-1 rounded-xl flex items-center gap-1 border border-slate-200/30">
             <button
               onClick={() => setActiveView("both")}
-              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${
                 activeView === "both"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               All Trends
             </button>
             <button
               onClick={() => setActiveView("revenue")}
-              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${
                 activeView === "revenue"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               Revenue
             </button>
             <button
               onClick={() => setActiveView("expenses")}
-              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${
                 activeView === "expenses"
-                  ? "bg-rose-500 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-rose-600 text-white shadow-2xs"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               Expenses
@@ -178,53 +178,53 @@ export default function RevenueTrendChart({
           {/* Net Line Toggle Button */}
           <button
             onClick={() => setShowNetLine(!showNetLine)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-xl text-xs font-medium border transition-all flex items-center gap-1.5 cursor-pointer ${
               showNetLine
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-2xs"
-                : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-2xs"
+                : "bg-white text-[#6E6E73] border-slate-200 hover:bg-slate-50"
             }`}
           >
-            {showNetLine && <Check className="h-3 w-3 text-emerald-600 stroke-[3]" />}
+            {showNetLine && <Check className="h-3 w-3 text-emerald-600" />}
             <span>Net Line</span>
           </button>
         </div>
       </div>
 
       {/* Top Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50/70 border border-slate-100 rounded-2xl p-3.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 shadow-2xs">
         <div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">
+          <span className="text-xs font-normal text-[#6E6E73] block mb-0.5">
             Total Revenue
           </span>
-          <span className="text-base font-black text-slate-900">
+          <span className="text-base font-semibold text-[#1D1D1F]">
             ${totalRev.toLocaleString()}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">
+          <span className="text-xs font-normal text-[#6E6E73] block mb-0.5">
             Total Expenses
           </span>
-          <span className="text-base font-black text-rose-600">
+          <span className="text-base font-semibold text-rose-600">
             ${totalExp.toLocaleString()}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">
+          <span className="text-xs font-normal text-[#6E6E73] block mb-0.5">
             Net Cashflow
           </span>
-          <span className="text-base font-black text-emerald-600 flex items-center gap-1">
+          <span className="text-base font-semibold text-emerald-600 flex items-center gap-1">
             ${totalNet.toLocaleString()}
-            <ArrowUpRight className="h-4 w-4 text-emerald-500 stroke-[2.5]" />
+            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">
+          <span className="text-xs font-normal text-[#6E6E73] block mb-0.5">
             Profit Margin
           </span>
           <div className="inline-flex items-center gap-1.5">
-            <span className="text-base font-black text-blue-600">{avgMargin}%</span>
+            <span className="text-base font-semibold text-[#1D1D1F]">{avgMargin}%</span>
             {peakMonth && (
-              <span className="text-[9px] font-extrabold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md uppercase tracking-wider">
                 Peak: {peakMonth.month}
               </span>
             )}

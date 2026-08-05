@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -140,7 +140,7 @@ export default function PlanUpgradeModal({
         {showPreviewScreen && previewData && targetTier ? (
           <div className="p-8 space-y-6">
             <DialogHeader className="mb-2">
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                 <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
                 Confirm Plan Upgrade
               </DialogTitle>
@@ -167,7 +167,7 @@ export default function PlanUpgradeModal({
                   <span className="text-emerald-600 font-bold">-${(Number(targetTier.price) - previewData.amountDue).toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200 border-dashed">
+                <div className="flex justify-between text-base font-semibold text-slate-900 pt-2 border-t border-slate-200 border-dashed">
                   <span>Prorated Charge Today</span>
                   <span className="text-blue-650">${previewData.amountDue.toFixed(2)}</span>
                 </div>
@@ -237,7 +237,7 @@ export default function PlanUpgradeModal({
         ) : setupClientSecret && targetTier ? (
           <div className="p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                 <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
                 Add Card to Upgrade
               </DialogTitle>
@@ -260,7 +260,7 @@ export default function PlanUpgradeModal({
         ) : clientSecret && targetTier ? (
           <div className="p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                 <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
                 Upgrade Payment Required
               </DialogTitle>
@@ -310,7 +310,7 @@ export default function PlanUpgradeModal({
                 <div className="border-l border-slate-200 pl-4 space-y-1 relative">
                   <ArrowRight className="absolute -left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-500 bg-white border border-slate-100 rounded-full p-0.5" />
                   <p className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Required Upgrade</p>
-                  <p className="font-extrabold text-slate-900 text-base flex items-center gap-1.5">
+                  <p className="font-semibold text-slate-900 text-base flex items-center gap-1.5">
                     {recommendedTier?.name || "Starter"}
                     <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Best Fit</span>
                   </p>

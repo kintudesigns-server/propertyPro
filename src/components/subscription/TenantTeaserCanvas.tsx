@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { 
@@ -79,23 +79,23 @@ function ViewLeaseTeaser() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Base Rent</p>
-          <p className="text-2xl font-black text-slate-900">$2,450.00</p>
+          <p className="text-2xl font-semibold text-slate-900">$2,450.00</p>
           <p className="text-xs text-slate-500 font-medium">Due on the 1st of each month</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lease Duration</p>
-          <p className="text-2xl font-black text-blue-600">12 Months</p>
+          <p className="text-2xl font-semibold text-blue-600">12 Months</p>
           <p className="text-xs text-slate-500 font-medium">Aug 01, 2025 — Jul 31, 2026</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Security Deposit Held</p>
-          <p className="text-2xl font-black text-emerald-600">$2,450.00</p>
+          <p className="text-2xl font-semibold text-emerald-600">$2,450.00</p>
           <p className="text-xs text-slate-500 font-medium">Escrow Account Verified</p>
         </div>
       </div>
 
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h4 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Tenancy Terms & Inclusions</h4>
+        <h4 className="text-sm font-semibold text-slate-900 border-b border-slate-100 pb-3">Tenancy Terms & Inclusions</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-slate-700">
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">✓ Water & Trash Included</div>
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">✓ Assigned Parking Spot #4B</div>
@@ -150,7 +150,7 @@ function ViewDocumentsTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Tenant Document Vault</h3>
+          <h3 className="text-base font-semibold text-slate-900">Tenant Document Vault</h3>
           <p className="text-xs text-slate-500 font-medium">Signed agreements, move-in checklists, and disclosures</p>
         </div>
         <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -238,7 +238,7 @@ function ViewMaintenanceTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <h3 className="text-base font-bold text-slate-900">My Maintenance Requests</h3>
+          <h3 className="text-base font-semibold text-slate-900">My Maintenance Requests</h3>
           <p className="text-xs text-slate-500 font-medium">Track repair progress and scheduled technician visits</p>
         </div>
         <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -260,7 +260,7 @@ function ViewMaintenanceTeaser() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-slate-400">{t.id}</span>
-                  <h4 className="text-sm font-bold text-slate-900">{t.title}</h4>
+                  <h4 className="text-sm font-semibold text-slate-900">{t.title}</h4>
                 </div>
                 <p className="text-xs text-slate-500">{t.cat} • Submitted {t.date}</p>
               </div>
@@ -319,7 +319,7 @@ function MakePaymentsTeaser() {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">August 2026 Rent Balance</p>
-          <p className="text-3xl font-black text-slate-900">$2,450.00</p>
+          <p className="text-3xl font-semibold text-slate-900">$2,450.00</p>
           <p className="text-xs text-amber-600 font-bold">Due on Aug 01, 2026 (In 2 Days)</p>
         </div>
         <div className="h-11 px-6 bg-blue-600 text-white rounded-xl font-bold text-sm flex items-center shadow-md">
@@ -328,12 +328,12 @@ function MakePaymentsTeaser() {
       </div>
 
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h4 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Saved Payment Methods</h4>
+        <h4 className="text-sm font-semibold text-slate-900 border-b border-slate-100 pb-3">Saved Payment Methods</h4>
         <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
           <div className="flex items-center gap-3">
             <CreditCard size={24} className="text-slate-700" />
             <div>
-              <p className="text-sm font-bold text-slate-900">Visa ending in •••• 4242</p>
+              <p className="text-sm font-semibold text-slate-900">Visa ending in •••• 4242</p>
               <p className="text-xs text-slate-500">Expires 12/28 • Default Payment Method</p>
             </div>
           </div>
@@ -388,7 +388,7 @@ function ViewInvoicesTeaser() {
   return (
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h3 className="text-base font-bold text-slate-900">Rent Invoices & Payment Receipts</h3>
+        <h3 className="text-base font-semibold text-slate-900">Rent Invoices & Payment Receipts</h3>
         <div className="space-y-2">
           {[
             { inv: "INV-2026-07", period: "July 2026 Monthly Rent", amount: "$2,450.00", status: "PAID", date: "Jul 01, 2026" },
@@ -398,7 +398,7 @@ function ViewInvoicesTeaser() {
             <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
               <div>
                 <p className="text-xs font-bold text-slate-400">{item.inv}</p>
-                <p className="text-sm font-bold text-slate-900">{item.period}</p>
+                <p className="text-sm font-semibold text-slate-900">{item.period}</p>
                 <p className="text-xs text-slate-500">Paid on {item.date}</p>
               </div>
               <div className="flex items-center gap-4">
@@ -420,7 +420,7 @@ function ViewTransactionsTeaser() {
   return (
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h3 className="text-base font-bold text-slate-900">Payment Transactions & History Ledger</h3>
+        <h3 className="text-base font-semibold text-slate-900">Payment Transactions & History Ledger</h3>
         <div className="space-y-2">
           {[
             { desc: "Rent Payment — Visa •••• 4242", cat: "Rent Payment", amount: "-$2,450.00", date: "Jul 01, 2026 09:14 AM" },
@@ -432,7 +432,7 @@ function ViewTransactionsTeaser() {
                 <p className="font-bold text-slate-900">{t.desc}</p>
                 <p className="text-slate-400">{t.cat} • {t.date}</p>
               </div>
-              <span className="font-black text-sm text-slate-900">{t.amount}</span>
+              <span className="font-semibold text-sm text-slate-900">{t.amount}</span>
             </div>
           ))}
         </div>
@@ -447,7 +447,7 @@ function TenantApplicationsTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <h3 className="text-base font-bold text-slate-900">My Rental Applications</h3>
+          <h3 className="text-base font-semibold text-slate-900">My Rental Applications</h3>
           <p className="text-xs text-slate-500 font-medium">Track application screening status and lease offers</p>
         </div>
         <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
@@ -460,7 +460,7 @@ function TenantApplicationsTeaser() {
           <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
             APPROVED & SIGNED
           </span>
-          <h4 className="text-base font-bold text-slate-900 pt-1">Sunset Heights Apartments — Unit 4B</h4>
+          <h4 className="text-base font-semibold text-slate-900 pt-1">Sunset Heights Apartments — Unit 4B</h4>
           <p className="text-xs text-slate-500">Submitted Jul 20, 2025 • Screening Cleared</p>
         </div>
         <span className="text-xs font-bold text-blue-600">View Application →</span>
@@ -474,7 +474,7 @@ function TenantToursTeaser() {
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900">Scheduled Showing Tours & Unit Walkthroughs</h3>
+          <h3 className="text-base font-semibold text-slate-900">Scheduled Showing Tours & Unit Walkthroughs</h3>
           <div className="h-9 px-4 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center">
             + Schedule Tour
           </div>
@@ -485,7 +485,7 @@ function TenantToursTeaser() {
             <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
               CONFIRMED TOUR
             </span>
-            <h4 className="text-sm font-bold text-slate-900 pt-1">Oakridge Luxury Suites — Unit 12</h4>
+            <h4 className="text-sm font-semibold text-slate-900 pt-1">Oakridge Luxury Suites — Unit 12</h4>
             <p className="text-xs text-slate-500 font-medium">📅 Aug 05, 2026 at 10:30 AM</p>
           </div>
         </div>
@@ -500,7 +500,7 @@ function MessageOwnerTeaser() {
     <div className="w-full space-y-4 select-none pointer-events-none opacity-85 p-6 max-w-5xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-base font-bold text-slate-900">Direct Landlord & Property Manager Chat</h3>
+          <h3 className="text-base font-semibold text-slate-900">Direct Landlord & Property Manager Chat</h3>
           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Real-Time Messaging</span>
         </div>
         <div className="space-y-3 max-w-lg mx-auto py-4">
@@ -525,7 +525,7 @@ function ViewCalendarTeaser() {
   return (
     <div className="w-full space-y-6 select-none pointer-events-none opacity-85 p-6 max-w-6xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h3 className="text-base font-bold text-slate-900">Activity Calendar & Due Dates</h3>
+        <h3 className="text-base font-semibold text-slate-900">Activity Calendar & Due Dates</h3>
         <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => <div key={d}>{d}</div>)}
         </div>

@@ -88,7 +88,7 @@ export default function DowngradePlanModal({
             <div className="border-l border-slate-200 pl-4 space-y-1 relative">
               <ArrowRight className="absolute -left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500 bg-white border border-slate-100 rounded-full p-0.5" />
               <p className="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Target Plan</p>
-              <p className="font-extrabold text-slate-900 text-base">{targetTier.name}</p>
+              <p className="font-semibold text-slate-900 text-base">{targetTier.name}</p>
               <p className="text-xs font-bold text-slate-650">${targetTier.price}/mo</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function DowngradePlanModal({
               type="button"
               onClick={handleConfirm}
               disabled={loading || isLimitExceeded}
-              className="flex-1 h-12 rounded-xl font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md disabled:opacity-50"
+              className="flex-1 h-12 rounded-xl font-medium bg-amber-600 hover:bg-amber-700 text-white shadow-md disabled:opacity-50"
             >
               {loading ? (
                 <>

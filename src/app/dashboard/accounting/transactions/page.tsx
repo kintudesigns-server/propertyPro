@@ -395,14 +395,16 @@ export default function TransactionsPage() {
       <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6">
       
       {/* ── HEADER ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black text-emerald-700 tracking-widest uppercase">Stripe Sandbox Connected</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Stripe Sandbox Connected
+            </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Transactions</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Transactions</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-1">
             {isTenant
               ? "View and monitor your rent payments, receipts, and invoices."
               : "Monitor your payments ledger, payout logs, and direct tenant card transactions."}
@@ -411,14 +413,14 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={fetchTransactions}
-            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-black rounded-xl text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-[#1D1D1F] font-medium rounded-xl text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Refresh
           </Button>
           {!isTenant && (
             <Button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl text-xs h-9 px-4 shadow-xs transition-all cursor-pointer"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs h-9 px-4 shadow-xs transition-all cursor-pointer border-none"
             >
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Record Transaction
             </Button>
@@ -433,8 +435,8 @@ export default function TransactionsPage() {
             <Info className="h-4 w-4" />
           </div>
           <div className="pr-8 flex-1">
-            <p className="text-xs font-black text-slate-900">Stripe Payments Sandbox</p>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            <p className="text-xs font-semibold text-[#1D1D1F]">Stripe Payments Sandbox</p>
+            <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
               Your property dashboard operates directly with secure tokenized payments. All card transactions processed
               by tenants via Stripe Elements update the ledger logs in real-time.
             </p>
@@ -449,7 +451,7 @@ export default function TransactionsPage() {
       )}
 
       {/* ── TABS NAVIGATION ── */}
-      <div className="flex gap-1.5 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs w-fit">
+      <div className="flex gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs w-fit">
         {[
           { id: "payments", label: isTenant ? "Rent Payments (Outflows)" : "Payments (Inflows)" },
           { id: "payouts", label: isTenant ? "Refunds & Credits (Inflows)" : "Payouts & Refunds (Outflows)" },
@@ -461,10 +463,10 @@ export default function TransactionsPage() {
               setActiveTab(tab.id as any);
               setActiveStatusFilter("ALL");
             }}
-            className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer border-none ${
               activeTab === tab.id
-                ? "bg-slate-900 text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white text-[#1D1D1F] shadow-2xs"
+                : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
             {tab.label}
@@ -521,13 +523,13 @@ export default function TransactionsPage() {
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
           {/* Search Input */}
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="text"
               placeholder="Search reference, tenant, category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 h-10 border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 shadow-2xs"
+              className="pl-9 pr-4 h-9 border-slate-200 rounded-xl text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs"
             />
           </div>
 
@@ -536,7 +538,7 @@ export default function TransactionsPage() {
             <select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="w-full h-10 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer"
+              className="w-full h-9 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-normal text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
             >
               <option value="all">Category: All</option>
               <option value="RENT">Rent Payments</option>
@@ -551,7 +553,7 @@ export default function TransactionsPage() {
             <select
               value={selectedDateFilter}
               onChange={(e) => setSelectedDateFilter(e.target.value)}
-              className="w-full h-10 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-semibold text-slate-900 outline-none shadow-2xs cursor-pointer"
+              className="w-full h-9 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-xs font-normal text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
             >
               <option value="all">Date: All Time</option>
               <option value="24hours">Last 24 Hours</option>
@@ -565,7 +567,7 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button
             onClick={handleExportCSV}
-            className="border border-slate-200 bg-white hover:bg-slate-50 text-xs font-black text-slate-900 rounded-xl h-10 px-4 flex items-center gap-2 shadow-2xs cursor-pointer"
+            className="border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-[#1D1D1F] rounded-xl h-9 px-4 flex items-center gap-2 shadow-2xs cursor-pointer"
           >
             <Download className="h-3.5 w-3.5 text-slate-500" /> Export CSV
           </Button>
@@ -576,19 +578,19 @@ export default function TransactionsPage() {
       <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="w-full">
-            <TableHeader className="bg-slate-50/70 border-b border-slate-200/80">
+            <TableHeader className="bg-slate-50/70 border-b border-slate-100 text-[#6E6E73]">
               <TableRow>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Transaction</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Reference &amp; Channel</TableHead>
-                {!isTenant && <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Customer</TableHead>}
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Amount</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-500 py-3.5 px-6">Date</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Transaction</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Reference &amp; Channel</TableHead>
+                {!isTenant && <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Customer</TableHead>}
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Amount</TableHead>
+                <TableHead className="font-normal text-xs text-[#6E6E73] py-3.5 px-6">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-slate-100">
               {paginatedTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isTenant ? 4 : 5} className="h-36 text-center text-slate-500 text-xs font-semibold">
+                  <TableCell colSpan={isTenant ? 4 : 5} className="h-36 text-center text-[#6E6E73] text-xs font-normal">
                     No transactions match your current filters.
                   </TableCell>
                 </TableRow>
@@ -613,12 +615,12 @@ export default function TransactionsPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-slate-900 text-xs truncate">{details.title}</span>
-                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border shadow-2xs ${details.badgeStyle}`}>
+                              <span className="font-semibold text-[#1D1D1F] text-xs truncate">{details.title}</span>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-medium uppercase tracking-wider border ${details.badgeStyle}`}>
                                 {details.badgeLabel}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-500 font-semibold mt-0.5 truncate">{details.subtitle}</div>
+                            <div className="text-xs text-[#6E6E73] font-normal mt-0.5 truncate">{details.subtitle}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -626,10 +628,10 @@ export default function TransactionsPage() {
                       {/* Reference & Channel */}
                       <TableCell className="py-4 px-6">
                         <div>
-                          <div className="font-mono text-xs font-extrabold text-slate-900 truncate max-w-[150px]">
+                          <div className="font-mono text-xs font-semibold text-[#1D1D1F] truncate max-w-[150px]">
                             {tx.reference || `Direct Ref: ${tx.id.substring(0, 8)}`}
                           </div>
-                          <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                          <div className="text-xs text-[#6E6E73] font-normal mt-0.5">
                             {tx.reference?.startsWith("pi_") || tx.reference?.startsWith("cs_") || (!tx.reference && tx.category === "RENT")
                               ? "Stripe Checkout"
                               : tx.reference?.includes("MANUAL_PAY") || tx.reference
@@ -643,8 +645,8 @@ export default function TransactionsPage() {
                       {!isTenant && (
                         <TableCell className="py-4 px-6">
                           <div>
-                            <div className="font-extrabold text-slate-900 text-xs">{tx.tenant?.name || "N/A"}</div>
-                            <div className="text-[11px] text-slate-500 font-semibold">{tx.tenant?.email || "No email"}</div>
+                            <div className="font-semibold text-[#1D1D1F] text-xs">{tx.tenant?.name || "N/A"}</div>
+                            <div className="text-xs text-[#6E6E73] font-normal">{tx.tenant?.email || "No email"}</div>
                           </div>
                         </TableCell>
                       )}
@@ -658,20 +660,20 @@ export default function TransactionsPage() {
                           
                           return (
                             <div>
-                              <span className={`font-black text-xs sm:text-sm ${displayColor}`}>
+                              <span className={`font-semibold text-xs ${displayColor}`}>
                                 {displaySign}${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                               <div className="mt-0.5">
                                 {isRefund ? (
-                                  <span className="px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-md font-black text-[9px] uppercase tracking-wider shadow-2xs">
+                                  <span className="px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-md font-medium text-[9px] uppercase tracking-wider">
                                     Refunded
                                   </span>
                                 ) : tx.status === "COMPLETED" || tx.status === "PENDING" ? (
-                                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md font-black text-[9px] uppercase tracking-wider shadow-2xs">
+                                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md font-medium text-[9px] uppercase tracking-wider">
                                     Succeeded
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-md font-black text-[9px] uppercase tracking-wider shadow-2xs">
+                                  <span className="px-2 py-0.5 bg-rose-50 text-rose-800 border border-rose-200 rounded-md font-medium text-[9px] uppercase tracking-wider">
                                     Failed
                                   </span>
                                 )}
@@ -682,7 +684,7 @@ export default function TransactionsPage() {
                       </TableCell>
 
                       {/* Date Paid */}
-                      <TableCell className="py-4 px-6 text-slate-500 text-xs font-semibold">
+                      <TableCell className="py-4 px-6 text-[#6E6E73] text-xs font-normal">
                         {new Date(tx.createdAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
@@ -699,12 +701,12 @@ export default function TransactionsPage() {
 
         {/* ── FOOTER PAGINATION ── */}
         <div className="bg-slate-50/50 border-t border-slate-100 px-6 py-4 flex items-center justify-between">
-          <div className="text-xs text-slate-500 font-semibold">
-            Showing <span className="font-extrabold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-            <span className="font-extrabold text-slate-900">
+          <div className="text-xs text-[#6E6E73] font-normal">
+            Showing <span className="font-semibold text-[#1D1D1F]">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+            <span className="font-semibold text-[#1D1D1F]">
               {Math.min(currentPage * itemsPerPage, filteredTransactions.length)}
             </span>{" "}
-            of <span className="font-extrabold text-slate-900">{filteredTransactions.length}</span> transactions
+            of <span className="font-semibold text-[#1D1D1F]">{filteredTransactions.length}</span> transactions
           </div>
           <div className="flex items-center gap-1.5">
             <button
@@ -714,7 +716,7 @@ export default function TransactionsPage() {
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-xs font-extrabold text-slate-800 px-2">Page {currentPage} of {totalPages}</span>
+            <span className="text-xs font-semibold text-[#1D1D1F] px-2">Page {currentPage} of {totalPages}</span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
@@ -730,3 +732,4 @@ export default function TransactionsPage() {
     </div>
   );
 }
+

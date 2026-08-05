@@ -516,24 +516,24 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
             {/* Vendor Work Console */}
             {!isClosed && !isPendingConfirmation && (
-              <Card className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
-                <div className="border-b border-slate-100 pb-4">
-                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <Wrench className="h-5 w-5 text-blue-600 animate-spin-slow" /> Vendor Maintenance console
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xs font-sans">
+                <div className="border-b border-slate-100 pb-4 font-sans">
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
+                    <Wrench className="h-4 w-4 text-slate-700" /> Vendor Maintenance console
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1">Please complete the steps in order to manage and resolve this ticket.</p>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-1">Please complete the steps in order to manage and resolve this ticket.</p>
                 </div>
 
                 {/* Inspector Reference Estimate Hint */}
                 {(request.inspectorEstimateLabor != null || request.inspectorEstimateMaterials != null) && (
-                  <div className="p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-2">
+                  <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/80 shadow-2xs space-y-1.5 font-sans">
                     <div className="flex items-center gap-2">
-                      <span className="text-base">🔍</span>
-                      <span className="text-xs font-bold text-teal-800 uppercase tracking-wide">Inspector Pre-Assessment on File</span>
+                      <span className="text-sm">🔍</span>
+                      <span className="text-xs font-medium uppercase tracking-wider text-teal-800">Inspector Pre-Assessment on File</span>
                     </div>
-                    <p className="text-xs font-semibold text-teal-700 leading-relaxed">
+                    <p className="text-xs font-normal text-teal-900 leading-relaxed">
                       A property inspector has previously assessed this job. Their estimated fair cost is{" "}
-                      <strong className="text-teal-900">
+                      <strong className="font-semibold text-teal-950">
                         ${(Number(request.inspectorEstimateLabor || 0) + Number(request.inspectorEstimateMaterials || 0)).toFixed(2)}
                       </strong>
                       {" "}(Labor: ${Number(request.inspectorEstimateLabor || 0).toFixed(2)} + Materials: ${Number(request.inspectorEstimateMaterials || 0).toFixed(2)}).
@@ -544,33 +544,33 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                 {getLatestRejectionReason(request.inspectorNotes) && request.status === "DIAGNOSIS_SCHEDULED" && (
 
-                  <div className="p-4 bg-rose-50 border-l-4 border-l-rose-500 border-rose-100 rounded-r-xl space-y-2">
+                  <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 shadow-2xs space-y-2 font-sans">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
-                      <span className="text-xs font-bold text-rose-850 uppercase tracking-wide">Estimate Revision Requested</span>
+                      <span className="text-xs font-medium uppercase tracking-wider text-rose-800">Estimate Revision Requested</span>
                     </div>
-                    <p className="text-xs font-semibold text-rose-700 leading-relaxed italic bg-white p-3 rounded-lg border border-rose-100/50">
+                    <p className="text-xs font-normal text-rose-900 leading-relaxed italic bg-white p-3 rounded-xl border border-rose-200/60 shadow-2xs">
                       &ldquo;{getLatestRejectionReason(request.inspectorNotes)}&rdquo;
                     </p>
-                    <p className="text-[10px] text-slate-500 font-semibold leading-normal">
+                    <p className="text-xs font-normal text-slate-600">
                       The property owner requested revisions on your initial quote. Please update labor/material costs in Step 2 and submit a revised estimate.
                     </p>
                   </div>
                 )}
 
                 {/* Horizontal Step Progress Bar */}
-                <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-2">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs font-sans flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-2">
                   <div className="flex items-center w-full md:w-auto gap-3">
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-all ${
                       isScheduled 
-                        ? "bg-emerald-600 text-white shadow-sm font-bold" 
-                        : "bg-indigo-600 text-white ring-4 ring-indigo-100 animate-pulse font-bold"
+                        ? "bg-slate-900 text-white shadow-2xs" 
+                        : "bg-slate-900 text-white shadow-2xs ring-4 ring-slate-200"
                     }`}>
                       {isScheduled ? "✓" : "1"}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-800 leading-tight">Schedule Visit</p>
-                      <p className="text-[10px] text-slate-500 font-semibold">
+                      <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">Schedule Visit</p>
+                      <p className="text-[11px] font-normal text-[#6E6E73]">
                         {isScheduled ? "Completed" : "Action Required"}
                       </p>
                     </div>
@@ -579,18 +579,18 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <div className="hidden md:block h-[1px] flex-1 bg-slate-200 self-center mx-2" />
 
                   <div className="flex items-center w-full md:w-auto gap-3">
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-all ${
                       !isScheduled 
-                        ? "bg-slate-200 text-slate-400 font-bold" 
+                        ? "bg-slate-200 text-slate-600" 
                         : workflowPath 
-                          ? "bg-emerald-600 text-white shadow-sm font-bold" 
-                          : "bg-indigo-600 text-white ring-4 ring-indigo-100 animate-pulse font-bold"
+                          ? "bg-slate-900 text-white shadow-2xs" 
+                          : "bg-slate-900 text-white shadow-2xs ring-4 ring-slate-200"
                     }`}>
                       {workflowPath ? "✓" : "2"}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-800 leading-tight">Choose Path</p>
-                      <p className="text-[10px] text-slate-500 font-semibold">
+                      <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">Choose Path</p>
+                      <p className="text-[11px] font-normal text-[#6E6E73]">
                         {!isScheduled ? "Locked" : workflowPath ? "Completed" : "Action Required"}
                       </p>
                     </div>
@@ -599,22 +599,22 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <div className="hidden md:block h-[1px] flex-1 bg-slate-200 self-center mx-2" />
 
                   <div className="flex items-center w-full md:w-auto gap-3">
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-all ${
                       !workflowPath 
-                        ? "bg-slate-200 text-slate-400 font-bold" 
+                        ? "bg-slate-200 text-slate-600" 
                         : workflowPath === "QUICK_FIX" 
-                          ? "bg-slate-200 text-slate-600 border border-slate-300 font-bold"
+                          ? "bg-slate-200 text-slate-700 border border-slate-300"
                           : isApproved 
-                            ? "bg-emerald-600 text-white shadow-sm font-bold" 
+                            ? "bg-slate-900 text-white shadow-2xs" 
                             : isAwaitingApproval 
-                              ? "bg-amber-500 text-white animate-pulse font-bold" 
-                              : "bg-indigo-600 text-white ring-4 ring-indigo-100 animate-pulse font-bold"
+                              ? "bg-amber-500 text-white" 
+                              : "bg-slate-900 text-white shadow-2xs ring-4 ring-slate-200"
                     }`}>
                       {workflowPath === "QUICK_FIX" ? "⚡" : isApproved ? "✓" : "3"}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-800 leading-tight">Cost Estimate</p>
-                      <p className="text-[10px] text-slate-500 font-semibold">
+                      <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">Cost Estimate</p>
+                      <p className="text-[11px] font-normal text-[#6E6E73]">
                         {!workflowPath 
                           ? "Locked" 
                           : workflowPath === "QUICK_FIX" 
@@ -631,18 +631,18 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <div className="hidden md:block h-[1px] flex-1 bg-slate-200 self-center mx-2" />
 
                   <div className="flex items-center w-full md:w-auto gap-3">
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-all ${
                       request.status === "RESOLVED" || request.status === "CLOSED" || request.status === "PENDING_TENANT_CONFIRMATION"
-                        ? "bg-emerald-600 text-white shadow-sm font-bold"
+                        ? "bg-slate-900 text-white shadow-2xs"
                         : (workflowPath === "QUICK_FIX" || (workflowPath === "ESTIMATE" && isApproved))
-                          ? "bg-indigo-600 text-white ring-4 ring-indigo-100 animate-pulse font-bold"
-                          : "bg-slate-200 text-slate-400 font-bold"
+                          ? "bg-slate-900 text-white shadow-2xs ring-4 ring-slate-200"
+                          : "bg-slate-200 text-slate-600"
                     }`}>
                       {request.status === "RESOLVED" || request.status === "CLOSED" || request.status === "PENDING_TENANT_CONFIRMATION" ? "✓" : "4"}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-800 leading-tight">Complete Repair</p>
-                      <p className="text-[10px] text-slate-500 font-semibold">
+                      <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">Complete Repair</p>
+                      <p className="text-[11px] font-normal text-[#6E6E73]">
                         {request.status === "RESOLVED" || request.status === "CLOSED" || request.status === "PENDING_TENANT_CONFIRMATION"
                           ? "Completed"
                           : (workflowPath === "QUICK_FIX" || (workflowPath === "ESTIMATE" && isApproved))
@@ -654,42 +654,43 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                 </div>
 
 
-                <div className="space-y-6">
+                <div className="space-y-6 font-sans">
                   {/* General Notes */}
-                  <div>
-                    <Label htmlFor="notes" className="text-slate-700 font-bold text-xs">Inspector / Diagnosis Notes</Label>
-                    <Textarea
+                  <div className="space-y-1.5">
+                    <Label htmlFor="notes" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Inspector / Diagnosis Notes</Label>
+                    <textarea
                       id="notes"
                       placeholder="Specify findings, diagnostic details, or tasks completed..."
                       value={inspectorNotes}
                       onChange={(e) => setInspectorNotes(e.target.value)}
-                      className="mt-1 bg-white border-slate-200 rounded-xl text-sm"
+                      rows={3}
+                      className="w-full min-h-[90px] rounded-xl border border-slate-200 bg-white p-3 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all resize-none font-sans"
                     />
                   </div>
 
                   {/* Step 1: Schedule Visit */}
                   {!isScheduled ? (
-                    <div className="p-5 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-4">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs font-sans space-y-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-sm text-indigo-900 flex items-center gap-2">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">1</span>
+                          <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">1</span>
                             Schedule Arrival Date & Time
                           </h4>
-                          <p className="text-xs text-indigo-700 mt-1">
+                          <p className="text-xs font-normal text-[#6E6E73] mt-1">
                             Review the tenant's preferred times and lock in your arrival slot.
                           </p>
                         </div>
-                        <Badge className="bg-indigo-100 text-indigo-800 border-none font-bold text-[10px] uppercase">Required first</Badge>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Required first</span>
                       </div>
                       
-                      <div className="bg-white/80 p-3 rounded-lg border border-indigo-50 text-xs text-slate-600 space-y-1">
-                        <p><strong>Tenant's Preferred Times:</strong> {request.preferredTimes || "No preference"}</p>
-                        <p><strong>Access Permission:</strong> {request.entryPermission ? "✅ Permission to enter if not home" : "❌ Tenant MUST be home"}</p>
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-[#6E6E73] space-y-1 shadow-2xs">
+                        <p><strong className="text-[#1D1D1F]">Tenant's Preferred Times:</strong> {request.preferredTimes || "No preference"}</p>
+                        <p><strong className="text-[#1D1D1F]">Access Permission:</strong> {request.entryPermission ? "✅ Permission to enter if not home" : "❌ Tenant MUST be home"}</p>
                       </div>
 
-                      <div className="space-y-3">
-                        <Label className="text-indigo-900 text-xs font-bold block">Select Appointment Date & Time</Label>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Select Appointment Date & Time</Label>
                         <div className="flex flex-col md:flex-row gap-2">
                           <div className="flex-1">
                             <Input
@@ -697,7 +698,7 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                               min={new Date().toISOString().split('T')[0]}
                               value={selectedDate}
                               onChange={(e) => setSelectedDate(e.target.value)}
-                              className="bg-white border-indigo-200 rounded-xl text-sm w-full h-10"
+                              className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                             />
                           </div>
                           
@@ -705,7 +706,7 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                             <select
                               value={selectedTime}
                               onChange={(e) => setSelectedTime(e.target.value)}
-                              className="bg-white border border-indigo-200 rounded-xl text-sm w-full h-10 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-slate-800"
+                              className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer"
                             >
                               <option value="">Select Time Slot</option>
                               {filteredTimeSlots.map(slot => (
@@ -717,36 +718,36 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                           <Button 
                             onClick={handleConfirmSchedule}
                             disabled={processing || !selectedDate || !selectedTime}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-10 px-6 text-xs shrink-0"
+                            className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 shrink-0"
                           >
                             Confirm Time
                           </Button>
                         </div>
                       </div>
                       
-                      <div className="text-[11px] text-indigo-700 leading-normal border-t border-indigo-100/50 pt-3">
-                        <strong>Not Available?</strong> If you are not available during the tenant's preferred times, please select the next closest slot that works for you or contact them directly to coordinate:
-                        <div className="mt-2 p-2 bg-indigo-100/40 rounded border border-indigo-100/50 flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs font-semibold text-slate-800">
+                      <div className="text-xs font-normal text-[#6E6E73] leading-relaxed border-t border-slate-200 pt-3">
+                        <strong className="text-[#1D1D1F]">Not Available?</strong> If you are not available during the tenant's preferred times, please select the next closest slot that works for you or contact them directly to coordinate:
+                        <div className="mt-2 p-2.5 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs font-normal text-[#1D1D1F] shadow-2xs">
                           <span>Tenant: {request.tenant.name} ({request.tenant.phone || request.tenant.email})</span>
                           <span>Owner: {request.unit.property.owner.name} ({request.unit.property.owner.email})</span>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-5 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-3">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs font-sans space-y-3">
                       <div className="flex justify-between items-center">
-                        <h4 className="font-bold text-sm text-emerald-950 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">✓</span>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">✓</span>
                           1. Schedule Arrival Date & Time
                         </h4>
-                        <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[10px] uppercase">Scheduled</Badge>
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Scheduled</span>
                       </div>
                       
-                      <div className="bg-white p-3 rounded-lg border border-emerald-100 space-y-3">
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-3 shadow-2xs">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                           <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase">Arrival Appointment</p>
-                            <p className="text-sm font-bold text-slate-800">
+                            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-0.5">Arrival Appointment</p>
+                            <p className="text-xs font-semibold text-[#1D1D1F]">
                               {new Date(request.scheduledDate).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })}
                             </p>
                           </div>
@@ -754,67 +755,66 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                         {/* Tenant Confirmation Status */}
                         <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
-                          <span className="text-slate-500 font-medium">Tenant Response Status:</span>
+                          <span className="text-[#6E6E73] font-normal">Tenant Response Status:</span>
                           {request.rescheduleRequested ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 animate-pulse">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
                               🚨 Reschedule Requested: "{request.rescheduleReason}"
                             </span>
                           ) : request.entryPermission ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                               ✅ Auto-Confirmed (Key Release Granted)
                             </span>
                           ) : request.tenantConfirmedSchedule ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                               ✅ Tenant Confirmed Availability
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
                               ⚠️ Awaiting Tenant Confirmation
                             </span>
                           )}
                         </div>
                       </div>
                       
-                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
-                          <Input
-                            type="date"
-                            value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="bg-white border-slate-200 rounded-xl text-xs h-9 flex-1 sm:w-36"
-                          />
-                          <select
-                            value={selectedTime}
-                            onChange={(e) => setSelectedTime(e.target.value)}
-                            className="bg-white border border-slate-200 rounded-xl text-xs h-9 px-2 focus:outline-none focus:ring-2 focus:ring-slate-500 font-semibold text-slate-800 flex-1 sm:w-36"
-                          >
-                            <option value="">Select Time</option>
-                            {filteredTimeSlots.map(slot => (
-                              <option key={slot.value} value={slot.value}>{slot.label}</option>
-                            ))}
-                          </select>
-                          <Button 
-                            size="sm"
-                            onClick={handleConfirmSchedule}
-                            disabled={processing || !selectedDate || !selectedTime}
-                            className="bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs h-9 px-4 shrink-0"
-                          >
-                            Reschedule
-                          </Button>
-                        </div>
+                      <div className="flex flex-col sm:flex-row gap-2 w-full items-center pt-1 font-sans">
+                        <Input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          className="w-full sm:w-auto flex-1 h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs"
+                        />
+                        <select
+                          value={selectedTime}
+                          onChange={(e) => setSelectedTime(e.target.value)}
+                          className="w-full sm:w-auto flex-1 h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs cursor-pointer"
+                        >
+                          <option value="">Select Time</option>
+                          {filteredTimeSlots.map(slot => (
+                            <option key={slot.value} value={slot.value}>{slot.label}</option>
+                          ))}
+                        </select>
+                        <Button 
+                          onClick={handleConfirmSchedule}
+                          disabled={processing || !selectedDate || !selectedTime}
+                          className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer px-4 shrink-0"
+                        >
+                          Reschedule
+                        </Button>
                       </div>
-                    )}
+                    </div>
+                  )}
                                        {/* Workflow Path Selection */}
                   {isScheduled && !workflowPath && (
                     !isReadyForWork ? (
-                      <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
-                        <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-                          <Lock className="h-4 w-4 text-amber-500" /> Select Repair Workflow Path
+                      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 font-sans">
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <Lock className="h-4 w-4 text-amber-600" /> Select Repair Workflow Path
                         </h4>
-                        <div className="p-5 bg-amber-50/30 border border-amber-200/50 rounded-xl space-y-3">
-                          <p className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                        <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 shadow-2xs space-y-2">
+                          <p className="text-xs font-semibold text-amber-900 flex items-center gap-1.5">
                             <AlertTriangle className="h-4 w-4 text-amber-600" /> Awaiting Appointment Confirmation
                           </p>
-                          <p className="text-xs text-slate-600 leading-normal">
+                          <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                             {request.rescheduleRequested 
                               ? "The tenant has requested to reschedule this appointment. Please select a new slot above and coordinate with them."
                               : "This appointment time is waiting for the tenant's confirmation. Once confirmed (or if the tenant has granted entry permission), you can select the repair path and submit costs."}
@@ -822,32 +822,32 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                         </div>
                       </div>
                     ) : (
-                      <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
-                        <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-indigo-500" /> What kind of job is this?
+                      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 font-sans">
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <Wrench className="h-4 w-4 text-slate-700" /> What kind of job is this?
                         </h4>
-                        <div className="bg-blue-50 border border-blue-150 p-4 rounded-xl text-xs text-blue-900 leading-normal">
-                          <p className="font-bold mb-1">💵 Pre-Approved Repair Budget: ${limit.toFixed(2)}</p>
-                          <p className="text-blue-800 font-medium">
-                            If the total parts & labor cost is under <strong>${limit.toFixed(2)}</strong>, choose <strong>Small Job (Quick Fix)</strong> to resolve right away and get paid immediately. Otherwise, select <strong>Large Job</strong> to submit an estimate for owner approval first.
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-[#6E6E73] leading-relaxed shadow-2xs">
+                          <p className="font-semibold text-[#1D1D1F] mb-1">💵 Pre-Approved Repair Budget: ${limit.toFixed(2)}</p>
+                          <p className="font-normal text-[#6E6E73]">
+                            If the total parts & labor cost is under <strong className="text-[#1D1D1F]">${limit.toFixed(2)}</strong>, choose <strong className="text-[#1D1D1F]">Small Job (Quick Fix)</strong> to resolve right away and get paid immediately. Otherwise, select <strong className="text-[#1D1D1F]">Large Job</strong> to submit an estimate for owner approval first.
                           </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                           <button
                             type="button"
                             onClick={() => setWorkflowPath("ESTIMATE")}
-                            className="p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/10 text-left transition flex flex-col justify-between h-full space-y-3 group cursor-pointer"
+                            className="p-5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between h-full space-y-3 shadow-2xs cursor-pointer group"
                           >
                             <div>
-                              <span className="inline-flex items-center justify-center p-2 rounded-xl bg-indigo-50 text-indigo-600 mb-2 group-hover:scale-105 transition-transform">
-                                <FileText className="h-5 w-5" />
+                              <span className="inline-flex items-center justify-center p-2 rounded-xl bg-slate-100 text-slate-700 mb-2 border border-slate-200/60 shadow-2xs">
+                                <FileText className="h-4 w-4" />
                               </span>
-                              <h5 className="font-bold text-sm text-slate-800">Large Job (Requires Cost Estimate)</h5>
-                              <p className="text-xs text-slate-450 mt-1 leading-normal">
-                                Select this if parts and labor will exceed <strong>${limit.toFixed(2)}</strong>. You must submit your estimate, which the owner will review and approve before you start work.
+                              <h5 className="text-xs font-semibold text-[#1D1D1F]">Large Job (Requires Cost Estimate)</h5>
+                              <p className="text-xs font-normal text-[#6E6E73] mt-1 leading-relaxed">
+                                Select this if parts and labor will exceed <strong className="text-[#1D1D1F]">${limit.toFixed(2)}</strong>. You must submit your estimate, which the owner will review and approve before you start work.
                               </p>
                             </div>
-                            <span className="text-[10px] font-bold text-indigo-600 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 mt-2">
+                            <span className="text-xs font-medium text-slate-900 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 mt-2">
                               Choose Large Job →
                             </span>
                           </button>
@@ -858,18 +858,18 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                               setWorkflowPath("QUICK_FIX");
                               setIsQuickFix(true);
                             }}
-                            className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/10 text-left transition flex flex-col justify-between h-full space-y-3 group cursor-pointer"
+                            className="p-5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between h-full space-y-3 shadow-2xs cursor-pointer group"
                           >
                             <div>
-                              <span className="inline-flex items-center justify-center p-2 rounded-xl bg-emerald-50 text-emerald-600 mb-2 group-hover:scale-105 transition-transform">
-                                <CheckCircle2 className="h-5 w-5" />
+                              <span className="inline-flex items-center justify-center p-2 rounded-xl bg-slate-100 text-slate-700 mb-2 border border-slate-200/60 shadow-2xs">
+                                <CheckCircle2 className="h-4 w-4" />
                               </span>
-                              <h5 className="font-bold text-sm text-slate-800">Small Job (Quick Fix / Below Budget)</h5>
-                              <p className="text-xs text-slate-450 mt-1 leading-normal">
-                                Select this if the issue is already resolved or can be resolved immediately for under <strong>${limit.toFixed(2)}</strong>. Skip estimate approval and enter actual final costs directly.
+                              <h5 className="text-xs font-semibold text-[#1D1D1F]">Small Job (Quick Fix / Below Budget)</h5>
+                              <p className="text-xs font-normal text-[#6E6E73] mt-1 leading-relaxed">
+                                Select this if the issue is already resolved or can be resolved immediately for under <strong className="text-[#1D1D1F]">${limit.toFixed(2)}</strong>. Skip estimate approval and enter actual final costs directly.
                               </p>
                             </div>
-                            <span className="text-[10px] font-bold text-emerald-600 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 mt-2">
+                            <span className="text-xs font-medium text-slate-900 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 mt-2">
                               Choose Small Job →
                             </span>
                           </button>
@@ -881,19 +881,19 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   {(() => {
                     if (!isScheduled) {
                       return (
-                        <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">2</span>
+                            <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">2</span>
                               Submit Cost Estimate
                             </h4>
-                            <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                               <Lock className="h-3 w-3" /> Locked
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400">Owner approval is required if the estimate exceeds the limit.</p>
-                          <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
-                            <Clock className="h-3.5 w-3.5 text-blue-500 shrink-0" /> Complete Step 1 (Schedule Appointment) to unlock
+                          <p className="text-xs font-normal text-[#6E6E73]">Owner approval is required if the estimate exceeds the limit.</p>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
+                            <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0" /> Complete Step 1 (Schedule Appointment) to unlock
                           </div>
                         </div>
                       );
@@ -901,18 +901,18 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                     if (!isReadyForWork) {
                       return (
-                        <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">2</span>
+                            <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">2</span>
                               Submit Cost Estimate
                             </h4>
-                            <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                               <Lock className="h-3 w-3" /> Locked
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400">Owner approval is required if the estimate exceeds the limit.</p>
-                          <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
+                          <p className="text-xs font-normal text-[#6E6E73]">Owner approval is required if the estimate exceeds the limit.</p>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
                             <Lock className="h-3.5 w-3.5 text-amber-500 shrink-0" /> Awaiting tenant confirmation of appointment to unlock
                           </div>
                         </div>
@@ -921,19 +921,19 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                     if (!workflowPath) {
                       return (
-                        <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">2</span>
+                            <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">2</span>
                               Submit Cost Estimate
                             </h4>
-                            <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                               <Lock className="h-3 w-3" /> Locked
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400">Owner approval is required if the estimate exceeds the limit.</p>
-                          <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
-                            <Wrench className="h-3.5 w-3.5 text-indigo-500 shrink-0" /> Select repair workflow path to unlock
+                          <p className="text-xs font-normal text-[#6E6E73]">Owner approval is required if the estimate exceeds the limit.</p>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
+                            <Wrench className="h-3.5 w-3.5 text-slate-700 shrink-0" /> Select repair workflow path to unlock
                           </div>
                         </div>
                       );
@@ -941,13 +941,13 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                     if (workflowPath === "QUICK_FIX") {
                       return (
-                        <div className="p-5 bg-slate-50/60 border border-slate-200 rounded-xl flex justify-between items-center">
+                        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center font-sans shadow-2xs">
                           <div className="space-y-1">
-                            <h4 className="font-bold text-sm text-slate-500 flex items-center gap-2">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">2</span>
+                            <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">2</span>
                               Submit Cost Estimate (Bypassed)
                             </h4>
-                            <p className="text-xs text-slate-400">You chose the Quick-Fix path. Immediate repair and resolution are active.</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">You chose the Quick-Fix path. Immediate repair and resolution are active.</p>
                           </div>
                           {!isClosed && !isPendingConfirmation && (
                             <Button
@@ -957,7 +957,7 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                                 setWorkflowPath(null);
                                 setIsQuickFix(false);
                               }}
-                              className="text-xs font-bold text-indigo-650 border-indigo-200 hover:bg-indigo-50/50 rounded-xl h-8 cursor-pointer"
+                              className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer px-4"
                             >
                               Change Path
                             </Button>
@@ -967,88 +967,88 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                     }
 
                     return (
-                      <div className="p-5 bg-slate-50/60 border border-slate-200 rounded-xl space-y-4">
+                      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 font-sans shadow-2xs">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">2</span>
+                            <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">2</span>
                               Submit Cost Estimate
                             </h4>
-                            <p className="text-xs text-slate-500 mt-1">Submit estimates if owner approval is required before starting repairs.</p>
+                            <p className="text-xs font-normal text-[#6E6E73] mt-1">Submit estimates if owner approval is required before starting repairs.</p>
                           </div>
                           <div className="flex items-center gap-2">
                             {!isAwaitingApproval && !isApproved && !request.estimatedLabor && !request.estimatedMaterials && (
                               <Button
                                 type="button"
-                                variant="ghost"
+                                variant="outline"
                                 onClick={() => {
                                   setWorkflowPath(null);
                                   setIsQuickFix(false);
                                 }}
-                                className="text-xs font-bold text-slate-500 hover:text-slate-700 h-7 px-2.5 rounded-lg border border-slate-200 cursor-pointer"
+                                className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer px-4"
                               >
                                 Change Path
                               </Button>
                             )}
                             {isAwaitingApproval && (
-                              <Badge className="bg-amber-100 text-amber-800 border-none font-bold text-[10px] uppercase">Awaiting Owner Approval</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">Awaiting Owner Approval</span>
                             )}
                             {isApproved && (
-                              <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[10px] uppercase">Estimate Approved</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Estimate Approved</span>
                             )}
                             {!isAwaitingApproval && !isApproved && (request.estimatedLabor || request.estimatedMaterials) && (
-                              <Badge className="bg-blue-100 text-blue-800 border-none font-bold text-[10px] uppercase">Estimate Submitted</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Estimate Submitted</span>
                             )}
                           </div>
                         </div>
 
                         {isAwaitingApproval && (
-                          <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-amber-800 leading-relaxed">
-                            <strong>⚠️ Cost Control Warning:</strong> Your estimate of <strong>${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}</strong> exceeds the owner's auto-approval limit. Please wait for the owner to approve before completing the repair.
+                          <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3 text-xs text-amber-900 leading-relaxed font-normal shadow-2xs">
+                            <strong className="font-semibold text-amber-950">⚠️ Cost Control Warning:</strong> Your estimate of <strong>${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}</strong> exceeds the owner's auto-approval limit. Please wait for the owner to approve before completing the repair.
                           </div>
                         )}
 
                         {isApproved && (request.estimatedLabor || request.estimatedMaterials) && (
-                          <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-xs text-emerald-850 leading-relaxed">
-                            <strong>✓ Approved:</strong> Your estimate of <strong>${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}</strong> is approved. You may proceed with the repairs.
+                          <div className="bg-slate-100 border border-slate-200 rounded-xl p-3 text-xs text-[#1D1D1F] leading-relaxed font-normal shadow-2xs">
+                            <strong className="font-semibold">✓ Approved:</strong> Your estimate of <strong>${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}</strong> is approved. You may proceed with the repairs.
                           </div>
                         )}
 
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="estLabor" className="text-slate-700 text-xs font-bold">Est. Labor ($)</Label>
+                          <div className="space-y-1">
+                            <Label htmlFor="estLabor" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Est. Labor ($)</Label>
                             <Input
                               id="estLabor"
                               type="number"
                               placeholder="0.00"
                               value={estimatedLabor}
                               onChange={(e) => setEstimatedLabor(e.target.value)}
-                              className="mt-1 bg-white border-slate-200 rounded-xl text-sm"
+                              className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                               disabled={isAwaitingApproval || isApproved}
                             />
                           </div>
-                          <div>
-                            <Label htmlFor="estMaterials" className="text-slate-700 text-xs font-bold">Est. Materials ($)</Label>
+                          <div className="space-y-1">
+                            <Label htmlFor="estMaterials" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Est. Materials ($)</Label>
                             <Input
                               id="estMaterials"
                               type="number"
                               placeholder="0.00"
                               value={estimatedMaterials}
                               onChange={(e) => setEstimatedMaterials(e.target.value)}
-                              className="mt-1 bg-white border-slate-200 rounded-xl text-sm"
+                              className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                               disabled={isAwaitingApproval || isApproved}
                             />
                           </div>
                         </div>
                         
-                        <div className="bg-white border border-slate-100 rounded-xl p-4 mt-2">
-                          <Label className="font-bold text-slate-800 mb-2 block text-xs flex items-center gap-1.5">
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs font-sans">
+                          <Label className="font-normal text-[#6E6E73] uppercase tracking-wider mb-2 block text-xs flex items-center gap-1.5">
                             📸 Diagnosis Photos (Before Starting Work)
                           </Label>
                           {diagnosisPhotos.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-3">
                               {diagnosisPhotos.map((url, i) => (
-                                <div key={i} className="relative h-16 w-16 rounded-lg border border-slate-200 overflow-hidden group">
+                                <div key={i} className="relative h-16 w-16 rounded-xl border border-slate-200 overflow-hidden group shadow-2xs">
                                   <img src={url} alt="Diagnosis" className="object-cover w-full h-full" />
                                   <button
                                     type="button"
@@ -1061,9 +1061,9 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                               ))}
                             </div>
                           )}
-                          <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group">
-                            <UploadCloud className="h-6 w-6 text-slate-500 mb-2 group-hover:scale-110 transition-transform" />
-                            <span className="text-xs font-bold text-slate-600">Tap/Click to upload "Before" photos</span>
+                          <label className="flex flex-col items-center justify-center h-20 border border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group shadow-2xs">
+                            <UploadCloud className="h-5 w-5 text-slate-500 mb-1 group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-normal text-[#6E6E73]">Tap/Click to upload "Before" photos</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -1090,11 +1090,11 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                         </div>
                         
                         {!isAwaitingApproval && !isApproved && (
-                          <div className="flex flex-col sm:flex-row gap-3">
+                          <div className="flex flex-col sm:flex-row gap-3 pt-1">
                             <Button
                               onClick={handleSubmitEstimate}
                               disabled={processing}
-                              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs cursor-pointer"
+                              className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex-1"
                             >
                               {processing ? "Submitting..." : "Submit Estimate"}
                             </Button>
@@ -1106,118 +1106,118 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
                   {/* Step 3: Complete & Resolve Repair */}
                   {!isScheduled ? (
-                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">3</span>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">3</span>
                           Complete & Resolve Repair
                         </h4>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                           <Lock className="h-3 w-3" /> Locked
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400">Fill in final actual costs and select if tenant liability applies.</p>
-                      <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
-                        <Clock className="h-3.5 w-3.5 text-blue-500 shrink-0" /> Complete Step 1 (Schedule Appointment) to unlock
+                      <p className="text-xs font-normal text-[#6E6E73]">Fill in final actual costs and select if tenant liability applies.</p>
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
+                        <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0" /> Complete Step 1 (Schedule Appointment) to unlock
                       </div>
                     </div>
                   ) : !isReadyForWork ? (
-                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">3</span>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">3</span>
                           Complete & Resolve Repair
                         </h4>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                           <Lock className="h-3 w-3" /> Locked
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400">Fill in final actual costs and select if tenant liability applies.</p>
-                      <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
+                      <p className="text-xs font-normal text-[#6E6E73]">Fill in final actual costs and select if tenant liability applies.</p>
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
                         <Lock className="h-3.5 w-3.5 text-amber-500 shrink-0" /> Awaiting tenant confirmation of appointment to unlock
                       </div>
                     </div>
                   ) : !workflowPath ? (
-                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">3</span>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">3</span>
                           Complete & Resolve Repair
                         </h4>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                           <Lock className="h-3 w-3" /> Locked
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400">Fill in final actual costs and select if tenant liability applies.</p>
-                      <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
-                        <Wrench className="h-3.5 w-3.5 text-indigo-500 shrink-0" /> Select repair workflow path to unlock
+                      <p className="text-xs font-normal text-[#6E6E73]">Fill in final actual costs and select if tenant liability applies.</p>
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
+                        <Wrench className="h-3.5 w-3.5 text-slate-700 shrink-0" /> Select repair workflow path to unlock
                       </div>
                     </div>
                   ) : workflowPath === "ESTIMATE" && !isApproved ? (
-                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-xl space-y-3 opacity-60 pointer-events-none">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 opacity-60 pointer-events-none font-sans">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-slate-400 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white">3</span>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-white">3</span>
                           Complete & Resolve Repair
                         </h4>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                           <Lock className="h-3 w-3" /> Locked
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400">Fill in final actual costs and select if tenant liability applies.</p>
-                      <div className="bg-white/80 p-2.5 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-2">
+                      <p className="text-xs font-normal text-[#6E6E73]">Fill in final actual costs and select if tenant liability applies.</p>
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs font-normal text-[#6E6E73] flex items-center gap-1.5 mt-2">
                         {isAwaitingApproval ? (
-                          <span className="flex items-center gap-1.5 text-amber-600">
+                          <span className="flex items-center gap-1.5 text-amber-700">
                             <AlertTriangle className="h-3.5 w-3.5" /> Estimate Awaiting Owner Approval
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1.5 text-indigo-600">
+                          <span className="flex items-center gap-1.5 text-slate-700">
                             <ShieldAlert className="h-3.5 w-3.5" /> Please submit estimate and get owner approval first
                           </span>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="p-5 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-4">
-                      <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">3</span>
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 font-sans shadow-2xs">
+                      <h4 className="text-xs font-semibold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">3</span>
                         Complete & Resolve Repair
                       </h4>
-                      <p className="text-xs text-slate-500">Fill in final actual costs, upload receipts, and note any tenant liability/negligence.</p>
+                      <p className="text-xs font-normal text-[#6E6E73]">Fill in final actual costs, upload receipts, and note any tenant liability/negligence.</p>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="finalLabor" className="text-slate-700 text-xs font-bold">Final Labor ($)</Label>
+                        <div className="space-y-1">
+                          <Label htmlFor="finalLabor" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Final Labor ($)</Label>
                           <Input
                             id="finalLabor"
                             type="number"
                             placeholder="0.00"
                             value={finalLabor}
                             onChange={(e) => setFinalLabor(e.target.value)}
-                            className="mt-1 bg-white border-slate-200 rounded-xl text-sm"
+                            className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="finalMaterials" className="text-slate-700 text-xs font-bold">Final Materials ($)</Label>
+                        <div className="space-y-1">
+                          <Label htmlFor="finalMaterials" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Final Materials ($)</Label>
                           <Input
                             id="finalMaterials"
                             type="number"
                             placeholder="0.00"
                             value={finalMaterials}
                             onChange={(e) => setFinalMaterials(e.target.value)}
-                            className="mt-1 bg-white border-slate-200 rounded-xl text-sm"
+                            className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                           />
                         </div>
                       </div>
 
-                      <div className="bg-white border border-slate-100 rounded-xl p-4 mt-2">
-                        <Label className="font-bold text-slate-800 mb-2 block text-xs flex items-center gap-1.5">
+                      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs font-sans">
+                        <Label className="font-normal text-[#6E6E73] uppercase tracking-wider mb-2 block text-xs flex items-center gap-1.5">
                           🧾 Invoice / Material Receipts (For refund/parts)
                         </Label>
                         {receiptPhotos.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-3">
                             {receiptPhotos.map((url, i) => (
-                              <div key={i} className="relative h-16 w-16 rounded-lg border border-slate-200 overflow-hidden group">
+                              <div key={i} className="relative h-16 w-16 rounded-xl border border-slate-200 overflow-hidden group shadow-2xs">
                                 <img src={url} alt="Receipt" className="object-cover w-full h-full" />
                                 <button
                                   type="button"
@@ -1230,9 +1230,9 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                             ))}
                           </div>
                         )}
-                        <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group">
-                          <UploadCloud className="h-6 w-6 text-slate-500 mb-2 group-hover:scale-110 transition-transform" />
-                          <span className="text-xs font-bold text-slate-600">Tap/Click to upload "Receipt" photos</span>
+                        <label className="flex flex-col items-center justify-center h-20 border border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group shadow-2xs">
+                          <UploadCloud className="h-5 w-5 text-slate-500 mb-1 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-normal text-[#6E6E73]">Tap/Click to upload "Receipt" photos</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1258,14 +1258,14 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                         </label>
                       </div>
 
-                      <div className="bg-white border border-slate-100 rounded-xl p-4 mt-2">
-                        <Label className="font-bold text-slate-800 mb-2 block text-xs flex items-center gap-1.5">
+                      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs font-sans">
+                        <Label className="font-normal text-[#6E6E73] uppercase tracking-wider mb-2 block text-xs flex items-center gap-1.5">
                           📸 Completion Photos (After Repair is Done)
                         </Label>
                         {repairPhotos.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-3">
                             {repairPhotos.map((url, i) => (
-                              <div key={i} className="relative h-16 w-16 rounded-lg border border-slate-200 overflow-hidden group">
+                              <div key={i} className="relative h-16 w-16 rounded-xl border border-slate-200 overflow-hidden group shadow-2xs">
                                 <img src={url} alt="Repair" className="object-cover w-full h-full" />
                                 <button
                                   type="button"
@@ -1278,9 +1278,9 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                             ))}
                           </div>
                         )}
-                        <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group">
-                          <UploadCloud className="h-6 w-6 text-slate-500 mb-2 group-hover:scale-110 transition-transform" />
-                          <span className="text-xs font-bold text-slate-600">Tap/Click to upload "After" photos</span>
+                        <label className="flex flex-col items-center justify-center h-20 border border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer group shadow-2xs">
+                          <UploadCloud className="h-5 w-5 text-slate-500 mb-1 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-normal text-[#6E6E73]">Tap/Click to upload "After" photos</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1306,64 +1306,64 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                         </label>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 mt-2">
+                      <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs font-sans">
                         <div className="flex items-start gap-2">
-                          <ShieldAlert className="h-4 w-4 text-orange-500 mt-0.5 animate-pulse" />
+                          <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5" />
                           <div>
-                            <Label className="font-bold text-slate-800 block text-xs">Tenant Liability / Damage</Label>
-                            <span className="text-[10px] text-slate-500 font-medium">Is this issue due to tenant negligence or abuse?</span>
+                            <Label className="font-semibold text-[#1D1D1F] block text-xs">Tenant Liability / Damage</Label>
+                            <span className="text-xs font-normal text-[#6E6E73]">Is this issue due to tenant negligence or abuse?</span>
                           </div>
                         </div>
                         <input
                           type="checkbox"
                           checked={vendorReportedFault}
                           onChange={(e) => setVendorReportedFault(e.target.checked)}
-                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 cursor-pointer"
                         />
                       </div>
 
                       <Button
                         onClick={handleResolveTicket}
                         disabled={processing}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs cursor-pointer"
+                        className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer"
                       >
                         {processing ? "Updating..." : "Mark Resolved & Notify Tenant"}
                       </Button>
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             )}
 
             {isPendingConfirmation && (
-              <Card className="p-6 bg-blue-50/70 border border-blue-100 text-blue-900 rounded-2xl shadow-sm text-center space-y-4">
-                <CheckCircle2 className="h-10 w-10 text-blue-600 mx-auto" />
+              <div className="p-6 md:p-8 rounded-3xl bg-slate-50 border border-slate-200 shadow-2xs font-sans text-center space-y-3">
+                <CheckCircle2 className="h-8 w-8 text-slate-700 mx-auto" />
                 <div className="space-y-1">
-                  <h3 className="font-extrabold text-lg text-blue-900">Repair Awaiting Verification</h3>
-                  <p className="text-xs text-blue-700 max-w-md mx-auto leading-relaxed">
-                    Great job! Work details and costs of <strong>${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}</strong> have been submitted. This ticket is currently waiting for the tenant to verify the repair.
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Repair Awaiting Verification</h3>
+                  <p className="text-xs font-normal text-[#6E6E73] max-w-md mx-auto leading-relaxed">
+                    Great job! Work details and costs of <strong className="font-semibold text-[#1D1D1F]">${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}</strong> have been submitted. This ticket is currently waiting for the tenant to verify the repair.
                   </p>
                 </div>
-              </Card>
+              </div>
             )}
 
             {isClosed && (
-              <Card className="p-6 bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl shadow-sm space-y-5">
+              <div className="p-6 md:p-8 rounded-3xl bg-white border border-slate-200 shadow-2xs font-sans space-y-5">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-slate-105 flex items-center justify-center text-slate-550">
-                    <CheckCircle className="h-5 w-5 text-slate-500" />
+                  <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200/60 shadow-2xs">
+                    <CheckCircle className="h-4 w-4 text-slate-700" />
                   </div>
                   <div>
-                    <h3 className="font-black text-slate-800 text-sm">Ticket Completed & Closed</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">This maintenance request is completed and finalized.</p>
+                    <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Ticket Completed & Closed</h3>
+                    <p className="text-xs font-normal text-[#6E6E73] mt-0.5">This maintenance request is completed and finalized.</p>
                   </div>
                 </div>
 
                 {/* Tenant Review & Feedback */}
                 {request.tenantRating !== null && request.tenantRating !== undefined && (
-                  <div className="border-t border-slate-200 pt-4 space-y-3">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                      <Star className="h-3 w-3 text-amber-500 fill-amber-500" /> Tenant Feedback &amp; Rating
+                  <div className="border-t border-slate-100 pt-4 space-y-3">
+                    <h4 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /> Tenant Feedback &amp; Rating
                     </h4>
                     <div className="flex items-center gap-2">
                       <div className="flex gap-0.5">
@@ -1378,39 +1378,39 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                           />
                         ))}
                       </div>
-                      <span className="text-xs font-bold text-slate-700">({request.tenantRating} / 5)</span>
+                      <span className="text-xs font-semibold text-[#1D1D1F]">({request.tenantRating} / 5)</span>
                     </div>
                     {request.tenantFeedback ? (
-                      <p className="text-xs font-medium text-slate-600 italic bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
+                      <p className="text-xs font-normal text-[#1D1D1F] italic bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed shadow-2xs">
                         &ldquo;{request.tenantFeedback}&rdquo;
                       </p>
                     ) : (
-                      <p className="text-xs text-slate-400 italic">No written feedback was provided by the tenant.</p>
+                      <p className="text-xs text-[#6E6E73] italic">No written feedback was provided by the tenant.</p>
                     )}
                   </div>
                 )}
 
                 {/* Vendor Payout Settlement Block */}
-                <div className="border-t border-slate-200 pt-4 space-y-3">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Settlement Status</h4>
+                <div className="border-t border-slate-100 pt-4 space-y-3">
+                  <h4 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Payout Settlement Status</h4>
                   {request.vendorExpenseTransactionId ? (
-                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl space-y-3 text-xs">
-                      <div className="flex items-center justify-between font-bold text-emerald-800">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-xs shadow-2xs font-sans">
+                      <div className="flex items-center justify-between font-semibold text-[#1D1D1F]">
                         <span className="flex items-center gap-1.5">💸 Payout Confirmed & Sent</span>
-                        <span className="font-mono text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                        <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
                           REF: VENDOR_PAY_{request.id.slice(-6)}
                         </span>
                       </div>
-                      <p className="text-emerald-700 leading-relaxed font-medium">
+                      <p className="text-[#6E6E73] leading-relaxed font-normal">
                         Payment was successfully processed by the property owner and recorded in the system ledger.
                       </p>
-                      <div className="bg-white p-3 rounded-lg border border-emerald-100/50 space-y-1.5 font-semibold text-slate-700 text-[11px]">
+                      <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5 font-normal text-[#1D1D1F] text-xs shadow-2xs">
                         <div className="flex justify-between">
-                          <span className="text-slate-450">Amount Disbursed:</span>
-                          <span className="font-extrabold text-slate-900">${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)} USD</span>
+                          <span className="text-[#6E6E73]">Amount Disbursed:</span>
+                          <span className="font-semibold text-[#1D1D1F]">${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)} USD</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-450">Settlement Method:</span>
+                          <span className="text-[#6E6E73]">Settlement Method:</span>
                           <span>
                             {request.transaction?.reference?.endsWith("_STRIPE") ? "Direct Deposit (ACH)" :
                              request.transaction?.reference?.endsWith("_CHECK") ? "Written Check" : "Physical Cash"}
@@ -1418,27 +1418,27 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                         </div>
                         {request.transaction?.createdAt && (
                           <div className="flex justify-between">
-                            <span className="text-slate-450">Settlement Date:</span>
+                            <span className="text-[#6E6E73]">Settlement Date:</span>
                             <span>{new Date(request.transaction.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
                           </div>
                         )}
                       </div>
-                      <div className="p-3 bg-emerald-100/30 rounded-lg text-[10px] text-emerald-800 leading-normal font-medium">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-[#6E6E73] leading-relaxed font-normal shadow-2xs">
                         {request.transaction?.reference?.endsWith("_STRIPE") 
                           ? "ℹ️ Funds have been transferred electronically. ACH settlement typically takes 1-3 business days depending on your bank."
                           : "ℹ️ Payment was settled offline. Please confirm receipt of physical check or cash from the property owner."}
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl space-y-2 text-xs">
-                      <div className="flex items-center justify-between font-bold text-amber-850">
+                    <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-2 text-xs font-sans shadow-2xs">
+                      <div className="flex items-center justify-between font-semibold text-amber-900">
                         <span>⏳ Awaiting Payout Settlement</span>
-                        <span className="font-mono text-[9px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Pending Owner</span>
+                        <span className="font-mono text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200">Pending Owner</span>
                       </div>
-                      <p className="text-amber-700 leading-relaxed font-medium">
-                        Your final repair invoice of <strong>${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}</strong> has been registered. The owner is processing the payment.
+                      <p className="text-amber-950 leading-relaxed font-normal">
+                        Your final repair invoice of <strong className="font-semibold">${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}</strong> has been registered. The owner is processing the payment.
                       </p>
-                      <p className="text-[10px] text-slate-500 leading-normal">
+                      <p className="text-xs text-[#6E6E73] leading-relaxed font-normal">
                         Make sure your bank details below are correct to enable electronic Direct Deposit payouts. You will receive an email confirmation once the payout is sent.
                       </p>
                     </div>
@@ -1446,17 +1446,17 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                 </div>
 
                 {/* Download Work Completion Certificate Button */}
-                <div className="border-t border-slate-200 pt-4">
+                <div className="border-t border-slate-100 pt-4 font-sans">
                   <button
                     onClick={printWorkCertificate}
-                    className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-950 text-white font-bold rounded-xl text-xs h-10 shadow-sm transition-all"
+                    className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2"
                   >
                     <FileText className="h-4 w-4" />
                     Download Work Completion Certificate (PDF)
                   </button>
-                  <p className="text-[10px] text-slate-400 text-center mt-1.5 font-medium">Includes job details, before &amp; after photos, and payment record</p>
+                  <p className="text-xs text-[#6E6E73] text-center mt-1.5 font-normal">Includes job details, before &amp; after photos, and payment record</p>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* Hidden Print Certificate — only rendered when ticket is CLOSED */}
@@ -1611,69 +1611,69 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
 
           {/* Cost Log Sidebar */}
           <div className="space-y-6">
-            <Card className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5 shadow-sm">
-              <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2">Financial Records</h3>
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-2xs font-sans">
+              <h3 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider border-b border-slate-100 pb-2.5 font-sans">Financial Records</h3>
               
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs text-slate-400 font-bold uppercase">Estimated Budget</p>
-                  <p className="font-black text-slate-800 text-lg">
+                  <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-0.5">Estimated Budget</p>
+                  <p className="text-base font-semibold text-[#1D1D1F] tracking-tight">
                     ${(Number(request.estimatedLabor || 0) + Number(request.estimatedMaterials || 0)).toFixed(2)}
                   </p>
-                  <span className="text-[10px] text-slate-500">Labor: ${request.estimatedLabor || "0.00"} | Materials: ${request.estimatedMaterials || "0.00"}</span>
+                  <span className="text-xs font-normal text-[#6E6E73]">Labor: ${request.estimatedLabor || "0.00"} | Materials: ${request.estimatedMaterials || "0.00"}</span>
                 </div>
                 
                 {request.finalLabor || request.finalMaterials ? (
                   <div>
-                    <p className="text-xs text-slate-400 font-bold uppercase">Final Repair Invoice</p>
-                    <p className="font-black text-emerald-600 text-lg">
+                    <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-0.5">Final Repair Invoice</p>
+                    <p className="text-base font-semibold text-emerald-600 tracking-tight">
                       ${(Number(request.finalLabor || 0) + Number(request.finalMaterials || 0)).toFixed(2)}
                     </p>
-                    <span className="text-[10px] text-slate-500">Labor: ${request.finalLabor || "0.00"} | Materials: ${request.finalMaterials || "0.00"}</span>
+                    <span className="text-xs font-normal text-[#6E6E73]">Labor: ${request.finalLabor || "0.00"} | Materials: ${request.finalMaterials || "0.00"}</span>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic font-medium">No final costs logged yet.</p>
+                  <p className="text-xs text-[#6E6E73] italic font-normal">No final costs logged yet.</p>
                 )}
               </div>
-            </Card>
+            </div>
 
-            <Card className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2">Timeline</h3>
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-2xs font-sans">
+              <h3 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider border-b border-slate-100 pb-2.5 font-sans">Timeline</h3>
               <div className="space-y-3">
-                <div className="flex gap-2 items-start text-xs">
+                <div className="flex gap-2.5 items-start text-xs">
                   <Calendar className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="font-bold text-slate-700">Created</p>
-                    <p className="text-slate-500">{new Date(request.createdAt).toLocaleString()}</p>
+                    <p className="font-semibold text-[#1D1D1F]">Created</p>
+                    <p className="text-[#6E6E73] font-normal mt-0.5">{new Date(request.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
                 {request.scheduledDate && (
-                  <div className="flex gap-2 items-start text-xs">
+                  <div className="flex gap-2.5 items-start text-xs">
                     <Clock className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
                     <div>
-                      <p className="font-bold text-slate-700">Scheduled Date</p>
-                      <p className="text-slate-500">{new Date(request.scheduledDate).toLocaleString()}</p>
+                      <p className="font-semibold text-[#1D1D1F]">Scheduled Date</p>
+                      <p className="text-[#6E6E73] font-normal mt-0.5">{new Date(request.scheduledDate).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
 
-            <Card className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-indigo-500" /> Payout Preferences
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-2xs font-sans">
+              <h3 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider border-b border-slate-100 pb-2.5 flex items-center gap-2 font-sans">
+                <Building2 className="h-4 w-4 text-slate-700" /> Payout Preferences
               </h3>
               
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase text-slate-500 block">How do you want to be paid?</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+              <div className="space-y-2">
+                <label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">How do you want to be paid?</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-2xs">
                   <button
                     type="button"
                     onClick={() => setPayoutMethod("STRIPE")}
-                    className={`py-2 px-3 rounded-lg text-[11px] font-extrabold transition text-center ${
+                    className={`py-1.5 px-3 rounded-xl text-xs transition text-center cursor-pointer ${
                       payoutMethod === "STRIPE"
-                        ? "bg-white text-indigo-700 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-850"
+                        ? "bg-slate-900 text-white font-medium shadow-2xs"
+                        : "bg-white text-[#6E6E73] hover:text-[#1D1D1F] font-normal border border-slate-200 shadow-2xs"
                     }`}
                   >
                     🏦 Bank ACH
@@ -1681,10 +1681,10 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <button
                     type="button"
                     onClick={() => setPayoutMethod("CASH")}
-                    className={`py-2 px-3 rounded-lg text-[11px] font-extrabold transition text-center ${
+                    className={`py-1.5 px-3 rounded-xl text-xs transition text-center cursor-pointer ${
                       payoutMethod === "CASH"
-                        ? "bg-white text-emerald-700 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-850"
+                        ? "bg-slate-900 text-white font-medium shadow-2xs"
+                        : "bg-white text-[#6E6E73] hover:text-[#1D1D1F] font-normal border border-slate-200 shadow-2xs"
                     }`}
                   >
                     💵 Cash
@@ -1692,10 +1692,10 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
                   <button
                     type="button"
                     onClick={() => setPayoutMethod("CHECK")}
-                    className={`py-2 px-3 rounded-lg text-[11px] font-extrabold transition text-center ${
+                    className={`py-1.5 px-3 rounded-xl text-xs transition text-center cursor-pointer ${
                       payoutMethod === "CHECK"
-                        ? "bg-white text-amber-700 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-850"
+                        ? "bg-slate-900 text-white font-medium shadow-2xs"
+                        : "bg-white text-[#6E6E73] hover:text-[#1D1D1F] font-normal border border-slate-200 shadow-2xs"
                     }`}
                   >
                     ✉️ Check
@@ -1704,47 +1704,47 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
               </div>
 
               {payoutMethod === "STRIPE" ? (
-                <div className="space-y-3 pt-2">
-                  <p className="text-[11px] text-slate-500 leading-normal">
+                <div className="space-y-3 pt-1">
+                  <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
                     Enter your banking details so the property owner can transfer repair funds directly to your account.
                   </p>
-                  <div>
-                    <Label htmlFor="bankName" className="text-slate-600 text-[10px] font-bold uppercase">Bank Name</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="bankName" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Bank Name</Label>
                     <Input
                       id="bankName"
                       placeholder="e.g. Chase Bank"
                       value={bankName === "CASH" || bankName === "CHECK" ? "" : bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      className="mt-1 bg-white border-slate-200 rounded-xl text-xs h-8 focus-visible:ring-indigo-500"
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="routingNumber" className="text-slate-600 text-[10px] font-bold uppercase">Routing Number</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="routingNumber" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Routing Number</Label>
                     <Input
                       id="routingNumber"
                       placeholder="9 digits"
                       value={routingNumber}
                       onChange={(e) => setRoutingNumber(e.target.value)}
-                      className="mt-1 bg-white border-slate-200 rounded-xl text-xs h-8 focus-visible:ring-indigo-500"
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="accountNumber" className="text-slate-600 text-[10px] font-bold uppercase">Account Number</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="accountNumber" className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Account Number</Label>
                     <Input
                       id="accountNumber"
                       placeholder="Account number"
                       value={accountNumber}
                       onChange={(e) => setAccountNumber(e.target.value)}
-                      className="mt-1 bg-white border-slate-200 rounded-xl text-xs h-8 focus-visible:ring-indigo-500"
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                     />
                   </div>
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 leading-normal space-y-1.5 mt-2">
-                  <p className="font-semibold">
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-[#6E6E73] leading-relaxed space-y-1 mt-2 shadow-2xs">
+                  <p className="font-semibold text-[#1D1D1F]">
                     {payoutMethod === "CASH" ? "💵 Cash Payout Preference" : "✉️ Offline Check Preference"}
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs font-normal text-[#6E6E73]">
                     {payoutMethod === "CASH" 
                       ? "You selected to receive payment in cash. The property owner will coordinate with you to pay you in cash once the work is verified."
                       : "You selected to receive payment via physical check. The owner will write you a check upon repair completion."}
@@ -1755,11 +1755,11 @@ export default function VendorTicketPage({ params }: { params: Promise<{ token: 
               <Button
                 onClick={handleSaveBankDetails}
                 disabled={processing}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs h-8 mt-2 shadow-sm"
+                className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 {processing ? "Saving..." : "Save Payout Preference"}
               </Button>
-            </Card>
+            </div>
           </div>
         </div>
 

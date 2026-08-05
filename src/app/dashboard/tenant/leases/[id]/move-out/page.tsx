@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -126,7 +126,7 @@ export default function TenantFinalStatementPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900">Move-Out Final Statement</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Move-Out Final Statement</h1>
           <p className="text-slate-500 font-semibold text-xs mt-0.5">
             Unit {lease.unit?.name} • {lease.unit?.property?.name}
           </p>
@@ -200,10 +200,10 @@ export default function TenantFinalStatementPage() {
       {(canReview || isAccepted || isDisputed || isDisputeFinalized || isCompleted) && (
         <Card className="rounded-3xl shadow-xs border border-slate-200 bg-white font-sans overflow-hidden">
           <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center justify-between text-base font-black text-slate-900 tracking-tight">
+            <CardTitle className="flex items-center justify-between text-base font-semibold text-slate-900 tracking-tight">
               <span>Itemized Deductions</span>
-              {isAccepted && <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-black uppercase tracking-wider shadow-2xs">Accepted</Badge>}
-              {isDisputed && <Badge className="bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-black uppercase tracking-wider shadow-2xs">Disputed — Awaiting Owner Response</Badge>}
+              {isAccepted && <Badge className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-semibold uppercase tracking-wider shadow-2xs">Accepted</Badge>}
+              {isDisputed && <Badge className="bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-semibold uppercase tracking-wider shadow-2xs">Disputed — Awaiting Owner Response</Badge>}
             </CardTitle>
             <CardDescription className="text-xs font-semibold text-slate-500">Review the deductions claimed by your landlord after the move-out inspection.</CardDescription>
           </CardHeader>
@@ -250,11 +250,11 @@ export default function TenantFinalStatementPage() {
             <div className="border-t border-slate-100 pt-5 space-y-2.5">
               <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
                 <span className="font-extrabold uppercase text-[10px] text-slate-400 tracking-wider">Original Security Deposit</span>
-                <span className="font-black text-slate-900 text-sm">${originalDeposit.toFixed(2)}</span>
+                <span className="font-semibold text-slate-900 text-sm">${originalDeposit.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
                 <span className="font-extrabold uppercase text-[10px] text-slate-400 tracking-wider">Total Deductions</span>
-                <span className="font-black text-rose-600 text-sm">-${totalDeducted.toFixed(2)}</span>
+                <span className="font-semibold text-rose-600 text-sm">-${totalDeducted.toFixed(2)}</span>
               </div>
               {excessBalance > 0 ? (
                 <div className="flex justify-between items-center text-xs font-extrabold text-amber-950 bg-amber-50/80 p-3 rounded-2xl border border-amber-200/80 shadow-2xs mt-2">
@@ -305,7 +305,7 @@ export default function TenantFinalStatementPage() {
           <CardHeader className="border-b border-slate-100 pb-4 bg-slate-50/50">
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="flex items-center gap-2 text-base font-black text-slate-900 tracking-tight">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight">
                   <Clock className="h-4 w-4 text-amber-600" /> Your Review Required
                 </CardTitle>
                 <CardDescription className="text-xs font-semibold text-slate-500 mt-1">
@@ -315,7 +315,7 @@ export default function TenantFinalStatementPage() {
                     : "Once accepted, the owner will process your refund."}
                 </CardDescription>
               </div>
-              <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-md bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs shrink-0">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs shrink-0">
                 Action Pending
               </span>
             </div>

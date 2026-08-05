@@ -256,7 +256,7 @@ export function ScheduleTourModal({
       <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-4">
-            <DialogTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <DialogTitle className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-slate-900" />
               Schedule a Showing
             </DialogTitle>
@@ -264,7 +264,7 @@ export function ScheduleTourModal({
               Verified Showing
             </Badge>
           </div>
-          <DialogDescription className="text-xs text-slate-500 font-semibold">
+          <DialogDescription className="text-xs text-[#6E6E73] font-normal">
             {unit?.property?.name} {unit?.name ? `(${unit.name})` : ""} — {unit?.property?.address}
           </DialogDescription>
         </DialogHeader>
@@ -418,13 +418,13 @@ export function ScheduleTourModal({
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
-              <Button type="button" variant="ghost" className="rounded-xl font-bold border-slate-200" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="ghost" className="rounded-xl font-medium border-slate-200" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={schedulingTour || isSlotConflicting}
-                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold h-11 px-6 text-xs shadow-xs"
+                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium h-11 px-6 text-xs shadow-xs"
               >
                 {schedulingTour ? (
                   <>
@@ -490,13 +490,13 @@ export function ScheduleTourModal({
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
-              <Button type="button" variant="ghost" className="rounded-xl font-bold" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="ghost" className="rounded-xl font-medium" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={schedulingTour || tourOtpCode.length < 6}
-                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold h-11 px-6 text-xs shadow-xs"
+                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium h-11 px-6 text-xs shadow-xs"
               >
                 {schedulingTour ? (
                   <>
@@ -518,7 +518,7 @@ export function ScheduleTourModal({
 
             <div>
               <h3 className="text-xl font-black text-slate-900">Tour Request Submitted!</h3>
-              <p className="text-xs text-slate-500 font-semibold mt-1">
+              <p className="text-xs text-[#6E6E73] font-normal mt-1">
                 The landlord has been notified and will confirm your visit shortly.
               </p>
             </div>
@@ -542,13 +542,13 @@ export function ScheduleTourModal({
 
             <div className="space-y-3">
               <a href={googleCalUrl} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="outline" className="w-full h-11 rounded-xl font-bold text-xs border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-2 text-slate-800">
+                <Button variant="outline" className="w-full h-11 rounded-xl font-medium text-xs border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-2 text-slate-800">
                   <CalendarIcon className="h-4 w-4 text-slate-900" /> Add to Google Calendar <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </a>
 
               <Link href="/dashboard/tenant/tours" onClick={() => onOpenChange(false)} className="block">
-                <Button className="w-full h-11 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-xs">
+                <Button className="w-full h-11 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-xs">
                   View My Scheduled Tours →
                 </Button>
               </Link>

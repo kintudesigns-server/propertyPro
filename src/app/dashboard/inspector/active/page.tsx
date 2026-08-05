@@ -218,26 +218,26 @@ export default function InspectorActiveTasksPage() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
 
       {/* ── HEADER ── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 font-sans">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Wrench className="h-4 w-4 text-indigo-500" />
-            <span className="text-[11px] font-extrabold text-indigo-500 uppercase tracking-widest">Assigned Repairs</span>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Wrench className="h-4 w-4 text-slate-700" />
+            <span className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Assigned Repairs</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900">Active Work Orders</h1>
-          <p className="text-[#8E8E93] text-sm mt-0.5">Manage and progress all repair tickets assigned to you.</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Active Work Orders</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Manage and progress all repair tickets assigned to you.</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Stats pills */}
           <div className="hidden sm:flex items-center gap-2">
             {[
-              { label: "Total", value: active.length, bg: "bg-[#F2F2F7]", text: "text-[#3C3C43]" },
-              { label: "Waiting Approval", value: active.filter(t => t.status === "AWAITING_APPROVAL").length, bg: "bg-amber-50", text: "text-amber-700" },
-              { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-blue-50", text: "text-blue-700" },
+              { label: "Total", value: active.length, bg: "bg-slate-100 text-slate-700 border-slate-200" },
+              { label: "Waiting Approval", value: active.filter(t => t.status === "AWAITING_APPROVAL").length, bg: "bg-amber-50 text-amber-700 border-amber-200" },
+              { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-blue-50 text-blue-700 border-blue-200" },
             ].map(s => (
-              <div key={s.label} className={`${s.bg} rounded-xl px-3 py-1.5 flex items-center gap-2`}>
-                <span className={`text-base font-black ${s.text}`}>{s.value}</span>
-                <span className={`text-[10px] font-bold ${s.text} opacity-80`}>{s.label}</span>
+              <div key={s.label} className={`px-2.5 py-1 rounded-md border shadow-2xs flex items-center gap-1.5 ${s.bg}`}>
+                <span className="text-xs font-semibold">{s.value}</span>
+                <span className="text-[10px] font-medium uppercase tracking-wider">{s.label}</span>
               </div>
             ))}
           </div>
@@ -246,39 +246,39 @@ export default function InspectorActiveTasksPage() {
 
       {/* ── EMERGENCY BANNER ── */}
       {emergencyCount > 0 && (
-        <div className="relative flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 shadow-xs">
-          <div className="absolute left-0 top-0 w-1 h-full bg-red-500 rounded-l-xl" />
-          <Zap className="ml-2 h-5 w-5 text-red-600 shrink-0" />
+        <div className="relative flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-2xs font-sans">
+          <div className="absolute left-0 top-0 w-1 h-full bg-rose-500 rounded-l-2xl" />
+          <Zap className="ml-2 h-4 w-4 text-rose-600 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-black text-red-900">{emergencyCount} Emergency ticket{emergencyCount > 1 ? "s" : ""} — Respond immediately</p>
-            <p className="text-xs text-red-600 mt-0.5 font-medium">Emergency repairs are auto-approved by the system. Visit, diagnose, and complete ASAP.</p>
+            <p className="text-xs font-semibold text-rose-950">{emergencyCount} Emergency ticket{emergencyCount > 1 ? "s" : ""} — Respond immediately</p>
+            <p className="text-xs font-normal text-rose-700 mt-0.5">Emergency repairs are auto-approved by the system. Visit, diagnose, and complete ASAP.</p>
           </div>
         </div>
       )}
 
       {/* ── TOOLBAR: Search + Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 font-sans">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
           <Input placeholder="Search title, property, tenant..." value={search} onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-9 border-slate-200 rounded-xl bg-white text-sm shadow-xs" />
+            className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 pl-9 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
         </div>
 
         {/* Priority filter */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-xs">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs flex-wrap">
           {["ALL", "EMERGENCY", "HIGH", "MEDIUM", "LOW"].map(p => (
             <button key={p} onClick={() => setPrio(p)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${prioFilter === p ? "bg-[#007AFF] text-white shadow-xs" : "text-[#6E6E73] hover:bg-[#F2F2F7]"}`}>
+              className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${prioFilter === p ? "bg-slate-900 text-white font-medium shadow-2xs" : "text-[#6E6E73] font-normal hover:bg-slate-100"}`}>
               {p === "ALL" ? "All" : p.charAt(0) + p.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
 
         {/* Status filter */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-xs">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs flex-wrap">
           {[["ALL", "All"], ["ASSIGNED", "Assigned"], ["DIAGNOSIS_SCHEDULED", "Visit"], ["DIAGNOSIS_COMPLETE", "Done"], ["AWAITING_APPROVAL", "Pending"]].map(([val, label]) => (
             <button key={val} onClick={() => setSt(val)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${stFilter === val ? "bg-[#007AFF] text-white shadow-xs" : "text-[#6E6E73] hover:bg-[#F2F2F7]"}`}>
+              className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${stFilter === val ? "bg-slate-900 text-white font-medium shadow-2xs" : "text-[#6E6E73] font-normal hover:bg-slate-100"}`}>
               {label}
             </button>
           ))}
@@ -287,60 +287,60 @@ export default function InspectorActiveTasksPage() {
 
       {/* ── DATA TABLE ── */}
       {filtered.length === 0 ? (
-        <div className="text-center bg-white border border-slate-200 rounded-2xl py-24 shadow-xs">
-          <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+        <div className="text-center bg-white border border-slate-200 rounded-3xl py-24 shadow-2xs font-sans">
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-700 shadow-2xs">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
           </div>
-          <h3 className="text-base font-black text-slate-800 mb-1">
+          <h3 className="text-xs font-semibold text-[#1D1D1F] mb-1">
             {search || prioFilter !== "ALL" || stFilter !== "ALL" ? "No tickets match your filters" : "No active work orders!"}
           </h3>
-          <p className="text-sm text-[#8E8E93]">
+          <p className="text-xs font-normal text-[#6E6E73]">
             {search || prioFilter !== "ALL" || stFilter !== "ALL" ? "Try adjusting the filters above." : "All caught up — great work!"}
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-2xs overflow-hidden font-sans">
           {/* Table wrapper with horizontal scroll on small screens */}
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm border-collapse">
+            <table className="w-full min-w-[900px] text-xs border-collapse">
               {/* ── THEAD ── */}
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
                   {/* Priority */}
                   <th className="text-left px-4 py-3 w-[110px]">
-                    <button onClick={() => toggleSort("priority")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("priority")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Priority <SortIcon field="priority" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   {/* Ticket */}
                   <th className="text-left px-4 py-3">
-                    <button onClick={() => toggleSort("title")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("title")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Work Order <SortIcon field="title" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   {/* Property */}
                   <th className="text-left px-4 py-3 w-[190px]">
-                    <button onClick={() => toggleSort("property")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("property")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Property / Unit <SortIcon field="property" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   {/* Tenant */}
                   <th className="text-left px-4 py-3 w-[160px]">
-                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Tenant</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73]">Tenant</span>
                   </th>
                   {/* Status */}
                   <th className="text-left px-4 py-3 w-[190px]">
-                    <button onClick={() => toggleSort("status")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("status")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   {/* Scheduled */}
                   <th className="text-left px-4 py-3 w-[140px]">
-                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Scheduled</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73]">Scheduled</span>
                   </th>
                   {/* Actions */}
                   <th className="text-right px-4 py-3 w-[220px]">
-                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Actions</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73]">Actions</span>
                   </th>
                 </tr>
               </thead>
@@ -362,23 +362,22 @@ export default function InspectorActiveTasksPage() {
                   return (
                     <React.Fragment key={t.id}>
                       <tr
-                        className={`hover:bg-[#F5F5F7]/70 transition-colors cursor-pointer ${t.priority === "EMERGENCY" ? "border-l-2 border-l-red-500" : ""}`}
+                        className={`hover:bg-slate-50/80 transition-colors cursor-pointer ${t.priority === "EMERGENCY" ? "border-l-2 border-l-rose-500" : ""}`}
                         onClick={() => setExpanded(isExpanded ? null : t.id)}
                       >
                         {/* Priority */}
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-black px-2.5 py-1 rounded-full border ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${pCfg.dot} ${t.priority === "EMERGENCY" ? "animate-pulse" : ""}`} />
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs inline-flex items-center gap-1.5 ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${pCfg.dot} ${t.priority === "EMERGENCY" ? "animate-ping" : ""}`} />
                             {pCfg.label}
                           </span>
                         </td>
 
                         {/* Work Order info */}
                         <td className="px-4 py-3.5 max-w-[280px]">
-                          <p className="font-bold text-slate-900 leading-snug">{t.title}</p>
-                          <p className="text-[11px] text-[#8E8E93] mt-0.5 truncate max-w-xs">{t.description}</p>
-                          {/* Entry permission micro-badge */}
-                          <span className={`inline-flex items-center gap-1 text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border ${
+                          <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.title}</p>
+                          <p className="text-xs font-normal text-[#6E6E73] mt-0.5 truncate max-w-xs">{t.description}</p>
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs mt-1.5 inline-flex items-center gap-1 ${
                             t.entryPermission
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                               : "bg-amber-50 text-amber-700 border-amber-200"
@@ -390,10 +389,10 @@ export default function InspectorActiveTasksPage() {
                         {/* Property */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-start gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-[#8E8E93] shrink-0 mt-0.5" />
+                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-bold text-slate-800 text-sm leading-snug">{t.unit?.property?.name}</p>
-                              <p className="text-[11px] text-[#8E8E93] font-medium">Unit {t.unit?.name} · {t.unit?.property?.city}</p>
+                              <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.unit?.property?.name}</p>
+                              <p className="text-xs font-normal text-[#6E6E73]">Unit {t.unit?.name} · {t.unit?.property?.city}</p>
                             </div>
                           </div>
                         </td>
@@ -401,10 +400,10 @@ export default function InspectorActiveTasksPage() {
                         {/* Tenant */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-start gap-1.5">
-                            <User className="h-3.5 w-3.5 text-[#8E8E93] shrink-0 mt-0.5" />
+                            <User className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-bold text-slate-800 text-sm leading-snug">{t.tenant?.name || "—"}</p>
-                              {t.tenant?.phone && <p className="text-[11px] text-[#8E8E93] font-medium">{t.tenant.phone}</p>}
+                              <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.tenant?.name || "—"}</p>
+                              {t.tenant?.phone && <p className="text-xs font-normal text-[#6E6E73]">{t.tenant.phone}</p>}
                             </div>
                           </div>
                         </td>
@@ -413,12 +412,12 @@ export default function InspectorActiveTasksPage() {
                         <td className="px-4 py-3.5">
                           {sCfg && (
                             <div className="space-y-1.5">
-                              <span className={`inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-full border ${sCfg.bg} ${sCfg.text} ${sCfg.border}`}>
-                                <span className={`h-1.5 w-1.5 rounded-full bg-current opacity-60 ${isWaiting ? "animate-pulse" : ""}`} />
+                              <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs inline-flex items-center gap-1.5 ${sCfg.bg} ${sCfg.text} ${sCfg.border}`}>
+                                <span className={`h-1.5 w-1.5 rounded-full bg-current opacity-60 ${isWaiting ? "animate-ping" : ""}`} />
                                 {sCfg.label}
                               </span>
                               <PipelineBadge status={t.status} />
-                              <p className="text-[9px] text-[#8E8E93] font-semibold">Step {sCfg.step} of 5</p>
+                              <p className="text-[10px] font-normal text-[#6E6E73]">Step {sCfg.step} of 5</p>
                             </div>
                           )}
                         </td>
@@ -427,14 +426,14 @@ export default function InspectorActiveTasksPage() {
                         <td className="px-4 py-3.5">
                           {scheduledDate ? (
                             <div className="flex items-start gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 text-[#8E8E93] shrink-0 mt-0.5" />
+                              <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                               <div>
-                                <p className="text-[11px] font-bold text-slate-700">{scheduledDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</p>
-                                <p className="text-[10px] text-[#8E8E93]">{scheduledDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                                <p className="text-xs font-semibold text-[#1D1D1F]">{scheduledDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</p>
+                                <p className="text-[10px] font-normal text-[#6E6E73]">{scheduledDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
                               </div>
                             </div>
                           ) : (
-                            <span className="text-[11px] text-slate-300 font-medium italic">Not scheduled</span>
+                            <span className="text-xs font-normal text-[#6E6E73] italic">Not scheduled</span>
                           )}
                         </td>
 
@@ -442,26 +441,26 @@ export default function InspectorActiveTasksPage() {
                         <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-2">
                             {isWaiting ? (
-                              <span className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1 text-[10px] font-bold text-amber-700">
-                                <Clock className="h-3 w-3 animate-pulse" /> Awaiting Approval
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs inline-flex items-center gap-1">
+                                <Clock className="h-3 w-3 animate-ping" /> Awaiting Approval
                               </span>
                             ) : (
                               <DropdownMenu>
-                                <DropdownMenuTrigger className="h-8 w-8 rounded-lg border border-slate-200 bg-white hover:bg-[#F5F5F7] transition-colors flex items-center justify-center focus:outline-none">
-                                  <MoreHorizontal className="h-4 w-4 text-[#6E6E73]" />
+                                <DropdownMenuTrigger className="h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all flex items-center justify-center text-slate-700 shadow-2xs focus:outline-none cursor-pointer">
+                                  <MoreHorizontal className="h-4 w-4 text-slate-700" />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44 rounded-xl border border-slate-200 bg-white shadow-lg p-1.5 z-50">
+                                <DropdownMenuContent align="end" className="w-44 rounded-xl border border-slate-200 bg-white shadow-lg p-1.5 z-50 font-sans">
                                   {sCfg?.cta && (
                                     <DropdownMenuItem
                                       onClick={() => openModal(t, sCfg.modal)}
-                                      className="cursor-pointer font-bold text-xs rounded-lg py-2 focus:bg-indigo-50 focus:text-indigo-700 px-2"
+                                      className="cursor-pointer font-medium text-xs rounded-lg py-2 focus:bg-slate-100 text-[#1D1D1F] px-2.5"
                                     >
                                       {sCfg.cta}
                                     </DropdownMenuItem>
                                   )}
                                   <DropdownMenuItem
                                     onClick={() => router.push(`/dashboard/maintenance/${t.id}`)}
-                                    className="cursor-pointer font-bold text-xs rounded-lg py-2 focus:bg-slate-50 text-slate-700 px-2"
+                                    className="cursor-pointer font-medium text-xs rounded-lg py-2 focus:bg-slate-100 text-[#1D1D1F] px-2.5"
                                   >
                                     View Details
                                   </DropdownMenuItem>
@@ -532,40 +531,38 @@ export default function InspectorActiveTasksPage() {
 
       {/* ── ACTION DIALOGS ── */}
       <Dialog open={!!modal} onOpenChange={open => !open && (setModal(null), setTicket(null), setFormData({}))}>
-        <DialogContent className="sm:max-w-[480px] rounded-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-black flex items-center gap-2">
-              {modal === "SCHEDULE_DIAGNOSIS" && <><Calendar className="h-5 w-5 text-blue-600" /> Schedule Diagnosis Visit</>}
-              {modal === "SUBMIT_ESTIMATE"    && <><Wrench className="h-5 w-5 text-teal-600" /> Submit Diagnosis Report</>}
+        <DialogContent className="sm:max-w-[480px] rounded-3xl p-6 md:p-8 font-sans max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xs">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-base font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
+              {modal === "SCHEDULE_DIAGNOSIS" && <><Calendar className="h-4 w-4 text-slate-700" /> Schedule Diagnosis Visit</>}
+              {modal === "SUBMIT_ESTIMATE"    && <><Wrench className="h-4 w-4 text-slate-700" /> Submit Diagnosis Report</>}
             </DialogTitle>
-            <DialogDescription className="pt-1">
-              <span className="font-bold text-slate-700">{ticket?.title}</span>
-              <span className="text-[#8E8E93] mx-1.5">·</span>
-              <span className="text-[#6E6E73]">{ticket?.unit?.property?.name}, Unit {ticket?.unit?.name}</span>
+            <DialogDescription className="text-xs font-normal text-[#6E6E73]">
+              <span className="font-semibold text-[#1D1D1F]">{ticket?.title}</span>
+              <span className="mx-1 text-[#6E6E73]">·</span>
+              <span>{ticket?.unit?.property?.name}, Unit {ticket?.unit?.name}</span>
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 font-sans">
             {/* Entry notice */}
-            <div className={`flex items-start gap-3 rounded-xl border p-3.5 ${ticket?.entryPermission ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
-              <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 ${ticket?.entryPermission ? "bg-emerald-100" : "bg-amber-100"}`}>
+            <div className={`p-3.5 rounded-2xl border flex items-start gap-3 shadow-2xs ${ticket?.entryPermission ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+              <div className="h-9 w-9 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0 mt-0.5">
                 {ticket?.entryPermission ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-amber-600" />}
               </div>
               <div>
-                <p className={`text-xs font-bold ${ticket?.entryPermission ? "text-emerald-800" : "text-amber-800"}`}>
+                <p className={`text-xs font-semibold ${ticket?.entryPermission ? "text-emerald-950" : "text-amber-950"}`}>
                   {ticket?.entryPermission ? "Entry Permitted — Access if tenant not home" : "Coordination Required — Tenant must be home"}
                 </p>
-                {ticket?.preferredTimes && <p className="text-[11px] text-[#6E6E73] mt-0.5">Preferred: {ticket.preferredTimes}</p>}
+                {ticket?.preferredTimes && <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Preferred: {ticket.preferredTimes}</p>}
               </div>
             </div>
-
-            {/* Emergency notice: not applicable for inspector reports */}
 
             {/* Date picker: only for scheduling visits */}
             {modal === "SCHEDULE_DIAGNOSIS" && (
               <div className="space-y-1.5">
-                <Label className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-wider">Date & Time</Label>
-                <Input type="datetime-local" className="h-10 rounded-xl border-slate-200"
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Date &amp; Time</Label>
+                <Input type="datetime-local" className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                   onChange={e => setFormData({ ...formData, date: e.target.value })} />
               </div>
             )}
@@ -573,33 +570,33 @@ export default function InspectorActiveTasksPage() {
             {/* Cost inputs — only for diagnosis report */}
             {modal === "SUBMIT_ESTIMATE" && (
               <div className="space-y-4">
-                <div className="bg-teal-50 border border-teal-200 rounded-xl p-3.5 flex items-start gap-2.5">
-                  <Info className="h-4 w-4 text-teal-600 shrink-0 mt-0.5" />
-                  <p className="text-xs text-teal-800 font-semibold leading-snug">
-                    <strong>Diagnosis Report:</strong> Enter your estimated reference cost for this job. The owner will use this to evaluate vendor quotes. This does not require owner approval.
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-2.5 shadow-2xs">
+                  <Info className="h-4 w-4 text-slate-600 shrink-0 mt-0.5" />
+                  <p className="text-xs font-normal text-[#6E6E73] leading-relaxed">
+                    <strong className="font-semibold text-[#1D1D1F]">Diagnosis Report:</strong> Enter your estimated reference cost for this job. The owner will use this to evaluate vendor quotes. This does not require owner approval.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-wider">Labor Cost ($)</Label>
+                    <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Labor Cost ($)</Label>
                     <Input 
                       type="number" 
                       placeholder="0.00" 
                       min="0" 
                       step="0.01" 
-                      className="h-10 rounded-xl border-slate-200"
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                       value={formData.labor !== undefined ? formData.labor : ""}
                       onChange={e => setFormData({ ...formData, labor: e.target.value ? Number(e.target.value) : undefined })} 
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-wider">Materials ($)</Label>
+                    <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Materials ($)</Label>
                     <Input 
                       type="number" 
                       placeholder="0.00" 
                       min="0" 
                       step="0.01" 
-                      className="h-10 rounded-xl border-slate-200"
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                       value={formData.materials !== undefined ? formData.materials : ""}
                       onChange={e => setFormData({ ...formData, materials: e.target.value ? Number(e.target.value) : undefined })} 
                     />
@@ -607,20 +604,20 @@ export default function InspectorActiveTasksPage() {
                 </div>
 
                 {/* Diagnosis Report Summary */}
-                <div className="bg-slate-50 border border-slate-200/85 rounded-xl p-4 space-y-3 shadow-xs">
-                  <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Reference Estimate Summary</p>
-                  <div className="space-y-1.5 text-xs font-semibold text-[#6E6E73]">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 shadow-2xs font-sans">
+                  <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Reference Estimate Summary</p>
+                  <div className="space-y-1 text-xs font-normal text-[#6E6E73]">
                     <div className="flex justify-between">
                       <span>Labor Cost:</span>
-                      <span className="font-bold text-slate-800">${estimatedLabor.toFixed(2)}</span>
+                      <span className="font-semibold text-[#1D1D1F]">${estimatedLabor.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Materials Cost:</span>
-                      <span className="font-bold text-slate-800">${estimatedMaterials.toFixed(2)}</span>
+                      <span className="font-semibold text-[#1D1D1F]">${estimatedMaterials.toFixed(2)}</span>
                     </div>
-                    <div className="border-t border-slate-200/80 my-1 pt-1.5 flex justify-between text-sm font-black">
-                      <span className="text-[#1D1D1F]">Total Reference Estimate:</span>
-                      <span className="text-teal-600 font-extrabold text-base">${totalEstimate.toFixed(2)}</span>
+                    <div className="border-t border-slate-200 pt-2 flex justify-between text-sm font-semibold text-[#1D1D1F]">
+                      <span>Total Reference Estimate:</span>
+                      <span className="text-emerald-600 font-semibold">${totalEstimate.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -630,17 +627,17 @@ export default function InspectorActiveTasksPage() {
             {/* Diagnosis notes */}
             {modal === "SUBMIT_ESTIMATE" && (
               <div className="space-y-1.5">
-                <Label className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-wider">Diagnosis Notes</Label>
-                <Textarea placeholder="Describe what you observed, the root cause, and what repair work is needed..." rows={3} className="rounded-xl border-slate-200 resize-none text-sm"
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Diagnosis Notes</Label>
+                <Textarea placeholder="Describe what you observed, the root cause, and what repair work is needed..." rows={3} className="w-full min-h-[80px] rounded-xl border border-slate-200 bg-white p-3 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all resize-none"
                   onChange={e => setFormData({ ...formData, notes: e.target.value })} />
               </div>
             )}
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setModal(null)} className="rounded-xl font-bold">Cancel</Button>
-            <Button onClick={submitModal} disabled={saving} className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl font-black px-6">
-              {saving ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Saving...</span> : "Confirm & Save"}
+          <DialogFooter className="gap-2 font-sans pt-2">
+            <Button variant="outline" onClick={() => setModal(null)} className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer px-4">Cancel</Button>
+            <Button onClick={submitModal} disabled={saving} className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2">
+              {saving ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-white" />Saving...</span> : "Confirm & Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -650,3 +647,4 @@ export default function InspectorActiveTasksPage() {
     </div>
   );
 }
+

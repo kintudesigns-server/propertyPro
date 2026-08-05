@@ -189,7 +189,7 @@ export default function AcceptInvitePage() {
                     </div>
                   </div>
 
-                  <Button disabled={submitting} type="submit" className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl mt-2">
+                  <Button disabled={submitting} type="submit" className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl mt-2">
                     {submitting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating Account...</> : "Accept Invitation & Join →"}
                   </Button>
                 </form>

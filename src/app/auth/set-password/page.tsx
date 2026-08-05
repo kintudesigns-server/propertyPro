@@ -142,7 +142,7 @@ function SetPasswordForm() {
                 <Button
                   type="submit"
                   disabled={loading || password.length < 8 || password !== confirm}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl text-sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-12 rounded-xl text-sm"
                 >
                   {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Setting Password...</> : "Set Password & Continue →"}
                 </Button>

@@ -196,24 +196,19 @@ export default function OwnerAssignedInspectionsPage() {
 
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-900 shrink-0 shadow-2xs">
-            <Wrench className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">My Assigned Inspections</h1>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage, schedule, and estimate repairs you've assigned to yourself</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">My Assigned Inspections</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage, schedule, and estimate repairs assigned to yourself</p>
         </div>
         <div className="flex items-center gap-2">
           {[
-            { label: "Total", value: active.length, bg: "bg-slate-100 text-slate-900 border-slate-200" },
+            { label: "Total", value: active.length, bg: "bg-slate-100 text-[#1D1D1F] border-slate-200/60" },
             { label: "Waiting Approval", value: active.filter(t => t.status === "AWAITING_APPROVAL").length, bg: "bg-amber-50 text-amber-800 border-amber-200" },
-            { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-slate-100 text-slate-900 border-slate-200" },
+            { label: "Needs Action", value: active.filter(t => t.status !== "AWAITING_APPROVAL").length, bg: "bg-slate-100 text-[#1D1D1F] border-slate-200/60" },
           ].map(s => (
-            <div key={s.label} className={`${s.bg} border rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-2xs`}>
-              <span className="text-sm font-black">{s.value}</span>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider opacity-80">{s.label}</span>
+            <div key={s.label} className={`${s.bg} border rounded-xl px-3 py-1 flex items-center gap-1.5 shadow-2xs`}>
+              <span className="text-xs font-semibold text-[#1D1D1F]">{s.value}</span>
+              <span className="text-[10px] font-medium text-[#6E6E73] uppercase tracking-wider">{s.label}</span>
             </div>
           ))}
         </div>
@@ -225,35 +220,39 @@ export default function OwnerAssignedInspectionsPage() {
           <div className="absolute left-0 top-0 w-1 h-full bg-rose-600 rounded-l-2xl" />
           <Zap className="ml-2 h-5 w-5 text-rose-600 shrink-0" />
           <div className="flex-1">
-            <p className="text-xs font-black text-rose-900 uppercase tracking-wider">{emergencyCount} Emergency ticket{emergencyCount > 1 ? "s" : ""} — Respond immediately</p>
-            <p className="text-xs text-rose-700 font-medium mt-0.5">Emergency repairs are auto-approved by the system. Visit, diagnose, and complete ASAP.</p>
+            <p className="text-xs font-semibold text-rose-900 uppercase tracking-wider">{emergencyCount} Emergency ticket{emergencyCount > 1 ? "s" : ""} — Respond immediately</p>
+            <p className="text-xs text-rose-700 font-normal mt-0.5">Emergency repairs are auto-approved by the system. Visit, diagnose, and complete ASAP.</p>
           </div>
         </div>
       )}
 
       {/* ── TOOLBAR: Search + Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input placeholder="Search title, property, tenant..." value={search} onChange={e => setSearch(e.target.value)}
-            className="pl-10 h-10 border-slate-200 rounded-xl bg-white text-xs font-semibold shadow-xs" />
+          <Input 
+            placeholder="Search title, property, tenant..." 
+            value={search} 
+            onChange={e => setSearch(e.target.value)}
+            className="pl-10 h-9 border-slate-200 rounded-xl bg-white text-xs font-normal text-[#1D1D1F] shadow-2xs focus-visible:ring-2 focus-visible:ring-slate-900/10" 
+          />
         </div>
 
         {/* Priority filter */}
-        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/30 p-1 rounded-xl shadow-2xs">
           {["ALL", "EMERGENCY", "HIGH", "MEDIUM", "LOW"].map(p => (
             <button key={p} onClick={() => setPrio(p)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${prioFilter === p ? "bg-slate-900 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"}`}>
+              className={`px-3 py-1 rounded-lg text-xs transition-all cursor-pointer ${prioFilter === p ? "bg-white text-[#1D1D1F] font-medium shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F] font-normal"}`}>
               {p === "ALL" ? "All" : p.charAt(0) + p.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
 
         {/* Status filter */}
-        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs">
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/30 p-1 rounded-xl shadow-2xs">
           {[["ALL", "All"], ["ASSIGNED", "Assigned"], ["DIAGNOSIS_SCHEDULED", "Visit"], ["DIAGNOSIS_COMPLETE", "Done"], ["AWAITING_APPROVAL", "Pending"]].map(([val, label]) => (
             <button key={val} onClick={() => setSt(val)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${stFilter === val ? "bg-slate-900 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"}`}>
+              className={`px-3 py-1 rounded-lg text-xs transition-all cursor-pointer ${stFilter === val ? "bg-white text-[#1D1D1F] font-medium shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F] font-normal"}`}>
               {label}
             </button>
           ))}
@@ -266,10 +265,10 @@ export default function OwnerAssignedInspectionsPage() {
           <div className="h-14 w-14 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-900 shadow-2xs">
             <CheckCircle2 className="h-7 w-7 text-emerald-600" />
           </div>
-          <h3 className="text-base font-extrabold text-slate-900 mb-1">
+          <h3 className="text-base font-semibold text-slate-900 mb-1">
             {search || prioFilter !== "ALL" || stFilter !== "ALL" ? "No tickets match your filters" : "No active work orders!"}
           </h3>
-          <p className="text-xs text-slate-500 font-semibold">
+          <p className="text-xs text-[#6E6E73] font-normal">
             {search || prioFilter !== "ALL" || stFilter !== "ALL" ? "Try adjusting the filters above." : "All caught up — great work!"}
           </p>
         </div>
@@ -279,35 +278,35 @@ export default function OwnerAssignedInspectionsPage() {
             <table className="w-full min-w-[900px] text-left border-collapse">
               {/* ── THEAD ── */}
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/70 hover:bg-slate-50/70">
+                <tr className="border-b border-slate-200 bg-slate-50/60">
                   <th className="px-6 py-3.5 w-[110px]">
-                    <button onClick={() => toggleSort("priority")} className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider hover:text-slate-900 transition-colors flex items-center cursor-pointer">
+                    <button onClick={() => toggleSort("priority")} className="font-normal text-xs text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Priority <SortIcon field="priority" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="px-6 py-3.5">
-                    <button onClick={() => toggleSort("title")} className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider hover:text-slate-900 transition-colors flex items-center cursor-pointer">
+                    <button onClick={() => toggleSort("title")} className="font-normal text-xs text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Work Order <SortIcon field="title" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="px-6 py-3.5 w-[190px]">
-                    <button onClick={() => toggleSort("property")} className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider hover:text-slate-900 transition-colors flex items-center cursor-pointer">
+                    <button onClick={() => toggleSort("property")} className="font-normal text-xs text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Property / Unit <SortIcon field="property" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="px-6 py-3.5 w-[160px]">
-                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Tenant</span>
+                    <span className="font-normal text-xs text-[#6E6E73]">Tenant</span>
                   </th>
                   <th className="px-6 py-3.5 w-[190px]">
-                    <button onClick={() => toggleSort("status")} className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider hover:text-slate-900 transition-colors flex items-center cursor-pointer">
+                    <button onClick={() => toggleSort("status")} className="font-normal text-xs text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="px-6 py-3.5 w-[140px]">
-                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Scheduled</span>
+                    <span className="font-normal text-xs text-[#6E6E73]">Scheduled</span>
                   </th>
                   <th className="px-6 py-3.5 w-[220px] text-right">
-                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Actions</span>
+                    <span className="font-normal text-xs text-[#6E6E73]">Actions</span>
                   </th>
                 </tr>
               </thead>
@@ -444,11 +443,11 @@ export default function OwnerAssignedInspectionsPage() {
                           <td colSpan={7} className="px-6 py-4">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                               <div>
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Description</p>
+                                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">Description</p>
                                 <p className="text-slate-700 font-medium leading-relaxed">{t.description || "No description provided."}</p>
                               </div>
                               <div>
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Entry &amp; Timing</p>
+                                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">Entry &amp; Timing</p>
                                 <div className="space-y-1">
                                   <p className={`font-semibold ${t.entryPermission ? "text-emerald-700" : "text-amber-800"}`}>
                                     {t.entryPermission ? "✓ Entry permitted if tenant not home" : "⚠ Tenant must be present — coordinate first"}
@@ -457,7 +456,7 @@ export default function OwnerAssignedInspectionsPage() {
                                 </div>
                               </div>
                               <div>
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Cost Estimate</p>
+                                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">Cost Estimate</p>
                                 {t.estimatedLabor || t.estimatedMaterials ? (
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-slate-600"><span>Labor:</span><span className="font-bold">${Number(t.estimatedLabor || 0).toFixed(2)}</span></div>
@@ -472,7 +471,7 @@ export default function OwnerAssignedInspectionsPage() {
                             </div>
                             {t.inspectorNotes && (
                               <div className="mt-3 pt-3 border-t border-slate-200">
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Inspector Notes</p>
+                                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">Inspector Notes</p>
                                 <p className="text-xs text-slate-600 font-medium leading-relaxed">{t.inspectorNotes}</p>
                               </div>
                             )}
@@ -488,7 +487,7 @@ export default function OwnerAssignedInspectionsPage() {
 
           {/* Table footer */}
           <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <p className="text-xs text-slate-500 font-semibold">
+            <p className="text-xs text-[#6E6E73] font-normal">
               Showing <strong className="text-slate-900 font-extrabold">{filtered.length}</strong> of <strong className="text-slate-900 font-extrabold">{active.length}</strong> active work orders
             </p>
             <p className="text-[10px] text-slate-400 font-bold uppercase">Click a row to expand details</p>
@@ -576,11 +575,11 @@ export default function OwnerAssignedInspectionsPage() {
                   <div className="space-y-1.5 text-xs font-semibold text-slate-600">
                     <div className="flex justify-between">
                       <span>Labor Cost:</span>
-                      <span className="font-extrabold text-slate-900">${estimatedLabor.toFixed(2)}</span>
+                      <span className="font-semibold text-slate-900">${estimatedLabor.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Materials Cost:</span>
-                      <span className="font-extrabold text-slate-900">${estimatedMaterials.toFixed(2)}</span>
+                      <span className="font-semibold text-slate-900">${estimatedMaterials.toFixed(2)}</span>
                     </div>
                     <div className="border-t border-slate-200/80 my-1 pt-1.5 flex justify-between text-sm font-black text-slate-900">
                       <span>Total Reference Estimate:</span>
@@ -603,7 +602,7 @@ export default function OwnerAssignedInspectionsPage() {
 
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setModal(null)} className="rounded-xl font-bold text-xs border-slate-200">Cancel</Button>
-            <Button onClick={submitModal} disabled={saving} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs px-6 shadow-xs">
+            <Button onClick={submitModal} disabled={saving} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs px-6 shadow-xs">
               {saving ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Saving...</span> : "Confirm & Save"}
             </Button>
           </DialogFooter>
@@ -612,3 +611,4 @@ export default function OwnerAssignedInspectionsPage() {
     </div>
   );
 }
+

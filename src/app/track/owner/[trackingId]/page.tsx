@@ -52,7 +52,7 @@ export default function OwnerTrackerPage() {
               <h1 className="text-2xl font-black text-[#0F172A]">Application Status</h1>
               <p className="text-slate-500 mt-1 text-sm">Tracking ID: <code className="text-blue-600 font-mono text-xs bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{params.trackingId}</code></p>
             </div>
-            <Link href="/" className="hidden sm:flex items-center justify-center h-10 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors">
+            <Link href="/" className="hidden sm:flex items-center justify-center h-10 px-4 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm hover:bg-slate-50 transition-colors">
               Go to Home
             </Link>
           </div>
@@ -127,7 +127,7 @@ export default function OwnerTrackerPage() {
                         <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto mb-3" />
                         <h3 className="text-[#0F172A] font-black text-lg mb-2">You're in! Check Your Email</h3>
                         <p className="text-slate-600 text-sm mb-4">Your login credentials have been sent to <strong className="text-emerald-700">{application.email}</strong></p>
-                        <Link href="/auth/login" className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md shadow-emerald-600/20">
+                        <Link href="/auth/login" className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-8 rounded-xl transition-colors shadow-md shadow-emerald-600/20">
                           Go to Login <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>

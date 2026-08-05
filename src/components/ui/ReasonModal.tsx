@@ -48,12 +48,12 @@ export function ReasonModal({
   const getVariantStyles = () => {
     switch (confirmVariant) {
       case "destructive":
-        return "bg-rose-600 hover:bg-rose-700 text-white";
+        return "bg-rose-600 hover:bg-rose-700 text-white border-none";
       case "warning":
-        return "bg-amber-50 hover:bg-amber-600 text-white";
+        return "bg-amber-600 hover:bg-amber-700 text-white border-none";
       case "primary":
       default:
-        return "bg-blue-600 hover:bg-blue-700 text-white";
+        return "bg-slate-900 hover:bg-slate-800 text-white border-none";
     }
   };
 
@@ -64,26 +64,26 @@ export function ReasonModal({
         if (!val) setReason("");
       }
     }}>
-      <DialogContent className="bg-white text-slate-800 rounded-3xl max-w-md p-6 border-0">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-black text-slate-900">{title}</DialogTitle>
+      <DialogContent className="sm:max-w-md rounded-3xl p-6 md:p-8 font-sans border border-slate-200 bg-white shadow-2xs">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-base font-semibold text-[#1D1D1F] tracking-tight">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="text-xs font-semibold text-[#8E8E93] mt-1 leading-relaxed">
+            <DialogDescription className="text-xs font-normal text-[#6E6E73] leading-relaxed">
               {description}
             </DialogDescription>
           )}
         </DialogHeader>
 
         {actionSummary && (
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 mt-3 text-xs font-semibold text-slate-700 leading-normal">
-            <span className="text-[#8E8E93] uppercase font-bold text-[9px] block mb-1">Target Action Preview</span>
-            {actionSummary}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 mt-3 text-xs font-sans shadow-2xs">
+            <span className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block mb-1">Target Action Preview</span>
+            <p className="text-xs font-semibold text-[#1D1D1F]">{actionSummary}</p>
           </div>
         )}
 
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4 mt-3 font-sans">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-[#8E8E93]">
+            <label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">
               Reason * (Min. {minLength} characters)
             </label>
             <textarea
@@ -92,25 +92,25 @@ export function ReasonModal({
               placeholder={placeholder}
               disabled={isLoading}
               rows={3}
-              className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all resize-none text-slate-800 placeholder:text-[#8E8E93] font-semibold"
+              className="w-full min-h-[90px] rounded-xl border border-slate-200 bg-white p-3 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all resize-none font-sans"
             />
             {reason.trim().length > 0 && reason.trim().length < minLength && (
-              <p className="text-[10px] text-rose-500 font-bold">
+              <p className="text-xs font-normal text-rose-600">
                 Please enter at least {minLength - reason.trim().length} more characters.
               </p>
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2 pt-1 font-sans">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               disabled={isLoading}
               onClick={() => {
                 setReason("");
                 onOpenChange(false);
               }}
-              className="flex-1 border border-slate-200 hover:bg-[#F5F5F7] rounded-xl h-11 text-xs font-bold text-[#6E6E73] disabled:opacity-50"
+              className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer px-4 flex-1"
             >
               Cancel
             </Button>
@@ -118,9 +118,9 @@ export function ReasonModal({
               type="button"
               disabled={reason.trim().length < minLength || isLoading}
               onClick={handleConfirm}
-              className={`flex-1 font-bold rounded-xl h-11 text-xs disabled:opacity-40 transition-colors shadow-sm flex items-center justify-center gap-1.5 ${getVariantStyles()}`}
+              className={`h-9 font-medium text-xs rounded-xl shadow-xs cursor-pointer px-4 flex-1 flex items-center justify-center gap-2 ${getVariantStyles()}`}
             >
-              {isLoading && <Loader2 size={14} className="animate-spin" />}
+              {isLoading && <Loader2 size={14} className="animate-spin text-white" />}
               {confirmLabel}
             </Button>
           </div>

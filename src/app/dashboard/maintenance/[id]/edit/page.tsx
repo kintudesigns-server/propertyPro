@@ -172,7 +172,7 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
           </Button>
         </Link>
         <div>
-          <h1 className="text-[28px] font-black text-[#1D1D1F] tracking-tight">Edit Request</h1>
+          <h1 className="text-[28px] font-semibold text-[#1D1D1F] tracking-tight">Edit Request</h1>
           <p className="text-[#6E6E73] text-sm font-medium mt-0.5">Ticket ID: {id.split("-")[0]}</p>
         </div>
       </div>
@@ -184,7 +184,7 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
             <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#007AFF]">
               <FileText className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#1D1D1F]">Request Details</h2>
+            <h2 className="text-lg font-semibold text-[#1D1D1F]">Request Details</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2.5">
@@ -274,7 +274,7 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
             <div className="h-8 w-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
               <MapPin className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#1D1D1F]">Location & Tenant</h2>
+            <h2 className="text-lg font-semibold text-[#1D1D1F]">Location & Tenant</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-6">
@@ -354,7 +354,7 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
             <div className="h-8 w-8 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#EF4444]">
               <Calendar className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-[#1D1D1F]">Assignment & Scheduling</h2>
+            <h2 className="text-lg font-semibold text-[#1D1D1F]">Assignment & Scheduling</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2.5">
@@ -403,11 +403,11 @@ export default function EditMaintenanceRequestPage({ params }: { params: Promise
         {/* Form Actions */}
         <div className="flex justify-end gap-3 pt-4">
           <Link href="/dashboard/maintenance">
-            <Button type="button" variant="outline" className="h-12 px-8 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] font-bold shadow-sm">
+            <Button type="button" variant="outline" className="h-12 px-8 rounded-xl border-[#E5E5EA] text-[#6E6E73] hover:text-[#1D1D1F] font-medium shadow-sm">
               Cancel
             </Button>
           </Link>
-          <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold shadow-sm">
+          <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-medium shadow-sm">
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save Changes"}
           </Button>
         </div>

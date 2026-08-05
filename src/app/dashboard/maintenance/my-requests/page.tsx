@@ -131,43 +131,43 @@ export default function MyRequestsPage() {
       <div className={isTenantBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}>
       <div className="w-full max-w-7xl mx-auto pt-6 space-y-6 pb-20 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-2xs font-sans">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
-            <Wrench className="h-5 w-5 text-white" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <Wrench className="h-4 w-4 text-slate-700" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Requests</h1>
-            <p className="text-slate-500 text-xs font-semibold mt-0.5">Track pending tickets, schedule inspection dates, and view histories.</p>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">My Requests</h1>
+            <p className="text-[#6E6E73] text-xs font-normal mt-0.5">Track pending tickets, schedule inspection dates, and view histories.</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
           <Button
             onClick={fetchMaintenance}
             variant="outline"
-            className="bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl font-black text-xs flex items-center gap-2 h-10 px-4 shadow-2xs cursor-pointer"
+            className="h-9 bg-white border border-slate-200 text-[#1D1D1F] hover:bg-slate-50 rounded-xl font-medium text-xs flex items-center justify-center gap-2 px-4 shadow-2xs cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
           <Button 
             onClick={() => router.push("/dashboard/maintenance/new")} 
-            className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs h-10 px-5 rounded-xl cursor-pointer transition-all flex items-center gap-2"
+            className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 transition-all"
           >
             <Plus className="h-4 w-4" /> Submit Request
           </Button>
         </div>
       </div>
 
-      <Card className="bg-white border border-slate-200 rounded-3xl shadow-xs p-6 md:p-8 font-sans">
+      <Card className="bg-white border border-slate-200 rounded-3xl shadow-2xs p-6 md:p-8 font-sans">
         <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-slate-100 mb-6">
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Maintenance Log</h2>
-            <span className="text-xs font-semibold text-slate-500">All logged repairs and their current statuses</span>
+            <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Maintenance Log</h2>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">All logged repairs and their current statuses</p>
           </div>
 
           <div className="flex gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
             <Select value={maintFilterPriority} onValueChange={(val) => setMaintFilterPriority(val || "ALL")}>
-              <SelectTrigger className="h-9 text-xs font-extrabold w-32 bg-slate-50 border-slate-200 rounded-xl shadow-2xs">
+              <SelectTrigger className="h-9 text-xs font-normal text-[#1D1D1F] w-32 bg-white border border-slate-200 rounded-xl shadow-2xs cursor-pointer">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent className="bg-white rounded-xl border-slate-200">
@@ -180,7 +180,7 @@ export default function MyRequestsPage() {
             </Select>
 
             <Select value={maintFilterStatus} onValueChange={(val) => setMaintFilterStatus(val || "ALL")}>
-              <SelectTrigger className="h-9 text-xs font-extrabold w-36 bg-slate-50 border-slate-200 rounded-xl shadow-2xs">
+              <SelectTrigger className="h-9 text-xs font-normal text-[#1D1D1F] w-36 bg-white border border-slate-200 rounded-xl shadow-2xs cursor-pointer">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-white rounded-xl border-slate-200">
@@ -200,20 +200,20 @@ export default function MyRequestsPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Ticket Title</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Category</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Priority</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Status</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Assigned Inspector</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Schedule</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400">Date Filed</TableHead>
-                <TableHead className="font-extrabold text-[10px] uppercase text-slate-400 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Ticket Title</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Category</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Priority</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Status</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Assigned Inspector</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Schedule</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3">Date Filed</TableHead>
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-[#6E6E73] py-3 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredMaint.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-slate-400 italic font-semibold text-xs">
+                  <TableCell colSpan={8} className="h-32 text-center text-[#6E6E73] font-normal text-xs italic">
                     No maintenance tickets found.
                   </TableCell>
                 </TableRow>
@@ -221,30 +221,30 @@ export default function MyRequestsPage() {
                 filteredMaint.map((m) => (
                   <TableRow
                     key={m.id}
-                    className="hover:bg-[#F5F5F7]/80 cursor-pointer transition-colors"
+                    className="hover:bg-slate-50 cursor-pointer transition-colors border-t border-slate-100"
                     onClick={() => router.push(`/dashboard/maintenance/${m.id}`)}
                   >
-                    <TableCell className="font-bold text-slate-800 py-4">
+                    <TableCell className="font-semibold text-xs text-[#1D1D1F] py-4">
                       {m.title}
-                      <p className="text-[10px] text-[#6E6E73] font-normal mt-0.5 line-clamp-1">{m.description}</p>
+                      <p className="text-xs text-[#6E6E73] font-normal mt-0.5 line-clamp-1">{m.description}</p>
                     </TableCell>
-                    <TableCell className="text-[#6E6E73] text-xs font-semibold">{m.category}</TableCell>
+                    <TableCell className="text-[#6E6E73] text-xs font-normal">{m.category}</TableCell>
                     <TableCell>
-                      <Badge className={
-                        m.priority === "EMERGENCY" ? "bg-red-50 text-red-700 border border-red-200" :
+                      <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider shadow-2xs ${
+                        m.priority === "EMERGENCY" ? "bg-rose-50 text-rose-700 border border-rose-200" :
                         m.priority === "HIGH" ? "bg-orange-50 text-orange-700 border border-orange-200" :
                         m.priority === "MEDIUM" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                         "bg-slate-100 text-slate-700 border border-slate-200"
-                      }>
+                      }`}>
                         {m.priority}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="rounded-full font-bold px-2.5 py-0.5 capitalize text-[10px]">
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                         {m.status === "CLOSED" ? "completed" : m.status.toLowerCase().replace(/_/g, ' ')}
-                      </Badge>
+                      </span>
                     </TableCell>
-                    <TableCell className="text-xs font-bold text-slate-700">
+                    <TableCell className="text-xs font-normal text-[#1D1D1F]">
                       {m.inspector ? m.inspector.name : <span className="text-[#6E6E73] italic">Awaiting assignment</span>}
                     </TableCell>
                     <TableCell className="text-xs">
@@ -363,3 +363,4 @@ export default function MyRequestsPage() {
     </div>
   );
 }
+

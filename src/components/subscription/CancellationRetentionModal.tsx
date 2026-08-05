@@ -64,7 +64,7 @@ export default function CancellationRetentionModal({
             </div>
             
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-slate-900 leading-tight">
+              <DialogTitle className="text-2xl font-semibold text-slate-900 leading-tight">
                 Wait! Don't Go Just Yet...
               </DialogTitle>
               <DialogDescription className="text-slate-500 text-sm font-medium mt-1">
@@ -105,7 +105,7 @@ export default function CancellationRetentionModal({
               <Button
                 variant="ghost"
                 onClick={onConfirmCancel}
-                className="w-full h-11 text-[#6E6E73] hover:text-red-600 hover:bg-red-50 font-bold rounded-xl"
+                className="w-full h-11 text-[#6E6E73] hover:text-red-600 hover:bg-red-50 font-medium rounded-xl"
               >
                 Cancel Anyway
               </Button>
@@ -121,7 +121,7 @@ export default function CancellationRetentionModal({
             </div>
 
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-slate-900 leading-tight">
+              <DialogTitle className="text-2xl font-semibold text-slate-900 leading-tight">
                 {redeemed ? "Offer Redeemed!" : "Stay With Us — 1 Month Free!"}
               </DialogTitle>
               <DialogDescription className="text-slate-500 text-sm font-medium mt-1">
@@ -148,7 +148,7 @@ export default function CancellationRetentionModal({
                   <Button
                     onClick={handleAcceptGift}
                     disabled={loading}
-                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                   >
                     {loading ? (
                       <>
@@ -166,7 +166,7 @@ export default function CancellationRetentionModal({
                     variant="ghost"
                     onClick={onConfirmCancel}
                     disabled={loading}
-                    className="w-full h-11 text-[#6E6E73] hover:text-slate-700 font-bold rounded-xl"
+                    className="w-full h-11 text-[#6E6E73] hover:text-slate-700 font-medium rounded-xl"
                   >
                     Cancel Anyway
                   </Button>

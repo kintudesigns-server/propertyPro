@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -168,7 +168,7 @@ export function AdminHero({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap"
+            className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight whitespace-nowrap"
           >
             {getGreeting()},{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-700 to-indigo-600">
@@ -267,7 +267,7 @@ export function AdminHero({
             </Button>
 
             <Link href="/dashboard/admin/owner-applications">
-              <Button variant="outline" className="h-9 px-3 rounded-xl border-slate-200/90 text-slate-700 bg-white hover:bg-slate-50 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+              <Button variant="outline" className="h-9 px-3 rounded-xl border-slate-200/90 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
                 <UserPlus className="h-3.5 w-3.5 text-slate-500" />
                 <span>Applications</span>
                 {pendingPropertiesCount > 0 && (
@@ -279,7 +279,7 @@ export function AdminHero({
             </Link>
 
             <Link href="/dashboard/admin/users/new">
-              <Button className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl shadow-xs text-xs flex items-center gap-1.5 transition-all hover:scale-102 active:scale-98 cursor-pointer">
+              <Button className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl shadow-xs text-xs flex items-center gap-1.5 transition-all hover:scale-102 active:scale-98 cursor-pointer">
                 <UserPlus className="h-3.5 w-3.5" />
                 <span>Add User</span>
               </Button>
@@ -309,3 +309,4 @@ export function AdminHero({
     </div>
   );
 }
+

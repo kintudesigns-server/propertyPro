@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { notifyMany } from "@/lib/notify";
+import { verifyTurnstileToken } from "@/lib/verify-turnstile";
 
 // GET all owner applications (Admin only)
 export async function GET(req: NextRequest) {
@@ -27,8 +28,17 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, website, entityType, portfolioSize, currentSoftware } = body;
+    const { name, email, phone, website, entityType, portfolioSize, currentSoftware, turnstileToken } = body;
     const finalPortfolioSize = portfolioSize || "1-5 Properties";
+
+    // Cloudflare Turnstile bot verification
+    const isHuman = await verifyTurnstileToken(turnstileToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { error: "Bot verification failed. Please refresh and try again." },
+        { status: 403 }
+      );
+    }
 
     if (!name || !email || !phone || !entityType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

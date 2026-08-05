@@ -27,6 +27,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { KpiCard } from "@/components/ui/KpiCard";
 
 export default function AdminProfitDashboard() {
   const { status } = useSession();
@@ -77,7 +78,7 @@ export default function AdminProfitDashboard() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-[#16A34A]" />
-        <p className="text-[#6E6E73] font-bold text-sm uppercase tracking-wider">Compiling Profit Reports...</p>
+        <p className="text-[#6E6E73] font-semibold text-sm uppercase tracking-wider">Compiling Profit Reports...</p>
       </div>
     );
   }
@@ -143,192 +144,121 @@ export default function AdminProfitDashboard() {
   const getEventBadge = (event: string) => {
     switch (event) {
       case "RENEWAL":
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-bold">RENEWAL</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-semibold">RENEWAL</Badge>;
       case "SUBSCRIBED":
-        return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold">SUBSCRIBED</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold">SUBSCRIBED</Badge>;
       case "UPGRADED":
-        return <Badge className="bg-green-100 text-green-800 border-green-200 font-bold">UPGRADED</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200 font-semibold">UPGRADED</Badge>;
       case "DOWNGRADED":
-        return <Badge className="bg-amber-100 text-amber-800 border-amber-200 font-bold">DOWNGRADED</Badge>;
+        return <Badge className="bg-amber-100 text-amber-800 border-amber-200 font-semibold">DOWNGRADED</Badge>;
       case "TRIAL_STARTED":
-        return <Badge className="bg-purple-100 text-purple-800 border-purple-200 font-bold">TRIAL STARTED</Badge>;
+        return <Badge className="bg-purple-100 text-purple-800 border-purple-200 font-semibold">TRIAL STARTED</Badge>;
       case "TRIAL_CONVERTED":
-        return <Badge className="bg-teal-100 text-teal-800 border-teal-200 font-bold">TRIAL CONVERTED</Badge>;
+        return <Badge className="bg-teal-100 text-teal-800 border-teal-200 font-semibold">TRIAL CONVERTED</Badge>;
       case "REACTIVATED":
-        return <Badge className="bg-cyan-100 text-cyan-800 border-cyan-200 font-bold">REACTIVATED</Badge>;
+        return <Badge className="bg-cyan-100 text-cyan-800 border-cyan-200 font-semibold">REACTIVATED</Badge>;
       case "PAST_DUE":
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200 font-bold">PAST DUE</Badge>;
-      case "PAUSED":
-      case "CANCELED":
-        return <Badge className="bg-red-100 text-red-800 border-red-200 font-bold">{event}</Badge>;
+        return <Badge className="bg-orange-100 text-orange-800 border-orange-200 font-semibold">PAST DUE</Badge>;
       default:
-        return <Badge variant="secondary" className="font-bold">{event}</Badge>;
+        return <Badge className="bg-slate-100 text-slate-800 border-slate-200 font-semibold">{event}</Badge>;
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pt-6 pb-20 px-2 sm:px-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/admin">
-            <Button variant="ghost" size="icon" className="text-[#6E6E73] hover:bg-[#E5E5EA]">
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div className="p-2.5 bg-green-50 text-green-600 rounded-xl">
-            <TrendingUp className="h-8 w-8" />
+          <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 text-slate-700 rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+            <TrendingUp className="h-5 w-5 text-slate-900" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Platform Profit</h1>
-            <p className="text-[#6E6E73] text-base mt-0.5">Detailed breakdown of commission & subscription revenues</p>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Platform Profit</h1>
+            <p className="text-[#6E6E73] text-xs font-normal mt-1">Detailed breakdown of commission &amp; subscription revenues</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="border-slate-200 text-[#1D1D1F] font-semibold h-11 px-5 rounded-xl flex items-center gap-2 hover:bg-slate-50 cursor-pointer shadow-2xs">
-            <Download className="h-4 w-4 text-slate-500" /> Export CSV
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="border-slate-200 bg-white text-[#1D1D1F] font-medium h-9 px-4 rounded-xl flex items-center gap-2 hover:bg-slate-50 cursor-pointer shadow-2xs text-xs">
+            <Download className="h-3.5 w-3.5 text-slate-500" /> Export CSV
           </Button>
           <Link href="/dashboard/admin/settings/pricing">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl flex items-center gap-2 h-11 px-6 shadow-sm cursor-pointer">
-              <PieChart className="h-4 w-4" /> Adjust Commission Rate
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl flex items-center gap-2 h-9 px-4 shadow-xs cursor-pointer text-xs border-none">
+              <PieChart className="h-3.5 w-3.5" /> Adjust Commission Rate
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Main Stats Cards */}
+      {/* Main Stats Cards — Standardized KpiCards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 border border-slate-800 shadow-xl rounded-2xl text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          <CardContent className="p-6 relative z-10">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Total Net Profit</p>
-              <ShieldCheck className="h-6 w-6 text-emerald-400" />
-            </div>
-            <p className="text-4xl font-black mb-1 tracking-tight text-white">
-              ${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-slate-400 font-semibold flex items-center gap-1">
-              <Activity className="h-3 w-3 text-emerald-400" /> Combined MRR &amp; Commission
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-slate-200/80 shadow-2xs rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Subscription MRR</p>
-              <div className="p-2 rounded-xl bg-slate-100 text-slate-700">
-                <PieChart className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="text-4xl font-black text-[#1D1D1F] mb-1 tracking-tight">
-              ${(profitData?.subscriptionMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-[#6E6E73] font-medium flex items-center gap-1">
-              <Activity className="h-3 w-3 text-slate-400" /> Monthly Owner Subscriptions
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-slate-200/80 shadow-2xs rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-xs font-extrabold text-[#6E6E73] uppercase tracking-widest">Rent Commissions</p>
-              <div className="p-2 rounded-xl bg-slate-100 text-slate-700">
-                <DollarSign className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="text-4xl font-black text-[#1D1D1F] mb-1 tracking-tight">
-              ${(profitData?.totalCommissionProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-[#6E6E73] font-medium flex items-center gap-1">
-              <Activity className="h-3 w-3 text-slate-400" /> Percentage cuts on volume
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          title="Total Net Profit"
+          value={`$${(profitData?.totalProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext="Combined MRR & Commission"
+          icon={ShieldCheck}
+          variant="emerald"
+        />
+        <KpiCard
+          title="Subscription MRR"
+          value={`$${(profitData?.subscriptionMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext="Monthly Owner Subscriptions"
+          icon={PieChart}
+          variant="blue"
+        />
+        <KpiCard
+          title="Rent Commissions"
+          value={`$${(profitData?.totalCommissionProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext="Percentage cuts on volume"
+          icon={DollarSign}
+          variant="indigo"
+        />
       </div>
 
-      {/* SaaS KPI Strip — compact secondary metrics */}
+      {/* SaaS KPI Strip — Standardized KpiCards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-        <div className="bg-white border border-slate-200/80 shadow-2xs rounded-2xl px-4 py-3.5 flex items-center justify-between group hover:border-slate-300 transition-all">
-          <div>
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">MRR</p>
-            <p className="text-xl font-black text-[#1D1D1F] mt-0.5 tracking-tight">
-              ${(profitData?.subscriptionMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[10px] font-semibold text-slate-400 mt-0.5">Monthly Recurring</p>
-          </div>
-          <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors shrink-0">
-            <TrendingUp className="h-4 w-4" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200/80 shadow-2xs rounded-2xl px-4 py-3.5 flex items-center justify-between group hover:border-slate-300 transition-all">
-          <div>
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">ARR</p>
-            <p className="text-xl font-black text-[#1D1D1F] mt-0.5 tracking-tight">
-              ${(profitData?.arr || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[10px] font-semibold text-slate-400 mt-0.5">Annual Run Rate</p>
-          </div>
-          <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors shrink-0">
-            <PieChart className="h-4 w-4" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200/80 shadow-2xs rounded-2xl px-4 py-3.5 flex items-center justify-between group hover:border-slate-300 transition-all">
-          <div>
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">ARPU</p>
-            <p className="text-xl font-black text-[#1D1D1F] mt-0.5 tracking-tight">
-              ${(profitData?.arpu || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[10px] font-semibold text-slate-400 mt-0.5">Avg Revenue / Owner</p>
-          </div>
-          <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors shrink-0">
-            <Users className="h-4 w-4" />
-          </div>
-        </div>
-
-        <div className={`bg-white border shadow-2xs rounded-2xl px-4 py-3.5 flex items-center justify-between group transition-all ${
-          profitData?.atRiskMRR > 0 ? "border-amber-200 bg-amber-50/20" : "border-slate-200/80 hover:border-slate-300"
-        }`}>
-          <div>
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">At-Risk MRR</p>
-            <p className={`text-xl font-black mt-0.5 tracking-tight ${profitData?.atRiskMRR > 0 ? "text-amber-600" : "text-[#1D1D1F]"}`}>
-              ${(profitData?.atRiskMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
-              {profitData?.atRiskMRR > 0 ? "Past Due / Grace Period" : "All healthy"}
-            </p>
-          </div>
-          {profitData?.atRiskMRR > 0 ? (
-            <div className="p-2 rounded-xl bg-amber-100 text-amber-700 shrink-0">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-          ) : (
-            <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors shrink-0">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-          )}
-        </div>
-
+        <KpiCard
+          title="MRR"
+          value={`$${(profitData?.subscriptionMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext="Monthly Recurring"
+          icon={TrendingUp}
+          variant="emerald"
+        />
+        <KpiCard
+          title="ARR"
+          value={`$${(profitData?.arr || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext="Annual Run Rate"
+          icon={PieChart}
+          variant="indigo"
+        />
+        <KpiCard
+          title="ARPU"
+          value={`$${(profitData?.arpu || 0).toFixed(2)}`}
+          subtext="Avg Revenue / Owner"
+          icon={Users}
+          variant="blue"
+        />
+        <KpiCard
+          title="AT-RISK MRR"
+          value={`$${(profitData?.atRiskMRR || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          subtext={profitData?.atRiskMRR > 0 ? "Past Due / Grace Period" : "All healthy"}
+          icon={AlertTriangle}
+          variant={profitData?.atRiskMRR > 0 ? "amber" : "slate"}
+        />
       </div>
-
 
       {/* Ledger Tabs & Tables */}
       <div className="space-y-4">
         {/* Main Tabs */}
-        <div className="flex gap-2 p-1 bg-[#F1F5F9] rounded-xl w-fit">
+        <div className="flex gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs w-fit">
           <button
             onClick={() => {
               setActiveTab("commissions");
               setCommissionsPage(1);
             }}
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${
               activeTab === "commissions"
-                ? "bg-white text-[#1D1D1F] shadow-sm"
+                ? "bg-white text-[#1D1D1F] shadow-2xs"
                 : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
@@ -341,9 +271,9 @@ export default function AdminProfitDashboard() {
               setEventsPage(1);
               setSubscriptionsPage(1);
             }}
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border-none ${
               activeTab === "subscriptions"
-                ? "bg-white text-[#1D1D1F] shadow-sm"
+                ? "bg-white text-[#1D1D1F] shadow-2xs"
                 : "text-[#6E6E73] hover:text-[#1D1D1F]"
             }`}
           >
@@ -353,40 +283,40 @@ export default function AdminProfitDashboard() {
 
         {/* Tables */}
         {activeTab === "commissions" ? (
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <CardHeader className="bg-[#F2F2F7] border-b border-[#E5E5EA] px-6 py-5">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-6 py-5">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-xl font-bold text-[#1D1D1F]">Detailed Commission Ledger</CardTitle>
-                  <CardDescription className="text-[#6E6E73] text-sm mt-1">Line-by-line breakdown of where your percentage profit comes from.</CardDescription>
+                  <CardTitle className="text-base font-semibold text-[#1D1D1F] tracking-tight">Detailed Commission Ledger</CardTitle>
+                  <CardDescription className="text-[#6E6E73] text-xs font-normal mt-1">Line-by-line breakdown of where your percentage profit comes from.</CardDescription>
                 </div>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-3 py-1 font-bold text-xs uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs w-fit">
                   {detailedProfits.length} Transactions
-                </Badge>
+                </span>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-[#F1F5F9]">
-                    <TableRow className="hover:bg-transparent border-b border-[#E5E5EA]">
-                      <TableHead className="font-bold text-[#475569] h-12">Date</TableHead>
-                      <TableHead className="font-bold text-[#475569] h-12">Property & Unit</TableHead>
-                      <TableHead className="font-bold text-[#475569] h-12">Landlord</TableHead>
-                      <TableHead className="font-bold text-[#475569] h-12">Gross Rent Billed</TableHead>
-                      <TableHead className="font-bold text-[#475569] h-12 text-right">Commission (%)</TableHead>
-                      <TableHead className="font-extrabold text-green-700 h-12 text-right">Platform Profit</TableHead>
+                  <TableHeader className="bg-slate-50/70 border-b border-slate-100 text-[#6E6E73]">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="font-normal text-xs text-[#6E6E73]">Date</TableHead>
+                      <TableHead className="font-normal text-xs text-[#6E6E73]">Property &amp; Unit</TableHead>
+                      <TableHead className="font-normal text-xs text-[#6E6E73]">Landlord</TableHead>
+                      <TableHead className="font-normal text-xs text-[#6E6E73]">Gross Rent Billed</TableHead>
+                      <TableHead className="font-normal text-xs text-[#6E6E73] text-right">Commission (%)</TableHead>
+                      <TableHead className="font-normal text-xs text-emerald-700 text-right">Platform Profit</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody className="divide-y divide-slate-100">
                     {paginatedProfits.map((item: any) => (
-                      <TableRow key={item.id} className="hover:bg-[#F2F2F7] border-b border-[#E5E5EA] transition-colors">
-                        <TableCell className="font-medium text-[#6E6E73] py-4">
+                      <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                        <TableCell className="font-normal text-xs text-[#6E6E73] py-4">
                           {new Date(item.date).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="py-4">
-                          <p className="font-bold text-[#1D1D1F]">{item.property}</p>
-                          <p className="text-xs font-semibold text-[#6E6E73] mt-0.5">Unit {item.unit}</p>
+                          <p className="font-semibold text-[#1D1D1F] text-xs">{item.property}</p>
+                          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Unit {item.unit}</p>
                         </TableCell>
                         <TableCell className="py-4">
                           <div className="flex items-center gap-2">
@@ -397,26 +327,26 @@ export default function AdminProfitDashboard() {
                                 className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-xs"
                               />
                             ) : (
-                              <div className="h-8 w-8 rounded-full bg-[#E5E5EA] flex items-center justify-center text-[#475569] font-bold text-xs shrink-0">
+                              <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[#1D1D1F] font-semibold text-xs shrink-0 border border-slate-200">
                                 {item.owner.charAt(0).toUpperCase()}
                               </div>
                             )}
-                            <span className="font-semibold text-[#334155]">{item.owner}</span>
+                            <span className="font-semibold text-xs text-[#1D1D1F]">{item.owner}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-4 font-black text-[#1D1D1F]">
+                        <TableCell className="py-4 font-semibold text-xs text-[#1D1D1F]">
                           ${item.grossAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="py-4 text-right">
-                          <Badge variant="outline" className="bg-slate-100 text-[#6E6E73] border-slate-200 font-bold">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                             {item.percentageCut}%
-                          </Badge>
+                          </span>
                         </TableCell>
                         <TableCell className="py-4 text-right">
-                          <p className="font-black text-green-600 text-lg">
+                          <p className="font-semibold text-xs text-emerald-700">
                             +${item.platformFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
-                          <p className="text-[10px] font-bold text-[#94A3B8] uppercase mt-0.5 tracking-wider">
+                          <p className="text-[10px] font-normal text-[#6E6E73] mt-0.5">
                             Retained Cut
                           </p>
                         </TableCell>
@@ -428,8 +358,8 @@ export default function AdminProfitDashboard() {
                         <TableCell colSpan={6} className="h-32 text-center">
                           <div className="flex flex-col items-center justify-center text-[#6E6E73]">
                             <ShieldCheck className="h-8 w-8 mb-2 opacity-50" />
-                            <p className="font-semibold">No profit recorded yet.</p>
-                            <p className="text-sm">When tenants pay rent, your commission cut will appear here.</p>
+                            <p className="font-normal text-xs">No profit recorded yet.</p>
+                            <p className="text-xs text-[#6E6E73]">When tenants pay rent, your commission cut will appear here.</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -448,41 +378,41 @@ export default function AdminProfitDashboard() {
             />
           </Card>
         ) : (
-          <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <CardHeader className="bg-[#F2F2F7] border-b border-[#E5E5EA] px-6 py-5">
+          <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-6 py-5">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
-                    <CardTitle className="text-xl font-bold text-[#1D1D1F]">Subscription Financial Intelligence</CardTitle>
+                    <CardTitle className="text-base font-semibold text-[#1D1D1F] tracking-tight">Subscription Financial Intelligence</CardTitle>
                   </div>
-                  <CardDescription className="text-[#6E6E73] text-sm">
+                  <CardDescription className="text-[#6E6E73] text-xs font-normal">
                     Track owner payment transactions, operational lifecycle events, and active subscriptions.
                   </CardDescription>
                 </div>
 
                 {/* Sub-tab Toggle & Filters */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex gap-1 p-1 bg-white border border-[#E5E5EA] rounded-lg">
+                  <div className="flex gap-1 p-1 bg-slate-100/80 border border-slate-200/30 rounded-xl shadow-2xs">
                     <button
                       onClick={() => { setSubTab("payments"); setPaymentsPage(1); }}
-                      className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        subTab === "payments" ? "bg-[#16A34A] text-white shadow-xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+                      className={`px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer border-none ${
+                        subTab === "payments" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
                       }`}
                     >
                       <Receipt className="h-3.5 w-3.5" /> Payment History ({rawPaymentHistory.length})
                     </button>
                     <button
                       onClick={() => { setSubTab("events"); setEventsPage(1); }}
-                      className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        subTab === "events" ? "bg-[#16A34A] text-white shadow-xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+                      className={`px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer border-none ${
+                        subTab === "events" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
                       }`}
                     >
                       <History className="h-3.5 w-3.5" /> Account Events ({rawAccountEvents.length})
                     </button>
                     <button
                       onClick={() => { setSubTab("roster"); setSubscriptionsPage(1); }}
-                      className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        subTab === "roster" ? "bg-[#16A34A] text-white shadow-xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
+                      className={`px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer border-none ${
+                        subTab === "roster" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"
                       }`}
                     >
                       <Users className="h-3.5 w-3.5" /> Active Roster ({detailedSubscriptions.length})
@@ -493,7 +423,7 @@ export default function AdminProfitDashboard() {
                     <select
                       value={paymentEventFilter}
                       onChange={(e) => { setPaymentEventFilter(e.target.value); setPaymentsPage(1); }}
-                      className="h-9 px-3 text-xs font-semibold bg-white border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#16A34A]"
+                      className="h-9 px-3 text-xs font-normal bg-white border border-slate-200 rounded-xl text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
                     >
                       <option value="ALL">All Payment Events</option>
                       <option value="RENEWAL">Renewals</option>
@@ -505,7 +435,7 @@ export default function AdminProfitDashboard() {
                     <select
                       value={accountEventFilter}
                       onChange={(e) => { setAccountEventFilter(e.target.value); setEventsPage(1); }}
-                      className="h-9 px-3 text-xs font-semibold bg-white border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#16A34A]"
+                      className="h-9 px-3 text-xs font-normal bg-white border border-slate-200 rounded-xl text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
                     >
                       <option value="ALL">All Lifecycle Events</option>
                       <option value="PAUSED">Paused</option>
@@ -519,7 +449,7 @@ export default function AdminProfitDashboard() {
                     <select
                       value={rosterStatusFilter}
                       onChange={(e) => { setRosterStatusFilter(e.target.value); setSubscriptionsPage(1); }}
-                      className="h-9 px-3 text-xs font-semibold bg-white border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#16A34A]"
+                      className="h-9 px-3 text-xs font-normal bg-white border border-slate-200 rounded-xl text-[#1D1D1F] outline-none shadow-2xs cursor-pointer"
                     >
                       <option value="ALL">All Statuses</option>
                       <option value="Active">Active</option>
@@ -597,7 +527,7 @@ export default function AdminProfitDashboard() {
                           </TableCell>
                           <TableCell className="py-4 text-right">
                             <div>
-                              <p className="font-black text-blue-600 text-base">
+                              <p className="font-semibold text-blue-600 text-base">
                                 +${Number(item.amountPaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </p>
                               <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">
@@ -758,7 +688,7 @@ export default function AdminProfitDashboard() {
                             )}
                           </TableCell>
                           <TableCell className="py-4 text-right">
-                            <p className="font-black text-blue-600 text-lg">
+                            <p className="font-semibold text-blue-600 text-lg">
                               +${item.monthlyPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </p>
                             <p className="text-[10px] font-bold text-[#94A3B8] uppercase mt-0.5 tracking-wider">
@@ -767,7 +697,7 @@ export default function AdminProfitDashboard() {
                           </TableCell>
                           <TableCell className="py-4 text-center">
                             <Link href={`/dashboard/admin/subscriptions/${item.id}`}>
-                              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-bold text-xs flex items-center gap-1 mx-auto">
+                              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-medium text-xs flex items-center gap-1 mx-auto">
                                 Manage <ArrowUpRight className="h-3.5 w-3.5" />
                               </Button>
                             </Link>

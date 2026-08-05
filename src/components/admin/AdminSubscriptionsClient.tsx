@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -234,10 +235,10 @@ export default function AdminSubscriptionsClient({
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1D1D1F]">
               Active Owner Subscriptions
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm font-semibold leading-relaxed">
+            <p className="text-[#6E6E73] text-xs md:text-sm font-normal leading-relaxed">
               Manage landlord SaaS subscription contracts, recurring MRR performance, custom feature grants, and global past-due policy locks.
             </p>
           </motion.div>
@@ -254,7 +255,7 @@ export default function AdminSubscriptionsClient({
 
             <Link
               href="/dashboard/admin/settings/pricing"
-              className="inline-flex items-center bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 px-4 transition-all shadow-xs cursor-pointer border-none"
+              className="inline-flex items-center bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs h-9 px-4 transition-all shadow-xs cursor-pointer border-none"
             >
               <Sparkles className="h-3.5 w-3.5 mr-2" />
               Pricing Tiers &amp; Fees <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
@@ -273,7 +274,7 @@ export default function AdminSubscriptionsClient({
               </div>
               <div>
                 <h3 className="text-base font-black text-slate-900">Global Subscription Gating &amp; Overage Policies</h3>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">System-wide default policy parameters governing soft-locks and past-due grace windows</p>
+                <p className="text-xs text-[#6E6E73] font-normal mt-0.5">System-wide default policy parameters governing soft-locks and past-due grace windows</p>
               </div>
             </div>
             <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-black text-[9px] uppercase tracking-wider">Platform-Wide Defaults</Badge>
@@ -282,9 +283,9 @@ export default function AdminSubscriptionsClient({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Column 1: Financial Controls */}
             <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-2xs">
-              <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Financial Controls</h4>
+              <h4 className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider border-b border-slate-200/60 pb-2">Financial Controls</h4>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Past_Due Grace Period</label>
+                <label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Past_Due Grace Period</label>
                 <div className="flex items-center gap-2">
                   <Input 
                     type="number" 
@@ -303,7 +304,7 @@ export default function AdminSubscriptionsClient({
                   onChange={(e) => setSettings({ ...settings, blockPayoutsOnPastDue: e.target.checked })}
                   className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="payoutsPastDue" className="text-xs font-extrabold text-slate-900 cursor-pointer">Block payouts during Past_Due grace</label>
+                <label htmlFor="payoutsPastDue" className="text-xs font-semibold text-slate-900 cursor-pointer">Block payouts during Past_Due grace</label>
               </div>
               <div className="flex items-center gap-3">
                 <input 
@@ -313,13 +314,13 @@ export default function AdminSubscriptionsClient({
                   onChange={(e) => setSettings({ ...settings, blockPayoutsOnPaused: e.target.checked })}
                   className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                 />
-                <label htmlFor="payoutsPaused" className="text-xs font-extrabold text-slate-900 cursor-pointer">Block payouts when account paused</label>
+                <label htmlFor="payoutsPaused" className="text-xs font-semibold text-slate-900 cursor-pointer">Block payouts when account paused</label>
               </div>
             </div>
 
             {/* Column 2: Paused Account Restrictions */}
             <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-2xs">
-              <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Paused Account Restrictions</h4>
+              <h4 className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider border-b border-slate-200/60 pb-2">Paused Account Restrictions</h4>
               <div className="flex items-center gap-3">
                 <input 
                   type="checkbox" 
@@ -365,7 +366,7 @@ export default function AdminSubscriptionsClient({
             {/* Column 3: Policy Welfare Exemptions */}
             <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-2xs flex flex-col justify-between">
               <div>
-                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-2">Welfare Exemptions</h4>
+                <h4 className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider border-b border-slate-200/60 pb-2">Welfare Exemptions</h4>
                 <div className="flex items-center gap-3 mt-3">
                   <input 
                     type="checkbox" 
@@ -391,82 +392,49 @@ export default function AdminSubscriptionsClient({
                 <div className="font-bold text-slate-900 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-600" /> Welfare Safe Guarantee
                 </div>
-                <p className="text-[11px] leading-normal font-semibold">
-                  Maintenance tickets and lease document viewing remain exempt from billing suspension locks.
-                </p>
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-            <Button variant="outline" onClick={() => { setSettings(platformSettings); setShowSettings(false); }} className="rounded-xl font-black text-xs h-9 border-slate-200 text-slate-900 bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
-            <Button onClick={handleSaveSettings} disabled={savingSettings} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 px-5 shadow-xs cursor-pointer border-none">
+            <Button variant="outline" onClick={() => { setSettings(platformSettings); setShowSettings(false); }} className="rounded-xl font-medium text-xs h-9 border-slate-200 text-slate-900 bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs h-9 px-5 shadow-xs cursor-pointer border-none">
               {savingSettings ? "Saving..." : "Save Policies"}
             </Button>
           </div>
         </Card>
       )}
 
-      {/* 2. REVENUE & PORTFOLIO METRICS CARDS */}
+      {/* 2. REVENUE & PORTFOLIO METRICS CARDS — Standardized KpiCards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-sans">
-        
-        {/* MRR Card */}
-        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Recurring Revenue</span>
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-200/80 shadow-2xs">
-              <DollarSign className="h-4 w-4 text-emerald-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">${mrr.toLocaleString()}/mo</p>
-          <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-emerald-700">
-            <TrendingUp className="h-3.5 w-3.5" />
-            <span>From {activeCount} active subscriptions</span>
-          </div>
-        </Card>
-
-        {/* At Risk MRR Card */}
-        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">At-Risk MRR</span>
-            <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200/80 shadow-2xs">
-              <ShieldAlert className="h-4 w-4 text-rose-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-rose-600 mt-2 tracking-tight">${atRiskMrr.toLocaleString()}/mo</p>
-          <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-rose-600">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            <span>{pastDueCount + pausedCount} accounts in grace / lock</span>
-          </div>
-        </Card>
-
-        {/* Paying Subscribers Card */}
-        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Paying Owners</span>
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-200/80 shadow-2xs">
-              <ShieldCheck className="h-4 w-4 text-blue-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">{activeCount} / {totalOwners}</p>
-          <p className="text-[11px] font-semibold text-slate-500 mt-1">
-            {totalOwners > 0 ? Math.round((activeCount / totalOwners) * 100) : 0}% active conversion rate
-          </p>
-        </Card>
-
-        {/* Soft-Locked Portfolios */}
-        <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-5 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Soft-Locked Portfolios</span>
-            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-2xl border border-amber-200/80 shadow-2xs">
-              <Lock className="h-4 w-4 text-amber-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-amber-700 mt-2 tracking-tight">{pausedCount + pastDueCount}</p>
-          <p className="text-[11px] font-semibold text-slate-500 mt-1">
-            {pastDueCount} past-due, {pausedCount} paused
-          </p>
-        </Card>
+        <KpiCard
+          title="Monthly Recurring Revenue"
+          value={`$${mrr.toLocaleString()}/mo`}
+          subtext={`From ${activeCount} active subscriptions`}
+          icon={DollarSign}
+          variant="emerald"
+        />
+        <KpiCard
+          title="At-Risk MRR"
+          value={`$${atRiskMrr.toLocaleString()}/mo`}
+          subtext={`${pastDueCount + pausedCount} accounts in grace / lock`}
+          icon={ShieldAlert}
+          variant="amber"
+        />
+        <KpiCard
+          title="Paying Owners"
+          value={`${activeCount} / ${totalOwners}`}
+          subtext={`${totalOwners > 0 ? Math.round((activeCount / totalOwners) * 100) : 0}% active conversion rate`}
+          icon={ShieldCheck}
+          variant="blue"
+        />
+        <KpiCard
+          title="Soft-Locked Portfolios"
+          value={pausedCount + pastDueCount}
+          subtext={`${pastDueCount} past-due, ${pausedCount} paused`}
+          icon={Lock}
+          variant="purple"
+        />
       </div>
 
       {/* 3. FILTER AND SEARCH CONSOLE */}
@@ -477,7 +445,7 @@ export default function AdminSubscriptionsClient({
             placeholder="Search owners by name or email address..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-slate-50 border-slate-200/80 focus:bg-white focus:border-slate-900 rounded-xl h-9 w-full font-semibold text-xs transition-all shadow-2xs text-slate-900"
+            className="pl-10 bg-slate-50 border-slate-200/80 focus:bg-white focus:border-slate-900 rounded-xl h-9 w-full font-normal text-xs transition-all shadow-2xs text-slate-900"
           />
           {search && (
             <button 
@@ -491,9 +459,9 @@ export default function AdminSubscriptionsClient({
 
         <div className="flex gap-3 w-full sm:w-auto shrink-0 font-sans">
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-extrabold text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
+            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-medium text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
               <div className="flex items-center gap-1.5 truncate">
-                <span className="text-slate-400 font-extrabold uppercase text-[10px]">Status:</span>
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Status:</span>
                 <span className="truncate">{formatStatus(statusFilter)}</span>
               </div>
             </SelectTrigger>
@@ -508,9 +476,9 @@ export default function AdminSubscriptionsClient({
           </Select>
 
           <Select value={tierFilter} onValueChange={(v) => setTierFilter(v || "ALL")}>
-            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-extrabold text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
+            <SelectTrigger className="w-full sm:w-[170px] bg-slate-50 border-slate-200/80 hover:border-slate-400 rounded-xl h-9 font-medium text-xs transition-all shadow-2xs text-slate-900 cursor-pointer">
               <div className="flex items-center gap-1.5 truncate">
-                <span className="text-slate-400 font-extrabold uppercase text-[10px]">Tier:</span>
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Tier:</span>
                 <span className="truncate">{tierFilter === "ALL" ? "All Tiers" : tierFilter}</span>
               </div>
             </SelectTrigger>
@@ -526,31 +494,37 @@ export default function AdminSubscriptionsClient({
 
       {/* 4. EXECUTIVE SAAS SUBSCRIPTIONS TABLE */}
       <Card className="bg-white border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
+        <CardHeader className="bg-slate-50/50 border-b border-[#E5E5EA] px-6 py-4">
+          <div>
+            <CardTitle className="text-lg font-semibold text-[#1D1D1F]">Active Landlord Subscriptions</CardTitle>
+            <CardDescription className="text-xs font-normal text-[#6E6E73]">Inspect active plan licenses, manage soft-lock status, and grant module overrides.</CardDescription>
+          </div>
+        </CardHeader>
         <div className="overflow-x-auto min-h-[400px]">
           <Table>
             <TableHeader className="bg-slate-50/80 border-b border-[#E5E5EA]">
               <TableRow className="border-[#E5E5EA] hover:bg-transparent">
-                <TableHead className="w-12 text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">#</TableHead>
-                <TableHead className="text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">Owner Account</TableHead>
-                <TableHead className="text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">SaaS Tier / License</TableHead>
-                <TableHead className="text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">Feature Overrides</TableHead>
-                <TableHead className="text-[#6E6E73] font-black text-[11px] uppercase tracking-wider">Portfolio Scale</TableHead>
-                <TableHead className="text-right text-[#6E6E73] font-black text-[11px] uppercase tracking-wider whitespace-nowrap">Manage Account</TableHead>
-                <TableHead className="text-right text-[#6E6E73] font-black text-[11px] uppercase tracking-wider w-[60px]">Actions</TableHead>
+                <TableHead className="w-12 text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">#</TableHead>
+                <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">Owner Account</TableHead>
+                <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">SaaS Tier / License</TableHead>
+                <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">Status</TableHead>
+                <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">Feature Overrides</TableHead>
+                <TableHead className="text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider">Portfolio Scale</TableHead>
+                <TableHead className="text-right text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider whitespace-nowrap">Manage Account</TableHead>
+                <TableHead className="text-right text-[#6E6E73] font-medium text-[11px] uppercase tracking-wider w-[60px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-[#F2F2F7] text-xs font-semibold text-[#1D1D1F]">
+            <TableBody className="divide-y divide-[#F2F2F7] text-xs font-normal text-[#1D1D1F]">
               {filteredOwners.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-48 text-center text-[#6E6E73]">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <CreditCard className="h-8 w-8 text-slate-300" />
-                      <p className="font-bold text-sm">No landlords found matching your filter criteria.</p>
+                      <p className="font-semibold text-sm">No landlords found matching your filter criteria.</p>
                       <Button 
                         onClick={() => { setSearch(""); setStatusFilter("ALL"); setTierFilter("ALL"); }}
-                        className="bg-[#1D1D1F] text-white hover:bg-black rounded-xl font-bold text-xs h-9 px-4"
+                        className="bg-[#1D1D1F] text-white hover:bg-black rounded-xl font-medium text-xs h-9 px-4"
                       >
                         Reset All Filters
                       </Button>
@@ -576,27 +550,27 @@ export default function AdminSubscriptionsClient({
                       className="border-[#E5E5EA] hover:bg-slate-50/60 transition-colors cursor-pointer" 
                       onClick={() => router.push(`/dashboard/admin/subscriptions/${owner.id}`)}
                     >
-                      <TableCell className="text-[#6E6E73] text-xs font-bold" onClick={(e) => e.stopPropagation()}>
+                      <TableCell className="text-[#6E6E73] text-xs font-medium" onClick={(e) => e.stopPropagation()}>
                         {idx + 1}
                       </TableCell>
 
                       {/* Owner Account */}
-                      <TableCell className="font-extrabold text-[#1D1D1F]">
+                      <TableCell className="font-semibold text-[#1D1D1F]">
                         <div className="flex items-center gap-3">
                           {owner.avatar ? (
                             <img src={owner.avatar} alt={owner.name} className="h-9 w-9 rounded-full object-cover shrink-0 border border-slate-200" />
                           ) : (
-                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0">
+                            <div className="h-9 w-9 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center shrink-0 border border-slate-200/80">
                               {owner.name?.charAt(0)?.toUpperCase() || "O"}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-extrabold text-sm text-[#1D1D1F] truncate">{owner.name || "Unknown"}</p>
-                              {isOverrideActive && <Badge className="bg-purple-50 text-purple-700 border-purple-100 font-bold text-[9px] px-1.5 py-0.5 rounded-md">⚙ Policy</Badge>}
-                              {isCompedActive && <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 font-bold text-[9px] px-1.5 py-0.5 rounded-md">🎁 Comped</Badge>}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-semibold text-sm text-[#1D1D1F] truncate">{owner.name || "Unknown"}</p>
+                              {isOverrideActive && <Badge className="bg-purple-50 text-purple-700 border-purple-100 font-medium text-[10px] px-1.5 py-0.5 rounded-md">Policy</Badge>}
+                              {isCompedActive && <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 font-medium text-[10px] px-1.5 py-0.5 rounded-md">Comped</Badge>}
                             </div>
-                            <p className="text-xs font-medium text-[#6E6E73] truncate">{owner.email}</p>
+                            <p className="text-xs font-normal text-[#6E6E73] truncate">{owner.email}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -604,11 +578,11 @@ export default function AdminSubscriptionsClient({
                       {/* Tier / Plan */}
                       <TableCell className="whitespace-nowrap">
                         {owner.pricingTier ? (
-                          <Badge className="bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-900 border-indigo-100 rounded-xl px-3 py-1 font-bold text-xs shadow-2xs">
+                          <Badge className="bg-slate-100 text-slate-800 border-slate-200/80 rounded-xl px-3 py-1 font-medium text-xs shadow-2xs">
                             {owner.pricingTier.name}
                           </Badge>
                         ) : (
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 rounded-xl px-3 py-1 font-bold text-xs shadow-none">
+                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 rounded-xl px-3 py-1 font-medium text-xs shadow-none">
                             No Active Plan
                           </Badge>
                         )}
@@ -617,23 +591,23 @@ export default function AdminSubscriptionsClient({
                       {/* Status */}
                       <TableCell className="whitespace-nowrap">
                         {owner.subscriptionStatus === "Active" || owner.subscriptionStatus === "Active (Canceling)" ? (
-                          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" /> Active Subscription
+                          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/60 font-medium text-xs px-3 py-1 flex items-center gap-1.5 w-max">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" /> Active Subscription
                           </Badge>
                         ) : owner.subscriptionStatus === "Past_Due" ? (
-                          <Badge className="bg-amber-50 text-amber-700 border-amber-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
-                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" /> Past Due Grace
+                          <Badge className="bg-amber-50 text-amber-700 border-amber-200/60 font-medium text-xs px-3 py-1 flex items-center gap-1.5 w-max">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" /> Past Due Grace
                           </Badge>
                         ) : owner.subscriptionStatus === "Paused" ? (
-                          <Badge className="bg-rose-50 text-rose-700 border-rose-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
+                          <Badge className="bg-rose-50 text-rose-700 border-rose-200/60 font-medium text-xs px-3 py-1 flex items-center gap-1.5 w-max">
                             <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" /> Soft-Locked (Paused)
                           </Badge>
                         ) : owner.subscriptionStatus === "Trialing" ? (
-                          <Badge className="bg-blue-50 text-blue-700 border-blue-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
+                          <Badge className="bg-blue-50 text-blue-700 border-blue-200/60 font-medium text-xs px-3 py-1 flex items-center gap-1.5 w-max">
                             <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" /> Trial Period
                           </Badge>
                         ) : (
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
+                          <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-medium text-xs px-3 py-1 flex items-center gap-1.5 w-max">
                             <span className="h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" /> Standard
                           </Badge>
                         )}
@@ -642,20 +616,20 @@ export default function AdminSubscriptionsClient({
                       {/* Feature Overrides */}
                       <TableCell className="whitespace-nowrap">
                         {activeOverridesCount > 0 ? (
-                          <Badge className="bg-purple-50 text-purple-700 border border-purple-200/60 font-extrabold text-[11px] rounded-lg px-2.5 py-1">
+                          <Badge className="bg-purple-50 text-purple-700 border border-purple-200/60 font-medium text-xs rounded-lg px-2.5 py-1">
                             {activeOverridesCount} Grant{activeOverridesCount > 1 ? "s" : ""}
                           </Badge>
                         ) : (
-                          <span className="text-slate-400 text-xs font-semibold">—</span>
+                          <span className="text-slate-400 text-xs font-normal">—</span>
                         )}
                       </TableCell>
 
                       {/* Portfolio Size */}
-                      <TableCell className="whitespace-nowrap font-semibold text-[#1D1D1F]">
+                      <TableCell className="whitespace-nowrap font-normal text-[#1D1D1F]">
                         <div className="flex items-center gap-1.5">
                           <Building className="h-3.5 w-3.5 text-slate-400" />
                           {owner.pricingTier ? (
-                            <span className={isOverLimit ? 'text-rose-600 font-extrabold' : ''}>
+                            <span className={isOverLimit ? 'text-rose-600 font-semibold' : ''}>
                               {owner.ownedProperties.length} prop ({totalUnits}/{owner.pricingTier.maxUnits} units)
                             </span>
                           ) : (
@@ -666,8 +640,8 @@ export default function AdminSubscriptionsClient({
 
                       {/* Manage Column Link */}
                       <TableCell className="text-right whitespace-nowrap" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/admin/subscriptions/${owner.id}`); }}>
-                        <span className="inline-flex items-center gap-1 bg-white hover:bg-[#007AFF] text-[#007AFF] hover:text-white border border-[#007AFF]/30 hover:border-[#007AFF] font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all shadow-2xs group">
-                          <span>Manage Owner</span>
+                        <span className="inline-flex items-center gap-1 bg-[#007AFF]/5 hover:bg-[#007AFF] text-[#007AFF] hover:text-white border border-[#007AFF]/20 font-medium text-xs px-3 py-1.5 rounded-lg transition-all shadow-2xs group">
+                          <span>Manage</span>
                           <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </span>
                       </TableCell>
@@ -731,3 +705,4 @@ export default function AdminSubscriptionsClient({
     </div>
   );
 }
+

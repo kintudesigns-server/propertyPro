@@ -227,8 +227,8 @@ export default function SettingsPage() {
 
       {/* ── Page Title ── */}
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
-        <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your profile, credentials and account preferences.</p>
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Account Settings</h1>
+        <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage your profile, credentials and account preferences.</p>
       </div>
 
       {/* ── Profile Identity Strip ── */}
@@ -433,7 +433,7 @@ export default function SettingsPage() {
             <Button
               type="submit"
               disabled={submitting || saveSuccess}
-              className={`h-10 px-6 rounded-xl font-bold text-sm transition-all ${
+              className={`h-10 px-6 rounded-xl font-medium text-sm transition-all ${
                 saveSuccess
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                   : "bg-slate-900 hover:bg-slate-800 text-white"

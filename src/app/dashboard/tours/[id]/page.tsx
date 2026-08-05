@@ -225,7 +225,7 @@ export default function TourDetailPage() {
         <h3 className="text-lg font-bold text-slate-800">Tour Request Not Found</h3>
         <p className="text-sm text-[#6E6E73]">The showing request could not be loaded or has been deleted.</p>
         <Link href="/dashboard/tours">
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold">Go Back</Button>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium">Go Back</Button>
         </Link>
       </div>
     );
@@ -260,7 +260,7 @@ export default function TourDetailPage() {
               </Button>
             </Link>
             <div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Visit details: {tour.tenantName}</h2>
+              <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Visit details: {tour.tenantName}</h2>
               <p className="text-sm text-[#6E6E73] mt-0.5">Manage showing outcomes and review prospect details.</p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function TourDetailPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-slate-800">{tour.tenantName}</span>
                   {tour.verifiedEmail && (
-                    <Badge className="bg-blue-50 text-blue-600 border border-blue-200 rounded-full py-0 px-2.5 text-[9px] font-black uppercase flex items-center gap-0.5">
+                    <Badge className="bg-blue-50 text-blue-600 border border-blue-200 rounded-full py-0 px-2.5 text-[9px] font-semibold uppercase flex items-center gap-0.5">
                       <ShieldCheck className="h-3 w-3" /> Verified
                     </Badge>
                   )}
@@ -610,8 +610,8 @@ export default function TourDetailPage() {
             </div>
           </div>
           <DialogFooter className="flex sm:justify-end gap-2">
-            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setConfirmOpen(false)}>Cancel</Button>
-            <Button className="bg-primary text-white rounded-xl font-bold" onClick={handleConfirmTour}>Confirm & Send Email</Button>
+            <Button variant="ghost" className="rounded-xl font-medium" onClick={() => setConfirmOpen(false)}>Cancel</Button>
+            <Button className="bg-primary text-white rounded-xl font-medium" onClick={handleConfirmTour}>Confirm & Send Email</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -639,9 +639,9 @@ export default function TourDetailPage() {
             </div>
           </div>
           <DialogFooter className="flex sm:justify-end gap-2">
-            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setCancelOpen(false)}>Back</Button>
+            <Button variant="ghost" className="rounded-xl font-medium" onClick={() => setCancelOpen(false)}>Back</Button>
             <Button 
-              className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold" 
+              className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-medium" 
               onClick={handleCancelTour}
               disabled={!cancellationReasonText.trim()}
             >
@@ -696,8 +696,8 @@ export default function TourDetailPage() {
             </div>
           </div>
           <DialogFooter className="flex sm:justify-end gap-2">
-            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setRateProspectOpen(false)}>Cancel</Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold" onClick={handleRateProspect}>Complete showing</Button>
+            <Button variant="ghost" className="rounded-xl font-medium" onClick={() => setRateProspectOpen(false)}>Cancel</Button>
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium" onClick={handleRateProspect}>Complete showing</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

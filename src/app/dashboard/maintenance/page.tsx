@@ -337,17 +337,17 @@ export default function MaintenancePage() {
       {/* Page Header & Primary Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
             Maintenance Command Center
           </h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
             Track emergency repairs, dispatch certified inspectors, and manage vendor estimates.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Link href="/dashboard/maintenance/new">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-black flex items-center gap-2 cursor-pointer">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-medium flex items-center gap-2 cursor-pointer border-none">
               <Plus className="h-4 w-4" /> Log Maintenance Ticket
             </Button>
           </Link>
@@ -395,7 +395,7 @@ export default function MaintenancePage() {
       </div>
 
       {/* Control Bar & Filter Container */}
-      <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden">
+      <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
         <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1 w-full">
@@ -404,7 +404,7 @@ export default function MaintenancePage() {
               placeholder="Search issue title, property, unit, or tenant..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 bg-white border-slate-200 rounded-xl font-semibold text-xs text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-xs"
+              className="pl-10 h-9 bg-white border-slate-200 rounded-xl font-normal text-xs text-[#1D1D1F] focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-2xs"
             />
           </div>
 
@@ -414,7 +414,7 @@ export default function MaintenancePage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="UNASSIGNED">⚠️ Needs Assignment</option>
@@ -430,7 +430,7 @@ export default function MaintenancePage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer"
             >
               <option value="ALL">All Priorities</option>
               <option value="EMERGENCY">Emergency</option>
@@ -443,7 +443,7 @@ export default function MaintenancePage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer"
             >
               <option value="ALL">All Categories</option>
               <option value="PLUMBING">Plumbing</option>
@@ -461,7 +461,7 @@ export default function MaintenancePage() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-semibold px-3.5 shadow-xs outline-none cursor-pointer"
+              className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer"
             >
               <option value="ALL">All Time</option>
               <option value="TODAY">Today</option>
@@ -470,17 +470,17 @@ export default function MaintenancePage() {
             </select>
 
             {/* View Switcher Toggle */}
-            <div className="flex bg-slate-100 border border-slate-200/80 p-1 rounded-xl shadow-2xs gap-1 shrink-0 ml-auto lg:ml-0">
+            <div className="flex bg-slate-100 border border-slate-200/50 p-1 rounded-xl shadow-2xs gap-1 shrink-0 ml-auto lg:ml-0">
               <button 
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === "list" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
+                className={`p-1 rounded-lg transition-colors cursor-pointer ${viewMode === "list" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"}`}
                 title="Table View"
               >
                 <LayoutList className="h-4 w-4" />
               </button>
               <button 
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === "grid" ? "bg-slate-900 text-white shadow-2xs" : "text-slate-500 hover:text-slate-900"}`}
+                className={`p-1 rounded-lg transition-colors cursor-pointer ${viewMode === "grid" ? "bg-white text-[#1D1D1F] shadow-2xs" : "text-[#6E6E73] hover:text-[#1D1D1F]"}`}
                 title="Card Grid View"
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -495,13 +495,13 @@ export default function MaintenancePage() {
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/70 hover:bg-slate-50/70">
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">Issue &amp; Category</th>
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">Property &amp; Unit</th>
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">Priority &amp; Status</th>
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">Assigned Dispatch</th>
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">Requested Date</th>
-                  <th className="py-3.5 px-6 font-extrabold text-slate-500 uppercase tracking-wider text-[10px] text-right">Action</th>
+                <tr className="border-b border-slate-200 bg-slate-50/60">
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Issue &amp; Category</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Property &amp; Unit</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Priority &amp; Status</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Assigned Dispatch</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Requested Date</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73] text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -516,7 +516,7 @@ export default function MaintenancePage() {
                     <td colSpan={6} className="py-16 text-center text-slate-500">
                       <div className="max-w-xs mx-auto space-y-2">
                         <Wrench className="h-8 w-8 text-slate-300 mx-auto" />
-                        <p className="text-sm font-extrabold text-slate-900">No requests found</p>
+                        <p className="text-sm font-semibold text-slate-900">No requests found</p>
                         <p className="text-xs text-slate-500 font-medium">Try adjusting your filters or log a new ticket.</p>
                       </div>
                     </td>
@@ -533,11 +533,11 @@ export default function MaintenancePage() {
                           <div className="space-y-1">
                             <Link 
                               href={`/dashboard/maintenance/${req.id}`}
-                              className="font-extrabold text-xs text-slate-900 hover:text-slate-700 transition-colors block line-clamp-1"
+                              className="font-semibold text-xs text-[#1D1D1F] hover:text-slate-700 transition-colors block line-clamp-1"
                             >
                               {req.title}
                             </Link>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-2xs">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-[#6E6E73] border border-slate-200/60 rounded-md text-[10px] font-medium uppercase tracking-wider">
                               {req.category?.replace(/_/g, ' ') || "General"}
                             </span>
                           </div>
@@ -553,15 +553,15 @@ export default function MaintenancePage() {
                                 className="h-9 w-9 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
                               />
                             ) : (
-                              <div className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 font-bold">
+                              <div className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 font-medium">
                                 <Building2 className="h-4 w-4" />
                               </div>
                             )}
                             <div className="space-y-0.5">
-                              <span className="font-extrabold text-xs text-slate-900 block">
+                              <span className="font-semibold text-xs text-[#1D1D1F] block">
                                 {req.unit?.property?.name || "Property"}
                               </span>
-                              <span className="text-[11px] font-semibold text-slate-500 block">
+                              <span className="text-xs font-normal text-[#6E6E73] block">
                                 {req.unit?.name?.includes("Unit") ? req.unit.name : `Unit ${req.unit?.name || 'A'}`}
                               </span>
                             </div>
@@ -571,7 +571,7 @@ export default function MaintenancePage() {
                         {/* 3. Priority & Status */}
                         <td className="py-3.5 px-6">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border shadow-2xs ${getPriorityColor(req.priority)} capitalize`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium uppercase border tracking-wider ${getPriorityColor(req.priority)} capitalize`}>
                               {req.priority.toLowerCase()}
                             </span>
                             {getStatusBadge(req.status)}
@@ -581,25 +581,25 @@ export default function MaintenancePage() {
                         {/* 4. Assigned Dispatch */}
                         <td className="py-3.5 px-6">
                           {req.inspector ? (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                              <UserPlus className="h-3.5 w-3.5 text-slate-600 shrink-0" />
-                              <span className="font-extrabold">{req.inspector.name}</span>
-                              <span className="text-[10px] text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-extrabold uppercase shadow-2xs">Inspector</span>
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-[#1D1D1F]">
+                              <UserPlus className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                              <span className="font-semibold">{req.inspector.name}</span>
+                              <span className="text-[10px] text-[#6E6E73] bg-slate-100 border border-slate-200/60 px-1.5 py-0.2 rounded font-medium uppercase tracking-wider">Inspector</span>
                             </div>
                           ) : req.externalVendor ? (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                              <Wrench className="h-3.5 w-3.5 text-slate-600 shrink-0" />
-                              <span className="font-extrabold">{req.externalVendor.name}</span>
-                              <span className="text-[10px] text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-extrabold uppercase shadow-2xs">Vendor</span>
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-[#1D1D1F]">
+                              <Wrench className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                              <span className="font-semibold">{req.externalVendor.name}</span>
+                              <span className="text-[10px] text-[#6E6E73] bg-slate-100 border border-slate-200/60 px-1.5 py-0.2 rounded font-medium uppercase tracking-wider">Vendor</span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium uppercase bg-amber-50 text-amber-800 border border-amber-200 tracking-wider">
                                 Unassigned
                               </span>
                               <button
                                 onClick={(e) => { e.stopPropagation(); openAssignModal(req); }}
-                                className="text-xs font-extrabold text-slate-900 hover:underline cursor-pointer"
+                                className="text-xs font-medium text-slate-900 hover:underline cursor-pointer"
                               >
                                 + Assign
                               </button>
@@ -609,7 +609,7 @@ export default function MaintenancePage() {
 
                         {/* 5. Requested Date */}
                         <td className="py-3.5 px-6">
-                          <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                          <span className="text-xs font-normal text-[#6E6E73] flex items-center gap-1.5">
                             <Calendar className="h-3.5 w-3.5 text-slate-400" />
                             {req.createdAt ? format(new Date(req.createdAt), "MMM d, yyyy") : "N/A"}
                           </span>
@@ -704,7 +704,7 @@ export default function MaintenancePage() {
               ) : filteredRequests.length === 0 ? (
                 <div className="col-span-full py-16 text-center text-slate-500">
                   <Wrench className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-extrabold text-slate-900">No requests found</p>
+                  <p className="text-sm font-semibold text-slate-900">No requests found</p>
                 </div>
               ) : (
                 (() => {
@@ -732,7 +732,7 @@ export default function MaintenancePage() {
                               <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
                                 {req.category?.replace(/_/g, ' ') || "General"}
                               </span>
-                              <h3 className="font-extrabold text-slate-900 text-sm leading-snug truncate">{req.title}</h3>
+                              <h3 className="font-semibold text-slate-900 text-sm leading-snug truncate">{req.title}</h3>
                               <p className="text-[11px] font-semibold text-slate-500 truncate">
                                 {req.unit?.property?.name} &bull; <span className="text-slate-900 font-bold">{req.unit?.name}</span>
                               </p>
@@ -785,7 +785,7 @@ export default function MaintenancePage() {
 
                         <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
                           <span>Assignee:</span>
-                          <span className="font-extrabold text-slate-900">
+                          <span className="font-semibold text-slate-900">
                             {req.inspector?.name || req.externalVendor?.name || "Unassigned"}
                           </span>
                         </div>
@@ -834,7 +834,7 @@ export default function MaintenancePage() {
               <>
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-base font-extrabold text-slate-900">Assign Inspector</h2>
+                    <h2 className="text-base font-semibold text-slate-900">Assign Inspector</h2>
                     <button 
                       onClick={() => setAssignModalMode("create")} 
                       className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
@@ -863,14 +863,14 @@ export default function MaintenancePage() {
                 </div>
                 <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setAssignModalOpen(false)} className="rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 h-9 px-4">Cancel</Button>
-                  <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-black bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Confirm Assignment</Button>
+                  <Button onClick={handleAssignSubmit} className="rounded-xl text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Confirm Assignment</Button>
                 </div>
               </>
             ) : (
               <>
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-1">
-                    <h2 className="text-base font-extrabold text-slate-900">Add New Inspector</h2>
+                    <h2 className="text-base font-semibold text-slate-900">Add New Inspector</h2>
                     <button 
                       onClick={() => setAssignModalMode("select")} 
                       className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
@@ -913,7 +913,7 @@ export default function MaintenancePage() {
                 </div>
                 <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setAssignModalMode("select")} className="rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 h-9 px-4">Cancel</Button>
-                  <Button onClick={handleCreateInspector} disabled={inspectorSubmitting} className="rounded-xl text-xs font-black bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Save Inspector</Button>
+                  <Button onClick={handleCreateInspector} disabled={inspectorSubmitting} className="rounded-xl text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Save Inspector</Button>
                 </div>
               </>
             )}
@@ -926,7 +926,7 @@ export default function MaintenancePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-base font-extrabold text-slate-900 mb-1">Dispatch External Vendor</h2>
+              <h2 className="text-base font-semibold text-slate-900 mb-1">Dispatch External Vendor</h2>
               <p className="text-xs font-medium text-slate-500 mb-6">Select an external vendor to assign to this maintenance request.</p>
               
               <div className="space-y-2">
@@ -950,7 +950,7 @@ export default function MaintenancePage() {
             </div>
             <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDispatchModalOpen(false)} className="rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 h-9 px-4">Cancel</Button>
-              <Button onClick={handleDispatchSubmit} className="rounded-xl text-xs font-black bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Confirm Dispatch</Button>
+              <Button onClick={handleDispatchSubmit} className="rounded-xl text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 h-9 px-5 shadow-xs">Confirm Dispatch</Button>
             </div>
           </div>
         </div>
@@ -959,3 +959,4 @@ export default function MaintenancePage() {
     </div>
   );
 }
+

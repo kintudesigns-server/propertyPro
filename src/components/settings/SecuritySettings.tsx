@@ -195,7 +195,7 @@ export default function SecuritySettings() {
             <Button
               type="submit"
               disabled={isSubmitting || isSuccess}
-              className={`h-10 px-6 rounded-xl font-bold text-sm transition-all ${
+              className={`h-10 px-6 rounded-xl font-medium text-sm transition-all ${
                 isSuccess
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                   : "bg-slate-900 hover:bg-slate-800 text-white"

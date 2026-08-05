@@ -108,7 +108,7 @@ function TrackerContent() {
             Please use the secure link sent to your email or copied at the time of your application submission.
           </p>
           <Link href="/listings">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl px-6 mt-2 shadow-xs">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 rounded-xl px-6 mt-2 shadow-xs">
               Browse Listings
             </Button>
           </Link>
@@ -138,7 +138,7 @@ function TrackerContent() {
             We couldn't locate any application with the ID: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-rose-600 text-[11px] font-bold">{appId}</code>
           </p>
           <Link href="/listings">
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl px-6 mt-2 shadow-xs">
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 rounded-xl px-6 mt-2 shadow-xs">
               Browse Listings
             </Button>
           </Link>
@@ -341,7 +341,7 @@ function TrackerContent() {
                 
                 <div>
                   <Link href="/auth/login">
-                    <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 rounded-xl shadow-xs">
+                    <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 rounded-xl shadow-xs">
                       Go to Login Portal <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>

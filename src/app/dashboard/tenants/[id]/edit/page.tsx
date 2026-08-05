@@ -146,7 +146,7 @@ export default function EditTenantPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-[#1D1D1F]">Edit Tenant</h1>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Edit Tenant</h1>
           <p className="text-[#6E6E73] text-sm mt-1">Update the profile details for this tenant.</p>
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function EditTenantPage() {
             <div>
               <h2 className="font-bold text-[#1D1D1F] text-lg">Profile Photo</h2>
               <p className="text-sm text-[#6E6E73] mt-1 mb-4 max-w-md">Update the professional photo for the tenant's profile. PNG, JPG, or GIF up to 5MB.</p>
-              <Button type="button" variant="outline" className="h-10 px-6 rounded-xl font-bold border-[#E5E5EA] text-[#1D1D1F]">
+              <Button type="button" variant="outline" className="h-10 px-6 rounded-xl font-medium border-[#E5E5EA] text-[#1D1D1F]">
                 Change Image
               </Button>
             </div>
@@ -338,9 +338,9 @@ export default function EditTenantPage() {
         {/* Floating Action Bar */}
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/80 backdrop-blur-md border-t border-[#E5E5EA] p-4 flex justify-end gap-3 z-20 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
           <Link href="/dashboard/tenants">
-            <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#1D1D1F] border-[#E5E5EA] shadow-sm hover:bg-[#F2F2F7]">Cancel</Button>
+            <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-medium text-[#1D1D1F] border-[#E5E5EA] shadow-sm hover:bg-[#F2F2F7]">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
+          <Button type="submit" disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 rounded-xl font-medium shadow-sm flex items-center gap-2">
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>

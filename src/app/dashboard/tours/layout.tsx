@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { useSession } from "next-auth/react";
@@ -14,7 +14,7 @@ export default function ToursLayout({ children }: { children: React.ReactNode })
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Verifying access permissions...</p>
+        <p className="text-slate-400 font-medium text-[11px] uppercase tracking-wider">Verifying access permissions...</p>
       </div>
     );
   }

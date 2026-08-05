@@ -102,7 +102,7 @@ export default function GuestTourFeedbackPage() {
           <h2 className="text-lg font-bold">Showing Link Expired</h2>
           <p className="text-xs text-slate-400">{error || "Could not find details for this showing visit."}</p>
           <Link href="/listings">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold mt-2">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium mt-2">
               Browse Available Listings
             </Button>
           </Link>
@@ -212,7 +212,7 @@ export default function GuestTourFeedbackPage() {
                     Submit your formal rental application online to reserve your spot!
                   </p>
                   <Link href={applyUrl} className="block">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl h-11 text-xs font-bold shadow-lg flex items-center justify-center gap-2">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl h-11 text-xs font-medium shadow-lg flex items-center justify-center gap-2">
                       Submit Rental Application <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -269,7 +269,7 @@ export default function GuestTourFeedbackPage() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-2xl h-12 text-sm shadow-xl transition-all"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-medium rounded-2xl h-12 text-sm shadow-xl transition-all"
                 >
                   {submitting ? "Submitting..." : "Submit Feedback & Rating"}
                 </Button>

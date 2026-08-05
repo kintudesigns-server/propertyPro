@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -211,7 +211,7 @@ export default function EmbeddedSubscribeModal({
                 <Zap className="h-5 w-5 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-black text-slate-900 leading-tight">
+                <DialogTitle className="text-2xl font-semibold text-slate-900 leading-tight">
                   {step === "payment" && selectedTier ? `Subscribe to ${selectedTier.name}` 
                    : step === "setup" && selectedTier ? `Add Card to Upgrade to ${selectedTier.name}`
                    : title}
@@ -293,7 +293,7 @@ export default function EmbeddedSubscribeModal({
 
                         <div className="ml-6 flex flex-col items-end gap-3 shrink-0">
                           <div className="text-right">
-                            <span className="text-2xl font-black text-slate-900">${tier.price}</span>
+                            <span className="text-2xl font-semibold text-slate-900">${tier.price}</span>
                             <span className="text-[#6E6E73] text-xs font-medium">/mo</span>
                           </div>
                           <Button

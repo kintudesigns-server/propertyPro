@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { Turnstile } from "@marsidev/react-turnstile";
 import {
   Building2,
   ArrowRight,
@@ -18,13 +21,10 @@ import {
   BarChart3,
   Loader2,
   ShieldCheck,
-
   Zap,
   MapPin,
-  TrendingUp,
   DollarSign,
   FileText,
-  Bell,
   Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,31 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 /* ─────────────────────────────────────────────────────
    Types
 ───────────────────────────────────────────────────── */
-type TurnstileStatus = 0 | 1 | 2;
+interface PricingTier {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  isCustom: boolean;
+  features: string[];
+}
+
+interface ListingUnit {
+  id: string;
+  name: string;
+  type: string;
+  rooms: number;
+  bathrooms: number;
+  sqFootage: number;
+  rentAmount: number;
+  images?: string[];
+  property?: {
+    name: string;
+    address: string;
+    city: string;
+    coverPhoto?: string;
+  };
+}
 
 /* ─────────────────────────────────────────────────────
    Hero background image set – curated Unsplash
@@ -57,27 +81,25 @@ export default function LandingPage() {
   const [ownerModalOpen, setOwnerModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [pricingTiers, setPricingTiers] = useState<any[]>([]);
+  const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([]);
   const [trackingId, setTrackingId] = useState<string | null>(null);
-  const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>(0);
-
-  // Portal tab (kept for potential future use)
-  const [activePortalTab, setActivePortalTab] = useState<"owner" | "tenant">("owner");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Listings
-  const [listings, setListings] = useState<any[]>([]);
+  const [listings, setListings] = useState<ListingUnit[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
 
   // FAQ accordion
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Hero ref
+  // Refs
   const heroRef = useRef<HTMLDivElement>(null);
+  const listingsMarqueeRef = useRef<HTMLDivElement>(null);
 
   /* ── Owner apply handler ───────────────────────── */
   const handleOwnerApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (turnstileStatus !== 2) {
+    if (!turnstileToken) {
       toast.error("Please complete the security check.");
       return;
     }
@@ -87,7 +109,7 @@ export default function LandingPage() {
       const res = await fetch("/api/owner-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, turnstileToken }),
       });
       const json = await res.json();
       if (res.ok) {
@@ -129,6 +151,52 @@ export default function LandingPage() {
     };
   }, []);
 
+  /* ── Auto-center zoom for listings marquee ───────── */
+  useEffect(() => {
+    let animId: number;
+    const updateCenterZoom = () => {
+      if (listingsMarqueeRef.current) {
+        const container = listingsMarqueeRef.current;
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        const cards = container.querySelectorAll<HTMLElement>(".listing-card-item");
+
+        cards.forEach((card) => {
+          const isHovered = card.matches(":hover") || card.contains(document.activeElement);
+          const rect = card.getBoundingClientRect();
+          const cardCenter = rect.left + rect.width / 2;
+          const dist = Math.abs(containerCenter - cardCenter);
+          const maxDist = 360; // Radius in px where auto-zoom applies
+
+          if (isHovered) {
+            card.style.transform = `scale(1.07)`;
+            card.style.opacity = "1";
+            card.style.zIndex = "50";
+            card.style.boxShadow = "0 20px 40px -10px rgba(0,0,0,0.18)";
+          } else if (dist < maxDist) {
+            const norm = 1 - dist / maxDist;
+            const factor = norm * norm * (3 - 2 * norm); // Cubic ease-out
+            const scale = 0.94 + factor * 0.10; // 0.94 side -> 1.04 center
+            const opacity = 0.82 + factor * 0.18; // 0.82 side -> 1.00 center
+            card.style.transform = `scale(${scale.toFixed(3)})`;
+            card.style.opacity = opacity.toFixed(3);
+            card.style.zIndex = Math.round(10 + factor * 20).toString();
+            card.style.boxShadow = `0 ${Math.round(8 + factor * 14)}px ${Math.round(20 + factor * 20)}px rgba(0,0,0,${0.04 + factor * 0.10})`;
+          } else {
+            card.style.transform = `scale(0.94)`;
+            card.style.opacity = "0.82";
+            card.style.zIndex = "1";
+            card.style.boxShadow = `0 2px 8px rgba(0,0,0,0.03)`;
+          }
+        });
+      }
+      animId = requestAnimationFrame(updateCenterZoom);
+    };
+
+    animId = requestAnimationFrame(updateCenterZoom);
+    return () => cancelAnimationFrame(animId);
+  }, [listings]);
+
   /* ── Feature cards ─────────────────────────────── */
   const features = [
     { icon: <Home className="h-5 w-5" />, color: "#007AFF", title: "Portfolio Dashboard", desc: "Manage unlimited properties and units from one intelligent hub — from studio apartments to office complexes." },
@@ -166,7 +234,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Desktop nav pill */}
-            <nav className={`hidden md:flex items-center gap-0.5 p-1 rounded-full border transition-all ${scrolled ? "bg-slate-100 border-slate-200" : "bg-white/10 border-white/20"}`}>
+            <nav aria-label="Main navigation" className={`hidden md:flex items-center gap-0.5 p-1 rounded-full border transition-all ${scrolled ? "bg-slate-100 border-slate-200" : "bg-white/10 border-white/20"}`}>
               {["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"].map((item) => {
                 const [label, href] = item.split("|");
                 return (
@@ -195,15 +263,18 @@ export default function LandingPage() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/dashboard">
-                <Button className="h-9 px-4 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02]">
-                  Dashboard
-                </Button>
-              </Link>
+              <Button
+                onClick={() => setOwnerModalOpen(true)}
+                className="h-9 px-4 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02]"
+              >
+                Get Started
+              </Button>
             </div>
 
             {/* Mobile toggle */}
             <button
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
               className={`md:hidden p-2 rounded-xl transition-all ${scrolled ? "text-slate-900 hover:bg-black/5" : "text-white hover:bg-white/15"}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -215,8 +286,17 @@ export default function LandingPage() {
 
       {/* Mobile drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-lg pt-24 px-5 md:hidden flex flex-col pb-10 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-1">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-lg pt-24 px-5 md:hidden flex flex-col pb-10 animate-in fade-in duration-200"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             {["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"].map((item) => {
               const [label, href] = item.split("|");
               return (
@@ -234,9 +314,12 @@ export default function LandingPage() {
               <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="outline" className="w-full h-11 rounded-xl font-semibold">Sign In</Button>
               </Link>
-              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full h-11 rounded-xl font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10">Dashboard</Button>
-              </Link>
+              <Button
+                onClick={() => { setMobileMenuOpen(false); setOwnerModalOpen(true); }}
+                className="w-full h-11 rounded-xl font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-black/10"
+              >
+                Get Started
+              </Button>
             </div>
           </div>
         </div>
@@ -255,10 +338,13 @@ export default function LandingPage() {
               className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
               style={{ opacity: idx === heroImg ? 1 : 0 }}
             >
-              <img
+              <Image
                 src={src}
-                alt="Property"
-                className="w-full h-full object-cover"
+                alt={`Hero property background ${idx + 1}`}
+                fill
+                className="object-cover"
+                priority={idx === 0}
+                sizes="100vw"
               />
             </div>
           ))}
@@ -304,10 +390,10 @@ export default function LandingPage() {
           <div className="animate-slide-up-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto pt-2">
             <Button
               onClick={() => setOwnerModalOpen(true)}
-              className="h-13 px-8 w-full sm:w-auto bg-[#007AFF] hover:bg-[#0066CC] text-white text-base font-semibold rounded-2xl shadow-2xl shadow-[#007AFF]/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              className="h-13 px-8 w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-900 text-base font-semibold rounded-2xl shadow-2xl shadow-black/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
               Request Owner Access
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 text-slate-900" />
             </Button>
             <Link href="/listings" className="w-full sm:w-auto">
               <Button
@@ -320,7 +406,7 @@ export default function LandingPage() {
           </div>
 
           {/* Trust badges row */}
-          <div className="animate-slide-up-5 flex flex-wrap items-center justify-center gap-6 text-xs text-white/60 font-medium pt-4 border-t border-white/10 w-full max-w-2xl">
+          <div className="animate-slide-up-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/60 font-medium pt-4 border-t border-white/10 w-full max-w-2xl">
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Stripe Rent Collection</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Digital Lease Signing</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-[#34C759]" />Automated Maintenance</span>
@@ -340,12 +426,19 @@ export default function LandingPage() {
       <section className="py-10 bg-white border-b border-[#E5E5EA] overflow-hidden">
         <ScrollReveal>
           <p className="text-center text-[10px] font-semibold text-[#6E6E73] uppercase tracking-widest mb-5">
-            Trusted by property groups worldwide
+            Built for modern property management
           </p>
           <div className="flex overflow-hidden">
-            <div className="animate-marquee flex items-center gap-14 text-[#1D1D1F]/25 font-bold text-sm uppercase tracking-widest select-none whitespace-nowrap">
-              {["Apex Realty", "Horizon Capital", "Oakwood Group", "Metro Housing", "Vertex Management", "Pacific Estates", "Skyline Props", "Apex Realty", "Horizon Capital", "Oakwood Group", "Metro Housing", "Vertex Management", "Pacific Estates", "Skyline Props"].map((name, i) => (
-                <span key={i} className="shrink-0">• {name}</span>
+            <div className="animate-marquee flex items-center gap-14 text-[#1D1D1F]/30 font-bold text-sm uppercase tracking-widest select-none whitespace-nowrap">
+              {[
+                "500+ Units Managed", "98% On-Time Rent", "Stripe Certified",
+                "Zero Platform Fees", "4.9★ Owner Rating", "24h Onboarding",
+                "$2M+ Processed", "AES-256 Encrypted",
+                "500+ Units Managed", "98% On-Time Rent", "Stripe Certified",
+                "Zero Platform Fees", "4.9★ Owner Rating", "24h Onboarding",
+                "$2M+ Processed", "AES-256 Encrypted",
+              ].map((stat, i) => (
+                <span key={i} className="shrink-0">• {stat}</span>
               ))}
             </div>
           </div>
@@ -378,9 +471,13 @@ export default function LandingPage() {
                   <h3 className="text-base font-semibold text-[#1D1D1F] mb-1.5">{f.title}</h3>
                   <p className="text-sm text-[#6E6E73] font-normal leading-relaxed">{f.desc}</p>
                 </div>
-                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center gap-1 text-xs font-medium text-[#007AFF] opacity-0 group-hover:opacity-100 transition-opacity">
+                <a
+                  href="#features"
+                  className="mt-auto pt-4 border-t border-slate-100 flex items-center gap-1 text-xs font-medium text-[#007AFF] opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`Learn more about ${f.title}`}
+                >
                   Learn more <ChevronRight className="h-3.5 w-3.5" />
-                </div>
+                </a>
               </div>
             </ScrollReveal>
           ))}
@@ -416,12 +513,14 @@ export default function LandingPage() {
 
             {/* ── CARD 1: Admin Portal ── */}
             <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
-              {/* Full-bleed Background Image with Ken Burns */}
+              {/* Full-bleed Background Image – Ken Burns on hover only */}
               <div className="absolute inset-0 z-0">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
-                  alt="Admin Control"
-                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                  alt="Admin Control workspace"
+                  fill
+                  className="object-cover opacity-40 transition-transform duration-[6000ms] group-hover:scale-110"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
               </div>
@@ -448,19 +547,19 @@ export default function LandingPage() {
               <div className="relative z-10 px-8 flex justify-center py-4 preserve-3d">
                 <div className="w-full max-w-sm bg-[#1C1C1E] rounded-2xl border border-slate-800 shadow-2xl p-4 transform group-hover:translate-z-10 group-hover:rotate-x-2 transition-transform duration-500 text-left font-mono text-[10px] text-slate-400 space-y-2">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-[9px] uppercase font-sans font-bold text-slate-500">
-                    <span>Active Services Monitor</span>
-                    <span className="text-[#34C759]">System Live</span>
+                    <span>Platform Status</span>
+                    <span className="text-[#34C759]">All Systems Live</span>
                   </div>
                   <div className="space-y-1.5 h-20 overflow-hidden relative">
-                    <p className="text-[#34C759]">✔ [auth] connection established (JWT v2.0)</p>
-                    <p className="text-[#007AFF]">ℹ [cron] active subscriptions audit completed</p>
-                    <p className="text-[#FF9500]">⚠ [database] query optimization triggered</p>
-                    <p className="text-white animate-pulse">● [stripe] webhook listening on port 3000...</p>
+                    <p className="text-[#34C759]">✔ [auth] sessions active — secure JWT</p>
+                    <p className="text-[#007AFF]">ℹ [billing] rent invoices dispatched</p>
+                    <p className="text-[#FF9500]">⚡ [maintenance] 3 tickets auto-triaged</p>
+                    <p className="text-white animate-pulse">● [stripe] webhook processing payments...</p>
                     <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#1C1C1E] to-transparent pointer-events-none" />
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-slate-800 text-[9px]">
-                    <span>CPU: 4.8% · RAM: 240MB</span>
-                    <span className="text-[#007AFF]">v2.0.4 stable</span>
+                    <span>Uptime: 99.98%</span>
+                    <span className="text-[#007AFF]">Cloudflare Protected</span>
                   </div>
                 </div>
               </div>
@@ -482,13 +581,14 @@ export default function LandingPage() {
 
             {/* ── CARD 2: Owner Workspace (Stripe Blue) ── */}
             <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
-              {/* Full-bleed Background Image with Ken Burns */}
+              {/* Full-bleed Background Image – Ken Burns on hover only */}
               <div className="absolute inset-0 z-0">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"
-                  alt="Landlord Workspace"
-                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
-                  style={{ animationDelay: "-4s" }}
+                  alt="Landlord owner workspace"
+                  fill
+                  className="object-cover opacity-40 transition-transform duration-[6000ms] group-hover:scale-110"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
               </div>
@@ -517,9 +617,9 @@ export default function LandingPage() {
                   <div className="flex justify-between items-center text-xs">
                     <div>
                       <p className="text-[9px] text-slate-400 font-bold uppercase">Stripe Payouts (MTD)</p>
-                      <p className="text-lg font-extrabold text-[#1D1D1F]">$32,450.00</p>
+                      <p className="text-lg font-extrabold text-[#1D1D1F]">Your Portfolio</p>
                     </div>
-                    <span className="text-[10px] font-bold text-[#34C759] bg-[#34C759]/10 px-2.5 py-0.5 rounded-md">▲ +14.2%</span>
+                    <span className="text-[10px] font-bold text-[#34C759] bg-[#34C759]/10 px-2.5 py-0.5 rounded-md">● Auto-collected</span>
                   </div>
                   {/* SVG Chart with Line Animation */}
                   <div className="h-16 w-full overflow-hidden">
@@ -560,7 +660,7 @@ export default function LandingPage() {
                     <span key={ft} className="text-[9px] font-bold text-slate-700 bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-md">{ft}</span>
                   ))}
                 </div>
-                <Button onClick={() => setOwnerModalOpen(true)} className="h-9 px-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-xl text-xs flex items-center gap-1 shadow-md shadow-[#007AFF]/20">
+                <Button onClick={() => setOwnerModalOpen(true)} className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center gap-1 shadow-md shadow-black/15">
                   Request Access <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -568,13 +668,14 @@ export default function LandingPage() {
 
             {/* ── CARD 3: Tenant Workspace (Green) ── */}
             <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
-              {/* Full-bleed Background Image with Ken Burns */}
+              {/* Full-bleed Background Image – Ken Burns on hover only */}
               <div className="absolute inset-0 z-0">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80"
-                  alt="Tenant Portal"
-                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
-                  style={{ animationDelay: "-8s" }}
+                  alt="Tenant portal"
+                  fill
+                  className="object-cover opacity-40 transition-transform duration-[6000ms] group-hover:scale-110"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
               </div>
@@ -635,13 +736,14 @@ export default function LandingPage() {
 
             {/* ── PORTAL 4: Inspector Portal (Orange) ── */}
             <div className="group relative rounded-3xl border border-[#E5E5EA] bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 min-h-[520px] flex flex-col justify-between perspective-1000 preserve-3d">
-              {/* Full-bleed Background Image with Ken Burns */}
+              {/* Full-bleed Background Image – Ken Burns on hover only */}
               <div className="absolute inset-0 z-0">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80"
-                  alt="Inspector Workspace"
-                  className="w-full h-full object-cover animate-ken-burns opacity-40 group-hover:scale-105 transition-transform duration-1000"
-                  style={{ animationDelay: "-12s" }}
+                  alt="Inspector workspace"
+                  fill
+                  className="object-cover opacity-40 transition-transform duration-[6000ms] group-hover:scale-110"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/20" />
               </div>
@@ -744,25 +846,26 @@ export default function LandingPage() {
           </div>
         ) : listings.length > 0 ? (
           <ScrollReveal delay={100}>
-            <div className="relative w-full overflow-hidden py-6">
+            <div ref={listingsMarqueeRef} className="relative w-full overflow-hidden py-12">
               {/* Apple style frosted fade overlays */}
               <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F5F5F7] to-transparent z-10 pointer-events-none" />
               <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F5F5F7] to-transparent z-10 pointer-events-none" />
               
-              <div className="animate-marquee-slow flex gap-6">
+              <div className="animate-marquee-slow flex gap-6 items-center">
                 {/* Duplicate array to ensure endless smooth loop */}
                 {[...listings, ...listings, ...listings, ...listings].map((unit, index) => {
                   const img = unit.images?.[0] || unit.property?.coverPhoto ||
                     "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
                   return (
-                    <div key={`${unit.id}-${index}`} className="w-[320px] sm:w-[360px] flex-shrink-0 bg-white rounded-3xl border border-[#E5E5EA] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative">
+                    <div key={`${unit.id}-${index}`} className="listing-card-item group w-[320px] sm:w-[360px] flex-shrink-0 bg-white rounded-3xl border border-[#E5E5EA] overflow-hidden flex flex-col justify-between relative cursor-pointer transition-all duration-300 ease-out">
                       {/* Image section with premium badges */}
                       <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
-                        <img
+                        <Image
                           src={img}
-                          alt={unit.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80"; }}
+                          alt={unit.name || "Property listing"}
+                          fill
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                          sizes="360px"
                         />
                         {/* Frosted role badge */}
                         <div className="absolute top-3.5 left-3.5 bg-black/45 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10">
@@ -802,8 +905,8 @@ export default function LandingPage() {
                           </span>
                         </div>
 
-                        <Link href={`/listings?id=${unit.id}`} className="mt-2">
-                          <Button className="w-full h-10 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-2xl text-xs shadow-sm shadow-[#007AFF]/15 transition-all active:scale-[0.98]">
+                        <Link href={`/listings/${unit.id}`} className="mt-2">
+                          <Button className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl text-xs shadow-sm shadow-black/10 transition-all active:scale-[0.98]">
                             Apply / Schedule Tour
                           </Button>
                         </Link>
@@ -832,7 +935,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <ScrollReveal>
             <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-              <span className="text-[10px] font-semibold text-[#007AFF] uppercase tracking-widest">Getting Started</span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Getting Started</span>
               <h2 className="text-4xl font-bold text-[#1D1D1F]">Up and running in three steps.</h2>
             </div>
           </ScrollReveal>
@@ -845,7 +948,7 @@ export default function LandingPage() {
             ].map((step, i) => (
               <ScrollReveal key={i} delay={i * 120} distance={30}>
                 <div className="relative flex flex-col items-center text-center gap-4">
-                  <div className="relative z-10 h-16 w-16 rounded-2xl bg-[#007AFF] flex items-center justify-center text-white shadow-lg shadow-[#007AFF]/25">
+                  <div className="relative z-10 h-16 w-16 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-xl shadow-black/20">
                     {step.icon}
                     <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#1D1D1F] text-white text-[9px] font-bold flex items-center justify-center">{step.n}</span>
                   </div>
@@ -875,7 +978,7 @@ export default function LandingPage() {
               return (
                 <ScrollReveal key={tier.id} delay={idx * 100} distance={30} className="h-full">
                   <div
-                    className={`rounded-3xl p-7 flex flex-col justify-between border transition-all duration-300 h-full ${
+                    className={`relative rounded-3xl p-7 flex flex-col justify-between border transition-all duration-300 h-full ${
                       isPop
                         ? "bg-[#1D1D1F] text-white border-slate-700 shadow-2xl shadow-black/15 md:-translate-y-3"
                         : "bg-white text-[#1D1D1F] border-[#E5E5EA] shadow-sm"
@@ -913,7 +1016,7 @@ export default function LandingPage() {
                       onClick={() => setOwnerModalOpen(true)}
                       className={`w-full h-10 rounded-xl font-semibold text-xs transition-all ${
                         isPop
-                          ? "bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-lg shadow-[#007AFF]/25"
+                          ? "bg-white hover:bg-slate-100 text-slate-900 shadow-lg shadow-black/20"
                           : "bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA]"
                       }`}
                     >
@@ -947,15 +1050,32 @@ export default function LandingPage() {
             <ScrollReveal key={i} delay={i * 60} distance={20}>
               <div className="bg-white rounded-2xl border border-[#E5E5EA] overflow-hidden shadow-sm">
                 <button
+                  id={`faq-btn-${i}`}
+                  aria-expanded={openFaq === i}
+                  aria-controls={`faq-answer-${i}`}
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full p-5 text-left flex justify-between items-center hover:bg-slate-50 transition-colors"
                 >
                   <span className="text-sm font-semibold text-[#1D1D1F]">{faq.q}</span>
                   <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${openFaq === i ? "rotate-180" : ""}`} />
                 </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-5 text-xs text-[#6E6E73] leading-relaxed border-t border-slate-100 pt-3">{faq.a}</div>
-                )}
+                <AnimatePresence initial={false}>
+                  {openFaq === i && (
+                    <motion.div
+                      id={`faq-answer-${i}`}
+                      role="region"
+                      aria-labelledby={`faq-btn-${i}`}
+                      key="faq-content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-5 text-xs text-[#6E6E73] leading-relaxed border-t border-slate-100 pt-3">{faq.a}</div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </ScrollReveal>
           ))}
@@ -966,10 +1086,12 @@ export default function LandingPage() {
       <section className="relative overflow-hidden py-28 bg-[#1D1D1F]">
         {/* Cinematic property backdrop */}
         <div className="absolute inset-0">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=2400&q=80"
-            alt="Property"
-            className="w-full h-full object-cover opacity-20 animate-ken-burns"
+            alt="Premium property background"
+            fill
+            className="object-cover opacity-20"
+            sizes="100vw"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-[#1D1D1F]/80 via-[#1D1D1F]/60 to-[#1D1D1F]/90" />
@@ -986,7 +1108,7 @@ export default function LandingPage() {
             <div className="pt-2 flex flex-col sm:flex-row justify-center gap-3">
               <Button
                 onClick={() => setOwnerModalOpen(true)}
-                className="h-12 px-8 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold rounded-2xl shadow-2xl shadow-[#007AFF]/30 text-sm transition-all hover:scale-[1.02]"
+                className="h-12 px-8 bg-white hover:bg-white/90 text-slate-900 font-semibold rounded-2xl shadow-2xl shadow-black/20 text-sm transition-all hover:scale-[1.02]"
               >
                 Apply for Owner Access
               </Button>
@@ -1006,8 +1128,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 md:col-span-1 space-y-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-[#007AFF] rounded-xl flex items-center justify-center text-white">
-                  <Building2 className="h-4 w-4" />
+                <div className="h-8 w-8 bg-slate-900 border border-white/20 rounded-xl flex items-center justify-center text-white shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                  <Building2 className="h-4 w-4 text-white" />
                 </div>
                 <span className="font-semibold text-white">PropertyPro</span>
               </div>
@@ -1019,14 +1141,39 @@ export default function LandingPage() {
             {[
               { title: "Product", links: ["Features|#features", "Workspaces|#portals", "Rentals|#listings", "Pricing|#pricing"] },
               { title: "Portals", links: ["Sign In|/auth/login", "Owner Dashboard|/dashboard", "Tenant Portal|/dashboard"] },
-              { title: "Trust", links: ["Stripe Certified|#", "256-bit Encryption|#", "Cloudflare Protected|#", "SOC2 Ready|#"] },
+              {
+                title: "Trust",
+                links: [
+                  "Stripe Certified|https://stripe.com/partners|external",
+                  "256-bit Encryption||badge",
+                  "Cloudflare Protected|https://cloudflare.com|external",
+                  "Privacy Policy|/privacy",
+                ],
+              },
             ].map((col) => (
               <div key={col.title} className="space-y-2">
                 <p className="text-[10px] font-semibold text-white uppercase tracking-widest">{col.title}</p>
                 {col.links.map((l) => {
-                  const [text, href] = l.split("|");
+                  const parts = l.split("|");
+                  const text = parts[0];
+                  const href = parts[1];
+                  const type = parts[2];
+                  if (type === "badge" || !href) {
+                    return (
+                      <span key={text} className="flex items-center gap-1 text-xs text-[#8E8E93]">
+                        <CheckCircle2 className="h-3 w-3 text-[#34C759] shrink-0" />{text}
+                      </span>
+                    );
+                  }
                   return (
-                    <a key={text} href={href} className="block text-xs text-[#8E8E93] hover:text-white transition-colors">{text}</a>
+                    <a
+                      key={text}
+                      href={href}
+                      {...(type === "external" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="block text-xs text-[#8E8E93] hover:text-white transition-colors"
+                    >
+                      {text}
+                    </a>
                   );
                 })}
               </div>
@@ -1036,9 +1183,9 @@ export default function LandingPage() {
           <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-[#8E8E93]">
             <p>© {new Date().getFullYear()} PropertyPro Inc. All rights reserved.</p>
             <div className="flex gap-5">
-              <a href="#" className="hover:text-white">Privacy</a>
-              <a href="#" className="hover:text-white">Terms</a>
-              <a href="#" className="hover:text-white">Support</a>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <a href="mailto:support@propertypro.app" className="hover:text-white transition-colors">Support</a>
             </div>
           </div>
         </div>
@@ -1113,28 +1260,39 @@ export default function LandingPage() {
                     <span className="text-[11px] text-[#6E6E73] leading-normal">I confirm all details are accurate and I agree to the Terms of Service and Privacy Policy.</span>
                   </label>
 
-                  {/* Turnstile mock */}
-                  <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        onClick={() => { if (turnstileStatus === 0) { setTurnstileStatus(1); setTimeout(() => setTurnstileStatus(2), 1200); } }}
-                        className={`w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer transition-colors ${turnstileStatus === 2 ? "bg-[#34C759] border-[#34C759]" : "bg-white border-slate-300 hover:border-slate-400"}`}
-                      >
-                        {turnstileStatus === 1 && <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />}
-                        {turnstileStatus === 2 && <CheckCircle2 className="h-5 w-5 text-white" />}
+                  {/* Cloudflare Turnstile — real bot protection */}
+                  <div className="rounded-xl overflow-hidden border border-[#E5E5EA]">
+                    {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+                      <Turnstile
+                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                        onSuccess={(token) => setTurnstileToken(token)}
+                        onExpire={() => setTurnstileToken(null)}
+                        onError={() => setTurnstileToken(null)}
+                        options={{ theme: "light", size: "flexible" }}
+                      />
+                    ) : (
+                      <div className="bg-[#F5F5F7] p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            onClick={() => setTurnstileToken(turnstileToken ? null : "dev-bypass-token")}
+                            className={`w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer transition-colors ${turnstileToken ? "bg-[#34C759] border-[#34C759]" : "bg-white border-slate-300 hover:border-slate-400"}`}
+                          >
+                            {turnstileToken && <CheckCircle2 className="h-5 w-5 text-white" />}
+                          </div>
+                          <span className="text-xs font-medium text-[#1D1D1F]">Verify you are human</span>
+                        </div>
+                        <div className="text-right">
+                          <ShieldCheck className="h-4 w-4 text-slate-400 ml-auto" />
+                          <span className="text-[8px] text-slate-400 font-semibold uppercase tracking-wide">Dev Mode</span>
+                        </div>
                       </div>
-                      <span className="text-xs font-medium text-[#1D1D1F]">Verify you are human</span>
-                    </div>
-                    <div className="text-right">
-                      <ShieldCheck className="h-4 w-4 text-slate-400 ml-auto" />
-                      <span className="text-[8px] text-slate-400 font-semibold uppercase tracking-wide">Cloudflare</span>
-                    </div>
+                    )}
                   </div>
 
                   <Button
-                    disabled={isSubmitting || turnstileStatus !== 2}
+                    disabled={isSubmitting || !turnstileToken}
                     type="submit"
-                    className="w-full h-11 bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl font-semibold shadow-md shadow-[#007AFF]/20 disabled:opacity-60 text-sm"
+                    className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-md shadow-black/15 disabled:opacity-60 text-sm"
                   >
                     {isSubmitting ? (
                       <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting…</>

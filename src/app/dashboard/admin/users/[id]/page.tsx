@@ -410,18 +410,17 @@ export default function UserProfilePage() {
 
   return (
     <div className="w-full space-y-6 pt-6 pb-20 px-4 sm:px-8">
-      
       {/* Top Header & Breadcrumb */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link
           href="/dashboard/admin/users"
-          className="p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-all shadow-xs"
+          className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">User Details</h1>
-          <p className="text-[#6E6E73] text-xs font-medium mt-0.5">Manage permissions, portfolio, and activity logs</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">User Details</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Manage permissions, portfolio, and activity logs</p>
         </div>
       </div>
 
@@ -451,7 +450,7 @@ export default function UserProfilePage() {
           
           {/* Top Tag & Floating Slide Badge */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-200/80 text-slate-800 font-black text-[10px] tracking-wider uppercase shadow-2xs">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5">
               <Sparkles className="h-3 w-3 text-amber-500" />
               {heroSlides[heroIndex]?.tag || `${formatRole(user.role)} Command Hub`}
             </span>
@@ -485,31 +484,31 @@ export default function UserProfilePage() {
                       : "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80")
                   }
                   alt={user.name || "User Avatar"}
-                  className="h-20 w-20 rounded-2xl object-cover border-2 border-white shadow-md"
+                  className="h-16 w-16 rounded-2xl object-cover border border-slate-200/80 shadow-2xs"
                 />
-                <span className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white shadow-xs ${
+                <span className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white shadow-xs ${
                   user.accountStatus === "SUSPENDED" ? "bg-rose-500" : "bg-emerald-500"
                 }`} title={user.accountStatus} />
               </div>
 
               <div className="space-y-1.5 min-w-0">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">{user.name || "Unnamed User"}</h2>
-                  <Badge className="bg-slate-900 text-white font-black text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-2xs">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h2 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight truncate">{user.name || "Unnamed User"}</h2>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                     {formatRole(user.role)}
-                  </Badge>
+                  </span>
                   {user.accountStatus === "SUSPENDED" ? (
-                    <Badge className="bg-rose-50 text-rose-700 border-rose-200/80 rounded-md px-2.5 py-0.5 font-black text-[10px] uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">
                       Suspended
-                    </Badge>
+                    </span>
                   ) : (
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/80 rounded-md px-2.5 py-0.5 font-black text-[10px] uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                       Active
-                    </Badge>
+                    </span>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-slate-500 text-xs font-semibold">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-[#6E6E73] text-xs font-normal">
                   <span className="flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-slate-400" />
                     {user.email}
@@ -532,18 +531,18 @@ export default function UserProfilePage() {
             <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200/80">
               <Link
                 href={`/dashboard/admin/users/${user.id}/edit`}
-                className="inline-flex items-center bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-9 px-4 transition-all cursor-pointer"
+                className="inline-flex items-center bg-white hover:bg-slate-50 text-[#1D1D1F] border border-slate-200 shadow-2xs rounded-xl font-medium text-xs h-9 px-4 transition-all cursor-pointer"
               >
-                <PenTool className="h-3.5 w-3.5 mr-2 text-slate-600" />
+                <PenTool className="h-3.5 w-3.5 mr-2 text-slate-500" />
                 Edit Profile
               </Link>
               
               <Button
                 onClick={handleSendResetLink}
                 disabled={resetLoading}
-                className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-2xs rounded-xl font-black text-xs h-9 px-4 transition-all cursor-pointer"
+                className="bg-white hover:bg-slate-50 text-[#1D1D1F] border border-slate-200 shadow-2xs rounded-xl font-medium text-xs h-9 px-4 transition-all cursor-pointer"
               >
-                {resetLoading ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Key className="h-3.5 w-3.5 mr-2 text-slate-600" />}
+                {resetLoading ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Key className="h-3.5 w-3.5 mr-2 text-slate-500" />}
                 Reset Password
               </Button>
 
@@ -551,7 +550,7 @@ export default function UserProfilePage() {
                 <Button
                   onClick={handleToggleStatus}
                   disabled={saving}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer border-none"
+                  className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs h-9 px-4 shadow-xs transition-all cursor-pointer border-none"
                 >
                   <UserCheck className="h-3.5 w-3.5 mr-2" />
                   Activate Account
@@ -560,7 +559,7 @@ export default function UserProfilePage() {
                 <Button
                   onClick={handleToggleStatus}
                   disabled={saving}
-                  className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-black text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer border-none"
+                  className="bg-rose-50/50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-medium text-xs h-9 px-4 shadow-2xs transition-all cursor-pointer"
                 >
                   <ShieldX className="h-3.5 w-3.5 mr-2" />
                   Suspend Account
@@ -573,20 +572,20 @@ export default function UserProfilePage() {
           {user.role === "OWNER" && ownerStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Properties</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{ownerStats.totalProperties}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Properties</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{ownerStats.totalProperties}</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Total Units</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{ownerStats.totalUnits}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Total Units</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{ownerStats.totalUnits}</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Occupancy</p>
-                <p className="text-2xl font-black text-emerald-600 mt-0.5">{ownerStats.occupancyRate}%</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Occupancy</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{ownerStats.occupancyRate}%</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Pending Payouts</p>
-                <p className={`text-2xl font-black mt-0.5 ${ownerStats.pendingPayoutsCount > 0 ? "text-amber-600" : "text-slate-900"}`}>
+                <p className="text-xs font-normal text-[#6E6E73]">Pending Payouts</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">
                   {ownerStats.pendingPayoutsCount}
                 </p>
               </div>
@@ -596,16 +595,16 @@ export default function UserProfilePage() {
           {user.role === "TENANT" && tenantStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-3 gap-3.5">
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Active Tickets</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{tenantStats.activeRequestsCount}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Active Tickets</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{tenantStats.activeRequestsCount}</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Compliance</p>
-                <p className="text-2xl font-black text-emerald-600 mt-0.5">{tenantStats.complianceRate}%</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Compliance</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{tenantStats.complianceRate}%</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Screening</p>
-                <p className="text-2xl font-black text-emerald-600 mt-0.5">Passed</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Screening</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">Passed</p>
               </div>
             </div>
           )}
@@ -613,12 +612,12 @@ export default function UserProfilePage() {
           {user.role === "INSPECTOR" && inspectorStats && (
             <div className="pt-4 border-t border-slate-200/80 grid grid-cols-2 gap-3.5">
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Assigned Walkthroughs</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{inspectorStats.totalWalkthroughs}</p>
+                <p className="text-xs font-normal text-[#6E6E73]">Assigned Walkthroughs</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">{inspectorStats.totalWalkthroughs}</p>
               </div>
               <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Pending Tasks</p>
-                <p className={`text-2xl font-black mt-0.5 ${inspectorStats.pendingWalkthroughs > 0 ? "text-amber-600" : "text-slate-900"}`}>
+                <p className="text-xs font-normal text-[#6E6E73]">Pending Tasks</p>
+                <p className="text-2xl font-semibold text-[#1D1D1F] mt-0.5 tracking-tight">
                   {inspectorStats.pendingWalkthroughs}
                 </p>
               </div>
@@ -628,13 +627,13 @@ export default function UserProfilePage() {
       </div>
 
       {/* 2. FULL WIDTH SEGMENTED TAB SWITCHER */}
-      <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-xs p-2 flex gap-1.5 overflow-x-auto scrollbar-hide font-sans">
+      <div className="flex gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs w-fit overflow-x-auto scrollbar-hide">
         <button 
           onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
             activeTab === "overview" 
-              ? "bg-slate-900 text-white shadow-2xs font-black" 
-              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              ? "bg-white text-[#1D1D1F] shadow-2xs" 
+              : "text-[#6E6E73] hover:text-[#1D1D1F]"
           }`}
         >
           <User className="h-3.5 w-3.5" />
@@ -646,10 +645,10 @@ export default function UserProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab("properties")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "properties" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <Building className="h-3.5 w-3.5" />
@@ -657,10 +656,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("tenants")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "tenants" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <Users className="h-3.5 w-3.5" />
@@ -668,10 +667,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("team")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "team" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <Wrench className="h-3.5 w-3.5" />
@@ -679,10 +678,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("financials")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "financials" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <DollarSign className="h-3.5 w-3.5" />
@@ -690,10 +689,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("billing-history")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "billing-history" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <Clock className="h-3.5 w-3.5" />
@@ -707,10 +706,10 @@ export default function UserProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab("leases")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "leases" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <FileText className="h-3.5 w-3.5" />
@@ -718,10 +717,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("ledger")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "ledger" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <CreditCard className="h-3.5 w-3.5" />
@@ -729,10 +728,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("maintenance")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "maintenance" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <Wrench className="h-3.5 w-3.5" />
@@ -740,10 +739,10 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("access-control")}
-              className={`px-4 py-2 rounded-xl font-extrabold text-xs whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "access-control" 
-                  ? "bg-slate-900 text-white shadow-2xs font-black" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <ShieldCheck className="h-3.5 w-3.5" />
@@ -757,10 +756,10 @@ export default function UserProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab("inspections")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "inspections" 
-                  ? "bg-slate-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -768,13 +767,12 @@ export default function UserProfilePage() {
             </button>
             <button 
               onClick={() => setActiveTab("access-control")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer border-none ${
                 activeTab === "access-control" 
-                  ? "bg-purple-900 text-white shadow-xs" 
-                  : "text-[#6E6E73] hover:bg-[#F2F2F7] hover:text-[#1D1D1F]"
+                  ? "bg-white text-[#1D1D1F] shadow-2xs" 
+                  : "text-[#6E6E73] hover:text-[#1D1D1F]"
               }`}
             >
-              <ShieldCheck className="h-3.5 w-3.5" />
               Access Control
             </button>
           </>
@@ -844,7 +842,7 @@ export default function UserProfilePage() {
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-[#007AFF] font-extrabold text-[10px] tracking-widest uppercase mb-1">
                                       Leased Property & Unit
                                     </span>
-                                    <h4 className="text-xl font-black text-[#1D1D1F] tracking-tight">
+                                    <h4 className="text-xl font-semibold text-[#1D1D1F] tracking-tight">
                                       {leaseProp?.name || "Property"} — {user.leases[0].unit?.name || "Unit"}
                                     </h4>
                                   </div>
@@ -852,7 +850,7 @@ export default function UserProfilePage() {
 
                                 <div className="text-left md:text-right">
                                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Monthly Rent</p>
-                                  <p className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight mt-0.5">
+                                  <p className="text-2xl sm:text-3xl font-semibold text-emerald-600 tracking-tight mt-0.5">
                                     ${Number(user.leases[0].monthlyRent).toLocaleString()}/mo
                                   </p>
                                 </div>
@@ -894,7 +892,7 @@ export default function UserProfilePage() {
                           {user.application && (
                             <Link
                               href={`/dashboard/applications/${user.application.id}`}
-                              className="inline-flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-2xs whitespace-nowrap"
+                              className="inline-flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl px-4 py-2 text-xs font-medium transition-all shadow-2xs whitespace-nowrap"
                             >
                               <FileText className="h-4 w-4" /> Review Application <ArrowUpRight className="h-3.5 w-3.5" />
                             </Link>
@@ -938,14 +936,14 @@ export default function UserProfilePage() {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-slate-200/60 space-y-1">
                           <p className="text-[11px] font-bold text-slate-500">Primary Occupation / Institution</p>
-                          <p className="font-extrabold text-slate-900 text-sm truncate">
+                          <p className="font-semibold text-slate-900 text-sm truncate">
                             {user.employer ? `${user.employer} (${user.position || "N/A"})` : user.application?.employerName ? `${user.application.employerName} (${user.application.jobTitle || "Student"})` : "Student / Independent"}
                           </p>
                         </div>
                         
                         <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-slate-200/60 space-y-1">
                           <p className="text-[11px] font-bold text-slate-500">Verified Annual Income</p>
-                          <p className="font-extrabold text-emerald-600 text-sm">
+                          <p className="font-semibold text-emerald-600 text-sm">
                             {user.annualIncome ? `$${Number(user.annualIncome).toLocaleString()}/yr` : user.application?.monthlyIncome ? `$${(Number(user.application.monthlyIncome) * 12).toLocaleString()}/yr` : "$80,000/yr"}
                           </p>
                         </div>
@@ -1032,7 +1030,7 @@ export default function UserProfilePage() {
 
                         <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-slate-200/60 space-y-1">
                           <p className="text-[11px] font-bold text-slate-500">Credit Score</p>
-                          <p className="font-black text-blue-600 text-sm">{user.creditScore || "700"} (Good)</p>
+                          <p className="font-semibold text-blue-600 text-sm">{user.creditScore || "700"} (Good)</p>
                         </div>
                       </div>
                     </div>
@@ -1070,33 +1068,33 @@ export default function UserProfilePage() {
                     <div className="space-y-3 font-sans">
                       <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                         <Sparkles className="h-4 w-4 text-amber-500" />
-                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Quick Admin Management Hub</h3>
+                        <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Quick Admin Management Hub</h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/dashboard/admin/subscriptions?search=${encodeURIComponent(user.email || "")}`}
-                          className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer"
+                          className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer inline-flex items-center gap-1.5 transition-all"
                         >
                           <CreditCard className="h-3.5 w-3.5" /> Active Subscription
                         </Link>
 
                         <button
                           onClick={() => setActiveTab("financials")}
-                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
+                          className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer inline-flex items-center gap-1.5 transition-all"
                         >
                           <DollarSign className="h-3.5 w-3.5 text-emerald-600" /> Disbursals &amp; Ledger
                         </button>
 
                         <button
                           onClick={() => setActiveTab("properties")}
-                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
+                          className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer inline-flex items-center gap-1.5 transition-all"
                         >
                           <Building className="h-3.5 w-3.5 text-slate-700" /> Portfolio ({user.ownedProperties?.length || 0})
                         </button>
 
                         <button
                           onClick={() => setActiveTab("tenants")}
-                          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-2xs cursor-pointer"
+                          className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer inline-flex items-center gap-1.5 transition-all"
                         >
                           <Users className="h-3.5 w-3.5 text-slate-700" /> Tenants ({ownerStats?.tenants?.length || 0})
                         </button>
@@ -1107,33 +1105,33 @@ export default function UserProfilePage() {
                     <div className="space-y-3 font-sans">
                       <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                         <TrendingUp className="h-4 w-4 text-emerald-600" />
-                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Portfolio Financial Health</h3>
+                        <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Portfolio Financial Health</h3>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Gross Monthly Rent Roll</p>
-                          <p className="font-black text-2xl text-emerald-600 tracking-tight mt-1">
+                          <p className="text-xs font-normal text-[#6E6E73]">Gross Monthly Rent Roll</p>
+                          <p className="font-semibold text-2xl text-emerald-600 tracking-tight mt-1">
                             ${(ownerStats?.tenants?.reduce((sum: number, t: any) => sum + Number(t.monthlyRent || 0), 0) || 0).toLocaleString()}/mo
                           </p>
-                          <p className="text-[10px] font-semibold text-slate-500">From {ownerStats?.occupiedUnits || 0} active leases</p>
+                          <p className="text-xs font-normal text-[#6E6E73]">From {ownerStats?.occupiedUnits || 0} active leases</p>
                         </div>
 
-                        <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-1 shadow-xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Ledger Wallet Balance</p>
-                          <p className="font-black text-2xl text-white tracking-tight mt-1">
+                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
+                          <p className="text-xs font-normal text-[#6E6E73]">Ledger Wallet Balance</p>
+                          <p className="font-semibold text-2xl text-[#1D1D1F] tracking-tight mt-1">
                             ${Number(user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
-                          <p className="text-[10px] font-semibold text-slate-300">
+                          <p className="text-xs font-normal text-[#6E6E73]">
                             {ownerStats?.pendingPayoutsCount || 0} pending disbursal requests
                           </p>
                         </div>
 
                         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Portfolio Occupancy</p>
-                          <p className="font-black text-2xl text-slate-900 tracking-tight mt-1">
+                          <p className="text-xs font-normal text-[#6E6E73]">Portfolio Occupancy</p>
+                          <p className="font-semibold text-2xl text-[#1D1D1F] tracking-tight mt-1">
                             {ownerStats?.occupancyRate || 0}%
                           </p>
-                          <p className="text-[10px] font-semibold text-slate-500">
+                          <p className="text-xs font-normal text-[#6E6E73]">
                             {ownerStats?.occupiedUnits || 0} of {ownerStats?.totalUnits || 0} units occupied
                           </p>
                         </div>
@@ -1145,11 +1143,11 @@ export default function UserProfilePage() {
                       <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                         <div className="flex items-center gap-2">
                           <CreditCard className="h-4 w-4 text-slate-700" />
-                          <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Subscription &amp; Invoicing Configuration</h3>
+                          <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Subscription &amp; Invoicing Configuration</h3>
                         </div>
                         <Link
                           href={`/dashboard/admin/subscriptions?search=${encodeURIComponent(user.email || "")}`}
-                          className="text-[10px] font-black text-slate-700 hover:text-slate-900 uppercase tracking-wider flex items-center gap-0.5"
+                          className="text-xs font-normal text-[#6E6E73] hover:text-[#1D1D1F] flex items-center gap-0.5"
                         >
                           Manage Subscriptions <ArrowUpRight className="h-3 w-3" />
                         </Link>
@@ -1157,38 +1155,38 @@ export default function UserProfilePage() {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-1 shadow-2xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Current SaaS Tier</p>
-                          <p className="font-black text-xl text-slate-900 mt-1.5 capitalize truncate">
+                          <p className="text-xs font-normal text-[#6E6E73]">Current SaaS Tier</p>
+                          <p className="font-semibold text-xl text-[#1D1D1F] mt-1.5 capitalize truncate">
                             {user.pricingTier?.name || "Free / Base Plan"}
                           </p>
-                          <p className="text-[10px] font-semibold text-slate-500 mt-1">Active Platform License</p>
+                          <p className="text-xs font-normal text-[#6E6E73] mt-1">Active Platform License</p>
                         </div>
 
                         <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl space-y-1.5 shadow-2xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Billing Status</p>
+                          <p className="text-xs font-normal text-[#6E6E73]">Billing Status</p>
                           <div className="mt-1">
                             {user.subscriptionStatus === "Active" || user.subscriptionStatus === "active" ? (
-                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/80 font-black text-[9px] uppercase tracking-wider">Active Subscription</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Active Subscription</span>
                             ) : user.subscriptionStatus === "Trialing" || user.subscriptionStatus === "trialing" ? (
-                              <Badge className="bg-blue-50 text-blue-700 border-blue-200/80 font-black text-[9px] uppercase tracking-wider">Trial Period</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs">Trial Period</span>
                             ) : user.subscriptionStatus === "Past_Due" || user.subscriptionStatus === "past_due" ? (
-                              <Badge className="bg-amber-50 text-amber-700 border-amber-200/80 font-black text-[9px] uppercase tracking-wider">Past Due</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">Past Due</span>
                             ) : (
-                              <Badge className="bg-slate-100 text-slate-700 border-slate-200 font-black text-[9px] uppercase tracking-wider">Standard Tier</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">Standard Tier</span>
                             )}
                           </div>
                         </div>
 
                         <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl space-y-1 shadow-2xs">
-                          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Stripe Identity</p>
+                          <p className="text-xs font-normal text-[#6E6E73]">Stripe Identity</p>
                           <div className="flex items-center justify-between mt-1">
-                            <p className="font-mono text-xs font-black text-slate-900 truncate max-w-[140px]" title={user.stripeCustomerId || ""}>
+                            <p className="font-mono text-xs font-semibold text-[#1D1D1F] truncate max-w-[140px]" title={user.stripeCustomerId || ""}>
                               {user.stripeCustomerId || "No Stripe Customer"}
                             </p>
                             {user.stripeCustomerId && (
                               <button
                                 onClick={() => copyToClipboard(user.stripeCustomerId, "Stripe Customer ID")}
-                                className="p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer"
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer border-none bg-transparent"
                               >
                                 <Copy className="h-3.5 w-3.5" />
                               </button>
@@ -1204,11 +1202,11 @@ export default function UserProfilePage() {
                         <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                           <div className="flex items-center gap-2">
                             <Building className="h-4 w-4 text-slate-700" />
-                            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Properties Summary</h3>
+                            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Properties Summary</h3>
                           </div>
                           <button
                             onClick={() => setActiveTab("properties")}
-                            className="text-[10px] font-black text-slate-700 hover:text-slate-900 uppercase tracking-wider flex items-center gap-0.5 cursor-pointer"
+                            className="text-xs font-normal text-[#6E6E73] hover:text-[#1D1D1F] flex items-center gap-0.5 cursor-pointer border-none bg-transparent"
                           >
                             View All ({user.ownedProperties.length}) →
                           </button>
@@ -1224,16 +1222,16 @@ export default function UserProfilePage() {
                               <div
                                 key={prop.id}
                                 onClick={() => router.push(`/dashboard/properties/${prop.id}`)}
-                                className="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:border-slate-400 transition-all cursor-pointer group shadow-2xs"
+                                className="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:border-slate-300 transition-all cursor-pointer group shadow-2xs"
                               >
                                 <div className="h-24 w-full relative overflow-hidden bg-slate-100">
                                   <img src={cover} alt={prop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                                  <p className="absolute bottom-2 left-3 right-3 text-white font-black text-xs truncate">{prop.name}</p>
+                                  <p className="absolute bottom-2 left-3 right-3 text-white font-semibold text-xs truncate">{prop.name}</p>
                                 </div>
-                                <div className="p-3 text-[11px] flex justify-between items-center font-semibold text-slate-600">
+                                <div className="p-3 text-xs flex justify-between items-center font-normal text-[#6E6E73]">
                                   <span>{prop.city}</span>
-                                  <span className="font-bold text-slate-900">{occupiedCount}/{uCount} Leased</span>
+                                  <span className="font-semibold text-[#1D1D1F]">{occupiedCount}/{uCount} Leased</span>
                                 </div>
                               </div>
                             );
@@ -1249,23 +1247,23 @@ export default function UserProfilePage() {
                   <div className="space-y-6 font-sans">
                     <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                       <UserCheck className="h-4 w-4 text-slate-700" />
-                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Assigned Landlord Portfolio</h3>
+                      <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Assigned Landlord Portfolio</h3>
                     </div>
                     {user.owner ? (
                       <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50 flex justify-between items-center shadow-2xs">
                         <div className="space-y-0.5">
-                          <p className="font-black text-slate-900">{user.owner.name}</p>
-                          <p className="text-xs font-semibold text-slate-500">{user.owner.email} • {user.owner.phone || "No Phone"}</p>
+                          <p className="font-semibold text-[#1D1D1F] text-sm">{user.owner.name}</p>
+                          <p className="text-xs font-normal text-[#6E6E73]">{user.owner.email} • {user.owner.phone || "No Phone"}</p>
                         </div>
                         <Link 
                           href={`/dashboard/admin/users/${user.owner.id}`}
-                          className="text-xs font-black text-slate-900 bg-white border border-slate-200 rounded-xl px-3.5 py-2 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                          className="text-xs font-medium text-[#1D1D1F] bg-white border border-slate-200 rounded-xl px-3.5 py-2 shadow-2xs hover:bg-slate-50 transition-all flex items-center gap-1 cursor-pointer"
                         >
                           View Owner Profile <ArrowUpRight className="h-3.5 w-3.5" />
                         </Link>
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-400 font-semibold bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                      <p className="text-xs text-[#6E6E73] font-normal bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         This inspector has not been mapped to any landlord portfolio yet.
                       </p>
                     )}
@@ -1276,9 +1274,9 @@ export default function UserProfilePage() {
                   <div className="p-6 bg-slate-900 text-white rounded-2xl space-y-2">
                     <div className="flex items-center gap-2">
                       <ShieldAlert className="h-5 w-5 text-amber-400" />
-                      <p className="text-sm font-black">Full Administrator Authorization</p>
+                      <p className="text-sm font-semibold">Full Administrator Authorization</p>
                     </div>
-                    <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                    <p className="text-xs text-slate-300 font-normal leading-relaxed">
                       This user has full superadmin authorization privileges across the platform. Feature override locks do not restrict administrative system access.
                     </p>
                   </div>
@@ -1291,11 +1289,11 @@ export default function UserProfilePage() {
                 {/* Internal Admin Notes Card */}
                 <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 space-y-3 font-sans">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-normal text-[#6E6E73] flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-slate-700" />
                       Internal Admin Notes
                     </h3>
-                    <span className={`text-[10px] font-bold ${notes.length > 450 ? "text-amber-600" : "text-slate-400"}`}>
+                    <span className="text-xs font-normal text-[#6E6E73]">
                       {notes.length}/500
                     </span>
                   </div>
@@ -1304,13 +1302,13 @@ export default function UserProfilePage() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value.slice(0, 500))}
                     placeholder="Add confidential admin notes, audit flags, or dispute history..."
-                    className="w-full min-h-[120px] bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-slate-900 focus:bg-white resize-none transition-all shadow-2xs text-slate-900 font-sans"
+                    className="w-full min-h-[120px] bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-normal focus:outline-none focus:border-slate-900 focus:bg-white resize-none transition-all shadow-2xs text-[#1D1D1F] font-sans"
                   />
                   
                   <Button 
                     onClick={handleSaveNotes}
                     disabled={notesSaving}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs h-9 shadow-xs transition-all cursor-pointer border-none"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-xs h-9 shadow-xs transition-all cursor-pointer border-none"
                   >
                     {notesSaving ? "Saving Notes..." : "Save Admin Notes"}
                   </Button>
@@ -1318,29 +1316,29 @@ export default function UserProfilePage() {
 
                 {/* Account Metadata Summary */}
                 <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 space-y-3.5 text-xs font-sans">
-                  <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Account Metadata</h3>
+                  <h3 className="text-xs font-normal text-[#6E6E73]">Account Metadata</h3>
                   
                   <div className="space-y-2.5 divide-y divide-slate-100">
                     <div className="flex justify-between pt-1">
-                      <span className="text-slate-500 font-semibold">Account ID</span>
-                      <span className="font-mono font-bold text-slate-900 text-[10px] truncate max-w-[140px]" title={user.id}>{user.id}</span>
+                      <span className="text-[#6E6E73] font-normal">Account ID</span>
+                      <span className="font-mono font-semibold text-[#1D1D1F] text-[10px] truncate max-w-[140px]" title={user.id}>{user.id}</span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-slate-500 font-semibold">Status</span>
-                      <span className={`font-black ${user.accountStatus === "SUSPENDED" ? "text-rose-600" : "text-emerald-600"}`}>
+                      <span className="text-[#6E6E73] font-normal">Status</span>
+                      <span className={`font-semibold ${user.accountStatus === "SUSPENDED" ? "text-rose-600" : "text-emerald-600"}`}>
                         {user.accountStatus || "ACTIVE"}
                       </span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-slate-500 font-semibold">Role</span>
-                      <span className="font-black text-slate-900">{formatRole(user.role)}</span>
+                      <span className="text-[#6E6E73] font-normal">Role</span>
+                      <span className="font-semibold text-[#1D1D1F]">{formatRole(user.role)}</span>
                     </div>
 
                     <div className="flex justify-between pt-2.5">
-                      <span className="text-slate-500 font-semibold">Created</span>
-                      <span className="font-semibold text-slate-900">{new Date(user.createdAt).toLocaleDateString()}</span>
+                      <span className="text-[#6E6E73] font-normal">Created</span>
+                      <span className="font-semibold text-[#1D1D1F]">{new Date(user.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -1357,8 +1355,8 @@ export default function UserProfilePage() {
         {activeTab === "properties" && user.role === "OWNER" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200 font-sans">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Properties Portfolio</h3>
-              <span className="text-xs font-semibold text-slate-500">{user.ownedProperties?.length || 0} Registered Properties</span>
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Properties Portfolio</h3>
+              <span className="text-xs font-normal text-[#6E6E73]">{user.ownedProperties?.length || 0} Registered Properties</span>
             </div>
             
             {user.ownedProperties && user.ownedProperties.length > 0 ? (
@@ -1372,7 +1370,7 @@ export default function UserProfilePage() {
                   return (
                     <div 
                       key={prop.id} 
-                      className="border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-slate-400 hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between shadow-xs font-sans"
+                      className="border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between shadow-xs font-sans"
                       onClick={() => router.push(`/dashboard/properties/${prop.id}`)}
                     >
                       {/* Property Image Header */}
@@ -1384,8 +1382,8 @@ export default function UserProfilePage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         <div className="absolute bottom-3 left-4 right-4 text-white">
-                          <p className="font-black text-base drop-shadow-sm truncate">{prop.name}</p>
-                          <p className="text-[11px] font-medium text-slate-200 flex items-center gap-1 drop-shadow-sm truncate">
+                          <p className="font-semibold text-base text-white tracking-tight drop-shadow-sm truncate">{prop.name}</p>
+                          <p className="text-xs font-normal text-slate-200 flex items-center gap-1 drop-shadow-sm truncate">
                             <MapPin className="h-3 w-3 shrink-0" />
                             {prop.address}, {prop.city}
                           </p>
@@ -1395,8 +1393,8 @@ export default function UserProfilePage() {
                       {/* Card Content & Occupancy Progress */}
                       <div className="p-5 space-y-3.5">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-slate-500">Occupancy Status</span>
-                          <span className="font-black text-slate-900">{occupiedUnits} of {totalUnits} Units Leased</span>
+                          <span className="font-normal text-[#6E6E73]">Occupancy Status</span>
+                          <span className="font-semibold text-[#1D1D1F]">{occupiedUnits} of {totalUnits} Units Leased</span>
                         </div>
 
                         {/* Light Neon Green Framer-Motion Animated Progress Bar */}
@@ -1409,9 +1407,9 @@ export default function UserProfilePage() {
                           />
                         </div>
 
-                        <div className="flex justify-between items-center text-[11px] pt-0.5">
-                          <span className="font-black text-emerald-600 tracking-tight">{progressPct}% Occupied</span>
-                          <span className="font-black text-slate-900 group-hover:text-slate-700 flex items-center gap-0.5">
+                        <div className="flex justify-between items-center text-xs pt-0.5">
+                          <span className="font-semibold text-emerald-600 tracking-tight">{progressPct}% Occupied</span>
+                          <span className="font-semibold text-[#1D1D1F] group-hover:text-slate-700 flex items-center gap-0.5">
                             View Property <ArrowUpRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -1423,7 +1421,7 @@ export default function UserProfilePage() {
             ) : (
               <div className="text-center py-16 border border-dashed border-slate-200 rounded-3xl bg-slate-50/50 space-y-2">
                 <Building className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-slate-500 text-sm font-semibold">No properties registered under this owner portfolio.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No properties registered under this owner portfolio.</p>
               </div>
             )}
           </div>
@@ -1434,45 +1432,45 @@ export default function UserProfilePage() {
         {/* ======================================================== */}
         {activeTab === "tenants" && user.role === "OWNER" && ownerStats && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <div className="flex justify-between items-center border-b border-[#F2F2F7] pb-3">
-              <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Tenant Registry</h3>
-              <span className="text-xs font-bold text-[#6E6E73]">{ownerStats.tenants.length} Active Tenants</span>
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Tenant Registry</h3>
+              <span className="text-xs font-normal text-[#6E6E73]">{ownerStats.tenants.length} Active Tenants</span>
             </div>
             
             {ownerStats.tenants.length > 0 ? (
-              <div className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white shadow-xs w-full">
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs w-full">
                 <div className="overflow-x-auto w-full">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-[#E5E5EA] text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                        <th className="py-4 px-6">Tenant Name</th>
-                        <th className="py-4 px-6">Property & Unit</th>
-                        <th className="py-4 px-6">Monthly Rent</th>
-                        <th className="py-4 px-6">Lease Duration</th>
-                        <th className="py-4 px-6 text-right">Action</th>
+                      <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-normal text-[#6E6E73]">
+                        <th className="py-3.5 px-6">Tenant Name</th>
+                        <th className="py-3.5 px-6">Property &amp; Unit</th>
+                        <th className="py-3.5 px-6">Monthly Rent</th>
+                        <th className="py-3.5 px-6">Lease Duration</th>
+                        <th className="py-3.5 px-6 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#F2F2F7]">
+                    <tbody className="divide-y divide-slate-100">
                       {ownerStats.tenants.map((ten: any, idx: number) => (
-                        <tr key={`${ten.id}-${idx}`} className="text-xs font-medium text-[#1D1D1F] hover:bg-slate-50/60 transition-colors">
+                        <tr key={`${ten.id}-${idx}`} className="text-xs font-normal text-[#1D1D1F] hover:bg-slate-50/60 transition-colors">
                           <td className="py-4 px-6">
-                            <p className="font-extrabold text-[#1D1D1F] text-sm">{ten.name}</p>
+                            <p className="font-semibold text-[#1D1D1F] text-sm">{ten.name}</p>
                             <p className="text-xs text-[#6E6E73] mt-0.5">{ten.email}</p>
                           </td>
                           <td className="py-4 px-6">
-                            <p className="font-bold text-sm">{ten.propertyName}</p>
+                            <p className="font-semibold text-[#1D1D1F] text-sm">{ten.propertyName}</p>
                             <p className="text-xs text-[#6E6E73] mt-0.5">Unit {ten.unitName}</p>
                           </td>
-                          <td className="py-4 px-6 font-bold text-emerald-600 text-sm">
+                          <td className="py-4 px-6 font-semibold text-emerald-600 text-sm">
                             ${Number(ten.monthlyRent).toLocaleString()}/mo
                           </td>
-                          <td className="py-4 px-6 text-[#6E6E73] font-semibold text-xs">
+                          <td className="py-4 px-6 text-[#6E6E73] font-normal text-xs">
                             {new Date(ten.leaseStart).toLocaleDateString()} - {new Date(ten.leaseEnd).toLocaleDateString()}
                           </td>
                           <td className="py-4 px-6 text-right">
                             <Link 
                               href={`/dashboard/admin/users/${ten.id}`}
-                              className="inline-flex items-center gap-1 text-xs font-bold text-[#007AFF] hover:bg-blue-50 bg-white border border-[#E5E5EA] px-3.5 py-1.5 rounded-xl transition-all shadow-xs"
+                              className="inline-flex items-center gap-1 text-xs font-medium text-[#1D1D1F] hover:bg-slate-50 bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl transition-all shadow-2xs"
                             >
                               Details
                             </Link>
@@ -1484,9 +1482,9 @@ export default function UserProfilePage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <Users className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No active tenants mapped to this owner's properties.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No active tenants mapped to this owner's properties.</p>
               </div>
             )}
           </div>
@@ -1496,19 +1494,19 @@ export default function UserProfilePage() {
         {activeTab === "team" && user.role === "OWNER" && (
           <div className="p-6 sm:p-8 space-y-8 animate-in fade-in duration-200">
             <div className="space-y-4">
-              <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Associated Inspectors</h3>
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Associated Inspectors</h3>
               
               {user.createdInspectors && user.createdInspectors.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {user.createdInspectors.map((ins: any) => (
-                    <div key={ins.id} className="border border-[#E5E5EA] p-5 rounded-2xl bg-slate-50/50 flex items-center justify-between">
+                    <div key={ins.id} className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <p className="font-bold text-[#1D1D1F] text-sm">{ins.name}</p>
-                        <p className="text-xs text-[#6E6E73]">{ins.email} • {ins.phone || "No Phone"}</p>
+                        <p className="font-semibold text-[#1D1D1F] text-sm">{ins.name}</p>
+                        <p className="text-xs font-normal text-[#6E6E73]">{ins.email} • {ins.phone || "No Phone"}</p>
                       </div>
                       <Link 
                         href={`/dashboard/admin/users/${ins.id}`}
-                        className="p-2 bg-white border border-[#E5E5EA] rounded-xl hover:bg-slate-100 text-slate-600 transition-all shadow-xs"
+                        className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-700 transition-all shadow-2xs"
                       >
                         <ArrowUpRight className="h-4 w-4" />
                       </Link>
@@ -1516,45 +1514,45 @@ export default function UserProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#8E8E93] font-semibold bg-slate-50/50 border border-dashed border-[#E5E5EA] rounded-2xl p-6 text-center">
+                <p className="text-xs text-[#6E6E73] font-normal bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
                   No inspectors created by this owner.
                 </p>
               )}
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Associated Contractors & External Vendors</h3>
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Associated Contractors &amp; External Vendors</h3>
               
               {user.ownedVendors && user.ownedVendors.length > 0 ? (
-                <div className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white shadow-xs w-full">
+                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs w-full">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-[#E5E5EA] text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                        <th className="py-4 px-6">Vendor</th>
-                        <th className="py-4 px-6">Specialty</th>
-                        <th className="py-4 px-6">Call-out Fee</th>
-                        <th className="py-4 px-6">Compliance Check</th>
+                      <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-normal text-[#6E6E73]">
+                        <th className="py-3.5 px-6">Vendor</th>
+                        <th className="py-3.5 px-6">Specialty</th>
+                        <th className="py-3.5 px-6">Call-out Fee</th>
+                        <th className="py-3.5 px-6">Compliance Check</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#F2F2F7] text-xs font-medium text-[#1D1D1F]">
+                    <tbody className="divide-y divide-slate-100 text-xs font-normal text-[#1D1D1F]">
                       {user.ownedVendors.map((ven: any) => (
                         <tr key={ven.id} className="hover:bg-slate-50/40">
                           <td className="py-4 px-6">
-                            <p className="font-bold text-sm">{ven.name}</p>
+                            <p className="font-semibold text-[#1D1D1F] text-sm">{ven.name}</p>
                             <p className="text-xs text-[#6E6E73] mt-0.5">{ven.email} • {ven.phone}</p>
                           </td>
-                          <td className="py-4 px-6 font-bold text-slate-700 text-sm">{ven.specialty}</td>
+                          <td className="py-4 px-6 font-semibold text-[#1D1D1F] text-sm">{ven.specialty}</td>
                           <td className="py-4 px-6 font-semibold text-emerald-600 text-sm">${ven.baseCallOutFee?.toFixed(2)}</td>
                           <td className="py-4 px-6 space-x-2">
                             {ven.w9OnFile ? (
-                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold text-[10px] px-2.5 py-1">W-9 On File</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">W-9 On File</span>
                             ) : (
-                              <Badge className="bg-rose-50 text-rose-700 border-rose-100 font-bold text-[10px] px-2.5 py-1">No W-9</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">No W-9</span>
                             )}
                             {ven.insuranceOnFile ? (
-                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold text-[10px] px-2.5 py-1">COI Verified</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">COI Verified</span>
                             ) : (
-                              <Badge className="bg-rose-50 text-rose-700 border-rose-100 font-bold text-[10px] px-2.5 py-1">No COI</Badge>
+                              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">No COI</span>
                             )}
                           </td>
                         </tr>
@@ -1563,7 +1561,7 @@ export default function UserProfilePage() {
                   </table>
                 </div>
               ) : (
-                <p className="text-xs text-[#8E8E93] font-semibold bg-slate-50/50 border border-dashed border-[#E5E5EA] rounded-2xl p-6 text-center">
+                <p className="text-xs text-[#6E6E73] font-normal bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
                   No external maintenance contractors registered under this owner.
                 </p>
               )}
@@ -1575,46 +1573,46 @@ export default function UserProfilePage() {
         {activeTab === "financials" && (
           <div className="p-6 sm:p-8 space-y-8 animate-in fade-in duration-200">
             {/* Ledger Balance Banner Card */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 p-6 sm:p-8 rounded-3xl text-white flex items-center justify-between border border-slate-800 shadow-md relative overflow-hidden w-full">
+            <div className="bg-slate-50 border border-slate-200 p-6 sm:p-8 rounded-3xl text-[#1D1D1F] flex items-center justify-between shadow-2xs relative overflow-hidden w-full">
               <div className="space-y-1 relative z-10">
-                <p className="text-slate-400 font-extrabold text-xs uppercase tracking-wider">Account Ledger Balance</p>
-                <p className="text-4xl font-black tracking-tight">${Number(user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                <p className="text-[#6E6E73] font-normal text-xs">Account Ledger Balance</p>
+                <p className="text-4xl font-semibold tracking-tight">${Number(user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
               </div>
-              <div className="h-14 w-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/15 shrink-0 relative z-10">
-                <DollarSign className="h-7 w-7 text-emerald-400" />
+              <div className="h-12 w-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs">
+                <DollarSign className="h-6 w-6 text-emerald-600" />
               </div>
             </div>
             
             {/* Direct Deposit Setup Card */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-3">
-                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <div className="p-1.5 bg-slate-100 text-slate-700 rounded-lg">
                   <CreditCard className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Direct Deposit & Payout Banking</h3>
-                  <p className="text-[11px] font-medium text-[#6E6E73]">Configured bank account for electronic funds transfer (EFT)</p>
+                  <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Direct Deposit &amp; Payout Banking</h3>
+                  <p className="text-xs font-normal text-[#6E6E73]">Configured bank account for electronic funds transfer (EFT)</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Bank Name</p>
-                  <p className="font-extrabold text-sm text-[#1D1D1F] flex items-center gap-2">
+                  <p className="text-xs font-normal text-[#6E6E73]">Bank Name</p>
+                  <p className="font-semibold text-sm text-[#1D1D1F] flex items-center gap-2">
                     <Building className="h-4 w-4 text-slate-400" />
                     {user.bankName || "Not Configured"}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Account Holder Name</p>
-                  <p className="font-extrabold text-sm text-[#1D1D1F] truncate">{user.accountName || "N/A"}</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Account Holder Name</p>
+                  <p className="font-semibold text-sm text-[#1D1D1F] truncate">{user.accountName || "N/A"}</p>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-wider">Account Number</p>
-                    <p className="font-mono font-bold text-sm text-[#1D1D1F]">
+                    <p className="text-xs font-normal text-[#6E6E73]">Account Number</p>
+                    <p className="font-mono font-semibold text-sm text-[#1D1D1F]">
                       {showAccount ? (user.accountNumber || "•••• •••• 3333") : maskAccount(user.accountNumber)}
                     </p>
                   </div>
@@ -1622,14 +1620,14 @@ export default function UserProfilePage() {
                     <div className="flex gap-1 shrink-0">
                       <button 
                         onClick={() => setShowAccount(!showAccount)} 
-                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors"
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors border-none bg-transparent cursor-pointer"
                         title={showAccount ? "Mask Account Number" : "Unmask Account Number"}
                       >
                         {showAccount ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                       <button 
                         onClick={() => copyToClipboard(user.accountNumber, "Bank Account")} 
-                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors"
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors border-none bg-transparent cursor-pointer"
                         title="Copy Account Number"
                       >
                         <Copy className="h-4 w-4" />
@@ -1643,18 +1641,18 @@ export default function UserProfilePage() {
             {/* Payout Disbursals Table Section */}
             {user.role === "OWNER" && (
               <div className="space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F2F2F7] pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-emerald-600" />
-                      <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Owner Disbursals & Payout Ledger</h3>
+                      <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Owner Disbursals &amp; Payout Ledger</h3>
                     </div>
-                    <p className="text-[11px] font-medium text-[#6E6E73] mt-0.5">Historical payout requests and settlement status</p>
+                    <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Historical payout requests and settlement status</p>
                   </div>
 
                   <Link
                     href={`/dashboard/admin/payouts?search=${encodeURIComponent(user.email || "")}`}
-                    className="inline-flex items-center justify-center gap-1.5 bg-[#007AFF] hover:bg-[#0062CC] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0"
+                    className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 transition-all"
                   >
                     <CreditCard className="h-3.5 w-3.5" /> Manage Payout Ledger <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
@@ -1663,47 +1661,47 @@ export default function UserProfilePage() {
                 {/* Production SaaS Financial Metric Summary Badges */}
                 {user.payoutRequests && user.payoutRequests.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white border border-[#E5E5EA] p-5 rounded-2xl shadow-2xs space-y-2">
+                    <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-2xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Settled Disbursals</span>
+                        <span className="text-xs font-normal text-[#6E6E73]">Settled Disbursals</span>
                         <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
                           <CheckCircle2 className="h-4 w-4" />
                         </div>
                       </div>
-                      <p className="font-black text-2xl text-[#1D1D1F] tracking-tight">
+                      <p className="font-semibold text-2xl text-[#1D1D1F] tracking-tight">
                         ${(user.payoutRequests.filter((p: any) => p.status === "APPROVED" || p.status === "PAID").reduce((s: number, p: any) => s + Number(p.amount), 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[11px] font-medium text-emerald-700">
+                      <p className="text-xs font-normal text-emerald-700">
                         {user.payoutRequests.filter((p: any) => p.status === "APPROVED" || p.status === "PAID").length} settled transactions
                       </p>
                     </div>
 
-                    <div className="bg-white border border-[#E5E5EA] p-5 rounded-2xl shadow-2xs space-y-2">
+                    <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-2xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Processing / Pending</span>
+                        <span className="text-xs font-normal text-[#6E6E73]">Processing / Pending</span>
                         <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
                           <Clock className="h-4 w-4" />
                         </div>
                       </div>
-                      <p className="font-black text-2xl text-[#1D1D1F] tracking-tight">
+                      <p className="font-semibold text-2xl text-[#1D1D1F] tracking-tight">
                         ${(user.payoutRequests.filter((p: any) => p.status === "PENDING" || p.status === "Processing").reduce((s: number, p: any) => s + Number(p.amount), 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[11px] font-medium text-amber-700">
+                      <p className="text-xs font-normal text-amber-700">
                         {user.payoutRequests.filter((p: any) => p.status === "PENDING" || p.status === "Processing").length} awaiting admin review
                       </p>
                     </div>
 
-                    <div className="bg-white border border-[#E5E5EA] p-5 rounded-2xl shadow-2xs space-y-2">
+                    <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-2xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Failed / Rejected</span>
+                        <span className="text-xs font-normal text-[#6E6E73]">Failed / Rejected</span>
                         <div className="p-1.5 bg-rose-50 text-rose-600 rounded-lg">
                           <AlertTriangle className="h-4 w-4" />
                         </div>
                       </div>
-                      <p className="font-black text-2xl text-[#1D1D1F] tracking-tight">
+                      <p className="font-semibold text-2xl text-[#1D1D1F] tracking-tight">
                         ${(user.payoutRequests.filter((p: any) => p.status === "REJECTED" || p.status === "Failed").reduce((s: number, p: any) => s + Number(p.amount), 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[11px] font-medium text-rose-700">
+                      <p className="text-xs font-normal text-rose-700">
                         {user.payoutRequests.filter((p: any) => p.status === "REJECTED" || p.status === "Failed").length} flagged requests
                       </p>
                     </div>
@@ -1711,10 +1709,10 @@ export default function UserProfilePage() {
                 )}
                 
                 {user.payoutRequests && user.payoutRequests.length > 0 ? (
-                  <div className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white shadow-2xs w-full">
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs w-full">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-slate-50/80 border-b border-[#E5E5EA] text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                        <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-normal text-[#6E6E73]">
                           <th className="py-3.5 px-6">Disbursal ID</th>
                           <th className="py-3.5 px-6">Amount</th>
                           <th className="py-3.5 px-6">Status</th>
@@ -1723,53 +1721,47 @@ export default function UserProfilePage() {
                           <th className="py-3.5 px-6 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#F2F2F7] text-xs font-semibold text-[#1D1D1F]">
+                      <tbody className="divide-y divide-slate-100 text-xs font-normal text-[#1D1D1F]">
                         {user.payoutRequests.map((payout: any) => (
                           <tr key={payout.id} className="hover:bg-slate-50/60 transition-colors">
                             <td className="py-4 px-6 whitespace-nowrap">
-                              <div className="inline-flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold text-slate-700">
+                              <div className="inline-flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 rounded-lg px-2.5 py-1 font-mono text-xs font-normal text-slate-700">
                                 <span>#{payout.id?.slice(0, 8)}</span>
                                 <button
                                   type="button"
                                   onClick={() => copyToClipboard(payout.id, "Disbursal ID")}
-                                  className="text-slate-400 hover:text-slate-800 transition-colors p-0.5"
+                                  className="text-slate-400 hover:text-slate-800 transition-colors p-0.5 border-none bg-transparent cursor-pointer"
                                   title="Copy Disbursal ID"
                                 >
                                   <Copy className="h-3 w-3" />
                                 </button>
                               </div>
                             </td>
-                            <td className="py-4 px-6 font-black text-[#1D1D1F] text-sm whitespace-nowrap">
+                            <td className="py-4 px-6 font-semibold text-[#1D1D1F] text-xs whitespace-nowrap">
                               ${Number(payout.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="py-4 px-6 whitespace-nowrap">
                               {payout.status === "APPROVED" || payout.status === "PAID" ? (
-                                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" /> Settled
-                                </Badge>
+                                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Settled</span>
                               ) : payout.status === "PENDING" || payout.status === "Processing" ? (
-                                <Badge className="bg-amber-50 text-amber-700 border-amber-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" /> Processing
-                                </Badge>
+                                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">Processing</span>
                               ) : (
-                                <Badge className="bg-rose-50 text-rose-700 border-rose-200/60 font-bold text-xs px-3 py-1 flex items-center gap-1.5 w-max">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" /> Failed
-                                </Badge>
+                                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Failed</span>
                               )}
                             </td>
-                            <td className="py-4 px-6 text-[#6E6E73] text-xs font-medium whitespace-nowrap">
+                            <td className="py-4 px-6 text-[#6E6E73] text-xs font-normal whitespace-nowrap">
                               {payout.refNumber || `Bank: ${payout.bankName}`}
                             </td>
-                            <td className="py-4 px-6 text-[#8E8E93] text-xs font-semibold whitespace-nowrap">
+                            <td className="py-4 px-6 text-[#6E6E73] text-xs font-normal whitespace-nowrap">
                               {new Date(payout.createdAt).toLocaleDateString()}
                             </td>
                             <td className="py-4 px-6 text-right whitespace-nowrap">
                               <Link
                                 href={`/dashboard/admin/payouts?search=${encodeURIComponent(user.email || "")}`}
-                                className="inline-flex items-center gap-1.5 whitespace-nowrap bg-white hover:bg-[#007AFF] text-[#007AFF] hover:text-white border border-[#007AFF]/30 hover:border-[#007AFF] font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all shadow-2xs group"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-[#1D1D1F] hover:bg-slate-50 bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl transition-all shadow-2xs"
                               >
                                 <span>Process Payout</span>
-                                <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-slate-500" />
                               </Link>
                             </td>
                           </tr>
@@ -1778,9 +1770,9 @@ export default function UserProfilePage() {
                     </table>
                   </div>
                 ) : (
-                  <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+                  <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                     <DollarSign className="h-8 w-8 text-slate-300 mx-auto" />
-                    <p className="text-[#6E6E73] text-sm font-semibold">No payout history associated with this owner account.</p>
+                    <p className="text-[#6E6E73] text-xs font-normal">No payout history associated with this owner account.</p>
                   </div>
                 )}
               </div>
@@ -1791,7 +1783,7 @@ export default function UserProfilePage() {
         {/* BILLING HISTORY TIMELINE TAB */}
         {activeTab === "billing-history" && user.role === "OWNER" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Subscription Life History</h3>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Subscription Life History</h3>
             
             {user.subscriptionHistory && user.subscriptionHistory.length > 0 ? (
               <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
@@ -1806,21 +1798,21 @@ export default function UserProfilePage() {
                       <div className="flex-1 bg-slate-50/60 border border-slate-200/60 rounded-2xl p-5 space-y-1">
                         <div className="flex justify-between items-start gap-2">
                           <div>
-                            <span className="text-[10px] font-black text-slate-800 uppercase bg-slate-200 px-2 py-0.5 rounded-md tracking-wider">
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-200 text-slate-700 border border-slate-300 shadow-2xs">
                               {hist.event}
                             </span>
-                            <p className="text-sm font-bold text-[#1D1D1F] mt-2">
+                            <p className="text-sm font-semibold text-[#1D1D1F] mt-2">
                               {hist.toTierName ? `Subscribed to ${hist.toTierName}` : "Billing Configuration Synchronized"}
                             </p>
                             {hist.fromTierName && hist.fromTierName !== hist.toTierName && (
-                              <p className="text-xs font-bold text-[#6E6E73] mt-0.5">Previous Plan: {hist.fromTierName}</p>
+                              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Previous Plan: {hist.fromTierName}</p>
                             )}
                           </div>
-                          <span className="text-xs text-[#8E8E93] font-bold shrink-0">{dateStr}</span>
+                          <span className="text-xs text-[#6E6E73] font-normal shrink-0">{dateStr}</span>
                         </div>
                         
                         {hist.amountPaid > 0 && (
-                          <p className="text-xs font-bold text-emerald-600 mt-2">
+                          <p className="text-xs font-semibold text-emerald-600 mt-2">
                             Amount Paid: ${hist.amountPaid.toFixed(2)}
                           </p>
                         )}
@@ -1830,9 +1822,9 @@ export default function UserProfilePage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <Clock className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No subscription events logged in historical audits.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No subscription events logged in historical audits.</p>
               </div>
             )}
           </div>
@@ -1841,7 +1833,7 @@ export default function UserProfilePage() {
         {/* LEASES TAB (FULL WIDTH) */}
         {activeTab === "leases" && user.role === "TENANT" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Active Lease Agreements</h3>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Active Lease Agreements</h3>
             
             {user.leases && user.leases.length > 0 ? (
               <div className="space-y-4">
@@ -1851,7 +1843,7 @@ export default function UserProfilePage() {
                   const coverImg = leaseProp?.coverPhoto || leaseProp?.images?.[0] || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80";
 
                   return (
-                    <div key={lease.id} className="border border-[#E5E5EA] rounded-3xl overflow-hidden bg-white shadow-xs space-y-0 hover:shadow-md transition-all duration-200">
+                    <div key={lease.id} className="border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-xs space-y-0 hover:shadow-md transition-all duration-200">
                       {/* Property Cover Photo Header Banner */}
                       <div className="h-44 w-full relative overflow-hidden bg-slate-100">
                         <img 
@@ -1861,13 +1853,13 @@ export default function UserProfilePage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                         <div className="absolute top-4 right-4">
-                          <Badge className="bg-slate-900/90 text-white backdrop-blur-md border border-white/20 font-extrabold text-xs px-3 py-1 shadow-sm">
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                             {lease.status}
-                          </Badge>
+                          </span>
                         </div>
                         <div className="absolute bottom-4 left-6 right-6 text-white space-y-1">
-                          <p className="text-2xl font-black drop-shadow-md truncate">{leaseProp?.name || "Unknown Property"}</p>
-                          <p className="text-xs font-bold text-slate-200 drop-shadow-sm">
+                          <p className="text-2xl font-semibold text-white tracking-tight drop-shadow-md truncate">{leaseProp?.name || "Unknown Property"}</p>
+                          <p className="text-xs font-normal text-slate-200 drop-shadow-sm">
                             Unit {lease.unit?.name || "N/A"} • ${Number(lease.monthlyRent).toLocaleString()}/month
                           </p>
                         </div>
@@ -1877,35 +1869,35 @@ export default function UserProfilePage() {
                       <div className="p-6 space-y-5 bg-white">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
                           <div>
-                            <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase">Start Date</p>
-                            <p className="font-bold text-[#1D1D1F] mt-0.5">{new Date(lease.startDate).toLocaleDateString()}</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">Start Date</p>
+                            <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5">{new Date(lease.startDate).toLocaleDateString()}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase">End Date</p>
-                            <p className="font-bold text-[#1D1D1F] mt-0.5">{new Date(lease.endDate).toLocaleDateString()}</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">End Date</p>
+                            <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5">{new Date(lease.endDate).toLocaleDateString()}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase">Rent Due Day</p>
-                            <p className="font-bold text-[#1D1D1F] mt-0.5">Day {lease.rentDueDay || 1}</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">Rent Due Day</p>
+                            <p className="font-semibold text-[#1D1D1F] text-xs mt-0.5">Day {lease.rentDueDay || 1}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase">Security Deposit</p>
-                            <p className="font-bold text-emerald-600 mt-0.5">${Number(lease.securityDeposit || 0).toLocaleString()}</p>
+                            <p className="text-xs font-normal text-[#6E6E73]">Security Deposit</p>
+                            <p className="font-semibold text-emerald-600 text-xs mt-0.5">${Number(lease.securityDeposit || 0).toLocaleString()}</p>
                           </div>
                         </div>
 
                         {ownerProfile && (
-                          <div className="pt-4 border-t border-[#E5E5EA] flex justify-between items-center bg-[#F8FAFC] rounded-2xl p-4 border border-[#E5E5EA]">
+                          <div className="pt-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-2xl p-4 border border-slate-200/80">
                             <div>
-                              <p className="text-[10px] font-extrabold text-[#8E8E93] uppercase">Supervisor Landlord</p>
-                              <p className="font-black text-[#1D1D1F] mt-0.5 text-base">{ownerProfile.name}</p>
-                              <p className="text-xs text-[#6E6E73]">{ownerProfile.email} • {ownerProfile.phone || "No Phone"}</p>
+                              <p className="text-xs font-normal text-[#6E6E73]">Supervisor Landlord</p>
+                              <p className="font-semibold text-[#1D1D1F] mt-0.5 text-sm">{ownerProfile.name}</p>
+                              <p className="text-xs font-normal text-[#6E6E73]">{ownerProfile.email} • {ownerProfile.phone || "No Phone"}</p>
                             </div>
                             <Link 
                               href={`/dashboard/admin/users/${ownerProfile.id}`}
-                              className="inline-flex items-center gap-1 text-xs font-bold text-[#007AFF] bg-white border border-[#E5E5EA] px-4 py-2 rounded-xl hover:bg-slate-100 shadow-2xs transition-all"
+                              className="inline-flex items-center gap-1 text-xs font-medium text-[#1D1D1F] hover:bg-slate-50 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-2xs transition-all"
                             >
-                              View Landlord <ArrowUpRight className="h-4 w-4" />
+                              View Landlord <ArrowUpRight className="h-3.5 w-3.5 text-slate-500" />
                             </Link>
                           </div>
                         )}
@@ -1915,9 +1907,9 @@ export default function UserProfilePage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <FileText className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No lease records associated with this tenant.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No lease records associated with this tenant.</p>
               </div>
             )}
           </div>
@@ -1926,53 +1918,53 @@ export default function UserProfilePage() {
         {/* PAYMENT LEDGER TAB (FULL WIDTH TABLE) */}
         {activeTab === "ledger" && user.role === "TENANT" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <div className="flex justify-between items-center border-b border-[#F2F2F7] pb-3">
-              <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">Payment Transaction History</h3>
-              <span className="text-xs font-bold text-[#6E6E73]">{user.transactions?.length || 0} Total Transactions</span>
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Payment Transaction History</h3>
+              <span className="text-xs font-normal text-[#6E6E73]">{user.transactions?.length || 0} Total Transactions</span>
             </div>
             
             {user.transactions && user.transactions.length > 0 ? (
-              <div className="border border-[#E5E5EA] rounded-2xl overflow-hidden bg-white shadow-xs w-full">
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-[#E5E5EA] text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                      <th className="py-4 px-6">Transaction ID</th>
-                      <th className="py-4 px-6">Details</th>
-                      <th className="py-4 px-6">Amount</th>
-                      <th className="py-4 px-6">Status</th>
-                      <th className="py-4 px-6">Date</th>
+                    <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-normal text-[#6E6E73]">
+                      <th className="py-3.5 px-6">Transaction ID</th>
+                      <th className="py-3.5 px-6">Details</th>
+                      <th className="py-3.5 px-6">Amount</th>
+                      <th className="py-3.5 px-6">Status</th>
+                      <th className="py-3.5 px-6">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F2F2F7] text-xs font-medium text-[#1D1D1F]">
+                  <tbody className="divide-y divide-slate-100 text-xs font-normal text-[#1D1D1F]">
                     {user.transactions.map((tx: any) => (
                       <tr key={tx.id} className="hover:bg-slate-50/50">
                         <td className="py-4 px-6 font-mono text-xs text-[#6E6E73] max-w-[150px] truncate" title={tx.id}>{tx.id}</td>
                         <td className="py-4 px-6">
-                          <p className="font-bold text-[#1D1D1F] uppercase text-xs">{tx.type} • {tx.category}</p>
+                          <p className="font-semibold text-[#1D1D1F] uppercase text-xs">{tx.type} • {tx.category}</p>
                           {tx.reference && <p className="text-xs text-[#6E6E73] mt-0.5">Ref: {tx.reference}</p>}
                         </td>
-                        <td className={`py-4 px-6 font-bold text-sm ${tx.type === "INCOME" ? "text-emerald-600" : "text-rose-600"}`}>
+                        <td className={`py-4 px-6 font-semibold text-xs ${tx.type === "INCOME" ? "text-emerald-600" : "text-rose-600"}`}>
                           {tx.type === "INCOME" ? "+" : "-"}${Number(tx.amount).toFixed(2)}
                         </td>
                         <td className="py-4 px-6">
                           {tx.status === "COMPLETED" || tx.status === "SUCCESS" ? (
-                            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold text-[10px] px-2.5 py-1">Completed</Badge>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">Completed</span>
                           ) : tx.status === "PENDING" ? (
-                            <Badge className="bg-amber-50 text-amber-700 border-amber-100 font-bold text-[10px] px-2.5 py-1">Pending</Badge>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">Pending</span>
                           ) : (
-                            <Badge className="bg-rose-50 text-rose-700 border-rose-100 font-bold text-[10px] px-2.5 py-1">Failed</Badge>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">Failed</span>
                           )}
                         </td>
-                        <td className="py-4 px-6 text-[#8E8E93] text-xs font-semibold">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                        <td className="py-4 px-6 text-[#6E6E73] text-xs font-normal">{new Date(tx.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <CreditCard className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No transactions registered under this tenant.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No transactions registered under this tenant.</p>
               </div>
             )}
           </div>
@@ -1981,35 +1973,35 @@ export default function UserProfilePage() {
         {/* MAINTENANCE TICKETS TAB */}
         {activeTab === "maintenance" && user.role === "TENANT" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Maintenance Service Inquiries</h3>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Maintenance Service Inquiries</h3>
             
             {user.maintenanceRequest && user.maintenanceRequest.length > 0 ? (
               <div className="space-y-4">
                 {user.maintenanceRequest.map((req: any) => (
-                  <div key={req.id} className="border border-[#E5E5EA] p-5 rounded-2xl bg-slate-50/50 hover:border-slate-300 transition-colors flex items-center justify-between">
+                  <div key={req.id} className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 hover:border-slate-300 transition-colors flex items-center justify-between">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-[#1D1D1F] text-base">{req.title}</p>
-                        <Badge className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                          req.priority === "EMERGENCY" ? "bg-rose-50 text-rose-700 border border-rose-100" :
-                          req.priority === "HIGH" ? "bg-orange-50 text-orange-700 border border-orange-100" :
-                          "bg-slate-200 text-slate-700"
+                        <p className="font-semibold text-[#1D1D1F] text-sm">{req.title}</p>
+                        <span className={`text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                          req.priority === "EMERGENCY" ? "bg-rose-50 text-rose-700 border border-rose-200" :
+                          req.priority === "HIGH" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                          "bg-slate-100 text-slate-700 border border-slate-200"
                         }`}>
                           {req.priority}
-                        </Badge>
+                        </span>
                       </div>
-                      <p className="text-xs text-[#6E6E73] line-clamp-1">{req.description}</p>
-                      <p className="text-xs text-[#8E8E93] font-bold">
+                      <p className="text-xs text-[#6E6E73] font-normal line-clamp-1">{req.description}</p>
+                      <p className="text-xs text-[#6E6E73] font-normal">
                         Property: {req.unit?.property?.name || "N/A"} • Unit {req.unit?.name || "N/A"} • Opened {new Date(req.createdAt).toLocaleDateString()}
                       </p>
                     </div>
 
                     <div className="text-right shrink-0 ml-4">
-                      <Badge className="bg-slate-900 text-white text-xs px-3 py-1 mb-2">{req.status}</Badge>
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-900 text-white shadow-2xs">{req.status}</span>
                       <br/>
                       <Link 
                         href={`/dashboard/maintenance`}
-                        className="inline-flex items-center gap-0.5 text-xs font-black text-[#007AFF] hover:underline"
+                        className="inline-flex items-center gap-0.5 text-xs font-semibold text-blue-600 hover:underline mt-2"
                       >
                         Open Dashboard <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
@@ -2018,9 +2010,9 @@ export default function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <Wrench className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No maintenance tickets reported by this tenant.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No maintenance tickets reported by this tenant.</p>
               </div>
             )}
           </div>
@@ -2029,33 +2021,33 @@ export default function UserProfilePage() {
         {/* ASSIGNED INSPECTIONS TAB (Inspector) */}
         {activeTab === "inspections" && user.role === "INSPECTOR" && (
           <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
-            <h3 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider border-b border-[#F2F2F7] pb-3">Scheduled Walkthroughs & Inspections</h3>
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight border-b border-slate-100 pb-3">Scheduled Walkthroughs &amp; Inspections</h3>
             
             {user.assignedInspections && user.assignedInspections.length > 0 ? (
               <div className="space-y-4">
                 {user.assignedInspections.map((insp: any) => (
-                  <div key={insp.id} className="border border-[#E5E5EA] p-5 rounded-2xl bg-slate-50/50 flex items-start justify-between">
+                  <div key={insp.id} className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 flex items-start justify-between">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-[#1D1D1F] text-base">{insp.title}</p>
-                        <Badge className="bg-sky-50 text-sky-700 border-sky-100 text-[10px] py-0.5 rounded-md">{insp.category}</Badge>
+                        <p className="font-semibold text-[#1D1D1F] text-sm">{insp.title}</p>
+                        <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md">{insp.category}</span>
                       </div>
-                      <p className="text-xs text-[#6E6E73] line-clamp-1">{insp.description}</p>
-                      <p className="text-xs text-[#8E8E93] font-bold">
+                      <p className="text-xs text-[#6E6E73] font-normal line-clamp-1">{insp.description}</p>
+                      <p className="text-xs text-[#6E6E73] font-normal">
                         Unit: {insp.unit?.property?.name} • Unit {insp.unit?.name}
                       </p>
                       {insp.tenant && (
-                        <p className="text-xs text-slate-700 font-bold">
+                        <p className="text-xs text-[#6E6E73] font-normal">
                           Tenant: {insp.tenant.name} ({insp.tenant.phone || "No phone"})
                         </p>
                       )}
                     </div>
 
                     <div className="text-right shrink-0 ml-4 space-y-2">
-                      <Badge className="bg-slate-900 text-white text-xs px-3 py-1">{insp.status}</Badge>
+                      <span className="bg-slate-900 text-white text-[10px] font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-md">{insp.status}</span>
                       {insp.scheduledDate && (
-                        <p className="text-xs text-[#8E8E93] font-black flex items-center gap-1 justify-end">
-                          <Clock className="h-3.5 w-3.5 text-orange-400" /> 
+                        <p className="text-xs text-[#6E6E73] font-normal flex items-center gap-1 justify-end">
+                          <Clock className="h-3.5 w-3.5 text-amber-500" /> 
                           {new Date(insp.scheduledDate).toLocaleDateString()}
                         </p>
                       )}
@@ -2064,27 +2056,26 @@ export default function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 border border-dashed border-[#E5E5EA] rounded-2xl bg-slate-50/50 space-y-2">
+              <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-slate-300 mx-auto" />
-                <p className="text-[#6E6E73] text-sm font-semibold">No walkthrough inspections assigned to this inspector.</p>
+                <p className="text-[#6E6E73] text-xs font-normal">No walkthrough inspections assigned to this inspector.</p>
               </div>
             )}
           </div>
         )}
 
-        {/* ACCESS CONTROL TAB (Permission Board - FULL WIDTH) */}
         {/* ACCESS CONTROL TAB (Enterprise SaaS Permission Board) */}
         {activeTab === "access-control" && (
           <div className="p-6 sm:p-8 space-y-8 animate-in fade-in duration-200">
             {/* Header & Metrics Summary */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#F2F2F7] pb-5">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200/80 text-purple-700 font-extrabold text-[10px] tracking-widest uppercase mb-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-purple-600" />
-                  Security & Policy Governance
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5 mb-1">
+                  <ShieldCheck className="h-3.5 w-3.5 text-slate-700" />
+                  Security &amp; Policy Governance
                 </span>
-                <h3 className="text-xl font-black text-[#1D1D1F] tracking-tight">Granular Feature Access Control</h3>
-                <p className="text-[#6E6E73] text-xs font-medium mt-0.5">Manage administrative overrides, temporary restriction locks, and welfare-exempt feature protections.</p>
+                <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">Granular Feature Access Control</h3>
+                <p className="text-[#6E6E73] text-xs font-normal mt-0.5">Manage administrative overrides, temporary restriction locks, and welfare-exempt feature protections.</p>
               </div>
 
               {/* Reset All Action */}
@@ -2113,7 +2104,7 @@ export default function UserProfilePage() {
                     }
                   }}
                   disabled={saving}
-                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs rounded-xl font-bold text-xs h-9 px-3.5"
+                  className="bg-white hover:bg-slate-50 text-[#1D1D1F] border border-slate-200 shadow-2xs rounded-xl font-medium text-xs h-9 px-4"
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
                   Reset All Overrides
@@ -2132,75 +2123,75 @@ export default function UserProfilePage() {
               return (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl space-y-1">
-                    <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Total Role Features</p>
-                    <p className="text-2xl font-black text-[#1D1D1F]">{totalFeatures}</p>
-                    <p className="text-[10px] font-semibold text-slate-500">Configured for {formatRole(user.role)}</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Total Role Features</p>
+                    <p className="text-2xl font-semibold text-[#1D1D1F]">{totalFeatures}</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Configured for {formatRole(user.role)}</p>
                   </div>
 
                   <div className="bg-emerald-50/60 border border-emerald-200/80 p-4 rounded-2xl space-y-1">
-                    <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Default Access Enabled</p>
-                    <p className="text-2xl font-black text-emerald-700">{defaultActiveCount}</p>
-                    <p className="text-[10px] font-semibold text-emerald-700">Operating on role defaults</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Default Access Enabled</p>
+                    <p className="text-2xl font-semibold text-[#1D1D1F]">{defaultActiveCount}</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Operating on role defaults</p>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border space-y-1 ${blockedCount > 0 ? "bg-rose-50/80 border-rose-200 text-rose-900" : "bg-slate-50 border-slate-200/80 text-slate-500"}`}>
-                    <p className="text-[10px] font-extrabold uppercase tracking-wider">Active Force Blocks</p>
-                    <p className={`text-2xl font-black ${blockedCount > 0 ? "text-rose-700" : "text-slate-900"}`}>{blockedCount}</p>
-                    <p className="text-[10px] font-semibold">{blockedCount > 0 ? "Admin restrictions active" : "No active blocks"}</p>
+                  <div className={`p-4 rounded-2xl border space-y-1 ${blockedCount > 0 ? "bg-rose-50/80 border-rose-200" : "bg-slate-50 border-slate-200/80"}`}>
+                    <p className="text-xs font-normal text-[#6E6E73]">Active Force Blocks</p>
+                    <p className="text-2xl font-semibold text-[#1D1D1F]">{blockedCount}</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">{blockedCount > 0 ? "Admin restrictions active" : "No active blocks"}</p>
                   </div>
 
                   <div className="bg-blue-50/60 border border-blue-200/80 p-4 rounded-2xl space-y-1">
-                    <p className="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Protected Exempt</p>
-                    <p className="text-2xl font-black text-blue-700">{protectedCount}</p>
-                    <p className="text-[10px] font-semibold text-blue-700">Welfare & legal protected</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Protected Exempt</p>
+                    <p className="text-2xl font-semibold text-[#1D1D1F]">{protectedCount}</p>
+                    <p className="text-xs font-normal text-[#6E6E73]">Welfare &amp; legal protected</p>
                   </div>
                 </div>
               );
             })()}
 
             {/* Audit Reason & Expiration Policy Panel */}
-            <div className="bg-white border border-slate-200/90 p-6 rounded-2xl shadow-2xs space-y-4">
+            <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-slate-700" />
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Administrative Policy & Audit Governance</h4>
+                  <h4 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Administrative Policy &amp; Audit Governance</h4>
                 </div>
                 {featureReason.trim().length >= 10 ? (
-                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-extrabold text-[10px]">
-                    <CheckCircle className="h-3 w-3 mr-1 text-emerald-600" /> Audit Note Valid
-                  </Badge>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                    Audit Note Valid
+                  </span>
                 ) : (
-                  <Badge className="bg-amber-50 text-amber-800 border-amber-200 font-extrabold text-[10px]">
-                    <AlertCircle className="h-3 w-3 mr-1 text-amber-600" /> Requires 10+ Chars Note To Override
-                  </Badge>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
+                    Requires 10+ Chars Note To Override
+                  </span>
                 )}
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Audit Log Reason Input */}
                 <div className="lg:col-span-6 space-y-1.5">
-                  <label className="text-[11px] font-extrabold text-slate-600 block uppercase tracking-wider">Audit Log Reason Note *</label>
+                  <label className="text-xs font-normal text-[#6E6E73] block">Audit Log Reason Note *</label>
                   <input
                     type="text"
                     value={featureReason}
                     onChange={(e) => setFeatureReason(e.target.value)}
                     placeholder="Enter confidential audit reason (e.g. Restricted due to active lease dispute review)..."
-                    className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 shadow-2xs transition-all"
+                    className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                   />
                 </div>
 
                 {/* Expiration Duration Selector */}
                 <div className="lg:col-span-6 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-extrabold text-slate-600 block uppercase tracking-wider">Override Expiration</label>
+                    <label className="text-xs font-normal text-[#6E6E73] block">Override Expiration</label>
                     {featureExpiresAt && (
-                      <span className="text-[10px] font-extrabold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                      <span className="text-xs font-normal text-[#6E6E73]">
                         Expires: {new Date(featureExpiresAt).toLocaleDateString()}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1 bg-slate-100/80 border border-slate-200/30 p-1 rounded-xl shadow-2xs w-fit">
                     {[
                       { id: "permanent", label: "Permanent", days: 0 },
                       { id: "1d", label: "+1 Day", days: 1 },
@@ -2237,10 +2228,10 @@ export default function UserProfilePage() {
                               setFeatureExpiresAt(`${year}-${month}-${day}`);
                             }
                           }}
-                          className={`text-xs px-3 h-9 rounded-xl font-extrabold transition-all border ${
+                          className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer border-none ${
                             isSelected
-                              ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
-                              : "bg-slate-50/80 text-slate-600 border-slate-200/80 hover:bg-slate-100 hover:text-slate-900"
+                              ? "bg-white text-[#1D1D1F] shadow-2xs"
+                              : "text-[#6E6E73] hover:text-[#1D1D1F]"
                           }`}
                         >
                           {opt.label}
@@ -2532,7 +2523,7 @@ export default function UserProfilePage() {
                                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
                               </div>
                               <div>
-                                <h4 className="text-sm font-black text-slate-900 tracking-tight">Welfare & Statutory Rights</h4>
+                                <h4 className="text-sm font-semibold text-slate-900 tracking-tight">Welfare & Statutory Rights</h4>
                                 <p className="text-slate-500 text-xs font-medium">Essential legal rights and welfare capabilities. Administrative overrides require confirmation.</p>
                               </div>
                             </div>
@@ -2555,7 +2546,7 @@ export default function UserProfilePage() {
                               <Key className="h-4 w-4" />
                             </div>
                             <div>
-                              <h4 className="text-sm font-black text-slate-900 tracking-tight">Configurable Capability Matrix</h4>
+                              <h4 className="text-sm font-semibold text-slate-900 tracking-tight">Configurable Capability Matrix</h4>
                               <p className="text-slate-500 text-xs font-medium">Selectively override feature access with 3-state administrative controls.</p>
                             </div>
                           </div>

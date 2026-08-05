@@ -32,8 +32,9 @@ export async function POST(
     return NextResponse.json({ error: "Lease not found" }, { status: 404 });
   }
 
-  // Only SUPERADMIN or the OWNER of the property can decrypt the tenant's refund account
-  if (user.role !== "SUPERADMIN" && lease.unit.property.ownerId !== user.id) {
+  // Only SUPERADMIN, ADMIN, PROPERTY_MANAGER or the OWNER of the property can decrypt the tenant's refund account
+  const isManager = ["SUPERADMIN", "ADMIN", "PROPERTY_MANAGER"].includes(user.role);
+  if (!isManager && lease.unit.property.ownerId !== user.id) {
     return NextResponse.json({ error: "Forbidden: Insufficient privileges to view sensitive bank data." }, { status: 403 });
   }
 

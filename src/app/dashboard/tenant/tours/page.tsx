@@ -331,31 +331,31 @@ export default function TenantToursPage() {
         <div className="max-w-6xl mx-auto space-y-6">
         
         {/* ── Page Header ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xs">
-              <CalendarIcon className="h-5 w-5 text-white" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <CalendarIcon className="h-4 w-4 text-slate-700" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
                 My Showings &amp; Tours
               </h1>
-              <p className="text-slate-500 text-xs font-semibold mt-0.5">
+              <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
                 Manage your property walkthrough schedules, virtual links, and feedback history.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/listings">
-              <Button className="h-10 px-5 text-xs font-black rounded-xl bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow-xs border-none cursor-pointer">
-                Browse Properties <ArrowRight className="h-3.5 w-3.5 text-white" />
+              <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2">
+                Browse Properties <ArrowRight className="h-4 w-4 text-white" />
               </Button>
             </Link>
           </div>
         </div>
 
         {/* ── Metric Cards — Interactive Filter Cards ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-sans">
           {[
             {
               tabKey: "CONFIRMED",
@@ -363,10 +363,7 @@ export default function TenantToursPage() {
               count: counts.CONFIRMED,
               sub: "Upcoming showings",
               icon: CheckCircle2,
-              activeColor: "bg-blue-50/80 border-blue-500 text-blue-950 ring-2 ring-blue-500/20 shadow-sm",
-              inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-blue-300 hover:shadow-xs",
-              iconBg: "bg-blue-100/80 text-blue-600",
-              dotColor: "bg-blue-500",
+              iconBg: "bg-blue-50 border border-blue-200/80 text-blue-600",
             },
             {
               tabKey: "PENDING",
@@ -374,10 +371,7 @@ export default function TenantToursPage() {
               count: counts.PENDING,
               sub: "Awaiting owner",
               icon: Clock,
-              activeColor: "bg-amber-50/80 border-amber-500 text-amber-950 ring-2 ring-amber-500/20 shadow-sm",
-              inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-amber-300 hover:shadow-xs",
-              iconBg: "bg-amber-100/80 text-amber-600",
-              dotColor: "bg-amber-500",
+              iconBg: "bg-amber-50 border border-amber-200/80 text-amber-600",
             },
             {
               tabKey: "COMPLETED",
@@ -385,10 +379,7 @@ export default function TenantToursPage() {
               count: counts.COMPLETED,
               sub: "Visited properties",
               icon: CalendarIcon,
-              activeColor: "bg-emerald-50/80 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 shadow-sm",
-              inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-emerald-300 hover:shadow-xs",
-              iconBg: "bg-emerald-100/80 text-emerald-600",
-              dotColor: "bg-emerald-500",
+              iconBg: "bg-emerald-50 border border-emerald-200/80 text-emerald-600",
             },
             {
               tabKey: "CANCELLED",
@@ -396,10 +387,7 @@ export default function TenantToursPage() {
               count: counts.CANCELLED,
               sub: "Inactive requests",
               icon: ShieldAlert,
-              activeColor: "bg-rose-50/80 border-rose-500 text-rose-950 ring-2 ring-rose-500/20 shadow-sm",
-              inactiveColor: "bg-white border-slate-200/90 text-slate-900 hover:border-rose-300 hover:shadow-xs",
-              iconBg: "bg-rose-100/80 text-rose-600",
-              dotColor: "bg-rose-500",
+              iconBg: "bg-rose-50 border border-rose-200/80 text-rose-600",
             },
           ].map((m) => {
             const Icon = m.icon;
@@ -408,29 +396,17 @@ export default function TenantToursPage() {
               <div
                 key={m.title}
                 onClick={() => setActiveTab(m.tabKey as any)}
-                className={`rounded-[20px] border p-4 transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between space-y-3 ${
-                  isActive ? m.activeColor : m.inactiveColor
+                className={`bg-white p-6 rounded-3xl border shadow-2xs flex justify-between items-start cursor-pointer transition-all ${
+                  isActive ? "border-slate-400 ring-1 ring-slate-400/20" : "border-slate-200 hover:border-slate-300"
                 }`}
               >
-                <div className="flex items-start justify-between gap-1.5">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 truncate">
-                    {m.title}
-                  </span>
-                  <div className={`h-7 w-7 rounded-xl flex items-center justify-center shrink-0 ${m.iconBg}`}>
-                    <Icon className="h-3.5 w-3.5" />
-                  </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">{m.title}</p>
+                  <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{m.count}</h3>
+                  <p className="text-xs font-normal text-[#6E6E73]">{m.sub}</p>
                 </div>
-
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-none">
-                    {m.count}
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${m.dotColor}`} />
-                    <span className="text-[11px] font-semibold text-slate-500 truncate">
-                      {m.sub}
-                    </span>
-                  </div>
+                <div className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-2xs shrink-0 ${m.iconBg}`}>
+                  <Icon className="h-4 w-4" />
                 </div>
               </div>
             );
@@ -438,8 +414,8 @@ export default function TenantToursPage() {
         </div>
 
         {/* ── Search & Filter Control Bar ── */}
-        <div className="bg-white p-3 rounded-[20px] border border-slate-200/80 shadow-xs space-y-3 md:space-y-0 md:flex md:items-center md:justify-between gap-4">
-          <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 overflow-x-auto">
+        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-3 md:space-y-0 md:flex md:items-center md:justify-between gap-4 font-sans">
+          <div className="flex bg-slate-100 p-1 rounded-xl gap-1 overflow-x-auto">
             {(
               [
                 { key: "ALL", label: "All Tours" },
@@ -454,10 +430,10 @@ export default function TenantToursPage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all whitespace-nowrap ${
                     active
-                      ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-900"
+                      ? "bg-slate-900 text-white shadow-2xs"
+                      : "text-[#6E6E73] hover:text-[#1D1D1F]"
                   }`}
                 >
                   {tab.label}
@@ -467,47 +443,48 @@ export default function TenantToursPage() {
           </div>
 
           <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-            <Input
+            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-[#6E6E73]" />
+            <input
+              type="text"
               placeholder="Search property or address..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-xs font-semibold rounded-xl bg-slate-50 border-slate-200 focus:bg-white text-slate-900 placeholder:text-slate-400"
+              className="w-full h-9 rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
             />
           </div>
         </div>
 
         {/* ── Enterprise SaaS Data Table ── */}
-        <div className="bg-white rounded-[24px] border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden font-sans">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs font-semibold">
+            <div className="p-12 text-center text-[#6E6E73] text-xs font-normal">
               Loading showing schedules...
             </div>
           ) : filteredTours.length === 0 ? (
             <div className="p-12 text-center space-y-3.5">
-              <div className="h-14 w-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
-                <CalendarIcon className="h-7 w-7" />
+              <div className="h-12 w-12 bg-slate-100 text-slate-700 rounded-2xl flex items-center justify-center mx-auto border border-slate-200/60 shadow-2xs">
+                <CalendarIcon className="h-6 w-6" />
               </div>
-              <h3 className="text-base font-black text-slate-900">No showings match your filter</h3>
-              <p className="text-xs text-slate-500 font-medium max-w-sm mx-auto">
+              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">No showings match your filter</h3>
+              <p className="text-xs text-[#6E6E73] font-normal max-w-sm mx-auto">
                 Schedule your next property walkthrough directly from any property listing!
               </p>
               <Link href="/listings" className="inline-block pt-1">
-                <Button size="sm" className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl px-5 h-10 cursor-pointer transition-all">
+                <Button size="sm" className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer">
                   Explore Available Listings
                 </Button>
               </Link>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold text-slate-700">
+              <table className="w-full text-left text-xs font-normal text-[#1D1D1F]">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/70 text-[10px] uppercase font-extrabold tracking-wider text-slate-400">
-                    <th className="py-3.5 px-5">Showing Date & Time</th>
-                    <th className="py-3.5 px-5">Property & Unit</th>
-                    <th className="py-3.5 px-5">Tour Format</th>
-                    <th className="py-3.5 px-5">Status</th>
-                    <th className="py-3.5 px-5 text-right">Actions</th>
+                  <tr className="border-b border-slate-100 bg-[#F2F2F7] text-[11px] uppercase font-medium tracking-wider text-[#6E6E73]">
+                    <th className="py-3 px-6">Showing Date & Time</th>
+                    <th className="py-3 px-6">Property & Unit</th>
+                    <th className="py-3 px-6">Tour Format</th>
+                    <th className="py-3 px-6">Status</th>
+                    <th className="py-3 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -531,63 +508,63 @@ export default function TenantToursPage() {
                         onClick={() => router.push(`/dashboard/tenant/tours/${tour.id}`)}
                       >
                         {/* Date & Time Column with Property Thumbnail */}
-                        <td className="py-4 px-5">
+                        <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
                             {tour.property?.coverPhoto || (tour.property?.images && tour.property.images.length > 0) ? (
                               <img
                                 src={tour.property.coverPhoto || tour.property.images?.[0] || ""}
                                 alt={tour.property.name}
-                                className="h-10 w-10 rounded-xl object-cover border border-slate-200/80 shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
+                                className="h-9 w-9 rounded-xl object-cover border border-slate-200/80 shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 font-black text-xs shadow-2xs">
-                                <Building2 className="h-5 w-5 text-white/90" />
+                              <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0 font-medium text-xs">
+                                <Building2 className="h-4 w-4 text-slate-700" />
                               </div>
                             )}
                             <div>
-                              <p className="font-extrabold text-slate-900 text-xs">{dateStr}</p>
-                              <p className="text-[11px] text-slate-500 font-medium">
-                                {timeStr} <span className="text-[10px] font-extrabold text-slate-400">{tzAbbrev}</span>
+                              <p className="font-semibold text-[#1D1D1F] text-xs">{dateStr}</p>
+                              <p className="text-xs text-[#6E6E73] font-normal">
+                                {timeStr} <span className="text-[10px] font-normal text-[#6E6E73]">{tzAbbrev}</span>
                               </p>
                             </div>
                           </div>
                         </td>
 
                         {/* Property & Unit Column */}
-                        <td className="py-4 px-5">
+                        <td className="py-4 px-6">
                           <div className="space-y-0.5 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-black text-slate-900 text-xs group-hover:text-[#007AFF] transition-colors truncate">
+                              <p className="font-semibold text-[#1D1D1F] text-xs group-hover:text-slate-900 transition-colors truncate">
                                 {tour.property.name}
                               </p>
                               {tour.unit && (
-                                <span className="bg-slate-100 text-slate-800 border border-slate-200/80 rounded-md text-[10px] font-bold px-1.5 py-0.2">
+                                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                                   Unit {tour.unit.name}
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] text-slate-400 font-medium truncate max-w-xs">
+                            <p className="text-xs text-[#6E6E73] font-normal truncate max-w-xs">
                               {tour.property.address}
                             </p>
                           </div>
                         </td>
 
                         {/* Tour Format Column */}
-                        <td className="py-4 px-5">
+                        <td className="py-4 px-6">
                           {tour.tourType === "VIDEO_CALL" ? (
-                            <span className="inline-flex items-center gap-1.5 text-purple-700 bg-purple-50 border border-purple-200/60 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs inline-flex items-center gap-1">
                               <Video className="h-3 w-3 text-purple-600" /> Virtual Video
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 text-slate-700 bg-slate-100 border border-slate-200/80 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1">
                               <MapPin className="h-3 w-3 text-slate-500" /> In-Person
                             </span>
                           )}
                         </td>
 
                         {/* Status Column */}
-                        <td className="py-4 px-5">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full text-[11px] font-extrabold px-3 py-1 border shadow-2xs ${theme.badge}`}>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider shadow-2xs inline-flex items-center gap-1.5 ${theme.badge}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
                             {theme.label}
                           </span>
@@ -745,7 +722,7 @@ export default function TenantToursPage() {
         <Dialog open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
           <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-sm p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <DialogTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-blue-600" /> Reschedule Tour
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
@@ -788,8 +765,8 @@ export default function TenantToursPage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="ghost" className="rounded-xl font-bold text-xs" onClick={() => setRescheduleOpen(false)}>Cancel</Button>
-              <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-bold text-xs" disabled={rescheduleLoading} onClick={handleRescheduleTour}>
+              <Button variant="ghost" className="rounded-xl font-medium text-xs" onClick={() => setRescheduleOpen(false)}>Cancel</Button>
+              <Button className="bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-medium text-xs" disabled={rescheduleLoading} onClick={handleRescheduleTour}>
                 {rescheduleLoading ? "Saving..." : "Confirm New Slot"}
               </Button>
             </DialogFooter>
@@ -800,7 +777,7 @@ export default function TenantToursPage() {
         <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
           <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-sm p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <DialogTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-rose-600" /> Cancel Showing Request
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
@@ -823,8 +800,8 @@ export default function TenantToursPage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="ghost" className="rounded-xl font-bold text-xs" onClick={() => setCancelOpen(false)}>Back</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs" onClick={handleCancelTour}>
+              <Button variant="ghost" className="rounded-xl font-medium text-xs" onClick={() => setCancelOpen(false)}>Back</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-medium text-xs" onClick={handleCancelTour}>
                 Yes, Cancel Showing
               </Button>
             </DialogFooter>
@@ -835,7 +812,7 @@ export default function TenantToursPage() {
         <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
           <DialogContent className="bg-white border-slate-200 text-slate-800 rounded-3xl max-w-md p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <DialogTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <Star className="h-5 w-5 text-amber-500 fill-amber-500" /> Rate Property Walkthrough
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
@@ -878,8 +855,8 @@ export default function TenantToursPage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="ghost" className="rounded-xl font-bold text-xs" onClick={() => setFeedbackOpen(false)}>Cancel</Button>
-              <Button className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs" onClick={handleSendFeedback}>
+              <Button variant="ghost" className="rounded-xl font-medium text-xs" onClick={() => setFeedbackOpen(false)}>Cancel</Button>
+              <Button className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium text-xs" onClick={handleSendFeedback}>
                 Submit Feedback
               </Button>
             </DialogFooter>
@@ -892,3 +869,4 @@ export default function TenantToursPage() {
     </div>
   );
 }
+

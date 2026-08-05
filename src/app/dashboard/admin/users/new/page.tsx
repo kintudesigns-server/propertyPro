@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -321,29 +321,29 @@ export default function AddNewUserPage() {
           <div className="flex items-center gap-2 mb-1.5">
             <Link 
               href="/dashboard/admin/users" 
-              className="text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-1.5 text-xs font-black uppercase tracking-wider"
+              className="text-slate-600 hover:text-[#1D1D1F] transition-colors flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Users Directory
             </Link>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
             Add New User Account
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-semibold">
-            Register a new platform member and configure their account role &amp; access permissions.
+          <p className="text-[#6E6E73] text-sm mt-0.5 font-normal">
+            Register a new platform member and configure their account role & access permissions.
           </p>
         </div>
         
         <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 font-sans">
           <Button 
             variant="outline" 
-            className="border-slate-200 text-slate-900 font-black text-xs h-9 px-4 rounded-xl hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
+            className="border-slate-200 text-slate-900 font-medium text-xs h-9 px-4 rounded-xl hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
             onClick={() => router.push("/dashboard/admin/users")}
           >
             Cancel
           </Button>
           <Button 
-            className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 h-9 px-5 shadow-xs transition-all cursor-pointer border-none"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl flex items-center justify-center gap-2 h-9 px-5 shadow-xs transition-all cursor-pointer border-none"
             onClick={handleSubmit}
             disabled={loading || uploadingAvatar || emailStatus === "TAKEN"}
           >
@@ -363,10 +363,10 @@ export default function AddNewUserPage() {
           <div className="space-y-4 font-sans">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-slate-700" /> 1. Account Role &amp; Access Level
                 </h3>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
                   Select the system role to assign default permissions and feature access.
                 </p>
               </div>
@@ -393,7 +393,7 @@ export default function AddNewUserPage() {
                           <IconComp className="h-4 w-4" />
                         </div>
                         <div>
-                          <h4 className="font-black text-slate-900 text-sm">
+                          <h4 className="font-semibold text-slate-900 text-sm">
                             {r.title}
                           </h4>
                         </div>
@@ -408,7 +408,7 @@ export default function AddNewUserPage() {
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-500 font-semibold mt-3 leading-relaxed">
+                    <p className="text-xs text-[#6E6E73] font-normal mt-3 leading-relaxed">
                       {r.subtitle}
                     </p>
                   </div>
@@ -436,17 +436,17 @@ export default function AddNewUserPage() {
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <User className="h-4 w-4 text-slate-700" /> 2. Personal Information
                 </h3>
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Step 2 of 4</span>
+                <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Step 2 of 4</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 
                 {/* First Name */}
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">First Name *</Label>
+                  <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">First Name *</Label>
                   <Input 
                     name="firstName"
                     placeholder="e.g. Sarah"
@@ -458,7 +458,7 @@ export default function AddNewUserPage() {
 
                 {/* Last Name */}
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Last Name</Label>
+                  <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Last Name</Label>
                   <Input 
                     name="lastName"
                     placeholder="e.g. Jenkins"
@@ -471,7 +471,7 @@ export default function AddNewUserPage() {
                 {/* Email Address with Real-time Check */}
                 <div className="space-y-1.5 sm:col-span-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Email Address *</Label>
+                    <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Email Address *</Label>
                     {checkingEmail && (
                       <span className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wider flex items-center gap-1">
                         <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
@@ -512,7 +512,7 @@ export default function AddNewUserPage() {
 
                 {/* Phone Number */}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Phone Number (Optional)</Label>
+                  <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Phone Number (Optional)</Label>
                   <Input 
                     type="tel"
                     name="phone"
@@ -531,7 +531,7 @@ export default function AddNewUserPage() {
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <KeyRound className="h-4 w-4 text-emerald-600" /> 3. Security &amp; Credentials
                 </h3>
 
@@ -577,13 +577,13 @@ export default function AddNewUserPage() {
               ) : (
                 <div className="space-y-5 animate-in fade-in duration-200 font-sans">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Manual Password Configuration</span>
+                    <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Manual Password Configuration</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={handleGeneratePassword}
-                      className="text-xs font-black text-slate-900 hover:bg-slate-100 h-8 rounded-lg flex items-center gap-1.5 cursor-pointer"
+                      className="text-xs font-medium text-slate-900 hover:bg-slate-100 h-8 rounded-lg flex items-center gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Generate Random Password
                     </Button>
@@ -593,7 +593,7 @@ export default function AddNewUserPage() {
                     
                     {/* Password Input */}
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Initial Password *</Label>
+                      <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Initial Password *</Label>
                       <div className="relative">
                         <Input 
                           type={showPassword ? "text" : "password"}
@@ -615,7 +615,7 @@ export default function AddNewUserPage() {
 
                     {/* Confirm Password Input */}
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Confirm Password *</Label>
+                      <Label className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider block">Confirm Password *</Label>
                       <div className="relative">
                         <Input 
                           type={showConfirmPassword ? "text" : "password"}
@@ -662,7 +662,7 @@ export default function AddNewUserPage() {
           {/* Section 4: Internal Admin Notes */}
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-4">
-              <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
                 <FileText className="h-4 w-4 text-purple-600" /> 4. Internal Admin Notes (Optional)
               </h3>
               <textarea
@@ -720,14 +720,14 @@ export default function AddNewUserPage() {
                 )}
               </div>
 
-              <h3 className="font-black text-slate-900 text-sm">Profile Avatar</h3>
+              <h3 className="font-semibold text-slate-900 text-sm">Profile Avatar</h3>
               <p className="text-xs text-slate-500 mt-0.5 mb-4 font-semibold">Supports JPG, PNG, or WEBP up to 10MB</p>
               
               {avatarUrl ? (
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-medium rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                   onClick={() => setAvatarUrl("")}
                 >
                   <X className="h-3.5 w-3.5" /> Remove Photo
@@ -737,7 +737,7 @@ export default function AddNewUserPage() {
                   variant="outline" 
                   size="sm"
                   disabled={uploadingAvatar}
-                  className="w-full border-slate-200 font-black rounded-xl text-slate-900 text-xs hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
+                  className="w-full border-slate-200 font-medium rounded-xl text-slate-900 text-xs hover:bg-slate-50 bg-white shadow-2xs cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Select Photo File
@@ -749,7 +749,7 @@ export default function AddNewUserPage() {
           {/* Account Status & Welcome Email Settings */}
           <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
             <CardContent className="p-6 space-y-5">
-              <h3 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
+              <h3 className="font-semibold text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-slate-700" /> Account Configurations
               </h3>
 
@@ -757,8 +757,8 @@ export default function AddNewUserPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-extrabold text-slate-900 text-xs">Active Status</h4>
-                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                    <h4 className="font-semibold text-slate-900 text-xs">Active Status</h4>
+                    <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                       formData.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
                     }`}>
                       {formData.isActive ? "ACTIVE" : "SUSPENDED"}
@@ -779,7 +779,7 @@ export default function AddNewUserPage() {
               {/* Welcome Email Switch */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
-                  <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                  <h4 className="font-semibold text-slate-900 text-xs flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-slate-700" /> Welcome Email
                   </h4>
                   <p className="text-[11px] text-slate-500 font-semibold leading-normal">
@@ -829,3 +829,4 @@ export default function AddNewUserPage() {
     </div>
   );
 }
+

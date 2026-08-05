@@ -100,7 +100,7 @@ export default function CheckoutForm({
             type="button"
             variant="outline"
             onClick={onBack}
-            className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+            className="h-12 px-5 rounded-xl border-slate-200 font-medium text-[#6E6E73] hover:bg-[#F5F5F7]"
             disabled={isProcessing}
           >
             <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -110,7 +110,7 @@ export default function CheckoutForm({
         <Button
           type="submit"
           disabled={!stripe || !elements || isProcessing || !ready}
-          className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-60"
+          className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-60"
         >
           {isProcessing ? (
             <>

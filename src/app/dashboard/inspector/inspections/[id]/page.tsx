@@ -129,8 +129,8 @@ export default function ConductInspectionPage() {
   if (loading || status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-        <p className="text-[#8E8E93] font-extrabold text-sm tracking-wider uppercase">Loading property details...</p>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-900"></div>
+        <p className="text-slate-500 font-extrabold text-sm tracking-wider uppercase">Loading property details...</p>
       </div>
     );
   }
@@ -138,87 +138,94 @@ export default function ConductInspectionPage() {
   if (!lease) return null;
 
   return (
-    <div className="flex flex-col max-w-2xl mx-auto w-full pb-20 pt-4">
-      {/* Mobile-friendly Header */}
-      <div className="flex items-center gap-3 mb-6 px-4 md:px-0">
-        <Link href="/dashboard/inspector">
-          <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-slate-200 bg-white">
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-xl font-black text-slate-900 leading-tight">
-            Conduct {inspectionType === "PRELIMINARY" ? "Preliminary" : "Final"} Walkthrough
-          </h1>
-          <p className="text-sm font-semibold text-[#6E6E73]">{lease.unit?.property?.name} - {lease.unit?.name}</p>
+    <div className="flex flex-col max-w-4xl mx-auto w-full pb-20 pt-4 font-sans space-y-6">
+      {/* Breadcrumbs & Header */}
+      <div className="px-4 md:px-0 space-y-3">
+        <div className="flex items-center gap-2 text-xs font-normal text-[#6E6E73]">
+          <Link href="/dashboard/inspector" className="hover:text-[#1D1D1F] transition-colors">Dashboard</Link>
+          <span>/</span>
+          <Link href="/dashboard/inspector/inspections" className="hover:text-[#1D1D1F] transition-colors">Walkthroughs</Link>
+          <span>/</span>
+          <span className="text-[#1D1D1F] font-semibold">{lease.unit?.property?.name}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/inspector/inspections">
+            <button className="h-9 w-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
+              Conduct {inspectionType === "PRELIMINARY" ? "Preliminary" : "Final"} Walkthrough
+            </h1>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{lease.unit?.property?.name} &bull; Unit {lease.unit?.name}</p>
+          </div>
         </div>
       </div>
 
       <div className="px-4 md:px-0 space-y-6">
         
         {/* Info Card */}
-        <Card className="bg-indigo-50/50 border-indigo-100 shadow-none rounded-2xl">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Tenant</p>
-              <p className="font-bold text-indigo-900">{lease.tenant?.name || "N/A"}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Move Out Date</p>
-              <p className="font-bold text-indigo-900">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "N/A"}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-2xs font-sans flex justify-between items-center">
+          <div>
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-0.5">Tenant</p>
+            <p className="text-xs font-semibold text-[#1D1D1F]">{lease.tenant?.name || "N/A"}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-0.5">Move Out Date</p>
+            <p className="text-xs font-semibold text-[#1D1D1F]">{lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "N/A"}</p>
+          </div>
+        </div>
 
         {/* Preliminary Inspection Findings */}
         {inspectionType === "FINAL" && lease.preliminaryInspectionStatus === "COMPLETED" && (
-          <Card className="border-amber-200 bg-amber-50/50 shadow-none rounded-2xl overflow-hidden">
-            <CardHeader className="py-4 px-5 border-b border-amber-100 bg-amber-50">
-              <CardTitle className="text-sm font-black text-amber-900">
+          <div className="bg-amber-50/70 border border-amber-200/70 rounded-2xl p-5 shadow-2xs font-sans space-y-3">
+            <div className="space-y-0.5">
+              <h3 className="text-xs font-semibold text-amber-950">
                 Preliminary Walkthrough Report (For Reference)
-              </CardTitle>
-              <CardDescription className="text-xs text-amber-700 font-semibold mt-0.5">
+              </h3>
+              <p className="text-xs font-normal text-amber-800">
                 Completed on {new Date(lease.preliminaryInspectionDate).toLocaleDateString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-5 space-y-3">
-              {lease.preliminaryInspectionNotes && (
-                <div className="text-xs text-amber-800 font-medium">
-                  <strong>Notes:</strong> {lease.preliminaryInspectionNotes}
-                </div>
-              )}
-              {lease.preliminaryDeductions && Array.isArray(lease.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
-                <div className="space-y-2 mt-2">
-                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Logged Remediation Items:</p>
-                  {lease.preliminaryDeductions.map((pd: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center text-xs bg-white p-2.5 rounded-xl border border-amber-100 font-semibold text-amber-900">
-                      <span>{pd.description} ({pd.category.replace("_", " ")})</span>
-                      <span className="text-amber-600">${Number(pd.amount).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-amber-700 italic">No deductions logged during preliminary walkthrough.</p>
-              )}
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+            {lease.preliminaryInspectionNotes && (
+              <div className="text-xs font-normal text-amber-900 leading-relaxed">
+                <strong className="font-semibold">Notes:</strong> {lease.preliminaryInspectionNotes}
+              </div>
+            )}
+            {lease.preliminaryDeductions && Array.isArray(lease.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
+              <div className="space-y-2 mt-2">
+                <p className="text-xs font-normal text-amber-800 uppercase tracking-wider">Logged Remediation Items:</p>
+                {lease.preliminaryDeductions.map((pd: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white border border-amber-200 rounded-xl text-xs font-semibold text-amber-950 shadow-2xs flex justify-between items-center">
+                    <span>{pd.description} ({pd.category.replace("_", " ")})</span>
+                    <span className="text-amber-700">${Number(pd.amount).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs font-normal text-amber-800 italic">No deductions logged during preliminary walkthrough.</p>
+            )}
+          </div>
         )}
 
         {/* Deductions Builder */}
-        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-slate-50 border-b border-slate-100 py-4 px-5">
-            <CardTitle className="text-lg font-black text-slate-900 flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-indigo-600" />
-              Log Damages & Deductions
-            </CardTitle>
-            <CardDescription className="text-xs font-semibold text-[#6E6E73]">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 md:p-8 space-y-6 font-sans">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-slate-700" />
+              Log Damages &amp; Deductions
+            </h3>
+            <p className="text-xs font-normal text-[#6E6E73]">
               Record any issues found during the walkthrough. These will be reviewed by the owner.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 space-y-6">
+            </p>
+          </div>
+
+          <div className="space-y-6">
             
             {/* No Damages Checkbox */}
-            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 p-4 rounded-xl">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs flex items-center gap-3">
               <input
                 id="no-damages"
                 type="checkbox"
@@ -227,9 +234,9 @@ export default function ConductInspectionPage() {
                   setNoDamagesFound(e.target.checked);
                   if (e.target.checked) setDeductions([]);
                 }}
-                className="h-5 w-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                className="h-4 w-4 text-slate-900 border-slate-300 rounded focus:ring-slate-400 cursor-pointer"
               />
-              <Label htmlFor="no-damages" className="text-sm font-bold text-slate-700 cursor-pointer select-none">
+              <Label htmlFor="no-damages" className="text-xs font-semibold text-[#1D1D1F] cursor-pointer select-none">
                 No damages or issues found (Clear condition)
               </Label>
             </div>
@@ -237,12 +244,12 @@ export default function ConductInspectionPage() {
             {/* New Deduction Form */}
             {!noDamagesFound && (
               <div className="space-y-4">
-              <div>
-                <Label className="text-xs font-bold text-[#6E6E73] uppercase">Category</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Category</Label>
                 <select
                   value={newDeduction.category}
                   onChange={(e) => setNewDeduction({ ...newDeduction, category: e.target.value })}
-                  className="mt-1 w-full h-11 bg-white border border-slate-200 rounded-xl px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                 >
                   <option value="DAMAGE">Physical Damage</option>
                   <option value="CLEANING">Cleaning Required</option>
@@ -252,22 +259,22 @@ export default function ConductInspectionPage() {
                 </select>
               </div>
 
-              <div>
-                <Label className="text-xs font-bold text-[#6E6E73] uppercase">Description</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Description</Label>
                 <Input
                   placeholder="e.g., Hole in living room wall"
                   value={newDeduction.description}
                   onChange={(e) => setNewDeduction({ ...newDeduction, description: e.target.value })}
-                  className="mt-1 h-11 bg-white border-slate-200 rounded-xl text-sm font-medium"
+                  className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
                 />
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <Label className="text-xs font-bold text-[#6E6E73] uppercase">Attach Photo Evidence</Label>
-                  <div className="mt-1 flex items-center gap-3">
-                    <label className="flex items-center justify-center h-11 px-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-[#F2F2F7] cursor-pointer text-xs font-bold text-slate-600 gap-2 shrink-0">
-                      <Camera className="h-5 w-5 text-[#6E6E73]" />
+                <div className="flex-1 space-y-1.5">
+                  <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Attach Photo Evidence</Label>
+                  <div className="flex items-center gap-3">
+                    <label className="h-9 px-3.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl cursor-pointer text-xs font-medium text-slate-700 flex items-center justify-center gap-2 shadow-2xs transition-all shrink-0">
+                      <Camera className="h-4 w-4 text-slate-500" />
                       {uploadingPhoto ? "Uploading..." : newDeductionPhotoUrl ? "Change Photo" : "Take Photo / Upload"}
                       <input 
                         type="file" 
@@ -278,12 +285,12 @@ export default function ConductInspectionPage() {
                       />
                     </label>
                     {newDeductionPhotoUrl && (
-                      <div className="relative h-11 w-11 rounded-lg overflow-hidden border border-slate-200 shrink-0">
+                      <div className="relative h-9 w-9 rounded-xl overflow-hidden border border-slate-200 shrink-0 shadow-2xs">
                         <img src={newDeductionPhotoUrl} alt="Preview" className="h-full w-full object-cover" />
                         <button 
                           type="button"
                           onClick={() => setNewDeductionPhotoUrl("")}
-                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5 text-[8px] font-bold h-4 w-4 flex items-center justify-center"
+                          className="absolute top-0.5 right-0.5 bg-rose-600 text-white rounded-full p-0.5 text-[8px] font-bold h-3.5 w-3.5 flex items-center justify-center cursor-pointer"
                         >
                           ×
                         </button>
@@ -293,12 +300,12 @@ export default function ConductInspectionPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-1">
                 <Button 
                   onClick={handleAddDeduction}
-                  className="w-full h-11 bg-slate-900 hover:bg-[#007AFF] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-none"
+                  className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Plus className="h-5 w-5" /> Add Damage Finding
+                  <Plus className="h-4 w-4 text-white" /> Add Damage Finding
                 </Button>
               </div>
             </div>
@@ -307,22 +314,22 @@ export default function ConductInspectionPage() {
             {/* List of Deductions */}
             {deductions.length > 0 && (
               <div className="mt-6 space-y-3">
-                <h4 className="text-xs font-bold text-[#8E8E93] uppercase border-b border-slate-100 pb-2">Logged Items ({deductions.length})</h4>
+                <h4 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider border-b border-slate-100 pb-2">Logged Items ({deductions.length})</h4>
                 {deductions.map((d, index) => (
-                  <div key={index} className="flex justify-between items-start p-3 bg-red-50 border border-red-100 rounded-xl gap-4">
+                  <div key={index} className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl shadow-2xs flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold text-slate-900">{d.description}</p>
+                        <p className="text-xs font-semibold text-[#1D1D1F]">{d.description}</p>
                         {d.photoUrl && (
-                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                            <Camera className="h-3 w-3" /> Photo Attached
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs inline-flex items-center gap-1">
+                            <Camera className="h-3 w-3 text-emerald-600" /> Photo Attached
                           </span>
                         )}
                       </div>
-                      <p className="text-xs font-semibold text-red-500 mt-0.5">{d.category.replace("_", " ")}</p>
+                      <p className="text-xs font-normal text-rose-700 mt-0.5">{d.category.replace("_", " ")}</p>
                       
                       {d.photoUrl && (
-                        <div className="mt-2 rounded-lg overflow-hidden border border-slate-100 max-w-[120px] shadow-sm bg-slate-50">
+                        <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 max-w-[120px] shadow-2xs bg-white">
                           <img 
                             src={d.photoUrl} 
                             alt="Damage evidence" 
@@ -332,10 +339,10 @@ export default function ConductInspectionPage() {
                         </div>
                       )}
                     </div>
-                    <div className="text-right flex items-center gap-4 shrink-0">
+                    <div className="text-right flex items-center gap-2 shrink-0">
                       <button 
                         onClick={() => removeDeduction(index)}
-                        className="text-red-400 hover:text-red-600 p-2"
+                        className="text-rose-600 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-100/50 cursor-pointer transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -345,40 +352,40 @@ export default function ConductInspectionPage() {
               </div>
             )}
 
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Notes */}
-        <div className="space-y-2">
-          <Label className="text-xs font-bold text-[#6E6E73] uppercase pl-1">Inspector Notes</Label>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Inspector Notes</Label>
           <textarea
             placeholder="General assessment of the property's condition..."
             value={inspectionNotes}
             onChange={(e) => setInspectionNotes(e.target.value)}
-            className="w-full h-32 bg-white border border-slate-200 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none shadow-sm"
+            className="w-full min-h-[100px] rounded-xl border border-slate-200 bg-white p-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all resize-none"
           />
         </div>
 
         {/* Declaration Checkbox */}
-        <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs flex items-start gap-3">
           <input
             id="declaration-checkbox"
             type="checkbox"
             checked={signed}
             onChange={(e) => setSigned(e.target.checked)}
-            className="h-5 w-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5 cursor-pointer"
+            className="h-4 w-4 text-slate-900 border-slate-300 rounded focus:ring-slate-400 mt-0.5 cursor-pointer shrink-0"
           />
-          <Label htmlFor="declaration-checkbox" className="text-xs font-semibold text-slate-600 leading-normal cursor-pointer select-none">
+          <Label htmlFor="declaration-checkbox" className="text-xs font-normal text-[#6E6E73] leading-relaxed cursor-pointer select-none">
             I hereby declare that I have personally inspected this unit, and the damages, deductions, and notes logged above represent a true and accurate assessment of the property's condition for this {inspectionType === "PRELIMINARY" ? "preliminary" : "final"} walkthrough.
           </Label>
         </div>
 
-        {/* Submit Button - Fixed to bottom on mobile, inline on desktop */}
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-200 md:relative md:bg-transparent md:border-0 md:p-0 z-10">
+        {/* Submit Button */}
+        <div>
           <Button 
             onClick={handleSubmit}
             disabled={submitting || !signed}
-            className="w-full h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg shadow-lg shadow-indigo-500/30 disabled:opacity-50"
+            className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2"
           >
             {submitting ? "Submitting..." : `Submit ${inspectionType === "PRELIMINARY" ? "Preliminary" : "Final"} Report`}
           </Button>

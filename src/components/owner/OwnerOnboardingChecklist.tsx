@@ -50,7 +50,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/3 flex flex-col justify-center">
           <div className="mb-4">
-            <h2 className="text-xl font-bold text-slate-900 mb-1">Welcome to PropertyPro! 🎉</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-1">Welcome to PropertyPro! 🎉</h2>
             <p className="text-[#6E6E73] text-sm">Let's get your account set up so you can start managing your portfolio.</p>
           </div>
           
@@ -63,7 +63,7 @@ export default function OwnerOnboardingChecklist({ onComplete, properties, lease
           </div>
           
           {percentage === 100 && (
-             <button onClick={handleDismiss} className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors">
+             <button onClick={handleDismiss} className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors">
                Go to Dashboard
              </button>
           )}

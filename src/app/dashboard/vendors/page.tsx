@@ -44,7 +44,7 @@ export default function VendorsPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Verifying vendor access...</p>
+        <p className="text-slate-400 font-medium text-[11px] uppercase tracking-wider">Verifying vendor access...</p>
       </div>
     );
   }
@@ -171,18 +171,18 @@ export default function VendorsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#1D1D1F] tracking-tight">Vendor Directory</h1>
-          <p className="text-[#6E6E73] mt-1 text-sm font-medium">Manage your network of 3rd-party contractors and specialists.</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Vendor Directory</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-1">Manage your network of 3rd-party contractors and specialists.</p>
         </div>
         
         <div className="flex flex-col items-end gap-1">
           <Link href="/dashboard/vendors/new">
             <Button
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2 rounded-xl h-11 px-5 shadow-sm text-sm border-none"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4" />
               <span>Add New Vendor</span>
             </Button>
           </Link>
@@ -191,28 +191,28 @@ export default function VendorsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 md:p-8 font-sans border border-slate-200 bg-white shadow-2xs max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Edit Vendor</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-[#1D1D1F] tracking-tight">Edit Vendor</DialogTitle>
           </DialogHeader>
           {editVendor && (
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Company / Name *</Label>
-                <Input value={editVendor.name} onChange={e => setEditVendor({...editVendor, name: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
+            <div className="grid gap-4 py-2 font-sans">
+              <div className="space-y-1">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Company / Name *</Label>
+                <Input value={editVendor.name} onChange={e => setEditVendor({...editVendor, name: e.target.value})} className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
               </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Email *</Label>
-                <Input value={editVendor.email} onChange={e => setEditVendor({...editVendor, email: e.target.value})} type="email" className="h-11 rounded-xl bg-slate-50" />
+              <div className="space-y-1">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Email *</Label>
+                <Input value={editVendor.email} onChange={e => setEditVendor({...editVendor, email: e.target.value})} type="email" className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
               </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Phone</Label>
-                <Input value={editVendor.phone} onChange={e => setEditVendor({...editVendor, phone: e.target.value})} className="h-11 rounded-xl bg-slate-50" />
+              <div className="space-y-1">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Phone</Label>
+                <Input value={editVendor.phone} onChange={e => setEditVendor({...editVendor, phone: e.target.value})} className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
               </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Specialty *</Label>
+              <div className="space-y-1">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Specialty *</Label>
                 <Select value={editVendor.specialty} onValueChange={v => setEditVendor({...editVendor, specialty: v || "General"})}>
-                  <SelectTrigger className="w-full h-11 rounded-xl bg-slate-50 border-[#E5E5EA]">
+                  <SelectTrigger className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer">
                     <SelectValue placeholder="Select specialty" />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,34 +228,34 @@ export default function VendorsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-[12px] text-[#1D1D1F] uppercase">Base Call-Out Fee ($)</Label>
-                <Input value={editVendor.baseCallOutFee} onChange={e => setEditVendor({...editVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="h-11 rounded-xl bg-slate-50" />
+              <div className="space-y-1">
+                <Label className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider block">Base Call-Out Fee ($)</Label>
+                <Input value={editVendor.baseCallOutFee} onChange={e => setEditVendor({...editVendor, baseCallOutFee: e.target.value})} type="number" min="0" step="0.01" className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
               </div>
               
-              <div className="space-y-4 pt-4 border-t border-[#E5E5EA] mt-2">
+              <div className="space-y-4 pt-3 border-t border-slate-100 mt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#1D1D1F]">W-9 Form on File</Label>
-                    <p className="text-[11px] text-[#6E6E73]">Required for 1099 tax reporting.</p>
+                    <Label className="text-xs font-semibold text-[#1D1D1F]">W-9 Form on File</Label>
+                    <p className="text-xs font-normal text-[#6E6E73]">Required for 1099 tax reporting.</p>
                   </div>
                   <Switch checked={editVendor.w9OnFile} onCheckedChange={c => setEditVendor({...editVendor, w9OnFile: c})} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-bold text-[#1D1D1F]">Liability Insurance</Label>
-                    <p className="text-[11px] text-[#6E6E73]">Verify active insurance coverage.</p>
+                    <Label className="text-xs font-semibold text-[#1D1D1F]">Liability Insurance</Label>
+                    <p className="text-xs font-normal text-[#6E6E73]">Verify active insurance coverage.</p>
                   </div>
                   <Switch checked={editVendor.insuranceOnFile} onCheckedChange={c => setEditVendor({...editVendor, insuranceOnFile: c})} />
                 </div>
               </div>
             </div>
           )}
-          <div className="flex justify-end gap-3 mt-4">
-            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="rounded-xl font-bold border-[#E5E5EA]">
+          <div className="flex justify-end gap-3 mt-4 font-sans">
+            <Button type="button" variant="outline" onClick={() => setEditOpen(false)} className="border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs h-9 px-4 rounded-xl shadow-2xs cursor-pointer">
               Cancel
             </Button>
-            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl px-8 shadow-sm">
+            <Button onClick={handleEdit} disabled={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs h-9 px-4 rounded-xl shadow-xs border-none cursor-pointer">
               Update Vendor
             </Button>
           </div>
@@ -263,20 +263,20 @@ export default function VendorsPage() {
       </Dialog>
 
       {/* Toolbar */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E5E5EA] flex flex-col md:flex-row gap-4 justify-between">
+      <div className="bg-white p-4 rounded-2xl shadow-2xs border border-slate-200 flex flex-col md:flex-row gap-4 justify-between font-sans">
         <div className="flex flex-col sm:flex-row gap-3 w-full md:max-w-xl">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
             <Input 
               placeholder="Search vendors or specialties..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-11 bg-slate-50 border-[#E5E5EA] rounded-xl text-sm font-medium focus-visible:ring-[#007AFF]"
+              className="w-full h-9 rounded-xl border border-slate-200 bg-white pl-10 px-3.5 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all"
             />
           </div>
           <Select value={filterSpecialty} onValueChange={(v) => setFilterSpecialty(v || "All")}>
-            <SelectTrigger className="w-full sm:w-[200px] h-11 bg-slate-50 border-[#E5E5EA] rounded-xl">
-              <Filter className="h-4 w-4 mr-2 text-[#94A3B8]" />
+            <SelectTrigger className="w-full sm:w-[200px] h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-normal text-[#1D1D1F] focus:outline-none focus:border-slate-400 shadow-2xs transition-all cursor-pointer">
+              <Filter className="h-3.5 w-3.5 mr-2 text-[#6E6E73]" />
               <SelectValue placeholder="All Specialties" />
             </SelectTrigger>
             <SelectContent>
@@ -296,82 +296,82 @@ export default function VendorsPage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-[#6E6E73] font-medium">Loading directory...</div>
+          <div className="col-span-full py-12 text-center text-[#6E6E73] font-normal text-xs">Loading directory...</div>
         ) : filtered.length === 0 ? (
-          <div className="col-span-full py-12 text-center bg-white border border-dashed border-[#CBD5E1] rounded-2xl">
-            <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Wrench className="h-6 w-6 text-[#94A3B8]" />
+          <div className="col-span-full py-12 text-center bg-white border border-dashed border-slate-300 rounded-3xl p-8 font-sans">
+            <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-700 shadow-2xs">
+              <Wrench className="h-5 w-5" />
             </div>
-            <h3 className="text-[#1D1D1F] font-bold text-lg mb-1">No Vendors Found</h3>
-            <p className="text-[#6E6E73] text-sm">Add a vendor to your directory to start dispatching maintenance requests.</p>
+            <h3 className="text-[#1D1D1F] font-semibold text-base mb-1">No Vendors Found</h3>
+            <p className="text-[#6E6E73] text-xs font-normal">Add a vendor to your directory to start dispatching maintenance requests.</p>
           </div>
         ) : (
           filtered.map((vendor) => (
-            <Card key={vendor.id} className="bg-white border border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all group">
+            <div key={vendor.id} className="bg-white border border-slate-200 shadow-2xs rounded-3xl overflow-hidden hover:shadow-xs transition-all group font-sans">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
-                      <Wrench className="h-6 w-6" />
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200/60 shrink-0 shadow-2xs">
+                      <Wrench className="h-5 w-5" />
                     </div>
-                    <div className="truncate pr-4 min-w-0">
-                      <h3 className="font-bold text-[#1D1D1F] text-lg leading-tight truncate">{vendor.name}</h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 mt-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-[#6E6E73]">
+                    <div className="truncate pr-2 min-w-0">
+                      <h3 className="font-semibold text-[#1D1D1F] text-base leading-tight truncate">{vendor.name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 mt-1 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                         {vendor.specialty}
                       </span>
                     </div>
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="h-8 w-8 text-[#94A3B8] hover:text-[#1D1D1F] hover:bg-[#F2F2F7] rounded-lg flex items-center justify-center transition-colors shrink-0 outline-none">
-                      <MoreHorizontal className="h-5 w-5" />
+                    <DropdownMenuTrigger className="h-8 w-8 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors shrink-0 outline-none cursor-pointer">
+                      <MoreHorizontal className="h-4 w-4" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5 shadow-lg border-slate-200">
-                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}`)} className="cursor-pointer font-bold text-slate-800 py-2 focus:bg-slate-50 rounded-lg">
-                        <Eye className="h-4 w-4 mr-2 text-amber-600" /> View Vendor Profile
+                    <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-md border-slate-200 font-sans">
+                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}`)} className="cursor-pointer font-medium text-xs text-[#1D1D1F] py-2 focus:bg-slate-50 rounded-xl">
+                        <Eye className="h-4 w-4 mr-2 text-slate-700" /> View Vendor Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}/edit`)} className="cursor-pointer font-semibold text-slate-700 py-2 focus:bg-slate-50 rounded-lg">
-                        <Edit className="h-4 w-4 mr-2 text-[#8E8E93]" /> Edit Vendor Info
+                      <DropdownMenuItem onClick={() => router.push(`/dashboard/vendors/${vendor.id}/edit`)} className="cursor-pointer font-medium text-xs text-[#1D1D1F] py-2 focus:bg-slate-50 rounded-xl">
+                        <Edit className="h-4 w-4 mr-2 text-slate-500" /> Edit Vendor Info
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(vendor.id)} className="cursor-pointer font-medium text-red-600 py-2 focus:bg-red-50 focus:text-red-700 rounded-lg">
-                        <Trash className="h-4 w-4 mr-2 text-red-500" /> Remove Vendor
+                      <DropdownMenuItem onClick={() => handleDelete(vendor.id)} className="cursor-pointer font-medium text-xs text-rose-600 py-2 focus:bg-rose-50 rounded-xl">
+                        <Trash className="h-4 w-4 mr-2 text-rose-500" /> Remove Vendor
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
-                    <Mail className="h-4 w-4 text-[#94A3B8]" />
-                    <a href={`mailto:${vendor.email}`} className="hover:text-[#007AFF] hover:underline truncate">{vendor.email}</a>
+                <div className="space-y-2.5 pt-3.5 border-t border-slate-100">
+                  <div className="flex items-center gap-2.5 text-xs font-normal text-[#6E6E73]">
+                    <Mail className="h-4 w-4 text-slate-400" />
+                    <a href={`mailto:${vendor.email}`} className="hover:text-[#1D1D1F] hover:underline truncate">{vendor.email}</a>
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
-                    <Phone className="h-4 w-4 text-[#94A3B8]" />
+                  <div className="flex items-center gap-2.5 text-xs font-normal text-[#6E6E73]">
+                    <Phone className="h-4 w-4 text-slate-400" />
                     <span>{vendor.phone || "No phone provided"}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#6E6E73]">
-                    <DollarSign className="h-4 w-4 text-[#94A3B8]" />
+                  <div className="flex items-center gap-2.5 text-xs font-normal text-[#6E6E73]">
+                    <DollarSign className="h-4 w-4 text-slate-400" />
                     <span>{vendor.baseCallOutFee > 0 ? `$${vendor.baseCallOutFee.toFixed(2)} Base Fee` : "No base fee set"}</span>
                   </div>
                 </div>
 
                 {/* Compliance Badges */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${vendor.w9OnFile ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs flex items-center gap-1 ${vendor.w9OnFile ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                     <FileSignature className="h-3 w-3" /> W-9 {vendor.w9OnFile ? 'On File' : 'Missing'}
-                  </div>
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${vendor.insuranceOnFile ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs flex items-center gap-1 ${vendor.insuranceOnFile ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                     <ShieldAlert className="h-3 w-3" /> Insurance {vendor.insuranceOnFile ? 'Active' : 'Missing'}
-                  </div>
+                  </span>
                 </div>
                 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs font-bold text-[#94A3B8] uppercase">
-                  <span>Jobs Completed: <span className="text-[#1D1D1F]">{vendor._count?.maintenanceRequests || 0}</span></span>
-                  <span className="flex items-center gap-1 text-emerald-600"><CheckCircle2 className="h-3.5 w-3.5" /> Active</span>
+                <div className="mt-5 pt-3.5 border-t border-slate-100 flex justify-between items-center text-xs font-normal text-[#6E6E73]">
+                  <span>Jobs Completed: <strong className="font-semibold text-[#1D1D1F]">{vendor._count?.maintenanceRequests || 0}</strong></span>
+                  <span className="flex items-center gap-1 text-slate-700 font-medium"><CheckCircle2 className="h-3.5 w-3.5" /> Active</span>
                 </div>
               </div>
-            </Card>
+            </div>
           ))
         )}
       </div>

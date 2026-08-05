@@ -182,15 +182,15 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h2 className="text-2xl font-black text-slate-900">{initialData ? "Edit Property" : "Add New Property"}</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{initialData ? "Edit Property" : "Add New Property"}</h2>
             <p className="text-sm text-[#6E6E73] mt-1">Complete the details below to list your property.</p>
           </div>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl px-6 h-11 font-bold">
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-[#F5F5F7] rounded-xl px-6 h-11 font-medium">
             Cancel
           </Button>
-          <Button type="submit" disabled={loading} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 h-11 rounded-xl shadow-md">
+          <Button type="submit" disabled={loading} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 h-11 rounded-xl shadow-md">
             {loading ? "Saving..." : "Save Property"}
           </Button>
         </div>
@@ -200,7 +200,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
       <Card className="bg-white border border-slate-100 rounded-[28px] p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
           <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl"><Folder className="h-5 w-5" /></div>
-          <h3 className="text-lg font-bold text-slate-900">General Information</h3>
+          <h3 className="text-lg font-semibold text-slate-900">General Information</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -245,7 +245,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
       <Card className="bg-white border border-slate-100 rounded-[28px] p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
           <div className="bg-red-50 text-red-500 p-2.5 rounded-xl"><MapPin className="h-5 w-5" /></div>
-          <h3 className="text-lg font-bold text-slate-900">Address</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Address</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="col-span-1 md:col-span-2 space-y-2">
@@ -276,9 +276,9 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="bg-purple-50 text-purple-600 p-2.5 rounded-xl"><Building2 className="h-5 w-5" /></div>
-            <h3 className="text-lg font-bold text-slate-900">Unit Management</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Unit Management</h3>
           </div>
-          <Button type="button" onClick={handleAddUnit} className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-full h-9 px-4 text-xs flex items-center gap-1.5 transition-colors">
+          <Button type="button" onClick={handleAddUnit} className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium rounded-full h-9 px-4 text-xs flex items-center gap-1.5 transition-colors">
             <Plus className="h-4 w-4" /> Add Unit
           </Button>
         </div>
@@ -356,7 +356,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
           <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl"><Star className="h-5 w-5" /></div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Amenities & Features</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Amenities & Features</h3>
             <p className="text-sm text-[#6E6E73] mt-0.5">Select the core amenities and features that best describe this property.</p>
           </div>
         </div>
@@ -403,7 +403,7 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
           <div className="bg-green-50 text-green-500 p-2.5 rounded-xl"><ImageIcon className="h-5 w-5" /></div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Property Images</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Property Images</h3>
             <p className="text-sm text-[#6E6E73] mt-0.5">Upload high-quality images to showcase your property.</p>
           </div>
         </div>
@@ -420,14 +420,14 @@ export function PropertyForm({ initialData, onSave, onCancel }: PropertyFormProp
           <div className="bg-blue-100 text-blue-600 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <UploadCloud className="h-8 w-8" />
           </div>
-          <h4 className="text-lg font-bold text-slate-900 mb-1">Upload property images</h4>
+          <h4 className="text-lg font-semibold text-slate-900 mb-1">Upload property images</h4>
           <p className="text-sm text-[#6E6E73] mb-4">Drag and drop your images here, or click to browse files</p>
           <div className="flex items-center justify-center gap-4 text-xs font-bold text-green-600 mb-6">
             <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> PNG, JPG, GIF</span>
             <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Up to 10MB each</span>
             <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> {formData.images.length}/20 uploaded</span>
           </div>
-          <Button type="button" variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50 bg-white rounded-xl h-11 px-6 font-bold" disabled={isUploading}>
+          <Button type="button" variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50 bg-white rounded-xl h-11 px-6 font-medium" disabled={isUploading}>
             <ImageIcon className="h-4 w-4 mr-2" />
             {isUploading ? "Uploading..." : "Choose Files"}
           </Button>

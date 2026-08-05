@@ -320,61 +320,61 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
           </div>
 
         ) : (
-          /* ─── SUBSCRIPTION TIER LOCK CARD — Premium Apple iOS Aesthetic ─── */
-          <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-3xl border border-white shadow-2xl ring-1 ring-slate-900/10 p-5 sm:p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-400 pointer-events-auto">
+          /* ─── SUBSCRIPTION TIER LOCK CARD — Clean Platform Aesthetic ─── */
+          <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-3xl border border-slate-200 shadow-2xl ring-1 ring-slate-900/5 p-5 sm:p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-400 pointer-events-auto font-sans">
           
             {/* Header Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-emerald-50/90 border border-emerald-300/80 rounded-full text-[10px] font-black text-emerald-800 uppercase tracking-widest shadow-2xs">
-              <Sparkles size={11} className="stroke-[2.5] text-emerald-600" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-100 border border-slate-200 rounded-md text-[10px] font-medium text-slate-700 uppercase tracking-wider shadow-2xs">
+              <Sparkles size={11} className="text-slate-600" />
               Available on {details.requiredTier} Plan
             </div>
 
             {/* Icon Header */}
             <div className="relative inline-flex items-center justify-center">
               <div className="relative">
-                <div className="h-12 w-12 bg-slate-100/80 rounded-2xl border border-slate-200/80 backdrop-blur-xl flex items-center justify-center text-slate-700 shadow-sm">
-                  <IconComponent size={22} className="stroke-[1.8]" />
+                <div className="h-10 w-10 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs">
+                  <IconComponent size={20} className="stroke-[1.8]" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(52,211,153,0.7)] ring-2 ring-white">
-                  <Lock size={10} className="text-white stroke-[2.2]" />
+                <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-slate-900 rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs">
+                  <Lock size={9} className="text-white stroke-[2.2]" />
                 </div>
               </div>
             </div>
 
             {/* Title & Description */}
-            <div className="space-y-1 font-sans">
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">
                 {`${details.title} is locked`}
               </h2>
-              <p className="text-xs text-slate-500 font-semibold max-w-xs mx-auto leading-relaxed">
+              <p className="text-xs text-[#6E6E73] font-normal max-w-xs mx-auto leading-relaxed">
                 {details.description}
               </p>
             </div>
 
             {/* Tier Lock Content */}
-            <div className="space-y-2.5 font-sans">
-              <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-3 text-left flex items-start gap-2.5 shadow-2xs">
-                <TrendingUp size={15} className="text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-xs font-black text-slate-900 leading-snug">
+            <div className="space-y-2.5">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-left flex items-start gap-2.5 shadow-2xs">
+                <TrendingUp size={15} className="text-slate-700 shrink-0 mt-0.5" />
+                <p className="text-xs font-medium text-[#1D1D1F] leading-snug">
                   {details.roiMetric}
                 </p>
               </div>
 
-              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-3 text-left space-y-1.5">
-                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+              <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-3 text-left space-y-2">
+                <h4 className="text-xs font-normal text-[#6E6E73]">
                   What you get when you unlock:
                 </h4>
-                <ul className="space-y-1.5 text-xs text-slate-700 font-extrabold">
+                <ul className="space-y-1.5 text-xs text-[#1D1D1F] font-normal">
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <ShieldCheck size={14} className="text-slate-700 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet1}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <ShieldCheck size={14} className="text-slate-700 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet2}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Sparkles size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <ShieldCheck size={14} className="text-slate-700 shrink-0 mt-0.5" />
                     <span className="leading-snug">{details.bullet3}</span>
                   </li>
                 </ul>
@@ -382,16 +382,16 @@ export default function ModuleLockedBanner({ module, source, reason, children }:
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-1 font-sans">
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
               <Button
                 onClick={() => router.push("/dashboard/owner/billing")}
-                className="flex-1 h-10 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 rounded-xl font-black shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm transition-all text-xs cursor-pointer border-none"
+                className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 transition-all"
               >
                 Upgrade to {details.requiredTier} &rarr;
               </Button>
               <Button
                 onClick={() => window.open("mailto:support@propertypro.com?subject=Plan%20Upgrade%20Inquiry")}
-                className="flex-1 h-10 border border-slate-200 text-slate-900 rounded-xl font-black bg-white hover:bg-slate-50 text-xs shadow-2xs cursor-pointer"
+                className="flex-1 h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer flex items-center justify-center"
               >
                 Contact Support
               </Button>

@@ -572,15 +572,15 @@ export default function EditPropertyPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto pt-6 space-y-6 pb-24 px-2 sm:px-0">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href={`/dashboard/properties/${id}`}>
-          <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl bg-white border border-[#E5E5EA] shadow-sm text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F2F2F7]">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Edit Property</h1>
-          <p className="text-[#6E6E73] text-sm font-medium mt-1">Update your property details and unit information.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+            <Building className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Edit Property</h1>
+            <p className="text-[#6E6E73] text-sm font-normal mt-0.5">Update your property details and unit information.</p>
+          </div>
         </div>
       </div>
 
@@ -599,8 +599,8 @@ export default function EditPropertyPage() {
           <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex justify-between items-center">
               <div>
-                <h2 className="font-bold text-[#1D1D1F] text-lg">General Information</h2>
-                <p className="text-sm text-[#6E6E73]">Basic details about this property.</p>
+                <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">General Information</h2>
+                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Basic details about this property.</p>
               </div>
             </div>
             <CardContent className="p-6 space-y-6">
@@ -703,12 +703,12 @@ export default function EditPropertyPage() {
           {/* Address */}
           <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-              <h2 className="font-bold text-[#1D1D1F] text-lg">Address Information</h2>
-              <p className="text-sm text-[#6E6E73]">Where is this property located?</p>
+              <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">Address Information</h2>
+              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Where is this property located?</p>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2 relative" onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
-                <label className="text-sm font-bold text-[#1D1D1F]">Street Address <span className="text-red-500">*</span></label>
+                <label className="text-xs font-medium text-[#1D1D1F]">Street Address <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <Input 
                     required 
@@ -756,22 +756,22 @@ export default function EditPropertyPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-[#1D1D1F]">City <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-medium text-[#1D1D1F]">City <span className="text-red-500">*</span></label>
                   <Input required name="city" value={formData.city} onChange={handleChange} placeholder="e.g. London" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-[#1D1D1F]">State / Province</label>
+                  <label className="text-xs font-medium text-[#1D1D1F]">State / Province</label>
                   <Input name="state" value={formData.state} onChange={handleChange} placeholder="e.g. NY" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-[#1D1D1F]">ZIP / Postal Code</label>
+                  <label className="text-xs font-medium text-[#1D1D1F]">ZIP / Postal Code</label>
                   <Input name="zip" value={formData.zip} onChange={handleChange} placeholder="e.g. 10001" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-[#1D1D1F]">Country <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-medium text-[#1D1D1F]">Country <span className="text-red-500">*</span></label>
                   <Input required name="country" value={formData.country} onChange={handleChange} placeholder="e.g. UK" className="h-11 rounded-xl bg-white border-[#E5E5EA]" />
                 </div>
               </div>
@@ -781,8 +781,8 @@ export default function EditPropertyPage() {
           {/* Property Images */}
           <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-              <h2 className="font-bold text-[#1D1D1F] text-lg">Property Images</h2>
-              <p className="text-sm text-[#6E6E73]">Categorize and upload high-quality images to showcase your property.</p>
+              <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">Property Images</h2>
+              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Categorize and upload high-quality images to showcase your property.</p>
             </div>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -838,10 +838,10 @@ export default function EditPropertyPage() {
                           ) : (
                             <UploadCloud className="h-8 w-8 text-[#94A3B8] mb-3" />
                           )}
-                          <h3 className={`text-sm font-bold ${hasImages ? "text-[#166534]" : "text-[#1D1D1F]"}`}>
+                          <h3 className={`text-xs font-semibold ${hasImages ? "text-[#166534]" : "text-[#1D1D1F]"}`}>
                             {cat.label}
                           </h3>
-                          {!hasImages && <p className="text-xs text-[#6E6E73] mt-1">Click to upload</p>}
+                          {!hasImages && <p className="text-[10px] text-[#6E6E73] font-normal mt-1">Click to upload</p>}
                           
                           {hasImages && (
                             <div className="flex gap-1 mt-3">
@@ -887,13 +887,10 @@ export default function EditPropertyPage() {
           {/* Dynamic Amenities */}
           <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50">
-              <h2 className="font-bold text-[#1D1D1F] text-lg flex items-center gap-2">
-                <div className="bg-[#EFF6FF] text-[#007AFF] p-1.5 rounded-full">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
-                </div>
+              <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight flex items-center gap-2">
                 {formData.type === "Commercial" ? "Commercial Features" : "Amenities & Features"}
               </h2>
-              <p className="text-sm text-[#6E6E73] mt-1">Select the core amenities that best describe this property.</p>
+              <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Select the core amenities that best describe this property.</p>
             </div>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -904,7 +901,7 @@ export default function EditPropertyPage() {
                       key={amenity}
                       type="button"
                       onClick={() => toggleAmenity(amenity)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-xs font-medium transition-colors ${
                         isSelected ? "border-[#007AFF] bg-[#EFF6FF] text-[#1D1D1F]" : "border-[#E5E5EA] bg-white text-[#6E6E73] hover:border-[#CBD5E1]"
                       }`}
                     >
@@ -918,7 +915,7 @@ export default function EditPropertyPage() {
               </div>
 
               <div className="mt-8 p-5 bg-[#F2F2F7] rounded-xl border border-[#E5E5EA]">
-                <label className="text-sm font-bold text-[#1D1D1F] mb-2 block">Add custom amenity or feature</label>
+                <label className="text-xs font-medium text-[#1D1D1F] mb-2 block">Add custom amenity or feature</label>
                 <div className="flex gap-3">
                   <Input 
                     value={customAmenity}
@@ -951,7 +948,7 @@ export default function EditPropertyPage() {
                 {formData.amenities.filter(a => !getPredefinedAmenities().includes(a)).length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-4">
                     {formData.amenities.filter(a => !getPredefinedAmenities().includes(a)).map(amenity => (
-                      <div key={amenity} className="flex items-center gap-2 px-3 py-1.5 bg-[#EFF6FF] text-[#007AFF] text-sm font-semibold rounded-lg">
+                      <div key={amenity} className="flex items-center gap-2 px-3 py-1.5 bg-[#EFF6FF] text-[#007AFF] text-xs font-medium rounded-lg">
                         {amenity}
                         <button type="button" onClick={() => toggleAmenity(amenity)} className="text-[#007AFF] hover:text-[#1D4ED8]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -969,17 +966,17 @@ export default function EditPropertyPage() {
             <Card className="bg-white border-[#E5E5EA] shadow-sm rounded-2xl overflow-hidden">
               <div className="p-6 border-b border-[#E5E5EA] bg-[#F2F2F7]/50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
-                  <h2 className="font-bold text-[#1D1D1F] text-lg">
+                  <h2 className="font-semibold text-[#1D1D1F] text-lg tracking-tight">
                     {formData.type === "Commercial" ? "Suite Management" : "Smart Unit Management"}
                   </h2>
-                  <p className="text-sm text-[#6E6E73]">Manage the {formData.type === "Commercial" ? "suites" : "units"} for this property.</p>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Manage the {formData.type === "Commercial" ? "suites" : "units"} for this property.</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button type="button" onClick={() => setBulkDialogOpen(true)} className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2 border border-emerald-200">
-                    <Layers className="h-4 w-4" /> Bulk Add {formData.type === "Commercial" ? "Suites" : "Units"}
+                  <Button type="button" onClick={() => setBulkDialogOpen(true)} className="bg-slate-100 text-slate-900 hover:bg-slate-200 h-9 px-4 rounded-xl font-medium text-xs shadow-2xs flex items-center gap-2 border border-slate-200 cursor-pointer">
+                    <Layers className="h-3.5 w-3.5" /> Bulk Add {formData.type === "Commercial" ? "Suites" : "Units"}
                   </Button>
-                  <Button type="button" onClick={addUnit} className="bg-[#EFF6FF] text-[#007AFF] hover:bg-[#DBEAFE] h-10 px-4 rounded-xl font-bold shadow-sm flex items-center gap-2">
-                    <Plus className="h-4 w-4" /> Add {formData.type === "Commercial" ? "Suite" : "Unit"}
+                  <Button type="button" onClick={addUnit} className="bg-slate-900 text-white hover:bg-slate-800 h-9 px-4 rounded-xl font-medium text-xs shadow-xs flex items-center gap-2 cursor-pointer border-none">
+                    <Plus className="h-3.5 w-3.5" /> Add {formData.type === "Commercial" ? "Suite" : "Unit"}
                   </Button>
                 </div>
               </div>
@@ -1132,12 +1129,12 @@ export default function EditPropertyPage() {
           )}
 
           {/* Floating Actions Bar */}
-          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/85 backdrop-blur-md border-t border-[#E5E5EA] p-4 flex justify-end gap-3 z-20 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
+          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 flex justify-end gap-3 z-20 shadow-lg">
             <Link href={`/dashboard/properties/${id}`}>
-              <Button type="button" variant="outline" className="h-11 px-6 rounded-xl font-bold text-[#1D1D1F] border-[#E5E5EA] shadow-sm hover:bg-[#F2F2F7]">Cancel</Button>
+              <Button type="button" variant="outline" className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-[#1D1D1F] bg-white hover:bg-slate-50 shadow-2xs cursor-pointer">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={loading} className="bg-[#007AFF] hover:bg-[#0062CC] text-white h-11 px-8 rounded-xl font-bold shadow-sm flex items-center gap-2">
-              {loading ? "Saving..." : <><Save className="h-4 w-4" /> Save Changes</>}
+            <Button type="submit" disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-5 rounded-xl font-medium text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer border-none">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <><Save className="h-4 w-4 text-white" /> Save Changes</>}
             </Button>
           </div>
         </form>
@@ -1362,7 +1359,7 @@ export default function EditPropertyPage() {
 
           <DialogFooter className="p-4 border-t border-slate-100 bg-slate-50 shrink-0 rounded-b-3xl">
             <Button variant="ghost" onClick={() => setBulkDialogOpen(false)} className="h-10 font-bold rounded-xl text-[#6E6E73]">Cancel</Button>
-            <Button onClick={handleBulkGenerate} className="bg-[#1D1D1F] hover:bg-[#1E293B] text-white h-10 font-bold rounded-xl px-6">Generate {bulkQty} Units</Button>
+            <Button onClick={handleBulkGenerate} className="bg-[#1D1D1F] hover:bg-[#1E293B] text-white h-10 font-medium rounded-xl px-6">Generate {bulkQty} Units</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

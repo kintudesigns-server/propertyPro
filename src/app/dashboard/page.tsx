@@ -473,7 +473,7 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-xs font-medium text-slate-500 mb-3 leading-relaxed">{s.desc}</p>
                     {s.active && s.action && (
-                      <Button onClick={s.action} className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm">
+                      <Button onClick={s.action} className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-xs shadow-sm">
                         {s.icon} {s.actionLabel}
                       </Button>
                     )}
@@ -578,25 +578,25 @@ export default function DashboardPage() {
 
                     <div className="relative z-10 flex items-start justify-between gap-4">
                       <div>
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 backdrop-blur-md mb-2.5 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                          <Home className="h-3 w-3 text-emerald-400" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-white/20 backdrop-blur-md text-white border border-white/20 mb-2.5 shadow-2xs">
+                          <Home className="h-3 w-3 text-white" />
                           Your Home
                         </span>
-                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+                        <h2 className="text-3xl font-semibold text-white tracking-tight drop-shadow-md">
                           {selectedLease?.unit?.property?.name || "No Active Lease"}
                         </h2>
                         {selectedLease && (
-                          <p className="text-slate-100 text-xs font-bold mt-1.5 flex items-center gap-1.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
-                            <MapPin className="h-3.5 w-3.5 text-cyan-300 shrink-0" />
+                          <p className="text-slate-200 text-xs font-normal mt-1 flex items-center gap-1.5 drop-shadow-sm">
+                            <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
                             {selectedLease.unit?.property?.address}, {selectedLease.unit?.property?.city}, {selectedLease.unit?.property?.state}
                           </p>
                         )}
                       </div>
                       {selectedLease && (
-                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.35)] ${
+                        <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider shadow-2xs ${
                           selectedLease.status === "ACTIVE"
-                            ? "bg-emerald-500/25 text-emerald-300 border border-emerald-400/50"
-                            : "bg-amber-500/25 text-amber-300 border border-amber-400/50"
+                            ? "bg-emerald-500 text-white"
+                            : "bg-amber-500 text-white"
                         }`}>
                           {selectedLease.status === "ACTIVE" ? "Active" : selectedLease.status.replace(/_/g, " ")}
                         </span>
@@ -607,63 +607,59 @@ export default function DashboardPage() {
               })()}
 
               {selectedLease ? (
-                <div className="p-6 space-y-5 bg-white">
+                <div className="p-6 space-y-5 bg-white font-sans">
                   {/* Cohesive Metric Data Cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Monthly Rent</p>
-                      <p className="text-xl font-black text-slate-900">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                      <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-1">Monthly Rent</p>
+                      <p className="text-lg font-semibold text-[#1D1D1F] tracking-tight">
                         ${Number(selectedLease.monthlyRent).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </p>
                     </div>
-                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Unit</p>
-                      <p className="text-xl font-black text-slate-900">{selectedLease.unit?.name || "—"}</p>
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                      <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-1">Unit</p>
+                      <p className="text-lg font-semibold text-[#1D1D1F] tracking-tight">{selectedLease.unit?.name || "—"}</p>
                     </div>
-                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70 col-span-2 sm:col-span-1">
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 col-span-2 sm:col-span-1">
+                      <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider mb-1">
                         {daysUntilLeaseEnd !== null && daysUntilLeaseEnd > 0 ? `Expires in ${daysUntilLeaseEnd}d` : "Lease Period"}
                       </p>
-                      <p className="text-sm font-black text-slate-900 leading-tight">
+                      <p className="text-xs font-semibold text-[#1D1D1F] leading-tight">
                         {new Date(selectedLease.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} —{" "}
                         {new Date(selectedLease.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </p>
                     </div>
                   </div>
 
-                  {/* Framer Motion Animated Lease Progress Bar with Neon Color & Glow */}
+                  {/* Lease Progress */}
                   <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-black text-slate-700 tracking-tight flex items-center gap-1.5">
+                      <p className="text-xs font-normal text-[#6E6E73] tracking-tight flex items-center gap-1.5">
                         <span>Lease Progress</span>
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                       </p>
-                      <span className="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                         {leaseProgress}% complete
                       </span>
                     </div>
 
-                    {/* Outer Track with subtle border & shadow */}
-                    <div className="w-full h-3 bg-slate-100/90 rounded-full p-0.5 border border-slate-200/80 relative overflow-hidden shadow-inner">
-                      {/* Animated Neon Gradient Fill */}
+                    <div className="w-full bg-slate-200/70 rounded-full h-3 p-0.5 overflow-hidden backdrop-blur-md relative border border-slate-200/80 shadow-inner">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${leaseProgress}%` }}
                         transition={{ duration: 1.6, ease: "easeOut" }}
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 relative shadow-[0_0_15px_rgba(52,211,153,0.85)]"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 relative shadow-[0_0_14px_rgba(52,211,153,0.9)]"
                       >
-                        {/* Glowing tip light pulsing bead */}
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-[0_0_12px_#34d399] animate-ping opacity-75" />
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 bg-emerald-100 rounded-full shadow-[0_0_10px_#10b981]" />
+                        <div className="absolute inset-0 bg-white/20 rounded-full" />
                       </motion.div>
                     </div>
                   </div>
 
-                  {/* Pay rent CTA if due - Sleek dark slate button matching the card header frame */}
+                  {/* Pay rent CTA if due */}
                   {unpaidInvoices.length > 0 && (
                     <Button
                       onClick={() => router.push("/dashboard/payments/pay-rent")}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl h-11 text-sm shadow-sm transition-all border border-slate-800 flex items-center justify-center gap-2 mt-2"
+                      className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2 mt-2"
                     >
                       <CreditCard className="h-4 w-4" />
                       Pay Rent — ${unpaidInvoices.reduce((s, i) => s + Number(i.amount), 0).toLocaleString()} Due
@@ -672,8 +668,8 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <p className="text-slate-500 font-medium text-sm">No active lease found.</p>
-                  <Button onClick={() => router.push("/listings")} className="mt-4 bg-[#007AFF] hover:bg-blue-600 text-white font-bold rounded-xl h-10 px-6 text-sm">
+                  <p className="text-xs text-[#6E6E73] font-normal">No active lease found.</p>
+                  <Button onClick={() => router.push("/listings")} className="mt-4 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer">
                     Browse Listings
                   </Button>
                 </div>
@@ -681,17 +677,21 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Activity Card in Left Column */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs flex flex-col overflow-hidden font-sans">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-amber-500" />
-                    Recent Activity
-                  </h2>
-                  <p className="text-xs font-medium text-slate-400 mt-0.5">Updates on your account</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                    <Bell className="h-4 w-4 text-slate-700" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">
+                      Recent Activity
+                    </h2>
+                    <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Updates on your account</p>
+                  </div>
                 </div>
                 {activities.filter(a => a.urgent).length > 0 && (
-                  <span className="h-5 w-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                  <span className="px-2 py-0.5 bg-rose-500 text-white text-[10px] font-medium rounded-md shadow-2xs">
                     {activities.filter(a => a.urgent).length}
                   </span>
                 )}
@@ -700,35 +700,35 @@ export default function DashboardPage() {
               <div className="divide-y divide-slate-100 px-2 py-1 max-h-[380px] overflow-y-auto">
                 {latestActivities.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                    <div className="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
-                      <Bell className="h-5 w-5 text-slate-400" />
+                    <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center mb-2 shadow-2xs">
+                      <Bell className="h-4 w-4 text-slate-400" />
                     </div>
-                    <p className="text-sm font-bold text-slate-500">All caught up!</p>
-                    <p className="text-xs text-slate-400 mt-1">No recent activity to show.</p>
+                    <p className="text-xs font-semibold text-[#1D1D1F]">All caught up!</p>
+                    <p className="text-xs text-[#6E6E73] font-normal mt-0.5">No recent activity to show.</p>
                   </div>
                 ) : (
                   latestActivities.map((act) => (
                     <div key={act.id} className="px-4 py-3.5 transition-all hover:bg-slate-50/80 group rounded-xl">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                        <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0 mt-0.5">
                           {act.icon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 mb-0.5">
-                            <p className="text-xs font-extrabold text-slate-900 truncate">{act.title}</p>
-                            <span className="text-[10px] text-slate-400 font-semibold shrink-0">
+                            <p className="text-xs font-semibold text-[#1D1D1F] truncate">{act.title}</p>
+                            <span className="text-xs text-[#6E6E73] font-normal shrink-0">
                               {act.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           </div>
-                          <p className="text-xs font-medium text-slate-500 leading-relaxed">{act.description}</p>
+                          <p className="text-xs text-[#6E6E73] font-normal leading-relaxed">{act.description}</p>
                           <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${act.badgeColor} uppercase tracking-wider`}>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                               {act.badgeText}
                             </span>
                             {act.action && act.actionLabel && (
                               <button
                                 onClick={act.action}
-                                className="text-[11px] font-black text-[#007AFF] hover:underline transition-colors cursor-pointer"
+                                className="text-xs font-medium text-slate-900 hover:underline transition-colors cursor-pointer"
                               >
                                 {act.actionLabel}
                               </button>
@@ -745,7 +745,7 @@ export default function DashboardPage() {
                 <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 text-center">
                   <button
                     onClick={() => router.push("/dashboard/activity-logs")}
-                    className="text-xs font-bold text-[#007AFF] hover:underline transition-colors py-1 cursor-pointer"
+                    className="text-xs font-medium text-slate-900 hover:underline transition-colors py-1 cursor-pointer"
                   >
                     View all activity →
                   </button>
@@ -755,40 +755,42 @@ export default function DashboardPage() {
           </div>
 
           {/* RIGHT — Quick Actions (2 cols) */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white border border-slate-200/80 shadow-sm rounded-3xl p-6">
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+          <div className="lg:col-span-2 font-sans">
+            <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl p-6">
+              <div className="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Activity className="h-4 w-4 text-slate-700" />
+                </div>
                 <div>
-                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-[#007AFF]" />
+                  <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">
                     Quick Actions
                   </h2>
-                  <p className="text-xs font-medium text-slate-400 mt-0.5">Frequent tenant tasks</p>
+                  <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Frequent tenant tasks</p>
                 </div>
               </div>
               
               <div className="space-y-3">
                 {[
-                  { label: "File a Repair Request", desc: "Report maintenance issue", icon: Wrench, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/maintenance/new" },
-                  { label: "Pay Rent Online", desc: "View & pay invoices", icon: Wallet, color: unpaidInvoices.length > 0 ? "bg-rose-50 text-rose-600 border-rose-200/80" : "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/payments/pay-rent" },
-                  { label: "View Lease Docs", desc: "Access signed agreements", icon: FileText, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/leases/my-leases" },
-                  { label: "Track Maintenance", desc: "Check repair status", icon: Settings, color: "bg-slate-100 text-slate-700 border-slate-200/80", route: "/dashboard/maintenance/my-requests" },
+                  { label: "File a Repair Request", desc: "Report maintenance issue", icon: Wrench, color: "bg-slate-100 border-slate-200/60 text-slate-700", route: "/dashboard/maintenance/new" },
+                  { label: "Pay Rent Online", desc: "View & pay invoices", icon: Wallet, color: unpaidInvoices.length > 0 ? "bg-rose-50 border-rose-200/80 text-rose-600" : "bg-slate-100 border-slate-200/60 text-slate-700", route: "/dashboard/payments/pay-rent" },
+                  { label: "View Lease Docs", desc: "Access signed agreements", icon: FileText, color: "bg-slate-100 border-slate-200/60 text-slate-700", route: "/dashboard/leases/my-leases" },
+                  { label: "Track Maintenance", desc: "Check repair status", icon: Settings, color: "bg-slate-100 border-slate-200/60 text-slate-700", route: "/dashboard/maintenance/my-requests" },
                 ].map((qa) => (
                   <button
                     key={qa.label}
                     onClick={() => router.push(qa.route)}
-                    className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50/80 hover:border-slate-300 transition-all cursor-pointer group text-left shadow-2xs"
+                    className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer group text-left shadow-2xs"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className={`p-2.5 rounded-xl border shrink-0 ${qa.color} group-hover:bg-slate-900 group-hover:text-white transition-colors`}>
-                        <qa.icon className="h-4.5 w-4.5" />
+                      <div className={`h-9 w-9 rounded-xl border flex items-center justify-center shrink-0 ${qa.color} shadow-2xs`}>
+                        <qa.icon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#007AFF] transition-colors">{qa.label}</p>
-                        <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{qa.desc}</p>
+                        <p className="text-xs font-semibold text-[#1D1D1F] truncate">{qa.label}</p>
+                        <p className="text-xs font-normal text-[#6E6E73] truncate mt-0.5">{qa.desc}</p>
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-slate-400 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+                    <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
                   </button>
                 ))}
               </div>
@@ -835,7 +837,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <Link href="/dashboard/owner/billing">
-            <Button className="bg-[#B25E00] hover:bg-[#804400] text-white font-bold rounded-xl text-xs px-4 h-9 shadow-xs whitespace-nowrap">
+            <Button className="bg-[#B25E00] hover:bg-[#804400] text-white font-medium rounded-xl text-xs px-4 h-9 shadow-xs whitespace-nowrap">
               Reactivate Subscription
             </Button>
           </Link>
@@ -887,95 +889,93 @@ export default function DashboardPage() {
         onViewFinancials={() => router.push("/dashboard/accounting/invoices")}
       />
 
-      <OnboardingChecklist
-        userId={(session?.user as any)?.id}
-        hasProperty={(stats?.totalProperties || 0) > 0}
-        hasUnit={(stats?.totalUnits || 0) > 0}
-        hasTenant={(stats?.activeTenantsCount || 0) > 0}
-        hasPayment={(stats?.monthlyRevenue || 0) > 0}
-      />
-
       {/* Setup Checklist if no properties */}
       {stats?.totalProperties === 0 && (
-        <Card className="relative bg-[#0F172A] border border-slate-800 rounded-3xl shadow-xl overflow-hidden mb-6">
-          <div className="relative z-10 p-6 md:p-8 border-b border-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mb-3">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 md:p-8 space-y-6 font-sans mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100 pb-6">
+            <div className="space-y-1">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-slate-900"></span>
                 </span>
-                <span className="text-[10px] font-semibold text-white tracking-wide uppercase">Onboarding Active</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-3 tracking-tight">
+                Onboarding Active
+              </span>
+              <h2 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mt-2">
                 Welcome to PropertyPro!
               </h2>
-              <p className="text-slate-400 mt-2 font-medium max-w-2xl text-base leading-relaxed">
+              <p className="text-[#6E6E73] text-xs font-normal max-w-2xl mt-0.5">
                 Let's get your portfolio set up so you can start managing properties and collecting rent online. Complete these steps to unlock your dashboard.
               </p>
             </div>
             
-            <div className="flex flex-col items-start md:items-end w-full md:w-auto bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 backdrop-blur-sm">
-              <span className="text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Setup Progress</span>
-              <div className="flex items-center gap-3">
-                <div className="w-28 h-2 bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out" style={{ width: `${(( (stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0) ) / 3) * 100}%` }}></div>
+            <div className="flex items-center gap-3 bg-slate-50 p-3 px-4 rounded-2xl border border-slate-200 shadow-2xs shrink-0">
+              <span className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Setup Progress</span>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-slate-900 rounded-full transition-all duration-700 ease-out" style={{ width: `${(( (stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0) ) / 3) * 100}%` }}></div>
                 </div>
-                <span className="font-semibold text-white text-lg">{(stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0)}<span className="text-slate-500">/3</span></span>
+                <span className="text-xs font-semibold text-[#1D1D1F]">{(stats?.profileComplete ? 1 : 0) + (stats?.totalProperties > 0 ? 1 : 0) + (stats?.bankConnected ? 1 : 0)}/3</span>
               </div>
             </div>
           </div>
           
-          <div className="p-6 md:p-8 space-y-3.5 bg-slate-900/30">
+          <div className="space-y-3">
             <div 
-              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.profileComplete ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-blue-500/50 hover:bg-blue-500/10'}`}
+              className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between hover:bg-slate-100/70 cursor-pointer transition-all group"
               onClick={() => router.push('/dashboard/settings')}
             >
-              <div className="flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.profileComplete ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'}`}>
-                  {stats?.profileComplete ? <CheckCircle2 className="h-6 w-6" /> : <Users className="h-6 w-6" />}
+              <div className="flex items-center gap-3.5">
+                <div className="h-9 w-9 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  {stats?.profileComplete ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Users className="h-4 w-4 text-slate-700" />}
                 </div>
                 <div>
-                  <h4 className={`font-semibold text-lg ${stats?.profileComplete ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-blue-400 transition-colors'}`}>Complete Landlord Profile</h4>
-                  <p className={`text-xs mt-0.5 font-medium ${stats?.profileComplete ? 'text-emerald-500/60' : 'text-slate-400'}`}>Set your entity type (Individual or Business) and support contact info.</p>
+                  <h4 className={`text-base font-semibold tracking-tight ${stats?.profileComplete ? 'text-[#6E6E73] line-through' : 'text-[#1D1D1F]'}`}>
+                    Complete Landlord Profile
+                  </h4>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Set your entity type (Individual or Business) and support contact info.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.profileComplete ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-blue-500'}`} />
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
 
             <div 
-              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.totalProperties > 0 ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-emerald-500/50 hover:bg-emerald-500/10'}`}
+              className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between hover:bg-slate-100/70 cursor-pointer transition-all group"
               onClick={() => router.push('/dashboard/properties/new')}
             >
-              <div className="flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.totalProperties > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-400'}`}>
-                  {stats?.totalProperties > 0 ? <CheckCircle2 className="h-6 w-6" /> : <Home className="h-6 w-6" />}
+              <div className="flex items-center gap-3.5">
+                <div className="h-9 w-9 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  {stats?.totalProperties > 0 ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Home className="h-4 w-4 text-slate-700" />}
                 </div>
                 <div>
-                  <h4 className={`font-semibold text-lg ${stats?.totalProperties > 0 ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-emerald-400 transition-colors'}`}>Add Your First Property</h4>
-                  <p className={`text-xs mt-0.5 font-medium ${stats?.totalProperties > 0 ? 'text-emerald-500/60' : 'text-slate-400'}`}>Create a property, set up rentable units, and track occupancy.</p>
+                  <h4 className={`text-base font-semibold tracking-tight ${stats?.totalProperties > 0 ? 'text-[#6E6E73] line-through' : 'text-[#1D1D1F]'}`}>
+                    Add Your First Property
+                  </h4>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Create a property, set up rentable units, and track occupancy.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.totalProperties > 0 ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-emerald-500'}`} />
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
 
             <div 
-              className={`flex items-center justify-between p-4.5 rounded-xl border transition-all duration-300 cursor-pointer group ${stats?.bankConnected ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-800/40 hover:border-purple-500/50 hover:bg-purple-500/10'}`}
+              className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between hover:bg-slate-100/70 cursor-pointer transition-all group"
               onClick={() => router.push('/dashboard/accounting/wallet')}
             >
-              <div className="flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors shadow-sm ${stats?.bankConnected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 group-hover:bg-purple-500/20 group-hover:text-purple-400'}`}>
-                  {stats?.bankConnected ? <CheckCircle2 className="h-6 w-6" /> : <Wallet className="h-6 w-6" />}
+              <div className="flex items-center gap-3.5">
+                <div className="h-9 w-9 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  {stats?.bankConnected ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Wallet className="h-4 w-4 text-slate-700" />}
                 </div>
                 <div>
-                  <h4 className={`font-semibold text-lg ${stats?.bankConnected ? 'text-emerald-400 line-through opacity-70' : 'text-white group-hover:text-purple-400 transition-colors'}`}>Connect Bank Account</h4>
-                  <p className={`text-xs mt-0.5 font-medium ${stats?.bankConnected ? 'text-emerald-500/60' : 'text-slate-400'}`}>Link your account to securely receive online rent payments via Stripe.</p>
+                  <h4 className={`text-base font-semibold tracking-tight ${stats?.bankConnected ? 'text-[#6E6E73] line-through' : 'text-[#1D1D1F]'}`}>
+                    Connect Bank Account
+                  </h4>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Link your account to securely receive online rent payments via Stripe.</p>
                 </div>
               </div>
-              <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${stats?.bankConnected ? 'text-emerald-500/50' : 'text-slate-600 group-hover:text-purple-500'}`} />
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Critical Status Alerts — Modern Clean SaaS Cards */}
@@ -1007,7 +1007,7 @@ export default function DashboardPage() {
                 {stats.overduePayments}
               </span>
             ) : (
-              <span className="text-[11px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
+              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
             )}
             <ChevronRight size={14} className="text-[#C7C7CC] group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -1040,7 +1040,7 @@ export default function DashboardPage() {
                 {stats.urgentMaintenance}
               </span>
             ) : (
-              <span className="text-[11px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
+              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
             )}
             <ChevronRight size={14} className="text-[#C7C7CC] group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -1073,7 +1073,7 @@ export default function DashboardPage() {
                 {stats.leaseRenewals}
               </span>
             ) : (
-              <span className="text-[11px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
+              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">Clear</span>
             )}
             <ChevronRight size={14} className="text-[#C7C7CC] group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -1106,7 +1106,7 @@ export default function DashboardPage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#007AFF] opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-[#007AFF]"></span>
                     </span>
-                    <h2 className="text-base font-extrabold text-[#1D1D1F] flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-[#1D1D1F] flex items-center gap-2">
                       <TrendingUp className="h-4.5 w-4.5 text-[#007AFF]" />
                       Portfolio Revenue Velocity
                     </h2>
@@ -1144,7 +1144,7 @@ export default function DashboardPage() {
               {/* Total Revenue Highlight Banner inside Card */}
               <div className="mb-4 flex items-baseline justify-between px-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
+                  <span className="text-2xl sm:text-3xl font-semibold text-[#1D1D1F] tracking-tight">
                     ${(stats?.monthlyRevenue || 28300).toLocaleString()}
                   </span>
                   <span className="text-xs font-bold text-[#8E8E93]">Total Monthly Collection</span>
@@ -1328,4 +1328,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 

@@ -204,18 +204,15 @@ export default function InspectorsAndVendorsPage() {
   const complianceRate = vendors.length > 0 ? Math.round((verifiedVendors / vendors.length) * 100) : 100;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 space-y-6">
+    <div className="w-full max-w-7xl mx-auto pt-4 space-y-6 pb-20 px-2 sm:px-6 font-sans">
 
       {/* Page Header & Primary Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
-            <span className="text-slate-900 font-bold">Inspectors &amp; Contractors</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
             Workforce Directory
           </h1>
-          <p className="text-xs md:text-sm text-slate-500 font-medium mt-0.5">
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
             Centralized directory for field inspectors, repair dispatchers, and trade contractors.
           </p>
         </div>
@@ -223,13 +220,13 @@ export default function InspectorsAndVendorsPage() {
         <div className="flex items-center gap-2">
           {activeTab === "inspectors" ? (
             <Link href="/dashboard/team/new">
-              <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl shadow-xs text-xs gap-2">
+              <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 rounded-xl shadow-xs text-xs gap-2 border-none cursor-pointer">
                 <Plus className="h-4 w-4" /> Add Field Inspector
               </Button>
             </Link>
           ) : hasVendorAccess ? (
             <Link href="/dashboard/vendors/new">
-              <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl shadow-xs text-xs gap-2">
+              <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 rounded-xl shadow-xs text-xs gap-2 border-none cursor-pointer">
                 <Plus className="h-4 w-4" /> Add Trade Contractor
               </Button>
             </Link>
@@ -238,68 +235,90 @@ export default function InspectorsAndVendorsPage() {
       </div>
 
       {/* Sleek KPI Summary Strip (Platform Design System) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-blue-500 bg-white">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Total Workforce</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{totalStaffCount}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Staff Field Inspectors</p>
-          </CardContent>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="rounded-3xl border border-slate-200 shadow-xs bg-white p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-normal text-[#6E6E73]">Total Workforce</span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
+              <Users className="h-4 w-4 text-slate-700" />
+            </div>
+          </div>
+          <div>
+            <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">{totalStaffCount}</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Staff Field Inspectors</p>
+          </div>
         </Card>
 
-        <Card className="rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-indigo-500 bg-white">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-extrabold text-indigo-800 uppercase tracking-wider">Active Workloads</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{activeWorkloadCount}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Assigned Inspections &amp; Jobs</p>
-          </CardContent>
+        <Card className="rounded-3xl border border-slate-200 shadow-xs bg-white p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-normal text-[#6E6E73]">Active Workloads</span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
+              <Activity className="h-4 w-4 text-slate-700" />
+            </div>
+          </div>
+          <div>
+            <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">{activeWorkloadCount}</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Assigned Inspections &amp; Jobs</p>
+          </div>
         </Card>
 
-        <Card className="rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-amber-500 bg-white">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider">Contractor Network</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{vendors.length}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Trade Specialists</p>
-          </CardContent>
+        <Card className="rounded-3xl border border-slate-200 shadow-xs bg-white p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-normal text-[#6E6E73]">Contractor Network</span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
+              <Wrench className="h-4 w-4 text-slate-700" />
+            </div>
+          </div>
+          <div>
+            <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">{vendors.length}</p>
+            <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Trade Specialists</p>
+          </div>
         </Card>
 
-        <Card className="rounded-2xl border border-slate-200 shadow-xs border-l-4 border-l-emerald-500 bg-white">
-          <CardContent className="p-4">
-            <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Compliance Status</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{complianceRate}%</p>
-            <p className="text-[11px] text-emerald-600 font-bold mt-0.5">Verified W-9 &amp; Insurance</p>
-          </CardContent>
+        <Card className="rounded-3xl border border-slate-200 shadow-xs bg-white p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-normal text-[#6E6E73]">Compliance Status</span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 flex items-center justify-center shadow-2xs">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+            </div>
+          </div>
+          <div>
+            <p className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">{complianceRate}%</p>
+            <p className="text-xs font-normal text-emerald-700 mt-0.5">Verified W-9 &amp; Insurance</p>
+          </div>
         </Card>
       </div>
 
       {/* Segmented Tabs & Control Bar */}
-      <Card className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/40 space-y-3">
+      <Card className="bg-white border border-slate-200 shadow-xs rounded-3xl overflow-hidden font-sans">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/50 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 
             {/* Segmented Tab Buttons */}
-            <div className="flex bg-slate-200/70 p-1 rounded-xl gap-1">
+            <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-fit border border-slate-200/30">
               <button
                 onClick={() => setActiveTab("inspectors")}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
                   activeTab === "inspectors"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-[#1D1D1F] shadow-2xs"
+                    : "text-[#6E6E73] hover:text-[#1D1D1F]"
                 }`}
               >
                 <UserCheck className="h-4 w-4 text-blue-600" />
                 Internal Inspectors
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700">
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-medium ${
+                  activeTab === "inspectors" ? "bg-slate-100 text-[#1D1D1F]" : "bg-slate-200/60 text-[#6E6E73]"
+                }`}>
                   {inspectors.length}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab("vendors")}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
                   activeTab === "vendors"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-[#1D1D1F] shadow-2xs"
+                    : "text-[#6E6E73] hover:text-[#1D1D1F]"
                 }`}
               >
                 <Wrench className="h-4 w-4 text-amber-600" />
@@ -307,7 +326,9 @@ export default function InspectorsAndVendorsPage() {
                 {!hasVendorAccess ? (
                   <Lock className="h-3 w-3 text-slate-400" />
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700">
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-medium ${
+                    activeTab === "vendors" ? "bg-slate-100 text-[#1D1D1F]" : "bg-slate-200/60 text-[#6E6E73]"
+                  }`}>
                     {vendors.length}
                   </span>
                 )}
@@ -317,12 +338,12 @@ export default function InspectorsAndVendorsPage() {
             {/* Tab Specific Search & Specialty Filters */}
             {activeTab === "inspectors" ? (
               <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="Search staff name or email..."
                   value={inspectorSearch}
                   onChange={(e) => setInspectorSearch(e.target.value)}
-                  className="pl-9 h-9 text-xs bg-white border-slate-200 rounded-xl focus:bg-white font-medium"
+                  className="pl-10 h-9 text-xs bg-white border-slate-200 rounded-xl font-normal text-[#1D1D1F] focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-2xs"
                 />
               </div>
             ) : hasVendorAccess ? (
@@ -330,7 +351,7 @@ export default function InspectorsAndVendorsPage() {
                 <select
                   value={filterSpecialty}
                   onChange={(e) => setFilterSpecialty(e.target.value)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                  className="h-9 rounded-xl border border-slate-200 bg-white text-[#1D1D1F] text-xs font-medium px-3 shadow-2xs outline-none cursor-pointer"
                 >
                   <option value="All">All Specialties</option>
                   <option value="Plumbing">Plumbing</option>
@@ -345,12 +366,12 @@ export default function InspectorsAndVendorsPage() {
                 </select>
 
                 <div className="relative w-full sm:w-56">
-                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
                     placeholder="Search contractor..."
                     value={vendorSearch}
                     onChange={(e) => setVendorSearch(e.target.value)}
-                    className="pl-9 h-9 text-xs bg-white border-slate-200 rounded-xl focus:bg-white font-medium"
+                    className="pl-10 h-9 text-xs bg-white border-slate-200 rounded-xl font-normal text-[#1D1D1F] focus-visible:ring-2 focus-visible:ring-slate-900/10 focus-visible:border-slate-400 shadow-2xs"
                   />
                 </div>
               </div>
@@ -365,17 +386,17 @@ export default function InspectorsAndVendorsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/60 border-b border-slate-200">
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Inspector Name</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Contact Channels</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Designation</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Active Workload</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Inspector Name</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Contact Channels</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Designation</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Active Workload</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73] text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-xs font-bold text-slate-400">
+                    <td colSpan={5} className="py-12 text-center text-xs font-normal text-[#6E6E73]">
                       Loading staff inspectors...
                     </td>
                   </tr>
@@ -384,8 +405,8 @@ export default function InspectorsAndVendorsPage() {
                     <td colSpan={5} className="py-16 text-center text-slate-400">
                       <div className="max-w-xs mx-auto space-y-2">
                         <UserCheck className="h-8 w-8 text-slate-300 mx-auto" />
-                        <p className="text-sm font-bold text-slate-700">No inspectors found</p>
-                        <p className="text-xs text-slate-400">Try adjusting search query or add a new inspector.</p>
+                        <p className="text-sm font-semibold text-[#1D1D1F]">No inspectors found</p>
+                        <p className="text-xs text-[#6E6E73] font-normal">Try adjusting search query or add a new inspector.</p>
                       </div>
                     </td>
                   </tr>
@@ -410,10 +431,10 @@ export default function InspectorsAndVendorsPage() {
                                   <img
                                     src={member.avatar}
                                     alt={member.name}
-                                    className="h-9 w-9 rounded-xl object-cover border border-slate-200 shadow-xs"
+                                    className="h-9 w-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
                                   />
                                 ) : (
-                                  <div className={`h-9 w-9 rounded-xl ${colorClass} font-black text-sm flex items-center justify-center shadow-xs`}>
+                                  <div className={`h-9 w-9 rounded-xl ${colorClass} font-semibold text-xs flex items-center justify-center shadow-2xs`}>
                                     {member.name.charAt(0).toUpperCase()}
                                   </div>
                                 )}
@@ -422,11 +443,11 @@ export default function InspectorsAndVendorsPage() {
                               <div>
                                 <Link
                                   href={`/dashboard/team/${member.id}`}
-                                  className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors block"
+                                  className="font-semibold text-xs text-[#1D1D1F] hover:text-blue-600 transition-colors block"
                                 >
                                   {member.name}
                                 </Link>
-                                <span className="text-[11px] font-semibold text-slate-500">
+                                <span className="text-xs font-normal text-[#6E6E73]">
                                   Staff Field Inspector
                                 </span>
                               </div>
@@ -438,7 +459,7 @@ export default function InspectorsAndVendorsPage() {
                             <div className="space-y-0.5">
                               <a
                                 href={`mailto:${member.email}`}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+                                className="flex items-center gap-1.5 text-xs font-normal text-[#6E6E73] hover:text-blue-600 transition-colors"
                               >
                                 <Mail className="h-3.5 w-3.5 text-slate-400" />
                                 {member.email}
@@ -446,9 +467,9 @@ export default function InspectorsAndVendorsPage() {
                               {member.phone && (
                                 <a
                                   href={`tel:${member.phone}`}
-                                  className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                                  className="flex items-center gap-1.5 text-xs font-normal text-[#6E6E73] hover:text-slate-800 transition-colors"
                                 >
-                                  <Phone className="h-3 w-3 text-slate-400" />
+                                  <Phone className="h-3.5 w-3.5 text-slate-400" />
                                   {member.phone}
                                 </a>
                               )}
@@ -457,16 +478,16 @@ export default function InspectorsAndVendorsPage() {
 
                           {/* Designation Badge */}
                           <td className="py-3.5 px-6">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-xs font-bold">
-                              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-md text-[10px] font-medium uppercase tracking-wider">
+                              <ShieldCheck className="h-3 w-3 text-blue-600" />
                               Certified Inspector
                             </span>
                           </td>
 
                           {/* Workload Indicator */}
                           <td className="py-3.5 px-6">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold">
-                              <Activity className="h-3.5 w-3.5 text-slate-400" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px] font-medium uppercase tracking-wider">
+                              <Activity className="h-3 w-3 text-slate-400" />
                               {totalJobs} Active Jobs
                             </span>
                           </td>
@@ -533,12 +554,12 @@ export default function InspectorsAndVendorsPage() {
             <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
               <Lock className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">External Contractor Portal Locked</h3>
+            <h3 className="text-xl font-semibold text-slate-900 tracking-tight">External Contractor Portal Locked</h3>
             <p className="text-sm text-slate-500 leading-relaxed font-medium">
               Managing 3rd-party vendor directories, call-out fee ledgers, and compliance W-9 tracking is exclusive to Professional tier plans.
             </p>
             <Link href="/dashboard/owner/billing">
-              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-11 px-8 rounded-xl mt-2 border-none">
+              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 px-8 rounded-xl mt-2 border-none">
                 Upgrade Subscription Plan
               </Button>
             </Link>
@@ -549,17 +570,17 @@ export default function InspectorsAndVendorsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/60 border-b border-slate-200">
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Company / Specialist</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Trade Specialty</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Call-Out Fee</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Compliance Verification</th>
-                  <th className="py-3.5 px-6 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Company / Specialist</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Trade Specialty</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Call-Out Fee</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73]">Compliance Verification</th>
+                  <th className="py-3.5 px-6 font-normal text-xs text-[#6E6E73] text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-xs font-bold text-slate-400">
+                    <td colSpan={5} className="py-12 text-center text-xs font-normal text-[#6E6E73]">
                       Loading vendor network...
                     </td>
                   </tr>
@@ -568,8 +589,8 @@ export default function InspectorsAndVendorsPage() {
                     <td colSpan={5} className="py-16 text-center text-slate-400">
                       <div className="max-w-xs mx-auto space-y-2">
                         <Wrench className="h-8 w-8 text-slate-300 mx-auto" />
-                        <p className="text-sm font-bold text-slate-700">No contractors found</p>
-                        <p className="text-xs text-slate-400">Try adjusting search query or add a new trade contractor.</p>
+                        <p className="text-sm font-semibold text-[#1D1D1F]">No contractors found</p>
+                        <p className="text-xs text-[#6E6E73] font-normal">Try adjusting search query or add a new trade contractor.</p>
                       </div>
                     </td>
                   </tr>
@@ -588,7 +609,7 @@ export default function InspectorsAndVendorsPage() {
                           <td className="py-3.5 px-6">
                             <div className="flex items-center gap-3">
                               <div
-                                className={`h-9 w-9 rounded-xl ${avatarBg} font-black text-sm flex items-center justify-center border border-white shadow-xs shrink-0 cursor-pointer`}
+                                className={`h-9 w-9 rounded-xl ${avatarBg} font-semibold text-xs flex items-center justify-center border border-white shadow-2xs shrink-0 cursor-pointer`}
                                 onClick={() => router.push(`/dashboard/vendors/${vendor.id}`)}
                               >
                                 {vendor.name.charAt(0).toUpperCase()}
@@ -596,11 +617,11 @@ export default function InspectorsAndVendorsPage() {
                               <div>
                                 <Link
                                   href={`/dashboard/vendors/${vendor.id}`}
-                                  className="font-bold text-sm text-slate-900 hover:text-amber-600 transition-colors block"
+                                  className="font-semibold text-xs text-[#1D1D1F] hover:text-amber-600 transition-colors block"
                                 >
                                   {vendor.name}
                                 </Link>
-                                <a href={`mailto:${vendor.email}`} className="text-xs font-semibold text-slate-500 hover:underline">
+                                <a href={`mailto:${vendor.email}`} className="text-xs font-normal text-[#6E6E73] hover:underline">
                                   {vendor.email}
                                 </a>
                               </div>
@@ -609,7 +630,7 @@ export default function InspectorsAndVendorsPage() {
 
                           {/* Trade Specialty */}
                           <td className="py-3.5 px-6">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold border ${specStyle.bg} ${specStyle.text} ${specStyle.border}`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border ${specStyle.bg} ${specStyle.text} ${specStyle.border}`}>
                               <Wrench className="h-3 w-3" />
                               {vendor.specialty}
                             </span>
@@ -617,7 +638,7 @@ export default function InspectorsAndVendorsPage() {
 
                           {/* Call Out Fee */}
                           <td className="py-3.5 px-6">
-                            <span className="font-extrabold text-slate-900 text-xs">
+                            <span className="font-semibold text-[#1D1D1F] text-xs">
                               {callOutFee > 0 ? `$${callOutFee.toFixed(2)} / call-out` : "Standard Rate"}
                             </span>
                           </td>
@@ -626,11 +647,11 @@ export default function InspectorsAndVendorsPage() {
                           <td className="py-3.5 px-6">
                             <div className="flex items-center gap-2 flex-wrap">
                               {vendor.w9OnFile ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-[11px] font-bold">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-[10px] font-medium uppercase tracking-wider">
                                   <Check className="h-3 w-3 text-emerald-600" /> W-9
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-md text-[11px] font-bold">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-md text-[10px] font-medium uppercase tracking-wider">
                                   <XCircle className="h-3 w-3 text-rose-500" /> W-9 Missing
                                 </span>
                               )}

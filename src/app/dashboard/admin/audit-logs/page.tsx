@@ -211,11 +211,11 @@ export default function AuditLogsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 flex items-center gap-2.5">
             <ShieldAlert className="h-6 w-6 text-rose-600 animate-pulse" />
             System Audit Trails
           </h1>
-          <p className="text-slate-500 text-xs font-semibold mt-0.5">
+          <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
             Enterprise security compliance, authentication tracking, financial mutations, and system event governance.
           </p>
         </div>
@@ -226,7 +226,7 @@ export default function AuditLogsPage() {
             disabled={exporting || loading}
             variant="outline"
             size="sm"
-            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-black text-xs bg-white shadow-2xs cursor-pointer"
+            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-medium text-xs bg-white shadow-2xs cursor-pointer"
           >
             <Download className={`h-3.5 w-3.5 text-emerald-600 ${exporting ? "animate-bounce" : ""}`} />
             {exporting ? "Exporting..." : "Export CSV"}
@@ -236,7 +236,7 @@ export default function AuditLogsPage() {
             onClick={fetchLogs}
             variant="outline"
             size="sm"
-            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-black text-xs bg-white shadow-2xs cursor-pointer"
+            className="h-9 border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl flex items-center gap-2 font-medium text-xs bg-white shadow-2xs cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${loading ? "animate-spin" : ""}`} />
             Refresh Trails
@@ -249,8 +249,8 @@ export default function AuditLogsPage() {
         <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Total Logs Filtered</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{pagination.total}</h3>
+              <p className="text-[10px] font-semibold tracking-wider uppercase text-[#6E6E73]">Total Logs Filtered</p>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1 tracking-tight">{pagination.total}</h3>
             </div>
             <div className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200/80 flex items-center justify-center font-bold shadow-2xs">
               <Activity className="h-5 w-5 text-blue-600" />
@@ -261,9 +261,9 @@ export default function AuditLogsPage() {
         <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Failed Logins (24h)</p>
+              <p className="text-[10px] font-semibold tracking-wider uppercase text-[#6E6E73]">Failed Logins (24h)</p>
               <div className="flex items-center gap-2 mt-1">
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{stats.failedLogins24h}</h3>
+                <h3 className="text-3xl font-semibold text-slate-900 tracking-tight">{stats.failedLogins24h}</h3>
                 {stats.failedLogins24h > 0 && (
                   <Badge className="bg-rose-50 text-rose-800 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200 shadow-2xs">
                     Alert
@@ -280,8 +280,8 @@ export default function AuditLogsPage() {
         <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Today's Activity</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.todayEvents}</h3>
+              <p className="text-[10px] font-semibold tracking-wider uppercase text-[#6E6E73]">Today's Activity</p>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1 tracking-tight">{stats.todayEvents}</h3>
             </div>
             <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center font-bold shadow-2xs">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -292,8 +292,8 @@ export default function AuditLogsPage() {
         <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400">Critical Events</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stats.criticalEvents}</h3>
+              <p className="text-[10px] font-semibold tracking-wider uppercase text-[#6E6E73]">Critical Events</p>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1 tracking-tight">{stats.criticalEvents}</h3>
             </div>
             <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center font-bold shadow-2xs">
               <FileText className="h-5 w-5 text-amber-600" />
@@ -334,7 +334,7 @@ export default function AuditLogsPage() {
                   setEntityType(e.target.value);
                   setPage(1);
                 }}
-                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
+                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
               >
                 <option value="">All Entity Types ({stats.totalEvents})</option>
                 <option value="AUTH">AUTH (Authentication &amp; Logins)</option>
@@ -354,7 +354,7 @@ export default function AuditLogsPage() {
                   setAction(e.target.value);
                   setPage(1);
                 }}
-                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
+                className="h-9 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
               >
                 <option value="">All Actions</option>
                 <option value="LOGIN_SUCCESS">Login Success ({getActionCount("LOGIN_SUCCESS")})</option>
@@ -380,7 +380,7 @@ export default function AuditLogsPage() {
                     setStartDate(e.target.value);
                     setPage(1);
                   }}
-                  className="bg-transparent text-xs font-extrabold text-slate-900 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer"
                 />
                 <span className="text-slate-400 text-xs font-extrabold">to</span>
                 <input
@@ -390,7 +390,7 @@ export default function AuditLogsPage() {
                     setEndDate(e.target.value);
                     setPage(1);
                   }}
-                  className="bg-transparent text-xs font-extrabold text-slate-900 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer"
                 />
               </div>
 
@@ -399,7 +399,7 @@ export default function AuditLogsPage() {
                   onClick={handleClearFilters}
                   variant="ghost"
                   size="sm"
-                  className="h-9 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-extrabold text-xs rounded-xl flex items-center gap-1 cursor-pointer"
+                  className="h-9 px-3 text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium text-xs rounded-xl flex items-center gap-1 cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                   Clear Filters
@@ -457,7 +457,7 @@ export default function AuditLogsPage() {
                   onClick={handleClearFilters}
                   variant="outline"
                   size="sm"
-                  className="mt-2 rounded-xl border-slate-200 text-xs font-bold"
+                  className="mt-2 rounded-xl border-slate-200 text-xs font-medium"
                 >
                   Reset All Filters
                 </Button>
@@ -643,34 +643,44 @@ export default function AuditLogsPage() {
 
       {/* Audit Trail Details & Diffs Dialog */}
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
-        <DialogContent className="max-w-3xl bg-white border-slate-100 text-slate-800 rounded-3xl p-6 overflow-hidden">
+        <DialogContent className="max-w-3xl bg-white border-slate-200 text-[#1D1D1F] rounded-3xl p-6 overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-rose-600" />
+            <DialogTitle className="text-lg font-semibold text-[#1D1D1F] flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-slate-700" />
               Audit Trail Payload Inspection
             </DialogTitle>
-            <DialogDescription className="text-[#8E8E93] text-xs">
+            <DialogDescription className="text-[#6E6E73] text-xs font-normal">
               Complete state mutation record and network metadata captured during execution.
             </DialogDescription>
           </DialogHeader>
 
           {selectedLog && (
-            <div className="space-y-4 pt-4 overflow-y-auto max-h-[500px] pr-2">
+            <div className="space-y-4 pt-2 overflow-y-auto max-h-[500px] pr-2">
               {/* Metadata Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Entity Type</div>
-                  <div className="text-slate-800 font-black">{selectedLog.entityType}</div>
-                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">{selectedLog.entityId.slice(0, 10)}...</div>
+                <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/60">
+                  <div className="text-xs font-normal text-[#6E6E73] mb-1">Entity Type</div>
+                  <div className="text-[#1D1D1F] font-semibold text-xs">{selectedLog.entityType}</div>
+                  <div className="text-xs text-[#6E6E73] font-mono mt-0.5">{selectedLog.entityId.slice(0, 10)}...</div>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Trigger Action</div>
-                  <div className="text-rose-600 font-black">{selectedLog.action.replace(/_/g, " ")}</div>
+                <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/60">
+                  <div className="text-xs font-normal text-[#6E6E73] mb-1">Trigger Action</div>
+                  <div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border ${
+                      selectedLog.action.includes("FAILED") || selectedLog.action.includes("DELETED")
+                        ? "bg-rose-50 text-rose-800 border-rose-200"
+                        : selectedLog.action.includes("SUCCESS") || selectedLog.action.includes("APPROVED")
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-slate-100 text-slate-700 border-slate-200"
+                    }`}>
+                      {selectedLog.action.replace(/_/g, " ")}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Actor</div>
+                <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/60">
+                  <div className="text-xs font-normal text-[#6E6E73] mb-1">Actor</div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {selectedLog.actor?.avatar ? (
                       <img
@@ -680,48 +690,48 @@ export default function AuditLogsPage() {
                       />
                     ) : null}
                     <div className="overflow-hidden">
-                      <div className="text-slate-800 font-bold truncate">{selectedLog.actor?.name || selectedLog.actorRole || "SYSTEM"}</div>
-                      <div className="text-[10px] text-slate-400 truncate">{selectedLog.actor?.email || selectedLog.actorId || "System Task"}</div>
+                      <div className="text-[#1D1D1F] font-semibold text-xs truncate">{selectedLog.actor?.name || selectedLog.actorRole || "SYSTEM"}</div>
+                      <div className="text-xs text-[#6E6E73] font-normal truncate">{selectedLog.actor?.email || selectedLog.actorId || "System Task"}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="font-bold text-[#8E8E93] uppercase text-[9px] mb-1">Network Info</div>
-                  <div className="text-slate-800 font-mono font-bold">{selectedLog.ipAddress || "N/A"}</div>
-                  <div className="text-[10px] text-slate-400 truncate" title={selectedLog.userAgent || ""}>
+                <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/60">
+                  <div className="text-xs font-normal text-[#6E6E73] mb-1">Network Info</div>
+                  <div className="text-[#1D1D1F] font-mono font-semibold text-xs">{selectedLog.ipAddress || "N/A"}</div>
+                  <div className="text-xs text-[#6E6E73] font-normal truncate mt-0.5" title={selectedLog.userAgent || ""}>
                     {selectedLog.userAgent ? selectedLog.userAgent.slice(0, 18) + "..." : "No User Agent"}
                   </div>
                 </div>
               </div>
 
-              {/* Event Description (P0 Fix: clean rendering without literal quotes) */}
+              {/* Event Description */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#6E6E73]">Event Description & Notes</label>
-                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs text-slate-700 font-medium">
+                <label className="text-xs font-normal text-[#6E6E73]">Event Description &amp; Notes</label>
+                <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/60 text-xs text-[#1D1D1F] font-normal">
                   {selectedLog.note || "No additional metadata comments recorded for this audit entry."}
                 </div>
               </div>
 
               {/* JSON Diffs Viewer */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 {/* Old Value */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-rose-600">Old / Before State</label>
+                    <label className="text-xs font-normal text-[#6E6E73]">Old / Before State</label>
                     {selectedLog.oldValue && (
                       <Button
                         onClick={() => copyToClipboard(selectedLog.oldValue, "old")}
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] font-bold text-rose-700 hover:bg-rose-100 rounded-lg flex items-center gap-1"
+                        className="h-6 px-2 text-xs font-medium text-[#1D1D1F] hover:bg-slate-100 rounded-lg flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedOld ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                        {copiedOld ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3 text-slate-500" />}
                         {copiedOld ? "Copied" : "Copy JSON"}
                       </Button>
                     )}
                   </div>
-                  <pre className="bg-rose-50/50 text-rose-800 border border-rose-100 p-4 rounded-2xl text-[11px] font-mono overflow-auto max-h-[220px]">
+                  <pre className="bg-slate-50 text-[#1D1D1F] border border-slate-200 p-4 rounded-2xl text-xs font-mono overflow-auto max-h-[220px]">
                     {selectedLog.oldValue ? JSON.stringify(selectedLog.oldValue, null, 2) : "null (No previous state recorded)"}
                   </pre>
                 </div>
@@ -729,20 +739,20 @@ export default function AuditLogsPage() {
                 {/* New Value */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-emerald-600">New / After State</label>
+                    <label className="text-xs font-normal text-[#6E6E73]">New / After State</label>
                     {selectedLog.newValue && (
                       <Button
                         onClick={() => copyToClipboard(selectedLog.newValue, "new")}
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100 rounded-lg flex items-center gap-1"
+                        className="h-6 px-2 text-xs font-medium text-[#1D1D1F] hover:bg-slate-100 rounded-lg flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedNew ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                        {copiedNew ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3 text-slate-500" />}
                         {copiedNew ? "Copied" : "Copy JSON"}
                       </Button>
                     )}
                   </div>
-                  <pre className="bg-emerald-50/50 text-emerald-800 border border-emerald-100 p-4 rounded-2xl text-[11px] font-mono overflow-auto max-h-[220px]">
+                  <pre className="bg-slate-50 text-[#1D1D1F] border border-slate-200 p-4 rounded-2xl text-xs font-mono overflow-auto max-h-[220px]">
                     {selectedLog.newValue ? JSON.stringify(selectedLog.newValue, null, 2) : "null (No subsequent state recorded)"}
                   </pre>
                 </div>
@@ -754,3 +764,4 @@ export default function AuditLogsPage() {
     </div>
   );
 }
+

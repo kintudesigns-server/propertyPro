@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { 
@@ -116,7 +116,7 @@ export default function AdminBillingDashboard() {
             <ChevronRight className="w-3 h-3" />
             <span>Billing Overview</span>
           </div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
             <CreditCard className="w-7 h-7 text-blue-600" />
             SaaS Subscription Intelligence
           </h1>

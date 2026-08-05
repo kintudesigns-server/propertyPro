@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { LucideIcon, Clock, X } from "lucide-react";
@@ -72,7 +72,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
                       <Icon size={14} />
                     </div>
                     <div className="space-y-0.5">
-                      <div className="font-extrabold text-slate-900 text-xs">{row.label}</div>
+                      <div className="font-semibold text-slate-900 text-xs">{row.label}</div>
                       <div className="text-[11px] text-slate-500 font-semibold leading-normal max-w-xs sm:max-w-sm">
                         {row.description}
                       </div>
@@ -88,7 +88,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
                       row.onChange("default");
                       if (row.onExpiryChange) row.onExpiryChange("");
                     }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider border transition-all cursor-pointer ${
                       row.value === "default"
                         ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
                         : "bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
@@ -103,7 +103,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
                   <button
                     type="button"
                     onClick={() => row.onChange("allow")}
-                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider border transition-all cursor-pointer ${
                       row.value === "allow"
                         ? "bg-emerald-600 border-emerald-600 text-white shadow-2xs"
                         : "bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
@@ -118,7 +118,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
                   <button
                     type="button"
                     onClick={() => row.onChange("block")}
-                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                    className={`w-full py-1.5 px-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider border transition-all cursor-pointer ${
                       row.value === "block"
                         ? "bg-rose-600 border-rose-600 text-white shadow-2xs"
                         : "bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
@@ -177,7 +177,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
 
                       {/* Expiration Active Badge or Indefinite Indicator */}
                       {row.expiresAt ? (
-                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-900 border border-slate-200 px-2.5 py-0.5 rounded-md shadow-2xs">
+                        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-900 border border-slate-200 px-2.5 py-0.5 rounded-md shadow-2xs">
                           <Clock size={10} className="text-slate-500 shrink-0" />
                           <span>{daysRemainingText} ({row.expiresAt})</span>
                           <button
@@ -193,7 +193,7 @@ export function PolicyToggleTable({ rows }: PolicyToggleTableProps) {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Permanent Exception</span>
+                        <span className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Permanent Exception</span>
                       )}
                     </div>
                   )}

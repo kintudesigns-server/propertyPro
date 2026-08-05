@@ -378,7 +378,7 @@ export default function MessagesPage() {
       <div className="w-80 border-r border-slate-200 bg-white flex flex-col shrink-0">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Chats</h1>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">Chats</h1>
           <button
             onClick={() => setIsNewChatOpen(true)}
             className="p-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-xs cursor-pointer"
@@ -390,13 +390,13 @@ export default function MessagesPage() {
 
         {/* Search */}
         <div className="p-3 border-b border-slate-100 relative">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
           <input
             type="text"
             placeholder="Search messages..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-all shadow-2xs"
+            className="pl-10 pr-4 py-2 w-full bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:bg-white focus:border-emerald-500 transition-all shadow-2xs"
           />
         </div>
 
@@ -404,20 +404,20 @@ export default function MessagesPage() {
         <div className="flex gap-2 p-3 bg-slate-50/60 border-b border-slate-100">
           <button
             onClick={() => setFilter("ALL")}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer border ${
+            className={`px-3 py-1 text-xs font-medium rounded-xl transition-all cursor-pointer border ${
               filter === "ALL"
                 ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                : "bg-white text-[#6E6E73] border-slate-200 hover:bg-slate-100"
             }`}
           >
             All
           </button>
           <button
             onClick={() => setFilter("UNREAD")}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer border ${
+            className={`px-3 py-1 text-xs font-medium rounded-xl transition-all cursor-pointer border ${
               filter === "UNREAD"
                 ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                : "bg-white text-[#6E6E73] border-slate-200 hover:bg-slate-100"
             }`}
           >
             Unread
@@ -431,7 +431,7 @@ export default function MessagesPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
             </div>
           ) : filteredThreads.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 font-semibold text-xs">
+            <div className="text-center py-12 text-[#6E6E73] font-normal text-xs">
               {searchQuery ? "No chats match query" : "No conversations yet"}
             </div>
           ) : (
@@ -443,7 +443,7 @@ export default function MessagesPage() {
                   key={thread.contact.id}
                   onClick={() => setActiveThreadId(thread.contact.id)}
                   className={`w-full flex items-center gap-3 p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors text-left relative cursor-pointer ${
-                    isActive ? "bg-emerald-50/80 border-l-4 border-l-emerald-600 font-extrabold" : ""
+                    isActive ? "bg-emerald-50/80 border-l-4 border-l-emerald-600" : ""
                   }`}
                 >
                   {/* Avatar */}
@@ -458,14 +458,14 @@ export default function MessagesPage() {
                   {/* Body */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <span className="font-extrabold text-xs text-slate-900 truncate">
+                      <span className="font-semibold text-xs text-[#1D1D1F] truncate">
                         {thread.contact.name || "User"}
                       </span>
-                      <span className="text-[10px] font-semibold text-slate-400">
+                      <span className="text-[10px] font-normal text-[#6E6E73]">
                         {formatMessageTime(thread.lastMessage.createdAt)}
                       </span>
                     </div>
-                    <p className={`text-xs truncate ${unread ? "font-extrabold text-slate-900" : "text-slate-500 font-semibold"}`}>
+                    <p className={`text-xs truncate ${unread ? "font-semibold text-[#1D1D1F]" : "text-[#6E6E73] font-normal"}`}>
                       {thread.lastMessage.senderId === currentUserId ? "You: " : ""}
                       {thread.lastMessage.content}
                     </p>
@@ -618,7 +618,7 @@ export default function MessagesPage() {
                   {attachmentPreview === "FILE" ? (
                     <div className="flex items-center gap-2 p-2 px-4">
                       <FileText className="h-5 w-5 text-emerald-700" />
-                      <span className="text-xs font-extrabold text-slate-900 truncate max-w-[200px]">{attachmentFile?.name}</span>
+                      <span className="text-xs font-semibold text-slate-900 truncate max-w-[200px]">{attachmentFile?.name}</span>
                     </div>
                   ) : (
                     <img src={attachmentPreview} alt="Preview" className="h-20 max-w-[200px] object-cover rounded-lg" />
@@ -687,16 +687,16 @@ export default function MessagesPage() {
           </>
         ) : (
           <div className="flex-1 flex flex-col justify-center items-center p-8 text-center bg-white">
-            <div className="h-16 w-16 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl flex items-center justify-center mb-4 shadow-2xs">
-              <MessageSquare className="h-7 w-7" />
+            <div className="h-14 w-14 bg-emerald-50 border border-emerald-200/60 text-emerald-700 rounded-2xl flex items-center justify-center mb-4 shadow-2xs">
+              <MessageSquare className="h-6 w-6" />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-1">Your Inbox</h2>
-            <p className="text-xs text-slate-500 font-semibold max-w-sm mb-6 leading-relaxed">
+            <h2 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight mb-1">Your Inbox</h2>
+            <p className="text-xs font-normal text-[#6E6E73] max-w-sm mb-6 leading-relaxed">
               Select a conversation from the list or start a new chat with your contacts to get started.
             </p>
             <Button
               onClick={() => setIsNewChatOpen(true)}
-              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs h-10 px-6 shadow-xs cursor-pointer"
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-6 border-none shadow-xs cursor-pointer"
             >
               Start Conversation
             </Button>
@@ -708,7 +708,7 @@ export default function MessagesPage() {
       {activeThreadId && activeThread && showRightPanel && (
         <div className="w-72 border-l border-slate-200 bg-white flex flex-col shrink-0">
           <div className="p-4 border-b border-slate-100 flex justify-between items-center sticky top-0 z-10 bg-white">
-            <h3 className="font-extrabold text-slate-900 text-xs">Contact Info</h3>
+            <h3 className="font-semibold text-[#1D1D1F] text-xs">Contact Info</h3>
             <button
               onClick={() => setShowRightPanel(false)}
               className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
@@ -725,18 +725,18 @@ export default function MessagesPage() {
                 className="h-16 w-16 rounded-2xl object-cover border border-slate-200 shadow-2xs"
               />
             </div>
-            <h4 className="font-black text-sm text-slate-900 text-center mb-1 leading-tight">
+            <h4 className="font-semibold text-xs text-[#1D1D1F] text-center mb-1 leading-tight">
               {activeThread.contact.name || "User"}
             </h4>
-            <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider ${getRoleColor(activeThread.contact.role)}`}>
+            <span className={`text-[9px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider ${getRoleColor(activeThread.contact.role)}`}>
               {activeThread.contact.role}
             </span>
           </div>
 
           <div className="p-6 space-y-4">
             <div className="space-y-1">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address</span>
-              <p className="text-xs font-semibold text-slate-900 break-all">{activeThread.contact.email}</p>
+              <span className="text-xs font-normal text-[#6E6E73] flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address</span>
+              <p className="text-xs font-semibold text-[#1D1D1F] break-all">{activeThread.contact.email}</p>
             </div>
           </div>
         </div>

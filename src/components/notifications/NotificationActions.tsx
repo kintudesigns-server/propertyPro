@@ -57,26 +57,22 @@ export function NotificationActions({ id, isRead: initialIsRead }: NotificationA
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       <button
         onClick={handleToggleRead}
         disabled={toggling}
-        className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors border disabled:opacity-50 ${
-          isRead
-            ? "bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100"
-            : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100"
-        }`}
+        className="w-full h-9 flex items-center justify-center gap-2 px-4 rounded-xl text-xs font-medium transition-colors border border-slate-200 bg-white hover:bg-slate-50 text-[#1D1D1F] shadow-2xs disabled:opacity-50 cursor-pointer"
       >
         {isRead ? (
-          <><Eye className="h-4 w-4" /> Mark as Unread</>
+          <><Eye className="h-4 w-4 text-[#6E6E73]" /> Mark as Unread</>
         ) : (
-          <><CheckCheck className="h-4 w-4" /> Mark as Read</>
+          <><CheckCheck className="h-4 w-4 text-emerald-600" /> Mark as Read</>
         )}
       </button>
       <button
         onClick={handleDelete}
         disabled={deleting}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-colors border border-red-100 disabled:opacity-50"
+        className="w-full h-9 flex items-center justify-center gap-2 px-4 bg-white hover:bg-rose-50 text-rose-700 rounded-xl text-xs font-medium transition-colors border border-rose-200 shadow-2xs disabled:opacity-50 cursor-pointer"
       >
         <Trash2 className="h-4 w-4" />
         {deleting ? "Deleting..." : "Delete Notification"}

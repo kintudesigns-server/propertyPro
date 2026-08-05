@@ -170,10 +170,10 @@ export default function ApplicationsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tenant Applications</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Review and manage tenant rental applications</p>
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Tenant Applications</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Review and manage tenant rental applications</p>
         </div>
-        <Button onClick={fetchApplications} variant="outline" className="h-9 px-3.5 rounded-xl font-bold text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer">
+        <Button onClick={fetchApplications} variant="outline" className="h-9 px-3.5 rounded-xl font-medium text-xs text-slate-700 bg-white border-slate-200 shadow-xs hover:bg-slate-50 cursor-pointer">
           <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Refresh
         </Button>
       </div>
@@ -233,7 +233,7 @@ export default function ApplicationsPage() {
                             {app.name ? app.name.charAt(0).toUpperCase() : "A"}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-extrabold text-slate-900 text-xs truncate">{app.name}</span>
+                            <span className="font-semibold text-slate-900 text-xs truncate">{app.name}</span>
                             <span className="text-[11px] text-slate-500 font-medium truncate">{app.email}</span>
                           </div>
                         </div>
@@ -326,7 +326,7 @@ export default function ApplicationsPage() {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-16 text-slate-500">
                       <FileText className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                      <p className="font-extrabold text-slate-900 text-sm">No applications found</p>
+                      <p className="font-semibold text-slate-900 text-sm">No applications found</p>
                       <p className="text-xs text-slate-500 mt-0.5">Try adjusting your search query or status filter.</p>
                     </TableCell>
                   </TableRow>

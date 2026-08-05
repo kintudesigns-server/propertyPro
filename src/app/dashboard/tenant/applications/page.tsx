@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -59,8 +59,8 @@ export default function TenantApplicationsPage() {
               <ClipboardList className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Applications</h1>
-              <p className="text-slate-500 text-xs font-semibold mt-0.5">Track the status of your rental applications in real-time.</p>
+              <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">My Applications</h1>
+              <p className="text-[#6E6E73] text-xs font-normal mt-0.5">Track the status of your rental applications in real-time.</p>
             </div>
           </div>
 
@@ -69,11 +69,11 @@ export default function TenantApplicationsPage() {
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 border border-slate-200/80 mb-5 text-slate-900 shadow-2xs">
             <ClipboardList className="h-7 w-7 text-slate-700" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1.5">No Applications Found</h3>
+          <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-1.5">No Applications Found</h3>
           <p className="text-slate-500 max-w-md mx-auto text-xs font-semibold leading-relaxed mb-6">
             You haven't submitted any rental applications yet. When you find a property you like, apply to see its status here!
           </p>
-          <Link href="/listings" className="inline-flex items-center justify-center px-6 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl transition-all cursor-pointer gap-2">
+          <Link href="/listings" className="inline-flex items-center justify-center px-6 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-medium text-xs rounded-xl transition-all cursor-pointer gap-2">
             <Search className="h-4 w-4 text-emerald-700" />
             Browse Listings
           </Link>
@@ -146,7 +146,7 @@ function ApplicationCard({ application }: { application: any }) {
             </div>
             <Link 
               href={`/dashboard/leases/${application.lease.id}`}
-              className="w-full inline-flex items-center justify-center px-4 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs rounded-xl transition-all cursor-pointer gap-2"
+              className="w-full inline-flex items-center justify-center px-4 h-11 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-medium text-xs rounded-xl transition-all cursor-pointer gap-2"
             >
               {application.lease.status === "PENDING_SIGNATURE" ? "Review & Sign Lease" : "View Lease Details"}
               <ArrowRight className="h-4 w-4 text-emerald-700" />
@@ -279,3 +279,4 @@ function ApplicationCard({ application }: { application: any }) {
     </div>
   );
 }
+

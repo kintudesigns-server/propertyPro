@@ -183,7 +183,7 @@ export default function OwnerAvailabilitySettingsPage() {
         <Button
           disabled={saving || blockTourSlots}
           onClick={handleSave}
-          className={`rounded-xl h-11 px-6 font-bold text-xs flex items-center gap-2 shadow-sm transition-all ${
+          className={`rounded-xl h-11 px-6 font-medium text-xs flex items-center gap-2 shadow-sm transition-all ${
             blockTourSlots 
               ? "bg-[#D1D1D6] text-[#8E8E93] cursor-not-allowed hover:bg-[#D1D1D6]" 
               : "bg-blue-600 hover:bg-blue-700 text-white"
@@ -306,7 +306,7 @@ export default function OwnerAvailabilitySettingsPage() {
                 <Button
                   onClick={handleAddBlackoutDate}
                   disabled={!newBlackoutDate}
-                  className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl h-10 px-3 font-bold text-xs shrink-0 flex items-center gap-1"
+                  className="bg-slate-900 hover:bg-[#007AFF] text-white rounded-xl h-10 px-3 font-medium text-xs shrink-0 flex items-center gap-1"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </Button>

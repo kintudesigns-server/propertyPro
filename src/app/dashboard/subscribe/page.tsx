@@ -137,9 +137,9 @@ function SubscribeContent() {
 
   if (status === "loading" || loading || syncing) {
     return (
-      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center text-white gap-4">
-        <Loader2 className="animate-spin h-10 w-10 text-indigo-500" />
-        <p className="text-slate-400 font-medium tracking-wide">
+      <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 font-sans">
+        <Loader2 className="animate-spin h-10 w-10 text-slate-700" />
+        <p className="text-[#6E6E73] text-xs font-normal">
           {syncing ? "Activating your account..." : "Loading subscription details..."}
         </p>
       </div>
@@ -147,144 +147,126 @@ function SubscribeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090D1A] text-white flex flex-col relative overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 blur-[150px] rounded-full" />
-
-      {/* Top Header */}
-      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center z-10 border-b border-white/5">
+    <div className="w-full max-w-7xl mx-auto pt-6 space-y-8 pb-20 px-4 md:px-0 font-sans">
+      {/* Header Panel */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="bg-indigo-600 p-2 rounded-xl">
-            <Building2 className="h-6 w-6 text-white" />
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+            <Building2 className="h-4 w-4 text-slate-700" />
           </div>
-          <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            PropertyPro
-          </span>
-          <Badge variant="outline" className="border-indigo-500/30 text-indigo-400 font-bold px-2.5 py-0.5">
-            Owner Portal
-          </Badge>
-        </div>
-        <Button
-          variant="ghost"
-          onClick={() => signOut({ callbackUrl: "/auth/login" })}
-          className="text-slate-400 hover:text-white hover:bg-white/5 gap-2 font-semibold"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </header>
-
-      {/* Main Container */}
-      <main className="flex-1 flex flex-col justify-center items-center px-6 py-16 z-10 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3.5 py-1.5 rounded-full text-indigo-300 text-xs font-semibold mb-6">
-            <Sparkles className="h-3.5 w-3.5" /> Set Up Your PropertyPro Account
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
+                Select Your Subscription Plan
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+                Owner Portal
+              </span>
+            </div>
+            <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
+              Choose the best plan for your properties. A valid card is required to activate trials. No charges made during 14-day free trial.
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">
-            Select Your Subscription Plan
-          </h1>
-          <p className="text-slate-400 text-lg leading-relaxed max-w-2xl mx-auto">
-            Choose the best plan for your properties. To prevent spam and secure your database limits, a valid card is required to activate trials. 
-            <span className="text-indigo-400 font-semibold block mt-2">No charges will be made during your 14-day free trial.</span>
-          </p>
         </div>
+      </div>
 
-        {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
-          {tiers.map((tier) => {
-            const isEnterprise = tier.isCustom;
-            const isPro = tier.name === "Professional";
+      {/* Pricing Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+        {tiers.map((tier) => {
+          const isEnterprise = tier.isCustom;
+          const isPro = tier.name === "Professional";
 
-            return (
-              <Card
-                key={tier.id}
-                className={`relative flex flex-col justify-between overflow-hidden bg-slate-900/40 backdrop-blur-xl border-white/10 text-white transition-all duration-300 hover:translate-y-[-4px] hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5 ${
-                  isPro ? "ring-2 ring-indigo-500/50 bg-slate-900/60" : ""
-                }`}
-              >
-                {isPro && (
-                  <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-extrabold px-4 py-1.5 rounded-bl-xl uppercase tracking-wider">
+          return (
+            <div
+              key={tier.id}
+              className={`bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 md:p-8 flex flex-col justify-between font-sans relative ${
+                isPro ? "ring-2 ring-slate-900/10 border-slate-400" : ""
+              }`}
+            >
+              {isPro && (
+                <div className="absolute top-4 right-4">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-900 text-white shadow-2xs">
                     Most Popular
+                  </span>
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">{tier.name}</h2>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-1 min-h-[36px]">
+                    {tier.description}
+                  </p>
+                </div>
+
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">
+                    {isEnterprise ? "Custom" : `$${tier.price}`}
+                  </span>
+                  {!isEnterprise && (
+                    <span className="text-xs font-normal text-[#6E6E73]">/month</span>
+                  )}
+                </div>
+
+                {tier.trialDays > 0 && (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                    <Shield className="h-3 w-3 text-emerald-600" />
+                    Includes {tier.trialDays}-Day Free Trial
                   </div>
                 )}
 
-                <CardHeader className="p-8">
-                  <div className="text-xs text-indigo-400 font-extrabold tracking-widest uppercase mb-2">
-                    {tier.name}
-                  </div>
-                  <CardTitle className="text-2xl font-bold mb-4">{tier.name}</CardTitle>
-                  <CardDescription className="text-slate-400 text-sm leading-relaxed min-h-[48px]">
-                    {tier.description}
-                  </CardDescription>
-                  <div className="mt-6 flex items-baseline gap-1">
-                    <span className="text-5xl font-black tracking-tight">
-                      {isEnterprise ? "Custom" : `$${tier.price}`}
-                    </span>
-                    {!isEnterprise && (
-                      <span className="text-slate-400 text-sm font-semibold">/month</span>
-                    )}
-                  </div>
-                  {tier.trialDays > 0 && (
-                    <div className="mt-2 text-indigo-300 text-xs font-semibold flex items-center gap-1.5">
-                      <Shield className="h-3.5 w-3.5 text-indigo-400" />
-                      Includes {tier.trialDays}-Day Free Trial
-                    </div>
-                  )}
-                </CardHeader>
-
-                <CardContent className="px-8 pb-8 pt-0 flex-1">
-                  <div className="border-t border-white/5 my-6" />
-                  <div className="text-slate-300 text-xs font-bold uppercase tracking-wider mb-4">
-                    What's Included:
-                  </div>
-                  <ul className="space-y-3.5">
+                <div className="border-t border-slate-100 pt-4 space-y-3">
+                  <p className="text-xs font-semibold text-[#1D1D1F]">What's Included:</p>
+                  <ul className="space-y-2.5">
                     {tier.features.map((feature: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-slate-300">
-                        <Check className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-2 text-xs font-normal text-[#6E6E73]">
+                        <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </div>
+              </div>
 
-                <CardFooter className="p-8 bg-white/[0.02] border-t border-white/5">
-                  <Button
-                    onClick={() => handleSelectPlan(tier)}
-                    disabled={subscribingTierId !== null}
-                    className={`w-full py-6 rounded-xl font-bold tracking-wide transition-all ${
-                      isPro
-                        ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20"
-                        : "bg-white/10 hover:bg-white/20 text-white"
-                    }`}
-                  >
-                    {subscribingTierId === tier.id ? (
-                      <Loader2 className="animate-spin h-5 w-5" />
-                    ) : isEnterprise ? (
-                      "Contact Sales"
-                    ) : (
-                      `Start Free Trial`
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
+              <div className="pt-6 border-t border-slate-100 mt-6">
+                <Button
+                  onClick={() => handleSelectPlan(tier)}
+                  disabled={subscribingTierId !== null}
+                  className={`w-full h-9 rounded-xl font-medium text-xs shadow-xs transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${
+                    isPro
+                      ? "bg-slate-900 hover:bg-slate-800 text-white"
+                      : "bg-slate-900 hover:bg-slate-800 text-white"
+                  }`}
+                >
+                  {subscribingTierId === tier.id ? (
+                    <Loader2 className="animate-spin h-4 w-4 text-white" />
+                  ) : isEnterprise ? (
+                    "Contact Sales"
+                  ) : (
+                    "Start Free Trial"
+                  )}
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        {/* Trust Badges */}
-        <div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-slate-500 text-xs font-semibold">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" /> Secure checkout with Stripe
-          </div>
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4" /> Cancel or modify subscription anytime
-          </div>
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4" /> Automated limits enforcement
-          </div>
+      {/* Trust Badges */}
+      <div className="flex flex-wrap justify-center items-center gap-6 text-[#6E6E73] text-xs font-normal pt-4">
+        <div className="flex items-center gap-1.5">
+          <CreditCard className="h-4 w-4 text-slate-500" />
+          <span>Secure checkout with Stripe</span>
         </div>
-      </main>
+        <div className="flex items-center gap-1.5">
+          <Shield className="h-4 w-4 text-slate-500" />
+          <span>Cancel or modify subscription anytime</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Layers className="h-4 w-4 text-slate-500" />
+          <span>Automated limits enforcement</span>
+        </div>
+      </div>
     </div>
   );
 }

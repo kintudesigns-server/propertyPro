@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -238,11 +238,11 @@ export default function LeasesDashboard({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Leases</h1>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Manage your property leases and agreements</p>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Leases</h1>
+          <p className="text-xs text-[#6E6E73] font-normal mt-0.5">Manage your property leases and agreements</p>
         </div>
         <Link href="/dashboard/leases/new">
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-black flex items-center gap-2 cursor-pointer">
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs rounded-xl h-9 px-4 text-xs font-medium flex items-center gap-2 cursor-pointer">
             <Plus className="h-4 w-4" /> Create Lease
           </Button>
         </Link>
@@ -320,10 +320,10 @@ export default function LeasesDashboard({
             <FileText className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 leading-tight">
+            <h2 className="text-base font-semibold text-slate-900 leading-tight">
               {title || (initialFilter === "ACTIVE" ? "Active Leases" : initialFilter === "EXPIRING" ? "Expiring Leases" : "All Leases")}
             </h2>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            <p className="text-xs text-[#6E6E73] font-normal mt-0.5">
               {subtitle || (initialFilter === "ACTIVE" ? "Manage your currently active leases and track revenue" : initialFilter === "EXPIRING" ? "Leases expiring within the next 30 days" : "Manage and view all your property leases")}
             </p>
           </div>
@@ -397,7 +397,7 @@ export default function LeasesDashboard({
             <div className="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-3 border border-slate-200">
               <FileText className="h-6 w-6 text-slate-400" />
             </div>
-            <h3 className="text-base font-extrabold text-slate-900">No leases found</h3>
+            <h3 className="text-base font-semibold text-slate-900">No leases found</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm font-medium">There are no leases matching your current search or filter criteria.</p>
           </div>
         ) : viewMode === 'grid' ? (
@@ -435,7 +435,7 @@ export default function LeasesDashboard({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-extrabold text-slate-900 text-sm truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
+                      <h3 className="font-semibold text-slate-900 text-sm truncate">{l.unit?.property?.name || "Unknown Property"}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] font-extrabold uppercase text-slate-800 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md truncate">Unit {l.unit?.name || ""}</span>
                         <span className="text-xs text-slate-500 font-medium truncate">{l.unit?.property?.city || ""}</span>
@@ -494,7 +494,7 @@ export default function LeasesDashboard({
                           {l.tenant?.name ? l.tenant.name.substring(0, 2).toUpperCase() : "U"}
                         </div>
                       )}
-                      <p className="text-xs font-extrabold text-slate-900 truncate">{l.tenant?.name || l.tenant?.email}</p>
+                      <p className="text-xs font-semibold text-slate-900 truncate">{l.tenant?.name || l.tenant?.email}</p>
                     </div>
                   </div>
                   <div>
@@ -587,7 +587,7 @@ export default function LeasesDashboard({
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-extrabold text-slate-900 text-xs">{l.unit?.property?.name || "Property Not Available"}</span>
+                                <span className="font-semibold text-slate-900 text-xs">{l.unit?.property?.name || "Property Not Available"}</span>
                                 {l.unit?.name && (
                                   <span className="bg-slate-100 text-slate-800 text-[10px] font-extrabold uppercase border border-slate-200 px-2 py-0.5 rounded-md">
                                     Unit {l.unit.name}
@@ -614,7 +614,7 @@ export default function LeasesDashboard({
                               </div>
                             )}
                             <div>
-                              <div className="font-extrabold text-slate-900 text-xs">{l.tenant?.name || "Unknown Tenant"}</div>
+                              <div className="font-semibold text-slate-900 text-xs">{l.tenant?.name || "Unknown Tenant"}</div>
                               <div className="text-[11px] text-slate-500 font-medium">{l.tenant?.email || "No email"}</div>
                             </div>
                           </div>
@@ -625,7 +625,7 @@ export default function LeasesDashboard({
                           </div>
                         </TableCell>
                         <TableCell className="py-3.5">
-                          <div className="font-extrabold text-slate-900 text-xs">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                          <div className="font-semibold text-slate-900 text-xs">${Number(l.monthlyRent).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                           <div className="text-[10px] text-slate-500 font-semibold">per month</div>
                         </TableCell>
                         <TableCell className="py-3.5 font-semibold text-slate-700 text-xs">
@@ -708,3 +708,4 @@ export default function LeasesDashboard({
     </div>
   );
 }
+

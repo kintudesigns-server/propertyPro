@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
@@ -156,7 +156,7 @@ function SetupForm({
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-[2] h-12 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2"
+          className="flex-[2] h-12 bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-medium text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2"
         >
           {processing ? (
             <><Loader2 className="h-4 w-4 animate-spin text-emerald-700" /> Saving Card...</>
@@ -285,7 +285,7 @@ export default function AddCardPage() {
               <span>/</span>
               <span className="text-slate-900">Payment Methods</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Payment Methods</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Payment Methods</h1>
             <p className="text-slate-500 text-xs sm:text-sm font-medium">
               Save a credit or debit card for 1-click rent checkouts and automated Auto-Pay.
             </p>
@@ -296,10 +296,10 @@ export default function AddCardPage() {
             <div className="bg-white border border-slate-200/80 rounded-[28px] shadow-xs p-6 sm:p-8 space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Default Payment Method</h2>
+                  <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Default Payment Method</h2>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">Used for instant 1-click checkout</p>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                   Default Card
                 </span>
@@ -356,7 +356,7 @@ export default function AddCardPage() {
                   <div className="flex items-center justify-between pt-2 border-t border-white/10">
                     <div>
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Card Brand</span>
-                      <span className="text-xs font-black uppercase text-white tracking-wider">{savedCard.cardBrand || "Visa"}</span>
+                      <span className="text-xs font-semibold uppercase text-white tracking-wider">{savedCard.cardBrand || "Visa"}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-400/30 px-3 py-1 rounded-full backdrop-blur-sm">
                       <CheckCircle2 className="h-3.5 w-3.5" />
@@ -378,7 +378,7 @@ export default function AddCardPage() {
                   onClick={handleRemoveCard}
                   disabled={removingCard}
                   variant="outline"
-                  className="flex-1 h-12 rounded-2xl border border-slate-200 hover:border-rose-200 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="flex-1 h-12 rounded-2xl border border-slate-200 hover:border-rose-200 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-medium text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {removingCard ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   Remove Card
@@ -398,7 +398,7 @@ export default function AddCardPage() {
               <Button
                 onClick={openSetupForm}
                 disabled={loadingSetup}
-                className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-black h-12 px-8 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 mx-auto transition-all cursor-pointer"
+                className="bg-emerald-50/90 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-300/80 shadow-[0_4px_20px_rgba(52,211,153,0.35)] backdrop-blur-sm font-medium h-12 px-8 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 mx-auto transition-all cursor-pointer"
               >
                 {loadingSetup ? <Loader2 className="h-4 w-4 animate-spin text-emerald-700" /> : <Plus className="h-4 w-4 text-emerald-700" />}
                 Add a Payment Card
@@ -445,7 +445,7 @@ export default function AddCardPage() {
           {/* ── HOW IT WORKS ── */}
           {!showForm && (
             <div className="bg-slate-50/60 border border-slate-200/70 rounded-[24px] p-6 space-y-4">
-              <h3 className="font-black text-slate-900 text-sm tracking-tight uppercase tracking-wider text-slate-400">How Saved Cards Work</h3>
+              <h3 className="font-semibold text-slate-900 text-sm tracking-tight uppercase tracking-wider text-slate-400">How Saved Cards Work</h3>
               <div className="space-y-3">
                 {[
                   { step: "1", text: "Add your card securely via encrypted 256-Bit Stripe gateway" },
@@ -467,7 +467,7 @@ export default function AddCardPage() {
           <div className="flex items-center gap-3.5 p-4 bg-white border border-slate-200/80 rounded-2xl shadow-2xs">
             <ShieldCheck className="h-5 w-5 text-indigo-600 shrink-0" />
             <p className="text-xs text-slate-500 font-medium">
-              <span className="font-extrabold text-slate-900">Secured by Stripe. </span>
+              <span className="font-semibold text-slate-900">Secured by Stripe. </span>
               Your card details are encrypted end-to-end. PropertyPro never stores full card numbers.
             </p>
           </div>
@@ -477,3 +477,4 @@ export default function AddCardPage() {
     </div>
   );
 }
+

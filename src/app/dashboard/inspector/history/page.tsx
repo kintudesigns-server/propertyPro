@@ -174,34 +174,34 @@ export default function InspectorHistoryPage() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-5">
       
       {/* ── HEADER ── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 font-sans">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Archive className="h-4 w-4 text-emerald-500" />
-            <span className="text-[11px] font-extrabold text-emerald-550 uppercase tracking-widest">History & Archives</span>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Archive className="h-4 w-4 text-slate-700" />
+            <span className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">History &amp; Archives</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900">History Logs</h1>
-          <p className="text-[#8E8E93] text-sm mt-0.5">A complete record of all resolved and closed repair requests.</p>
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">History Logs</h1>
+          <p className="text-xs font-normal text-[#6E6E73] mt-0.5">A complete record of all resolved and closed repair requests.</p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold text-[#6E6E73] bg-white border border-slate-200 rounded-xl px-4 py-2">
-          <CheckCircle className="h-4 w-4 text-emerald-500" />
+        <div className="px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5">
+          <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
           {completedTasks.length} resolved ticket{completedTasks.length !== 1 ? "s" : ""}
         </div>
       </div>
 
       {/* ── TOOLBAR ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 font-sans">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E93]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E6E73]" />
           <Input placeholder="Search title, property, tenant..." value={search} onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-9 border-slate-200 rounded-xl bg-white text-sm shadow-xs" />
+            className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3.5 pl-9 text-xs font-normal text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:border-slate-400 shadow-2xs transition-all" />
         </div>
 
         {/* Status filter */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-xs">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs flex-wrap">
           {["ALL", "RESOLVED", "CLOSED"].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${statusFilter === s ? "bg-[#007AFF] text-white shadow-xs" : "text-[#6E6E73] hover:bg-[#F2F2F7]"}`}>
+              className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${statusFilter === s ? "bg-slate-900 text-white font-medium shadow-2xs" : "text-[#6E6E73] font-normal hover:bg-slate-100"}`}>
               {s === "ALL" ? "All Completed" : s.charAt(0) + s.slice(1).toLowerCase()}
             </button>
           ))}
@@ -210,48 +210,48 @@ export default function InspectorHistoryPage() {
 
       {/* ── TABLE ── */}
       {filtered.length === 0 ? (
-        <div className="text-center bg-white border border-slate-200 rounded-2xl py-24 shadow-xs">
-          <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-            <Archive className="h-7 w-7 text-slate-350" />
+        <div className="text-center bg-white border border-slate-200 rounded-3xl py-24 shadow-2xs font-sans">
+          <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-700 shadow-2xs">
+            <Archive className="h-4 w-4 text-slate-500" />
           </div>
-          <h3 className="text-base font-black text-slate-800 mb-1">
+          <h3 className="text-xs font-semibold text-[#1D1D1F] mb-1">
             {search || statusFilter !== "ALL" ? "No logs match your filters" : "No history logs yet"}
           </h3>
-          <p className="text-sm text-[#8E8E93]">
+          <p className="text-xs font-normal text-[#6E6E73]">
             {search || statusFilter !== "ALL" ? "Try adjusting the filters above." : "Resolved tickets will appear here once finalized."}
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-2xs overflow-hidden font-sans">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm border-collapse">
+            <table className="w-full min-w-[900px] text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="text-left px-5 py-3">
-                    <button onClick={() => toggleSort("title")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("title")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Work Order <SortIcon field="title" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="text-left px-5 py-3 w-[220px]">
-                    <button onClick={() => toggleSort("property")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("property")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Property / Unit <SortIcon field="property" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="text-left px-5 py-3 w-[180px]">
-                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Tenant</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73]">Tenant</span>
                   </th>
                   <th className="text-left px-5 py-3 w-[160px]">
-                    <button onClick={() => toggleSort("status")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("status")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="text-left px-5 py-3 w-[150px]">
-                    <button onClick={() => toggleSort("date")} className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest hover:text-[#6E6E73] transition-colors flex items-center">
+                    <button onClick={() => toggleSort("date")} className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] hover:text-[#1D1D1F] transition-colors flex items-center cursor-pointer">
                       Completed Date <SortIcon field="date" sortField={sortField} sortDir={sortDir} />
                     </button>
                   </th>
                   <th className="text-right px-5 py-3 w-[160px]">
-                    <span className="text-[10px] font-extrabold text-[#8E8E93] uppercase tracking-widest">Actions</span>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#6E6E73]">Actions</span>
                   </th>
                 </tr>
               </thead>
@@ -263,45 +263,45 @@ export default function InspectorHistoryPage() {
 
                   return (
                     <React.Fragment key={t.id}>
-                      <tr className="hover:bg-[#F5F5F7]/70 transition-colors cursor-pointer" onClick={() => setExpanded(isExpanded ? null : t.id)}>
+                      <tr className="hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setExpanded(isExpanded ? null : t.id)}>
                         {/* Work order title */}
-                        <td className="px-5 py-4 max-w-[280px]">
-                          <p className="font-bold text-slate-900 leading-snug">{t.title}</p>
-                          <p className="text-[11px] text-[#8E8E93] mt-0.5 truncate max-w-xs">{t.description}</p>
+                        <td className="px-5 py-3.5 max-w-[280px]">
+                          <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.title}</p>
+                          <p className="text-xs font-normal text-[#6E6E73] mt-0.5 truncate max-w-xs">{t.description}</p>
                           {t.priority && (
-                            <span className={`inline-flex items-center gap-1 text-[9px] font-bold mt-1.5 px-2 py-0.5 rounded border ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
+                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs mt-1.5 inline-flex items-center gap-1 ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
                               {pCfg.label}
                             </span>
                           )}
                         </td>
 
                         {/* Property */}
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <div className="flex items-start gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-[#8E8E93] shrink-0 mt-0.5" />
+                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-bold text-slate-800 text-sm leading-snug">{t.unit?.property?.name}</p>
-                              <p className="text-[11px] text-[#8E8E93] font-medium">Unit {t.unit?.name}</p>
+                              <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.unit?.property?.name}</p>
+                              <p className="text-xs font-normal text-[#6E6E73]">Unit {t.unit?.name}</p>
                             </div>
                           </div>
                         </td>
 
                         {/* Tenant */}
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <div className="flex items-start gap-1.5">
-                            <User className="h-3.5 w-3.5 text-[#8E8E93] shrink-0 mt-0.5" />
+                            <User className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-bold text-slate-800 text-sm leading-snug">{t.tenant?.name || "—"}</p>
-                              {t.tenant?.phone && <p className="text-[11px] text-[#8E8E93] font-medium">{t.tenant.phone}</p>}
+                              <p className="text-xs font-semibold text-[#1D1D1F] leading-snug">{t.tenant?.name || "—"}</p>
+                              {t.tenant?.phone && <p className="text-xs font-normal text-[#6E6E73]">{t.tenant.phone}</p>}
                             </div>
                           </div>
                         </td>
 
                         {/* Status */}
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-full border ${
+                        <td className="px-5 py-3.5">
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs inline-flex items-center gap-1.5 ${
                             t.status === "CLOSED"
-                              ? "bg-slate-100 text-slate-650 border-slate-200"
+                              ? "bg-slate-100 text-slate-700 border-slate-200"
                               : "bg-emerald-50 text-emerald-700 border-emerald-200"
                           }`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${t.status === "CLOSED" ? "bg-slate-400" : "bg-emerald-500"}`} />
@@ -310,30 +310,30 @@ export default function InspectorHistoryPage() {
                         </td>
 
                         {/* Date */}
-                        <td className="px-5 py-4 text-xs font-bold text-[#6E6E73]">
+                        <td className="px-5 py-3.5 text-xs font-semibold text-[#1D1D1F]">
                           {new Date(t.updatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                         </td>
 
                         {/* Actions */}
-                        <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
+                        <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-2">
                             {isResolved && (
                               <Button
                                 size="sm"
                                 disabled={updatingId === t.id}
                                 onClick={() => handleUpdateStatus(t.id, "CLOSED")}
-                                className="h-8 text-[11px] font-bold bg-slate-900 hover:bg-[#007AFF] text-white rounded-lg px-3 shadow-xs"
+                                className="h-8 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-3 shadow-xs cursor-pointer border-none"
                               >
                                 {updatingId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Archive"}
                               </Button>
                             )}
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="h-8 w-8 rounded-lg border border-slate-200 bg-white hover:bg-[#F5F5F7] flex items-center justify-center transition-colors shadow-xs">
-                                <MoreHorizontal className="h-4 w-4 text-[#6E6E73]" />
+                              <DropdownMenuTrigger className="h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all focus:outline-none cursor-pointer">
+                                <MoreHorizontal className="h-4 w-4 text-slate-700" />
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-40 rounded-xl p-1 shadow-lg border-slate-100">
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${t.id}`)} className="text-xs font-bold text-slate-700 cursor-pointer py-2 focus:bg-slate-50">
-                                  <Eye className="h-4 w-4 mr-2 text-[#8E8E93]" />
+                              <DropdownMenuContent align="end" className="w-40 rounded-xl p-1.5 shadow-lg border border-slate-200 bg-white font-sans z-50">
+                                <DropdownMenuItem onClick={() => router.push(`/dashboard/maintenance/${t.id}`)} className="text-xs font-medium text-[#1D1D1F] cursor-pointer py-2 focus:bg-slate-100 rounded-lg">
+                                  <Eye className="h-4 w-4 mr-2 text-slate-500" />
                                   View Details
                                 </DropdownMenuItem>
                               </DropdownMenuContent>

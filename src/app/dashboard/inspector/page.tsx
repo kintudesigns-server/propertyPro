@@ -71,8 +71,8 @@ export default function InspectorOverviewPage() {
   if (loading || status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center h-[65vh] gap-3">
-        <Loader2 className="h-9 w-9 animate-spin text-blue-600" />
-        <p className="text-slate-400 font-extrabold text-xs tracking-wider uppercase">Loading Field Dashboard...</p>
+        <Loader2 className="h-9 w-9 animate-spin text-slate-900" />
+        <p className="text-slate-500 font-extrabold text-xs tracking-wider uppercase">Loading Field Dashboard...</p>
       </div>
     );
   }
@@ -147,40 +147,40 @@ export default function InspectorOverviewPage() {
           expiresAt={featureAccess.expiresAt}
         />
       )}
-      <div className={`max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 space-y-8 font-sans ${isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}`}>
+      <div className={`max-w-7xl mx-auto pt-6 pb-24 space-y-6 font-sans px-4 sm:px-0 ${isBlocked ? "pointer-events-none select-none blur-[2.5px] opacity-70" : ""}`}>
 
       {/* ── HERO HEADER BANNER ── */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 font-sans">
-        <div className="space-y-1.5 font-sans">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-black shadow-2xs">
-              <ShieldCheck className="h-3.5 w-3.5 text-white" />
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6 font-sans">
+        <div className="space-y-1 font-sans">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-slate-700" />
               Field Inspector Hub
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
               Available for Dispatch
             </span>
           </div>
 
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight pt-1">
             Good {now.getHours() < 12 ? "morning" : now.getHours() < 18 ? "afternoon" : "evening"}, {userName} 👋
           </h1>
-          <p className="text-slate-500 text-xs font-semibold">
+          <p className="text-[#6E6E73] text-xs font-normal">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-            <span className="text-slate-300 mx-2">&bull;</span>
-            <span className="text-slate-900 font-extrabold">{activeTasks.length} Active Work Orders</span>
+            <span className="mx-2">&bull;</span>
+            <span className="text-[#1D1D1F] font-semibold">{activeTasks.length} Active Work Orders</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 font-sans">
           <Link href="/dashboard/messages">
-            <Button variant="outline" className="h-10 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 font-black px-5 rounded-xl text-xs gap-2 shadow-2xs cursor-pointer">
+            <Button variant="outline" className="h-9 border border-slate-200 bg-white text-[#1D1D1F] hover:bg-slate-50 font-medium text-xs rounded-xl shadow-2xs cursor-pointer flex items-center justify-center gap-2 px-4">
               <MessageSquare className="h-4 w-4 text-slate-700" /> Messages
             </Button>
           </Link>
           <Link href="/dashboard/inspector/active">
-            <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white font-black px-6 rounded-xl shadow-xs text-xs gap-2 border-none cursor-pointer">
+            <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer flex items-center justify-center gap-2">
               <Wrench className="h-4 w-4 text-white" /> View All Work Orders
             </Button>
           </Link>
@@ -189,111 +189,111 @@ export default function InspectorOverviewPage() {
 
       {/* ── EMERGENCY ALERT BANNER ── */}
       {EMERGENCY_count > 0 && (
-        <div className="bg-red-50 border border-red-200/90 rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-red-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-sm animate-pulse">
-              <Zap className="h-6 w-6" />
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 shadow-2xs flex items-center justify-between gap-4 font-sans">
+          <div className="flex items-center gap-3.5">
+            <div className="h-9 w-9 bg-rose-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+              <Zap className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-base font-black text-red-950">
+              <p className="text-xs font-semibold text-rose-950">
                 {EMERGENCY_count} High-Priority Emergency Repair{EMERGENCY_count > 1 ? "s" : ""} Assigned
               </p>
-              <p className="text-xs font-semibold text-red-700 mt-0.5">Immediate field response required. Contact tenant and dispatch diagnosis.</p>
+              <p className="text-xs font-normal text-rose-700 mt-0.5">Immediate field response required. Contact tenant and dispatch diagnosis.</p>
             </div>
           </div>
           <Link href="/dashboard/inspector/active">
-            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold h-10 px-5 rounded-xl text-xs gap-1.5 border-none shadow-sm">
+            <Button className="h-9 bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs rounded-xl px-4 flex items-center justify-center gap-1.5 border-none shadow-xs">
               Respond Now <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
       )}
 
-      {/* ── APPLE-STYLE KPI STRIP ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── KPI STAT CARDS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans">
         <Link href="/dashboard/inspector/active">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-sm hover:border-blue-200 transition-all flex items-center justify-between group">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start hover:border-slate-300 transition-all group">
             <div className="space-y-1">
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Active Repairs</p>
-              <h3 className="text-2xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">{activeTasks.length}</h3>
-              <p className="text-xs font-semibold text-slate-500">In-progress &amp; assigned</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Active Repairs</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{activeTasks.length}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">In-progress &amp; assigned</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all">
-              <Wrench className="h-6 w-6" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <Wrench className="h-4 w-4" />
             </div>
           </div>
         </Link>
 
         <Link href="/dashboard/inspector/inspections">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-sm hover:border-indigo-200 transition-all flex items-center justify-between group">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start hover:border-slate-300 transition-all group">
             <div className="space-y-1">
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Walkthroughs</p>
-              <h3 className="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{walkthroughItems.length}</h3>
-              <p className="text-xs font-semibold text-slate-500">Move-in / Move-out</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Walkthroughs</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{walkthroughItems.length}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Move-in / Move-out</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-              <ClipboardCheck className="h-6 w-6" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <ClipboardCheck className="h-4 w-4" />
             </div>
           </div>
         </Link>
 
         <Link href="/dashboard/inspector/active">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-sm hover:border-emerald-200 transition-all flex items-center justify-between group">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start hover:border-slate-300 transition-all group">
             <div className="space-y-1">
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Completed</p>
-              <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{resolvedTasks.length}</h3>
-              <p className="text-xs font-semibold text-slate-500">Resolved repairs</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Completed</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{resolvedTasks.length}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Resolved repairs</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-              <CheckCircle2 className="h-6 w-6" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             </div>
           </div>
         </Link>
 
         <Link href="/dashboard/inspector/history">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-sm hover:border-slate-300 transition-all flex items-center justify-between group">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex justify-between items-start hover:border-slate-300 transition-all group">
             <div className="space-y-1">
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Archived</p>
-              <h3 className="text-2xl font-black text-slate-900 group-hover:text-slate-700 transition-colors">{closedTasks.length}</h3>
-              <p className="text-xs font-semibold text-slate-500">Closed history</p>
+              <p className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Archived</p>
+              <h3 className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">{closedTasks.length}</h3>
+              <p className="text-xs font-normal text-[#6E6E73]">Closed history</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-slate-800 group-hover:text-white transition-all">
-              <Archive className="h-6 w-6" />
+            <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+              <Archive className="h-4 w-4" />
             </div>
           </div>
         </Link>
       </div>
 
       {/* ── MAIN DISPATCH WORKLOAD & ACTIONS GRID ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
 
-        {/* LEFT 2 COLUMNS: Workload Dispatch & Schedule */}
+        {/* LEFT 2 COLUMNS: Workload Dispatch */}
         <div className="lg:col-span-2 space-y-6">
 
           {/* ACTIVE DISPATCH QUEUE */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div className="p-6 pb-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
-                  <Navigation className="h-5 w-5" />
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Navigation className="h-4 w-4 text-slate-700" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-slate-900 tracking-tight">Active Workload &amp; Field Dispatch</h2>
-                  <p className="text-xs font-semibold text-slate-400">Assigned repair tasks and scheduled walkthrough inspections</p>
+                  <h2 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Active Workload &amp; Field Dispatch</h2>
+                  <p className="text-xs font-normal text-[#6E6E73] mt-0.5">Assigned repair tasks and scheduled walkthrough inspections</p>
                 </div>
               </div>
-              <span className="text-xs font-extrabold px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                 {allItems.length} Total Jobs
               </span>
             </div>
 
             {allItems.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <div className="h-14 w-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-500">
-                  <CheckCircle className="h-7 w-7" />
+              <div className="p-12 text-center space-y-2">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center mx-auto text-slate-700 shadow-2xs mb-1">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
                 </div>
-                <h3 className="text-base font-bold text-slate-800">All Field Tasks Clear</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">You currently have no active work orders or scheduled inspections assigned.</p>
+                <h3 className="text-xs font-semibold text-[#1D1D1F]">All Field Tasks Clear</h3>
+                <p className="text-xs font-normal text-[#6E6E73] max-w-sm mx-auto">You currently have no active work orders or scheduled inspections assigned.</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -302,26 +302,26 @@ export default function InspectorOverviewPage() {
                   const sCfg = STATUS_STEP[item.status];
                   return (
                     <div key={item.id} className="p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className={`mt-1 h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 ${item.type === "WALKTHROUGH" ? "bg-indigo-50 text-indigo-600" : "bg-blue-50 text-blue-600"}`}>
-                          {item.type === "WALKTHROUGH" ? <ClipboardCheck className="h-5 w-5" /> : <Wrench className="h-5 w-5" />}
+                      <div className="flex items-start gap-3.5">
+                        <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0 mt-0.5">
+                          {item.type === "WALKTHROUGH" ? <ClipboardCheck className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}
                         </div>
 
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md border ${item.type === "WALKTHROUGH" ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                               {item.type === "WALKTHROUGH" ? `${item.walkthroughType} Inspection` : "Repair Request"}
                             </span>
                             {item.priority && (
-                              <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md border ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
+                              <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider border shadow-2xs ${pCfg.bg} ${pCfg.text} ${pCfg.border}`}>
                                 {pCfg.label}
                               </span>
                             )}
                           </div>
 
-                          <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
+                          <h4 className="text-xs font-semibold text-[#1D1D1F]">{item.title}</h4>
 
-                          <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 flex-wrap">
+                          <div className="flex items-center gap-3 text-xs font-normal text-[#6E6E73] flex-wrap">
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3.5 w-3.5 text-slate-400" /> {item.property} &bull; Unit {item.unit}
                             </span>
@@ -336,7 +336,7 @@ export default function InspectorOverviewPage() {
 
                       <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
                         <Link href={item.link}>
-                          <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl px-4 flex items-center gap-1.5 border-none cursor-pointer">
+                          <Button className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl px-4 flex items-center justify-center gap-1.5 border-none cursor-pointer shadow-xs">
                             {sCfg?.next || (item.type === "WALKTHROUGH" ? "Conduct" : "View")}
                             <ArrowRight className="h-3.5 w-3.5 text-white" />
                           </Button>
@@ -354,43 +354,43 @@ export default function InspectorOverviewPage() {
         <div className="space-y-6">
 
           {/* ACTION REQUIRED WIDGET */}
-          <div className="bg-white rounded-3xl border border-amber-200/80 shadow-xs overflow-hidden">
-            <div className="p-5 border-b border-amber-100 bg-amber-50/60 flex items-center gap-3">
-              <div className="h-9 w-9 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center shrink-0">
-                <AlertTriangle className="h-5 w-5" />
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center gap-3">
+              <div className="h-9 w-9 bg-amber-50 border border-amber-200/80 text-amber-700 rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                <AlertTriangle className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-base font-black text-amber-950">Action Required</h3>
-                <p className="text-xs font-medium text-amber-700">
+                <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">Action Required</h3>
+                <p className="text-xs font-normal text-[#6E6E73] mt-0.5">
                   {unscheduled.length === 0 ? "All tasks scheduled" : `${unscheduled.length} task${unscheduled.length > 1 ? "s" : ""} pending action`}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-3">
               {unscheduled.length === 0 ? (
-                <div className="py-8 text-center space-y-2">
-                  <div className="h-10 w-10 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500">
-                    <CheckCircle className="h-5 w-5" />
+                <div className="py-6 text-center space-y-1">
+                  <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center mx-auto text-slate-700 shadow-2xs mb-1">
+                    <CheckCircle className="h-4 w-4 text-emerald-600" />
                   </div>
-                  <p className="text-xs font-bold text-slate-700">Everything On Schedule!</p>
-                  <p className="text-[11px] text-slate-400">No pending unscheduled tasks.</p>
+                  <p className="text-xs font-semibold text-[#1D1D1F]">Everything On Schedule!</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">No pending unscheduled tasks.</p>
                 </div>
               ) : (
                 unscheduled.map((item) => {
                   const sCfg = STATUS_STEP[item.status];
                   return (
-                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs space-y-3">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                           {item.type}
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900 mt-1">{item.title}</h4>
-                        <p className="text-xs text-slate-500 font-medium">{item.property} &bull; Unit {item.unit}</p>
+                        <h4 className="text-xs font-semibold text-[#1D1D1F] mt-1.5">{item.title}</h4>
+                        <p className="text-xs font-normal text-[#6E6E73] mt-0.5">{item.property} &bull; Unit {item.unit}</p>
                       </div>
 
                       <Link href={item.link} className="block">
-                        <Button className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black rounded-xl gap-1 border-none cursor-pointer">
+                        <Button className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl flex items-center justify-center gap-1 border-none cursor-pointer shadow-xs">
                           {sCfg?.next || "View Task"} <ArrowRight className="h-3 w-3 text-white" />
                         </Button>
                       </Link>
@@ -402,21 +402,21 @@ export default function InspectorOverviewPage() {
           </div>
 
           {/* QUICK LINKS PANEL */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Field Staff Shortcuts</h3>
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs space-y-3">
+            <h3 className="text-xs font-normal text-[#6E6E73] uppercase tracking-wider">Field Staff Shortcuts</h3>
 
             {[
-              { label: "Assigned Work Orders", href: "/dashboard/inspector/active", Icon: Wrench, color: "text-blue-600", bg: "bg-blue-50" },
-              { label: "Move-Out Walkthroughs", href: "/dashboard/inspector/inspections", Icon: ClipboardCheck, color: "text-indigo-600", bg: "bg-indigo-50" },
-              { label: "Inbox Messages", href: "/dashboard/messages", Icon: MessageSquare, color: "text-purple-600", bg: "bg-purple-50" },
-              { label: "Closed Diagnostics History", href: "/dashboard/inspector/history", Icon: ListChecks, color: "text-emerald-600", bg: "bg-emerald-50" },
+              { label: "Assigned Work Orders", href: "/dashboard/inspector/active", Icon: Wrench },
+              { label: "Move-Out Walkthroughs", href: "/dashboard/inspector/inspections", Icon: ClipboardCheck },
+              { label: "Inbox Messages", href: "/dashboard/messages", Icon: MessageSquare },
+              { label: "Closed Diagnostics History", href: "/dashboard/inspector/history", Icon: ListChecks },
             ].map((link) => (
-              <Link key={link.href} href={link.href} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
-                <div className={`h-9 w-9 ${link.bg} rounded-xl flex items-center justify-center shrink-0`}>
-                  <link.Icon className={`h-4 w-4 ${link.color}`} />
+              <Link key={link.href} href={link.href} className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer group shadow-2xs">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <link.Icon className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors flex-1">{link.label}</span>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+                <span className="text-xs font-semibold text-[#1D1D1F] flex-1">{link.label}</span>
+                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all shrink-0" />
               </Link>
             ))}
           </div>
@@ -426,3 +426,4 @@ export default function InspectorOverviewPage() {
   </div>
 );
 }
+

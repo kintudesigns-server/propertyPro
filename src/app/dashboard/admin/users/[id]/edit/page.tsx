@@ -237,7 +237,7 @@ export default function EditUserPage() {
         </Link>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Edit User Profile</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Edit User Profile</h1>
             <Badge className="bg-blue-50 text-blue-700 border-blue-100 font-bold text-xs">
               ID: {params.id?.slice(0, 8)}...
             </Badge>
@@ -256,7 +256,7 @@ export default function EditUserPage() {
             <div className="flex items-center justify-between border-b border-[#F2F2F7] pb-3">
               <div className="flex items-center gap-2">
                 <span className="h-6 w-6 rounded-full bg-slate-900 text-white text-xs font-black flex items-center justify-center">1</span>
-                <h3 className="text-sm font-black text-[#1D1D1F] tracking-tight">System Role Authorization</h3>
+                <h3 className="text-sm font-semibold text-[#1D1D1F] tracking-tight">System Role Authorization</h3>
               </div>
               <Badge className={selectedRoleObj.badgeColor}>{selectedRoleObj.title}</Badge>
             </div>
@@ -300,7 +300,7 @@ export default function EditUserPage() {
           <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden p-6 space-y-5">
             <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-3">
               <span className="h-6 w-6 rounded-full bg-slate-900 text-white text-xs font-black flex items-center justify-center">2</span>
-              <h3 className="text-sm font-black text-[#1D1D1F] tracking-tight">Personal & Contact Details</h3>
+              <h3 className="text-sm font-semibold text-[#1D1D1F] tracking-tight">Personal & Contact Details</h3>
             </div>
 
             {/* Profile Avatar Upload */}
@@ -419,7 +419,7 @@ export default function EditUserPage() {
             <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden p-6 space-y-5">
               <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-3">
                 <span className="h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center">3</span>
-                <h3 className="text-sm font-black text-[#1D1D1F] tracking-tight">Tenant Screening & Employment Profile</h3>
+                <h3 className="text-sm font-semibold text-[#1D1D1F] tracking-tight">Tenant Screening & Employment Profile</h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -504,7 +504,7 @@ export default function EditUserPage() {
             <Card className="bg-white border border-[#E5E5EA] shadow-xs rounded-3xl overflow-hidden p-6 space-y-5">
               <div className="flex items-center gap-2 border-b border-[#F2F2F7] pb-3">
                 <span className="h-6 w-6 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">3</span>
-                <h3 className="text-sm font-black text-[#1D1D1F] tracking-tight">Direct Deposit & Banking Configuration</h3>
+                <h3 className="text-sm font-semibold text-[#1D1D1F] tracking-tight">Direct Deposit & Banking Configuration</h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -601,7 +601,7 @@ export default function EditUserPage() {
             <Button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-bold text-xs h-11 shadow-xs transition-all"
+              className="w-full bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-xl font-medium text-xs h-11 shadow-xs transition-all"
             >
               {saving ? (
                 <>
@@ -614,7 +614,7 @@ export default function EditUserPage() {
 
             <Link
               href={`/dashboard/admin/users/${params.id}`}
-              className="w-full inline-flex items-center justify-center rounded-xl font-bold text-xs h-10 border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-[#F2F2F7] transition-all"
+              className="w-full inline-flex items-center justify-center rounded-xl font-medium text-xs h-10 border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-[#F2F2F7] transition-all"
             >
               Cancel & Discard
             </Link>
