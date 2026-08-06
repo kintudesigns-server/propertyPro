@@ -876,20 +876,20 @@ export default function MyLeasesPage() {
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <Card className="w-full max-w-lg bg-white border-0 shadow-2xl rounded-[24px] flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-              {/* Sticky Header */}
-              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
                 <div>
-                  <h2 className="text-xl font-semibold text-[#1D1D1F]">Request Move-Out</h2>
-                  <p className="text-xs text-[#6E6E73] mt-0.5">{activeLeaseForMoveOut.unit?.property?.name} — {activeLeaseForMoveOut.unit?.name}</p>
+                  <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Request Move-Out</h2>
+                  <p className="text-xs text-slate-500 font-normal mt-0.5">{activeLeaseForMoveOut.unit?.property?.name} — {activeLeaseForMoveOut.unit?.name}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* Step dots */}
                   <div className="flex gap-1.5">
                     {[1, 2].map((step) => (
-                      <div key={step} className={`h-1.5 rounded-full transition-all ${moveOutStep >= step ? 'w-8 bg-[#007AFF]' : 'w-4 bg-[#E5E5EA]'}`} />
+                      <div key={step} className={`h-1.5 rounded-full transition-all ${moveOutStep >= step ? 'w-8 bg-slate-900' : 'w-4 bg-slate-200'}`} />
                     ))}
                   </div>
-                  <button type="button" onClick={() => setShowMoveOutModal(false)} className="p-1.5 rounded-full hover:bg-[#F2F2F7] text-[#8E8E93] hover:text-[#6E6E73] transition-colors">
+                  <button type="button" onClick={() => setShowMoveOutModal(false)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -897,54 +897,54 @@ export default function MyLeasesPage() {
 
               <form onSubmit={handleRequestMoveOut} className="flex flex-col flex-1 overflow-hidden">
                 {/* Scrollable Form Fields */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 overflow-y-auto p-6 space-y-5 font-sans">
                   {/* ── STEP 1: Notice Details ── */}
                   {moveOutStep === 1 && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                      <p className="text-sm font-semibold text-[#6E6E73]">Step 1 of 2 — Notice Details</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Step 1 of 2 — Notice Details</p>
 
                       {/* Move-Out Date */}
-                      <div>
-                        <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Planned Move-Out Date *</label>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-normal text-slate-500">Planned Move-Out Date *</label>
                         <input
                           type="date"
                           required
                           value={moveOutDate}
                           min={new Date().toISOString().split("T")[0]}
                           onChange={(e) => setMoveOutDate(e.target.value)}
-                          className="w-full mt-1.5 p-3 rounded-xl border border-[#E5E5EA] focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF] outline-none text-sm"
+                          className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                         />
                         {moveOutDate && !isShortNotice && (
-                          <p className="text-emerald-600 text-xs font-semibold mt-1 flex items-center gap-1">
-                            <CheckCircle className="h-3.5 w-3.5" /> Notice period met ({noticeDays} days required).
+                          <p className="text-emerald-600 text-xs font-medium mt-1 flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> Notice period met ({noticeDays} days required).
                           </p>
                         )}
                       </div>
 
                       {/* Early Termination Warning */}
                       {moveOutDate && isShortNotice && (
-                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                          <p className="text-amber-900 font-extrabold text-sm flex items-center gap-2 mb-1">
-                            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                        <div className="bg-slate-900 text-white border border-slate-800 p-4 rounded-2xl shadow-xs space-y-1">
+                          <p className="text-white font-semibold text-xs sm:text-sm flex items-center gap-2 tracking-tight">
+                            <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
                             Early Termination Notice
                           </p>
-                          <p className="text-amber-800 text-xs font-semibold leading-relaxed">
+                          <p className="text-slate-300 text-xs font-normal leading-relaxed">
                             Your lease requires {noticeDays} days notice. By submitting this date, you are breaking your lease early.
                             {activeLeaseForMoveOut.earlyTerminationFee && Number(activeLeaseForMoveOut.earlyTerminationFee) > 0 && (
-                              <> An early termination fee of <strong>${Number(activeLeaseForMoveOut.earlyTerminationFee).toLocaleString()}</strong> will be billed.</>
+                              <> An early termination fee of <strong className="text-white font-semibold">${Number(activeLeaseForMoveOut.earlyTerminationFee).toLocaleString()}</strong> will be billed.</>
                             )}
                           </p>
                         </div>
                       )}
 
                       {/* Reason */}
-                      <div>
-                        <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Reason for Moving *</label>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-normal text-slate-500">Reason for Moving *</label>
                         <select
                           required
                           value={moveOutReason}
                           onChange={(e) => setMoveOutReason(e.target.value)}
-                          className="w-full mt-1.5 p-3 rounded-xl border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm bg-white"
+                          className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                         >
                           <option value="" disabled>Select a reason...</option>
                           <option value="End of Lease Term">End of Lease Term</option>
@@ -956,62 +956,64 @@ export default function MyLeasesPage() {
                           <option value="Other">Other</option>
                         </select>
                         {moveOutReason === "Other" && (
-                          <div className="mt-2">
+                          <div className="mt-2 space-y-1">
                             <input
                               type="text"
                               required
                               placeholder="Please describe your reason (min. 10 characters)..."
                               value={otherReasonNote}
                               onChange={(e) => setOtherReasonNote(e.target.value)}
-                              className="w-full p-3 rounded-xl border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                              className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                             />
                             {otherReasonNote.length > 0 && otherReasonNote.length < 10 && (
-                              <p className="text-red-500 text-xs mt-1">{10 - otherReasonNote.length} more characters required.</p>
+                              <p className="text-rose-600 text-xs">{10 - otherReasonNote.length} more characters required.</p>
                             )}
                           </div>
                         )}
                       </div>
 
                       {/* Forwarding Address — always visible */}
-                      <div>
-                        <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Forwarding Address *</label>
-                        <p className="text-[10px] text-[#94A3B8] mt-0.5 mb-1.5">Your deposit disposition letter will be mailed here — required regardless of refund method.</p>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-xs font-normal text-slate-500">Forwarding Address *</label>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Your deposit disposition letter will be mailed here — required regardless of refund method.</p>
+                        </div>
                         <input
                           required
                           placeholder="Street Address"
                           value={forwardingStreet}
                           onChange={(e) => setForwardingStreet(e.target.value)}
-                          className="w-full p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                          className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                         />
-                        <div className="grid grid-cols-3 gap-2 mt-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <input
                             required
                             placeholder="City"
                             value={forwardingCity}
                             onChange={(e) => setForwardingCity(e.target.value)}
-                            className="col-span-1 p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                            className="col-span-1 h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                           />
                           <input
                             required
                             placeholder="State"
                             value={forwardingState}
                             onChange={(e) => setForwardingState(e.target.value)}
-                            className="p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                            className="h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                           />
                           <input
                             required
                             placeholder="Zip"
                             value={forwardingZip}
                             onChange={(e) => setForwardingZip(e.target.value)}
-                            className="p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                            className="h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                           />
                         </div>
                       </div>
 
                       {/* Deposit info */}
-                      <div className="bg-[#F2F2F7] border border-[#E5E5EA] p-3 rounded-xl flex justify-between items-center text-xs">
-                        <span className="font-bold text-[#6E6E73]">Security Deposit Timeline:</span>
-                        <span className="font-black text-[#007AFF]">Within {activeLeaseForMoveOut.depositReturnDays || 21} days of move-out</span>
+                      <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex justify-between items-center text-xs">
+                        <span className="font-normal text-slate-500">Security Deposit Timeline:</span>
+                        <span className="font-semibold text-slate-900">Within {activeLeaseForMoveOut.depositReturnDays || 21} days of move-out</span>
                       </div>
                     </div>
                   )}
@@ -1019,60 +1021,60 @@ export default function MyLeasesPage() {
                   {/* ── STEP 2: Confirm & Refund Method ── */}
                   {moveOutStep === 2 && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                      <p className="text-sm font-semibold text-[#6E6E73]">Step 2 of 2 — Confirm & Refund Method</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Step 2 of 2 — Confirm & Refund Method</p>
 
                       {/* Deposit Refund Account */}
-                      <div>
-                        <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Deposit Refund Account *</label>
-                        <p className="text-xs text-[#6E6E73] mt-1 mb-3">Please provide your bank details. Your deposit refund will be securely transferred via encrypted wire. This is the fastest and safest method.</p>
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                          <div>
-                            <label className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider mb-1 block">Bank Name</label>
+                      <div className="space-y-2">
+                        <label className="text-xs font-normal text-slate-500">Deposit Refund Account *</label>
+                        <p className="text-xs text-slate-500 leading-relaxed">Please provide your bank details. Your deposit refund will be securely transferred via encrypted wire. This is the fastest and safest method.</p>
+                        <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-normal text-slate-500 block">Bank Name</label>
                             <input
                               required
                               placeholder="e.g. Chase Bank"
                               value={refundBankName}
                               onChange={(e) => setRefundBankName(e.target.value)}
-                              className="w-full p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                              className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                             />
                           </div>
-                          <div>
-                            <label className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider mb-1 block">Account Holder Name</label>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-normal text-slate-500 block">Account Holder Name</label>
                             <input
                               required
                               placeholder="e.g. John Doe"
                               value={refundAccountName}
                               onChange={(e) => setRefundAccountName(e.target.value)}
-                              className="w-full p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm"
+                              className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-medium text-slate-900 shadow-2xs transition-all"
                             />
                           </div>
-                          <div>
-                            <label className="text-[10px] font-bold text-[#6E6E73] uppercase tracking-wider mb-1 block">Account Number</label>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-normal text-slate-500 block">Account Number</label>
                             <input
                               required
                               type="text"
                               placeholder="Account Number"
                               value={refundAccountNumber}
                               onChange={(e) => setRefundAccountNumber(e.target.value)}
-                              className="w-full p-2.5 rounded-lg border border-[#E5E5EA] focus:border-[#007AFF] outline-none text-sm font-mono"
+                              className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-xs font-mono text-slate-900 shadow-2xs transition-all"
                             />
                           </div>
                         </div>
                       </div>
 
                       {/* Your Responsibilities */}
-                      <div>
-                        <label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Your Responsibilities</label>
-                        <div className="mt-2 space-y-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-normal text-slate-500">Your Responsibilities</label>
+                        <div className="space-y-2.5 pt-1">
                           <label className="flex items-start gap-3 cursor-pointer group">
-                            <input type="checkbox" required checked={utilitiesChecked} onChange={(e) => setUtilitiesChecked(e.target.checked)} className="mt-1 shrink-0 h-4 w-4 rounded border-[#E5E5EA] text-[#007AFF]" />
-                            <span className="text-xs font-semibold text-[#6E6E73] group-hover:text-[#1D1D1F] transition-colors leading-relaxed">
+                            <input type="checkbox" required checked={utilitiesChecked} onChange={(e) => setUtilitiesChecked(e.target.checked)} className="mt-0.5 shrink-0 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
+                            <span className="text-xs font-normal text-slate-600 group-hover:text-slate-900 transition-colors leading-relaxed">
                               I will transfer or cancel all utilities by my move-out date.
                             </span>
                           </label>
                           <label className="flex items-start gap-3 cursor-pointer group">
-                            <input type="checkbox" required checked={cleaningChecked} onChange={(e) => setCleaningChecked(e.target.checked)} className="mt-1 shrink-0 h-4 w-4 rounded border-[#E5E5EA] text-[#007AFF]" />
-                            <span className="text-xs font-semibold text-[#6E6E73] group-hover:text-[#1D1D1F] transition-colors leading-relaxed">
+                            <input type="checkbox" required checked={cleaningChecked} onChange={(e) => setCleaningChecked(e.target.checked)} className="mt-0.5 shrink-0 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
+                            <span className="text-xs font-normal text-slate-600 group-hover:text-slate-900 transition-colors leading-relaxed">
                               I have read and agree to the move-out cleaning standards to ensure a full deposit return.
                             </span>
                           </label>
@@ -1080,17 +1082,17 @@ export default function MyLeasesPage() {
                       </div>
 
                       {/* Confirmation Summary */}
-                      <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-4 space-y-2">
-                        <p className="text-xs font-extrabold text-[#0369A1] uppercase tracking-wider mb-2">Confirm Your Notice</p>
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2">
+                        <p className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Confirm Your Notice</p>
                         <div className="grid grid-cols-2 gap-y-1.5 text-xs">
-                          <span className="text-[#6E6E73] font-semibold">Move-Out Date:</span>
-                          <span className="font-bold text-[#1D1D1F]">{moveOutDate ? new Date(moveOutDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—"}</span>
-                          <span className="text-[#6E6E73] font-semibold">Reason:</span>
-                          <span className="font-bold text-[#1D1D1F]">{moveOutReason === "Other" ? `Other: ${otherReasonNote}` : moveOutReason}</span>
-                          <span className="text-[#6E6E73] font-semibold">Forwarding Address:</span>
-                          <span className="font-bold text-[#1D1D1F]">{forwardingFull || "—"}</span>
-                          <span className="text-[#6E6E73] font-semibold">Refund Method:</span>
-                          <span className="font-bold text-[#1D1D1F]">Direct Bank Transfer</span>
+                          <span className="text-slate-500 font-normal">Move-Out Date:</span>
+                          <span className="font-semibold text-slate-900">{moveOutDate ? new Date(moveOutDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—"}</span>
+                          <span className="text-slate-500 font-normal">Reason:</span>
+                          <span className="font-semibold text-slate-900">{moveOutReason === "Other" ? `Other: ${otherReasonNote}` : moveOutReason}</span>
+                          <span className="text-slate-500 font-normal">Forwarding Address:</span>
+                          <span className="font-semibold text-slate-900">{forwardingFull || "—"}</span>
+                          <span className="text-slate-500 font-normal">Refund Method:</span>
+                          <span className="font-semibold text-slate-900">Direct Bank Transfer</span>
                         </div>
                       </div>
                     </div>
@@ -1098,13 +1100,13 @@ export default function MyLeasesPage() {
                 </div>
 
                 {/* Sticky Footer */}
-                <div className="px-6 py-4 border-t border-[#F1F5F9] flex gap-3 shrink-0 bg-slate-50/50">
+                <div className="px-6 py-4 border-t border-slate-100 flex gap-3 shrink-0 bg-slate-50/50">
                   {moveOutStep === 1 ? (
                     <Button type="button" variant="outline" onClick={() => setShowMoveOutModal(false)}
-                      className="flex-1 rounded-xl h-11 border-[#E5E5EA] text-[#6E6E73] font-bold">Cancel</Button>
+                      className="flex-1 rounded-xl h-9 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium text-xs shadow-2xs transition-colors cursor-pointer">Cancel</Button>
                   ) : (
                     <Button type="button" variant="outline" onClick={() => setMoveOutStep(1)}
-                      className="flex-1 rounded-xl h-11 border-[#E5E5EA] text-[#6E6E73] font-bold">← Back</Button>
+                      className="flex-1 rounded-xl h-9 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium text-xs shadow-2xs transition-colors cursor-pointer">← Back</Button>
                   )}
                   <Button
                     type="submit"
@@ -1112,9 +1114,7 @@ export default function MyLeasesPage() {
                       (moveOutStep === 1 && !step1Valid) ||
                       (moveOutStep === 2 && (!step2Valid || moveOutSubmitting))
                     }
-                    className={`flex-1 rounded-xl h-11 font-medium text-white disabled:opacity-50 ${
-                      isShortNotice ? "bg-amber-500 hover:bg-amber-600" : "bg-[#007AFF] hover:bg-[#0062CC]"
-                    }`}
+                    className="flex-1 rounded-xl h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {moveOutStep < 2
                       ? "Next →"

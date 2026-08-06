@@ -1944,11 +1944,17 @@ export default function TenantDashboard() {
                   
                   <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 mb-6 border-b border-slate-100">
                     <div className="h-24 w-24 shrink-0 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center relative shadow-xs">
-                      <img 
-                        src={getUserAvatar({ id: (session?.user as any)?.id, name: profileName || session?.user?.name, avatar: profileAvatar })} 
-                        alt="Avatar" 
-                        className="h-full w-full object-cover" 
-                      />
+                      {profileAvatar ? (
+                        <img 
+                          src={profileAvatar} 
+                          alt="Avatar" 
+                          className="h-full w-full object-cover" 
+                        />
+                      ) : (
+                        <span className="text-slate-500 font-bold text-2xl select-none">
+                          {profileName ? profileName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() : "?"}
+                        </span>
+                      )}
                       {avatarUploading && (
                         <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                           <Loader2 className="h-6 w-6 animate-spin text-slate-900" />

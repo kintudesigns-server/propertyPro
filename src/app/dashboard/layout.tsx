@@ -138,6 +138,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Global Real-Time SSE Listener
   React.useEffect(() => {
     if (status !== "authenticated") return;
+    // GAP 5 FIX — Don't open an SSE connection while the owner is on the subscribe page.
+    // It wastes resources and could pop confusing "New Message" toasts during checkout.
+    if (isOwner && subscriptionStatus === "PendingPlanSelection") return;
 
     const eventSource = new EventSource("/api/notifications/sse");
     
@@ -167,6 +170,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (!isOwnerOrAdmin) return;
+    // GAP 6 FIX — Skip the leases expiry count fetch for owners who haven't subscribed yet.
+    if (isOwner && subscriptionStatus === "PendingPlanSelection") return;
     fetch("/api/leases")
       .then((res) => res.json())
       .then((data) => {
@@ -192,6 +197,39 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center text-slate-900 gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
         <p className="text-[#6E6E73] font-semibold text-xs tracking-wider uppercase">Loading PropertyPro...</p>
+      </div>
+    );
+  }
+
+  // GAP 1 FIX — Owner hasn't selected a plan yet.
+  // Render a stripped-down shell (no sidebar, no nav links) so the owner never sees
+  // a full clickable sidebar that silently bounces every click back to this page.
+  if (isOwner && subscriptionStatus === "PendingPlanSelection") {
+    return (
+      <div className="min-h-screen bg-[#F5F5F7] font-sans flex flex-col">
+        {/* Minimal header — logo + sign-out only */}
+        <header className="h-16 bg-white border-b border-[#E5E5EA] flex items-center justify-between px-6 sticky top-0 z-30 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="bg-slate-900 text-white p-2 rounded-xl flex items-center justify-center shadow-xs">
+              <Building className="h-5 w-5" />
+            </div>
+            <span className="font-semibold text-base tracking-tight text-[#1D1D1F]">PropertyPro</span>
+            <span className="ml-2 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs hidden sm:inline-flex">
+              Subscription Required
+            </span>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors text-xs font-semibold border border-transparent hover:border-slate-200"
+          >
+            <LogOut className="h-4 w-4 text-slate-500" />
+            <span>Sign Out</span>
+          </button>
+        </header>
+        {/* Page content (the subscribe page itself) */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-10">
+          {children}
+        </div>
       </div>
     );
   }

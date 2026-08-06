@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { renderSaaSEmail } from "@/lib/email-template";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import bcrypt from "bcryptjs";
@@ -91,77 +92,41 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       await sendEmail({
         to: application.email,
         subject: "🎉 Welcome to PropertyPro — Securely Set Up Your Owner Account!",
-        html: `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-          <tr>
-            <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
-                <!-- Header -->
-                <tr>
-                  <td align="center" style="background-color: #2563eb; padding: 40px 20px;">
-                    <div style="font-size: 40px; margin-bottom: 12px;">🎉</div>
-                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome Aboard!</h1>
-                    <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 16px;">Your owner application has been approved</p>
-                  </td>
-                </tr>
-                <!-- Body -->
-                <tr>
-                  <td style="padding: 40px 32px;">
-                    <p style="margin: 0 0 16px; font-size: 16px; color: #0f172a; font-weight: 600;">Hi ${application.name},</p>
-                    <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
-                      Your owner application has been reviewed and <strong style="color: #2563eb;">approved</strong>. Welcome to PropertyPro! 
-                    </p>
-                    <p style="margin: 0 0 24px; color: #475569; line-height: 1.6; font-size: 15px;">
-                      Please click the button below to choose your private secure password, select your pricing subscription plan, and finish setting up your account.
-                    </p>
-                    
-                    <!-- CTA -->
-                    <div style="text-align: center; margin-bottom: 28px;">
-                      <a href="${setupUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Set Up Your Password & Login →</a>
-                    </div>
-
-                    <!-- Info Alert -->
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; margin-bottom: 32px;">
-                      <tr>
-                        <td style="padding: 12px 16px;">
-                          <p style="color: #1e40af; font-size: 13px; margin: 0; font-weight: 600;">🔒 Security Notice: For your safety, this setup link is one-time use only and will expire in 48 hours.</p>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <!-- Plan Details -->
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
-                      <tr>
-                        <td style="padding: 20px;">
-                          <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Pricing Subscription Setup</h3>
-                          <p style="color: #475569; font-size: 13px; margin: 0; line-height: 1.6;">
-                            Upon your first login, you will be prompted to select a subscription plan (Essentials or Professional) and configure your payment method for card-first free trials.
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <!-- Checklist -->
-                    <h3 style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px; border-top: 1px solid #e2e8f0; padding-top: 24px;">Getting Started Checklist</h3>
-                    <ul style="list-style: none; padding: 0; margin: 0; color: #475569; font-size: 14px; line-height: 2;">
-                      <li><span style="color: #2563eb; font-weight: bold; margin-right: 8px;">✓</span> Owner application approved</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Set up your password</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Choose your subscription plan & add card details</li>
-                      <li><span style="color: #94a3b8; font-weight: bold; margin-right: 8px;">○</span> Add your first property list</li>
-                    </ul>
-                  </td>
-                </tr>
-                <!-- Footer -->
-                <tr>
-                  <td align="center" style="background-color: #f8fafc; padding: 20px; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">© ${new Date().getFullYear()} PropertyPro Inc. Need help? Reply to this email.</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-        `,
+        html: renderSaaSEmail({
+          categoryBadge: "OWNER APPLICATION APPROVED",
+          preheader: `Welcome to PropertyPro! Set up your password to activate your owner account.`,
+          title: "Welcome Aboard!",
+          subtitle: "Your owner application has been approved.",
+          statusPill: { text: "APPROVED", type: "success" },
+          greeting: `Hi ${application.name},`,
+          bodyParagraphs: [
+            "Great news! Your PropertyPro owner application has been reviewed and <strong>approved</strong>.",
+            "Click the button below to set up your password, choose your subscription plan, and start managing your portfolio."
+          ],
+          primaryAction: {
+            label: "Set Up Your Password & Login →",
+            url: setupUrl,
+          },
+          infoNotice: {
+            title: "🔒 One-Time Security Setup",
+            text: "This security link is single-use only and expires in 48 hours for account safety.",
+            type: "info",
+          },
+          summaryCard: {
+            title: "Subscription Setup Info",
+            items: [
+              { label: "Selected Entity", value: application.entityType || "Individual/Business" },
+              { label: "Portfolio Size", value: application.portfolioSize || "Standard" },
+              { label: "Account Status", value: "Pending Password Setup" },
+            ],
+          },
+          checklist: [
+            { text: "Owner application approved", completed: true },
+            { text: "Set up your password & credentials", completed: false },
+            { text: "Select your subscription plan & payment method", completed: false },
+            { text: "Add your first property & units", completed: false },
+          ],
+        }),
       });
 
       return NextResponse.json({ message: "Application approved and owner account created", userId: newUser.id });
@@ -181,19 +146,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       await sendEmail({
         to: application.email,
         subject: "Update on Your PropertyPro Owner Application",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #0f172a; padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 22px;">Application Update</h1>
-            </div>
-            <div style="padding: 32px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none;">
-              <p style="color: #0f172a; font-weight: 600;">Hi ${application.name},</p>
-              <p style="color: #475569; line-height: 1.7;">Thank you for your interest in PropertyPro. After reviewing your application, we are unable to approve it at this time.</p>
-              ${rejectionReason ? `<div style="background: white; border-left: 4px solid #ef4444; padding: 16px; border-radius: 0 8px 8px 0; margin: 20px 0;"><p style="color: #0f172a; font-weight: 600; margin: 0 0 4px; font-size: 13px;">Reason:</p><p style="color: #475569; margin: 0;">${rejectionReason}</p></div>` : ""}
-              <p style="color: #475569;">You are welcome to re-apply in 30 days if your circumstances change. If you believe this decision was made in error, please contact our support team.</p>
-            </div>
-          </div>
-        `,
+        html: renderSaaSEmail({
+          categoryBadge: "OWNER APPLICATION UPDATE",
+          preheader: `Important update regarding your PropertyPro owner application.`,
+          title: "Application Status Update",
+          statusPill: { text: "NOT APPROVED", type: "danger" },
+          greeting: `Hi ${application.name},`,
+          bodyParagraphs: [
+            "Thank you for your interest in PropertyPro. After reviewing your application, we are unable to approve your owner account at this time."
+          ],
+          infoNotice: rejectionReason ? {
+            title: "Decision Details",
+            text: rejectionReason,
+            type: "warning",
+          } : undefined,
+          footerNote: "You are welcome to re-apply in 30 days if your portfolio details change. If you believe this decision was made in error, please reply to this email.",
+        }),
       });
 
       return NextResponse.json({ message: "Application rejected" });

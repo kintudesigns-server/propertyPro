@@ -156,12 +156,16 @@ export default function BillingPage() {
 
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get("session_id") || undefined;
+      const targetTierId = params.get("tierId");
       if (params.get("checkout") === "success") {
         setSuccessMsg("🎉 Checkout completed! Syncing status with Stripe...");
         handleSyncStatus(false, sessionId);
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (params.get("checkout") === "cancelled") {
         setError("Checkout was cancelled. You can try again when you're ready.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (targetTierId) {
+        handleSubscribe(targetTierId);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }

@@ -54,35 +54,57 @@ const IMG = {
     cover:    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200",
     interior: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200",
     exterior: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200",
+    img3:     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
+    img4:     "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1200",
   },
   sandbox: {
     cover:    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200",
     interior: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
+    img2:     "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=1200",
+    img3:     "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200",
+    img4:     "https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=1200",
   },
   commercial: {
     cover:  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200",
     lobby:  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200",
     office: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200",
+    img3:   "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1200",
+    img4:   "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1200",
   },
   patelHome: {
     cover:    "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200",
     interior: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200",
+    img2:     "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200",
+    img3:     "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200",
+    img4:     "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1200",
   },
   patelCondo: {
     cover:    "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200",
     interior: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200",
+    img2:     "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=1200",
+    img3:     "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=1200",
+    img4:     "https://images.unsplash.com/photo-1540518614846-7ede433c517a?w=1200",
   },
   carterSquare: {
     cover:    "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=1200",
     interior: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200",
+    img2:     "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200",
+    img3:     "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200",
+    img4:     "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1200",
   },
   carterHeights: {
     cover:    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200",
     interior: "https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=1200",
+    img2:     "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200",
+    img3:     "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200",
+    img4:     "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=1200",
   },
   impendingPlaza: {
     cover:    "https://images.unsplash.com/photo-1460317442991-0ec209397118?w=1200",
     interior: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=1200",
+    img2:     "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200",
+    img3:     "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200",
+    img4:     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200",
   },
   maint: {
     smokeDetector: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800",
@@ -820,14 +842,14 @@ async function main() {
       type: "Apartment", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
       yearBuilt: 2018, description: "Modern luxury apartment complex in downtown LA with premium amenities.", parkingSpaces: 120,
       amenities: ["Pool", "Gym", "Rooftop Deck", "Concierge", "EV Charging"],
-      coverPhoto: IMG.grand.cover, images: [IMG.grand.cover, IMG.grand.unit2br, IMG.grand.unit3br],
+      coverPhoto: IMG.grand.cover, images: [IMG.grand.cover, IMG.grand.unit1br, IMG.grand.unit2br, IMG.grand.unit3br, IMG.grand.interior1],
       units: { create: [
-        { name: "101", type: "Apartment", floor: 1, rentAmount: 2000, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 800, status: "OCCUPIED", maxOccupants: 2, amenities: ["Balcony", "In-unit W/D"], images: [IMG.grand.unit1br] },
-        { name: "102", type: "Apartment", floor: 1, rentAmount: 3000, depositAmt: 3500, rooms: 2, bathrooms: 2, sqFootage: 1200, status: "OCCUPIED", maxOccupants: 3, amenities: ["City Views", "Stainless Appliances"], images: [IMG.grand.unit2br] },
-        { name: "103", type: "Apartment", floor: 2, rentAmount: 2400, depositAmt: 2800, rooms: 1, bathrooms: 1, sqFootage: 900, status: "OCCUPIED", maxOccupants: 2, images: [IMG.grand.interior1] },
-        { name: "104", type: "Apartment", floor: 2, rentAmount: 3200, depositAmt: 3800, rooms: 2, bathrooms: 2, sqFootage: 1300, status: "OCCUPIED", maxOccupants: 4, amenities: ["Corner Unit"], images: [IMG.grand.interior2] },
-        { name: "105", type: "Apartment", floor: 3, rentAmount: 2800, depositAmt: 3000, rooms: 2, bathrooms: 1, sqFootage: 1100, status: "VACANT", maxOccupants: 2, images: [IMG.grand.interior3] },
-        { name: "106", type: "Apartment", floor: 3, rentAmount: 4500, depositAmt: 5000, rooms: 3, bathrooms: 2, sqFootage: 1800, status: "VACANT", maxOccupants: 5, amenities: ["Penthouse Views", "Premium Finishes"], images: [IMG.grand.unit3br] },
+        { name: "101", type: "Apartment", floor: 1, rentAmount: 2000, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 800, status: "OCCUPIED", maxOccupants: 2, amenities: ["Balcony", "In-unit W/D"], images: [IMG.grand.unit1br, IMG.grand.interior1, IMG.grand.interior2] },
+        { name: "102", type: "Apartment", floor: 1, rentAmount: 3000, depositAmt: 3500, rooms: 2, bathrooms: 2, sqFootage: 1200, status: "OCCUPIED", maxOccupants: 3, amenities: ["City Views", "Stainless Appliances"], images: [IMG.grand.unit2br, IMG.grand.interior2, IMG.grand.interior3] },
+        { name: "103", type: "Apartment", floor: 2, rentAmount: 2400, depositAmt: 2800, rooms: 1, bathrooms: 1, sqFootage: 900, status: "OCCUPIED", maxOccupants: 2, images: [IMG.grand.interior1, IMG.grand.unit1br, IMG.grand.interior3] },
+        { name: "104", type: "Apartment", floor: 2, rentAmount: 3200, depositAmt: 3800, rooms: 2, bathrooms: 2, sqFootage: 1300, status: "OCCUPIED", maxOccupants: 4, amenities: ["Corner Unit"], images: [IMG.grand.interior2, IMG.grand.unit2br, IMG.grand.interior1] },
+        { name: "105", type: "Apartment", floor: 3, rentAmount: 2800, depositAmt: 3000, rooms: 2, bathrooms: 1, sqFootage: 1100, status: "VACANT", maxOccupants: 2, images: [IMG.grand.interior3, IMG.grand.unit3br, IMG.grand.interior2] },
+        { name: "106", type: "Apartment", floor: 3, rentAmount: 4500, depositAmt: 5000, rooms: 3, bathrooms: 2, sqFootage: 1800, status: "VACANT", maxOccupants: 5, amenities: ["Penthouse Views", "Premium Finishes"], images: [IMG.grand.unit3br, IMG.grand.interior1, IMG.grand.unit2br] },
       ]},
     },
     include: { units: true },
@@ -846,9 +868,9 @@ async function main() {
       type: "House", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
       yearBuilt: 2015, description: "Stunning oceanfront villa with panoramic views. Perfect for executive tenants.", parkingSpaces: 4,
       amenities: ["Private Pool", "Ocean Views", "Home Theater", "Chef Kitchen"],
-      coverPhoto: IMG.villa.cover, images: [IMG.villa.cover, IMG.villa.interior, IMG.villa.exterior],
+      coverPhoto: IMG.villa.cover, images: [IMG.villa.cover, IMG.villa.interior, IMG.villa.exterior, IMG.villa.img3, IMG.villa.img4],
       units: { create: [
-        { name: "Main Villa", type: "House", rentAmount: 7500, depositAmt: 7500, rooms: 4, bathrooms: 3, sqFootage: 3200, status: "VACANT", maxOccupants: 6, amenities: ["Pool", "Ocean View", "3-Car Garage"], images: [IMG.villa.interior] },
+        { name: "Main Villa", type: "House", rentAmount: 7500, depositAmt: 7500, rooms: 4, bathrooms: 3, sqFootage: 3200, status: "VACANT", maxOccupants: 6, amenities: ["Pool", "Ocean View", "3-Car Garage"], images: [IMG.villa.cover, IMG.villa.interior, IMG.villa.exterior, IMG.villa.img3, IMG.villa.img4] },
       ]},
     },
     include: { units: true },
@@ -859,15 +881,15 @@ async function main() {
     data: {
       name: "Move-Out Sandbox Estates", address: "999 Testing Lane", city: "Los Angeles", state: "CA", zip: "90001", country: "USA",
       type: "Apartment", ownerId: ownerAtlas.id, approvalStatus: "APPROVED",
-      coverPhoto: IMG.sandbox.cover, images: [IMG.sandbox.cover, IMG.sandbox.interior],
+      coverPhoto: IMG.sandbox.cover, images: [IMG.sandbox.cover, IMG.sandbox.interior, IMG.sandbox.img2, IMG.sandbox.img3, IMG.sandbox.img4],
       units: { create: [
-        { name: "201", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Liam
-        { name: "202", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Amy
-        { name: "203", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Dan
-        { name: "204", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Kelly
-        { name: "205", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" }, // Scott
-        { name: "206", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "VACANT" },
-        { name: "207", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "VACANT" },
+        { name: "201", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.sandbox.cover, IMG.sandbox.interior, IMG.sandbox.img2] }, // Liam
+        { name: "202", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.sandbox.interior, IMG.sandbox.img2, IMG.sandbox.img3] }, // Amy
+        { name: "203", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.sandbox.img2, IMG.sandbox.img3, IMG.sandbox.img4] }, // Dan
+        { name: "204", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.sandbox.img3, IMG.sandbox.img4, IMG.sandbox.cover] }, // Kelly
+        { name: "205", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.sandbox.img4, IMG.sandbox.cover, IMG.sandbox.interior] }, // Scott
+        { name: "206", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "VACANT", images: [IMG.sandbox.cover, IMG.sandbox.img2, IMG.sandbox.img4] },
+        { name: "207", type: "Apartment", rentAmount: 2200, depositAmt: 2500, rooms: 1, bathrooms: 1, sqFootage: 850, status: "VACANT", images: [IMG.sandbox.interior, IMG.sandbox.img3, IMG.sandbox.cover] },
       ]},
     },
     include: { units: true },
@@ -881,12 +903,12 @@ async function main() {
       type: "Commercial", ownerId: ownerCoastal.id, approvalStatus: "APPROVED",
       yearBuilt: 2010, description: "Class A commercial office space in downtown San Francisco's financial district.", parkingSpaces: 80,
       amenities: ["24/7 Security", "High-Speed Fiber", "Conference Rooms", "Cafeteria"], zoningType: "Commercial",
-      coverPhoto: IMG.commercial.cover, images: [IMG.commercial.cover, IMG.commercial.lobby, IMG.commercial.office],
+      coverPhoto: IMG.commercial.cover, images: [IMG.commercial.cover, IMG.commercial.lobby, IMG.commercial.office, IMG.commercial.img3, IMG.commercial.img4],
       units: { create: [
-        { name: "Suite A", type: "Commercial", floor: 1, rentAmount: 8500, depositAmt: 17000, rooms: 5, sqFootage: 2200, status: "OCCUPIED", leaseStructure: "NNN", camCharges: 850, maxOccupants: 25 },
-        { name: "Suite B", type: "Commercial", floor: 1, rentAmount: 6500, depositAmt: 13000, rooms: 4, sqFootage: 1800, status: "VACANT",   leaseStructure: "NNN", camCharges: 650, maxOccupants: 20 },
-        { name: "Suite C", type: "Commercial", floor: 2, rentAmount: 9500, depositAmt: 19000, rooms: 6, sqFootage: 2600, status: "VACANT",   leaseStructure: "Gross", maxOccupants: 30 },
-        { name: "Suite D", type: "Commercial", floor: 2, rentAmount: 12000, depositAmt: 24000, rooms: 8, sqFootage: 3400, status: "VACANT",  leaseStructure: "NNN", camCharges: 1200, maxOccupants: 45 },
+        { name: "Suite A", type: "Commercial", floor: 1, rentAmount: 8500, depositAmt: 17000, rooms: 5, sqFootage: 2200, status: "OCCUPIED", leaseStructure: "NNN", camCharges: 850, maxOccupants: 25, images: [IMG.commercial.cover, IMG.commercial.lobby, IMG.commercial.office] },
+        { name: "Suite B", type: "Commercial", floor: 1, rentAmount: 6500, depositAmt: 13000, rooms: 4, sqFootage: 1800, status: "VACANT",   leaseStructure: "NNN", camCharges: 650, maxOccupants: 20, images: [IMG.commercial.lobby, IMG.commercial.office, IMG.commercial.img3] },
+        { name: "Suite C", type: "Commercial", floor: 2, rentAmount: 9500, depositAmt: 19000, rooms: 6, sqFootage: 2600, status: "VACANT",   leaseStructure: "Gross", maxOccupants: 30, images: [IMG.commercial.office, IMG.commercial.img3, IMG.commercial.img4] },
+        { name: "Suite D", type: "Commercial", floor: 2, rentAmount: 12000, depositAmt: 24000, rooms: 8, sqFootage: 3400, status: "VACANT",  leaseStructure: "NNN", camCharges: 1200, maxOccupants: 45, images: [IMG.commercial.img3, IMG.commercial.img4, IMG.commercial.cover] },
       ]},
     },
     include: { units: true },
@@ -901,9 +923,9 @@ async function main() {
       type: "House", ownerId: ownerPatel.id, approvalStatus: "APPROVED",
       yearBuilt: 2002, description: "Charming single-family home in a quiet residential neighborhood.", parkingSpaces: 2,
       amenities: ["Backyard", "Garage", "Hardwood Floors"],
-      coverPhoto: IMG.patelHome.cover, images: [IMG.patelHome.cover, IMG.patelHome.interior],
+      coverPhoto: IMG.patelHome.cover, images: [IMG.patelHome.cover, IMG.patelHome.interior, IMG.patelHome.img2, IMG.patelHome.img3, IMG.patelHome.img4],
       units: { create: [
-        { name: "Main Home", type: "House", rentAmount: 4200, depositAmt: 4200, rooms: 3, bathrooms: 2, sqFootage: 1850, status: "OCCUPIED", maxOccupants: 5 },
+        { name: "Main Home", type: "House", rentAmount: 4200, depositAmt: 4200, rooms: 3, bathrooms: 2, sqFootage: 1850, status: "OCCUPIED", maxOccupants: 5, images: [IMG.patelHome.cover, IMG.patelHome.interior, IMG.patelHome.img2, IMG.patelHome.img3, IMG.patelHome.img4] },
       ]},
     },
     include: { units: true }
@@ -917,9 +939,9 @@ async function main() {
       type: "Apartment", ownerId: ownerPatel.id, approvalStatus: "PENDING", // ← tests admin approval queue
       yearBuilt: 2021, description: "Modern luxury condos in high demand neighborhood.", parkingSpaces: 1,
       amenities: ["Rooftop Pool", "Underground Parking"],
-      coverPhoto: IMG.patelCondo.cover, images: [IMG.patelCondo.cover, IMG.patelCondo.interior],
+      coverPhoto: IMG.patelCondo.cover, images: [IMG.patelCondo.cover, IMG.patelCondo.interior, IMG.patelCondo.img2, IMG.patelCondo.img3, IMG.patelCondo.img4],
       units: { create: [
-        { name: "Unit 305", type: "Apartment", rentAmount: 3200, depositAmt: 3200, rooms: 1, bathrooms: 1, sqFootage: 750, status: "VACANT", maxOccupants: 2 },
+        { name: "Unit 305", type: "Apartment", rentAmount: 3200, depositAmt: 3200, rooms: 1, bathrooms: 1, sqFootage: 750, status: "VACANT", maxOccupants: 2, images: [IMG.patelCondo.cover, IMG.patelCondo.interior, IMG.patelCondo.img2] },
       ]},
     },
   });
@@ -930,14 +952,14 @@ async function main() {
       name: "Carter Square", address: "404 Main Street", city: "Los Angeles", state: "CA", zip: "90012", country: "USA",
       type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
       yearBuilt: 2012, description: "A quiet, cozy apartment complex.", parkingSpaces: 20,
-      coverPhoto: IMG.carterSquare.cover, images: [IMG.carterSquare.cover, IMG.carterSquare.interior],
+      coverPhoto: IMG.carterSquare.cover, images: [IMG.carterSquare.cover, IMG.carterSquare.interior, IMG.carterSquare.img2, IMG.carterSquare.img3, IMG.carterSquare.img4],
       units: { create: [
-        { name: "Unit A1", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
-        { name: "Unit A2", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
-        { name: "Unit A3", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED" },
-        { name: "Unit A4", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" },
-        { name: "Unit A5", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED" },
-        { name: "Unit A6", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "VACANT" },
+        { name: "Unit A1", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED", images: [IMG.carterSquare.cover, IMG.carterSquare.interior] },
+        { name: "Unit A2", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED", images: [IMG.carterSquare.interior, IMG.carterSquare.img2] },
+        { name: "Unit A3", type: "Apartment", rentAmount: 1500, depositAmt: 1500, rooms: 1, bathrooms: 1, sqFootage: 650, status: "OCCUPIED", images: [IMG.carterSquare.img2, IMG.carterSquare.img3] },
+        { name: "Unit A4", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.carterSquare.img3, IMG.carterSquare.img4] },
+        { name: "Unit A5", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "OCCUPIED", images: [IMG.carterSquare.img4, IMG.carterSquare.cover] },
+        { name: "Unit A6", type: "Apartment", rentAmount: 1800, depositAmt: 1800, rooms: 2, bathrooms: 1, sqFootage: 850, status: "VACANT", images: [IMG.carterSquare.cover, IMG.carterSquare.img2] },
       ]},
     },
     include: { units: true }
@@ -949,12 +971,12 @@ async function main() {
       name: "Carter Heights", address: "808 Hilltop Road", city: "Los Angeles", state: "CA", zip: "90028", country: "USA",
       type: "Apartment", ownerId: ownerPaused.id, approvalStatus: "APPROVED",
       yearBuilt: 2016, description: "Modern units with a view.", parkingSpaces: 10,
-      coverPhoto: IMG.carterHeights.cover, images: [IMG.carterHeights.cover, IMG.carterHeights.interior],
+      coverPhoto: IMG.carterHeights.cover, images: [IMG.carterHeights.cover, IMG.carterHeights.interior, IMG.carterHeights.img2, IMG.carterHeights.img3, IMG.carterHeights.img4],
       units: { create: [
-        { name: "Unit B1", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "OCCUPIED" },
-        { name: "Unit B2", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
-        { name: "Unit B3", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
-        { name: "Unit B4", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT" },
+        { name: "Unit B1", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "OCCUPIED", images: [IMG.carterHeights.cover, IMG.carterHeights.interior] },
+        { name: "Unit B2", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT", images: [IMG.carterHeights.interior, IMG.carterHeights.img2] },
+        { name: "Unit B3", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT", images: [IMG.carterHeights.img2, IMG.carterHeights.img3] },
+        { name: "Unit B4", type: "Apartment", rentAmount: 2200, depositAmt: 2200, rooms: 2, bathrooms: 2, sqFootage: 1050, status: "VACANT", images: [IMG.carterHeights.img3, IMG.carterHeights.img4] },
       ]},
     },
     include: { units: true }
@@ -966,10 +988,10 @@ async function main() {
       name: "Impending Plaza", address: "777 Clock Tower Ave", city: "Los Angeles", state: "CA", zip: "90036", country: "USA",
       type: "Apartment", ownerId: ownerPausedImpending.id, approvalStatus: "APPROVED",
       yearBuilt: 2014, description: "A beautifully maintained apartment community near downtown.", parkingSpaces: 15,
-      coverPhoto: IMG.impendingPlaza.cover, images: [IMG.impendingPlaza.cover, IMG.impendingPlaza.interior],
+      coverPhoto: IMG.impendingPlaza.cover, images: [IMG.impendingPlaza.cover, IMG.impendingPlaza.interior, IMG.impendingPlaza.img2, IMG.impendingPlaza.img3, IMG.impendingPlaza.img4],
       units: { create: [
-        { name: "Unit 101", type: "Apartment", rentAmount: 1900, depositAmt: 1900, rooms: 1, bathrooms: 1, sqFootage: 700, status: "VACANT" },
-        { name: "Unit 102", type: "Apartment", rentAmount: 2300, depositAmt: 2300, rooms: 2, bathrooms: 2, sqFootage: 950, status: "OCCUPIED" },
+        { name: "Unit 101", type: "Apartment", rentAmount: 1900, depositAmt: 1900, rooms: 1, bathrooms: 1, sqFootage: 700, status: "VACANT", images: [IMG.impendingPlaza.cover, IMG.impendingPlaza.interior] },
+        { name: "Unit 102", type: "Apartment", rentAmount: 2300, depositAmt: 2300, rooms: 2, bathrooms: 2, sqFootage: 950, status: "OCCUPIED", images: [IMG.impendingPlaza.interior, IMG.impendingPlaza.img2] },
       ]},
     },
     include: { units: true }

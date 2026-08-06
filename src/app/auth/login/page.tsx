@@ -40,7 +40,13 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        toast.error(res.error || "Invalid login credentials.");
+        let errorMessage = res.error;
+        if (res.error === "CredentialsSignin") {
+          errorMessage = "Invalid email or password. Please check your credentials or click a Quick Demo Login below.";
+        } else if (res.error === "Failed to fetch") {
+          errorMessage = "Server connection interrupted. Please try clicking Sign In again.";
+        }
+        toast.error(errorMessage);
         setLoading(false);
       } else {
         toast.success("Logged in successfully! Redirecting...");
@@ -61,7 +67,7 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error("An unexpected error occurred during login.");
+      toast.error(err?.message || "Login failed. Please check your credentials or click a Quick Demo Login below.");
       setLoading(false);
     }
   };
@@ -71,6 +77,7 @@ export default function LoginPage() {
     { label: "Owner (Full)", email: "owner.atlas@yopmail.com" },
     { label: "Owner (New)", email: "owner.new@yopmail.com" },
     { label: "Owner (Paused)", email: "james.carter@demo.com" },
+    { label: "Tenant (Raj)", email: "raj@yopmail.com" },
     { label: "Tenant (Active)", email: "tenant.adam@yopmail.com" },
     { label: "Tenant (Overdue)", email: "tenant.oscar@yopmail.com" },
     { label: "Inspector", email: "inspector.jake@yopmail.com" },

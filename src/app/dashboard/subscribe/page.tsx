@@ -48,15 +48,31 @@ function SubscribeContent() {
               body: JSON.stringify({ checkoutSessionId: sessionId }),
             });
             if (res.ok) {
-              await update(); // force next-auth session cookie refresh
+              await update(); // refresh next-auth session token
+              
+              // Poll session endpoint to verify NextAuth cookie is updated on client
+              let attempts = 0;
+              while (attempts < 6) {
+                try {
+                  const freshRes = await fetch("/api/auth/session");
+                  const freshData = await freshRes.json();
+                  if (freshData?.user?.subscriptionStatus && freshData.user.subscriptionStatus !== "PendingPlanSelection") {
+                    break;
+                  }
+                } catch (err) {}
+                await new Promise((r) => setTimeout(r, 500));
+                attempts++;
+              }
+
               toast.success("Subscription activated successfully!");
-              router.push("/dashboard");
+              // Hard navigation forces full re-render with fresh session cookie
+              window.location.href = "/dashboard";
             } else {
               toast.error("Failed to sync your subscription status. Please contact support.");
+              setSyncing(false);
             }
           } catch (e) {
             toast.error("An error occurred during synchronization.");
-          } finally {
             setSyncing(false);
           }
         };
@@ -123,10 +139,10 @@ function SubscribeContent() {
         // Redirect to Stripe Checkout Session
         window.location.href = result.url;
       } else {
-        // If it succeeded directly (e.g. free tier or trialed), reload session and redirect
+        // Free / trial tier activated directly — hard navigate so fresh session is picked up.
         await update();
         toast.success(`Welcome to the ${tier.name} plan!`);
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       toast.error(err.message || "An unexpected error occurred.");

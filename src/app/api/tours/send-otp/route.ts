@@ -1,3 +1,4 @@
+import { renderSaaSEmail } from "@/lib/email-template";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
@@ -103,32 +104,34 @@ export async function POST(req: NextRequest) {
 
     // 6. Send Email
     const property = await prisma.property.findUnique({ where: { id: propertyId } });
-    const htmlBody = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Property<span style="color: #3b82f6;">Pro</span></h1>
-        </div>
-        <div style="padding: 32px; color: #334155;">
-          <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Tour Verification Request</h2>
-          <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">You are currently scheduling a showing tour for <strong style="color: #0f172a;">${property?.name || "a property"}</strong> on PropertyPro.</p>
-          <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Please use the following secure 6-digit code to verify your identity and finalize your tour request:</p>
-          
-          <div style="background: linear-gradient(145deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px; text-align: center; margin: 32px 0;">
-            <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #2563eb;">${otp}</span>
-          </div>
-          
-          <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-            This security code will automatically expire in <strong>${otpExpiryMinutes} minutes</strong>. If you did not initiate this request, you can safely ignore or delete this email.
-          </p>
-        </div>
-      </div>
-    `;
 
     try {
       await sendEmail({
         to: email,
         subject: `Your PropertyPro Tour Verification Code: ${otp}`,
-        html: htmlBody,
+        html: renderSaaSEmail({
+          categoryBadge: "TOUR VERIFICATION",
+          preheader: `Your 6-digit tour verification code is ${otp}. Valid for ${otpExpiryMinutes} minutes.`,
+          title: "Verify Your Tour Request",
+          subtitle: `Showing Tour • ${property?.name || "PropertyPro Unit"}`,
+          statusPill: { text: "OTP CODE", type: "info" },
+          bodyParagraphs: [
+            `You are currently scheduling a showing tour for <strong>${property?.name || "a property"}</strong> on PropertyPro.`,
+            "Please enter the following 6-digit verification code to confirm your identity and finalize your booking:"
+          ],
+          summaryCard: {
+            title: "Verification Code",
+            items: [
+              { label: "Security Code", value: `<span style="font-size: 24px; font-weight: 900; letter-spacing: 4px; color: #0F172A;">${otp}</span>` },
+              { label: "Expires In", value: `${otpExpiryMinutes} minutes` },
+            ],
+          },
+          infoNotice: {
+            title: "Security Notice",
+            text: `This single-use security code will automatically expire in ${otpExpiryMinutes} minutes. Do not share this code with anyone.`,
+            type: "warning",
+          },
+        }),
       });
     } catch (err) {
       console.error("Failed to send OTP email:", err);

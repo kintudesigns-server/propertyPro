@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { renderSaaSEmail } from "./email-template";
 
 interface EmailOptions {
   to: string;
@@ -14,6 +15,11 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
   const { to, subject, text, html, attachments } = options;
+
+  const finalHtml = html || renderSaaSEmail({
+    title: subject,
+    bodyParagraphs: text ? text.split("\n\n").filter(Boolean) : ["Thank you for using PropertyPro."],
+  });
 
   // 1. Try SMTP if configured in .env
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
@@ -34,7 +40,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         to,
         subject,
         text: text || "",
-        html: html || text || "",
+        html: finalHtml,
         attachments,
       });
       console.log(`[Email] Sent via SMTP to ${to}: "${subject}"`);

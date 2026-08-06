@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { renderSaaSEmail } from "@/lib/email-template";
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -40,32 +41,26 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: email,
       subject: "Reset Your PropertyPro Password",
-      html: `
-        <div style="font-family: 'Inter', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 20px; background: #F8FAFC; border-radius: 16px; border: 1px solid #E2E8F0;">
-          <div style="text-align: center; margin-bottom: 28px;">
-            <div style="font-size: 24px; font-weight: 800; color: #2563EB;">Property<span style="color: #0F172A;">Pro</span></div>
-            <div style="font-size: 13px; color: #64748B; margin-top: 4px; font-weight: 600;">Password Reset Request</div>
-          </div>
-          <div style="background: #fff; border-radius: 12px; padding: 28px; border: 1px solid #E2E8F0;">
-            <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0 0 12px;">Reset your password</h2>
-            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 24px;">
-              Hello ${user.name || "there"},<br/><br/>
-              We received a request to reset your password. Click the button below to choose a new password. This link is valid for <strong>1 hour</strong>.
-            </p>
-            <div style="text-align: center; margin-bottom: 24px;">
-              <a href="${resetUrl}" style="background: #2563EB; color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 14px 32px; border-radius: 10px; display: inline-block;">
-                Reset My Password
-              </a>
-            </div>
-            <p style="font-size: 12px; color: #94A3B8; text-align: center; margin: 0;">
-              If you did not request a password reset, you can safely ignore this email.<br/>Your password will not change.
-            </p>
-          </div>
-          <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #94A3B8;">
-            &copy; 2026 PropertyPro. All rights reserved.
-          </div>
-        </div>
-      `,
+      html: renderSaaSEmail({
+        categoryBadge: "SECURITY & ACCOUNT",
+        preheader: "Reset your PropertyPro account password using this secure link (expires in 1 hour).",
+        title: "Reset Your Password",
+        statusPill: { text: "ACTION REQUIRED", type: "warning" },
+        greeting: `Hello ${user.name || "there"},`,
+        bodyParagraphs: [
+          "We received a request to reset the password for your PropertyPro account.",
+          "Click the button below to set a new password. For security purposes, this link is valid for <strong>1 hour</strong>."
+        ],
+        primaryAction: {
+          label: "Reset My Password →",
+          url: resetUrl,
+        },
+        infoNotice: {
+          title: "Didn't request this?",
+          text: "If you did not initiate a password reset, you can safely ignore this email. Your password will remain unchanged.",
+          type: "info",
+        },
+      }),
       text: `Reset your PropertyPro password by visiting: ${resetUrl}\n\nThis link expires in 1 hour.`,
     });
 

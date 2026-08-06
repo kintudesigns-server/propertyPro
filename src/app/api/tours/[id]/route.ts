@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit-log";
 import { sendEmail } from "@/lib/email";
+import { renderSaaSEmail } from "@/lib/email-template";
 import { notify } from "@/lib/notify";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
 import { generateICSContent } from "@/lib/ics";
@@ -292,54 +293,38 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           url: meetingUrl || undefined,
         });
 
-        const htmlBody = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Property<span style="color: #3b82f6;">Pro</span></h1>
-            </div>
-            <div style="padding: 32px; color: #334155;">
-              <h2 style="color: #16a34a; margin-top: 0; font-size: 20px; font-weight: 700;">✅ Tour Confirmed!</h2>
-              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Hello <strong style="color: #0f172a;">${tour.tenantName}</strong>,</p>
-              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">The property owner has confirmed your showing request for <strong style="color: #0f172a;">${tour.property.name}</strong> ${tour.unitId ? `(Unit ${tour.unit?.name})` : ""}.</p>
-              
-              <table style="width: 100%; border-collapse: collapse; margin: 24px 0; background-color: #f8fafc; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
-                <tr>
-                  <td style="padding: 16px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; width: 120px;">Date:</td>
-                  <td style="padding: 16px; color: #0f172a; font-weight: 500; border-bottom: 1px solid #e2e8f0;">${dateStr}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0;">Time:</td>
-                  <td style="padding: 16px; color: #0f172a; font-weight: 500; border-bottom: 1px solid #e2e8f0;">${timeDisplay}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0;">Type:</td>
-                  <td style="padding: 16px; color: #0f172a; font-weight: 500;">${updatedTour.tourType === "VIDEO_CALL" ? "Virtual Video Call" : "In-Person Showing"}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px; font-weight: 600; color: #64748b;">Location:</td>
-                  <td style="padding: 16px; color: #0f172a; font-weight: 500;">${updatedTour.tourType === "VIDEO_CALL" ? (meetingUrl ? `<a href="${meetingUrl}" style="color: #2563eb; font-weight: 700;">Join Video Call</a>` : "Link Pending") : fullAddress}</td>
-                </tr>
-              </table>
-
-              ${updatedTour.ownerNotes ? `
-                <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin: 24px 0; border-radius: 4px;">
-                  <p style="margin: 0 0 8px 0; font-weight: 700; color: #1e40af; font-size: 14px;">Owner's Instructions:</p>
-                  <p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 1.5;">"${updatedTour.ownerNotes}"</p>
-                </div>
-              ` : ""}
-              
-              <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-                We have attached a calendar event (.ics) to this email so you can add this tour directly to your calendar!
-              </p>
-            </div>
-          </div>
-        `;
-
         try {
           await sendEmail({
             to: tour.tenantEmail,
             subject: `✅ Confirmed Showing: ${tour.property.name}`,
-            html: htmlBody,
+            html: renderSaaSEmail({
+              categoryBadge: "SHOWING TOUR CONFIRMED",
+              preheader: `Your tour for ${tour.property.name} is confirmed for ${dateStr} at ${timeDisplay}. Calendar invite (.ics) attached.`,
+              title: "Tour Confirmed!",
+              subtitle: `${tour.property.name}${tour.unitId ? ` • Unit ${tour.unit?.name}` : ""}`,
+              statusPill: { text: "CONFIRMED", type: "success" },
+              greeting: `Hello ${tour.tenantName},`,
+              bodyParagraphs: [
+                `Great news! The property owner has confirmed your showing request for <strong>${tour.property.name}</strong>${tour.unitId ? ` (Unit ${tour.unit?.name})` : ""}.`,
+                "We have attached an `.ics` calendar invitation to this email so you can automatically add this showing to your Apple Calendar, Google Calendar, or Outlook."
+              ],
+              summaryCard: {
+                title: "Confirmed Showing Details",
+                items: [
+                  { label: "Property", value: tour.property.name },
+                  ...(tour.unitId && tour.unit?.name ? [{ label: "Unit", value: tour.unit.name }] : []),
+                  { label: "Date", value: dateStr },
+                  { label: "Time", value: timeDisplay },
+                  { label: "Showing Format", value: updatedTour.tourType === "VIDEO_CALL" ? "Virtual Video Call" : "In-Person Showing" },
+                  { label: "Location / Link", value: updatedTour.tourType === "VIDEO_CALL" ? (meetingUrl ? `<a href="${meetingUrl}" style="color: #0F172A; font-weight: 700;">Join Video Call</a>` : "Link Pending") : fullAddress },
+                ],
+              },
+              infoNotice: updatedTour.ownerNotes ? {
+                title: "Owner Instructions",
+                text: `"${updatedTour.ownerNotes}"`,
+                type: "info",
+              } : undefined,
+            }),
             attachments: [
               {
                 filename: `tour-${tour.id}.ics`,

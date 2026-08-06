@@ -556,36 +556,45 @@ export default function FinalStatementPage() {
 
       {/* Completed State */}
       {isTerminated && (
-        <Card className={`rounded-[24px] shadow-sm overflow-hidden ${lease.tenantDisputeNote ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50"}`}>
-          <div className="p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className={`h-20 w-20 rounded-full flex items-center justify-center shrink-0 ${lease.tenantDisputeNote ? "bg-amber-100" : "bg-emerald-100"}`}>
+        <Card className="rounded-3xl shadow-xs border border-slate-800 bg-slate-900 text-white overflow-hidden p-6 font-sans">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border ${
+              lease.tenantDisputeNote 
+                ? "bg-amber-500/20 border-amber-500/30 text-amber-400" 
+                : "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+            }`}>
               {lease.tenantDisputeNote
-                ? <ShieldAlert className="h-10 w-10 text-amber-600" />
-                : <CheckCircle2 className="h-10 w-10 text-emerald-600" />}
+                ? <ShieldAlert className="h-6 w-6" />
+                : <CheckCircle2 className="h-6 w-6" />}
             </div>
-            <div className="flex-1 space-y-3">
-              <div>
-                <h2 className={`text-xl font-black ${lease.tenantDisputeNote ? "text-amber-900" : "text-emerald-900"}`}>
-                  {lease.tenantDisputeNote ? "⚠️ Dispute Recorded" : "Lease Officially Terminated"}
-                </h2>
-                <p className={`font-medium mt-1.5 leading-relaxed text-sm ${lease.tenantDisputeNote ? "text-amber-700" : "text-emerald-700"}`}>
-                  {lease.tenantDisputeNote
-                    ? `The tenant disputed the deductions. Note: "${lease.tenantDisputeNote}"`
-                    : `A refund of $${refundAmount.toFixed(2)} has been issued via ${
-                        lease.refundMethod === "ORIGINAL" ? "original payment method" :
-                        lease.refundMethod === "CHECK" ? "mailed check" : "bank transfer"
-                      }.`}
-                </p>
+            <div className="flex-1 space-y-2 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-white tracking-tight">
+                    {lease.tenantDisputeNote ? "Dispute Recorded" : "Lease Officially Terminated"}
+                  </h2>
+                  <p className="text-xs text-slate-300 font-normal leading-relaxed mt-1">
+                    {lease.tenantDisputeNote
+                      ? `The tenant disputed the deductions. Note: "${lease.tenantDisputeNote}"`
+                      : `A refund of $${refundAmount.toFixed(2)} has been issued via ${
+                          lease.refundMethod === "ORIGINAL" ? "original payment method" :
+                          lease.refundMethod === "CHECK" ? "mailed check" : "bank transfer"
+                        }.`}
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => generateDispositionPDF(lease)} 
+                  className="bg-white hover:bg-slate-100 text-slate-900 font-semibold h-9 px-4 rounded-xl text-xs shadow-2xs border-none cursor-pointer shrink-0 transition-colors"
+                >
+                  <FileDown className="h-3.5 w-3.5 mr-1.5" /> Download Disposition PDF
+                </Button>
               </div>
               {lease.forwardingAddress && lease.refundMethod === "CHECK" && (
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                  <MapPin className="h-3.5 w-3.5 text-[#8E8E93]" />
-                  <span>Forwarding Address: <strong>{lease.forwardingAddress}</strong></span>
+                <div className="flex items-center gap-2 text-xs font-normal text-slate-400 pt-1">
+                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Forwarding Address: <strong className="font-semibold text-slate-200">{lease.forwardingAddress}</strong></span>
                 </div>
               )}
-              <Button onClick={() => generateDispositionPDF(lease)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-5 rounded-xl text-sm">
-                <FileDown className="h-4 w-4 mr-2" /> Download Disposition PDF
-              </Button>
             </div>
           </div>
         </Card>

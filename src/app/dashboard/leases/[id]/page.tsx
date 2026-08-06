@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, CheckCircle2, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound, AlertCircle, TrendingUp, Plus } from "lucide-react";
+import { ArrowLeft, Building, Calendar, DollarSign, FileDown, FileText, User, MapPin, Phone, Mail, CheckCircle, CheckCircle2, Clock, XCircle, MoreVertical, CreditCard, UploadCloud, Settings, ShieldAlert, ArrowUpRight, Loader2, Lock, KeyRound, AlertCircle, TrendingUp, Plus, Home } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { generateLeasePDF } from "@/lib/pdfGenerator";
@@ -156,8 +156,10 @@ export default function LeaseDetailsPage() {
       toast.error("Please provide your signature and agree to the terms.");
       return;
     }
-    if (lease.tenant?.name && signatureName.trim().toLowerCase() !== lease.tenant.name.toLowerCase()) {
-      toast.error("Signature must exactly match your legal name on file.");
+    const normalize = (s: string) =>
+      s.trim().toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+    if (lease.tenant?.name && normalize(signatureName) !== normalize(lease.tenant.name)) {
+      toast.error("Name confirmation doesn't match your legal name on file. Please type your name exactly as registered.");
       return;
     }
 
@@ -385,16 +387,16 @@ export default function LeaseDetailsPage() {
 
   const getStatusBadge = (status: string) => {
     if (status === "ACTIVE" && unpaidDepositInvoice) {
-      return <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Awaiting Deposit</span>;
+      return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-800 border border-blue-200/80 rounded-lg text-xs font-semibold shadow-2xs"><Clock className="h-3.5 w-3.5 text-blue-600" /> Awaiting Deposit</span>;
     }
     switch (status) {
-      case "ACTIVE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#DCFCE7] text-[#10B981] border border-[#A7F3D0] rounded-full text-xs font-bold shadow-sm"><CheckCircle className="h-3.5 w-3.5" /> Active Lease</span>;
-      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEF3C7] text-[#F59E0B] border border-[#FDE68A] rounded-full text-xs font-bold shadow-sm"><Clock className="h-3.5 w-3.5" /> Pending Signature</span>;
-      case "SIGNED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-full text-xs font-bold shadow-sm"><KeyRound className="h-3.5 w-3.5" /> Signed – Awaiting Move-In</span>;
-      case "EXPIRED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Expired</span>;
-      case "TERMINATED": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEE2E2] text-[#EF4444] border border-[#FECACA] rounded-full text-xs font-bold shadow-sm"><XCircle className="h-3.5 w-3.5" /> Terminated</span>;
-      case "DRAFT": return <span className="flex items-center gap-1.5 px-3 py-1 bg-[#F1F5F9] text-[#6E6E73] border border-[#E5E5EA] rounded-full text-xs font-bold shadow-sm"><FileText className="h-3.5 w-3.5" /> Draft</span>;
-      default: return <span className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shadow-sm">{status}</span>;
+      case "ACTIVE": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/80 rounded-lg text-xs font-semibold shadow-2xs"><CheckCircle className="h-3.5 w-3.5 text-emerald-600" /> Active Lease</span>;
+      case "PENDING_SIGNATURE": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-lg text-xs font-semibold shadow-2xs"><Clock className="h-3.5 w-3.5 text-amber-600" /> Pending Signature</span>;
+      case "SIGNED": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-800 border border-blue-200/80 rounded-lg text-xs font-semibold shadow-2xs"><KeyRound className="h-3.5 w-3.5 text-blue-600" /> Signed – Awaiting Move-In</span>;
+      case "EXPIRED": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-50 text-rose-800 border border-rose-200/80 rounded-lg text-xs font-semibold shadow-2xs"><XCircle className="h-3.5 w-3.5 text-rose-600" /> Expired</span>;
+      case "TERMINATED": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-50 text-rose-800 border border-rose-200/80 rounded-lg text-xs font-semibold shadow-2xs"><XCircle className="h-3.5 w-3.5 text-rose-600" /> Terminated</span>;
+      case "DRAFT": return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-lg text-xs font-semibold shadow-2xs"><FileText className="h-3.5 w-3.5 text-slate-500" /> Draft</span>;
+      default: return <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs">{status}</span>;
     }
   };
 
@@ -422,94 +424,101 @@ export default function LeaseDetailsPage() {
       </div>
 
       {/* ── PRE-MOVE-IN DASHBOARD ── */}
-      {isTenant && lease.status === "SIGNED" && getDaysUntilMoveIn() > 0 && (
-        <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 sm:p-10 shadow-xl text-white relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10">
-            <KeyRound className="w-64 h-64" />
-          </div>
-          
-          <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
-              <div>
-                <span className="bg-white/20 text-indigo-50 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm border border-white/10">Pre-Move-In Journey</span>
-                <h2 className="text-3xl font-black mt-3">Welcome to your new home!</h2>
-                <p className="text-indigo-100 mt-1 max-w-xl text-sm leading-relaxed">Your lease is signed and your move-in date is locked. Complete the onboarding checklist below to ensure a smooth transition into your new unit.</p>
+      {isTenant && lease.status === "SIGNED" && getDaysUntilMoveIn() > 0 && (() => {
+        const signedDateStr = lease.signedAt ? new Date(lease.signedAt).toLocaleDateString() : lease.updatedAt ? new Date(lease.updatedAt).toLocaleDateString() : "Recently";
+        return (
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs text-slate-900 relative overflow-hidden font-sans">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-[0.03] pointer-events-none">
+              <KeyRound className="w-64 h-64 text-slate-900" />
+            </div>
+            
+            <div className="relative z-10 space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border border-slate-200/80">Pre-Move-In Journey</span>
+                  <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-2.5">Welcome to your new home!</h2>
+                  <p className="text-slate-500 mt-1 max-w-xl text-xs sm:text-sm leading-relaxed font-normal">Your lease is signed and your move-in date is locked. Complete the onboarding checklist below to ensure a smooth transition into your new unit.</p>
+                </div>
+                <div className="bg-slate-50/80 border border-slate-200/80 p-4 sm:p-5 rounded-2xl text-center min-w-[130px] shrink-0 shadow-2xs">
+                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Move-in Date</p>
+                  <p className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">{getDaysUntilMoveIn()}</p>
+                  <p className="text-slate-500 text-xs font-medium">Days to go</p>
+                </div>
               </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl text-center min-w-[140px] shrink-0">
-                <p className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Move-in Date</p>
-                <p className="text-4xl font-black">{getDaysUntilMoveIn()}</p>
-                <p className="text-indigo-200 text-sm font-semibold">Days to go</p>
+
+              <div className="bg-slate-50/60 rounded-2xl p-5 sm:p-6 border border-slate-200/80">
+                <h3 className="font-semibold text-sm sm:text-base text-slate-900 flex items-center gap-2 mb-4 tracking-tight">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Your Onboarding Checklist
+                </h3>
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="h-7 w-7 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                      <CheckCircle className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-xs text-slate-500 line-through">Sign Lease Agreement</p>
+                      <p className="text-[11px] text-slate-400">Completed on {signedDateStr}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3.5">
+                    <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${!unpaidDepositInvoice ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}`}>
+                      {!unpaidDepositInvoice ? <CheckCircle className="h-4 w-4" /> : <div className="h-2 w-2 rounded-full bg-amber-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-xs ${!unpaidDepositInvoice ? 'font-medium text-slate-500 line-through' : 'font-semibold text-slate-900'}`}>Pay Security Deposit</p>
+                      <p className="text-[11px] text-slate-500">{!unpaidDepositInvoice ? 'Payment received' : 'Action required to secure the unit'}</p>
+                    </div>
+                    {unpaidDepositInvoice && (
+                      <Button onClick={() => router.push(`/dashboard/payments/pay-rent`)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs h-8 px-3 shadow-2xs transition-colors">
+                        Pay Now
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3.5 opacity-60">
+                     <div className="h-7 w-7 rounded-full border border-slate-200 bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-xs font-semibold">
+                       3
+                     </div>
+                     <div className="flex-1">
+                       <p className="text-xs font-normal text-slate-600">Pay First Month's Rent</p>
+                       <p className="text-[11px] text-slate-400">Invoice will be available on your start date ({new Date(lease.startDate).toLocaleDateString()})</p>
+                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-3.5 opacity-60">
+                     <div className="h-7 w-7 rounded-full border border-slate-200 bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-xs font-semibold">
+                       4
+                     </div>
+                     <div className="flex-1">
+                       <p className="text-xs font-normal text-slate-600">Pick up keys</p>
+                       <p className="text-[11px] text-slate-400">Available on move-in day after all payments clear</p>
+                     </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><CheckCircle2 className="w-5 h-5" /> Your Onboarding Checklist</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 opacity-70">
-                  <div className="h-8 w-8 rounded-full bg-emerald-400 flex items-center justify-center shrink-0">
-                    <CheckCircle className="h-5 w-5 text-indigo-900" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-white line-through">Sign Lease Agreement</p>
-                    <p className="text-xs text-indigo-200">Completed on {new Date(lease.updatedAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${!unpaidDepositInvoice ? 'bg-emerald-400' : 'bg-amber-400 border-2 border-white'}`}>
-                    {!unpaidDepositInvoice ? <CheckCircle className="h-5 w-5 text-indigo-900" /> : <div className="h-2 w-2 rounded-full bg-amber-900" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-bold ${!unpaidDepositInvoice ? 'text-white line-through opacity-70' : 'text-amber-300'}`}>Pay Security Deposit</p>
-                    <p className="text-xs text-indigo-200">{!unpaidDepositInvoice ? 'Payment received' : 'Action required to secure the unit'}</p>
-                  </div>
-                  {unpaidDepositInvoice && (
-                    <Button onClick={() => router.push(`/dashboard/payments/pay-rent`)} size="sm" className="bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-lg text-xs">
-                      Pay Now
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4 opacity-50">
-                   <div className="h-8 w-8 rounded-full border-2 border-indigo-200 flex items-center justify-center shrink-0">
-                   </div>
-                   <div className="flex-1">
-                     <p className="font-bold text-white">Pay First Month's Rent</p>
-                     <p className="text-xs text-indigo-200">Invoice will be available on your start date ({new Date(lease.startDate).toLocaleDateString()})</p>
-                   </div>
-                </div>
-
-                <div className="flex items-center gap-4 opacity-50">
-                   <div className="h-8 w-8 rounded-full border-2 border-indigo-200 flex items-center justify-center shrink-0">
-                   </div>
-                   <div className="flex-1">
-                     <p className="font-bold text-white">Pick up keys</p>
-                     <p className="text-xs text-indigo-200">Available on move-in day after all payments clear</p>
-                   </div>
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Action Banner — Step 1: Sign first, Step 2: Pay deposit */}
       {isTenant && lease.status === "PENDING_SIGNATURE" && (
-        <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <Card className="p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 bg-white text-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-extrabold text-base flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-amber-500" />
+            <h4 className="font-semibold text-base text-slate-900 tracking-tight flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
               Step 1 of 2 — Signature Required
             </h4>
-            <p className="text-sm font-semibold opacity-90 mt-1">
+            <p className="text-xs font-normal text-slate-500 mt-1 leading-relaxed">
               Please review your lease agreement below and sign it to activate your tenancy.
               {unpaidDepositInvoice && ` After signing, you'll be prompted to pay the $${Number(lease.securityDeposit).toFixed(2)} security deposit.`}
             </p>
           </div>
           <Button
             onClick={() => setShowSignModal(true)}
-            className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 px-4 rounded-xl text-xs shadow-2xs transition-colors self-stretch md:self-auto shrink-0 cursor-pointer"
           >
             Review & Sign Lease
           </Button>
@@ -518,19 +527,19 @@ export default function LeaseDetailsPage() {
 
       {/* Action Banner — Step 2: Pay deposit after signing */}
       {isTenant && (lease.status === "ACTIVE" || lease.status === "SIGNED") && unpaidDepositInvoice && (
-        <Card className="p-5 rounded-[20px] shadow-sm border bg-blue-50 border-blue-200 text-blue-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <Card className="p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 bg-white text-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-extrabold text-base flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-blue-500" />
+            <h4 className="font-semibold text-base text-slate-900 tracking-tight flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-emerald-600 shrink-0" />
               Step 2 of 2 — Security Deposit Due
             </h4>
-            <p className="text-sm font-semibold opacity-90 mt-1">
-              Lease signed! Now please pay your security deposit of <strong>${Number(lease.securityDeposit).toFixed(2)}</strong> to complete your move-in.
+            <p className="text-xs font-normal text-slate-500 mt-1 leading-relaxed">
+              Lease signed! Now please pay your security deposit of <strong className="text-slate-900 font-semibold">${Number(lease.securityDeposit).toFixed(2)}</strong> to complete your move-in.
             </p>
           </div>
           <Button
             onClick={() => router.push('/dashboard/payments/pay-rent')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 px-4 rounded-xl text-xs shadow-2xs transition-colors self-stretch md:self-auto shrink-0 cursor-pointer"
           >
             Pay Security Deposit
           </Button>
@@ -539,22 +548,22 @@ export default function LeaseDetailsPage() {
 
       {/* Owner banner: lease is SIGNED, awaiting physical move-in confirmation */}
       {isOwner && lease.status === "SIGNED" && (
-        <Card className="p-5 rounded-[20px] shadow-sm border bg-indigo-50 border-indigo-200 text-indigo-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <Card className="p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 bg-white text-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-extrabold text-base flex items-center gap-2">
-              <KeyRound className="h-5 w-5 text-indigo-500" />
+            <h4 className="font-semibold text-base text-slate-900 tracking-tight flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-emerald-600 shrink-0" />
               Tenant Has Signed — Confirm Key Handover
             </h4>
-            <p className="text-sm font-semibold opacity-90 mt-1">
+            <p className="text-xs font-normal text-slate-500 mt-1 leading-relaxed">
               The tenant has signed the lease. Once you hand over the physical keys, click the button to activate the lease and mark the unit as Occupied.
             </p>
           </div>
           <Button
             onClick={() => setShowConfirmActivate(true)}
             disabled={activatingLease}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium h-9 px-4 rounded-xl text-xs shadow-2xs transition-colors self-stretch md:self-auto shrink-0 cursor-pointer flex items-center gap-2"
           >
-            {activatingLease ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <KeyRound className="h-4 w-4 mr-2" />}
+            {activatingLease ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <KeyRound className="h-4 w-4 mr-1.5" />}
             Confirm Keys Handed Over
           </Button>
         </Card>
@@ -587,13 +596,13 @@ export default function LeaseDetailsPage() {
 
       {/* Optional: Preliminary Walkthrough */}
       {isOwner && ["MOVE_OUT_REQUESTED", "KEYS_RETURNED"].includes(lease.moveOutStatus) && lease.preliminaryInspectionStatus !== "SKIPPED" && (
-        <Card className="p-5 rounded-3xl shadow-2xs border bg-purple-50/80 border-purple-200 text-purple-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
+        <Card className="p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 bg-white text-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="text-base font-semibold text-purple-900 tracking-tight flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-purple-600" />
+            <h4 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
               Optional: Preliminary Walkthrough
             </h4>
-            <p className="text-xs font-normal text-purple-800 mt-1">
+            <p className="text-xs font-normal text-slate-500 mt-1 leading-relaxed">
               {lease.preliminaryInspectionStatus === "NONE" 
                 ? "Offer the tenant a preliminary walkthrough to identify issues before they move out." 
                 : lease.preliminaryInspectionStatus === "SCHEDULED" 
@@ -606,13 +615,13 @@ export default function LeaseDetailsPage() {
               <>
                 <Button
                   onClick={() => setShowConfirmSkipPrelim(true)}
-                  className="h-9 border border-purple-200 bg-white text-purple-900 hover:bg-purple-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer"
+                  className="h-9 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-medium text-xs px-4 rounded-xl shadow-2xs cursor-pointer"
                 >
                   Skip
                 </Button>
                 <Button
                   onClick={() => setScheduleInspectionType("PRELIMINARY")}
-                  className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
+                  className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-2xs transition-colors cursor-pointer"
                 >
                   Schedule Walkthrough
                 </Button>
@@ -627,7 +636,7 @@ export default function LeaseDetailsPage() {
                     toast.error("This is assigned to another inspector.");
                   }
                 }}
-                className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
+                className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-2xs transition-colors cursor-pointer"
               >
                 Start Walkthrough
               </Button>
@@ -635,7 +644,7 @@ export default function LeaseDetailsPage() {
             {lease.preliminaryInspectionStatus === "COMPLETED" && (
               <Button
                 onClick={() => setShowPrelimResultsModal(true)}
-                className="h-9 bg-purple-900 hover:bg-purple-800 text-white font-medium text-xs px-4 rounded-xl shadow-xs border-none cursor-pointer"
+                className="h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 rounded-xl shadow-2xs transition-colors cursor-pointer"
               >
                 View Results
               </Button>
@@ -905,13 +914,13 @@ export default function LeaseDetailsPage() {
 
       {/* Tenant banner: Limbo State for Move-Out */}
       {isTenant && (lease.status === "NOTICE_GIVEN" || lease.status === "TERMINATED") && (lease.status === "TERMINATED" || !lease.keyReturnConfirmedAt) && (
-        <Card className="p-5 rounded-[20px] shadow-sm border bg-amber-50 border-amber-200 text-amber-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <Card className="p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-800 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-sans">
           <div>
-            <h4 className="font-extrabold text-base flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-amber-600" />
+            <h4 className="font-semibold text-base text-white tracking-tight flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-400 shrink-0" />
               {lease.status === "NOTICE_GIVEN" ? "Move-Out Scheduled" : "Lease Terminated"}
             </h4>
-            <p className="text-sm font-semibold opacity-90 mt-1">
+            <p className="text-xs font-normal text-slate-300 mt-1 leading-relaxed">
               {lease.status === "NOTICE_GIVEN" 
                 ? `Your move-out is scheduled for ${lease.moveOutDate ? new Date(lease.moveOutDate).toLocaleDateString() : "TBD"}. Please ensure the unit is deep cleaned, all personal items are removed, and keys are left on the kitchen counter to ensure a full deposit refund.`
                 : "Your lease is officially terminated and the final security deposit statement has been processed."}
@@ -920,9 +929,9 @@ export default function LeaseDetailsPage() {
           {lease.status === "TERMINATED" && (
             <Button
               onClick={() => router.push(`/dashboard/tenant/leases/${lease.id}/move-out`)}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-10 px-5 rounded-xl text-xs shadow-sm self-stretch md:self-auto shrink-0"
+              className="bg-white hover:bg-slate-100 text-slate-900 font-semibold h-9 px-4 rounded-xl text-xs shadow-2xs transition-colors self-stretch md:self-auto shrink-0 cursor-pointer flex items-center gap-1.5"
             >
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4" />
               View Final Deposit Statement
             </Button>
           )}
@@ -930,15 +939,15 @@ export default function LeaseDetailsPage() {
       )}
 
       {/* Header Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs font-sans">
         <div className="flex items-center gap-3.5">
-          <div className="h-12 w-12 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center text-slate-900 shrink-0 shadow-2xs">
+          <div className="h-12 w-12 bg-slate-100 border border-slate-200/80 rounded-2xl flex items-center justify-center text-slate-900 shrink-0 shadow-2xs">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Lease Agreement</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Lease Agreement</h1>
             <div className="flex items-center gap-2.5 mt-0.5">
-              <span className="text-[10px] font-extrabold text-slate-400 tracking-wider uppercase">ID: {lease.id.substring(0,8)}</span>
+              <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">ID: {lease.id.substring(0,8)}</span>
               {getStatusBadge(lease.status)}
             </div>
           </div>
@@ -950,7 +959,7 @@ export default function LeaseDetailsPage() {
               {lease.status === "PENDING_SIGNATURE" && (
                 <Button
                   onClick={() => setShowSignModal(true)}
-                  className="h-9 rounded-xl font-black text-xs bg-amber-500 hover:bg-amber-600 text-white shadow-xs flex-1 md:flex-none cursor-pointer"
+                  className="h-9 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors flex-1 md:flex-none cursor-pointer"
                 >
                   Sign Lease
                 </Button>
@@ -1276,8 +1285,8 @@ export default function LeaseDetailsPage() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                            {lease.unit?.name ? lease.unit.name.replace(/Unit\s+/i, '').replace(/\s*\(.*?\)/, '') : "-"}
+                          <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <Home className="h-5 w-5" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-black text-slate-900 truncate">
@@ -2243,17 +2252,17 @@ export default function LeaseDetailsPage() {
           <div className="bg-white w-full max-w-2xl rounded-[28px] shadow-2xl flex flex-col border border-slate-200 overflow-hidden" style={{ maxHeight: '92vh' }}>
             
             {/* Modal Header with Step Indicator */}
-            <div className="px-7 py-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
+            <div className="px-7 py-5 border-b border-slate-200/80 flex justify-between items-center bg-slate-50/80">
               <div>
-                <h2 className="text-xl font-black text-slate-900">Sign Lease Agreement</h2>
-                <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Unit {lease.unit?.name} · {lease.unit?.property?.name}</p>
+                <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Sign Lease Agreement</h2>
+                <p className="text-xs font-normal text-slate-500 mt-0.5">Unit {lease.unit?.name} · {lease.unit?.property?.name}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {[1, 2, 3].map(s => (
-                  <div key={s} className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-black transition-all ${
-                    s < signStep ? 'bg-emerald-500 text-white' : s === signStep ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-slate-100 text-[#8E8E93]'
+                  <div key={s} className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all ${
+                    s < signStep ? 'bg-emerald-600 text-white' : s === signStep ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-400'
                   }`}>
-                    {s < signStep ? <CheckCircle className="h-4 w-4" /> : s}
+                    {s < signStep ? <CheckCircle className="h-3.5 w-3.5" /> : s}
                   </div>
                 ))}
               </div>
@@ -2263,11 +2272,11 @@ export default function LeaseDetailsPage() {
             {signStep === 1 && (
               <>
                 <div className="px-7 pt-5 pb-2">
-                  <h3 className="text-base font-black text-slate-800">Read & Agree to Lease Terms</h3>
-                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Scroll to the bottom to proceed.</p>
+                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">Read & Agree to Lease Terms</h3>
+                  <p className="text-xs font-normal text-slate-500 mt-0.5">Scroll to the bottom to proceed.</p>
                 </div>
                 <div
-                  className="mx-7 mb-4 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50"
+                  className="mx-7 mb-4 flex-1 overflow-y-auto rounded-2xl border border-slate-200/80 bg-slate-50/50"
                   style={{ maxHeight: '50vh' }}
                   onScroll={(e) => {
                     const el = e.currentTarget;
@@ -2276,61 +2285,61 @@ export default function LeaseDetailsPage() {
                     }
                   }}
                 >
-                  <div className="p-5 space-y-5 text-sm text-slate-600 leading-relaxed">
+                  <div className="p-5 space-y-5 text-sm text-slate-600 leading-relaxed font-sans">
                     {/* Platform Standard Terms */}
                     <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2 flex items-center gap-2">
-                        <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-[10px] font-black">P</span>
+                      <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2.5 flex items-center gap-2">
+                        <span className="w-5 h-5 bg-slate-100 text-slate-800 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-200">P</span>
                         Platform Standard Terms
                       </h4>
-                      <div className="space-y-2 text-xs">
-                        <p><strong className="text-[#1D1D1F]">1. Rent Payment:</strong> Rent is due on Day {lease.rentDueDay || 1} of each month. A grace period of {lease.gracePeriodDays || 5} days applies. Late fees of {lease.lateFeeType === 'PERCENTAGE' ? `${lease.lateFeeAmount}%` : `$${Number(lease.lateFeeAmount || 0).toFixed(2)}`} will be charged after the grace period.</p>
-                        <p><strong className="text-[#1D1D1F]">2. Security Deposit:</strong> A security deposit of ${Number(lease.securityDeposit || 0).toFixed(2)} is required. This will be held and refunded subject to the unit condition upon move-out.</p>
-                        <p><strong className="text-[#1D1D1F]">3. Maintenance:</strong> Tenants must report any maintenance issues promptly. Damage caused by tenant negligence may be deducted from the security deposit.</p>
-                        <p><strong className="text-[#1D1D1F]">4. Early Termination:</strong> Early termination before {new Date(lease.endDate).toLocaleDateString()} may result in a fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)}.</p>
-                        <p><strong className="text-[#1D1D1F]">5. Move-Out Notice:</strong> The Tenant agrees to provide a minimum of {lease.moveOutNoticeDays || 30} days written notice prior to terminating this lease or moving out.</p>
-                        <p><strong className="text-[#1D1D1F]">6. Renewal:</strong> You will be notified {lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.</p>
-                        <p><strong className="text-[#1D1D1F]">7. Privacy & Data:</strong> Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.</p>
-                        <p><strong className="text-[#1D1D1F]">8. Electronic Signature:</strong> By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).</p>
-                        <p><strong className="text-[#1D1D1F]">9. Governing Law:</strong> This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
+                      <div className="space-y-2 text-xs text-slate-600">
+                        <p><strong className="text-slate-900 font-semibold">1. Rent Payment:</strong> Rent is due on Day {lease.rentDueDay || 1} of each month. A grace period of {lease.gracePeriodDays || 5} days applies. Late fees of {lease.lateFeeType === 'PERCENTAGE' ? `${lease.lateFeeAmount}%` : `$${Number(lease.lateFeeAmount || 0).toFixed(2)}`} will be charged after the grace period.</p>
+                        <p><strong className="text-slate-900 font-semibold">2. Security Deposit:</strong> A security deposit of ${Number(lease.securityDeposit || 0).toFixed(2)} is required. This will be held and refunded subject to the unit condition upon move-out.</p>
+                        <p><strong className="text-slate-900 font-semibold">3. Maintenance:</strong> Tenants must report any maintenance issues promptly. Damage caused by tenant negligence may be deducted from the security deposit.</p>
+                        <p><strong className="text-slate-900 font-semibold">4. Early Termination:</strong> Early termination before {new Date(lease.endDate).toLocaleDateString()} may result in a fee of ${Number(lease.earlyTerminationFee || 0).toFixed(2)}.</p>
+                        <p><strong className="text-slate-900 font-semibold">5. Move-Out Notice:</strong> The Tenant agrees to provide a minimum of {lease.moveOutNoticeDays || 30} days written notice prior to terminating this lease or moving out.</p>
+                        <p><strong className="text-slate-900 font-semibold">6. Renewal:</strong> You will be notified {lease.renewalNoticeDays || 60} days before the lease end date regarding renewal options.</p>
+                        <p><strong className="text-slate-900 font-semibold">7. Privacy & Data:</strong> Your personal information is stored securely and used solely for property management purposes in accordance with applicable data protection laws.</p>
+                        <p><strong className="text-slate-900 font-semibold">8. Electronic Signature:</strong> By signing below, you acknowledge this electronic signature is legally equivalent to a handwritten signature under applicable e-signature laws (ESIGN Act / UETA).</p>
+                        <p><strong className="text-slate-900 font-semibold">9. Governing Law:</strong> This agreement shall be governed by the laws of the jurisdiction where the property is located.</p>
                       </div>
                     </div>
 
                     {/* Owner Custom Terms */}
                     {lease.customTerms && (
                       <div>
-                        <h4 className="font-semibold text-slate-900 text-sm mb-2 flex items-center gap-2">
-                          <span className="w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[10px] font-black">O</span>
+                        <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+                          <span className="w-5 h-5 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center text-[10px] font-bold border border-amber-200">O</span>
                           Property-Specific Terms (Added by Owner)
                         </h4>
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 whitespace-pre-wrap">
+                        <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 whitespace-pre-wrap">
                           {lease.customTerms}
                         </div>
                       </div>
                     )}
 
                     {/* Lease Financial Summary */}
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                      <h4 className="font-extrabold text-indigo-900 text-sm mb-3">Lease Financial Summary</h4>
-                      <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-                        <div><span className="text-[#6E6E73]">Monthly Rent:</span> <strong className="text-[#1D1D1F]">${Number(lease.monthlyRent || 0).toLocaleString()}</strong></div>
-                        <div><span className="text-[#6E6E73]">Security Deposit:</span> <strong className="text-[#1D1D1F]">${Number(lease.securityDeposit || 0).toLocaleString()}</strong></div>
-                        <div><span className="text-[#6E6E73]">Start Date:</span> <strong className="text-[#1D1D1F]">{new Date(lease.startDate).toLocaleDateString()}</strong></div>
-                        <div><span className="text-[#6E6E73]">End Date:</span> <strong className="text-[#1D1D1F]">{new Date(lease.endDate).toLocaleDateString()}</strong></div>
+                    <div className="bg-slate-100/70 border border-slate-200/80 rounded-2xl p-4">
+                      <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2.5">Lease Financial Summary</h4>
+                      <div className="grid grid-cols-2 gap-2.5 text-xs">
+                        <div><span className="text-slate-500 font-medium">Monthly Rent:</span> <strong className="text-slate-900 font-semibold">${Number(lease.monthlyRent || 0).toLocaleString()}</strong></div>
+                        <div><span className="text-slate-500 font-medium">Security Deposit:</span> <strong className="text-slate-900 font-semibold">${Number(lease.securityDeposit || 0).toLocaleString()}</strong></div>
+                        <div><span className="text-slate-500 font-medium">Start Date:</span> <strong className="text-slate-900 font-semibold">{new Date(lease.startDate).toLocaleDateString()}</strong></div>
+                        <div><span className="text-slate-500 font-medium">End Date:</span> <strong className="text-slate-900 font-semibold">{new Date(lease.endDate).toLocaleDateString()}</strong></div>
                       </div>
                     </div>
 
-                    <div className="text-center py-2 text-[11px] text-[#8E8E93] font-normal border-t border-slate-200 pt-4">
+                    <div className="text-center py-2 text-[11px] text-slate-400 font-normal border-t border-slate-200/60 pt-4">
                       ✓ You've reached the end of the terms.
                     </div>
                   </div>
                 </div>
-                <div className="px-7 py-4 border-t border-slate-100 flex justify-between items-center">
-                  <button onClick={() => setShowSignModal(false)} className="text-sm font-bold text-[#8E8E93] hover:text-slate-600">Cancel</button>
+                <div className="px-7 py-4 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50">
+                  <button onClick={() => setShowSignModal(false)} className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">Cancel</button>
                   <Button
                     onClick={() => setSignStep(2)}
                     disabled={!hasScrolledTerms}
-                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40"
+                    className="h-9 px-6 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors disabled:opacity-40"
                   >
                     {hasScrolledTerms ? 'I Have Read — Continue →' : 'Scroll to Read All Terms'}
                   </Button>
@@ -2345,19 +2354,19 @@ export default function LeaseDetailsPage() {
                 <div className="px-7 pt-5 pb-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-black text-slate-800">Your Signature</h3>
-                      <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Choose how you want to sign your lease.</p>
+                      <h3 className="text-base font-semibold text-slate-900 tracking-tight">Your Signature</h3>
+                      <p className="text-xs font-normal text-slate-500 mt-0.5">Choose how you want to sign your lease.</p>
                     </div>
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                    <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60">
                       <button
                         onClick={() => setSignatureMode('draw')}
-                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-colors ${signatureMode === 'draw' ? 'bg-white shadow-sm text-indigo-600' : 'text-[#6E6E73] hover:text-slate-700'}`}
+                        className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all ${signatureMode === 'draw' ? 'bg-white shadow-2xs text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}
                       >
                         Draw
                       </button>
                       <button
                         onClick={() => setSignatureMode('type')}
-                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-colors ${signatureMode === 'type' ? 'bg-white shadow-sm text-indigo-600' : 'text-[#6E6E73] hover:text-slate-700'}`}
+                        className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all ${signatureMode === 'type' ? 'bg-white shadow-2xs text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}
                       >
                         Type
                       </button>
@@ -2367,7 +2376,7 @@ export default function LeaseDetailsPage() {
                 
                 <div className="px-7 pb-4 space-y-4 flex-1 overflow-y-auto">
                   {/* Signature Input Area */}
-                  <div className="border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50 relative h-[200px] flex items-center justify-center">
+                  <div className="border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 relative h-[200px] flex items-center justify-center">
                     {signatureMode === 'draw' ? (
                       <>
                         <canvas
@@ -2385,11 +2394,11 @@ export default function LeaseDetailsPage() {
                         />
                         {!canvasSignatureData && (
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                            <p className="text-slate-300 text-sm font-bold">Sign here...</p>
+                            <p className="text-slate-400 text-xs font-semibold">Sign here...</p>
                           </div>
                         )}
                         <div className="absolute bottom-3 right-4 z-20">
-                          <button onClick={clearCanvas} className="text-xs font-medium text-[#8E8E93] hover:text-slate-600 bg-white/80 px-2 py-1 rounded backdrop-blur">Clear</button>
+                          <button onClick={clearCanvas} className="text-xs font-medium text-slate-500 hover:text-slate-900 bg-white/80 px-2.5 py-1 rounded-lg border border-slate-200/60 shadow-2xs backdrop-blur-xs">Clear</button>
                         </div>
                       </>
                     ) : (
@@ -2399,35 +2408,35 @@ export default function LeaseDetailsPage() {
                           placeholder="Type your name here..."
                           value={typedSignature}
                           onChange={(e) => setTypedSignature(e.target.value)}
-                          className="w-full bg-transparent text-center outline-none text-[#1E293B] placeholder:text-slate-300"
+                          className="w-full bg-transparent text-center outline-none text-slate-900 placeholder:text-slate-300"
                           style={{ fontFamily: "'Caveat', cursive", fontSize: "56px" }}
                         />
                       </div>
                     )}
                   </div>
                   
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p className="text-[11px] text-[#6E6E73] leading-relaxed font-medium">
-                      <ShieldAlert className="inline h-3.5 w-3.5 text-[#8E8E93] mr-1 -mt-0.5" />
+                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-normal">
+                      <ShieldAlert className="inline h-3.5 w-3.5 text-slate-400 mr-1 -mt-0.5" />
                       By signing, you consent to legally binding electronic signatures. Your IP address and timestamp will be cryptographically attached to the final record to ensure non-repudiation under the ESIGN Act and UETA.
                     </p>
                   </div>
 
                   {/* Legal Name Confirmation */}
-                  <div className="space-y-1.5 pt-2">
-                    <label className="block text-sm font-bold text-slate-700">Confirm Full Legal Name <span className="text-red-500">*</span></label>
+                  <div className="space-y-1.5 pt-1">
+                    <label className="block text-xs font-semibold text-slate-900">Confirm Full Legal Name <span className="text-rose-500">*</span></label>
                     <input
                       type="text"
                       placeholder="Type your full legal name to confirm"
                       value={signatureName}
                       onChange={(e) => setSignatureName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-medium text-slate-900 text-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none font-medium text-slate-900 text-xs shadow-2xs"
                     />
-                    <p className="text-[11px] font-normal text-[#8E8E93]">Must exactly match: <strong className="text-[#3C3C43]">{lease.tenant?.name}</strong></p>
+                    <p className="text-[11px] font-normal text-slate-500">Type your name as registered — punctuation differences are OK. Expected: <strong className="text-slate-900 font-semibold">{lease.tenant?.name}</strong></p>
                   </div>
                 </div>
-                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
-                  <Button variant="outline" onClick={() => setSignStep(1)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                <div className="px-7 py-4 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50">
+                  <Button variant="outline" onClick={() => setSignStep(1)} className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-slate-700 hover:bg-slate-100">← Back</Button>
                   <Button
                     onClick={() => {
                       if (signatureMode === 'draw' && !canvasSignatureData) { toast.error("Please draw your signature first."); return; }
@@ -2435,7 +2444,7 @@ export default function LeaseDetailsPage() {
                       if (!signatureName.trim()) { toast.error("Please type your legal name."); return; }
                       setSignStep(3);
                     }}
-                    className="h-11 px-8 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="h-9 px-6 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors"
                   >
                     Review & Continue →
                   </Button>
@@ -2447,49 +2456,49 @@ export default function LeaseDetailsPage() {
             {signStep === 3 && (
               <>
                 <div className="px-7 pt-5 pb-3">
-                  <h3 className="text-base font-black text-slate-800">Confirm & Sign</h3>
-                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">Review your signature before final submission.</p>
+                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">Confirm & Sign</h3>
+                  <p className="text-xs font-normal text-slate-500 mt-0.5">Review your signature before final submission.</p>
                 </div>
                 <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
                   {/* Signature Preview */}
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
-                      <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Your Signature Preview</p>
+                  <div className="border border-slate-200/80 rounded-2xl overflow-hidden">
+                    <div className="bg-slate-50/80 px-4 py-2 border-b border-slate-200/80">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Signature Preview</p>
                     </div>
                     {signatureMode === 'draw' && canvasSignatureData ? (
                       <img src={canvasSignatureData} alt="Signature Preview" className="w-full h-28 object-contain p-2 bg-white" />
                     ) : (
                       <div className="w-full h-28 flex items-center justify-center bg-white">
-                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "48px" }} className="text-[#1E293B]">
+                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: "48px" }} className="text-slate-900">
                           {typedSignature || signatureName}
                         </span>
                       </div>
                     )}
-                    <div className="bg-slate-50 px-4 py-2 border-t border-slate-200">
-                      <p className="text-xs font-bold text-slate-800">{signatureName}</p>
-                      <p className="text-[10px] text-[#8E8E93] font-semibold">{new Date().toLocaleString()}</p>
+                    <div className="bg-slate-50/80 px-4 py-2 border-t border-slate-200/80">
+                      <p className="text-xs font-semibold text-slate-900">{signatureName}</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">{new Date().toLocaleString()}</p>
                     </div>
                   </div>
 
                   {/* Final Checkbox */}
-                  <div className="flex items-start gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                  <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
                     <input
                       type="checkbox" id="finalConsent"
                       checked={signatureConsent}
                       onChange={(e) => setSignatureConsent(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 cursor-pointer"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-slate-900 cursor-pointer"
                     />
-                    <label htmlFor="finalConsent" className="text-xs font-semibold text-indigo-900 cursor-pointer leading-relaxed">
-                      I, <strong>{signatureName || '___'}</strong>, acknowledge that this electronic signature is the legally binding equivalent of my handwritten signature under ESIGN/UETA law. I have read and agree to all terms of this lease agreement for <strong>Unit {lease.unit?.name}</strong> at <strong>{lease.unit?.property?.name}</strong>.
+                    <label htmlFor="finalConsent" className="text-xs font-normal text-slate-800 cursor-pointer leading-relaxed">
+                      I, <strong className="font-semibold text-slate-900">{signatureName || '___'}</strong>, acknowledge that this electronic signature is the legally binding equivalent of my handwritten signature under ESIGN/UETA law. I have read and agree to all terms of this lease agreement for <strong className="font-semibold text-slate-900">Unit {lease.unit?.name}</strong> at <strong className="font-semibold text-slate-900">{lease.unit?.property?.name}</strong>.
                     </label>
                   </div>
                 </div>
-                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
-                  <Button variant="outline" onClick={() => setSignStep(2)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                <div className="px-7 py-4 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50">
+                  <Button variant="outline" onClick={() => setSignStep(2)} className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-slate-700 hover:bg-slate-100">← Back</Button>
                   <Button
                     onClick={handleRequestOtp}
                     disabled={signing || !signatureConsent}
-                    className="h-11 px-8 rounded-2xl font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-md disabled:opacity-40"
+                    className="h-9 px-6 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors disabled:opacity-40"
                   >
                     {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : 'Request OTP & Continue →'}
                   </Button>
@@ -2501,15 +2510,15 @@ export default function LeaseDetailsPage() {
             {signStep === 4 && (
               <>
                 <div className="px-7 pt-5 pb-3">
-                  <h3 className="text-base font-black text-slate-800">Verify Your Identity</h3>
-                  <p className="text-xs font-normal text-[#8E8E93] mt-0.5">We sent a 6-digit code to your email.</p>
+                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">Verify Your Identity</h3>
+                  <p className="text-xs font-normal text-slate-500 mt-0.5">We sent a 6-digit code to your email.</p>
                 </div>
-                <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto">
-                  <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <Mail className="h-12 w-12 text-indigo-500 mb-4" />
-                    <p className="text-sm font-bold text-slate-700 text-center mb-4">
+                <div className="px-7 pb-4 space-y-5 flex-1 overflow-y-auto font-sans">
+                  <div className="flex flex-col items-center justify-center p-8 bg-slate-50/50 border border-slate-200/80 rounded-2xl">
+                    <Mail className="h-10 w-10 text-slate-800 mb-3" />
+                    <p className="text-xs font-normal text-slate-600 text-center mb-4 leading-relaxed">
                       Enter the 6-digit verification code sent to <br />
-                      <span className="text-indigo-600">{lease.tenant?.email}</span>
+                      <span className="font-semibold text-slate-900">{lease.tenant?.email}</span>
                     </p>
                     <input
                       type="text"
@@ -2517,19 +2526,19 @@ export default function LeaseDetailsPage() {
                       placeholder="------"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className="w-[280px] text-center text-4xl tracking-[0.4em] font-mono font-black px-4 py-4 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none text-slate-900 bg-white placeholder:text-slate-300"
+                      className="w-[260px] text-center text-3xl tracking-[0.4em] font-mono font-bold px-4 py-3 rounded-xl border border-slate-200 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none text-slate-900 bg-white placeholder:text-slate-300 shadow-2xs"
                     />
-                    <button onClick={handleRequestOtp} className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline mt-4">
+                    <button onClick={handleRequestOtp} className="text-xs font-semibold text-slate-700 hover:text-slate-900 underline mt-4 transition-colors">
                       Didn't receive it? Resend Code
                     </button>
                   </div>
                 </div>
-                <div className="px-7 py-4 border-t border-slate-100 flex justify-between">
-                  <Button variant="outline" onClick={() => setSignStep(3)} className="h-11 px-6 rounded-2xl font-bold border-slate-200">← Back</Button>
+                <div className="px-7 py-4 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50">
+                  <Button variant="outline" onClick={() => setSignStep(3)} className="h-9 px-4 rounded-xl font-medium text-xs border-slate-200 text-slate-700 hover:bg-slate-100">← Back</Button>
                   <Button
                     onClick={handleVerifyOtpAndSign}
                     disabled={signing || otp.length !== 6}
-                    className="h-11 px-8 rounded-2xl font-medium bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-40"
+                    className="h-9 px-6 rounded-xl font-medium text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors disabled:opacity-40"
                   >
                     {signing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying...</> : '✓ Verify & Sign Lease'}
                   </Button>
@@ -2633,55 +2642,131 @@ export default function LeaseDetailsPage() {
       {/* Preliminary Walkthrough Modals are handled by unified consolidated modals above */}
 
       <Dialog open={showPrelimResultsModal} onOpenChange={setShowPrelimResultsModal}>
-        <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-lg p-6 font-sans shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black flex items-center gap-2 text-slate-900 tracking-tight">
-              <ShieldAlert className="h-5 w-5 text-amber-600" /> Preliminary Walkthrough Results
+        <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-lg p-6 font-sans shadow-lg max-h-[90vh] flex flex-col">
+          <DialogHeader className="pb-3 border-b border-slate-100 shrink-0">
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900 tracking-tight">
+              <ShieldAlert className="h-4.5 w-4.5 text-amber-500 shrink-0" /> Preliminary Walkthrough Results
             </DialogTitle>
-            <DialogDescription className="text-xs font-semibold text-slate-500">
-              Findings logged during the preliminary walkthrough inspection.
+            <DialogDescription className="text-xs font-normal text-slate-500 mt-0.5">
+              Findings logged during the preliminary walkthrough inspection for {lease?.unit?.property?.name || "Property"}{lease?.unit?.name ? ` — ${lease.unit.name}` : ""}.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 my-4 max-h-[60vh] overflow-y-auto pr-1">
+          <div className="space-y-4 my-3 flex-1 overflow-y-auto pr-1">
+            {/* Inspection Metadata Strip */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-[11px] font-normal text-slate-500 block">Inspection Date</span>
+                <span className="font-semibold text-slate-900">
+                  {lease?.preliminaryInspectionDate ? new Date(lease.preliminaryInspectionDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recently Completed"}
+                </span>
+              </div>
+              <div>
+                <span className="text-[11px] font-normal text-slate-500 block">Inspector</span>
+                <span className="font-semibold text-slate-900 truncate block">
+                  {lease?.moveOutInspector?.name || "Self-Inspected by Owner"}
+                </span>
+              </div>
+            </div>
+
+            {/* Tenant Guidance Banner */}
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1">
+              <p className="font-semibold text-amber-950 flex items-center gap-1.5">
+                💡 Preliminary Remedy Guidance
+              </p>
+              <p className="text-[11px] font-normal leading-relaxed text-amber-800">
+                Flagged items below can be cleaned or repaired prior to your final move-out date to avoid security deposit deductions on your disposition statement.
+              </p>
+            </div>
+
+            {/* General Notes */}
             {lease?.preliminaryInspectionNotes && (
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
-                <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mb-1">General Notes</p>
-                <p className="text-xs font-semibold text-slate-700">{lease.preliminaryInspectionNotes}</p>
+              <div className="space-y-1">
+                <p className="text-xs font-normal text-slate-500">General Notes</p>
+                <div className="bg-white border border-slate-200/80 p-3 rounded-xl text-xs font-normal text-slate-800 leading-relaxed shadow-2xs">
+                  {lease.preliminaryInspectionNotes}
+                </div>
               </div>
             )}
             
-            <div className="space-y-3">
-              <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider">Flagged Issues ({lease?.preliminaryDeductions?.length || 0})</p>
+            {/* Flagged Issues List */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-slate-900">Flagged Remedy Items ({lease?.preliminaryDeductions?.length || 0})</p>
+                {Array.isArray(lease?.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 && (
+                  <span className="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/80">
+                    Action Required
+                  </span>
+                )}
+              </div>
+
               {Array.isArray(lease?.preliminaryDeductions) && lease.preliminaryDeductions.length > 0 ? (
-                lease.preliminaryDeductions.map((d: any, idx: number) => (
-                  <div key={idx} className="flex gap-3 items-start p-3 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-2xs">
-                    <div className="bg-amber-100 text-amber-600 h-6 w-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
-                      <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 text-xs">{d.description}</p>
-                      <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wider mt-1">Category: {d.category}</p>
+                lease.preliminaryDeductions.map((d: any, idx: number) => {
+                  // Parse room name from description e.g. "[Hallway / Entry] table is broken"
+                  const roomMatch = d.description?.match(/^\[(.*?)\]\s*(.*)$/);
+                  const roomName = roomMatch ? roomMatch[1] : null;
+                  const itemDescription = roomMatch ? roomMatch[2] : d.description;
+
+                  return (
+                    <div key={idx} className="bg-white border border-slate-200/80 rounded-2xl p-4 space-y-3 shadow-2xs">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <div className="h-7 w-7 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <AlertCircle className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            {roomName && (
+                              <span className="inline-block text-[10px] font-semibold text-slate-600 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md mb-1">
+                                {roomName}
+                              </span>
+                            )}
+                            <p className="font-semibold text-slate-900 text-xs leading-snug">{itemDescription}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-50 border border-slate-200/80 px-2 py-0.5 rounded-md shrink-0">
+                          {d.category === "DAMAGE" ? "Physical Damage" : d.category === "CLEANING" ? "Cleaning Required" : d.category || "General"}
+                        </span>
+                      </div>
+
+                      {/* Photo evidence preview if attached */}
                       {d.photoUrl && (
-                        <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 max-w-[150px] shadow-2xs">
-                          <img 
-                            src={d.photoUrl} 
-                            alt="Damage evidence" 
-                            className="w-full h-24 object-cover cursor-zoom-in"
+                        <div className="pt-1">
+                          <p className="text-[10px] font-normal text-slate-400 mb-1">Photo Evidence:</p>
+                          <div 
                             onClick={() => window.open(d.photoUrl, '_blank')}
-                          />
+                            className="relative group rounded-xl overflow-hidden border border-slate-200/80 max-w-[200px] shadow-2xs bg-slate-50 cursor-pointer"
+                          >
+                            <img 
+                              src={d.photoUrl} 
+                              alt="Damage evidence" 
+                              className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-200"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-medium gap-1">
+                              <span>Click to enlarge ↗</span>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  <p className="font-extrabold text-xs">No issues were flagged during the preliminary walkthrough!</p>
+                <div className="flex items-center gap-2.5 text-emerald-800 bg-emerald-50 p-4 rounded-2xl border border-emerald-200/80 text-xs font-medium">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <p>No issues were flagged during the preliminary walkthrough! Unit is in good condition.</p>
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 shrink-0">
+            <Button
+              type="button"
+              onClick={() => setShowPrelimResultsModal(false)}
+              className="w-full rounded-xl h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition-colors cursor-pointer"
+            >
+              Close Results
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

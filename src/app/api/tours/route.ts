@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit-log";
 import { sendEmail } from "@/lib/email";
+import { renderSaaSEmail } from "@/lib/email-template";
 import { notify } from "@/lib/notify";
 import { getTimezoneForState, formatDateTimeInTimezone } from "@/lib/timezones";
 import { checkModuleAccess, moduleLockedResponse } from "@/lib/module-guard";
@@ -224,49 +225,37 @@ export async function POST(req: NextRequest) {
     const { dateStr, timeStr, tzAbbrev } = formatDateTimeInTimezone(scheduledAt, tz);
     const timeDisplay = `${timeStr} ${tzAbbrev}`.trim();
 
-    const htmlBody = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Property<span style="color: #3b82f6;">Pro</span></h1>
-        </div>
-        <div style="padding: 32px; color: #334155;">
-          <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Tour Request Received!</h2>
-          <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Hello <strong style="color: #0f172a;">${tenantName}</strong>,</p>
-          <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">We have received your request to tour <strong style="color: #0f172a;">${property.name}</strong> ${unitId ? `(Unit ${tour.unit?.name})` : ""}.</p>
-          
-          <table style="width: 100%; border-collapse: collapse; margin: 24px 0; background-color: #f8fafc; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
-            <tr>
-              <td style="padding: 16px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; width: 120px;">Date:</td>
-              <td style="padding: 16px; color: #0f172a; font-weight: 500; border-bottom: 1px solid #e2e8f0;">${dateStr}</td>
-            </tr>
-            <tr>
-              <td style="padding: 16px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0;">Time:</td>
-              <td style="padding: 16px; color: #0f172a; font-weight: 500; border-bottom: 1px solid #e2e8f0;">${timeDisplay}</td>
-            </tr>
-            <tr>
-              <td style="padding: 16px; font-weight: 600; color: #64748b;">Type:</td>
-              <td style="padding: 16px; color: #0f172a; font-weight: 500;">${tourType === "VIDEO_CALL" ? "Virtual Video Call" : "In-Person Showing"}</td>
-            </tr>
-          </table>
-          
-          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 24px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #166534; font-size: 14px; line-height: 1.5;">
-              The property owner is currently reviewing your request. We will email you as soon as they confirm or cancel the showing.
-            </p>
-          </div>
-          
-          <p style="color: #94a3b8; font-size: 13px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-            Thank you for using PropertyPro!
-          </p>
-        </div>
-      </div>
-    `;
-
     try {
       await sendEmail({
         to: tenantEmail,
         subject: `PropertyPro Tour Requested: ${property.name}`,
-        html: htmlBody
+        html: renderSaaSEmail({
+          categoryBadge: "SHOWING TOUR REQUEST",
+          preheader: `Tour request received for ${property.name}. Date: ${dateStr} at ${timeDisplay}.`,
+          title: "Tour Request Received",
+          subtitle: `${property.name}${unitId ? ` • Unit ${tour.unit?.name}` : ""}`,
+          statusPill: { text: "PENDING REVIEW", type: "warning" },
+          greeting: `Hello ${tenantName},`,
+          bodyParagraphs: [
+            `We have received your request to tour <strong>${property.name}</strong>${unitId ? ` (Unit ${tour.unit?.name})` : ""}.`,
+            "The property owner is currently reviewing your requested slot. We will notify you via email as soon as your tour is confirmed or rescheduled."
+          ],
+          summaryCard: {
+            title: "Tour Reservation Details",
+            items: [
+              { label: "Property", value: property.name },
+              ...(unitId && tour.unit?.name ? [{ label: "Unit", value: tour.unit.name }] : []),
+              { label: "Date", value: dateStr },
+              { label: "Time", value: timeDisplay },
+              { label: "Tour Type", value: tourType === "VIDEO_CALL" ? "Virtual Video Call" : "In-Person Showing" },
+            ],
+          },
+          infoNotice: {
+            title: "Status Update Notice",
+            text: "The property manager will review your request. You will receive an automated update once confirmed.",
+            type: "info",
+          },
+        }),
       });
     } catch (_) {}
 

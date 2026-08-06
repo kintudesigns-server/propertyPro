@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     }
 
     const subStatus = owner?.subscriptionStatus?.toLowerCase() ?? "";
-    const hasActiveSubscription = subStatus === "active" || subStatus === "active (canceling)" || rules.isCompedAccess;
+    const hasActiveSubscription = subStatus === "active" || subStatus === "active (canceling)" || subStatus === "trialing" || rules.isCompedAccess;
     if (!hasActiveSubscription) {
       return NextResponse.json({ error: "Active subscription required to create leases." }, { status: 403 });
     }

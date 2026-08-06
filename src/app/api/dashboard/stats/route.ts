@@ -158,6 +158,8 @@ export async function GET(req: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { 
+        name: true,
+        phone: true,
         employmentStatus: true, 
         position: true,
         bankName: true,
@@ -169,7 +171,7 @@ export async function GET(req: NextRequest) {
     });
     
     const profileComplete = role === "OWNER"
-      ? (user?.employmentStatus === "INDIVIDUAL" || user?.employmentStatus === "BUSINESS") && !!user?.position
+      ? (user?.employmentStatus === "INDIVIDUAL" || user?.employmentStatus === "BUSINESS") && !!user?.phone
       : !!user?.employmentStatus;
     const bankConnected = !!user?.bankName;
 

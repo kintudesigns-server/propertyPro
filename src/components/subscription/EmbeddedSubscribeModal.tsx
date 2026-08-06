@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -7,14 +7,11 @@ import {
 } from "@stripe/stripe-js";
 import {
   Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
 } from "@stripe/react-stripe-js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Loader2, ArrowLeft, Lock, Zap, Shield, AlertTriangle } from "lucide-react";
+import { Check, Loader2, ArrowLeft, Lock, Sparkles, Shield, AlertTriangle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import SetupForm from "./SetupForm";
 import CheckoutForm from "./CheckoutForm";
@@ -47,9 +44,6 @@ interface EmbeddedSubscribeModalProps {
   required?: boolean;
 }
 
-
-
-
 // ─── Main Modal Component ─────────────────────────────────────────────────────
 export default function EmbeddedSubscribeModal({
   open,
@@ -60,7 +54,7 @@ export default function EmbeddedSubscribeModal({
   currentTierPrice = 0,
   onSuccess,
   contextMessage,
-  title = "Choose Your Plan",
+  title = "Choose Your Subscription Plan",
   required = false,
 }: EmbeddedSubscribeModalProps) {
   const [step, setStep] = useState<"plans" | "confirm" | "payment" | "setup" | "downgrade_blocked">("plans");
@@ -106,22 +100,7 @@ export default function EmbeddedSubscribeModal({
   }, [open]);
 
   const handleSelectPlan = (tier: PricingTier) => {
-    const isDowngrade = currentTierId && tier.price < currentTierPrice;
-    const isDowngradeBlocked = isDowngrade && currentUserUnitCount > tier.maxUnits;
-
-    if (isDowngradeBlocked) {
-      setSelectedTier(tier);
-      setStep("downgrade_blocked" as any);
-      return;
-    }
-
-    // If user already has a plan and is switching, show confirmation
-    if (currentTierId && tier.id !== currentTierId) {
-      setConfirmTier(tier);
-      setStep("confirm");
-    } else {
-      processPlanSwitch(tier);
-    }
+    window.location.href = `/dashboard/owner/billing?tierId=${tier.id}`;
   };
 
   const processPlanSwitch = async (tier: PricingTier) => {
@@ -180,7 +159,7 @@ export default function EmbeddedSubscribeModal({
         appearance: {
           theme: "stripe",
           variables: {
-            colorPrimary: "#0062CC",
+            colorPrimary: "#0F172A",
             colorBackground: "#ffffff",
             colorText: "#1D1D1F",
             colorDanger: "#EF4444",
@@ -201,23 +180,23 @@ export default function EmbeddedSubscribeModal({
       }}
       disablePointerDismissal={required}
     >
-      <DialogContent showCloseButton={!required} className="bg-white border-0 rounded-[28px] w-[95vw] sm:max-w-[680px] p-0 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <DialogContent showCloseButton={!required} className="bg-white border border-slate-200/80 rounded-3xl w-[95vw] sm:max-w-[640px] p-0 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto font-sans">
         
-        {/* Header */}
-        <div className="px-8 pt-8 pb-4">
+        {/* Modern SaaS Header */}
+        <div className="px-6 md:px-8 pt-7 pb-4 border-b border-slate-100">
           <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="h-10 w-10 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                <Zap className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                <Sparkles className="h-4 w-4 text-slate-700" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-semibold text-slate-900 leading-tight">
+                <DialogTitle className="text-xl md:text-2xl font-semibold text-[#1D1D1F] tracking-tight">
                   {step === "payment" && selectedTier ? `Subscribe to ${selectedTier.name}` 
                    : step === "setup" && selectedTier ? `Add Card to Upgrade to ${selectedTier.name}`
                    : title}
                 </DialogTitle>
                 {contextMessage && step === "plans" && (
-                  <DialogDescription className="text-[#6E6E73] text-sm font-medium mt-0.5">
+                  <DialogDescription className="text-[#6E6E73] text-xs font-normal mt-0.5">
                     {contextMessage}
                   </DialogDescription>
                 )}
@@ -226,15 +205,15 @@ export default function EmbeddedSubscribeModal({
           </DialogHeader>
         </div>
 
-        <div className="px-8 pb-8">
+        <div className="p-6 md:p-8">
           {/* ── STEP 1: Plan Selection ── */}
           {step === "plans" && (
             <div className="space-y-4">
               {loadingTiers ? (
                 // Loading skeleton
                 <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="border-2 border-slate-100 rounded-2xl p-5 animate-pulse">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="border border-slate-200 rounded-2xl p-5 animate-pulse bg-slate-50/50">
                       <div className="flex items-center justify-between">
                         <div className="space-y-2 flex-1">
                           <div className="h-5 bg-slate-200 rounded-lg w-32" />
@@ -253,82 +232,82 @@ export default function EmbeddedSubscribeModal({
                   .filter((tier) => tier.id !== currentTierId)
                   .map((tier) => {
                     const isCurrent = tier.id === currentTierId;
-                  const isLoading = loadingTierId === tier.id;
-                  const isDowngrade = currentTierId && tier.price < currentTierPrice;
-                  const isDowngradeBlocked = isDowngrade && currentUserUnitCount > tier.maxUnits;
+                    const isLoading = loadingTierId === tier.id;
+                    const isDowngrade = currentTierId && tier.price < currentTierPrice;
+                    const isDowngradeBlocked = isDowngrade && currentUserUnitCount > tier.maxUnits;
 
-                  return (
-                    <div
-                      key={tier.id}
-                      className={`border-2 rounded-2xl p-5 transition-all ${
-                        isCurrent
-                          ? "border-slate-200 bg-slate-50 opacity-70 cursor-default"
-                          : "border-slate-200 hover:border-blue-400 hover:shadow-md hover:shadow-blue-50 cursor-pointer"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-black text-slate-900 text-lg">{tier.name}</h3>
-                            {isCurrent && (
-                              <Badge className="bg-slate-200 text-[#6E6E73] hover:bg-slate-200 border-0 rounded-lg text-[10px] font-bold px-2">
-                                Current
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-[#6E6E73] mb-3">
-                            {tier.description || `Up to ${tier.maxUnits} units`}
-                          </p>
-                          {tier.features && tier.features.length > 0 && (
-                            <div className="flex flex-wrap gap-x-4 gap-y-1">
-                              {tier.features.slice(0, 3).map((f, i) => (
-                                <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73]">
-                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                                  {f}
+                    return (
+                      <div
+                        key={tier.id}
+                        className={`bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs transition-all font-sans relative ${
+                          isCurrent
+                            ? "opacity-60 cursor-default bg-slate-50/60"
+                            : "hover:border-slate-300 hover:shadow-xs cursor-pointer"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base font-semibold text-[#1D1D1F] tracking-tight">{tier.name}</h3>
+                              {isCurrent && (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                                  Current Plan
                                 </span>
-                              ))}
+                              )}
                             </div>
-                          )}
-                        </div>
-
-                        <div className="ml-6 flex flex-col items-end gap-3 shrink-0">
-                          <div className="text-right">
-                            <span className="text-2xl font-semibold text-slate-900">${tier.price}</span>
-                            <span className="text-[#6E6E73] text-xs font-medium">/mo</span>
-                          </div>
-                          <Button
-                            onClick={() => handleSelectPlan(tier)}
-                            disabled={isCurrent || !!loadingTierId}
-                            className={`h-9 px-5 rounded-xl font-bold text-sm transition-all ${
-                              isCurrent
-                                ? "bg-slate-200 text-[#8E8E93] cursor-not-allowed"
-                                : isDowngradeBlocked
-                                ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 shadow-sm"
-                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
-                            }`}
-                          >
-                            {isLoading ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : isCurrent ? (
-                              "Active"
-                            ) : isDowngradeBlocked ? (
-                              "Downgrade"
-                            ) : isDowngrade ? (
-                              "Downgrade"
-                            ) : (
-                              "Upgrade"
+                            <p className="text-xs font-normal text-[#6E6E73]">
+                              {tier.description || `Up to ${tier.maxUnits} units`}
+                            </p>
+                            {tier.features && tier.features.length > 0 && (
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                                {tier.features.slice(0, 3).map((f, i) => (
+                                  <span key={i} className="flex items-center gap-1.5 text-xs font-normal text-[#6E6E73]">
+                                    <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                                    {f}
+                                  </span>
+                                ))}
+                              </div>
                             )}
-                          </Button>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-3 shrink-0">
+                            <div className="text-right">
+                              <span className="text-2xl font-semibold text-[#1D1D1F] tracking-tight">${tier.price}</span>
+                              <span className="text-[#6E6E73] text-xs font-normal">/mo</span>
+                            </div>
+                            <Button
+                              onClick={() => handleSelectPlan(tier)}
+                              disabled={isCurrent || !!loadingTierId}
+                              className={`h-9 px-4 rounded-xl font-medium text-xs transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${
+                                isCurrent
+                                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                  : isDowngradeBlocked
+                                  ? "bg-amber-500 hover:bg-amber-600 text-white shadow-2xs"
+                                  : "bg-slate-900 hover:bg-slate-800 text-white shadow-2xs"
+                              }`}
+                            >
+                              {isLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                              ) : isCurrent ? (
+                                "Active"
+                              ) : isDowngradeBlocked ? (
+                                "Downgrade"
+                              ) : isDowngrade ? (
+                                "Downgrade"
+                              ) : (
+                                "Upgrade Plan"
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })
               )}
 
-              <p className="text-center text-[11px] text-[#8E8E93] font-medium pt-2 flex items-center justify-center gap-1.5">
-                <Lock className="h-3 w-3" />
-                All plans are billed monthly · Cancel anytime
+              <p className="text-center text-xs text-[#6E6E73] font-normal pt-2 flex items-center justify-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-slate-400" />
+                All plans are billed monthly · Secure checkout via Stripe · Cancel anytime
               </p>
             </div>
           )}
@@ -336,15 +315,15 @@ export default function EmbeddedSubscribeModal({
           {/* ── STEP 1.5: Plan Switch Confirmation ── */}
           {step === "confirm" && confirmTier && (
             <div className="space-y-6">
-              <div className={`p-6 rounded-2xl border ${confirmTier.price > currentTierPrice ? 'bg-blue-50 border-blue-100 text-blue-900' : 'bg-amber-50 border-amber-100 text-amber-900'}`}>
-                <h3 className="text-lg font-black mb-2">
+              <div className={`p-6 rounded-2xl border ${confirmTier.price > currentTierPrice ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
+                <h3 className="text-base font-semibold text-[#1D1D1F] mb-2">
                   {confirmTier.price > currentTierPrice ? 'Upgrading to ' : 'Downgrading to '} {confirmTier.name}
                 </h3>
-                <p className="text-sm font-medium leading-relaxed opacity-90">
+                <p className="text-xs font-normal leading-relaxed text-[#6E6E73]">
                   {confirmTier.price > currentTierPrice ? (
-                    "You are about to upgrade your subscription. You will be immediately charged a prorated amount to cover the remainder of your current billing cycle."
+                    "You are upgrading your subscription. You will be charged a prorated amount immediately to cover the remainder of your current billing cycle."
                   ) : (
-                    "You are about to downgrade your subscription. You will not be charged today. The unused time from your current plan will be automatically deposited into your Stripe wallet as a credit, which will be applied to your future invoices."
+                    "You are downgrading your subscription. The unused credit from your current plan will automatically apply to future invoices."
                   )}
                 </p>
               </div>
@@ -354,20 +333,20 @@ export default function EmbeddedSubscribeModal({
                   type="button"
                   variant="outline"
                   onClick={() => setStep("plans")}
-                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+                  className="h-9 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs font-medium text-xs transition-all"
                   disabled={!!loadingTierId}
                 >
-                  <ArrowLeft className="h-4 w-4 mr-1.5" />
-                  Back to Plans
+                  <ArrowLeft className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
+                  Back
                 </Button>
                 <Button
                   type="button"
                   onClick={() => processPlanSwitch(confirmTier)}
                   disabled={!!loadingTierId}
-                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-60"
+                  className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-2xs transition-all border-none cursor-pointer flex items-center justify-center gap-2"
                 >
                   {loadingTierId ? (
-                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing...</>
+                    <><Loader2 className="h-4 w-4 animate-spin text-white mr-1" /> Processing...</>
                   ) : (
                     "Confirm & Switch Plan"
                   )}
@@ -379,17 +358,17 @@ export default function EmbeddedSubscribeModal({
           {/* ── STEP 1.7: Downgrade Blocked ── */}
           {step === "downgrade_blocked" && selectedTier && (
             <div className="space-y-6">
-              <div className="p-6 rounded-2xl border border-red-100 bg-red-50 text-red-900">
-                <h3 className="text-lg font-black mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
-                  Downgrade Blocked
+              <div className="p-6 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900">
+                <h3 className="text-base font-semibold mb-2 flex items-center gap-2 text-amber-900">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                  Unit Limit Exceeded
                 </h3>
-                <p className="text-sm font-medium leading-relaxed opacity-90">
-                  You currently have <span className="font-bold">{currentUserUnitCount} active units</span> registered. 
-                  The <span className="font-bold">{selectedTier.name} plan</span> only allows up to <span className="font-bold">{selectedTier.maxUnits} units</span>.
+                <p className="text-xs font-normal leading-relaxed text-amber-800">
+                  You currently have <span className="font-semibold">{currentUserUnitCount} active units</span> registered. 
+                  The <span className="font-semibold">{selectedTier.name} plan</span> allows up to <span className="font-semibold">{selectedTier.maxUnits} units</span>.
                 </p>
-                <p className="text-sm font-medium leading-relaxed opacity-90 mt-2">
-                  To downgrade, please archive at least <span className="font-bold">{currentUserUnitCount - selectedTier.maxUnits} unit(s)</span> from your Properties tab, then return here.
+                <p className="text-xs font-normal leading-relaxed text-amber-800 mt-2">
+                  Please delete at least <span className="font-semibold">{currentUserUnitCount - selectedTier.maxUnits} unit(s)</span> from your Properties tab to downgrade.
                 </p>
               </div>
 
@@ -398,24 +377,22 @@ export default function EmbeddedSubscribeModal({
                   type="button"
                   variant="outline"
                   onClick={() => setStep("plans")}
-                  className="h-12 px-5 rounded-xl border-slate-200 font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+                  className="h-9 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs font-medium text-xs transition-all"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-1.5" />
-                  Back to Plans
+                  <ArrowLeft className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
+                  Back
                 </Button>
                 <Button
                   type="button"
                   onClick={() => {
                     onOpenChange(false);
-                    // Navigate to properties hash/tab
                     window.location.hash = "#properties";
-                    // If they are on owner dashboard page, they can also trigger tab change directly
                     const tabBtn = document.querySelector('[role="tab"][value="properties"]') as HTMLButtonElement;
                     if (tabBtn) tabBtn.click();
                   }}
-                  className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all"
+                  className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-2xs transition-all border-none cursor-pointer flex items-center justify-center"
                 >
-                  Go to Properties & Manage Units
+                  Manage Properties & Units
                 </Button>
               </div>
             </div>
@@ -439,13 +416,13 @@ export default function EmbeddedSubscribeModal({
 
           {step === "payment" && !clientSecret && (
             <div className="h-64 flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
             </div>
           )}
 
           {/* ── STEP 2b: Setup Card (no payment method on file) ── */}
           {step === "setup" && setupClientSecret && selectedTier && (
-            <Elements stripe={stripePromise} options={{ clientSecret: setupClientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#0062CC", borderRadius: "12px" } } }}>
+            <Elements stripe={stripePromise} options={{ clientSecret: setupClientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#0F172A", borderRadius: "12px" } } }}>
               <SetupForm
                 tierName={selectedTier.name}
                 tierId={selectedTier.id}

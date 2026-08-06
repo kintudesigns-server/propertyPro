@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { renderSaaSEmail } from "@/lib/email-template";
 import { setOtp } from "@/lib/otpStore";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,24 +38,33 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     await setOtp(lease.id, otp);
 
-    const htmlBody = `
-      <div style="font-family: sans-serif; max-w-lg; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-        <h2 style="color: #0f172a;">Lease Signature Verification</h2>
-        <p style="color: #475569;">You are attempting to sign the lease for <strong>${lease.unit.name} at ${lease.unit.property.name}</strong>.</p>
-        <p style="color: #475569;">Please use the following 6-digit code to verify your identity and finalize your electronic signature:</p>
-        
-        <div style="background-color: #f1f5f9; padding: 15px; border-radius: 6px; text-align: center; margin: 20px 0;">
-          <span style="font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #3b82f6;">${otp}</span>
-        </div>
-        
-        <p style="color: #64748b; font-size: 12px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-      </div>
-    `;
-
     await sendEmail({
       to: lease.tenant.email,
-      subject: `Your Verification Code: ${otp}`,
-      html: htmlBody,
+      subject: `Your PropertyPro Lease Signature Code: ${otp}`,
+      html: renderSaaSEmail({
+        categoryBadge: "LEASE SIGNATURE",
+        preheader: `Your 6-digit electronic signature verification code is ${otp}. Valid for 10 minutes.`,
+        title: "Lease Signature Verification",
+        subtitle: `${lease.unit.property.name} • Unit ${lease.unit.name}`,
+        statusPill: { text: "SIGNATURE OTP", type: "info" },
+        greeting: `Hi ${lease.tenant.name || "Resident"},`,
+        bodyParagraphs: [
+          `You are attempting to electronically sign the lease agreement for <strong>Unit ${lease.unit.name}</strong> at <strong>${lease.unit.property.name}</strong>.`,
+          "Please enter the 6-digit verification code below to authorize your digital signature:"
+        ],
+        summaryCard: {
+          title: "Verification Code",
+          items: [
+            { label: "Security Code", value: `<span style="font-size: 24px; font-weight: 900; letter-spacing: 4px; color: #0F172A;">${otp}</span>` },
+            { label: "Expires In", value: "10 minutes" },
+          ],
+        },
+        infoNotice: {
+          title: "Legal & Security Notice",
+          text: "By entering this code, you confirm your identity and authorize electronic signature of your lease contract.",
+          type: "warning",
+        },
+      }),
     });
 
     return NextResponse.json({ success: true, message: "OTP sent" });

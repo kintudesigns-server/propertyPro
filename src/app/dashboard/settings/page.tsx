@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import SecuritySettings from "@/components/settings/SecuritySettings";
-import { getUserAvatar } from "@/lib/avatar";
 
 const ROLE_CONFIG: Record<string, { label: string; dot: string }> = {
   SUPER_ADMIN: { label: "Super Admin",    dot: "bg-purple-500" },
@@ -236,11 +235,15 @@ export default function SettingsPage() {
         {/* Avatar */}
         <div className="relative shrink-0">
           <div className="h-16 w-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shadow-xs">
-            <img 
-              src={avatar || getUserAvatar({ id: (session?.user as any)?.id, name, avatar })} 
-              alt="Profile" 
-              className="h-full w-full object-cover" 
-            />
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-slate-500 font-bold text-xl select-none">{initials || "?"}</span>
+            )}
             {avatarUploading && (
               <div className="absolute inset-0 rounded-2xl bg-black/30 flex items-center justify-center">
                 <Loader2 className="h-4 w-4 text-white animate-spin" />

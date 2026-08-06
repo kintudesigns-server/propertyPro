@@ -49,33 +49,21 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const typeLabel    = isHouse ? "House" : isCommercial ? "Commercial" : "Apartment";
   const fullAddress  = `${unit.property.address}, ${unit.property.city}, ${unit.property.state || ""} ${unit.property.zip || ""}`;
 
-  // Gallery images
+  // Gallery images: Use only uploaded images; fallback to 1 single placeholder only if 0 uploaded
   const allImages = [
     ...(unit.property.coverPhoto ? [unit.property.coverPhoto] : []),
     ...(unit.property.images || []),
     ...(unit.images || []),
   ];
-  let uniqueImages = Array.from(new Set(allImages)) as string[];
-  const placeholders = isHouse ? [
-    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80",
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80",
-  ] : isCommercial ? [
-    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
-    "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&q=80",
-    "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&q=80",
-    "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
-    "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=80",
-  ] : [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
-    "https://images.unsplash.com/photo-1502672260266-1c1c2f165a2a?w=800&q=80",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
-    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80",
-    "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
-  ];
-  while (uniqueImages.length < 5) uniqueImages.push(placeholders[uniqueImages.length]);
+  let uniqueImages = Array.from(new Set(allImages)).filter(Boolean) as string[];
+  if (uniqueImages.length === 0) {
+    const fallbackImage = isHouse
+      ? "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+      : isCommercial
+      ? "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
+      : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80";
+    uniqueImages = [fallbackImage];
+  }
 
   const rent        = Number(unit.rentAmount);
   const deposit     = Number(unit.depositAmt || unit.rentAmount);

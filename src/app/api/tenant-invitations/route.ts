@@ -1,3 +1,4 @@
+import { renderSaaSEmail } from "@/lib/email-template";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
@@ -71,35 +72,37 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: tenantEmail,
       subject: `You've been invited to join ${unit.property.name} on PropertyPro`,
-      html: `
-        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 40px 32px; border-radius: 16px 16px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800;">🏠 Tenancy Invitation</h1>
-            <p style="color: #c4b5fd; margin: 8px 0 0;">${unit.property.name} has invited you</p>
-          </div>
-          <div style="padding: 32px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none;">
-            <p style="font-size: 16px; color: #0f172a; font-weight: 600; margin-top: 0;">Hi ${tenantName},</p>
-            <p style="color: #475569; line-height: 1.7;">You have been invited to manage your tenancy for the following unit through the PropertyPro platform. Accept the invitation to get access to your tenant portal where you can pay rent online, submit maintenance requests, and communicate with your landlord.</p>
-
-            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0;">
-              <h3 style="margin: 0 0 16px; font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Unit Details</h3>
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr><td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 140px;">Property</td><td style="padding: 8px 0; font-weight: 700; color: #0f172a; font-size: 14px;">${unit.property.name}</td></tr>
-                <tr style="border-top: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Unit</td><td style="padding: 8px 0; font-weight: 700; color: #0f172a; font-size: 14px;">${unit.name}</td></tr>
-                <tr style="border-top: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Monthly Rent</td><td style="padding: 8px 0; font-weight: 700; color: #059669; font-size: 16px;">$${Number(monthlyRent).toLocaleString()}/mo</td></tr>
-                <tr style="border-top: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Lease Start</td><td style="padding: 8px 0; font-weight: 700; color: #0f172a; font-size: 14px;">${new Date(leaseStartDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</td></tr>
-                <tr style="border-top: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; font-size: 14px;">Address</td><td style="padding: 8px 0; font-weight: 600; color: #475569; font-size: 13px;">${unit.property.address}, ${unit.property.city}</td></tr>
-              </table>
-            </div>
-
-            <div style="text-align: center; margin: 28px 0;">
-              <a href="${acceptUrl}" style="display: inline-block; background: #4f46e5; color: white; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px;">Accept Invitation & Create Account →</a>
-            </div>
-
-            <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">This invitation expires on ${expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.</p>
-          </div>
-        </div>
-      `,
+      html: renderSaaSEmail({
+        categoryBadge: "TENANCY INVITATION",
+        preheader: `You've been invited to join ${unit.property.name} (Unit ${unit.name}). Accept to activate your tenant portal.`,
+        title: "You've Been Invited!",
+        subtitle: `${unit.property.name} • Unit ${unit.name}`,
+        statusPill: { text: "INVITATION PENDING", type: "info" },
+        greeting: `Hi ${tenantName},`,
+        bodyParagraphs: [
+          `You have been invited to manage your tenancy for <strong>Unit ${unit.name}</strong> at <strong>${unit.property.name}</strong> through PropertyPro.`,
+          "Accept this invitation to activate your tenant portal where you can pay rent online, submit maintenance requests, and message your property manager."
+        ],
+        summaryCard: {
+          title: "Unit & Lease Details",
+          items: [
+            { label: "Property", value: unit.property.name },
+            { label: "Unit", value: unit.name },
+            { label: "Monthly Rent", value: `$${Number(monthlyRent).toLocaleString()}/mo` },
+            { label: "Lease Start Date", value: new Date(leaseStartDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) },
+            { label: "Location", value: `${unit.property.address}, ${unit.property.city}` },
+          ],
+        },
+        primaryAction: {
+          label: "Accept Invitation & Create Account →",
+          url: acceptUrl,
+        },
+        infoNotice: {
+          title: "Invitation Expiry",
+          text: `This secure invitation link is valid until ${expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`,
+          type: "warning",
+        },
+      }),
     });
 
     return NextResponse.json({ message: "Invitation sent successfully", invitationId: invitation.id }, { status: 201 });

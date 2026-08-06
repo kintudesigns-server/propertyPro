@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Layers, ArrowRight, ShieldCheck, CheckCircle2, Sparkles, Loader2, CreditCard } from "lucide-react";
+import { Layers, ArrowRight, ShieldCheck, Check, Sparkles, Loader2, CreditCard, Shield } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import SetupForm from "./SetupForm";
@@ -63,30 +63,7 @@ export default function PlanUpgradeModal({
     .sort((a, b) => a.price - b.price)[0] || pricingTiers.find(t => t.name === "Starter") || null;
 
   const handleUpgradeClick = async (tier: PricingTier) => {
-    setErrorMsg("");
-    setTargetTier(tier);
-
-    const isPaidSub = currentTier && currentTier.price > 0;
-    if (isPaidSub) {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/stripe/preview-upgrade", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tierId: tier.id }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load upgrade preview.");
-        setPreviewData(data);
-        setShowPreviewScreen(true);
-      } catch (err: any) {
-        setErrorMsg(err.message || "An unexpected error occurred.");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      await executeUpgrade(tier);
-    }
+    window.location.href = `/dashboard/owner/billing?tierId=${tier.id}`;
   };
 
   const executeUpgrade = async (tier: PricingTier) => {
@@ -136,57 +113,63 @@ export default function PlanUpgradeModal({
         setErrorMsg("");
       }
     }}>
-      <DialogContent className="sm:max-w-lg p-0 bg-white rounded-[32px] overflow-hidden border-0 shadow-2xl">
+      <DialogContent className="sm:max-w-lg p-0 bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl font-sans">
         {showPreviewScreen && previewData && targetTier ? (
-          <div className="p-8 space-y-6">
+          <div className="p-6 md:p-8 space-y-6">
             <DialogHeader className="mb-2">
-              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
-                Confirm Plan Upgrade
-              </DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
-                Review your billing summary. Stripe will charge your card on file for the prorated amount immediately.
-              </DialogDescription>
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Sparkles className="h-4 w-4 text-slate-700" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl md:text-2xl font-semibold text-[#1D1D1F] tracking-tight">
+                    Confirm Plan Upgrade
+                  </DialogTitle>
+                  <DialogDescription className="text-[#6E6E73] text-xs font-normal mt-0.5">
+                    Review your billing summary. Your card will be charged the prorated amount immediately.
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
 
             {/* Price Preview Card */}
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
-              <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-3">
-                <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Upgrade Plan</span>
-                <span className="font-black text-slate-800">{currentTier?.name} → {targetTier.name}</span>
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+              <div className="flex justify-between items-center text-xs border-b border-slate-200/60 pb-3">
+                <span className="font-medium text-[#6E6E73] uppercase tracking-wider text-[10px]">Upgrade Summary</span>
+                <span className="font-semibold text-[#1D1D1F]">{currentTier?.name} → {targetTier.name}</span>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm font-semibold text-slate-650">
-                  <span>New Monthly Subscription Rate</span>
-                  <span className="text-slate-900 font-bold">${targetTier.price}/mo</span>
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs font-normal text-[#6E6E73]">
+                  <span>New Rate</span>
+                  <span className="text-[#1D1D1F] font-semibold">${targetTier.price}/mo</span>
                 </div>
                 
-                <div className="flex justify-between text-sm font-semibold text-slate-650">
-                  <span>Unused Credit (Starter Plan)</span>
-                  <span className="text-emerald-600 font-bold">-${(Number(targetTier.price) - previewData.amountDue).toFixed(2)}</span>
+                <div className="flex justify-between text-xs font-normal text-[#6E6E73]">
+                  <span>Unused Credit</span>
+                  <span className="text-emerald-600 font-medium">-${(Number(targetTier.price) - previewData.amountDue).toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between text-base font-semibold text-slate-900 pt-2 border-t border-slate-200 border-dashed">
+                <div className="flex justify-between text-sm font-semibold text-[#1D1D1F] pt-2 border-t border-slate-200/60 border-dashed">
                   <span>Prorated Charge Today</span>
-                  <span className="text-blue-650">${previewData.amountDue.toFixed(2)}</span>
+                  <span className="text-[#1D1D1F]">${previewData.amountDue.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             {/* Payment Method / Card details */}
-            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex items-center justify-between text-sm">
+            <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
-                <CreditCard className="h-4.5 w-4.5 text-blue-600" />
-                <span className="font-bold text-slate-700 capitalize">{previewData.cardBrand} ending in {previewData.cardLast4}</span>
+                <CreditCard className="h-4 w-4 text-slate-700" />
+                <span className="font-medium text-[#1D1D1F] capitalize">{previewData.cardBrand} ending in {previewData.cardLast4}</span>
               </div>
-              <span className="text-xs font-bold text-slate-400">Card on File</span>
+              <span className="text-[10px] font-medium text-[#6E6E73] bg-white border border-slate-200 px-2 py-0.5 rounded-md">Card on File</span>
             </div>
 
             {/* Billing cycle details */}
             {previewData.nextBillingDate && (
-              <p className="text-xs text-slate-500 font-medium text-center">
-                Your next monthly invoice of <strong>${targetTier.price}.00</strong> is scheduled for{" "}
+              <p className="text-xs text-[#6E6E73] font-normal text-center">
+                Next invoice of <strong>${targetTier.price}.00</strong> scheduled for{" "}
                 <strong>
                   {new Date(previewData.nextBillingDate * 1000).toLocaleDateString("en-US", {
                     month: "long",
@@ -198,7 +181,7 @@ export default function PlanUpgradeModal({
             )}
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl">
                 {errorMsg}
               </div>
             )}
@@ -213,7 +196,7 @@ export default function PlanUpgradeModal({
                   setPreviewData(null);
                 }}
                 disabled={loading}
-                className="flex-1 h-12 rounded-xl font-bold text-slate-650 hover:bg-slate-50"
+                className="flex-1 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs"
               >
                 Back
               </Button>
@@ -221,11 +204,11 @@ export default function PlanUpgradeModal({
                 type="button"
                 onClick={() => executeUpgrade(targetTier)}
                 disabled={loading}
-                className="flex-1 h-12 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-indigo-200"
+                className="flex-1 h-9 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-all border-none cursor-pointer flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin text-white mr-1" />
                     Processing...
                   </>
                 ) : (
@@ -235,18 +218,24 @@ export default function PlanUpgradeModal({
             </div>
           </div>
         ) : setupClientSecret && targetTier ? (
-          <div className="p-8">
+          <div className="p-6 md:p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
-                Add Card to Upgrade
-              </DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
-                Please add a payment method to upgrade your plan to <span className="font-bold text-slate-800">{targetTier.name}</span>.
-              </DialogDescription>
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Sparkles className="h-4 w-4 text-slate-700" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold text-[#1D1D1F] tracking-tight">
+                    Add Card to Upgrade
+                  </DialogTitle>
+                  <DialogDescription className="text-[#6E6E73] text-xs font-normal mt-0.5">
+                    Please add a payment method to upgrade your plan to <span className="font-semibold text-[#1D1D1F]">{targetTier.name}</span>.
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
 
-            <Elements stripe={stripePromise} options={{ clientSecret: setupClientSecret }}>
+            <Elements stripe={stripePromise} options={{ clientSecret: setupClientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#0F172A", borderRadius: "12px" } } }}>
               <SetupForm
                 tierId={targetTier.id}
                 tierName={targetTier.name}
@@ -258,18 +247,24 @@ export default function PlanUpgradeModal({
             </Elements>
           </div>
         ) : clientSecret && targetTier ? (
-          <div className="p-8">
+          <div className="p-6 md:p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
-                Upgrade Payment Required
-              </DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
-                Confirm your subscription payment to upgrade to <span className="font-bold text-slate-800">{targetTier.name}</span>.
-              </DialogDescription>
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Sparkles className="h-4 w-4 text-slate-700" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold text-[#1D1D1F] tracking-tight">
+                    Upgrade Payment Required
+                  </DialogTitle>
+                  <DialogDescription className="text-[#6E6E73] text-xs font-normal mt-0.5">
+                    Confirm subscription payment to upgrade to <span className="font-semibold text-[#1D1D1F]">{targetTier.name}</span>.
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
 
-            <Elements stripe={stripePromise} options={{ clientSecret: clientSecret }}>
+            <Elements stripe={stripePromise} options={{ clientSecret: clientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#0F172A", borderRadius: "12px" } } }}>
               <CheckoutForm
                 tierName={targetTier.name}
                 tierPrice={Number(targetTier.price)}
@@ -282,39 +277,40 @@ export default function PlanUpgradeModal({
           </div>
         ) : (
           <div>
-            {/* Top Gradient Banner */}
-            <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-6 translate-x-6" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl -translate-x-6 translate-y-6" />
-              
+            {/* Header Box */}
+            <div className="p-6 md:p-8 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                  <Layers className="h-5 w-5 text-white" />
+                <div className="h-9 w-9 bg-slate-100 border border-slate-200/60 rounded-xl flex items-center justify-center text-slate-700 shadow-2xs shrink-0">
+                  <Layers className="h-4 w-4 text-slate-700" />
                 </div>
-                <span className="text-xs font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">Plan Upgrade Required</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-[#1D1D1F] tracking-tight">Increase Property Limits</h2>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">Upgrade Required</span>
+                  </div>
+                  <p className="text-[#6E6E73] text-xs font-normal mt-0.5">
+                    You're listing a property with {requestedUnits} units, which exceeds your current plan limit.
+                  </p>
+                </div>
               </div>
-              <h2 className="text-2xl font-black tracking-tight mt-3">Increase Your Property Limits</h2>
-              <p className="text-blue-100 text-sm font-medium mt-1">
-                You're listing a property with {requestedUnits} units, which exceeds your current limit.
-              </p>
             </div>
 
-            <div className="p-8 space-y-6">
+            <div className="p-6 md:p-8 space-y-6">
               {/* Limit Comparison Card */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4.5 rounded-2xl border border-slate-100">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4.5 rounded-2xl border border-slate-200/80">
                 <div className="space-y-1">
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Current Plan</p>
-                  <p className="font-extrabold text-slate-800 text-base">{currentTier?.name || "Hobbyist"}</p>
-                  <p className="text-xs font-bold text-slate-500">{currentUnitsLimit} Units Limit</p>
+                  <p className="text-[10px] font-medium text-[#6E6E73] uppercase tracking-wider">Current Plan</p>
+                  <p className="font-semibold text-[#1D1D1F] text-base">{currentTier?.name || "Hobbyist"}</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">{currentUnitsLimit} Units Limit</p>
                 </div>
                 <div className="border-l border-slate-200 pl-4 space-y-1 relative">
-                  <ArrowRight className="absolute -left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-500 bg-white border border-slate-100 rounded-full p-0.5" />
-                  <p className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Required Upgrade</p>
-                  <p className="font-semibold text-slate-900 text-base flex items-center gap-1.5">
+                  <ArrowRight className="absolute -left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 bg-white border border-slate-200 rounded-full p-0.5 shadow-2xs" />
+                  <p className="text-[10px] font-medium text-slate-700 uppercase tracking-wider">Required Upgrade</p>
+                  <p className="font-semibold text-[#1D1D1F] text-base flex items-center gap-1.5">
                     {recommendedTier?.name || "Starter"}
-                    <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Best Fit</span>
+                    <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Recommended</span>
                   </p>
-                  <p className="text-xs font-bold text-slate-650">Up to {recommendedTier?.maxUnits || 15} Units</p>
+                  <p className="text-xs font-normal text-[#6E6E73]">Up to {recommendedTier?.maxUnits || 15} Units</p>
                 </div>
               </div>
 
@@ -323,21 +319,21 @@ export default function PlanUpgradeModal({
                   {/* Price Block */}
                   <div className="flex items-baseline justify-between">
                     <div>
-                      <span className="text-3xl font-black text-slate-950">${recommendedTier.price}</span>
-                      <span className="text-slate-500 text-sm font-bold"> / month</span>
+                      <span className="text-3xl font-semibold text-[#1D1D1F] tracking-tight">${recommendedTier.price}</span>
+                      <span className="text-[#6E6E73] text-xs font-normal"> / month</span>
                     </div>
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 flex items-center gap-1">
-                      <ShieldCheck className="h-3.5 w-3.5" /> Cancel anytime
+                    <span className="text-xs font-normal text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Cancel anytime
                     </span>
                   </div>
 
                   {/* Features List */}
-                  <div className="space-y-2.5">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Included in {recommendedTier.name}</p>
+                  <div className="space-y-2.5 border-t border-slate-100 pt-4">
+                    <p className="text-xs font-semibold text-[#1D1D1F]">What's included in {recommendedTier.name}:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {recommendedTier.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                          <CheckCircle2 className="h-4 w-4 text-indigo-500 shrink-0" />
+                        <div key={idx} className="flex items-center gap-2 text-xs font-normal text-[#6E6E73]">
+                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                           <span>{feature}</span>
                         </div>
                       ))}
@@ -345,7 +341,7 @@ export default function PlanUpgradeModal({
                   </div>
 
                   {errorMsg && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl">
+                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl">
                       {errorMsg}
                     </div>
                   )}
@@ -357,7 +353,7 @@ export default function PlanUpgradeModal({
                       type="button"
                       onClick={() => onOpenChange(false)}
                       disabled={loading}
-                      className="flex-1 h-12 rounded-xl font-bold text-slate-650 hover:bg-slate-50"
+                      className="flex-1 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs"
                     >
                       Cancel
                     </Button>
@@ -365,11 +361,11 @@ export default function PlanUpgradeModal({
                       type="button"
                       onClick={() => handleUpgradeClick(recommendedTier)}
                       disabled={loading}
-                      className="flex-1 h-12 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-indigo-200"
+                      className="flex-1 h-9 rounded-xl font-medium text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-all border-none cursor-pointer flex items-center justify-center gap-2"
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <Loader2 className="h-4 w-4 animate-spin text-white mr-1" />
                           Checking...
                         </>
                       ) : (

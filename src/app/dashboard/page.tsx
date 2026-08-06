@@ -399,37 +399,37 @@ export default function DashboardPage() {
         {onboardingLease && (() => {
           const step = onboardingLease.status === "PENDING_SIGNATURE" ? 1 : 2;
           return (
-            <div className="bg-white rounded-3xl border border-indigo-100 shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-50 via-white to-purple-50/30 p-6 border-b border-indigo-100/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
-                    <Key className="h-5 w-5 text-white" />
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="bg-slate-50/80 p-5 sm:p-6 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="h-11 w-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-2xs border border-slate-800 shrink-0">
+                    <Key className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-indigo-950">Move-In Checklist</h2>
-                    <p className="text-sm font-medium text-indigo-600/80">
-                      Complete these final steps to secure <strong>Unit {onboardingLease.unit?.name}</strong>.
+                    <h2 className="text-base sm:text-lg font-semibold text-slate-900 tracking-tight">Move-In Checklist</h2>
+                    <p className="text-xs text-slate-500 font-normal mt-0.5">
+                      Complete these final steps to secure <span className="font-semibold text-slate-800">Unit {onboardingLease.unit?.name}</span>.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl border border-indigo-100 shadow-sm shrink-0">
-                  <div className="relative h-10 w-10">
+                <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200/80 shadow-2xs shrink-0">
+                  <div className="relative h-9 w-9">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E0E7FF" strokeWidth="4" />
-                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4F46E5" strokeWidth="4"
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E2E8F0" strokeWidth="3.5" />
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0F172A" strokeWidth="3.5"
                         strokeDasharray={`${((step - 1) / 2) * 100} 100`} strokeLinecap="round" />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-indigo-900">
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-slate-900">
                       {Math.round(((step - 1) / 2) * 100)}%
                     </span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Progress</p>
-                    <p className="text-sm font-black text-indigo-950">Step {step} of 3</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Progress</p>
+                    <p className="text-xs font-semibold text-slate-900">Step {step} of 3</p>
                   </div>
                 </div>
               </div>
-              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   {
                     n: 1, label: "Sign Lease", desc: "Review terms and digitally sign your contract.",
@@ -454,26 +454,26 @@ export default function DashboardPage() {
                   },
                 ].map((s) => (
                   <div key={s.n} className={`p-5 rounded-2xl border transition-all ${
-                    s.done ? "bg-emerald-50 border-emerald-200" :
-                    s.active ? "bg-indigo-50 border-indigo-200 shadow-sm" :
-                    "bg-slate-50 border-slate-200 opacity-50"
+                    s.done ? "bg-emerald-50/50 border-emerald-200/80 shadow-2xs" :
+                    s.active ? "bg-slate-900/[0.02] border-slate-900/20 shadow-xs ring-1 ring-slate-900/5" :
+                    "bg-slate-50/50 border-slate-200/60 opacity-60"
                   }`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black ${
-                        s.done ? "bg-emerald-500 text-white" :
-                        s.active ? "bg-indigo-600 text-white" :
-                        "bg-slate-300 text-slate-500"
+                    <div className="flex items-center gap-3 mb-2.5">
+                      <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        s.done ? "bg-emerald-600 text-white" :
+                        s.active ? "bg-slate-900 text-white shadow-2xs" :
+                        "bg-slate-200 text-slate-500 font-bold"
                       }`}>
                         {s.done ? <CheckCircle2 className="h-4 w-4" /> : s.n}
                       </div>
-                      <p className={`font-black text-sm ${s.done ? "text-emerald-800" : s.active ? "text-indigo-900" : "text-slate-500"}`}>
+                      <p className={`font-semibold text-xs ${s.done ? "text-emerald-950" : s.active ? "text-slate-900" : "text-slate-500"}`}>
                         {s.label}
                       </p>
-                      {s.done && <span className="ml-auto text-[9px] font-black px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full uppercase tracking-wider">Done</span>}
+                      {s.done && <span className="ml-auto text-[9px] font-extrabold px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-md uppercase tracking-wider">Done</span>}
                     </div>
-                    <p className="text-xs font-medium text-slate-500 mb-3 leading-relaxed">{s.desc}</p>
+                    <p className="text-xs font-normal text-slate-500 mb-3.5 leading-relaxed">{s.desc}</p>
                     {s.active && s.action && (
-                      <Button onClick={s.action} className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-xs shadow-sm">
+                      <Button onClick={s.action} className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs shadow-2xs transition-colors flex items-center justify-center gap-2">
                         {s.icon} {s.actionLabel}
                       </Button>
                     )}

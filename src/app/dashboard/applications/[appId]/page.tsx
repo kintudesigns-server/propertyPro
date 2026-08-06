@@ -470,57 +470,108 @@ export default function ApplicationDetailsPage() {
           </div>
 
           <div className="bg-slate-50/60 border border-slate-200/80 rounded-2xl p-5 sm:p-6">
-            {!app.idDocumentUrl && !app.incomeProofUrl ? (
-              <div className="p-6 text-center text-slate-500 text-xs font-semibold">
-                No supporting files attached with this application.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {app.idDocumentUrl && (
-                  <div className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-3 truncate">
-                      <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-200">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div className="truncate">
-                        <p className="text-xs font-semibold text-slate-900 truncate">Government ID</p>
-                        <p className="text-[10px] text-slate-500 font-semibold">ID Card / Passport</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <a href={app.idDocumentUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors" title="View Document">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                      <a href={app.idDocumentUrl} download className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors" title="Download Document">
-                        <Download className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </div>
-                )}
+            {(() => {
+              // Infer employment status from jobTitle field (set during form submission)
+              const jobTitleRaw = (app.jobTitle || "").toUpperCase();
+              const isStudent = jobTitleRaw === "STUDENT";
+              const isUnemployed = jobTitleRaw === "UNEMPLOYED";
 
-                {app.incomeProofUrl && (
-                  <div className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-3 truncate">
-                      <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-200">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div className="truncate">
-                        <p className="text-xs font-semibold text-slate-900 truncate">Proof of Income</p>
-                        <p className="text-[10px] text-slate-500 font-semibold">Pay Stubs / Tax Returns</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <a href={app.incomeProofUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors" title="View Document">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                      <a href={app.incomeProofUrl} download className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors" title="Download Document">
-                        <Download className="h-4 w-4" />
-                      </a>
-                    </div>
+              // Build document card list
+              const docCards: { url: string; title: string; subtitle: string }[] = [];
+
+              if (app.idDocumentUrl) {
+                docCards.push({
+                  url: app.idDocumentUrl,
+                  title: "Government ID",
+                  subtitle: "ID Card / Passport",
+                });
+              }
+
+              if (app.incomeProofUrl) {
+                docCards.push({
+                  url: app.incomeProofUrl,
+                  title: isStudent
+                    ? "Proof of Student Enrollment"
+                    : isUnemployed
+                    ? "Proof of Assets / Bank Statement"
+                    : "Proof of Income",
+                  subtitle: isStudent
+                    ? "Student ID / Enrollment Letter"
+                    : isUnemployed
+                    ? "Bank Statement / Asset Proof"
+                    : "Pay Stubs / Tax Returns",
+                });
+              }
+
+              // Guarantor documents — stored in documents[] at index 2 & 3
+              if (app.hasGuarantor && Array.isArray(app.documents)) {
+                const guarantorDocs = app.documents.filter(
+                  (d: string) => d && d !== app.idDocumentUrl && d !== app.incomeProofUrl
+                );
+                if (guarantorDocs[0]) {
+                  docCards.push({
+                    url: guarantorDocs[0],
+                    title: "Guarantor — Government ID",
+                    subtitle: `${app.guarantorName || "Guarantor"} — ID Card / Passport`,
+                  });
+                }
+                if (guarantorDocs[1]) {
+                  docCards.push({
+                    url: guarantorDocs[1],
+                    title: "Guarantor — Proof of Income",
+                    subtitle: `${app.guarantorName || "Guarantor"} — Pay Stubs / Tax Returns`,
+                  });
+                }
+              }
+
+              if (docCards.length === 0) {
+                return (
+                  <div className="p-6 text-center text-slate-500 text-xs font-semibold">
+                    No supporting files attached with this application.
                   </div>
-                )}
-              </div>
-            )}
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {docCards.map((doc, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="flex items-center gap-3 truncate">
+                        <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-200">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-semibold text-slate-900 truncate">{doc.title}</p>
+                          <p className="text-[10px] text-slate-500 font-semibold">{doc.subtitle}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors"
+                          title="View Document"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                        <a
+                          href={doc.url}
+                          download
+                          className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-800 transition-colors"
+                          title="Download Document"
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
 

@@ -89,59 +89,59 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-md p-6 max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-black text-slate-900">Schedule Inspection Walkthrough</DialogTitle>
-          <DialogDescription className="text-xs font-normal text-[#8E8E93]">
+      <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-md p-6 max-h-[90vh] overflow-y-auto font-sans shadow-lg">
+        <DialogHeader className="space-y-1 pb-2 border-b border-slate-100">
+          <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight">Schedule Inspection Walkthrough</DialogTitle>
+          <DialogDescription className="text-xs font-normal text-slate-500">
             Assign an inspector and choose a type and date/time for the walkthrough.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleScheduleInspection} className="space-y-4 mt-4">
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Inspection Type</Label>
+        <form onSubmit={handleScheduleInspection} className="space-y-4 mt-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-normal text-slate-500">Inspection Type</Label>
             <select
               value={inspectionType}
               onChange={(e) => setInspectionType(e.target.value as "PRELIMINARY" | "FINAL")}
-              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800 text-sm"
+              className="w-full h-9 bg-white border border-slate-200 rounded-xl px-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 font-medium text-slate-900 text-xs shadow-2xs transition-all cursor-pointer"
             >
               <option value="FINAL">Final Walkthrough (Legally Binding)</option>
               <option value="PRELIMINARY">Preliminary Walkthrough (Remedy List)</option>
             </select>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Date</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-normal text-slate-500">Date</Label>
             <Input
               type="date"
               required
               value={inspectionDate}
               onChange={(e) => setInspectionDate(e.target.value)}
-              className="bg-slate-50 border-slate-200 rounded-xl h-11"
+              className="w-full h-9 bg-white border border-slate-200 rounded-xl px-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 font-medium text-slate-900 text-xs shadow-2xs transition-all"
             />
             {showWarning() && (
-              <p className="text-[11px] font-semibold text-amber-600 mt-1">
+              <p className="text-[11px] font-medium text-amber-600 mt-1">
                 ⚠️ Warning: Final inspections are legally binding and should occur after the tenant has vacated.
               </p>
             )}
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Time</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-normal text-slate-500">Time</Label>
             <Input
               type="time"
               required
               value={inspectionTime}
               onChange={(e) => setInspectionTime(e.target.value)}
-              className="bg-slate-50 border-slate-200 rounded-xl h-11"
+              className="w-full h-9 bg-white border border-slate-200 rounded-xl px-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 font-medium text-slate-900 text-xs shadow-2xs transition-all"
             />
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Assign Inspector</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-normal text-slate-500">Assign Inspector</Label>
             <select
               value={selectedInspectorId}
               onChange={(e) => setSelectedInspectorId(e.target.value)}
-              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800 text-sm"
+              className="w-full h-9 bg-white border border-slate-200 rounded-xl px-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 font-medium text-slate-900 text-xs shadow-2xs transition-all cursor-pointer"
             >
               <option value="">Unassigned (Submits to pool)</option>
-              <option value="SELF" className="font-bold text-blue-700">Assign to Me (Self-Inspect)</option>
+              <option value="SELF" className="font-semibold text-slate-900">Assign to Me (Self-Inspect)</option>
               {inspectors.map((ins: any) => (
                 <option key={ins.id} value={ins.id}>
                   {ins.name} ({ins.email})
@@ -149,30 +149,30 @@ export function ScheduleInspectionModal({ leaseId, open, onOpenChange, onSuccess
               ))}
             </select>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">Notes / Instructions</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-normal text-slate-500">Notes / Instructions</Label>
             <textarea
               placeholder="e.g. Check kitchen cabinets and master bathroom ceiling..."
               value={inspectionNotes}
               onChange={(e) => setInspectionNotes(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800 text-sm h-24 resize-none"
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 font-normal text-slate-900 text-xs shadow-2xs transition-all h-24 resize-none"
             />
           </div>
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-3 border-t border-slate-100">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 border border-slate-200 rounded-xl h-11 text-xs font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+              className="flex-1 rounded-xl h-9 border-slate-200 text-slate-700 hover:bg-slate-50 font-medium text-xs shadow-2xs transition-colors cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={schedulingInspection}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 text-xs font-medium"
+              className="flex-1 rounded-xl h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
             >
-              {schedulingInspection ? "Scheduling..." : "Schedule"}
+              {schedulingInspection ? "Scheduling..." : "Schedule Walkthrough"}
             </Button>
           </div>
         </form>

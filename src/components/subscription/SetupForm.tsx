@@ -102,12 +102,12 @@ export default function SetupForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-3 items-start">
+    <form onSubmit={handleSubmit} className="space-y-5 font-sans">
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex gap-3 items-start">
         <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
         <div>
-          <p className="text-sm font-bold text-amber-900">No payment method on file</p>
-          <p className="text-xs text-amber-700 mt-0.5">Add a card below to upgrade to <strong>{tierName}</strong>. Your card will be saved for future billing.</p>
+          <p className="text-xs font-semibold text-amber-900">Payment method required</p>
+          <p className="text-xs text-amber-800 font-normal mt-0.5">Add a card below to upgrade to <strong>{tierName}</strong>. Your card will be saved securely for future billing.</p>
         </div>
       </div>
 
@@ -120,28 +120,28 @@ export default function SetupForm({
 
       {!ready && (
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#8E8E93]" />
+          <Loader2 className="h-6 w-6 animate-spin text-slate-700" />
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-xl">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium px-4 py-3 rounded-xl">
           {errorMsg}
         </div>
       )}
 
       <div className="flex gap-3 pt-2">
         {onBack && (
-          <Button type="button" variant="outline" onClick={onBack} className="h-12 px-5 rounded-xl border-slate-200 font-medium text-[#6E6E73]" disabled={isProcessing}>
-            <ArrowLeft className="h-4 w-4 mr-1.5" /> Back
+          <Button type="button" variant="outline" onClick={onBack} className="h-9 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs" disabled={isProcessing}>
+            <ArrowLeft className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Back
           </Button>
         )}
-        <Button type="submit" disabled={!stripe || !elements || isProcessing || !ready} className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-600/20">
-          {isProcessing ? (<><Loader2 className="h-4 w-4 animate-spin mr-2" />Processing...</>) : (<><Lock className="h-4 w-4 mr-2" />Save Card & Upgrade</>)}
+        <Button type="submit" disabled={!stripe || !elements || isProcessing || !ready} className="flex-1 h-9 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl shadow-2xs transition-all border-none cursor-pointer flex items-center justify-center gap-2">
+          {isProcessing ? (<><Loader2 className="h-4 w-4 animate-spin text-white mr-1" />Processing...</>) : (<><Lock className="h-3.5 w-3.5 mr-1" />Save Card & Upgrade</>)}
         </Button>
       </div>
-      <p className="text-center text-[11px] text-[#8E8E93] font-medium flex items-center justify-center gap-1.5">
-        <Lock className="h-3 w-3" /> Secured by Stripe · 256-bit SSL encryption
+      <p className="text-center text-xs text-[#6E6E73] font-normal flex items-center justify-center gap-1.5">
+        <Lock className="h-3.5 w-3.5 text-slate-400" /> Secured by Stripe · 256-bit SSL encryption
       </p>
     </form>
   );

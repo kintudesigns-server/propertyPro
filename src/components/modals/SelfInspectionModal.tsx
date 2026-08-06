@@ -264,17 +264,17 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
   // ─────────────────────────────────────────────
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-white border-0 text-slate-800 rounded-3xl max-w-2xl w-full p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-2xl w-full p-0 overflow-hidden max-h-[90vh] flex flex-col font-sans shadow-lg">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+        <div className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0 bg-slate-50/50">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
-              Self-Inspection Checklist
-              <span className="ml-auto text-xs font-bold text-[#8E8E93] bg-slate-100 px-2.5 py-1 rounded-full">
+            <DialogTitle className="text-lg font-semibold text-slate-900 tracking-tight flex items-center justify-between">
+              <span>Self-Inspection Checklist</span>
+              <span className="text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-2xs">
                 Step {step} of 3
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs font-normal text-[#8E8E93] mt-1">
+            <DialogDescription className="text-xs font-normal text-slate-500 mt-1">
               {step === 1 && "Rate the condition of each room — this becomes your official inspection record."}
               {step === 2 && "Describe the issues found and attach photo evidence for each flagged room."}
               {step === 3 && "Review your findings, confirm the declaration, and submit."}
@@ -287,7 +287,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
               <div
                 key={s}
                 className={`h-1.5 flex-1 rounded-full transition-all ${
-                  s < step ? "bg-indigo-500" : s === step ? "bg-indigo-400" : "bg-[#E5E5EA]"
+                  s <= step ? "bg-slate-900" : "bg-slate-200"
                 }`}
               />
             ))}
@@ -295,7 +295,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
         </div>
 
         {/* Body — scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 font-sans">
 
           {/* ── STEP 1: Room Condition Ratings ── */}
           {step === 1 && (
@@ -306,14 +306,14 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                   className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${
                     room.condition
                       ? `${conditionConfig[room.condition].bg} ${conditionConfig[room.condition].border}`
-                      : "bg-slate-50 border-slate-200"
+                      : "bg-slate-50/60 border-slate-200/80"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     {room.condition ? conditionConfig[room.condition].icon : (
                       <div className="h-4 w-4 rounded-full border-2 border-slate-300" />
                     )}
-                    <span className={`text-sm font-bold ${room.condition ? conditionConfig[room.condition].color : "text-[#6E6E73]"}`}>
+                    <span className={`text-xs font-semibold ${room.condition ? conditionConfig[room.condition].color : "text-slate-700"}`}>
                       {room.name}
                     </span>
                   </div>
@@ -322,10 +322,10 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                       <button
                         key={cond}
                         onClick={() => setCondition(idx, cond)}
-                        className={`text-[10px] font-black px-2.5 py-1.5 rounded-lg border transition-all ${
+                        className={`text-[11px] font-medium px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                           room.condition === cond
-                            ? `${conditionConfig[cond].border} ${conditionConfig[cond].bg} ${conditionConfig[cond].color} shadow-sm`
-                            : "border-slate-200 bg-white text-[#6E6E73] hover:border-slate-300"
+                            ? `${conditionConfig[cond].border} ${conditionConfig[cond].bg} ${conditionConfig[cond].color} shadow-2xs font-semibold`
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                         }`}
                       >
                         {conditionConfig[cond].label}
@@ -337,15 +337,15 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
 
               {/* Summary hint */}
               {step1Valid && (
-                <div className={`mt-2 p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                <div className={`mt-2 p-3.5 rounded-xl text-xs font-medium flex items-center gap-2 ${
                   flaggedRooms.length === 0
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-amber-50 text-amber-800 border border-amber-200"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                    : "bg-amber-50 text-amber-900 border border-amber-200/80"
                 }`}>
                   {flaggedRooms.length === 0 ? (
-                    <><CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> All rooms in good condition — you can submit directly on the next step.</>
+                    <><CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> All rooms in good condition — you can submit directly on the next step.</>
                   ) : (
-                    <><AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" /> {flaggedRooms.length} room(s) flagged. Add details and photos in Step 2.</>
+                    <><AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" /> {flaggedRooms.length} room(s) flagged. Add details and photos in Step 2.</>
                   )}
                 </div>
               )}
@@ -356,10 +356,10 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
           {step === 2 && (
             <div className="space-y-5">
               {flaggedRooms.length === 0 ? (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
-                  <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-emerald-800">All rooms rated Good</p>
-                  <p className="text-xs text-emerald-600 mt-1">No issues to document. Proceed to Step 3 to review and submit.</p>
+                <div className="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-6 text-center">
+                  <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-emerald-900">All rooms rated Good</p>
+                  <p className="text-xs text-emerald-700 mt-1">No issues to document. Proceed to Step 3 to review and submit.</p>
                 </div>
               ) : (
                 flaggedRooms.map((room) => {
@@ -370,7 +370,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                       {/* Room header */}
                       <div className={`flex items-center gap-2 px-4 py-3 ${cfg.bg}`}>
                         {cfg.icon}
-                        <span className={`text-sm font-black ${cfg.color}`}>{room.name}</span>
+                        <span className={`text-xs font-semibold ${cfg.color}`}>{room.name}</span>
                         <span className={`ml-auto text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
                           {cfg.label}
                         </span>
@@ -379,18 +379,18 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                       {/* Findings list */}
                       <div className="bg-white p-4 space-y-3">
                         {room.findings.map((finding, fIdx) => (
-                          <div key={fIdx} className="bg-slate-50 rounded-xl p-3 space-y-2.5 border border-slate-200">
+                          <div key={fIdx} className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 space-y-2.5">
                             <div className="flex items-start gap-2">
                               <textarea
                                 placeholder={`Describe the issue (e.g. Broken cabinet hinge, stained carpet...)`}
                                 value={finding.description}
                                 onChange={(e) => updateFinding(roomIdx, fIdx, { description: e.target.value })}
                                 rows={2}
-                                className="flex-1 w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                                className="flex-1 w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-normal text-slate-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 shadow-2xs transition-all resize-none"
                               />
                               <button
                                 onClick={() => removeFinding(roomIdx, fIdx)}
-                                className="text-red-400 hover:text-red-600 transition-colors mt-0.5 shrink-0"
+                                className="text-slate-400 hover:text-rose-600 transition-colors mt-1 shrink-0 cursor-pointer"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -401,7 +401,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                               <select
                                 value={finding.category}
                                 onChange={(e) => updateFinding(roomIdx, fIdx, { category: e.target.value })}
-                                className="h-9 flex-1 bg-white border border-slate-200 rounded-xl px-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                className="h-9 flex-1 bg-white border border-slate-200 rounded-xl px-2.5 text-xs font-medium text-slate-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 shadow-2xs transition-all cursor-pointer"
                               >
                                 {CATEGORIES.map((c) => (
                                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -409,17 +409,17 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                               </select>
 
                               {/* Photo upload */}
-                              <label className={`flex items-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold cursor-pointer transition-all shrink-0 ${
+                              <label className={`flex items-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-medium cursor-pointer transition-all shrink-0 ${
                                 finding.photoUrl
-                                  ? "bg-emerald-50 border-emerald-300 text-emerald-700"
-                                  : "bg-slate-100 border-slate-200 text-[#6E6E73] hover:bg-slate-200"
+                                  ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs"
                               }`}>
                                 {finding.uploading ? (
                                   <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading…</>
                                 ) : finding.photoUrl ? (
-                                  <><Camera className="h-3.5 w-3.5" /> Photo ✓</>
+                                  <><Camera className="h-3.5 w-3.5 text-emerald-600" /> Photo ✓</>
                                 ) : (
-                                  <><Camera className="h-3.5 w-3.5" /> Add Photo</>
+                                  <><Camera className="h-3.5 w-3.5 text-slate-400" /> Add Photo</>
                                 )}
                                 <input
                                   type="file"
@@ -438,7 +438,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                                   <button
                                     type="button"
                                     onClick={() => updateFinding(roomIdx, fIdx, { photoUrl: "" })}
-                                    className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+                                    className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
                                   >
                                     <Trash2 className="h-3 w-3 text-white" />
                                   </button>
@@ -451,7 +451,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                         {/* Add finding button */}
                         <button
                           onClick={() => addFinding(roomIdx)}
-                          className="w-full h-9 rounded-xl border-2 border-dashed border-slate-300 text-xs font-bold text-[#6E6E73] hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center gap-1.5"
+                          className="w-full h-9 rounded-xl border border-dashed border-slate-300 text-xs font-medium text-slate-600 hover:border-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           + Add Finding for {room.name}
                         </button>
@@ -463,7 +463,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
 
               {/* General notes */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider">
+                <Label className="text-xs font-normal text-slate-500">
                   General Notes (Optional)
                 </Label>
                 <textarea
@@ -471,7 +471,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                   value={generalNotes}
                   onChange={(e) => setGeneralNotes(e.target.value)}
                   rows={3}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-normal text-slate-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:border-slate-900 shadow-2xs transition-all resize-none"
                 />
               </div>
             </div>
@@ -481,9 +481,9 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
           {step === 3 && (
             <div className="space-y-4">
               {/* Room summary */}
-              <div className="rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="bg-slate-50 px-4 py-3 border-b border-slate-100">
-                  <p className="text-xs font-black text-slate-700 uppercase tracking-wider">Inspection Summary</p>
+              <div className="rounded-2xl border border-slate-200/80 overflow-hidden">
+                <div className="bg-slate-50/80 px-4 py-3 border-b border-slate-100">
+                  <p className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Inspection Summary</p>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {rooms.map((room) => {
@@ -495,7 +495,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-bold text-slate-800">{room.name}</p>
+                            <p className="text-xs font-semibold text-slate-900">{room.name}</p>
                             {cfg && (
                               <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
                                 {cfg.label}
@@ -505,9 +505,9 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                           {room.findings.length > 0 && (
                             <div className="mt-1.5 space-y-1">
                               {room.findings.map((f, fi) => (
-                                <div key={fi} className="flex items-center gap-2 text-xs text-[#6E6E73] font-medium">
-                                  <span className="text-[#8E8E93]">•</span>
-                                  <span className="flex-1">{f.description || <em className="text-[#8E8E93]">No description</em>}</span>
+                                <div key={fi} className="flex items-center gap-2 text-xs text-slate-600 font-normal">
+                                  <span className="text-slate-400">•</span>
+                                  <span className="flex-1">{f.description || <em className="text-slate-400">No description</em>}</span>
                                   {f.photoUrl && (
                                     <a href={f.photoUrl} target="_blank" rel="noreferrer">
                                       <img src={f.photoUrl} alt="" className="h-6 w-6 rounded object-cover border border-slate-200" />
@@ -525,20 +525,20 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
               </div>
 
               {/* Amounts note */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 font-semibold flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl p-4 text-xs font-normal leading-relaxed flex items-start gap-2.5 shadow-xs">
+                <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>Deduction amounts are set to $0 — you'll price each item on the Final Statement page after submitting this inspection.</span>
               </div>
 
               {/* Declaration */}
-              <label className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-4 cursor-pointer hover:bg-[#F2F2F7] transition-colors">
+              <label className="flex items-start gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 cursor-pointer hover:bg-slate-100/60 transition-colors">
                 <input
                   type="checkbox"
                   checked={declared}
                   onChange={(e) => setDeclared(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5 cursor-pointer shrink-0"
+                  className="h-4 w-4 text-slate-900 border-slate-300 rounded focus:ring-slate-900 mt-0.5 cursor-pointer shrink-0"
                 />
-                <span className="text-xs font-semibold text-slate-700 leading-relaxed">
+                <span className="text-xs font-normal text-slate-700 leading-relaxed">
                   I declare that I have personally inspected this unit and the findings above represent a true and accurate assessment of the property's condition at move-out.
                 </span>
               </label>
@@ -547,20 +547,20 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
         </div>
 
         {/* Footer — always visible */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 bg-white">
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 bg-slate-50/50">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => {
               if (step === 1) handleOpenChange(false);
               else setStep((s) => (s - 1) as 1 | 2 | 3);
             }}
-            className="flex items-center gap-1.5 border border-slate-200 rounded-xl h-10 px-4 text-xs font-bold text-[#6E6E73] hover:bg-[#F5F5F7]"
+            className="flex items-center gap-1.5 border border-slate-200 rounded-xl h-9 px-4 text-xs font-medium text-slate-700 hover:bg-slate-100 shadow-2xs transition-colors cursor-pointer"
           >
             <ChevronLeft className="h-4 w-4" />
             {step === 1 ? "Cancel" : "Back"}
           </Button>
 
-          <div className="text-xs font-normal text-[#8E8E93]">
+          <div className="text-xs font-normal text-slate-500">
             {step === 1 && `${rooms.filter((r) => r.condition !== null).length} / ${rooms.length} rooms rated`}
             {step === 2 && flaggedRooms.length > 0 && `${flaggedRooms.filter((r) => r.findings.length > 0).length} / ${flaggedRooms.length} rooms detailed`}
           </div>
@@ -579,7 +579,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
                   setStep(3);
                 }
               }}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 px-5 text-xs font-bold"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 px-5 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
             >
               Continue <ChevronRight className="h-4 w-4" />
             </Button>
@@ -587,7 +587,7 @@ export function SelfInspectionModal({ leaseId, unit, open, onOpenChange, onSucce
             <Button
               onClick={handleSubmit}
               disabled={submitting || !declared}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 px-5 text-xs font-medium disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-9 px-5 text-xs font-medium shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
             >
               {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "Submit Inspection"}
             </Button>
